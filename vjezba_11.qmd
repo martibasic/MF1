@@ -1,0 +1,131 @@
+# Vježba 11: Zakon očuvanja količine gibanja
+
+## Mehanika fluida – Vježba 11
+
+### Zadatak 97: Vrijeme pražnjenja spremnika
+
+**Rješenje:**
+$T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{0,5}{0,025} \right)^2 \frac{2 \sqrt{0,5}}{\sqrt{19,62}} = \mathbf{127,7 \, \text{s}}$.
+
+***
+
+### Zadatak 98: Kinematika dva mlaza
+
+**Rješenje:**
+1. Donji mlaz: $10 = 2\sqrt{(H-4) \cdot 4} \implies H = \mathbf{10,25 \, \text{m}}$.
+2. Gornji mlaz: $10 = 2\sqrt{(10,25-4-h) \cdot (4+h)} \implies h = \mathbf{2,25 \, \text{m}}$.
+
+***
+
+### Zadatak 99: Rotirajući spremnik s cijevi
+
+**Rješenje:**
+1. Brzina $w = \sqrt{2 \frac{p_{m0}}{\rho} - 2g(L+H_1) - \frac{\omega^2 r^2}{2}} = \mathbf{3,99 \, \text{m/s}}$.
+2. Protok $\dot{V} = \mathbf{0,313 \, \text{L/s}}$.
+3. Pretlak A: $p_{mA} = \rho \frac{\omega^2 r^2}{2} + \rho g(L+H_1) = \mathbf{36,2 \, \text{kPa}}$.
+
+***
+
+### Zadatak 100-101: Sila na koljeno cijevi
+
+**Rješenje (100 - 30°):**
+1. $v_1 = 1,24 \, \text{m/s}, v_2 = 20 \, \text{m/s}, p_{1m} = 202 \, \text{kPa}$.
+2. $F_{Rx} = \beta \dot{m} (v_2 \cos 30^\circ - v_1) - p_{1m} A_1 = \mathbf{-2053 \, \text{N}}$.
+3. $F_{Rz} = \beta \dot{m} v_2 \sin 30^\circ = \mathbf{144 \, \text{N}}$.
+
+```{=html}
+<!-- Pipe Bend Force Widget -->
+<div id="bend-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #fff;">
+    <h3 style="text-align: center;">Sile u koljenu cijevi (Momentum)</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <canvas id="bend-canvas" width="400" height="300" style="border: 1px solid #eee; background: white; flex: 1;"></canvas>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label>Kut skretanja &alpha;: <span id="alpha-bend-val">30</span>°</label>
+                <input type="range" id="alpha-bend-slider" min="0" max="180" step="15" value="30" style="width: 100%;">
+            </div>
+            <div style="background: #fdf2f2; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                <strong>Reakcijska sila F<sub>R</sub>:</strong>
+                <p style="font-size: 0.9em;">Što je veći kut skretanja, to je veća sila kojom fluid "gura" koljeno (princip mlaznog motora).</p>
+                <div id="force-vector-res" style="font-weight: bold; color: #c0392b;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const aS = document.getElementById('alpha-bend-slider');
+    const canvas = document.getElementById('bend-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function update() {
+        const alpha = parseFloat(aS.value);
+        document.getElementById('alpha-bend-val').innerText = alpha;
+        
+        // Simplified calc for visualization
+        const v = 20; const m_dot = 14;
+        const Frx = m_dot * (v * Math.cos(alpha * Math.PI / 180) - 1.24);
+        const Frz = m_dot * (v * Math.sin(alpha * Math.PI / 180));
+        
+        document.getElementById('force-vector-res').innerHTML = `F_x &approx; ${(-Frx).toFixed(0)} N <br> F_z &approx; ${Frz.toFixed(0)} N`;
+        
+        draw(alpha);
+    }
+
+    function draw(alpha) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const x0 = 100; const y0 = 150; const r = 60;
+        const rad = alpha * Math.PI / 180;
+
+        // Inlet pipe
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 20; ctx.lineCap = "butt";
+        ctx.beginPath(); ctx.moveTo(20, y0); ctx.lineTo(x0, y0); ctx.stroke();
+
+        // Bend (simplified as arc or line)
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x0 + Math.cos(rad)*80, y0 + Math.sin(rad)*80);
+        ctx.stroke();
+
+        // Flow arrows
+        ctx.lineWidth = 2; ctx.strokeStyle = "#3498db";
+        drawArrow(ctx, 30, y0, 70, y0, "#3498db");
+        drawArrow(ctx, x0 + Math.cos(rad)*30, y0 + Math.sin(rad)*30, x0 + Math.cos(rad)*70, y0 + Math.sin(rad)*70, "#3498db");
+
+        // Reaction force arrow (Exaggerated)
+        drawArrow(ctx, x0, y0, x0 - 50, y0 + 30, "#e74c3c", "F_R");
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, label="") {
+        const headlen = 10;
+        const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-Math.PI/6), y2-headlen*Math.sin(angle-Math.PI/6));
+        ctx.lineTo(x2-headlen*Math.cos(angle+Math.PI/6), y2-headlen*Math.sin(angle+Math.PI/6));
+        ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+        if(label) ctx.fillText(label, x1, y1 - 10);
+    }
+
+    aS.oninput = update;
+    update();
+})();
+</script>
+```
+
+***
+
+### Zadatak 102: Mlaz na ploču
+
+**Rješenje:**
+$F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
+
+***
+
+### Zadatak 103: Vjetroturbina
+
+**Rješenje:**
+1. $P_{max} = 1445 \, \text{W} \implies \eta = 400/1445 = \mathbf{27,7 \%}$.
+2. $v_2 = v_1 \sqrt{1-\eta} = \mathbf{2,66 \, \text{m/s}}$.
+3. $F_S = \dot{m}(v_1 - v_2) = \mathbf{138 \, \text{N}}$.

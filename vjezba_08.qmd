@@ -1,0 +1,425 @@
+# Vježba 8
+
+
+# Mehanika fluida – Vježba 8
+
+### ZADATAK 70.
+
+**Tekst zadatka:**
+(2500 SPFM – 8.4) Voda struji kroz difuzor, čiji ulazni i izlazni presjeci iznose $120\text{ mm}$, odnosno $180\text{ mm}$. Ukoliko voda struji na izlaznom poprečnom presjeku srednjom brzinom $16\text{ m/s}$, potrebno je odrediti srednju brzinu na ulaznom poprečnom presjeku, te volumenski i maseni protok na ulazu.
+
+**Zadano:**
+*   $D_1 = 0,12\text{ [m]}$
+*   $D_2 = 0,18\text{ [m]}$
+*   $v_{2sr} = 16\text{ [m/s]}$
+*   $\rho = 998\text{ [kg/m}^3\text{]}$
+
+**Odrediti:**
+*   $v_{1sr} = ?$, $\dot{V}_1 = ?$, $\dot{m}_1 = ?$
+
+**Objašnjenje i rješenje korak po korak:**
+
+1.  **Fizikalni koncept (Jednadžba kontinuiteta):** Budući da je voda nestlačiv fluid ($\rho = \text{const.}$) i strujanje je stacionarno, masa koja uđe u difuzor mora iz njega izaći u istoj jedinici vremena. To znači da je volumenski protok konstantan: $A_1 \cdot v_1 = A_2 \cdot v_2$.
+2.  **Matematički izvod brzine $v_{1sr}$:**
+    Uvrštavamo formulu za površinu kruga $A = \frac{D^2 \pi}{4}$:
+    $$\frac{D_1^2 \pi}{4} \cdot v_{1sr} = \frac{D_2^2 \pi}{4} \cdot v_{2sr}$$
+    Poništavamo $\frac{\pi}{4}$ s obje strane i izoliramo $v_{1sr}$:
+    $$v_{1sr} = \frac{D_2^2}{D_1^2} \cdot v_{2sr} = \frac{0,18^2}{0,12^2} \cdot 16 = 2,25 \cdot 16 = \mathbf{36\text{ [m/s]}}$$
+    *Fizikalno objašnjenje:* Budući da se poprečni presjek difuzora povećava ($D_2 > D_1$), brzina se mora smanjiti kako bi protok ostao isti.
+3.  **Volumenski protok ($\dot{V}_1$):**
+    $$\dot{V}_1 = A_1 \cdot v_{1sr} = \frac{D_1^2 \pi}{4} \cdot v_{1sr} = \frac{0,12^2 \cdot \pi}{4} \cdot 36 = \mathbf{0,40715\text{ [m}^3\text{/s]}}$$
+4.  **Maseni protok ($\dot{m}$):**
+    $$\dot{m} = \rho \cdot \dot{V}_1 = 998 \cdot 0,40715 = \mathbf{406,34\text{ [kg/s]}}$$
+
+```{=html}
+<div id="diffuser-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #fdfefe; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2e4053;">Jednadžba kontinuiteta: Difuzor</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <label>Ulazni promjer D1 (mm): <input type="number" id="d1-70" value="120" step="10" style="width: 100%;"></label>
+        <label>Izlazni promjer D2 (mm): <input type="number" id="d2-70" value="180" step="10" style="width: 100%;"></label>
+        <label>Izlazna brzina v2 (m/s): <input type="number" id="v2-70" value="16" step="1" style="width: 100%;"></label>
+    </div>
+    <div style="position: relative; width: 100%; height: 150px; background: #ebf5fb; border-radius: 5px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+        <div id="pipe-visual" style="background: #3498db; height: 60px; width: 300px; clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 80%); transition: all 0.3s;"></div>
+        <div style="position: absolute; left: 20px; color: white; font-weight: bold;">v1</div>
+        <div style="position: absolute; right: 20px; color: white; font-weight: bold;">v2</div>
+    </div>
+    <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 5px; border-left: 5px solid #3498db;">
+        Ulazna brzina (v1): <span id="v1-res-70" style="font-size: 1.2em; font-weight: bold; color: #2980b9;">...</span> m/s<br>
+        Volumenski protok: <span id="vdot-res-70" style="font-weight:bold;">...</span> m³/s
+    </div>
+</div>
+<script>
+(function() {
+    const d1I = document.getElementById('d1-70'), d2I = document.getElementById('d2-70'), v2I = document.getElementById('v2-70');
+    function calc() {
+        const d1 = parseFloat(d1I.value)/1000, d2 = parseFloat(d2I.value)/1000, v2 = parseFloat(v2I.value);
+        const v1 = (d2*d2 / (d1*d1)) * v2;
+        const vdot = (Math.pow(d2, 2) * Math.PI / 4) * v2;
+        
+        document.getElementById('v1-res-70').innerText = v1.toFixed(2);
+        document.getElementById('vdot-res-70').innerText = vdot.toFixed(4);
+        
+        // Vizualizacija oblika
+        const p1 = 50 - (d1/d2)*40;
+        const p2 = 50 + (d1/d2)*40;
+        document.getElementById('pipe-visual').style.clipPath = `polygon(0% ${p1}%, 100% 0%, 100% 100%, 0% ${p2}%)`;
+    }
+    [d1I, d2I, v2I].forEach(i => i.oninput = calc);
+    calc();
+})();
+</script>
+```
+
+***
+
+### ZADATAK 71.
+
+**Tekst zadatka:**
+(2500 SPFM – 8.6) Voda ustrujava u spremnik za miješanje prikazan na slici pri čemu volumenski protok iznosi $150\text{ dm}^3\text{/s}$ kroz presjek A, istovremeno kroz presjek B ustrujava ulje relativne gustoće $0,8$ volumenskim protokom $30\text{ dm}^3\text{/s}$. Ukoliko su tekućine nestlačive, te ukoliko možemo smatrati mješavinu homogenom, potrebno je odrediti srednju brzinu i gustoću tekućine koja istrujava kroz presjek C čiji promjer iznosi $30\text{ cm}$.
+
+**Zadano:**
+*   $\dot{V}_A = 0,15\text{ [m}^3\text{/s]}$
+*   $\dot{V}_B = 0,03\text{ [m}^3\text{/s]}$
+*   $D_C = 0,3\text{ [m]}$
+*   $\rho_A = 1000\text{ [kg/m}^3\text{]}$
+*   $\bar{\rho}_B = 0,8 \implies \rho_B = 800\text{ [kg/m}^3\text{]}$
+
+**Objašnjenje i rješenje korak po korak:**
+
+1.  **Gustoća ulja:** $\rho_B = \rho_A \cdot \bar{\rho}_B = 1000 \cdot 0,8 = 800\text{ kg/m}^3$.
+2.  **Očuvanje mase:** Ukupni maseni tok na izlazu (C) mora biti jednak zbroju masenih tokova na ulazima (A i B).
+    $$\dot{m}_C = \dot{m}_A + \dot{m}_B = \rho_A \dot{V}_A + \rho_B \dot{V}_B$$
+    $$\dot{m}_C = 1000 \cdot 0,15 + 800 \cdot 0,03 = 150 + 24 = 174\text{ [kg/s]}$$
+3.  **Očuvanje volumena (za nestlačive fluide):**
+    $$\dot{V}_C = \dot{V}_A + \dot{V}_B = 0,15 + 0,03 = 0,18\text{ [m}^3\text{/s]}$$
+4.  **Izlazna brzina ($v_{Csr}$):**
+    $$v_{Csr} = \frac{\dot{V}_C}{A_C} = \frac{\dot{V}_C}{\frac{D_C^2 \pi}{4}} = \frac{0,18}{\frac{0,3^2 \cdot \pi}{4}} = \mathbf{2,55\text{ [m/s]}}$$
+5.  **Gustoća mješavine ($\rho_C$):** Gustoća na izlazu dobije se dijeljenjem ukupnog masenog protoka s volumenskim protokom:
+    $$\rho_C = \frac{\dot{m}_C}{\dot{V}_C} = \frac{174}{0,18} = \mathbf{966,7\text{ [kg/m}^3\text{]}}$$
+
+```{=html}
+<div id="mixing-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #fffcf0; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #d68910;">Miješanje fluida (Zadatak 71)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <label>Voda QA (dm³/s): <input type="number" id="qa-71" value="150" step="10" style="width: 100%;"></label>
+        <label>Ulje QB (dm³/s): <input type="number" id="qb-71" value="30" step="5" style="width: 100%;"></label>
+        <label>Gustoća ulja (kg/m³): <input type="number" id="rho-b-71" value="800" step="50" style="width: 100%;"></label>
+        <label>Promjer izlaza Dc (cm): <input type="number" id="dc-71" value="30" step="5" style="width: 100%;"></label>
+    </div>
+    <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #d68910; font-size: 0.95em;">
+        <strong>Izlazni parametri (Presjek C):</strong><br>
+        Brzina vC: <span id="vc-res-71" style="font-weight:bold; color: #e67e22;">...</span> m/s<br>
+        Gustoća mješavine: <span id="rhoc-res-71" style="font-weight:bold;">...</span> kg/m³
+    </div>
+</div>
+<script>
+(function() {
+    const qaI = document.getElementById('qa-71'), qbI = document.getElementById('qb-71'), 
+          rbI = document.getElementById('rho-b-71'), dcI = document.getElementById('dc-71');
+    function calc() {
+        const qa = parseFloat(qaI.value)/1000, qb = parseFloat(qbI.value)/1000, 
+              rb = parseFloat(rbI.value), dc = parseFloat(dcI.value)/100;
+        const ra = 1000;
+        
+        const mc = ra * qa + rb * qb;
+        const qc = qa + qb;
+        const vc = qc / (Math.pow(dc, 2) * Math.PI / 4);
+        const rc = mc / qc;
+        
+        document.getElementById('vc-res-71').innerText = vc.toFixed(2);
+        document.getElementById('rhoc-res-71').innerText = rc.toFixed(1);
+    }
+    [qaI, qbI, rbI, dcI].forEach(i => i.oninput = calc);
+    calc();
+})();
+</script>
+```
+
+***
+
+### ZADATAK 72. (Spremnik s promjenjivom razinom)
+
+**Tekst zadatka:**
+Voda ustrujava u cilindrični spremnik kroz cijev 1 brzinom $8,3 \text{ m/s}$. Istovremeno, voda istrujava kroz cijevi 2 i 3 brzinama $0,9 \text{ m/s}$ i $3,6 \text{ m/s}$. Cijev 4 je otvorena prema atmosferi. Potrebno je odrediti brzinu promjene razine vode u spremniku ($dh/dt$) te srednju brzinu ustrujavanja zraka kroz cijev 4.
+
+**Zadano:**
+*   **Brzine:** $v_1 = 8,3 \text{ m/s}$ (ulaz), $v_2 = 0,9 \text{ m/s}$ (izlaz), $v_3 = 3,6 \text{ m/s}$ (izlaz)
+*   **Promjeri cijevi:** $D_1 = 75 \text{ mm}$, $D_2 = 50 \text{ mm}$, $D_3 = 60 \text{ mm}$, $D_4 = 50 \text{ mm}$
+*   **Promjer spremnika:** $d_s = 0,61 \text{ m}$
+*   **Gustoće:** $\rho_{voda} = 1000 \text{ kg/m}^3$, $\rho_{zrak} = 1,2 \text{ kg/m}^3$
+
+**Odrediti:**
+*   $dh/dt = ?$, $v_{4sr} = ?$
+
+***
+
+### Objašnjenje i rješenje korak po korak:
+
+#### **1. Fizikalni koncept (Bilanca mase)**
+Budući da voda ulazi brže nego što izlazi kroz cijevi 2 i 3, masa tekućine unutar spremnika će se povećavati. To uzrokuje podizanje razine vode ($dh/dt$). Prema zakonu o očuvanju mase:
+$$\text{Ulazna masa} - \text{Izlazna masa} = \text{Promjena mase u spremniku}$$
+$$\dot{m}_1 - (\dot{m}_2 + \dot{m}_3) = \frac{dm_{spremnik}}{dt}$$
+
+#### **2. Izračun površina presjeka ($A$):**
+Površine računamo standardno kao $A = \frac{D^2 \pi}{4}$:
+*   $A_1 = \frac{0,075^2 \pi}{4} = \mathbf{4,42 \cdot 10^{-3} \text{ m}^2}$
+*   $A_2 = \frac{0,05^2 \pi}{4} = \mathbf{1,96 \cdot 10^{-3} \text{ m}^2}$ (isto vrijedi i za $A_4$ jer je promjer isti)
+*   $A_3 = \frac{0,06^2 \pi}{4} = \mathbf{2,83 \cdot 10^{-3} \text{ m}^2}$
+*   $A_s = \frac{0,61^2 \pi}{4} = \mathbf{292,25 \cdot 10^{-3} \text{ m}^2}$ (površina spremnika)
+
+#### **3. Izračun brzine promjene razine ($dh/dt$):**
+Uvrštavamo masene protoke ($\dot{m} = \rho A v$) u jednadžbu bilance. Budući da je voda nestlačiva ($\rho = konst.$), gustoća se krati:
+$$A_1 v_1 - A_2 v_2 - A_3 v_3 = A_s \frac{dh}{dt}$$
+Izoliramo $dh/dt$:
+$$\frac{dh}{dt} = \frac{A_1 v_1 - A_2 v_2 - A_3 v_3}{A_s}$$
+$$\frac{dh}{dt} = \frac{(4,42 \cdot 10^{-3} \cdot 8,3) - (1,96 \cdot 10^{-3} \cdot 0,9) - (2,83 \cdot 10^{-3} \cdot 3,6)}{292,25 \cdot 10^{-3}}$$
+$$\frac{dh}{dt} = \mathbf{0,0846 \text{ m/s}}$$
+
+#### **4. Fizikalni koncept za zrak (Cijev 4)**
+Kako se razina vode podiže, ona zauzima prostor u kojem je bio zrak. Taj zrak mora izaći van kroz cijev 4. Volumen zraka koji istrujava u sekundi jednak je volumenu za koji se "povećala" voda u spremniku.
+$$\text{Volumenski protok zraka} = A_s \cdot \frac{dh}{dt}$$
+
+#### **5. Izračun brzine zraka ($v_{4sr}$):**
+Iz jednadžbe kontinuiteta za zrak u cijevi 4:
+$$A_4 \cdot v_{4sr} = A_s \cdot \frac{dh}{dt}$$
+$$v_{4sr} = \frac{A_s \cdot \frac{dh}{dt}}{A_4} = \frac{292,25 \cdot 10^{-3} \cdot 0,0846}{1,96 \cdot 10^{-3}}$$
+$$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
+
+```{=html}
+<div id="tank-level-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #ebf5fb; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2e86c1;">Razina vode i brzina zraka (Zadatak 72)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <label>Ulazna brzina v1 (m/s): <input type="number" id="v1-72" value="8.3" step="0.5" style="width: 100%;"></label>
+        <label>Izlazna v2 (m/s): <input type="number" id="v2-72" value="0.9" step="0.1" style="width: 100%;"></label>
+        <label>Izlazna v3 (m/s): <input type="number" id="v3-72" value="3.6" step="0.5" style="width: 100%;"></label>
+    </div>
+    <div style="position: relative; width: 200px; height: 250px; margin: 0 auto; border: 3px solid #34495e; background: white; border-top: none; border-radius: 0 0 5px 5px;">
+        <div id="water-level" style="position: absolute; bottom: 0; width: 100%; background: #3498db; height: 50%; transition: height 0.5s ease-out; opacity: 0.8;"></div>
+        <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); width: 25px; height: 30px; border: 2px solid #34495e; border-bottom: none; background: white;">
+            <div id="air-arrow" style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 20px; color: #7f8c8d; display: none;">↑</div>
+        </div>
+    </div>
+    <div style="margin-top: 15px; background: white; padding: 15px; border-radius: 5px; border-left: 5px solid #2980b9; font-size: 0.9em;">
+        Brzina promjene razine (dh/dt): <span id="dhdt-res" style="font-weight:bold; color: #2e86c1;">...</span> m/s<br>
+        <strong>Brzina zraka na izlazu (v4):</strong> <span id="v4-res" style="font-weight:bold; color: #c0392b;">...</span> m/s
+    </div>
+</div>
+<script>
+(function() {
+    const v1I = document.getElementById('v1-72'), v2I = document.getElementById('v2-72'), v3I = document.getElementById('v3-72');
+    const water = document.getElementById('water-level'), arrow = document.getElementById('air-arrow');
+    
+    function calc() {
+        const v1 = parseFloat(v1I.value), v2 = parseFloat(v2I.value), v3 = parseFloat(v3I.value);
+        const a1 = 0.00442, a2 = 0.00196, a3 = 0.00283, as = 0.29225, a4 = 0.00196;
+        
+        const dhdt = (a1*v1 - a2*v2 - a3*v3) / as;
+        const v4 = (as * dhdt) / a4;
+        
+        document.getElementById('dhdt-res').innerText = dhdt.toFixed(4);
+        document.getElementById('v4-res').innerText = Math.abs(v4).toFixed(2);
+        
+        const fillPercent = 50 + dhdt * 200; 
+        water.style.height = Math.min(100, Math.max(0, fillPercent)) + "%";
+        
+        if (dhdt > 0.001) {
+            arrow.style.display = "block"; arrow.innerText = "↑"; arrow.style.color = "#e74c3c";
+        } else if (dhdt < -0.001) {
+            arrow.style.display = "block"; arrow.innerText = "↓"; arrow.style.color = "#2ecc71";
+        } else {
+            arrow.style.display = "none";
+        }
+    }
+    [v1I, v2I, v3I].forEach(i => i.oninput = calc);
+    calc();
+})();
+</script>
+```
+
+**Fizikalno objašnjenje:** Zrak istrujava znatno brže ($12,59 \text{ m/s}$) nego što se razina vode podiže ($0,08 \text{ m/s}$) jer je cijev 4 puno uža od samog spremnika. Da bi se istisnuo isti volumen fluida kroz manji presjek, brzina mora bti veća.
+
+
+***
+
+### ZADATAK 73.
+
+**Tekst zadatka:**
+(2500 SPFM – 8.20) U spremnik sa slike ustrujava $10,2\text{ kg/s}$ vode, pri čemu istrujava $5,3\text{ kg/s}$ benzina, relativne gustoće $0,69$. Ukoliko pretpostavimo da su svi fluidi nestlačivi, potrebno je odrediti volumenski protok zraka i njegov smjer. Zrak je temperature $20^\circ\text{C}$ i tlak je atmosferski – $1\text{ bar}$.
+
+**Zadano:**
+*   $\dot{m}_1 = 10,2\text{ [kg/s]}$ (voda)
+*   $\dot{m}_2 = 5,3\text{ [kg/s]}$ (benzin)
+*   $\bar{\rho}_b = 0,69$, $\rho_v = 998\text{ [kg/m}^3\text{]}$, $\rho_z = 1,2\text{ [kg/m}^3\text{]}$
+*   $D_3 = 0,05\text{ [m]}$ (otvor za zrak)
+
+**Objašnjenje i rješenje korak po korak:**
+
+1.  **Gustoća benzina:** $\rho_b = 998 \cdot 0,69 = 688,6\text{ kg/m}^3$.
+2.  **Volumenski protoci tekućina:**
+    *   Voda (ulaz): $\dot{V}_1 = \frac{\dot{m}_1}{\rho_v} = \frac{10,2}{998} = 0,010214\text{ m}^3\text{/s}$
+    *   Benzin (izlaz): $\dot{V}_2 = \frac{\dot{m}_2}{\rho_b} = \frac{5,3}{688,6} = 0,007698\text{ m}^3\text{/s}$
+3.  **Bilanca volumena:** Budući da voda ulazi brže nego što benzin izlazi ($\dot{V}_1 > \dot{V}_2$), razina tekućine u spremniku raste. To znači da tekućina istiskuje zrak van.
+    $$\dot{V}_{zrak} = \dot{V}_1 - \dot{V}_2 = 0,010214 - 0,007698 = \mathbf{0,00252\text{ [m}^3\text{/s]}}$$
+4.  **Brzina zraka na izlazu:**
+    $$v_{zsr} = \frac{\dot{V}_3}{A_3} = \frac{0,00252}{\frac{0,05^2 \cdot \pi}{4}} = \mathbf{1,28\text{ [m/s]}}$$
+
+```{=html}
+<div id="air-displacement-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #fff5e6; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #d35400;">Istiskivanje zraka (Zadatak 73)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <label>Masa vode m1 (kg/s): <input type="number" id="m1-73" value="10.2" step="0.5" style="width: 100%;"></label>
+        <label>Masa benzina m2 (kg/s): <input type="number" id="m2-73" value="5.3" step="0.5" style="width: 100%;"></label>
+        <label>Rel. gustoća benzina: <input type="number" id="rb-73" value="0.69" step="0.01" style="width: 100%;"></label>
+        <label>Promjer otvora D3 (cm): <input type="number" id="d3-73" value="5" step="1" style="width: 100%;"></label>
+    </div>
+    <div id="air-res-73" style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #e67e22; font-size: 0.95em;">
+        Protoka zraka: <span id="vair-res-73" style="font-weight:bold;">...</span> m³/s<br>
+        <strong>Brzina zraka na otvoru:</strong> <span id="sair-res-73" style="font-weight:bold; color: #c0392b;">...</span> m/s<br>
+        Smjer: <span id="dir-res-73" style="font-weight:bold; color: #2980b9;">...</span>
+    </div>
+</div>
+<script>
+(function() {
+    const m1I = document.getElementById('m1-73'), m2I = document.getElementById('m2-73'),
+          rbI = document.getElementById('rb-73'), d3I = document.getElementById('d3-73');
+    function calc() {
+        const m1 = parseFloat(m1I.value), m2 = parseFloat(m2I.value),
+              rb = parseFloat(rbI.value), d3 = parseFloat(d3I.value)/100;
+        const rv = 998, rb_abs = rv * rb;
+        
+        const V1 = m1 / rv;
+        const V2 = m2 / rb_abs;
+        const Vair = V1 - V2;
+        const A3 = (Math.pow(d3, 2) * Math.PI) / 4;
+        const speed = Vair / A3;
+        
+        document.getElementById('vair-res-73').innerText = Math.abs(Vair).toFixed(5);
+        document.getElementById('sair-res-73').innerText = Math.abs(speed).toFixed(2);
+        document.getElementById('dir-res-73').innerText = Vair > 0 ? "IZLAZI (Istiskivanje)" : "ULAZI (Usisavanje)";
+    }
+    [m1I, m2I, rbI, d3I].forEach(i => i.oninput = calc);
+    calc();
+})();
+</script>
+```
+
+***
+
+### ZADATAK 74.
+
+**Tekst zadatka:**
+(2500 SPFM – 8.24) Ispitne stjenke zračnog tunela izrađene su od perforiranog materijala, pri čemu se fluid isisava u svrhu generiranja tankog viskoznog sloja. Stjenka ima $800$ provrta promjera $7\text{ mm}$ po kvadratnom metru površine. Brzina istrujavanja na svakom provrtu iznosi $v_p = 10\text{ m/s}$, pri čemu brzina na ulazu iznosi $v_1 = 46\text{ m/s}$. Ukoliko pretpostavimo da je fluid (zrak) nestlačiv temperature $20^\circ\text{C}$ i tlaka $1\text{ atm}$, potrebno je odrediti ukupne odsisne brzine $v_2$, te $v_f$.
+
+**Zadano:**
+*   $v_p = 10\text{ [m/s]}, v_1 = 46\text{ [m/s]}, n_p = 800\text{ [provrta/m}^2\text{]}$
+*   $d_p = 0,007\text{ [m]}, L = 4\text{ [m]}, D_1 = D_2 = 0,9\text{ [m]}, D_0 = 2,6\text{ [m]}, D_f = 2,4\text{ [m]}$
+
+**Objašnjenje i rješenje korak po korak:**
+
+1.  **Ulazna brzina $v_0$:** Iz kontinuiteta između sekcije 0 i 1:
+    $$v_0 = \frac{D_1^2}{D_0^2} \cdot v_1 = \frac{0,9^2}{2,6^2} \cdot 46 = 5,512\text{ m/s}$$
+2.  **Protok kroz jedan provrt ($\dot{V}_p$):**
+    $$\dot{V}_p = A_p \cdot v_p = \frac{0,007^2 \cdot \pi}{4} \cdot 10 = 0,000385\text{ m}^3\text{/s}$$
+3.  **Ukupni broj provrta ($N_p$):** Površina stjenke je plašt valjka $P = D_1 \cdot \pi \cdot L$.
+    $$N_p = n_p \cdot (D_1 \cdot \pi \cdot L) = 800 \cdot (0,9 \cdot \pi \cdot 4) \approx 9048$$
+4.  **Ukupni odsisni protok ($\dot{V}_L$):**
+    $$\dot{V}_L = N_p \cdot \dot{V}_p = 9048 \cdot 0,000385 = 3,482\text{ m}^3\text{/s}$$
+5.  **Brzina na presjeku 2 ($v_2$):** Protok u 2 je ono što ostane nakon odsisa: $\dot{V}_2 = \dot{V}_1 - \dot{V}_L$.
+    $$\dot{V}_1 = \frac{D_1^2 \pi}{4} \cdot v_1 = \frac{0,9^2 \cdot \pi}{4} \cdot 46 = 29,26\text{ m}^3\text{/s}$$
+    $$\dot{V}_2 = 29,26 - 3,482 = 25,78\text{ m}^3\text{/s} \implies v_2 = \frac{\dot{V}_2}{A_2} = \mathbf{40,53\text{ [m/s]}}$$
+6.  **Brzina ventilatora ($v_f$):** $v_f = \frac{D_2^2}{D_f^2} \cdot v_2 = \frac{0,9^2}{2,4^2} \cdot 40,53 = \mathbf{5,7\text{ [m/s]}}$
+
+```{=html}
+<div id="wind-tunnel-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #f4fcf4; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #27ae60;">Zračni tunel s odsisom (Zadatak 74)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <label>Ulazna brzina v1 (m/s): <input type="number" id="v1-74" value="46" step="1" style="width: 100%;"></label>
+        <label>Brzina na rupicama vp (m/s): <input type="number" id="vp-74" value="10" step="1" style="width: 100%;"></label>
+        <label>Broj rupa po m²: <input type="number" id="np-74" value="800" step="100" style="width: 100%;"></label>
+        <label>Duljina sekcije L (m): <input type="number" id="l-74" value="4" step="0.5" style="width: 100%;"></label>
+    </div>
+    <div style="background: white; padding: 15px; border-radius: 5px; border-left: 5px solid #27ae60; font-size: 0.9em;">
+        Ukupan broj provrta: <span id="total-n-74" style="font-weight:bold;">...</span><br>
+        Odsisani protok: <span id="vdot-l-74" style="font-weight:bold;">...</span> m³/s<br>
+        <strong>Izlazna brzina v2:</strong> <span id="v2-res-74" style="font-weight:bold; color: #c0392b;">...</span> m/s
+    </div>
+</div>
+<script>
+(function() {
+    const v1I = document.getElementById('v1-74'), vpI = document.getElementById('vp-74'),
+          npI = document.getElementById('np-74'), lI = document.getElementById('l-74');
+    function calc() {
+        const v1 = parseFloat(v1I.value), vp = parseFloat(vpI.value),
+              np = parseFloat(npI.value), L = parseFloat(lI.value);
+        const D1 = 0.9, dp = 0.007;
+        
+        const Np = Math.round(np * (D1 * Math.PI * L));
+        const Vp = (Math.pow(dp, 2) * Math.PI / 4) * vp;
+        const VdotL = Np * Vp;
+        const Vdot1 = (Math.pow(D1, 2) * Math.PI / 4) * v1;
+        const v2 = (Vdot1 - VdotL) / (Math.pow(D1, 2) * Math.PI / 4);
+        
+        document.getElementById('total-n-74').innerText = Np;
+        document.getElementById('vdot-l-74').innerText = VdotL.toFixed(3);
+        document.getElementById('v2-res-74').innerText = v2.toFixed(2);
+    }
+    [v1I, vpI, npI, lI].forEach(i => i.oninput = calc);
+    calc();
+})();
+</script>
+```
+
+***
+
+### ZADATAK 75.
+
+**Tekst zadatka:**
+(2500 SPFM – 8.27) Pumpa ubrizgava vodu, prikazano na slici, brzinom $v_1 = 26\text{ m/s}$ kroz cijev promjera $100\text{ mm}$, oko koje struji voda brzinom $2,6\text{ m/s}$. Dva toka se nizstrujno miješaju, pri čemu u presjeku 3 brzina $v_3$ postaje konstantnom. Ukoliko je tok stacionaran i nestlačiv, potrebno je odrediti brzinu $v_3$.
+
+**Zadano:**
+*   $v_1 = 26\text{ [m/s]}, v_2 = 2,6\text{ [m/s]}$
+*   $D_1 = 0,1\text{ [m]}, D_2 = 0,3\text{ [m]}$
+
+**Objašnjenje i rješenje korak po korak:**
+
+1.  **Fizikalni model:** Imamo dva ulazna toka. Prvi je kroz unutarnju cijev ($A_1$), a drugi kroz prstenasti prostor između cijevi 1 i vanjske cijevi 2 ($A_2 - A_1$). Na kraju se spajaju u cijev promjera $D_2$ (presjek 3).
+2.  **Jednadžba bilance protoka:**
+    $$\dot{V}_1 + \dot{V}_2 = \dot{V}_3$$
+    $$A_1 \cdot v_1 + (A_2 - A_1) \cdot v_2 = A_3 \cdot v_3$$
+    Budući da je $A_3 = A_2$ (vanjski promjer cijevi u kojoj se miješaju), uvrštavamo formule:
+    $$\frac{D_1^2 \pi}{4} \cdot v_1 + \frac{(D_2^2 - D_1^2) \pi}{4} \cdot v_2 = \frac{D_2^2 \pi}{4} \cdot v_3$$
+3.  **Izračun brzine $v_3$:**
+    Poništavamo $\pi/4$ i izoliramo $v_3$:
+    $$v_3 = \frac{D_1^2 \cdot v_1 + (D_2^2 - D_1^2) \cdot v_2}{D_2^2}$$
+    $$v_3 = \frac{0,1^2 \cdot 26 + (0,3^2 - 0,1^2) \cdot 2,6}{0,3^2} = \frac{0,26 + 0,08 \cdot 2,6}{0,09} = \frac{0,468}{0,09} = \mathbf{5,2\text{ [m/s]}}$$
+
+```{=html}
+<div id="coaxial-mix-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #fdfefe; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2c3e50;">Miješanje koaksijalnih tokova (Zadatak 75)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <label>Brzina mlaza v1 (m/s): <input type="number" id="v1-75" value="26" step="1" style="width: 100%;"></label>
+        <label>Brzina okruženja v2 (m/s): <input type="number" id="v2-75" value="2.6" step="0.5" style="width: 100%;"></label>
+        <label>Promjer mlaza D1 (m): <input type="number" id="d1-75" value="0.1" step="0.05" style="width: 100%;"></label>
+        <label>Vanjski promjer D2 (m): <input type="number" id="d2-75" value="0.3" step="0.1" style="width: 100%;"></label>
+    </div>
+    <div style="background: #ebf5fb; padding: 15px; border-radius: 5px; border-left: 5px solid #2c3e50;">
+        <strong>Konačna brzina mješavine (v3):</strong> <span id="v3-res-75" style="font-size: 1.3em; font-weight: bold; color: #c0392b;">...</span> m/s
+    </div>
+</div>
+<script>
+(function() {
+    const v1I = document.getElementById('v1-75'), v2I = document.getElementById('v2-75'),
+          d1I = document.getElementById('d1-75'), d2I = document.getElementById('d2-75');
+    function calc() {
+        const v1 = parseFloat(v1I.value), v2 = parseFloat(v2I.value),
+              d1 = parseFloat(d1I.value), d2 = parseFloat(d2I.value);
+        
+        const v3 = (Math.pow(d1, 2) * v1 + (Math.pow(d2, 2) - Math.pow(d1, 2)) * v2) / Math.pow(d2, 2);
+        document.getElementById('v3-res-75').innerText = v3.toFixed(2);
+    }
+    [v1I, v2I, d1I, d2I].forEach(i => i.oninput = calc);
+    calc();
+})();
+</script>
+```

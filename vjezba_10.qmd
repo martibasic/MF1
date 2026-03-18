@@ -1,0 +1,120 @@
+# Vježba 10: Dinamika realnog fluida i mjerenje protoka
+
+## Mehanika fluida – Vježba 10
+
+### Zadatak 86: Sifon s realnim fluidom
+
+**Tekst zadatka:** 
+Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubitak visine dobave $h_w$ i tlak u tjemenu sifona (točka 2). Pretpostaviti da se 2/3 gubitaka događa do točke 2.
+
+**Rješenje:**
+1. **Brzina:** $v = \frac{0,15}{\pi \cdot 0,1^2} = \mathbf{4,775 \, \text{m/s}}$.
+2. **Ukupni gubitak:** $h_{w1-3} = (z_1 - z_3) - \frac{v^2}{2g} = 1,5 - 1,162 = \mathbf{0,338 \, \text{m}}$.
+3. **Tlak u točki 2:** $\frac{p_2}{\rho g} = (z_1 - z_2) - \frac{v^2}{2g} - \frac{2}{3}h_{w1-3} = -2 - 1,162 - 0,225 = -3,387 \, \text{m} \implies p_2 = \mathbf{-33,2 \, \text{kPa}}$ (podtlak).
+
+***
+
+### Zadatak 87: Visina mlaza iz sapnice
+
+**Rješenje:**
+1. $v_A = 2,43 \, \text{m/s}, v_{is} = 4 v_A = 9,72 \, \text{m/s}$.
+2. Energija u A: $H_A = \frac{p_A}{\rho g} + \frac{v_A^2}{2g} + z_A = 5,62 + 0,3 + 0 = 5,92 \, \text{m}$.
+3. Visina mlaza $h_1$: $z_{vrh} = H_A \implies h_1 + h_2 = 5,92 \implies h_1 = \mathbf{4,82 \, \text{m}}$.
+
+***
+
+### Zadatak 89: Istjecanje iz velikog spremnika
+
+**Tekst zadatka:** 
+Za veliki spremnik s otvorom na dubini $h=5 \, \text{m}$, odrediti brzinu istjecanja $v_2$ (idealan fluid).
+
+**Rješenje:**
+$v_2 = \sqrt{2gh} = \sqrt{2 \cdot 9,81 \cdot 5} = \mathbf{9,9 \, \text{m/s}}$.
+
+***
+
+### Zadatak 90: Pitot-statička cijev (Prandtl)
+
+**Rješenje:**
+$\Delta p = (\rho_{Hg} - \rho_v) g \Delta h_{Hg} = 7850 \, \text{Pa}$.
+$v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
+
+***
+
+### Zadatak 92: Protočna sapnica u cijevi
+
+**Tekst zadatka:** 
+Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 \, \text{mm}$ ako je razlika u Hg manometru $20 \, \text{mm}$ ($c_c=0,95$).
+
+**Rješenje:**
+1. $\Delta p = (\rho_{Hg}-\rho_v)g h = 2472 \, \text{Pa}$.
+2. $\dot{V} = c_c \frac{A_s}{\sqrt{1-(A_s/A_c)^2}} \sqrt{\frac{2\Delta p}{\rho_v}} = \mathbf{1,5 \, \text{dm}^3\text{/s}}$.
+
+***
+
+### Zadatak 94-95: Venturi cijev i podizanje tekućine
+
+**Rješenje (95):**
+$v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \text{m}^3\text{/s}}$.
+
+```{=html}
+<!-- Venturi Effect Widget -->
+<div id="venturi-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #fcfcfc;">
+    <h3 style="text-align: center;">Venturijev efekt i mjerenje protoka</h3>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <canvas id="venturi-canvas" width="600" height="200" style="width: 100%; border: 1px solid #eee; background: white;"></canvas>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <label>Protok (L/s): <span id="q-vent-val">45</span></label>
+                <input type="range" id="q-vent-slider" min="10" max="100" step="1" value="45" style="width: 100%;">
+            </div>
+            <div style="background: #fff3cd; padding: 10px; border-radius: 8px; font-size: 0.9em;">
+                <strong>Fizika:</strong> U suženju cijevi brzina <i>raste</i>, a statički tlak <i>pada</i>. Ta razlika tlakova (h) direktno nam govori koliki je protok.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const qS = document.getElementById('q-vent-slider');
+    const canvas = document.getElementById('venturi-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function draw() {
+        const Q = parseFloat(qS.value) / 1000;
+        document.getElementById('q-vent-val').innerText = qS.value;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cy = 100; const d1 = 60; const d2 = 30;
+        
+        // Cijev outline
+        ctx.beginPath();
+        ctx.moveTo(50, cy - d1/2); ctx.lineTo(250, cy - d1/2);
+        ctx.lineTo(300, cy - d2/2); ctx.lineTo(350, cy - d2/2);
+        ctx.lineTo(400, cy - d1/2); ctx.lineTo(550, cy - d1/2);
+        ctx.lineTo(550, cy + d1/2); ctx.lineTo(400, cy + d1/2);
+        ctx.lineTo(350, cy + d2/2); ctx.lineTo(300, cy + d2/2);
+        ctx.lineTo(250, cy + d1/2); ctx.lineTo(50, cy + d1/2);
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 2; ctx.stroke();
+
+        // Fluid flow
+        ctx.fillStyle = "#3498db"; ctx.globalAlpha = 0.3;
+        ctx.fill(); ctx.globalAlpha = 1.0;
+
+        // Manometar levels (symbolic)
+        const h_diff = (Q*Q) * 5000; // Simplified scaling
+        ctx.fillStyle = "#e74c3c";
+        ctx.fillRect(150, cy - d1/2 - 20, 5, 20); // Level 1
+        ctx.fillRect(325, cy - d2/2 - 20 - h_diff, 5, 20 + h_diff); // Level 2
+        
+        ctx.font = "12px Arial"; ctx.fillStyle = "#2c3e50";
+        ctx.fillText("p1 (visok)", 130, 50);
+        ctx.fillText("p2 (nizak)", 310, 50 - h_diff);
+        
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+</script>
+```

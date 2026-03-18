@@ -1,0 +1,1295 @@
+# Vježba 2: Viskoznost (nastavak) i Površinska napetost
+
+## Mehanika fluida – Vježba 2
+
+### Zadatak 10: Okretni moment na krnjem stošcu (Izvod)
+
+**Tekst zadatka:**
+Ulje dinamičke viskoznosti $\mu$ ispunjava zračnost $\delta$. Potrebno je odrediti izraz za okretni moment potreban za rotaciju krnjeg stošca konstantnom kutnom brzinom. Prilikom proračuna zanemariti utjecaj gornjeg i donjeg horizontalnog dijela krnjeg stošca.
+
+**Rješenje:**
+1.  **Geometrija:** Radijus $r = y \tan\alpha$. Element površine $dA = 2\pi r ds = 2\pi (y \tan\alpha) \frac{dy}{\cos\alpha}$.
+2.  **Newtonov zakon:** $\tau = \mu \frac{v}{\delta} = \mu \frac{\omega r}{\delta} = \frac{\mu \omega y \tan\alpha}{\delta}$.
+3.  **Moment:** $dT = r \tau dA = (y \tan\alpha) \left( \frac{\mu \omega y \tan\alpha}{\delta} \right) \left( 2\pi y \tan\alpha \frac{dy}{\cos\alpha} \right)$.
+4.  **Integracija:** $T = \int_a^{a+b} \frac{2\pi \mu \omega \tan^3\alpha}{\delta \cos\alpha} y^3 dy = \mathbf{\frac{\pi \mu \omega \tan^3\alpha}{2 \delta \cos\alpha} [(a+b)^4 - a^4]}$.
+
+***
+
+### Zadatak 11: Snaga za rotaciju stošca
+
+**Zadano:**
+* $D = 0,12 \text{ m}, d = 0,04 \text{ m}, L = 0,12 \text{ m}$
+* $\omega = 200 \text{ rad/s}, \delta = 0,0012 \text{ m}$
+* $\mu_{20} = 0,1 \text{ Pa s}, \mu_{80} = 0,0078 \text{ Pa s}$
+
+**Rješenje:**
+1. **Snaga na bazama:** $P_{baze} = \frac{\pi \mu \omega^2 (D^4 + d^4)}{32 \delta} = \mathbf{68,7 \text{ W}}$.
+2. **Snaga na plaštu:** $\tan\alpha = \frac{D-d}{2L} = 0,33 \implies \alpha = 18,4^\circ$.
+   $P_{plašt} = \frac{\pi \mu \omega^2 (D^4 - d^4)}{32 \delta \sin\alpha} = \mathbf{211,9 \text{ W}}$.
+3. **Ukupna snaga (20 °C):** $P_{tot} = \mathbf{280,6 \text{ W}}$.
+4. **Pad snage na 80 °C:** $P_{80} = P_{20} \cdot \frac{0,0078}{0,1} = \mathbf{21,9 \text{ W}}$ (Smanjenje za 92,2%).
+
+```{=html}
+<!-- ZADATAK 10/11: Rotirajući krnji stožac u ulju -->
+<div class="widget-container" id="widget-10-11">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 800px;
+            font-family: 'Segoe UI', system-ui, sans-serif; color: #333;
+        }
+        .widget-header { margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .widget-title { font-size: 1.4rem; font-weight: 700; color: #2c3e50; margin: 0; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .control-group { display: flex; flex-direction: column; }
+        .control-group label { font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; color: #555; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #3498db; }
+        .btn { background: #3498db; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn:hover { background: #2980b9; transform: translateY(-1px); }
+        .btn.heat { background: #e74c3c; }
+        .btn.heat:hover { background: #c0392b; }
+        .canvas-wrapper { position: relative; width: 100%; height: 320px; background: #f4f6f7; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #dfe6e9; }
+        canvas { display: block; }
+        .metrics { display: flex; justify-content: space-around; background: #2c3e50; color: white; padding: 12px; border-radius: 8px; margin-top: 15px; font-family: monospace; font-size: 1.1rem; }
+        .metric-item { text-align: center; }
+        .metric-label { font-size: 0.75rem; opacity: 0.8; display: block; }
+        .info-text { font-size: 0.9rem; color: #7f8c8d; margin-top: 15px; line-height: 1.5; font-style: italic; border-left: 3px solid #3498db; padding-left: 10px; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Rotirajući krnji stožac u viskoznom ulju</h3></div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Kutna brzina ω: <span id="val-w">200</span> rad/s</label>
+            <input type="range" id="slider-w" min="0" max="400" value="200" step="10">
+        </div>
+        <div class="control-group">
+            <label>Viskoznost ulja μ: <span id="val-mu">0.1</span> Pa·s</label>
+            <input type="range" id="slider-mu" min="0.001" max="0.5" value="0.1" step="0.001">
+        </div>
+        <div class="control-group">
+            <label>Debljina sloja δ: <span id="val-delta">2.0</span> mm</label>
+            <input type="range" id="slider-delta" min="0.5" max="5" value="2.0" step="0.1">
+        </div>
+        <button class="btn heat" id="btn-heat">🔥 Zagrij ulje na 80°C</button>
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas-10-11" width="600" height="300"></canvas>
+    </div>
+
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">MOMENT T</span><span id="out-T">0.00</span> N·m</div>
+        <div class="metric-item"><span class="metric-label">SNAGA P</span><span id="out-P">0.00</span> W</div>
+        <div class="metric-item"><span class="metric-label">MAX SMIK τ</span><span id="out-tau">0.00</span> Pa</div>
+    </div>
+    <div class="metrics" id="savings-panel" style="display:none; background:#27ae60; margin-top:5px;">
+        <div class="metric-item"><span class="metric-label">UŠTEDA SNAGE ΔP</span><span id="out-dP">0.00</span> W</div>
+    </div>
+
+    <p class="info-text">Viskozni moment raste s kutnom brzinom i viskoznošću. Tangencijalno naprezanje (τ) je najveće na najvećem radijusu jer je tamo obodna brzina najveća. Zagrijavanje ulja drastično smanjuje viskoznost i potrebnu snagu.</p>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas-10-11');
+            const ctx = canvas.getContext('2d');
+            const slW = document.getElementById('slider-w');
+            const slMu = document.getElementById('slider-mu');
+            const slD = document.getElementById('slider-delta');
+            const btnHeat = document.getElementById('btn-heat');
+            
+            const R1 = 0.05; 
+            const R2 = 0.10; 
+            const H = 0.15;  
+
+            let rotAngle = 0;
+
+            function calculate() {
+                const w = parseFloat(slW.value);
+                const mu = parseFloat(slMu.value);
+                const delta = parseFloat(slD.value) / 1000; 
+
+                const sinAlpha = Math.sin(Math.atan((R2-R1)/H));
+                const term = (Math.pow(R2, 4) - Math.pow(R1, 4)) / 4;
+                const T = (2 * Math.PI * mu * w / (delta * sinAlpha)) * term;
+                
+                const P = T * w;
+                const tauMax = mu * w * R2 / delta;
+
+                return { T, P, tauMax, w, mu, delta };
+            }
+
+            function update() {
+                const data = calculate();
+                
+                document.getElementById('val-w').textContent = slW.value;
+                document.getElementById('val-mu').textContent = parseFloat(slMu.value).toFixed(3);
+                document.getElementById('val-delta').textContent = slD.value;
+
+                document.getElementById('out-T').textContent = data.T.toFixed(2);
+                document.getElementById('out-P').textContent = data.P.toFixed(1);
+                document.getElementById('out-tau').textContent = Math.round(data.tauMax);
+
+                draw(data);
+                requestAnimationFrame(update);
+            }
+
+            function draw(data) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2 + 50;
+                const scale = 1200; 
+
+                rotAngle += data.w * 0.002; 
+
+                const topW = R2 * 2 * scale;
+                const botW = R1 * 2 * scale;
+                const hPx = H * scale;
+                
+                ctx.fillStyle = `rgba(241, 196, 15, ${0.3 + data.mu*1.5})`; 
+                ctx.beginPath();
+                ctx.moveTo(cx - botW/2 - 20, cy);
+                ctx.lineTo(cx + botW/2 + 20, cy);
+                ctx.lineTo(cx + topW/2 + 20, cy - hPx);
+                ctx.lineTo(cx - topW/2 - 20, cy - hPx);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#f39c12';
+                ctx.stroke();
+
+                ctx.save();
+                const grad = ctx.createLinearGradient(0, cy, 0, cy - hPx);
+                grad.addColorStop(0, '#3498db');
+                grad.addColorStop(1, '#e74c3c');
+                ctx.fillStyle = grad;
+                
+                ctx.beginPath();
+                ctx.moveTo(cx - botW/2, cy);
+                ctx.lineTo(cx + botW/2, cy);
+                ctx.lineTo(cx + topW/2, cy - hPx);
+                ctx.lineTo(cx - topW/2, cy - hPx);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx, cy - hPx);
+                ctx.stroke();
+
+                for(let i=0; i<=5; i++) {
+                    const f = i/5;
+                    const y = cy - f*hPx;
+                    const r_real = R1 + (R2-R1)*f;
+                    const r = r_real * scale;
+                    const tau = data.mu * data.w * r_real / data.delta;
+                    const arrowLen = tau * 0.05; 
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.moveTo(cx - r/2, y);
+                    const dx = Math.cos(rotAngle + i)*arrowLen;
+                    ctx.lineTo(cx - r/2 + dx, y);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            btnHeat.addEventListener('click', () => {
+                const oldP = calculate().P;
+                let currentMu = parseFloat(slMu.value);
+                const targetMu = 0.015; 
+                
+                const interval = setInterval(() => {
+                    currentMu -= 0.005;
+                    if(currentMu <= targetMu) {
+                        currentMu = targetMu;
+                        clearInterval(interval);
+                        const newP = calculate().P;
+                        document.getElementById('savings-panel').style.display = 'flex';
+                        document.getElementById('out-dP').textContent = (oldP - newP).toFixed(1);
+                    }
+                    slMu.value = currentMu;
+                }, 20);
+            });
+
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 12: Kapilarni porast (Voda vs Živa)
+
+**Tekst zadatka:**
+Usporediti kapilarni porast vode i žive u staklenoj cijevi polumjera 0,3 mm pri 60 °C. Kut kvašenja za vodu je 0°, a za živu 130°.
+
+**Rješenje:**
+* **Voda:** $h_v = \frac{2 \cdot 0,0662 \cdot \cos 0^\circ}{983,7 \cdot 9,81 \cdot 0,0003} = \mathbf{45,7 \text{ mm}}$
+* **Živa:** $h_{Hg} = \frac{2 \cdot 0,47 \cdot \cos 130^\circ}{13480 \cdot 9,81 \cdot 0,0003} = \mathbf{-15,2 \text{ mm}}$ (kapilarna depresija)
+
+```{=html}
+<!-- ZADATAK 12: Kapilarni porast (Voda vs Živa) -->
+<div class="widget-container" id="widget-12">
+    <div class="widget-header"><h3 class="widget-title">Usporedni prikaz kapilarnosti: Voda vs. Živa</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Promjer kapilare D: <span id="val-d12">1.0</span> mm</label>
+            <input type="range" id="slider-d12" min="0.1" max="2.0" value="1.0" step="0.1">
+        </div>
+        <div class="control-group">
+            <label>Temperatura T: <span id="val-temp12">20</span> °C</label>
+            <input type="range" id="slider-temp12" min="20" max="80" value="20" step="5">
+        </div>
+        <button class="btn" id="btn-anim-rise">▶ Animacija penjanja</button>
+    </div>
+
+    <div class="canvas-wrapper" style="height: 350px;">
+        <svg id="svg-12" width="100%" height="100%" viewBox="0 0 600 350">
+            <text x="150" y="30" text-anchor="middle" font-weight="bold" fill="#2980b9">VODA (Hidrofilno)</text>
+            <text x="450" y="30" text-anchor="middle" font-weight="bold" fill="#7f8c8d">ŽIVA (Hidrofobno)</text>
+            
+            <rect x="50" y="250" width="200" height="80" fill="#d6eaf8" stroke="#2980b9" stroke-width="2"/>
+            <rect x="350" y="250" width="200" height="80" fill="#bdc3c7" stroke="#7f8c8d" stroke-width="2"/>
+            
+            <rect x="130" y="50" width="40" height="280" fill="none" stroke="#333" stroke-width="2" id="tube-water"/>
+            <rect x="430" y="50" width="40" height="280" fill="none" stroke="#333" stroke-width="2" id="tube-mercury"/>
+
+            <path id="water-col" fill="#3498db" opacity="0.8" />
+            <path id="mercury-col" fill="#95a5a6" opacity="0.9" />
+
+            <text id="lbl-h-water" x="190" y="200" fill="#2980b9" font-family="monospace">h = 0 mm</text>
+            <text id="lbl-h-mercury" x="490" y="200" fill="#7f8c8d" font-family="monospace">h = 0 mm</text>
+            
+            <line x1="50" y1="260" x2="250" y2="260" stroke="#2980b9" stroke-dasharray="4"/>
+            <line x1="350" y1="260" x2="550" y2="260" stroke="#7f8c8d" stroke-dasharray="4"/>
+        </svg>
+    </div>
+
+    <p class="info-text">Voda ima kut kvašenja 0° (konkavni meniskus, penje se). Živa ima kut kvašenja ~130° (konveksni meniskus, spušta se). Visina je obrnuto proporcionalna promjeru cijevi.</p>
+
+    <script>
+        (function() {
+            const slD = document.getElementById('slider-d12');
+            const slT = document.getElementById('slider-temp12');
+            const btnAnim = document.getElementById('btn-anim-rise');
+            
+            const pathWater = document.getElementById('water-col');
+            const pathMercury = document.getElementById('mercury-col');
+            
+            let animProgress = 1.0; 
+
+            function update() {
+                const D_mm = parseFloat(slD.value);
+                const T = parseFloat(slT.value);
+                const D = D_mm / 1000;
+                
+                const sigW = 0.0728 - (T-20)*((0.0728-0.0626)/60);
+                const rhoW = 998 - (T-20)*((998-971)/60);
+                const cosW = 1.0; 
+                
+                const sigHg = 0.486 - (T-20)*((0.486-0.47)/60);
+                const rhoHg = 13545 - (T-20)*((13545-13400)/60);
+                const cosHg = Math.cos(130 * Math.PI/180); 
+
+                const g = 9.81;
+
+                let hW = (4 * sigW * cosW) / (rhoW * g * D); 
+                let hHg = (4 * sigHg * cosHg) / (rhoHg * g * D);
+
+                hW *= animProgress;
+                hHg *= animProgress;
+
+                const scale = 5000; 
+                const hW_px = hW * scale;
+                const hHg_px = hHg * scale; 
+
+                const baseX = 260; 
+
+                const wPx = D_mm * 20; 
+                document.getElementById('tube-water').setAttribute('width', wPx);
+                document.getElementById('tube-water').setAttribute('x', 150 - wPx/2);
+                document.getElementById('tube-mercury').setAttribute('width', wPx);
+                document.getElementById('tube-mercury').setAttribute('x', 450 - wPx/2);
+
+                const menW = wPx/4;
+                const topW = baseX - hW_px;
+                const dW = `M ${150-wPx/2} ${baseX+50} L ${150-wPx/2} ${topW} Q ${150} ${topW+menW} ${150+wPx/2} ${topW} L ${150+wPx/2} ${baseX+50} Z`;
+                pathWater.setAttribute('d', dW);
+
+                const topHg = baseX - hHg_px; 
+                const dHg = `M ${450-wPx/2} ${baseX+50} L ${450-wPx/2} ${topHg} Q ${450} ${topHg-menW} ${450+wPx/2} ${topHg} L ${450+wPx/2} ${baseX+50} Z`;
+                pathMercury.setAttribute('d', dHg);
+
+                document.getElementById('val-d12').textContent = D_mm.toFixed(1);
+                document.getElementById('val-temp12').textContent = T;
+                document.getElementById('lbl-h-water').textContent = `h = ${(hW*1000).toFixed(1)} mm`;
+                document.getElementById('lbl-h-water').setAttribute('y', baseX - hW_px - 10);
+                document.getElementById('lbl-h-mercury').textContent = `h = ${(hHg*1000).toFixed(1)} mm`;
+                document.getElementById('lbl-h-mercury').setAttribute('y', baseX - hHg_px + 20);
+            }
+
+            btnAnim.addEventListener('click', () => {
+                animProgress = 0;
+                let step = 0;
+                const interval = setInterval(() => {
+                    step += 0.02;
+                    animProgress = Math.sin(step * Math.PI / 2); 
+                    if(step >= 1) {
+                        animProgress = 1;
+                        clearInterval(interval);
+                    }
+                    update();
+                }, 16);
+            });
+
+            slD.addEventListener('input', update);
+            slT.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 13: Površinska napetost kapi
+
+**Tekst zadatka:**
+Kuglolika kap vode promjera 0,5 mm ima unutarnji pretlak od 565 Pa. Odrediti površinsku napetost.
+
+**Rješenje:**
+$\Delta p = \frac{4\sigma}{D} \implies \sigma = \frac{\Delta p \cdot D}{4} = \frac{565 \cdot 0,0005}{4} = \mathbf{0,0706 \text{ N/m}}$.
+
+```{=html}
+<!-- ZADATAK 13: Tlak unutar kapljice -->
+<div class="widget-container" id="widget-13">
+    <div class="widget-header"><h3 class="widget-title">Tlak unutar kapljice (Young-Laplace)</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Promjer kapljice D: <span id="val-d13">2.0</span> mm</label>
+            <input type="range" id="slider-d13" min="0.1" max="5.0" value="2.0" step="0.1">
+        </div>
+        <div class="control-group">
+            <label>Površinska napetost σ: <span id="val-sig13">0.073</span> N/m</label>
+            <input type="range" id="slider-sig13" min="0.01" max="0.1" value="0.073" step="0.001">
+        </div>
+    </div>
+
+    <div class="canvas-wrapper" style="background: white;">
+        <div id="drop-container" style="position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
+            <div id="water-drop" style="border-radius: 50%; background: radial-gradient(circle at 30% 30%, #a9dfbf, #2ecc71); transition: all 0.2s ease-out; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <div id="drop-text" style="color: white; font-weight: bold; text-shadow: 1px 1px 2px black;"></div>
+            </div>
+            <div id="arrows-layer" style="position: absolute; width: 100%; height: 100%; pointer-events: none;"></div>
+        </div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">NADTLAK Δp</span><span id="out-dp13">0</span> Pa</div>
+    </div>
+
+    <p class="info-text">Young-Laplace: Δp = 4σ/D. Manje kapljice imaju drastično veći unutarnji tlak. Boja kapljice postaje intenzivnija s tlakom.</p>
+
+    <script>
+        (function() {
+            const slD = document.getElementById('slider-d13');
+            const slS = document.getElementById('slider-sig13');
+            const drop = document.getElementById('water-drop');
+            const arrows = document.getElementById('arrows-layer');
+            const outDp = document.getElementById('out-dp13');
+
+            function update() {
+                const D_mm = parseFloat(slD.value);
+                const sig = parseFloat(slS.value);
+                const D = D_mm / 1000;
+                const dp = (4 * sig) / D;
+
+                document.getElementById('val-d13').textContent = D_mm.toFixed(1);
+                document.getElementById('val-sig13').textContent = sig.toFixed(3);
+                outDp.textContent = Math.round(dp);
+
+                const sizePx = D_mm * 50;
+                drop.style.width = `${sizePx}px`;
+                drop.style.height = `${sizePx}px`;
+
+                const intensity = Math.min(1, dp / 2000);
+                const r = Math.round(46 + intensity * (231 - 46));
+                const g = Math.round(204 - intensity * 150);
+                const b = Math.round(113 - intensity * 50);
+                drop.style.background = `radial-gradient(circle at 30% 30%, rgb(${r+40},${g+40},${b+40}), rgb(${r},${g},${b}))`;
+
+                arrows.innerHTML = '';
+                const numArrows = 8;
+                const arrowLen = 10 + sig * 200;
+                const cx = arrows.offsetWidth / 2;
+                const cy = arrows.offsetHeight / 2;
+                const radius = sizePx / 2;
+
+                for(let i=0; i<numArrows; i++) {
+                    const angle = (i / numArrows) * 2 * Math.PI;
+                    const el = document.createElement('div');
+                    el.style.position = 'absolute';
+                    el.style.left = `${cx + Math.cos(angle)*radius}px`;
+                    el.style.top = `${cy + Math.sin(angle)*radius}px`;
+                    el.style.width = `${arrowLen}px`;
+                    el.style.height = '2px';
+                    el.style.background = '#333';
+                    el.style.transformOrigin = '0 50%';
+                    el.style.transform = `rotate(${angle * 180 / Math.PI + 180}deg)`;
+                    
+                    const head = document.createElement('div');
+                    head.style.position = 'absolute';
+                    head.style.right = '-4px';
+                    head.style.top = '-3px';
+                    head.style.borderLeft = '6px solid #333';
+                    head.style.borderTop = '4px solid transparent';
+                    head.style.borderBottom = '4px solid transparent';
+                    el.appendChild(head);
+                    arrows.appendChild(el);
+                }
+            }
+            slD.addEventListener('input', update);
+            slS.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 14: Sila žive na staklenu cijev
+
+**Tekst zadatka:**
+Odrediti silu kojom živa "vuče" staklenu cijev ($d_o=35 \text{ mm}, d_i=25 \text{ mm}$) pri kutu kvašenja od 130° ($\theta_{rel} = 180-130 = 50^\circ$).
+
+**Rješenje:**
+$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cdot \pi \cdot (0,035 + 0,025) \cdot 0,642 = \mathbf{0,0623 \text{ N}}$.
+
+```{=html}
+<!-- ZADATAK 14: Sila na staklenoj cijevi -->
+<div class="widget-container" id="widget-14">
+    <div class="widget-header"><h3 class="widget-title">Sila površinske napetosti na cijevi</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Vanjski promjer do: <span id="val-do">40</span> mm</label>
+            <input type="range" id="slider-do" min="20" max="60" value="40">
+        </div>
+        <div class="control-group">
+            <label>Unutarnji promjer di: <span id="val-di">30</span> mm</label>
+            <input type="range" id="slider-di" min="10" max="50" value="30">
+        </div>
+        <div class="control-group">
+            <label>Kut kvašenja θ: <span id="val-theta">140</span>°</label>
+            <input type="range" id="slider-theta" min="100" max="150" value="140">
+        </div>
+        <button class="btn" id="btn-fluid-type">💧 Prebaci na Vodu (Hidrofilno)</button>
+    </div>
+
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">UKUPNA SILA F</span><span id="out-F">0.00</span> N</div>
+        <div class="metric-item"><span class="metric-label">SMJER</span><span id="out-dir">DOLJE</span></div>
+    </div>
+    
+    <div class="canvas-wrapper">
+        <svg id="svg-14" width="100%" height="100%" viewBox="0 0 400 300">
+            <defs>
+                <linearGradient id="grad-hg" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#bdc3c7;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#7f8c8d;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect x="0" y="150" width="400" height="150" fill="url(#grad-hg)" id="liq-rect" />
+            <rect x="120" y="50" width="10" height="200" fill="#ecf0f1" stroke="#95a5a6" id="wall-left"/>
+            <rect x="270" y="50" width="10" height="200" fill="#ecf0f1" stroke="#95a5a6" id="wall-right"/>
+            <path id="meniscus-left-out" fill="none" stroke="#2c3e50" stroke-width="2"/>
+            <line id="force-left-out" stroke="#e74c3c" stroke-width="3" />
+        </svg>
+    </div>
+
+    <script>
+        (function() {
+            const slDo = document.getElementById('slider-do');
+            const slDi = document.getElementById('slider-di');
+            const slTh = document.getElementById('slider-theta');
+            const btnType = document.getElementById('btn-fluid-type');
+            let isMercury = true;
+
+            function update() {
+                let do_mm = parseFloat(slDo.value);
+                let di_mm = parseFloat(slDi.value);
+                if(di_mm >= do_mm) { di_mm = do_mm - 2; slDi.value = di_mm; }
+
+                let theta = parseFloat(slTh.value);
+                const sig = isMercury ? 0.48 : 0.073;
+
+                const L_out = do_mm * Math.PI / 1000;
+                const L_in = di_mm * Math.PI / 1000;
+                const F_total = sig * (L_out + L_in) * Math.cos(theta * Math.PI / 180);
+
+                document.getElementById('val-do').textContent = do_mm;
+                document.getElementById('val-di').textContent = di_mm;
+                document.getElementById('val-theta').textContent = theta;
+                document.getElementById('out-F').textContent = Math.abs(F_total).toFixed(4);
+                document.getElementById('out-dir').textContent = F_total < 0 ? "DOLJE (Odbijanje)" : "GORE (Privlačenje)";
+                document.getElementById('out-dir').style.color = F_total < 0 ? "#e74c3c" : "#27ae60";
+
+                const cx = 200;
+                const scale = 3; 
+                const wallThick = (do_mm - di_mm) / 2 * scale;
+                const r_in = di_mm / 2 * scale;
+                
+                document.getElementById('wall-left').setAttribute('x', cx - r_in - wallThick);
+                document.getElementById('wall-left').setAttribute('width', wallThick);
+                document.getElementById('wall-right').setAttribute('x', cx + r_in);
+                document.getElementById('wall-right').setAttribute('width', wallThick);
+
+                const depression = (theta > 90) ? 10 : -10;
+                const liqY = 150;
+                const x_wall_out = cx - r_in - wallThick;
+                document.getElementById('meniscus-left-out').setAttribute('d', `M ${x_wall_out-20} ${liqY} Q ${x_wall_out-5} ${liqY} ${x_wall_out} ${liqY+depression}`);
+                
+                const arr = document.getElementById('force-left-out');
+                arr.setAttribute('x1', x_wall_out);
+                arr.setAttribute('y1', liqY+depression);
+                arr.setAttribute('x2', x_wall_out);
+                arr.setAttribute('y2', liqY+depression + (F_total < 0 ? 30 : -30));
+                arr.style.stroke = F_total < 0 ? "#e74c3c" : "#27ae60";
+            }
+
+            btnType.addEventListener('click', () => {
+                isMercury = !isMercury;
+                if(!isMercury) {
+                    slTh.min = 0; slTh.max = 80; slTh.value = 20;
+                    btnType.textContent = "🌡️ Prebaci na Živu (Hidrofobno)";
+                    document.getElementById('liq-rect').style.fill = "#3498db";
+                } else {
+                    slTh.min = 100; slTh.max = 150; slTh.value = 140;
+                    btnType.textContent = "💧 Prebaci na Vodu (Hidrofilno)";
+                    document.getElementById('liq-rect').style.fill = "url(#grad-hg)";
+                }
+                update();
+            });
+
+            slDo.addEventListener('input', update);
+            slDi.addEventListener('input', update);
+            slTh.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 15: Plutajuće kuglice
+
+**Tekst zadatka:**
+Odrediti maksimalni promjer čelične ($\rho=7800$) i aluminijske ($\rho=2700$) kuglice koje mogu plutati na vodi ($\sigma=0,073$).
+
+**Rješenje:**
+$D_{max} = \sqrt{\frac{6\sigma}{\rho g}}$
+* **Čelik:** $D = \sqrt{\frac{6 \cdot 0,073}{7800 \cdot 9,81}} = \mathbf{2,4 \text{ mm}}$
+* **Aluminij:** $D = \sqrt{\frac{6 \cdot 0,073}{2700 \cdot 9,81}} = \mathbf{4,1 \text{ mm}}$
+
+```{=html}
+<!-- ZADATAK 15: Plutajuća kuglica -->
+<div class="widget-container" id="widget-15">
+    <div class="widget-header"><h3 class="widget-title">Plutajuća kuglica (Napetost vs Težina)</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Promjer d: <span id="val-d15">2.0</span> mm</label>
+            <input type="range" id="slider-d15" min="0.1" max="5.0" value="2.0" step="0.1">
+        </div>
+        <div class="control-group">
+            <label>Gustoća ρ: <span id="val-rho15">2700</span> kg/m³ (Aluminij)</label>
+            <input type="range" id="slider-rho15" min="1000" max="10000" value="2700" step="100">
+        </div>
+        <button class="btn" id="btn-reset15">Reset</button>
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas-15" width="600" height="300"></canvas>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">TEŽINA Fg</span><span id="out-fg">0</span> µN</div>
+        <div class="metric-item"><span class="metric-label">MAX SILA NAPETOSTI</span><span id="out-fs">0</span> µN</div>
+        <div class="metric-item"><span class="metric-label">STATUS</span><span id="out-status15">PLUTA</span></div>
+    </div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas-15');
+            const ctx = canvas.getContext('2d');
+            const slD = document.getElementById('slider-d15');
+            const slR = document.getElementById('slider-rho15');
+            let sunk = false; let sinkY = 0;
+
+            function update() {
+                const d_mm = parseFloat(slD.value);
+                const rho = parseFloat(slR.value);
+                const d = d_mm / 1000;
+                const sig = 0.073; const g = 9.81;
+                const V = (4/3) * Math.PI * Math.pow(d/2, 3);
+                const Fg = rho * V * g;
+                const F_sig_max = Math.PI * d * sig;
+                const ratio = Fg / F_sig_max;
+                
+                document.getElementById('val-d15').textContent = d_mm.toFixed(1);
+                document.getElementById('val-rho15').textContent = rho;
+                document.getElementById('out-fg').textContent = (Fg*1e6).toFixed(1);
+                document.getElementById('out-fs').textContent = (F_sig_max*1e6).toFixed(1);
+
+                if (ratio > 1 && !sunk) sunk = true;
+                document.getElementById('out-status15').textContent = sunk ? "TONE ✗" : "PLUTA ✓";
+                document.getElementById('out-status15').style.color = sunk ? "#e74c3c" : "#27ae60";
+
+                draw(d_mm, ratio, sunk);
+            }
+
+            function draw(d_mm, ratio, isSunk) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const cx = canvas.width / 2; const cy = canvas.height / 2;
+                const rPx = d_mm * 20; 
+                ctx.beginPath(); ctx.strokeStyle = '#3498db'; ctx.lineWidth = 2;
+                
+                if (isSunk) {
+                    sinkY += 2; ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy); ctx.stroke();
+                    ctx.fillStyle = '#95a5a6'; ctx.beginPath(); ctx.arc(cx, cy + sinkY, rPx, 0, Math.PI*2); ctx.fill();
+                } else {
+                    const depth = Math.min(rPx, ratio * rPx); 
+                    ctx.moveTo(0, cy);
+                    ctx.bezierCurveTo(cx - rPx*2, cy, cx - rPx, cy + depth, cx, cy + depth);
+                    ctx.bezierCurveTo(cx + rPx, cy + depth, cx + rPx*2, cy, canvas.width, cy);
+                    ctx.stroke();
+                    ctx.fillStyle = '#95a5a6'; ctx.beginPath(); ctx.arc(cx, cy + depth - rPx*0.8, rPx, 0, Math.PI*2); ctx.fill();
+                }
+            }
+            document.getElementById('btn-reset15').addEventListener('click', () => { sunk = false; sinkY = 0; update(); });
+            slD.addEventListener('input', () => { sunk=false; sinkY=0; update(); });
+            slR.addEventListener('input', () => { sunk=false; sinkY=0; update(); });
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 16: Pogreška manometra
+
+**Tekst zadatka:**
+Voda u cijevi promjera 1 mm očitana je na visini 170 mm. Odrediti pravu visinu ako je $\sigma = 0,0712 \text{ N/m}$.
+
+**Rješenje:**
+1. Kapilarni uspon: $h = \frac{2\sigma}{\rho g R} = \frac{2 \cdot 0,0712}{996 \cdot 9,81 \cdot 0,0005} = 29 \text{ mm}$.
+2. Prava visina: $H_o = 170 - 29 = \mathbf{141 \text{ mm}}$.
+
+```{=html}
+<!-- ZADATAK 16/17: Kapilarna greška -->
+<div class="widget-container" id="widget-16">
+    <div class="widget-header"><h3 class="widget-title">Kapilarna greška u manometru</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Promjer cijevi dc: <span id="val-dc16">2.0</span> mm</label>
+            <input type="range" id="slider-dc16" min="0.5" max="5.0" value="2.0" step="0.1">
+        </div>
+        <div class="control-group">
+            <label>Gustoća ρ: <span id="val-rho16">1000</span> kg/m³</label>
+            <input type="range" id="slider-rho16" min="700" max="1400" value="1000" step="50">
+        </div>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">KAPILARNI POMAK h</span><span id="out-h16">0.00</span> mm</div>
+        <div class="metric-item"><span class="metric-label">RELATIVNA GREŠKA (na 10cm)</span><span id="out-err16">0.00</span> %</div>
+    </div>
+
+    <div class="canvas-wrapper">
+        <svg id="svg-16" width="100%" height="100%" viewBox="0 0 400 300">
+            <rect x="50" y="150" width="150" height="100" fill="#d6eaf8" stroke="#3498db"/>
+            <rect x="250" y="50" width="30" height="200" fill="none" stroke="#333" id="tube-16"/>
+            <rect x="250" y="150" width="30" height="100" fill="#d6eaf8" id="liq-16"/>
+            <line x1="200" y1="150" x2="350" y2="150" stroke="green" stroke-dasharray="4" stroke-width="2"/>
+            <text x="360" y="155" fill="green" font-size="12">Stvarna H</text>
+            <line id="line-read" x1="240" y1="130" x2="350" y2="130" stroke="red" stroke-width="2"/>
+            <text id="txt-read" x="360" y="135" fill="red" font-size="12">Očitana</text>
+            <line id="arrow-err" x1="265" y1="150" x2="265" y2="130" stroke="#e74c3c" />
+            <text id="lbl-err" x="275" y="140" fill="#e74c3c" font-size="12">h</text>
+        </svg>
+    </div>
+    
+    <script>
+        (function() {
+            const slDc = document.getElementById('slider-dc16');
+            const slRho = document.getElementById('slider-rho16');
+
+            function update() {
+                const dc_mm = parseFloat(slDc.value);
+                const rho = parseFloat(slRho.value);
+                const dc = dc_mm / 1000;
+                const sig = 0.073; const g = 9.81;
+                const h = (4 * sig) / (rho * g * dc) * 1000; 
+
+                document.getElementById('val-dc16').textContent = dc_mm.toFixed(1);
+                document.getElementById('val-rho16').textContent = rho;
+                document.getElementById('out-h16').textContent = h.toFixed(2);
+                const err = (h / 100) * 100;
+                document.getElementById('out-err16').textContent = err.toFixed(1);
+
+                const scale = 5; 
+                const hPx = h * scale;
+                const tubeW = dc_mm * 10; 
+                
+                document.getElementById('tube-16').setAttribute('width', tubeW);
+                document.getElementById('liq-16').setAttribute('width', tubeW);
+                document.getElementById('liq-16').setAttribute('y', 150 - hPx);
+                document.getElementById('liq-16').setAttribute('height', 100 + hPx);
+
+                document.getElementById('line-read').setAttribute('y1', 150 - hPx);
+                document.getElementById('line-read').setAttribute('y2', 150 - hPx);
+                document.getElementById('txt-read').setAttribute('y', 150 - hPx + 5);
+
+                document.getElementById('arrow-err').setAttribute('y1', 150);
+                document.getElementById('arrow-err').setAttribute('y2', 150 - hPx);
+            }
+            slDc.addEventListener('input', update);
+            slRho.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 17: Kerozin u kapilari
+
+**Tekst zadatka:**
+Cijev promjera 0,75 mm uronjena je u kerozin ($\rho = 820 \text{ kg/m}^3, \sigma = 0,028 \text{ N/m}, \theta = 26^\circ$). Odrediti kapilarni porast.
+
+**Rješenje:**
+$h = \frac{2 \sigma \cos\theta}{\rho g R_c} = \frac{2 \cdot 0,028 \cdot \cos 26^\circ}{820 \cdot 9,81 \cdot 0,000375} = \mathbf{16,7 \text{ mm}}$.
+
+***
+
+### Zadatak 18: Visina dizanja soka u biljkama
+
+**Tekst zadatka:**
+Do koje visine se može podignuti otopina u biljci kroz kapilare promjera 0,005 mm ($\sigma = 0,073 \text{ N/m}, \theta = 15^\circ$)?
+
+**Rješenje:**
+$h = \frac{2 \cdot 0,073 \cdot \cos 15^\circ}{998,2 \cdot 9,81 \cdot 0,0000025} = \mathbf{5,76 \text{ m}}$.
+*Napomena:* Visoka stabla (npr. sekvoje) koriste i osmotski tlak jer kapilarni efekt sam po sebi nije dovoljan za 100 m.
+
+```{=html}
+<!-- ZADATAK 18: Kapilarni porast u biljkama -->
+<div class="widget-container" id="widget-18">
+    <div class="widget-header"><h3 class="widget-title">Kapilarnost u biljkama (Xilem)</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Promjer kapilare d: <span id="val-d18">0.05</span> mm</label>
+            <input type="range" id="slider-d18" min="0.001" max="0.1" value="0.05" step="0.001">
+        </div>
+        <div class="control-group">
+            <label>Visina stabla H: <span id="val-h18">10</span> m</label>
+            <input type="range" id="slider-h18" min="1" max="100" value="10">
+        </div>
+        <button class="btn" id="btn-sequoia">🌲 Sekvoja 100m</button>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">MAX KAPILARNI DOMET</span><span id="out-hcap18">0.00</span> m</div>
+        <div class="metric-item"><span class="metric-label">STATUS</span><span id="out-status18">OK</span></div>
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas-18" width="400" height="300"></canvas>
+    </div>
+    
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas-18');
+            const ctx = canvas.getContext('2d');
+            const slD = document.getElementById('slider-d18');
+            const slH = document.getElementById('slider-h18');
+            const btnSeq = document.getElementById('btn-sequoia');
+
+            function update() {
+                const d_mm = parseFloat(slD.value);
+                const H_tree = parseFloat(slH.value);
+                const d = d_mm / 1000;
+                const h_cap = (4 * 0.073) / (1000 * 9.81 * d); 
+
+                document.getElementById('val-d18').textContent = d_mm.toFixed(3);
+                document.getElementById('val-h18').textContent = H_tree;
+                document.getElementById('out-hcap18').textContent = h_cap.toFixed(2);
+                
+                const status = document.getElementById('out-status18');
+                if (h_cap >= H_tree) {
+                    status.textContent = "Dostiže vrh ✓";
+                    status.style.color = "#27ae60";
+                } else {
+                    status.textContent = "Nedovoljno (treba osmoza) ✗";
+                    status.style.color = "#e74c3c";
+                }
+                draw(h_cap, H_tree);
+            }
+
+            function draw(h_cap, H_tree) {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                const cx = canvas.width/2;
+                ctx.fillStyle = '#8e44ad'; ctx.beginPath();
+                ctx.moveTo(cx-20, 300); ctx.lineTo(cx-10, 50); ctx.lineTo(cx+10, 50); ctx.lineTo(cx+20, 300); ctx.fill();
+                ctx.fillStyle = '#27ae60'; ctx.beginPath(); ctx.arc(cx, 50, 40, 0, Math.PI*2); ctx.fill();
+
+                const pxPerMeter = 250 / Math.max(H_tree, h_cap, 10);
+                const risePx = Math.min(h_cap, H_tree * 1.2) * pxPerMeter; 
+                ctx.fillStyle = '#3498db'; ctx.fillRect(cx-5, 300 - risePx, 10, risePx);
+                
+                ctx.strokeStyle = '#e74c3c'; ctx.setLineDash([5, 5]); ctx.beginPath();
+                ctx.moveTo(cx-50, 300 - h_cap*pxPerMeter); ctx.lineTo(cx+50, 300 - h_cap*pxPerMeter); ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#333'; ctx.fillText(`Max domet: ${h_cap.toFixed(1)}m`, cx+55, 300 - h_cap*pxPerMeter);
+            }
+
+            btnSeq.addEventListener('click', () => {
+                slH.value = 100;
+                const d_req = (4 * 0.073) / (1000 * 9.81 * 100) * 1000; 
+                slD.value = 0.001;
+                alert(`Za 100m visine samom kapilarnošću, promjer bi morao biti ~${(d_req*1000).toFixed(2)} mikrometara! To je premalo za efikasan transport.`);
+                update();
+            });
+
+            slD.addEventListener('input', update);
+            slH.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 19: Relativna gustoća ulja
+
+**Tekst zadatka:**
+Sustav s četiri tekućine (SAE ulje, maslinovo ulje, voda, živa) je u ravnoteži. Odrediti relativnu gustoću maslinovog ulja ako je tlak na dnu 217,7 kPa.
+
+**Rješenje:**
+$p_{dno} = p_{atm} + \rho_v g (\bar{\rho}_{SAE}h_{SAE} + \bar{\rho}_u h_u + 1 \cdot h_v + \bar{\rho}_{Hg}h_{Hg})$
+Uvrštavanjem: $217700 = 101030 + 998 \cdot 9,81 \cdot (0,89 \cdot 1,5 + \bar{\rho}_u \cdot 2,9 + 1 \cdot 2,5 + 13,6 \cdot 0,4)$
+Rješavanjem po $\bar{\rho}_u$ dobivamo: $\mathbf{\bar{\rho}_u = 0,911}$.
+
+```{=html}
+<!-- ZADATAK 19: Višeslojna tekućina (Manometar gustoće) -->
+<div class="widget-container" id="widget-19">
+    <div class="widget-header"><h3 class="widget-title">Tlak u višeslojnom spremniku</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Visina SAE Ulja: <span id="val-h1-19">2</span> m</label>
+            <input type="range" id="slider-h1-19" min="0" max="5" value="2" step="0.5">
+        </div>
+        <div class="control-group">
+            <label>Visina Vode: <span id="val-h2-19">2</span> m</label>
+            <input type="range" id="slider-h2-19" min="0" max="5" value="2" step="0.5">
+        </div>
+        <div class="control-group">
+            <label>Gustoća Ulja: <span id="val-rho-19">900</span> kg/m³</label>
+            <input type="range" id="slider-rho-19" min="800" max="1100" value="900" step="10">
+        </div>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">TLAK NA DNU</span><span id="out-p-bottom">0</span> Pa</div>
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas-19" width="500" height="300"></canvas>
+    </div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas-19');
+            const ctx = canvas.getContext('2d');
+            const slH1 = document.getElementById('slider-h1-19');
+            const slH2 = document.getElementById('slider-h2-19');
+            const slRho = document.getElementById('slider-rho-19');
+
+            function update() {
+                const h1 = parseFloat(slH1.value); 
+                const h2 = parseFloat(slH2.value); 
+                const rho1 = parseFloat(slRho.value);
+                const rho2 = 1000; const g = 9.81;
+                const p1 = rho1 * g * h1;
+                const p2 = p1 + rho2 * g * h2;
+                
+                document.getElementById('val-h1-19').textContent = h1;
+                document.getElementById('val-h2-19').textContent = h2;
+                document.getElementById('val-rho-19').textContent = rho1;
+                document.getElementById('out-p-bottom').textContent = Math.round(p2);
+
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                const w = 200; const baseX = 50; const baseY = 280; const scaleY = 20; 
+
+                ctx.fillStyle = '#3498db'; ctx.fillRect(baseX, baseY - h2*scaleY, w, h2*scaleY);
+                ctx.fillStyle = '#f1c40f'; ctx.fillRect(baseX, baseY - (h2+h1)*scaleY, w, h1*scaleY);
+
+                const graphX = 300;
+                ctx.beginPath(); ctx.strokeStyle = '#333';
+                ctx.moveTo(graphX, 20); ctx.lineTo(graphX, 280); ctx.moveTo(graphX, 280); ctx.lineTo(graphX+150, 280); ctx.stroke();
+
+                ctx.beginPath(); ctx.strokeStyle = 'red'; ctx.lineWidth = 2;
+                ctx.moveTo(graphX, baseY - (h2+h1)*scaleY); 
+                const p1_scaled = p1 / 200; ctx.lineTo(graphX + p1_scaled, baseY - h2*scaleY);
+                const p2_scaled = p2 / 200; ctx.lineTo(graphX + p2_scaled, baseY); ctx.stroke();
+                ctx.fillStyle = '#000'; ctx.fillText('p(z)', graphX+10, 20);
+            }
+            slH1.addEventListener('input', update);
+            slH2.addEventListener('input', update);
+            slRho.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 20: Intravenozna infuzija
+
+**Rješenje:**
+a) $p = \rho g h = 1020 \cdot 9,81 \cdot 1,2 = \mathbf{12 \text{ kPa}}$.
+b) $h = \frac{20000}{1020 \cdot 9,81} = \mathbf{2,0 \text{ m}}$.
+c) $180 \text{ mmHg} = 24 \text{ kPa} \implies h = \frac{24000}{1020 \cdot 9,81} = \mathbf{2,4 \text{ m}}$.
+
+```{=html}
+<!-- ZADATAK 20: IV Infuzija -->
+<div class="widget-container" id="widget-20">
+    <div class="widget-header"><h3 class="widget-title">Intravenozna Infuzija (Hidrostatika)</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Visina vrećice h: <span id="val-h20">1.0</span> m</label>
+            <input type="range" id="slider-h20" min="0" max="3.0" value="1.0" step="0.1">
+        </div>
+        <div class="control-group">
+            <label>Krvni tlak: <span id="val-pb20">100</span> mmHg</label>
+            <input type="range" id="slider-pb20" min="40" max="200" value="100" step="5">
+        </div>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">HIDROSTATSKI TLAK</span><span id="out-ph20">0</span> Pa</div>
+        <div class="metric-item"><span class="metric-label">KRVNI TLAK</span><span id="out-pb20-pa">0</span> Pa</div>
+        <div class="metric-item"><span class="metric-label">STATUS</span><span id="out-status20">OK</span></div>
+    </div>
+
+    <script>
+        (function() {
+            const slH = document.getElementById('slider-h20');
+            const slP = document.getElementById('slider-pb20');
+            
+            function update() {
+                const h = parseFloat(slH.value);
+                const p_mmHg = parseFloat(slP.value);
+                const p_blood = p_mmHg * 133.322; 
+                const p_hydro = 1020 * 9.81 * h; 
+                
+                document.getElementById('val-h20').textContent = h.toFixed(1);
+                document.getElementById('val-pb20').textContent = p_mmHg;
+                document.getElementById('out-ph20').textContent = Math.round(p_hydro);
+                document.getElementById('out-pb20-pa').textContent = Math.round(p_blood);
+                
+                const status = document.getElementById('out-status20');
+                if(p_hydro > p_blood) {
+                    status.textContent = "INFUZIJA TEČE ✓";
+                    status.style.color = "#27ae60";
+                } else {
+                    status.textContent = "TLAK KRVI PREVISOK ✗";
+                    status.style.color = "#e74c3c";
+                }
+            }
+            slH.addEventListener('input', update);
+            slP.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 21: Utjecaj težine zraka
+
+**Rješenje:**
+a) $p_B = p_A + \rho_z g \Delta h_z - \rho_v g \Delta h_v = 98000 + 1,2 \cdot 9,81 \cdot 2 - 998 \cdot 9,81 \cdot 2 = \mathbf{78443 \text{ Pa}}$.
+b) Bez zraka: $p_B = 78419 \text{ Pa}$. Pogreška $\approx \mathbf{0,03\%}$ (zanemarivo).
+
+```{=html}
+<!-- ZADATAK 21: Zatvoreni spremnik -->
+<div class="widget-container" id="widget-21">
+    <div class="widget-header"><h3 class="widget-title">Utjecaj težine zraka na tlak</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Tlak pA: <span id="val-pa21">100</span> kPa</label>
+            <input type="range" id="slider-pa21" min="80" max="120" value="100">
+        </div>
+        <div class="control-group">
+            <label>Visina vode Δhv: <span id="val-hv21">5</span> m</label>
+            <input type="range" id="slider-hv21" min="1" max="10" value="5">
+        </div>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">TLAK pB (točan)</span><span id="out-pb21">0</span> Pa</div>
+        <div class="metric-item"><span class="metric-label">GREŠKA (bez zraka)</span><span id="out-err21">0.00</span> %</div>
+    </div>
+
+    <script>
+        (function() {
+            const slPa = document.getElementById('slider-pa21');
+            const slHv = document.getElementById('slider-hv21');
+
+            function update() {
+                const pA = parseFloat(slPa.value) * 1000;
+                const hv = parseFloat(slHv.value);
+                const rho_z = 1.2; const rho_v = 1000; const g = 9.81;
+                
+                const pB_exact = pA + rho_z * g * hv - rho_v * g * hv;
+                const pB_approx = pA - rho_v * g * hv;
+                const err = Math.abs((pB_exact - pB_approx) / pB_exact) * 100;
+
+                document.getElementById('val-pa21').textContent = slPa.value;
+                document.getElementById('val-hv21').textContent = hv;
+                document.getElementById('out-pb21').textContent = Math.round(pB_exact);
+                document.getElementById('out-err21').textContent = err.toFixed(4);
+            }
+            slPa.addEventListener('input', update);
+            slHv.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Zadatak 22: Manometar na planini
+
+**Rješenje:**
+Pretlak $p_{m1} = p_1 - p_{atm} = \rho_{Hg} g h_3 - \rho_v g h_1 - \rho_u g h_2$
+$p_{m1} = 9,81 \cdot (13600 \cdot 0,46 - 1000 \cdot 0,1 - 850 \cdot 0,2) = \mathbf{58,7 \text{ kPa}}$.
+Apsolutni tlak: $p_1 = 58,7 + 85,6 = \mathbf{144,3 \text{ kPa}}$.
+
+```{=html}
+<!-- ZADATAK 22: Višefluidni manometar -->
+<div class="widget-container" id="widget-22">
+    <div class="widget-header"><h3 class="widget-title">Manometar i nadmorska visina</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Nadmorska visina: <span id="val-alt22">0</span> m</label>
+            <input type="range" id="slider-alt22" min="0" max="3000" value="0" step="100">
+        </div>
+        <div class="control-group">
+            <label>Visina žive h3: <span id="val-h3-22">460</span> mm</label>
+            <input type="range" id="slider-h3-22" min="100" max="1000" value="460" step="10">
+        </div>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric-item"><span class="metric-label">p_atm</span><span id="out-patm22">0</span> kPa</div>
+        <div class="metric-item"><span class="metric-label">p_apsolutni</span><span id="out-pabs22">0</span> kPa</div>
+    </div>
+
+    <script>
+        (function() {
+            const slAlt = document.getElementById('slider-alt22');
+            const slH3 = document.getElementById('slider-h3-22');
+
+            function update() {
+                const alt = parseFloat(slAlt.value);
+                const h3 = parseFloat(slH3.value) / 1000;
+                
+                const p_atm = 101.3 * Math.exp(-alt / 8000); // approx
+                const p_gauge = (13600 * 9.81 * h3 - 1000 * 9.81 * 0.1 - 850 * 9.81 * 0.2) / 1000;
+                const p_abs = p_atm + p_gauge;
+
+                document.getElementById('val-alt22').textContent = alt;
+                document.getElementById('val-h3-22').textContent = Math.round(h3*1000);
+                document.getElementById('out-patm22').textContent = p_atm.toFixed(1);
+                document.getElementById('out-pabs22').textContent = p_abs.toFixed(1);
+            }
+            slAlt.addEventListener('input', update);
+            slH3.addEventListener('input', update);
+            update();
+        })();
+    </script>
+</div>
+```
+
+***
+
+## Bonus interaktivni sadržaj
+
+### Bonus 1: Utrka viskoznosti (Stokesov zakon)
+
+U ovom widgetu možete vidjeti kako se terminalna brzina pada kuglice mijenja ovisno o viskoznosti fluida.
+
+```{=html}
+<!-- BONUS 1: Race of Viscosities -->
+<div class="widget-container" id="bonus-1">
+    <div class="widget-header"><h3 class="widget-title">Utrka Viskoznosti (Stokes)</h3></div>
+    <div class="controls">
+        <button class="btn" id="btn-race">🏁 ISPUSTI KUGLICE</button>
+    </div>
+    
+    <div class="canvas-wrapper">
+        <canvas id="canvas-race" width="600" height="400"></canvas>
+    </div>
+    <div class="metrics" id="results-race" style="font-size: 0.9em; flex-wrap: wrap; background: #eee; color: #333;"></div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas-race');
+            const ctx = canvas.getContext('2d');
+            const btn = document.getElementById('btn-race');
+            const resDiv = document.getElementById('results-race');
+
+            const fluids = [
+                { name: 'Voda', mu: 0.001, color: '#3498db' },
+                { name: 'Ulje', mu: 0.1, color: '#f1c40f' },
+                { name: 'Glicerin', mu: 1.5, color: '#bdc3c7' },
+                { name: 'Med', mu: 10, color: '#e67e22' },
+                { name: 'Bitumen', mu: 1000, color: '#2c3e50' }
+            ];
+
+            let balls = []; let animationId = null; let finishedCount = 0;
+
+            function init() {
+                balls = fluids.map((f, i) => ({
+                    x: 60 + i * 110, y: 20, v: 0, finished: false, finishTime: null, fluid: f
+                }));
+                draw(); resDiv.innerHTML = '';
+            }
+
+            function draw() {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                fluids.forEach((f, i) => {
+                    ctx.fillStyle = f.color; ctx.globalAlpha = 0.3; ctx.fillRect(10 + i * 110, 0, 100, 400);
+                    ctx.globalAlpha = 1.0; ctx.fillStyle = '#000'; ctx.fillText(f.name, 35 + i*110, 380);
+                });
+                balls.forEach(b => {
+                    ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(b.x, b.y, 10, 0, Math.PI*2); ctx.fill();
+                });
+            }
+
+            function startRace() {
+                if(animationId) cancelAnimationFrame(animationId);
+                init(); finishedCount = 0;
+                const startTime = Date.now();
+                
+                function loop() {
+                    let allFinished = true;
+                    balls.forEach(b => {
+                        if(!b.finished) {
+                            const v_term = (2/9) * (7800 - 1000) * 9.81 * 0.005**2 / b.fluid.mu;
+                            b.y += v_term * 1000 * 0.016; 
+                            if(b.y >= 350) { b.y = 350; b.finished = true; b.finishTime = (Date.now() - startTime)/1000; finishedCount++; }
+                            allFinished = false;
+                        }
+                    });
+                    draw();
+                    if(finishedCount < balls.length && (Date.now()-startTime < 15000)) animationId = requestAnimationFrame(loop);
+                    else showResults();
+                }
+                loop();
+            }
+
+            function showResults() {
+                let html = '';
+                balls.sort((a,b) => (a.finishTime || 999) - (b.finishTime || 999));
+                balls.forEach((b, i) => { html += `<div style="margin:5px;">#${i+1} ${b.fluid.name}: ${b.finishTime ? b.finishTime.toFixed(2)+'s' : 'DNF'}</div>`; });
+                resDiv.innerHTML = html;
+            }
+            btn.addEventListener('click', startRace);
+            init();
+        })();
+    </script>
+</div>
+```
+
+***
+
+### Bonus 2: Nenjutnovski Fluidi
+
+Razlika između Newtonskih fluida (viskoznost konstantna), shear-thinning (viskoznost pada s brzinom smicanja) i shear-thickening (viskoznost raste).
+
+```{=html}
+<!-- BONUS 2: Non-Newtonian Fluids -->
+<div class="widget-container" id="bonus-2">
+    <div class="widget-header"><h3 class="widget-title">Nenjutnovski Fluidi (Shear thinning/thickening)</h3></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Brzina smicanja (Shear Rate):</label>
+            <input type="range" id="slider-shear" min="0" max="100" value="50">
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap: wrap;">
+            <button class="btn" id="btn-newton">Newtonski</button>
+            <button class="btn" id="btn-thin">Shear-Thinning (Kečap)</button>
+            <button class="btn" id="btn-thick">Shear-Thickening (Oobleck)</button>
+        </div>
+    </div>
+    
+    <div class="canvas-wrapper">
+        <canvas id="canvas-rheo" width="600" height="300"></canvas>
+    </div>
+    <div class="metrics"><div class="metric-item"><span class="metric-label">RELATIVNA VISKOZNOST</span><span id="out-visc">1.00</span></div></div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas-rheo');
+            const ctx = canvas.getContext('2d');
+            const slShear = document.getElementById('slider-shear');
+            let type = 'newton'; let particles = [];
+            for(let i=0; i<50; i++) particles.push({x: Math.random()*600, y: Math.random()*300, angle: Math.random()*Math.PI*2});
+
+            function update() {
+                const shear = parseFloat(slShear.value);
+                ctx.clearRect(0,0,600,300);
+                let mu = 1;
+                if(type === 'newton') mu = 5;
+                if(type === 'thin') mu = 100 / (shear + 10);
+                if(type === 'thick') mu = 0.1 * (shear + 1);
+                document.getElementById('out-visc').textContent = mu.toFixed(2);
+
+                particles.forEach(p => {
+                    const u = (shear/10) * (1 - p.y/300) * 10; 
+                    p.x += u; if(p.x > 600) p.x = 0;
+                    ctx.save(); ctx.translate(p.x, p.y);
+                    if(type === 'thin') p.angle += (0 - p.angle) * 0.1 * (shear/100);
+                    else if (type === 'thick') p.angle += (Math.random()-0.5) * (shear/50);
+                    ctx.rotate(p.angle);
+                    ctx.fillStyle = type==='thick' ? '#8e44ad' : (type==='thin'?'#c0392b':'#3498db');
+                    if(type==='thick' && shear > 50) ctx.fillRect(-5,-5, 10,10);
+                    else if (type==='thin') ctx.fillRect(-10, -2, 20, 4);
+                    else { ctx.beginPath(); ctx.arc(0,0,4,0,Math.PI*2); ctx.fill(); }
+                    ctx.restore();
+                });
+                requestAnimationFrame(update);
+            }
+            document.getElementById('btn-newton').addEventListener('click', ()=>{type='newton';});
+            document.getElementById('btn-thin').addEventListener('click', ()=>{type='thin';});
+            document.getElementById('btn-thick').addEventListener('click', ()=>{type='thick';});
+            update();
+        })();
+    </script>
+</div>
+```

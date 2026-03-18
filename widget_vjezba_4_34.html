@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zadatak 34: Rotirajući cilindar</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --fluid: #3498db;
+            --bg: #f8f9fa;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--bg);
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        .controls {
+            background: #f1f3f5;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .control-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .value-display {
+            font-family: monospace;
+            color: var(--accent);
+            float: right;
+        }
+        .visualization {
+            position: relative;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 450px;
+        }
+        canvas {
+            display: block;
+        }
+        .alert {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+        }
+        .results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .result-card {
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .result-card strong {
+            display: block;
+            color: var(--primary);
+            font-size: 1.1em;
+        }
+        .physics-text {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-left: 4px solid var(--fluid);
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #34495e;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Zadatak 34: Rotirajući cilindar</h2>
+        <p>Formiranje paraboloidne slobodne površine</p>
+    </div>
+
+    <div class="main-layout">
+        <div class="controls">
+            <div class="control-group">
+                <label>Kutna brzina ω (rad/s) <span id="omega-val" class="value-display">10</span></label>
+                <input type="range" id="omega" min="0" max="30" step="0.5" value="10">
+            </div>
+            <div class="control-group">
+                <label>Početna visina h<sub>0</sub> (m) <span id="h0-val" class="value-display">0.3</span></label>
+                <input type="range" id="h0" min="0.1" max="0.55" step="0.01" value="0.3">
+            </div>
+            <div class="control-group">
+                <label>Polumjer R (m) <span id="R-val" class="value-display">0.15</span></label>
+                <input type="range" id="R" min="0.05" max="0.2" step="0.01" value="0.15">
+            </div>
+            <div class="control-group">
+                <label>Visina cilindra H<sub>cil</sub> (m) <span id="Hcil-val" class="value-display">0.6</span></label>
+                <input type="range" id="Hcil" min="0.3" max="0.8" step="0.05" value="0.6">
+            </div>
+            
+            <button id="spinUpBtn">Animirani Spin-Up</button>
+
+            <div class="results">
+                <div class="result-card">
+                    <small>n (o/min)</small>
+                    <strong id="rpm-res">0</strong>
+                </div>
+                <div class="result-card">
+                    <small>h<sub>C</sub> (m)</small>
+                    <strong id="hc-res">0</strong>
+                </div>
+                <div class="result-card">
+                    <small>z<sub>max</sub> (m)</small>
+                    <strong id="zmax-res">0</strong>
+                </div>
+                <div class="result-card">
+                    <small>Δz (m)</small>
+                    <strong id="dz-res">0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <div id="overflowAlert" class="alert">PRELIJEVANJE!</div>
+            <canvas id="cylCanvas"></canvas>
+        </div>
+    </div>
+
+    <div class="physics-text">
+        <strong>Fizikalni tekst:</strong> Tekućina u rotirajućoj posudi ponaša se kao kruto tijelo uslijed viskoznosti nakon što se postigne stacionarno stanje. Centrifugalna pseudo-sila izvlači fluid prema stijenkama, stvarajući slobodnu površinu u obliku rotacijskog paraboloida z = h<sub>C</sub> + ω²r²/2g.
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('cylCanvas');
+    const ctx = canvas.getContext('2d');
+    const omegaSlider = document.getElementById('omega');
+    const h0Slider = document.getElementById('h0');
+    const RSlider = document.getElementById('R');
+    const HcilSlider = document.getElementById('Hcil');
+    const alertBox = document.getElementById('overflowAlert');
+    const spinUpBtn = document.getElementById('spinUpBtn');
+
+    const g = 9.81;
+    let isAnimating = false;
+    let targetOmega = 10;
+
+    function update() {
+        const omega = parseFloat(omegaSlider.value);
+        const h0 = parseFloat(h0Slider.value);
+        const R = parseFloat(RSlider.value);
+        const Hcil = parseFloat(HcilSlider.value);
+
+        document.getElementById('omega-val').textContent = omega.toFixed(1);
+        document.getElementById('h0-val').textContent = h0.toFixed(2);
+        document.getElementById('R-val').textContent = R.toFixed(2);
+        document.getElementById('Hcil-val').textContent = Hcil.toFixed(2);
+
+        const rpm = (omega * 60) / (2 * Math.PI);
+        const dz = (omega * omega * R * R) / (2 * g);
+        const hc = h0 - dz / 2;
+        const zmax = hc + dz;
+
+        document.getElementById('rpm-res').textContent = Math.round(rpm);
+        document.getElementById('hc-res').textContent = hc.toFixed(3);
+        document.getElementById('zmax-res').textContent = zmax.toFixed(3);
+        document.getElementById('dz-res').textContent = dz.toFixed(3);
+
+        if (zmax > Hcil) {
+            const n_kr = (60 / (2 * Math.PI)) * Math.sqrt((2 * g * (Hcil - h0)) / (R * R / 2));
+            // Wait, overflow is when z(R) > Hcil. z(R) = h0 + w^2 R^2 / 4g. 
+            // h0 + w^2 R^2 / 4g = Hcil -> w^2 = 4g(Hcil - h0)/R^2
+            const w_kr = Math.sqrt(4 * g * (Hcil - h0) / (R * R));
+            const n_kr_val = (60 * w_kr) / (2 * Math.PI);
+            alertBox.style.display = 'block';
+            alertBox.textContent = `PRELIJEVANJE! n_kr = ${Math.round(n_kr_val)} o/min`;
+        } else {
+            alertBox.style.display = 'none';
+        }
+
+        draw(omega, h0, R, Hcil, hc, dz);
+    }
+
+    function draw(omega, h0, R, Hcil, hc, dz) {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const centerX = w / 2;
+        const centerY = h - 50;
+        const scale = 400; // px per meter
+
+        const cylW = R * 2 * scale;
+        const cylH = Hcil * scale;
+
+        // Draw Cylinder
+        ctx.strokeStyle = "#2c3e50";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(centerX - cylW / 2, centerY - cylH, cylW, cylH);
+        
+        // Fluid Gradient
+        const grad = ctx.createLinearGradient(0, centerY, 0, centerY - cylH);
+        grad.addColorStop(0, "#3498db");
+        grad.addColorStop(1, "#85c1e9");
+
+        // Parabola
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        const steps = 50;
+        for (let i = 0; i <= steps; i++) {
+            const r_rel = (i / steps) * 2 - 1; // -1 to 1
+            const r = r_rel * R;
+            const z_fluid = hc + (omega * omega * r * r) / (2 * g);
+            const px = centerX + r_rel * (cylW / 2);
+            const py = centerY - Math.min(z_fluid, Hcil + 0.05) * scale;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.lineTo(centerX + cylW / 2, centerY);
+        ctx.lineTo(centerX - cylW / 2, centerY);
+        ctx.closePath();
+        ctx.fill();
+
+        // Isobars
+        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        ctx.lineWidth = 1;
+        for(let j=1; j<5; j++) {
+            const h_off = (h0 / 5) * j;
+            const hc_iso = h_off - dz / 2;
+            ctx.beginPath();
+            for (let i = 0; i <= steps; i++) {
+                const r_rel = (i / steps) * 2 - 1;
+                const r = r_rel * R;
+                const z_iso = hc_iso + (omega * omega * r * r) / (2 * g);
+                if (z_iso < 0) continue;
+                const px = centerX + r_rel * (cylW / 2);
+                const py = centerY - z_iso * scale;
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        // Centrifugal Force Arrows
+        if (omega > 0) {
+            ctx.strokeStyle = "#e74c3c";
+            ctx.fillStyle = "#e74c3c";
+            ctx.lineWidth = 2;
+            for (let r_f = 0.05; r_f <= R; r_f += 0.05) {
+                const z_pos = 0.1;
+                const force = omega * omega * r_f * 0.05;
+                drawArrow(centerX + r_f * scale, centerY - z_pos * scale, force * scale, 0);
+                drawArrow(centerX - r_f * scale, centerY - z_pos * scale, -force * scale, 0);
+            }
+        }
+    }
+
+    function drawArrow(x, y, dx, dy) {
+        if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + dx, y + dy);
+        ctx.stroke();
+        const angle = Math.atan2(dy, dx);
+        ctx.save();
+        ctx.translate(x + dx, y + dy);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-6, 3);
+        ctx.lineTo(-6, -3);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    spinUpBtn.addEventListener('click', () => {
+        if (isAnimating) return;
+        isAnimating = true;
+        targetOmega = parseFloat(omegaSlider.value);
+        omegaSlider.value = 0;
+        let currentW = 0;
+        const interval = setInterval(() => {
+            currentW += 0.2;
+            if (currentW >= targetOmega) {
+                currentW = targetOmega;
+                clearInterval(interval);
+                isAnimating = false;
+            }
+            omegaSlider.value = currentW;
+            update();
+        }, 30);
+    });
+
+    [omegaSlider, h0Slider, RSlider, HcilSlider].forEach(s => s.addEventListener('input', update));
+    window.addEventListener('resize', update);
+    update();
+</script>
+
+</body>
+</html>

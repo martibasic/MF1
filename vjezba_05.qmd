@@ -1,0 +1,169 @@
+# Vježba 5: Hidrostatska sila na ravne plohe
+
+## Mehanika fluida – Vježba 5
+
+### Zadatak 37: Vertikalni trokut s vrhom na površini
+
+**Tekst zadatka:** 
+Trokut visine $h$ i baze $b$ nalazi se u vertikalnom položaju uronjen u tekućinu tako da mu vrh dotiče slobodnu površinu. Odrediti centar tlaka $z_{Fh}$.
+
+**Rješenje:**
+1. $z_T = \frac{2}{3} h$
+2. $I_{x0} = \frac{bh^3}{36}, A = \frac{bh}{2}$
+3. $z_{Fh} = z_T + \frac{I_{x0}}{z_T A} = \frac{2h}{3} + \frac{h}{12} = \mathbf{\frac{3}{4} h}$.
+
+***
+
+### Zadatak 38: Vertikalni trokut distanciran od površine
+
+**Tekst zadatka:** 
+Trokut visine $h$ i baze $b$ potopljen je tako da mu je vrh na dubini $a$. Odrediti centar tlaka.
+
+**Rješenje:**
+1. $z_T = a + \frac{2}{3} h$
+2. $z_{Fh} = (a + \frac{2}{3} h) + \frac{h^2}{18(a + \frac{2}{3}h)} = \mathbf{\frac{6a^2 + 8ah + 3h^2}{6(a + \frac{2}{3}h)}}$.
+
+***
+
+### Zadatak 39: Krug i Elipsa dotiču površinu
+
+**Rješenje:**
+* **Krug:** $z_T = R = d/2 \implies z_{Fh} = z_T + \frac{\pi R^4 / 4}{R \cdot \pi R^2} = R + \frac{R}{4} = \mathbf{\frac{5}{8} d}$.
+* **Elipsa:** $z_{Fh} = \mathbf{a + \frac{b^2}{4a}}$ (gdje je $a$ vertikalna poluosi).
+
+***
+
+### Zadatak 40: Polukrug dotiče površinu
+
+**Rješenje:**
+1. Težište polukruga: $z_T = \frac{4R}{3\pi}$.
+2. Centar tlaka: $z_{Fh} = z_T + \frac{I_{x0}}{z_T A} \approx \mathbf{0,589 \cdot r}$.
+
+***
+
+### Zadatak 41: Pravokutna vertikalna zaklopka
+
+**Rješenje:**
+1. $z_T = h_2 - h_1/2 = 5 - 1,5 = 3,5 \text{ m}$.
+2. $F_h = \rho g z_T (b h_1) = 1000 \cdot 9,81 \cdot 3,5 \cdot 18 = \mathbf{618 \text{ kN}}$.
+3. $z_{Fh} = 3,5 + \frac{13,5}{3,5 \cdot 18} = \mathbf{3,714 \text{ m}}$.
+
+```{=html}
+<!-- Pressure Wedge Widget -->
+<div id="pressure-wedge-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2c3e50;">Raspodjela tlaka (Hidrostatski klin)</h3>
+    <div style="display: flex; gap: 20px;">
+        <canvas id="wedge-canvas" width="400" height="350" style="border: 1px solid #eee;"></canvas>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label>Dubina vode (m): <span id="depth-val">5</span></label>
+                <input type="range" id="depth-slider" min="1" max="10" step="0.5" value="5" style="width: 100%;">
+            </div>
+            <div style="background: #eaf2f8; padding: 15px; border-radius: 8px;">
+                <p><strong>Fizikalni princip:</strong></p>
+                <p style="font-size: 0.9em;">Tlak raste linearno s dubinom ($p = \rho g z$). Ukupna sila je zapravo "volumen" ovog trokutastog klina tlaka koji pritišće stjenku.</p>
+                <p style="font-size: 0.9em;">Hvatište sile (centar tlaka) je u <strong>težištu ovog klina</strong>, što je kod pravokutne stjenke na 2/3 dubine od vrha.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const dS = document.getElementById('depth-slider');
+    const canvas = document.getElementById('wedge-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function update() {
+        const h = parseFloat(dS.value);
+        document.getElementById('depth-val').innerText = h;
+        draw(h);
+    }
+
+    function draw(h) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const scale = 30; const top = 20; const left = 50;
+        
+        // Water surface
+        ctx.strokeStyle = "#3498db"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left + 300, top); ctx.stroke();
+
+        // Wall
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left, top + h*scale); ctx.stroke();
+
+        // Pressure wedge
+        ctx.fillStyle = "rgba(52, 152, 219, 0.3)";
+        ctx.beginPath();
+        ctx.moveTo(left, top);
+        ctx.lineTo(left + h*scale*0.6, top + h*scale);
+        ctx.lineTo(left, top + h*scale);
+        ctx.closePath(); ctx.fill();
+
+        // Arrows
+        ctx.strokeStyle = "#3498db"; ctx.lineWidth = 1;
+        for(let z = 0.5; z <= h; z += 0.5) {
+            drawArrow(ctx, left, top + z*scale, left + z*scale*0.6, top + z*scale, "#3498db");
+        }
+
+        // Resultant force
+        drawArrow(ctx, left - 40, top + (2/3)*h*scale, left, top + (2/3)*h*scale, "#e74c3c", "F_h");
+        ctx.fillStyle = "#e74c3c"; ctx.fillText("Centar tlaka (2/3 h)", left + 10, top + (2/3)*h*scale - 5);
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, label="") {
+        const headlen = 8;
+        const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-Math.PI/6), y2-headlen*Math.sin(angle-Math.PI/6));
+        ctx.lineTo(x2-headlen*Math.cos(angle+Math.PI/6), y2-headlen*Math.sin(angle+Math.PI/6));
+        ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+        if(label) ctx.fillText(label, x1, y1 - 5);
+    }
+
+    dS.oninput = update;
+    update();
+})();
+</script>
+```
+
+***
+
+### Zadatak 42: Nagnuta zaklopka (Ravnoteža momenata)
+
+**Rješenje:**
+1. $z_T = h_2 + \frac{h_1}{2} = 2 \text{ m}, A = a \cdot b = 4,243 \cdot 5 = 21,215 \text{ m}^2$.
+2. $F_h = \rho g z_T A = 416,2 \text{ kN}$.
+3. $z_{Fhi} = z_{Ti} + \frac{I_{x0}}{z_{Ti} A} = 3,359 \text{ m} \implies z_p = z_{Fhi} - h_{2i} = 2,652 \text{ m}$.
+4. $\sum M_B = 0 \implies \mathbf{F = 521 \text{ kN}}$.
+
+***
+
+### Zadatak 43: Brana s nagnutom stjenkom
+
+**Tekst zadatka:** 
+Brana duljine $20 \text{ m}$ zadržava $7 \text{ m}$ vode. Nagib je $60^\circ$. Odrediti silu i centar tlaka.
+
+**Rješenje:**
+1. $A = L \cdot \frac{h_v}{\sin 60^\circ} = 161,66 \text{ m}^2$.
+2. $F = \rho g \frac{h_v}{2} A = 998 \cdot 9,81 \cdot 3,5 \cdot 161,66 = \mathbf{5,54 \text{ MN}}$.
+3. $z_{Fh} = \frac{2}{3} h_v = \mathbf{4,66 \text{ m}}$ (vertikalno).
+
+***
+
+### Zadatak 44: Ukupna sila (Hidrostatska + Atmosferska)
+
+**Rješenje:**
+1. Nadomjesna visina: $\Delta h = \frac{p_{atm}}{\rho g} = 10,19 \text{ m}$.
+2. Ukupna sila: $F_R = (p_{atm} + \rho g z_T) A = \mathbf{964 \text{ MN}}$.
+3. Centar tlaka: $z_{FRi} = \mathbf{17,08 \text{ m}}$ (niz kosinu).
+
+***
+
+### Zadatak 45-48: Integracijske metode i asimetrične plohe
+
+*   **Pravokutnik (45):** $z_{Fh} = z_T + \frac{h^2}{12 z_T} = 3,6 + \frac{1,2^2}{12 \cdot 3,6} = \mathbf{3,633 \text{ m}}$.
+*   **Trokut (46):** $z_{Fh} = 7 + \frac{1,5}{7 \cdot 3} = \mathbf{7,071 \text{ m}}$.
+*   **Nagnuti pravokutnik (47):** $z_{Fh} = \mathbf{9,037 \text{ m}}$.
+*   **Asimetrični trokut (48):** Uz $I_{xz}$, dobiva se bočni pomak $\Delta x_i = \mathbf{-0,286 \text{ m}}$.

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zadatak 28: Solarno jezero</title>
+    <style>
+        :root {
+            --surface: #87ceeb;
+            --bottom: #00008b;
+            --bg: #f4f7f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
+        }
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+        }
+        .control-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .val-display {
+            float: right;
+            color: #2c3e50;
+            font-family: monospace;
+        }
+        .visual-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            height: 450px;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #eee;
+        }
+        .toggle-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .toggle-btn:hover {
+            background: #34495e;
+        }
+        .toggle-btn.active {
+            background: #27ae60;
+        }
+        .results-bar {
+            grid-column: span 3;
+            background: #2c3e50;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .physics-note {
+            margin-top: 25px;
+            padding: 15px;
+            background: #e1f5fe;
+            border-left: 5px solid #0288d1;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Zadatak 28: Solarno jezero (Integralni tlak)</h2>
+        <p>Gradijent gustoće i nelinearni porast tlaka</p>
+    </div>
+
+    <div class="main-layout">
+        <div class="controls">
+            <div class="control-group">
+                <label>Površinski sloj h<sub>0</sub> [m] <span id="h0-v" class="val-display">1.0</span></label>
+                <input type="range" id="h0" min="0.2" max="2.0" step="0.1" value="1.0">
+            </div>
+            <div class="control-group">
+                <label>Gradijentna zona h [m] <span id="h-v" class="val-display">4.0</span></label>
+                <input type="range" id="h" min="1.0" max="8.0" step="0.1" value="4.0">
+            </div>
+            <div class="control-group">
+                <label>Gustoća površine ρ<sub>0</sub> [kg/m³] <span id="r0-v" class="val-display">1020</span></label>
+                <input type="range" id="r0" min="1000" max="1100" step="10" value="1020">
+            </div>
+            <button id="toggleSalt" class="toggle-btn active">Solarno jezero (sa soli)</button>
+            
+            <div style="margin-top: 20px; font-size: 0.8em; color: #666;">
+                * ρ<sub>max</sub> je fiksirano na 1200 kg/m³ za potrebe simulacije.
+            </div>
+        </div>
+
+        <div class="visual-area">
+            <canvas id="pondCanvas"></canvas>
+            <canvas id="rhoCanvas"></canvas>
+            <canvas id="pCanvas"></canvas>
+            
+            <div class="results-bar">
+                <span>Tlak na granici gradijenta (p<sub>1</sub>): <strong id="p1-res">0</strong> Pa</span>
+                <span>Tlak na dnu jezera (p<sub>2</sub>): <strong id="p2-res">0</strong> Pa</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="physics-note">
+        <strong>Fizikalni tekst:</strong> U solarnom jezeru gustoća raste s dubinom zbog koncentracije soli, što sprječava konvekciju i omogućuje pohranu topline na dnu. Budući da fluid nije homogen, tlak se ne računa linearno (p = ρgh), već integracijom gradijenta gustoće. Graf tlaka u gradijentnoj zoni poprima parabolični oblik, što je jasno vidljivo u usporedbi s homogenim jezerom gdje je prirast tlaka strogo linearan.
+    </div>
+</div>
+
+<script>
+    const pondCanvas = document.getElementById('pondCanvas');
+    const rhoCanvas = document.getElementById('rhoCanvas');
+    const pCanvas = document.getElementById('pCanvas');
+    const toggleBtn = document.getElementById('toggleSalt');
+
+    let hasSalt = true;
+    const g = 9.81;
+    const rho_max = 1200;
+
+    function update() {
+        const h0 = parseFloat(document.getElementById('h0').value);
+        const h = parseFloat(document.getElementById('h').value);
+        const rho0 = parseFloat(document.getElementById('r0').value);
+
+        document.getElementById('h0-v').textContent = h0.toFixed(1);
+        document.getElementById('h-v').textContent = h.toFixed(1);
+        document.getElementById('r0-v').textContent = rho0;
+
+        const p1 = rho0 * g * h0;
+        let p2;
+        if (hasSalt) {
+            // p2 = p1 + integral(rho0 + deltaRho/h * (z-h0)) dz from h0 to h0+h
+            p2 = p1 + rho0 * g * h + (rho_max - rho0) * g * h / 2;
+        } else {
+            p2 = rho0 * g * (h0 + h);
+        }
+
+        document.getElementById('p1-res').textContent = Math.round(p1).toLocaleString();
+        document.getElementById('p2-res').textContent = Math.round(p2).toLocaleString();
+
+        draw(h0, h, rho0);
+    }
+
+    function draw(h0, h_zone, rho0) {
+        const canvases = [pondCanvas, rhoCanvas, pCanvas];
+        canvases.forEach(c => {
+            c.width = c.parentElement.clientWidth / 3 - 10;
+            c.height = 400;
+        });
+
+        const w = pondCanvas.width;
+        const H = pondCanvas.height;
+        const margin = 30;
+        const maxDepth = 10; // m
+        const scaleY = (H - 2 * margin) / maxDepth;
+
+        // 1. Pond Visualization
+        const ctx1 = pondCanvas.getContext('2d');
+        ctx1.clearRect(0,0,w,H);
+        
+        // Draw layers
+        const grad = ctx1.createLinearGradient(0, margin, 0, margin + (h0 + h_zone) * scaleY);
+        grad.addColorStop(0, '#87ceeb'); // Surface
+        grad.addColorStop(h0 / (h0 + h_zone), '#87ceeb');
+        if (hasSalt) {
+            grad.addColorStop(1, '#00008b'); // Deep
+        } else {
+            grad.addColorStop(1, '#87ceeb');
+        }
+
+        ctx1.fillStyle = grad;
+        ctx1.fillRect(margin, margin, w - 2*margin, (h0 + h_zone) * scaleY);
+        ctx1.strokeStyle = '#333';
+        ctx1.strokeRect(margin, margin, w - 2*margin, (h0 + h_zone) * scaleY);
+        
+        ctx1.fillStyle = 'black';
+        ctx1.font = '10px Arial';
+        ctx1.fillText("Površina", margin + 5, margin - 5);
+        ctx1.fillText("Dno", margin + 5, margin + (h0 + h_zone) * scaleY + 15);
+
+        // 2. Density Graph rho(z)
+        const ctx2 = rhoCanvas.getContext('2d');
+        ctx2.clearRect(0,0,w,H);
+        drawAxes(ctx2, w, H, margin, "ρ [kg/m³]", "z [m]");
+        
+        ctx2.beginPath();
+        ctx2.strokeStyle = '#e67e22';
+        ctx2.lineWidth = 2;
+        
+        let py = margin;
+        ctx2.moveTo(margin + (rho0 - 900) * 0.5, py); // scale rho: 900-1300
+        
+        // Surface zone
+        py += h0 * scaleY;
+        ctx2.lineTo(margin + (rho0 - 900) * 0.5, py);
+        
+        // Gradient zone
+        if (hasSalt) {
+            ctx2.lineTo(margin + (rho_max - 900) * 0.5, py + h_zone * scaleY);
+        } else {
+            ctx2.lineTo(margin + (rho0 - 900) * 0.5, py + h_zone * scaleY);
+        }
+        ctx2.stroke();
+
+        // 3. Pressure Graph p(z)
+        const ctx3 = pCanvas.getContext('2d');
+        ctx3.clearRect(0,0,w,H);
+        drawAxes(ctx3, w, H, margin, "p [kPa]", "z [m]");
+
+        const maxP = 120000;
+        const scaleP = (w - 2 * margin) / maxP;
+
+        ctx3.beginPath();
+        ctx3.strokeStyle = '#c0392b';
+        ctx3.lineWidth = 2;
+        
+        let p_curr = 0;
+        ctx3.moveTo(margin, margin);
+        
+        // Linear part (surface)
+        p_curr = rho0 * g * h0;
+        ctx3.lineTo(margin + p_curr * scaleP, margin + h0 * scaleY);
+
+        // Gradient part
+        if (hasSalt) {
+            for (let i = 1; i <= 20; i++) {
+                let stepZ = (h_zone / 20) * i;
+                let rho_z = rho0 + (rho_max - rho0) * (stepZ / h_zone);
+                let p_z = rho0 * g * h0 + rho0 * g * stepZ + (rho_max - rho0) * g * (stepZ**2) / (2 * h_zone);
+                ctx3.lineTo(margin + p_z * scaleP, margin + (h0 + stepZ) * scaleY);
+            }
+        } else {
+            p_curr = rho0 * g * (h0 + h_zone);
+            ctx3.lineTo(margin + p_curr * scaleP, margin + (h0 + h_zone) * scaleY);
+        }
+        ctx3.stroke();
+    }
+
+    function drawAxes(ctx, w, H, m, xLabel, yLabel) {
+        ctx.strokeStyle = '#999';
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(m, m);
+        ctx.lineTo(m, H - m);
+        ctx.lineTo(w - m, H - m);
+        ctx.stroke();
+        ctx.fillStyle = '#666';
+        ctx.font = '10px Arial';
+        ctx.fillText(xLabel, w - m - 40, H - m + 15);
+        ctx.fillText(yLabel, m - 25, m - 10);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        hasSalt = !hasSalt;
+        toggleBtn.textContent = hasSalt ? "Solarno jezero (sa soli)" : "Homogeno jezero (bez soli)";
+        toggleBtn.classList.toggle('active');
+        update();
+    });
+
+    ['h0', 'h', 'r0'].forEach(id => document.getElementById(id).addEventListener('input', update));
+    window.addEventListener('resize', update);
+    update();
+</script>
+
+</body>
+</html>

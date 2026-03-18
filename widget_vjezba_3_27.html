@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zadatak 27: Višeslojna tekućina</title>
+    <style>
+        :root {
+            --oil: #f1c40f;
+            --water: #3498db;
+            --glyc: #9b59b6;
+            --mercury: #95a5a6;
+            --bg: #fdfdfd;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .slider-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.85em;
+            color: #495057;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .val {
+            float: right;
+            color: #2b6cb0;
+            font-weight: bold;
+        }
+        .visuals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        canvas {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            width: 100%;
+        }
+        .info-panel {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-around;
+            background: #2d3748;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .info-item {
+            text-align: center;
+        }
+        .info-item div {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #63b3ed;
+        }
+        .physics-box {
+            margin-top: 25px;
+            padding: 15px;
+            background: #fffaf0;
+            border-left: 5px solid #ed8936;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="text-align: center; margin-bottom: 25px;">Zadatak 27: Višeslojna tekućina i ekvivalent žive</h2>
+    
+    <div class="layout">
+        <div class="controls">
+            <div class="slider-group">
+                <label>Visina ulja h<sub>u</sub> [m] <span id="hu-v" class="val">0.8</span></label>
+                <input type="range" id="hu" min="0.1" max="1.5" step="0.1" value="0.8">
+            </div>
+            <div class="slider-group">
+                <label>Rel. gustoća ulja ρ̄<sub>u</sub> <span id="ru-v" class="val">0.85</span></label>
+                <input type="range" id="ru" min="0.7" max="1.0" step="0.01" value="0.85">
+            </div>
+            <div class="slider-group">
+                <label>Visina vode h<sub>v</sub> [m] <span id="hv-v" class="val">1.0</span></label>
+                <input type="range" id="hv" min="0.1" max="1.5" step="0.1" value="1.0">
+            </div>
+            <div class="slider-group">
+                <label>Visina glicerina h<sub>g</sub> [m] <span id="hg-v" class="val">0.6</span></label>
+                <input type="range" id="hg" min="0.1" max="1.5" step="0.1" value="0.6">
+            </div>
+            <div class="slider-group">
+                <label>Rel. gustoća glicerina ρ̄<sub>g</sub> <span id="rg-v" class="val">1.26</span></label>
+                <input type="range" id="rg" min="1.1" max="1.5" step="0.01" value="1.26">
+            </div>
+        </div>
+
+        <div class="visuals">
+            <canvas id="tankCanvas"></canvas>
+            <canvas id="graphCanvas"></canvas>
+            
+            <div class="info-panel">
+                <div class="info-item">
+                    <small>Pretlak u točki A</small>
+                    <div id="pA-res">0 Pa</div>
+                </div>
+                <div class="info-item">
+                    <small>Ekvivalent žive</small>
+                    <div id="hHg-res">0 mm Hg</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="physics-box">
+        <strong>Fizikalni tekst:</strong> Veliki tlak uzrokovan stupcima lakših tekućina može se uravnotežiti vrlo malim stupcem žive zbog njezine visoke gustoće (ρ ≈ 13550 kg/m³). Nagib grafikona tlaka direktno ovisi o gustoći: gušći fluidi (poput glicerina) uzrokuju brži porast tlaka s dubinom (strmiji nagib), dok rjeđi (poput ulja) imaju blaži nagib.
+    </div>
+</div>
+
+<script>
+    const tCanvas = document.getElementById('tankCanvas');
+    const gCanvas = document.getElementById('graphCanvas');
+    const tCtx = tCanvas.getContext('2d');
+    const gCtx = gCanvas.getContext('2d');
+
+    const inputs = ['hu', 'ru', 'hv', 'hg', 'rg'];
+    const rho_Hg = 13546;
+    const g = 9.81;
+
+    function update() {
+        const vals = {};
+        inputs.forEach(id => {
+            vals[id] = parseFloat(document.getElementById(id).value);
+            document.getElementById(id + '-v').textContent = id.startsWith('r') ? vals[id].toFixed(2) : vals[id].toFixed(1);
+        });
+
+        const p_u = vals.ru * 1000 * g * vals.hu;
+        const p_v = 1000 * g * vals.hv;
+        const p_g = vals.rg * 1000 * g * vals.hg;
+        const p_total = p_u + p_v + p_g;
+        const hHg = (p_total / (rho_Hg * g)) * 1000;
+
+        document.getElementById('pA-res').textContent = Math.round(p_total).toLocaleString() + " Pa";
+        document.getElementById('hHg-res').textContent = hHg.toFixed(1) + " mm Hg";
+
+        draw(vals, p_u, p_v, p_g, hHg);
+    }
+
+    function draw(v, p_u, p_v, p_g, hHg) {
+        tCanvas.width = tCanvas.parentElement.clientWidth / 2 - 10;
+        tCanvas.height = 350;
+        gCanvas.width = tCanvas.width;
+        gCanvas.height = 350;
+
+        const w = tCanvas.width;
+        const h = tCanvas.height;
+        const margin = 40;
+        const total_H = v.hu + v.hv + v.hg;
+        const scaleY = (h - 2 * margin) / 4.5; // Max 4.5m total
+
+        // Tank Visualization
+        tCtx.clearRect(0,0,w,h);
+        
+        // Layers
+        let currentY = margin;
+        
+        // Oil
+        tCtx.fillStyle = '#f1c40f';
+        tCtx.fillRect(margin, currentY, w - 2*margin, v.hu * scaleY);
+        tCtx.fillStyle = 'black';
+        tCtx.fillText(`Ulje (${v.ru.toFixed(2)})`, margin + 5, currentY + 15);
+        currentY += v.hu * scaleY;
+
+        // Water
+        tCtx.fillStyle = '#3498db';
+        tCtx.fillRect(margin, currentY, w - 2*margin, v.hv * scaleY);
+        tCtx.fillStyle = 'white';
+        tCtx.fillText("Voda (1.00)", margin + 5, currentY + 15);
+        currentY += v.hv * scaleY;
+
+        // Glycerin
+        tCtx.fillStyle = '#9b59b6';
+        tCtx.fillRect(margin, currentY, w - 2*margin, v.hg * scaleY);
+        tCtx.fillStyle = 'white';
+        tCtx.fillText(`Glicerin (${v.rg.toFixed(2)})`, margin + 5, currentY + 15);
+        
+        // Tank Outline
+        tCtx.strokeStyle = '#333';
+        tCtx.lineWidth = 3;
+        tCtx.strokeRect(margin, margin, w - 2*margin, total_H * scaleY);
+
+        // Mercury Equivalent
+        const hHg_px = (hHg/1000) * scaleY * 10; // Exaggerated for visibility
+        tCtx.fillStyle = '#95a5a6';
+        tCtx.fillRect(w - margin + 5, margin + total_H * scaleY - hHg_px, 15, hHg_px);
+        tCtx.font = "10px Arial";
+        tCtx.fillStyle = "#666";
+        tCtx.fillText("Hg", w - margin + 5, margin + total_H * scaleY + 15);
+
+        // Pressure Graph
+        gCtx.clearRect(0,0,w,h);
+        gCtx.beginPath();
+        gCtx.strokeStyle = '#ccc';
+        gCtx.moveTo(margin, margin);
+        gCtx.lineTo(margin, h - margin);
+        gCtx.lineTo(w - margin, h - margin);
+        gCtx.stroke();
+
+        const maxP = 40000;
+        const scaleP = (w - 2*margin) / maxP;
+
+        gCtx.beginPath();
+        gCtx.strokeStyle = '#e74c3c';
+        gCtx.lineWidth = 2;
+        let px = margin;
+        let py = margin;
+        gCtx.moveTo(px, py);
+        
+        // Oil segment
+        px += p_u * scaleP;
+        py += v.hu * scaleY;
+        gCtx.lineTo(px, py);
+        
+        // Water segment
+        px += p_v * scaleP;
+        py += v.hv * scaleY;
+        gCtx.lineTo(px, py);
+
+        // Glycerin segment
+        px += p_g * scaleP;
+        py += v.hg * scaleY;
+        gCtx.lineTo(px, py);
+        gCtx.stroke();
+
+        gCtx.fillStyle = 'black';
+        gCtx.fillText("Tlak p [Pa] →", w - 80, h - margin + 15);
+        gCtx.fillText("Dubina z [m] ↓", margin - 35, margin - 10);
+    }
+
+    inputs.forEach(id => document.getElementById(id).addEventListener('input', update));
+    window.addEventListener('resize', update);
+    update();
+</script>
+
+</body>
+</html>

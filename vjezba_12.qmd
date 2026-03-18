@@ -1,0 +1,162 @@
+# Vježba 12: Količina gibanja - Sateliti, Turbine i Propulzija
+
+## Mehanika fluida – Vježba 12
+
+### Zadatak 104: Potisak satelita
+
+**Rješenje:**
+1. $F_p = \dot{m} v_i = 50 \cdot 3000 = \mathbf{150 \, \text{kN}}$.
+2. $a_s = F_p / m_s = \mathbf{30 \, \text{m/s}^2}$.
+3. $\Delta v = a_s \Delta t = \mathbf{60 \, \text{m/s}}$.
+
+***
+
+### Zadatak 105: Sila na prirubnici slavine
+
+**Rješenje:**
+1. $v_1 = v_2 = 3,724 \, \text{m/s}$.
+2. $F_{Rx} = -p_1 A_1 - \beta \dot{m} v_1 = \mathbf{-32,5 \, \text{N}}$.
+3. $F_{Rz} = G - \beta \dot{m} v_2 = \mathbf{52,55 \, \text{N}}$.
+
+***
+
+### Zadatak 107: Snaga rotirajuće prskalice
+
+**Rješenje:**
+1. $v_{rel} = 63,66 \, \text{m/s}, v_{oboda} = 18,85 \, \text{m/s} \implies v_{aps} = 44,81 \, \text{m/s}$.
+2. $M = \dot{m} v_{aps} r = \mathbf{537,7 \, \text{Nm}}$.
+3. $P = M \omega = \mathbf{16,9 \, \text{kW}}$.
+
+***
+
+### Zadatak 108: Komercijalne vjetroturbine
+
+**Tekst zadatka:** 
+Vjetroturbina promjera $90 \, \text{m}$ generira snagu pri brzini vjetra $25 \, \text{km/h}$ uz učinkovitost $32\%$. Odrediti snagu i silu na stup.
+
+**Rješenje:**
+1. $v_1 = 6,94 \, \text{m/s}, \dot{m} = 55223 \, \text{kg/s}$.
+2. $P_{max} = 1331 \, \text{kW} \implies P = \mathbf{426 \, \text{kW}}$.
+3. $v_2 = v_1 \sqrt{1-0,32} = 5,73 \, \text{m/s}$.
+4. $F_R = \dot{m}(v_2 - v_1) = \mathbf{-67,2 \, \text{kN}}$.
+
+***
+
+### Zadatak 109: Snaga helikoptera
+
+**Rješenje:**
+1. Prazan: $v = 21,7 \, \text{m/s} \implies P = \mathbf{1064 \, \text{kW}}$.
+2. S teretom: $v = 34,3 \, \text{m/s} \implies P = \mathbf{4205 \, \text{kW}}$.
+
+***
+
+### Zadatak 111: Peltonova turbina
+
+**Tekst zadatka:** 
+Dokazati izraz za snagu Peltonove turbine: $P = \rho \dot{V} (v-w) w (1 - \cos\beta)$. Odrediti snagu za $v=50 \, \text{m/s}, \dot{V}=150 \, \text{L/s}, r=2 \, \text{m}, n=150 \, \text{o/min}, \beta=160^\circ$.
+
+**Rješenje:**
+1. $w = r \omega = 31,42 \, \text{m/s}$.
+2. $P = 1000 \cdot 0,15 \cdot (50-31,42) \cdot 31,42 \cdot (1 - \cos 160^\circ) = \mathbf{11,3 \, \text{MW}}$.
+
+***
+
+### Zadatak 112: Flyboard dinamika
+
+**Rješenje:**
+1. Za lebdenje ($150 \, \text{kg}$): $v_{min} = \mathbf{13,69 \, \text{m/s}}$.
+2. Pri $15 \, \text{m/s}$: $a = \mathbf{1,97 \, \text{m/s}^2}$.
+
+```{=html}
+<!-- Flyboard / Rocket Widget -->
+<div id="flyboard-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #f0f7ff;">
+    <h3 style="text-align: center;">Dinamika potiska (Flyboard)</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <canvas id="fly-canvas" width="300" height="400" style="background: white; border-radius: 8px; flex: 1;"></canvas>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label>Brzina mlaza v (m/s): <span id="v-fly-val">15</span></label>
+                <input type="range" id="v-fly-slider" min="10" max="30" step="0.5" value="15" style="width: 100%;">
+            </div>
+            <div id="fly-status" style="padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;">
+                Ubrzava prema gore!
+            </div>
+            <div style="font-size: 0.9em; background: white; padding: 10px; border-radius: 8px;">
+                <p><strong>Fizika:</strong> Uzgon (potisak) nastaje zbog promjene količine gibanja vode. Ako je potisak veći od težine, osoba ubrzava.</p>
+                <p>Potisak ~ v²</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const vS = document.getElementById('v-fly-slider');
+    const canvas = document.getElementById('fly-canvas');
+    const ctx = canvas.getContext('2d');
+    const status = document.getElementById('fly-status');
+
+    let personY = 300;
+    let vel = 0;
+
+    function frame() {
+        const v = parseFloat(vS.value);
+        document.getElementById('v-fly-val').innerText = v;
+        
+        const A = 4 * (Math.PI * 0.05 * 0.05 / 4);
+        const thrust = 1000 * A * v * v;
+        const weight = 150 * 9.81;
+        const accel = (thrust - weight) / 150;
+
+        if(accel > 0) {
+            status.innerText = "Uzlijeće! a = " + accel.toFixed(2) + " m/s²";
+            status.style.background = "#d4edda";
+        } else if (accel < -0.1) {
+            status.innerText = "Pada! a = " + accel.toFixed(2) + " m/s²";
+            status.style.background = "#f8d7da";
+        } else {
+            status.innerText = "Lebdi u ravnoteži";
+            status.style.background = "#fff3cd";
+        }
+
+        // Simple animation logic
+        vel += accel * 0.01;
+        personY -= vel;
+        if(personY > 320) { personY = 320; vel = 0; }
+        if(personY < 50) { personY = 50; vel = 0; }
+
+        draw(personY, v);
+        requestAnimationFrame(frame);
+    }
+
+    function draw(y, v) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Water
+        ctx.fillStyle = "#3498db";
+        ctx.fillRect(0, 350, 300, 50);
+
+        // Person (Stick figure)
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(150, y - 40, 10, 0, Math.PI*2); // Head
+        ctx.moveTo(150, y-30); ctx.lineTo(150, y); // Body
+        ctx.moveTo(150, y-20); ctx.lineTo(130, y-10); // Arms
+        ctx.moveTo(150, y-20); ctx.lineTo(170, y-10);
+        ctx.stroke();
+
+        // Board
+        ctx.fillStyle = "#7f8c8d";
+        ctx.fillRect(130, y, 40, 5);
+
+        // Jets
+        ctx.fillStyle = "rgba(52, 152, 219, 0.6)";
+        const jetLen = v * 2;
+        ctx.fillRect(135, y + 5, 5, jetLen);
+        ctx.fillRect(160, y + 5, 5, jetLen);
+    }
+
+    frame();
+})();
+</script>
+```

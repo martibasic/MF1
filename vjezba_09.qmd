@@ -1,0 +1,127 @@
+# Vježba 9: Dinamika idealnog fluida - Bernoullijeva jednadžba
+
+## Mehanika fluida – Vježba 9
+
+### Zadatak 76: Domet slobodnog mlaza
+
+**Tekst zadatka:** 
+Potrebno je odrediti izraz za udaljenost $x$ na kojoj mlaz iz spremnika udara u tlo, ovisno o razini vode $h$ i ukupnoj visini spremnika $H$.
+
+**Rješenje:**
+1. **Brzina istjecanja:** $v_0 = \sqrt{2g(H-h)}$.
+2. **Domet:** $x = v_0 \cdot \sqrt{\frac{2h}{g}} = \mathbf{2\sqrt{h(H-h)}}$.
+3. **Maksimum:** Domet je maksimalan kada je $h = H/2$, tada je $x = H$.
+
+```{=html}
+<!-- Widget for Free Jet Range -->
+<div id="jet-range-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center;">Torricellijev zakon i domet mlaza</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <canvas id="jet-canvas" width="450" height="300" style="border: 1px solid #eee; border-radius: 8px; flex: 2;"></canvas>
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label>Visina otvora h (m): <span id="h-jet-val">2.5</span></label>
+                <input type="range" id="h-jet-slider" min="0.1" max="4.9" step="0.1" value="2.5" style="width: 100%;">
+            </div>
+            <div style="background: #e8f4fd; padding: 15px; border-radius: 8px;">
+                <strong>Domet x:</strong><br>
+                <span id="x-res" style="font-size: 1.5em; font-weight: bold; color: #2c3e50;">5.0 m</span>
+                <p style="font-size: 0.8em; color: #555; margin-top: 10px;">Primijetite da su dometi isti za npr. h=1m i h=4m (ako je H=5m).</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const hS = document.getElementById('h-jet-slider');
+    const canvas = document.getElementById('jet-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function update() {
+        const h = parseFloat(hS.value);
+        const H = 5.0;
+        document.getElementById('h-jet-val').innerText = h.toFixed(1);
+        const x = 2 * Math.sqrt(h * (H - h));
+        document.getElementById('x-res').innerText = x.toFixed(2) + " m";
+        draw(h, H, x);
+    }
+
+    function draw(h, H, x) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const scale = 50; const x0 = 100; const y0 = 270;
+        
+        // Ground
+        ctx.strokeStyle = "#95a5a6"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(20, y0); ctx.lineTo(430, y0); ctx.stroke();
+
+        // Tank
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 3;
+        ctx.strokeRect(x0 - 50, y0 - H*scale, 50, H*scale);
+        
+        // Water in tank
+        ctx.fillStyle = "#3498db"; ctx.globalAlpha = 0.4;
+        ctx.fillRect(x0 - 50, y0 - H*scale, 50, H*scale);
+        ctx.globalAlpha = 1.0;
+
+        // Jet trajectory (parabola)
+        ctx.strokeStyle = "#3498db"; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0 - h*scale);
+        const v0 = Math.sqrt(2 * 9.81 * (H-h));
+        for(let t = 0; t < 2; t += 0.05) {
+            let px = v0 * t;
+            let py = 0.5 * 9.81 * t*t;
+            if(py > h) break;
+            ctx.lineTo(x0 + px*scale, y0 - h*scale + py*scale);
+        }
+        ctx.stroke();
+
+        // Labels
+        ctx.fillStyle = "#2c3e50";
+        ctx.fillText("H", x0 - 70, y0 - H*scale/2);
+        ctx.fillText("h", x0 + 10, y0 - h*scale/2);
+    }
+
+    hS.oninput = update;
+    update();
+})();
+</script>
+```
+
+***
+
+### Zadatak 77: Srednja brzina laminarnog toka
+
+**Dokaz:** $v_{sr} = \frac{1}{A} \int v dA = \frac{1}{R^2 \pi} \int_0^R v_{max}(1 - \frac{r^2}{R^2}) 2\pi r dr = \mathbf{\frac{v_{max}}{2}}$.
+
+***
+
+### Zadatak 78: Difuzor bez gubitaka
+
+**Rješenje:**
+1. $v_A = \frac{\dot{V}}{A_A} = 5,3 \text{ m/s}, v_B = \frac{\dot{V}}{A_B} = 1,3 \text{ m/s}$.
+2. Bernoulli: $H_B = H_A + \frac{v_A^2 - v_B^2}{2g} + (z_A - z_B) = 6,75 + 1,35 - 4,6 = \mathbf{3,5 \text{ m}}$.
+
+***
+
+### Zadatak 79: Pad tlaka u konfuzoru
+
+**Rješenje:**
+$\Delta p = \frac{\rho}{2}(v_2^2 - v_1^2) = \frac{1,2}{2}(30,63^2 - 8,1^2) = \mathbf{523 \text{ Pa}}$.
+
+***
+
+### Zadatak 80-81: Visina dobave pumpe
+
+*   **Zadatak 80:** $H_A = \frac{p_A}{\rho g} + \frac{v_A^2}{2g} + z_A = \mathbf{-3,33 \text{ m}}$.
+*   **Zadatak 81:** $H_A = \mathbf{7,31 \text{ m}}, H_B = \mathbf{24,37 \text{ m}}$.
+
+***
+
+### Zadatak 83-84: Sifoni
+
+**Rješenje (84):**
+1. Bernoulli (1-3): $H_{1-3} = 6 \frac{v^2}{2g} \implies v = \mathbf{3,13 \text{ m/s}}$.
+2. Protok: $\dot{V} = \mathbf{0,0142 \text{ m}^3\text{/s}}$.
+3. Tlak u vrhu (2): $p_{2,abs} = \mathbf{76,6 \text{ kPa}}$.

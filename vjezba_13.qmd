@@ -1,0 +1,122 @@
+# Vježba 13: Strujanje realnih fluida u cjevovodima
+
+## Mehanika fluida – Vježba 13
+
+### Zadatak 120: Laminarno strujanje u tankoj cijevi
+
+**Rješenje:**
+1. $Re = \frac{\rho v d}{\mu} = \mathbf{1836}$ (Laminarno).
+2. $\lambda = 64/Re = \mathbf{0,0349}$.
+3. $\Delta p = \lambda \frac{L}{d} \frac{\rho v^2}{2} = \mathbf{188,2 \, \text{kPa}}$.
+4. $h_w = \Delta p / (\rho g) = \mathbf{19,19 \, \text{m}}$.
+
+***
+
+### Zadatak 121: Turbulentno strujanje zraka
+
+**Rješenje:**
+1. $d_{ekv} = \frac{4A}{O} = \mathbf{0,1714 \, \text{m}}$.
+2. $Re = \mathbf{72507}$ (Turbulentno).
+3. $\lambda = \mathbf{0,0204}$ (uz $k/d = 0,00026$).
+4. $\Delta p = \mathbf{23,3 \, \text{Pa}}, P = \dot{V} \Delta p = \mathbf{4,9 \, \text{W}}$.
+
+***
+
+### Zadatak 122: Difuzor s lokalnim gubicima
+
+**Rješenje:**
+1. $v_2 = 3,11 \, \text{m/s}$.
+2. $h_{wm} = \zeta \frac{v_1^2}{2g} = \mathbf{0,175 \, \text{m}}$.
+3. $p_2 = p_1 + \rho (\frac{\beta v_1^2 - \beta v_2^2}{2} - g h_{wm}) = \mathbf{169,1 \, \text{kPa}}$.
+
+***
+
+### Zadatak 123: Protok između dva spremnika
+
+**Rješenje:**
+1. $v = 3,06 \, \text{m/s}, Re = 116865, \lambda = 0,0315$.
+2. $\sum \zeta = 2,36$.
+3. $h_w = \frac{v^2}{2g} (2,36 + 0,0315 \frac{89}{0,05}) = \mathbf{27,8 \, \text{m}}$.
+4. $z_1 = z_2 + h_w = \mathbf{31,8 \, \text{m}}$.
+
+***
+
+### Zadatak 124: Paralelni cjevovodi
+
+**Rješenje:**
+1. $v_2 = v_1 \sqrt{\frac{\lambda_1 d_2}{\lambda_2 d_1}} = 1,56 v_1$.
+2. $\dot{V}_{tot} = A_1 v_1 + A_2 (1,56 v_1) \implies v_1 = \mathbf{3,29 \, \text{m/s}}, v_2 = \mathbf{5,15 \, \text{m/s}}$.
+3. $\dot{V}_1 = \mathbf{4,1 \, \text{L/s}}, \dot{V}_2 = \mathbf{25,9 \, \text{L/s}}$.
+4. $H_{pump} = (z_B - z_A) + h_{wl1} = \mathbf{18,93 \, \text{m}}$.
+
+```{=html}
+<!-- Flow Regime / Reynolds Widget -->
+<div id="reynolds-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #f8f9fa;">
+    <h3 style="text-align: center;">Vizualizacija Reynoldsovog broja</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 2; min-width: 300px;">
+            <canvas id="flow-canvas" width="450" height="150" style="background: white; border: 1px solid #eee; border-radius: 8px; width: 100%;"></canvas>
+        </div>
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 10px;">
+            <div>
+                <label>Brzina strujanja v (m/s): <span id="v-re-val">0.5</span></label>
+                <input type="range" id="v-re-slider" min="0.05" max="5" step="0.05" value="0.5" style="width: 100%;">
+            </div>
+            <div id="re-status" style="padding: 10px; border-radius: 8px; font-weight: bold; text-align: center;">
+                Re = 1000 (Laminarno)
+            </div>
+            <p style="font-size: 0.8em; color: #666;">Pri niskim Re (brzinama), viskoznost dominira i strujanje je uredno. Pri visokim Re, inercija prevladava i nastaju vrtlozi (turbulencija).</p>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const vS = document.getElementById('v-re-slider');
+    const canvas = document.getElementById('flow-canvas');
+    const ctx = canvas.getContext('2d');
+    const status = document.getElementById('re-status');
+
+    let particles = [];
+    for(let i=0; i<50; i++) particles.push({x: Math.random()*450, y: 30 + Math.random()*90, ox: Math.random()*Math.PI*2});
+
+    function update() {
+        const v = parseFloat(vS.value);
+        document.getElementById('v-re-val').innerText = v.toFixed(2);
+        const Re = (1000 * v * 0.05) / 0.001; // Water d=50mm
+        
+        if(Re < 2300) {
+            status.innerText = `Re = ${Re.toFixed(0)} (Laminarno)`;
+            status.style.background = "#d4edda";
+        } else if(Re < 4000) {
+            status.innerText = `Re = ${Re.toFixed(0)} (Prijelazno)`;
+            status.style.background = "#fff3cd";
+        } else {
+            status.innerText = `Re = ${Re.toFixed(0)} (Turbulentno)`;
+            status.style.background = "#f8d7da";
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 2;
+        ctx.strokeRect(0, 20, 450, 110);
+
+        particles.forEach(p => {
+            p.x += v * 2;
+            if(p.x > 450) p.x = 0;
+            
+            let y_offset = 0;
+            if(Re > 2300) {
+                let intensity = Math.min(10, (Re-2300)/1000);
+                y_offset = Math.sin(p.x * 0.1 + Date.now()*0.01 + p.ox) * intensity;
+            }
+            
+            ctx.fillStyle = "#3498db";
+            ctx.beginPath(); ctx.arc(p.x, p.y + y_offset, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        requestAnimationFrame(update);
+    }
+    update();
+})();
+</script>
+```

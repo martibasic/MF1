@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primjer 1: Kolica na kosini</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --fluid: rgba(52, 152, 219, 0.6);
+            --fluid-border: #2980b9;
+            --bg: #f8f9fa;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--bg);
+        }
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
+        .controls {
+            background: #f1f3f5;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #495057;
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+        .value-display {
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--accent);
+            float: right;
+            font-weight: bold;
+        }
+        .visualization-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .canvas-wrapper {
+            position: relative;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        canvas {
+            display: block;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 15px;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
+        }
+        .results-table th {
+            background: #e9ecef;
+            color: var(--primary);
+        }
+        .physics-text {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: #2c3e50;
+        }
+        .vector-panel {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .live-values {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .live-card {
+            background: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            text-align: center;
+            font-size: 0.85em;
+        }
+        .live-card strong {
+            display: block;
+            color: var(--accent);
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Primjer 1: Kolica na kosini</h2>
+        <p>Relativno mirovanje tekućine u sustavu s translacijskim ubrzanjem</p>
+    </div>
+
+    <div class="main-layout">
+        <div class="controls">
+            <div class="control-group">
+                <label>Kut kosine α (°) <span id="alpha-val" class="value-display">20</span></label>
+                <input type="range" id="alpha" min="0" max="45" step="1" value="20">
+            </div>
+            <div class="control-group">
+                <label>Ubrzanje a<sub>x</sub> (m/s²) <span id="ax-val" class="value-display">2.0</span></label>
+                <input type="range" id="ax" min="-8" max="8" step="0.1" value="2.0">
+            </div>
+            <div class="control-group">
+                <label>Visina tekućine h<sub>0</sub> (m) <span id="h0-val" class="value-display">0.4</span></label>
+                <input type="range" id="h0" min="0.1" max="0.8" step="0.05" value="0.4">
+            </div>
+            <div class="control-group">
+                <label>Duljina spremnika L (m) <span id="L-val" class="value-display">1.2</span></label>
+                <input type="range" id="L" min="0.5" max="2.0" step="0.1" value="1.2">
+            </div>
+
+            <div class="live-values">
+                <div class="live-card">
+                    <small>Kut površine Θ</small>
+                    <strong id="theta-res">0°</strong>
+                </div>
+                <div class="live-card">
+                    <small>Δh (m)</small>
+                    <strong id="dh-res">0</strong>
+                </div>
+                <div class="live-card">
+                    <small>f<sub>R</sub> (m/s²)</small>
+                    <strong id="fr-res">0</strong>
+                </div>
+                <div class="live-card">
+                    <small>Tlak p<sub>max</sub> (kPa)</small>
+                    <strong id="pmax-res">0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="visualization-container">
+            <div class="canvas-wrapper">
+                <canvas id="mainCanvas"></canvas>
+            </div>
+            
+            <div class="info-grid">
+                <div class="vector-panel">
+                    <canvas id="vectorCanvas"></canvas>
+                </div>
+                <div>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Točka</th>
+                                <th>Koordinate (x,z)</th>
+                                <th>Tlak p (kPa)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pressure-body">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="physics-text">
+        <strong>Fizikalni tekst:</strong> U neinercijskom sustavu koji ubrzava dodajemo pseudo-silu suprotnu ubrzanju. Slobodna površina tekućine uvijek se postavlja okomito na rezultantu svih masenih sila (gravitacije i pseudo-sile). Kut nagiba površine u odnosu na dno spremnika &Theta; ovisi o omjeru komponenti rezultantne sile.
+    </div>
+</div>
+
+<script>
+    const mainCanvas = document.getElementById('mainCanvas');
+    const vectorCanvas = document.getElementById('vectorCanvas');
+    const ctx = mainCanvas.getContext('2d');
+    const vctx = vectorCanvas.getContext('2d');
+
+    const sliders = ['alpha', 'ax', 'h0', 'L'];
+    const rho = 1000;
+    const g = 9.81;
+
+    function update() {
+        const alpha = parseFloat(document.getElementById('alpha').value) * Math.PI / 180;
+        const ax = parseFloat(document.getElementById('ax').value);
+        const h0 = parseFloat(document.getElementById('h0').value);
+        const L = parseFloat(document.getElementById('L').value);
+
+        document.getElementById('alpha-val').textContent = document.getElementById('alpha').value;
+        document.getElementById('ax-val').textContent = ax.toFixed(1);
+        document.getElementById('h0-val').textContent = h0.toFixed(2);
+        document.getElementById('L-val').textContent = L.toFixed(1);
+
+        // Relative frame components (x along slope, z normal to slope)
+        const fx = g * Math.sin(alpha) - ax;
+        const fz = -g * Math.cos(alpha);
+        const fR = Math.sqrt(fx * fx + fz * fz);
+
+        // Angle of surface theta relative to slope
+        const thetaRad = Math.atan2(fx, -fz); // -fz because fz is negative (down)
+        const thetaDeg = thetaRad * 180 / Math.PI;
+        const dh = (L / 2) * Math.tan(thetaRad);
+
+        document.getElementById('theta-res').textContent = thetaDeg.toFixed(1) + "°";
+        document.getElementById('dh-res').textContent = Math.abs(dh).toFixed(3);
+        document.getElementById('fr-res').textContent = fR.toFixed(2);
+
+        // Pressure at points 1(0,0), 2(L,0), 3(L,h0*2?), 4(0,h0*2?) - using (x,z) relative to center bottom
+        // Surface center is at (L/2, h0) where p=0
+        function getPressure(x, z) {
+            // p = rho * (fx*(xc - x) + fz*(zc - z))
+            // xc = L/2, zc = h0
+            const p = rho * (fx * (L/2 - x) - fz * (h0 - z)); // -fz because formula is f dot (r0-r)
+            // Wait: grad p = rho * f.  p - p0 = rho * integral f dr
+            // p = p0 + rho * [ fx*(x - L/2) + fz*(z - h0) ] ?
+            // No, free surface normal n = -f. Pressure increases opposite to f.
+            // p(x,z) = rho * [ (g sin a - ax)*(L/2 - x) + (-g cos a)*(h0 - z) ] 
+            // Let's re-verify: if ax=0, alpha=0: fx=0, fz=-g. p = rho * (0 + g*(h0 - z)) = rho*g*(h0-z). Correct.
+            return Math.max(0, p / 1000); // kPa
+        }
+
+        const points = [
+            { name: "1 (Lijevo dno)", x: 0, z: 0 },
+            { name: "2 (Desno dno)", x: L, z: 0 },
+            { name: "3 (Lijevo vrh)", x: 0, z: h0*2 },
+            { name: "E (Sredina dno)", x: L/2, z: 0 }
+        ];
+
+        let tbody = "";
+        let pmax = 0;
+        points.forEach(p => {
+            const pres = getPressure(p.x, p.z);
+            if (pres > pmax) pmax = pres;
+            tbody += `<tr><td>${p.name}</td><td>(${p.x.toFixed(1)}, ${p.z.toFixed(1)})</td><td>${pres.toFixed(2)}</td></tr>`;
+        });
+        document.getElementById('pressure-body').innerHTML = tbody;
+        document.getElementById('pmax-res').textContent = pmax.toFixed(2);
+
+        drawMain(alpha, ax, h0, L, thetaRad, dh);
+        drawVectors(alpha, ax, fx, fz, fR);
+    }
+
+    function drawMain(alpha, ax, h0, L, theta, dh) {
+        mainCanvas.width = mainCanvas.parentElement.clientWidth;
+        mainCanvas.height = 350;
+        const w = mainCanvas.width;
+        const h = mainCanvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const centerX = w / 2;
+        const centerY = h / 2 + 50;
+        const scale = 120; // px per meter
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(-alpha); // Tilt the whole scene by alpha
+
+        // Draw Slope
+        ctx.strokeStyle = "#95a5a6";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-w, 0);
+        ctx.lineTo(w, 0);
+        ctx.stroke();
+
+        // Draw Cart/Tank
+        const tankW = L * scale;
+        const tankH = 1.0 * scale; // Fixed visual tank height
+        const fluidH = h0 * scale;
+
+        // Cart
+        ctx.fillStyle = "#34495e";
+        ctx.fillRect(-tankW/2 - 5, 0, tankW + 10, 10);
+        // Wheels
+        ctx.beginPath();
+        ctx.arc(-tankW/2 + 20, 15, 8, 0, Math.PI * 2);
+        ctx.arc(tankW/2 - 20, 15, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tank outline
+        ctx.strokeStyle = "#2c3e50";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-tankW/2, -tankH, tankW, tankH);
+
+        // Fluid
+        ctx.fillStyle = "rgba(52, 152, 219, 0.5)";
+        ctx.beginPath();
+        ctx.moveTo(-tankW/2, -fluidH + dh*scale);
+        ctx.lineTo(tankW/2, -fluidH - dh*scale);
+        ctx.lineTo(tankW/2, 0);
+        ctx.lineTo(-tankW/2, 0);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Isobars
+        ctx.strokeStyle = "rgba(52, 152, 219, 0.3)";
+        ctx.lineWidth = 1;
+        for(let i=1; i<=5; i++) {
+            const offset = (fluidH / 5) * i;
+            ctx.beginPath();
+            ctx.moveTo(-tankW/2, -offset + dh*scale);
+            ctx.lineTo(tankW/2, -offset - dh*scale);
+            ctx.stroke();
+        }
+
+        // Labels
+        ctx.fillStyle = "#2c3e50";
+        ctx.font = "14px Arial";
+        ctx.fillText("L = " + L + " m", -20, 25);
+        
+        ctx.restore();
+
+        // Draw Alpha Arc
+        ctx.strokeStyle = "#7f8c8d";
+        ctx.setLineDash([5,5]);
+        ctx.beginPath();
+        ctx.moveTo(centerX - 150, centerY);
+        ctx.lineTo(centerX + 150, centerY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 100, 0, -alpha, true);
+        ctx.stroke();
+        ctx.fillText("α", centerX + 110, centerY - 10);
+    }
+
+    function drawVectors(alpha, ax, fx, fz, fR) {
+        vectorCanvas.width = vectorCanvas.parentElement.clientWidth;
+        vectorCanvas.height = 180;
+        const w = vectorCanvas.width;
+        const h = vectorCanvas.height;
+        vctx.clearRect(0, 0, w, h);
+
+        const cx = w / 2;
+        const cy = h / 2 + 20;
+        const vScale = 10;
+
+        // Draw axes (relative)
+        vctx.strokeStyle = "#eee";
+        vctx.beginPath();
+        vctx.moveTo(0, cy); vctx.lineTo(w, cy);
+        vctx.moveTo(cx, 0); vctx.lineTo(cx, h);
+        vctx.stroke();
+
+        function drawArrow(x, y, color, label) {
+            vctx.strokeStyle = color;
+            vctx.fillStyle = color;
+            vctx.lineWidth = 2;
+            vctx.beginPath();
+            vctx.moveTo(cx, cy);
+            vctx.lineTo(cx + x * vScale, cy - y * vScale);
+            vctx.stroke();
+            // Arrow head
+            const angle = Math.atan2(-y, x);
+            vctx.save();
+            vctx.translate(cx + x * vScale, cy - y * vScale);
+            vctx.rotate(angle);
+            vctx.beginPath();
+            vctx.moveTo(0, 0);
+            vctx.lineTo(-8, 4);
+            vctx.lineTo(-8, -4);
+            vctx.fill();
+            vctx.restore();
+            vctx.fillText(label, cx + x * vScale + 5, cy - y * vScale - 5);
+        }
+
+        // g components
+        const gx = g * Math.sin(alpha);
+        const gz = -g * Math.cos(alpha);
+        
+        drawArrow(gx, gz, "#27ae60", "g");
+        drawArrow(-ax, 0, "#e67e22", "-a_x");
+        drawArrow(fx, fz, "#e74c3c", "f_R");
+
+        vctx.fillStyle = "#2c3e50";
+        vctx.font = "bold 12px Arial";
+        vctx.fillText("Dijagram sila (rel. sustav)", 10, 20);
+    }
+
+    sliders.forEach(id => document.getElementById(id).addEventListener('input', update));
+    window.addEventListener('resize', update);
+    update();
+</script>
+
+</body>
+</html>

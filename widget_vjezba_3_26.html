@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zadatak 26: Nakošeni manometar</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --water: #3498db;
+            --mercury: #95a5a6;
+            --bg: #f8f9fa;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--bg);
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        .controls {
+            background: #eee;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .value-display {
+            font-family: monospace;
+            color: var(--accent);
+            float: right;
+        }
+        .visualization {
+            position: relative;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+        .physics-text {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-left: 4px solid var(--water);
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .result-card {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .result-card strong {
+            display: block;
+            font-size: 1.1em;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Zadatak 26: Nakošeni manometar (V-oblik)</h2>
+        <p>Povećanje osjetljivosti mjerenja nagnutim cijevima</p>
+    </div>
+
+    <div class="main-layout">
+        <div class="controls">
+            <div class="control-group">
+                <label>Razlika tlaka Δp<sub>AB</sub> (kPa) <span id="dp-val" class="value-display">25</span></label>
+                <input type="range" id="dp" min="5" max="50" step="1" value="25">
+            </div>
+            <div class="control-group">
+                <label>Duljina cijevi a (m) <span id="a-val" class="value-display">0.4</span></label>
+                <input type="range" id="a" min="0.1" max="0.6" step="0.01" value="0.4">
+            </div>
+            <div class="results">
+                <div class="result-card">
+                    <small>Kut α</small>
+                    <strong id="alpha-res">-</strong>
+                </div>
+                <div class="result-card">
+                    <small>Visina 2h</small>
+                    <strong id="h2-res">-</strong>
+                </div>
+                <div class="result-card">
+                    <small>Pomak L</small>
+                    <strong id="l-res">-</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <canvas id="manometerCanvas"></canvas>
+        </div>
+    </div>
+
+    <div class="physics-text">
+        <strong>Fizikalni tekst:</strong> Nagnuti manometar povećava osjetljivost – isti vertikalni pomak žive (h) odgovara puno dužem pomaku uzduž cijevi (l = h/sin α). Smanjenjem kuta α mjerenje postaje preciznije jer se skala "rasteže", omogućujući lakše očitavanje malih promjena tlaka.
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('manometerCanvas');
+    const ctx = canvas.getContext('2d');
+    const dpSlider = document.getElementById('dp');
+    const aSlider = document.getElementById('a');
+
+    const rho_Hg = 13546; // kg/m3
+    const rho_w = 1000;   // kg/m3
+    const g = 9.81;
+
+    function update() {
+        const dp = parseFloat(dpSlider.value) * 1000;
+        const a = parseFloat(aSlider.value);
+        
+        document.getElementById('dp-val').textContent = dpSlider.value;
+        document.getElementById('a-val').textContent = aSlider.value;
+
+        // Formula: dp = (rho_Hg - rho_w) * g * H_total
+        // H_total = 2h (since it's a V-shape symmetric, each side moves h vertically)
+        const H_total = dp / ((rho_Hg - rho_w) * g);
+        const h = H_total / 2;
+
+        // If l = a (mercury reaches end), sin(alpha) = h / a
+        let sinAlpha = h / a;
+        let alphaRad = Math.asin(Math.min(sinAlpha, 1));
+        let alphaDeg = alphaRad * 180 / Math.PI;
+
+        if (sinAlpha > 1) {
+            // Pressure too high for tube length
+            alphaDeg = 90;
+            alphaRad = Math.PI / 2;
+        }
+
+        document.getElementById('alpha-res').textContent = alphaDeg.toFixed(1) + "°";
+        document.getElementById('h2-res').textContent = (H_total * 100).toFixed(1) + " cm";
+        document.getElementById('l-res').textContent = (a * 100).toFixed(1) + " cm";
+
+        draw(H_total, h, a, alphaRad, alphaDeg);
+    }
+
+    function draw(H_total, h, a, alphaRad, alphaDeg) {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 400;
+        const w = canvas.width;
+        const h_c = canvas.height;
+
+        ctx.clearRect(0, 0, w, h_c);
+
+        const centerX = w / 2;
+        const centerY = h_c - 100;
+        const scale = 400; // pixels per meter
+
+        // Draw reservoirs
+        ctx.fillStyle = "#3498db22";
+        ctx.fillRect(centerX - 150, centerY - 250, 80, 100);
+        ctx.fillRect(centerX + 70, centerY - 250, 80, 100);
+        ctx.strokeStyle = "#3498db";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(centerX - 150, centerY - 250, 80, 100);
+        ctx.strokeRect(centerX + 70, centerY - 250, 80, 100);
+        
+        ctx.fillStyle = "#2c3e50";
+        ctx.fillText("Rezervoar A", centerX - 145, centerY - 260);
+        ctx.fillText("Rezervoar B", centerX + 75, centerY - 260);
+
+        // Draw V-tube
+        const l_px = a * scale;
+        const endLX = centerX - l_px * Math.cos(alphaRad);
+        const endLY = centerY - l_px * Math.sin(alphaRad);
+        const endRX = centerX + l_px * Math.cos(alphaRad);
+        const endRY = centerY - l_px * Math.sin(alphaRad);
+
+        // Glass tubes
+        ctx.strokeStyle = "#ccc";
+        ctx.lineWidth = 15;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(endLX, endLY);
+        ctx.lineTo(centerX, centerY);
+        ctx.lineTo(endRX, endRY);
+        ctx.stroke();
+
+        // Inner part of tubes
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 11;
+        ctx.stroke();
+
+        // Mercury in tubes
+        ctx.strokeStyle = "#95a5a6";
+        ctx.lineWidth = 11;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(endRX, endRY); // Full right side (simplified for visualization)
+        ctx.stroke();
+
+        // Connect to reservoirs (logic representation)
+        ctx.strokeStyle = "#3498db";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(endLX, endLY);
+        ctx.lineTo(centerX - 110, centerY - 150);
+        ctx.moveTo(endRX, endRY);
+        ctx.lineTo(centerX + 110, centerY - 150);
+        ctx.stroke();
+
+        // Labels and Dimensions
+        ctx.fillStyle = "black";
+        ctx.font = "12px Arial";
+        
+        // Kut α
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX + 100, centerY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 40, 0, -alphaRad, true);
+        ctx.stroke();
+        ctx.fillText("α = " + alphaDeg.toFixed(1) + "°", centerX + 45, centerY - 15);
+
+        // Visina 2h
+        const h_total_px = H_total * scale;
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(endRX + 20, endRY);
+        ctx.lineTo(endRX + 40, endRY);
+        ctx.moveTo(endRX + 20, centerY);
+        ctx.lineTo(endRX + 40, centerY);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(endRX + 30, endRY);
+        ctx.lineTo(endRX + 30, centerY);
+        ctx.stroke();
+        ctx.fillText("2h = " + (H_total * 100).toFixed(1) + " cm", endRX + 35, centerY - h_total_px/2);
+
+        // Comparison vertical
+        ctx.strokeStyle = "#eee";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(50, centerY);
+        ctx.lineTo(50, centerY - h_total_px);
+        ctx.stroke();
+        ctx.fillStyle = "#95a5a6";
+        ctx.fillText("Vertikalni: " + (H_total * 100).toFixed(1) + " cm", 20, centerY + 20);
+        ctx.fillText("Nakošeni (L): " + (a * 100).toFixed(1) + " cm", 20, centerY + 40);
+    }
+
+    dpSlider.addEventListener('input', update);
+    aSlider.addEventListener('input', update);
+    window.addEventListener('resize', update);
+    update();
+</script>
+
+</body>
+</html>

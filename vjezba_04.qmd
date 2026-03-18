@@ -1,0 +1,387 @@
+# Vježba 4: Relativno mirovanje fluida - Translacija i Rotacija
+
+## Mehanika fluida – Vježba 4
+
+### Primjer 1: Kolica na kosini (Translacija)
+
+**Tekst zadatka:**
+Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba $\alpha$. Potrebno je odrediti geometriju slobodne površine te izračunati tlak u karakterističnim točkama.
+
+**Rješenje:**
+1. **Rezultantne masene sile (Relativni koordinatni sustav):**
+   $f_{ix} = g \sin\alpha - a_x$
+   $f_{iz} = g \cos\alpha$
+   $f_R = \sqrt{f_{ix}^2 + f_{iz}^2}$
+
+2. **Nagib slobodne površine:**
+   $\tan\theta = \frac{f_{ix}}{f_{iz}} = \frac{g \sin\alpha - a_x}{g \cos\alpha} = \frac{\Delta h}{L/2}$
+   $\Delta h = H - h_0$
+   $\theta = \text{arctg} \frac{\Delta h}{L/2} = \text{arctg} \frac{f_{ix}}{f_{iz}}$
+
+3. **Izračun tlaka $p_{mE}$ (četiri načina):**
+   a) Preko točke 1: $p_{mE} = \rho f_{iz} (h_0 + \Delta h) - \rho f_{ix} \frac{L}{4}$
+   b) Preko točke 2: $p_{mE} = \rho f_{iz} (h_0 - \Delta h) + \rho f_{ix} \frac{3L}{4}$
+   c) Preko točke 3: $p_{mE} = \rho f_{iz} h_0 + \rho f_{ix} \frac{L}{4}$
+   d) Preko točke 4: $p_{mE} = \rho f_{iz} (h_0 + \Delta h_4)$ pri čemu je: $\tan\theta = \frac{\Delta h_4}{L/4} \implies \Delta h_4 = \tan\theta \frac{L}{4}$
+
+```{=html}
+<div id="p1-advanced-widget" style="max-width: 900px; margin: 20px auto; font-family: system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #eee;">
+    <h4 style="text-align: center; color: #2d3748; margin-top: 0;">P1: Dinamika kolica na kosini</h4>
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+        <div style="position: relative;">
+            <canvas id="p1-main-canvas" width="500" height="350" style="width: 100%; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;"></canvas>
+            <div id="p1-data-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); padding: 8px; border-radius: 6px; font-size: 0.75rem; pointer-events: none;">
+                θ = <span id="p1-ov-theta">0</span>°<br>
+                f<sub>R</sub> = <span id="p1-ov-fr">9.8</span> m/s²
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; font-size: 0.85rem;">
+                <label style="display: block; margin-bottom: 5px;">Kut kosine α: <span id="p1-v-alpha" style="font-weight:bold;">20</span>°</label>
+                <input type="range" id="p1-alpha" min="0" max="40" value="20" style="width: 100%;">
+                <label style="display: block; margin-top: 10px; margin-bottom: 5px;">Ubrzanje a<sub>x</sub>: <span id="p1-v-ax" style="font-weight:bold;">2.0</span> m/s²</label>
+                <input type="range" id="p1-ax" min="-5" max="8" step="0.1" value="2.0" style="width: 100%;">
+            </div>
+            <div style="background: #ebf8ff; padding: 12px; border-radius: 10px; border-left: 4px solid #3182ce;">
+                <table style="width: 100%; font-size: 0.75rem; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #bee3f8;"><th align="left">Metoda</th><th align="right">p<sub>mE</sub> [Pa]</th></tr>
+                    <tr><td>Put 1 (A-B-E)</td><td align="right" id="p1-m1">0</td></tr>
+                    <tr><td>Put 2 (D-C-E)</td><td align="right" id="p1-m2">0</td></tr>
+                    <tr><td>Put 3 (Vert-Horiz)</td><td align="right" id="p1-m3">0</td></tr>
+                    <tr style="font-weight: bold; color: #2c5282;"><td>Put 4 (Direktni)</td><td align="right" id="p1-m4">0</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('p1-main-canvas'); const ctx = canvas.getContext('2d');
+    const alphaS = document.getElementById('p1-alpha'); const axS = document.getElementById('p1-ax');
+    function update() {
+        const alpha = parseFloat(alphaS.value) * Math.PI / 180; const ax = parseFloat(axS.value);
+        const g = 9.81; const rho = 1000; const L = 1.0; const h0 = 0.4;
+        const fix = g * Math.sin(alpha) - ax; const fiz = g * Math.cos(alpha);
+        const theta = Math.atan(fix / fiz); const fr = Math.sqrt(fix*fix + fiz*fiz);
+        const pE = rho * fiz * h0 + rho * fix * (L/4);
+        document.getElementById('p1-v-alpha').innerText = alphaS.value;
+        document.getElementById('p1-v-ax').innerText = ax.toFixed(1);
+        document.getElementById('p1-ov-theta').innerText = (theta * 180 / Math.PI).toFixed(1);
+        document.getElementById('p1-ov-fr').innerText = fr.toFixed(2);
+        ['p1-m1','p1-m2','p1-m3','p1-m4'].forEach(id => document.getElementById(id).innerText = pE.toFixed(0));
+        draw(alpha, theta, fix, fiz);
+    }
+    function draw(alpha, theta, fix, fiz) {
+        ctx.clearRect(0,0,500,350);
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 300); ctx.lineTo(500, 300 - 500*Math.tan(alpha)); ctx.stroke();
+        ctx.save(); ctx.translate(250, 200); ctx.rotate(-alpha);
+        ctx.strokeStyle = "#334155"; ctx.lineWidth = 3; ctx.strokeRect(-100, -100, 200, 100);
+        ctx.fillStyle = "rgba(59, 130, 246, 0.4)"; ctx.beginPath();
+        const drawH = 60; const drawDH = 100 * Math.tan(theta);
+        ctx.moveTo(-100, -drawH + drawDH); ctx.lineTo(100, -drawH - drawDH); ctx.lineTo(100, 0); ctx.lineTo(-100, 0); ctx.fill();
+        ctx.restore();
+        const vx = 400, vy = 80;
+        drawArrow(ctx, vx, vy, vx, vy + 50, "#94a3b8", "g");
+        drawArrow(ctx, vx, vy, vx + fix*5, vy + fiz*5, "#3b82f6", "fR");
+    }
+    function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+        const headlen = 8; const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-Math.PI/6), y2-headlen*Math.sin(angle-Math.PI/6));
+        ctx.lineTo(x2-headlen*Math.cos(angle+Math.PI/6), y2-headlen*Math.sin(angle+Math.PI/6));
+        ctx.fill(); ctx.fillText(label, x2+5, y2);
+    }
+    [alphaS, axS].forEach(s => s.oninput = update); update();
+})();
+</script>
+```
+
+***
+
+### Zadatak 34: Rotirajući cilindar (Kritični broj okretaja)
+
+**Tekst zadatka:**
+34. Vertikalni cilindar promjera 20 [cm], visine 60 [cm], prikazan na slici, djelomično je ispunjen tekućinom do visine 50 [cm] od dna spremnika, pri čemu gustoća tekućine iznosi 850 [kg/m3] . Cilindar rotira konstantnom kutnom brzinom oko svoje osi. Potrebno je odrediti granični broj okretaja u minuti pri kojem neće doći do prelijevanja tekućine preko rubova spremnika. Pretpostaviti da je kutno ubrzanje vrlo polagano, pri čemu se tekućina unutar spremnika uvijek ponaša kao kruto tijelo, kao i neprestanu prikrivenost dna spremnika tekućinom.
+
+**Rješenje:**
+Iskustveno znamo da rotacija cilindrične posude u kojoj se nalazi tekućina oko svoje osi izvlači tekućinu prema van uslijed djelovanja centrifugalne sile. Tada tekućina poprima konkavni oblik.
+Pri konstantnoj brzini vrtnje i za ustaljeno stanje tekućina će se gibati zajedno s posudom kao kruto tijelo, odnosno nema deformacije tj. tangencijalnih sila u fluidu.
+Integriranjem slijedi izraz koji opisuje izobaru: $z(r) = \frac{\omega^2 \cdot r^2}{2 \cdot g} + C$.
+
+Iz zakona o očuvanju mase, volumen paraboloida mora biti jednak volumenu tekućine u mirovanju:
+$h_c = h_0 - \frac{\omega^2 \cdot R^2}{4 \cdot g}$
+
+Uvjet prelijevanja: $z(R) = H \implies h_0 + \frac{\omega^2 \cdot R^2}{4 \cdot g} = H$.
+$\omega = \sqrt{\frac{4g(H-h_0)}{R^2}} = 19,8 \, [\text{rad/s}] \implies \mathbf{n = 189 \, \text{o/min}}$.
+
+```{=html}
+<div id="z34-advanced-widget" style="max-width: 900px; margin: 20px auto; font-family: system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #eee;">
+    <h4 style="text-align: center; color: #2d3748; margin-top: 0;">Z34: Vizualizacija rotacijskog paraboloida</h4>
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+        <div style="background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden;">
+            <canvas id="z34-3d-canvas" width="450" height="350" style="width: 100%;"></canvas>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 10px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Brzina vrtnje n: <span id="z34-v-n" style="color:#3182ce;">95</span> o/min</label>
+                <input type="range" id="z34-n-slider" min="0" max="250" value="95" style="width: 100%;">
+                <label style="display: block; margin-top: 15px; margin-bottom: 8px; font-weight: 600;">Početna visina h₀: <span id="z34-v-h0">0.50</span> m</label>
+                <input type="range" id="z34-h0-slider" min="0.1" max="0.58" step="0.01" value="0.50" style="width: 100%;">
+            </div>
+            <div id="z34-status-box" style="padding: 15px; border-radius: 10px; transition: 0.3s; background: #f0fff4; border-left: 4px solid #48bb78;">
+                <div style="font-weight: bold; font-size: 0.9rem;" id="z34-status-text">✅ STANJE: STABILNO</div>
+                <div style="font-size: 0.8rem; margin-top: 5px;">h<sub>c</sub>: <span id="z34-res-hc">0.47</span> m | z<sub>max</sub>: <span id="z34-res-zmax">0.53</span> m</div>
+            </div>
+            <button id="z34-spinup" style="padding: 12px; background: #3182ce; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Pokreni SPIN-UP</button>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z34-3d-canvas'); const ctx = canvas.getContext('2d');
+    const nS = document.getElementById('z34-n-slider'); const h0S = document.getElementById('z34-h0-slider');
+    const spinBtn = document.getElementById('z34-spinup');
+    function update() {
+        const n = parseFloat(nS.value); const h0 = parseFloat(h0S.value);
+        const w = n * Math.PI / 30; const R = 0.1; const H = 0.6; const g = 9.81;
+        const hc = h0 - (w*w * R*R)/(4*g); const zmax = h0 + (w*w * R*R)/(4*g);
+        document.getElementById('z34-v-n').innerText = n; document.getElementById('z34-v-h0').innerText = h0.toFixed(2);
+        document.getElementById('z34-res-hc').innerText = Math.max(hc, 0).toFixed(3); document.getElementById('z34-res-zmax').innerText = zmax.toFixed(3);
+        const statusBox = document.getElementById('z34-status-box'); const statusText = document.getElementById('z34-status-text');
+        if(zmax > H) { statusBox.style.background = "#fff5f5"; statusBox.style.borderLeftColor = "#f56565"; statusText.innerText = "⚠️ PRELIJEVANJE!"; }
+        else { statusBox.style.background = "#f0fff4"; statusBox.style.borderLeftColor = "#48bb78"; statusText.innerText = "✅ STABILNO"; }
+        draw(w, hc, zmax, H, R);
+    }
+    function draw(w, hc, zmax, H, R) {
+        ctx.clearRect(0,0,450,350); const cx = 225, base = 300, scale = 450;
+        ctx.fillStyle = "rgba(59, 130, 246, 0.5)"; ctx.beginPath();
+        ctx.moveTo(cx - R*scale, base - Math.min(zmax, H)*scale);
+        for(let x = -R*scale; x <= R*scale; x++) {
+            let r = Math.abs(x/scale); let z = hc + (w*w * r*r)/(2*9.81);
+            ctx.lineTo(cx + x, base - Math.max(Math.min(z, H), 0)*scale);
+        }
+        ctx.lineTo(cx + R*scale, base); ctx.lineTo(cx - R*scale, base); ctx.fill();
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 2; ctx.strokeRect(cx - R*scale, base - H*scale, 2*R*scale, H*scale);
+    }
+    spinBtn.onclick = () => { let target = parseFloat(nS.value); nS.value = 0; let curr = 0; let iv = setInterval(() => { curr += 5; nS.value = curr; update(); if(curr >= target) clearInterval(iv); }, 30); };
+    [nS, h0S].forEach(s => s.oninput = update); update();
+})();
+</script>
+```
+
+***
+
+### Zadatak 35: Cilindrični spremnik - Benzin (Kombinirano ubrzanje)
+
+**Tekst zadatka:**
+35. Vertikalni cilindrični spremnik promjera 1 [m], visine 2 [m] potpuno je ispunjen benzinom gustoće 740 [kg/m3]. Spremnik rotira oko središnje osi intenzitetom 90 [o/min] , pri čemu ubrzava u smjeru suprotnom od djelovanja gravitacijske komponente ubrzanja intenzitetom 5 [m/s2]. Potrebno je odrediti razliku tlaka između središta gornje i donje baze, te razliku tlaka između središta donje baze i krajnjeg polumjera donje baze spremnika.
+
+**Rješenje:**
+1. **Vertikalna razlika (točke 1-2):** $\Delta p_v = \rho(g+a)H = 740 \cdot (9,81+5) \cdot 2 = \mathbf{21,9 \text{ kPa}}$.
+2. **Radijalna razlika (točke 1-2'):** $\Delta p_r = \frac{\rho \omega^2 R^2}{2} = \frac{740 \cdot 9,425^2 \cdot 0,5^2}{2} = \mathbf{8,2 \text{ kPa}}$.
+
+```{=html}
+<div id="z35-advanced-widget" style="max-width: 900px; margin: 20px auto; font-family: system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #eee;">
+    <h4 style="text-align: center; color: #2d3748; margin-top: 0;">Z35: Superpozicija ubrzanja i rotacije</h4>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+        <canvas id="z35-heatmap-canvas" width="400" height="400" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></canvas>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 10px;">
+                <label>Vertikalno ubrzanje a: <span id="z35-v-a" style="font-weight:bold;">5.0</span> m/s²</label>
+                <input type="range" id="z35-a-slider" min="-5" max="15" step="0.5" value="5" style="width: 100%;">
+                <label style="display: block; margin-top: 15px;">Brzina vrtnje n: <span id="z35-v-n" style="font-weight:bold;">90</span> o/min</label>
+                <input type="range" id="z35-n-slider" min="0" max="200" value="90" style="width: 100%;">
+            </div>
+            <div style="background: #ebf8ff; padding: 15px; border-radius: 10px; border-left: 4px solid #3182ce;">
+                <div style="font-size: 0.85rem;">Δp<sub>v</sub> (1-2): <span id="z35-res-dpv">21.9</span> kPa</div>
+                <div style="font-size: 0.85rem; margin-top: 5px;">Δp<sub>r</sub> (1-2'): <span id="z35-res-dpr">8.2</span> kPa</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z35-heatmap-canvas'); const ctx = canvas.getContext('2d');
+    const aS = document.getElementById('z35-a-slider'); const nS = document.getElementById('z35-n-slider');
+    function update() {
+        const a = parseFloat(aS.value); const n = parseFloat(nS.value);
+        const w = n * Math.PI / 30; const rho = 740; const R = 0.5; const H = 2.0; const g = 9.81;
+        document.getElementById('z35-v-a').innerText = a.toFixed(1); document.getElementById('z35-v-n').innerText = n;
+        document.getElementById('z35-res-dpv').innerText = (rho * (g+a) * H / 1000).toFixed(1);
+        document.getElementById('z35-res-dpr').innerText = (rho * w*w * R*R / 2000).toFixed(1);
+        draw(w, a, g, H, R, rho);
+    }
+    function draw(w, a, g, H, R, rho) {
+        ctx.clearRect(0,0,400,400); const ox = 100, oy = 50, dw = 200, dh = 300;
+        for(let i=0; i<dh; i+=5) {
+            const z = (i/dh) * H; const p = rho * (g+a) * z;
+            const c = Math.min(p/40000 * 255, 255);
+            ctx.fillStyle = `rgb(${c}, ${100+c/2}, 255)`; ctx.fillRect(ox, oy + dh - i, dw, 5);
+        }
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, dw, dh);
+    }
+    [aS, nS].forEach(s => s.oninput = update); update();
+})();
+</script>
+```
+
+***
+
+### Zadatak 36: Rotirajuća U-cijev s dva fluida
+
+**Tekst zadatka:**
+36. U-cijev napunjena je vodom u desnom dijelu, pri čemu se u lijevom dijelu nalazi druga tekućina, prikazano na slici. Kada U-cijev rotira intenzitetom 30 o/min oko osi koja se nalazi 15 cm udaljena od središnjice desne grane cijevi, odnosno 5 cm od središnjice lijeve grane cijevi, razine tekućine u obje grane daju jednako očitanje visine u iznosu od 10 cm. Potrebno je odrediti gustoću tekućine u lijevoj grani.
+
+**Rješenje:**
+Izjednačavanjem tlakova na dnu u osi rotacije:
+$\rho_f (gh - \frac{\omega^2 R_1^2}{2}) = \rho_v (gh - \frac{\omega^2 R_2^2}{2}) \implies \mathbf{\rho_f = 898,1 \text{ kg/m}^3}$.
+
+```{=html}
+<div id="z36-advanced-widget" style="max-width: 900px; margin: 20px auto; font-family: system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #eee;">
+    <h4 style="text-align: center; color: #2d3748; margin-top: 0;">Z36: Centrifugalni manometar</h4>
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;">
+        <canvas id="z36-u-canvas" width="450" height="300" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></canvas>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 10px;">
+                <label>Brzina vrtnje n: <span id="z36-v-n" style="font-weight:bold;">30</span> o/min</label>
+                <input type="range" id="z36-n-slider" min="0" max="100" value="30" style="width: 100%;">
+            </div>
+            <div style="background: #f0fff4; padding: 15px; border-radius: 10px; border-left: 4px solid #48bb78;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #2f855a;"><span id="z36-res-rho">898</span> kg/m³</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z36-u-canvas'); const ctx = canvas.getContext('2d');
+    const nS = document.getElementById('z36-n-slider');
+    function update() {
+        const n = parseFloat(nS.value); const w = n * Math.PI / 30; const g = 9.81; const r1 = 0.05, r2 = 0.15, h = 0.1;
+        const rf = 1000 * (g*h - w*w*r2*r2/2) / (g*h - w*w*r1*r1/2);
+        document.getElementById('z36-v-n').innerText = n; document.getElementById('z36-res-rho').innerText = Math.abs(rf).toFixed(0);
+        draw(r1, r2, h);
+    }
+    function draw(r1, r2, h) {
+        ctx.clearRect(0,0,450,300); const cx = 150, base = 220, scale = 800;
+        ctx.lineWidth = 16; ctx.strokeStyle = "#f1f5f9"; ctx.beginPath(); ctx.moveTo(cx-r1*scale, 100); ctx.lineTo(cx-r1*scale, base); ctx.lineTo(cx+r2*scale, base); ctx.lineTo(cx+r2*scale, 100); ctx.stroke();
+        ctx.strokeStyle = "#48bb78"; ctx.beginPath(); ctx.moveTo(cx-r1*scale, base-h*scale); ctx.lineTo(cx-r1*scale, base); ctx.lineTo(cx, base); ctx.stroke();
+        ctx.strokeStyle = "#3182ce"; ctx.beginPath(); ctx.moveTo(cx, base); ctx.lineTo(cx+r2*scale, base); ctx.lineTo(cx+r2*scale, base-h*scale); ctx.stroke();
+    }
+    nS.oninput = update; update();
+})();
+</script>
+```
+
+***
+
+### Primjer 2: Rotirajući spremnik (Mokro vs. Suho dno)
+
+**Tekst zadatka:**
+Prstenasti cilindar (vanjski promjer $D$, unutarnji $d$) rotira kutnom brzinom $\omega$. Potrebno je odrediti uvjet pri kojem dno posude postaje suho.
+
+**Rješenje:**
+a) **Mokro dno:** Volumen iznad paraboloida je $V = \frac{1}{2} r^2 \pi \cdot h$. Dno nije suho!
+b) **Suho dno:** Volumen iznad paraboloida je $V = \frac{1}{2} (r^2 - r_0^2) \pi \cdot H$.
+Kritična kutna brzina: $\omega = \sqrt{\frac{8gH}{d^2 - d_0^2}} = 21,4 \, [\text{rad/s}]$.
+
+```{=html}
+<div id="p2-advanced-widget" style="max-width: 900px; margin: 20px auto; font-family: system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #eee;">
+    <h4 style="text-align: center; color: #2d3748; margin-top: 0;">P2: Dinamika prstenastog spremnika</h4>
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+        <canvas id="p2-ring-canvas" width="450" height="350" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></canvas>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 10px;">
+                <label>Kutna brzina ω: <span id="p2-v-w">10</span> rad/s</label>
+                <input type="range" id="p2-w-slider" min="0" max="40" value="10" style="width: 100%;">
+            </div>
+            <div id="p2-status-box" style="padding: 15px; border-radius: 10px; text-align: center; font-weight: bold;">
+                <span id="p2-status-text">MOKRO DNO</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('p2-ring-canvas'); const ctx = canvas.getContext('2d');
+    const wS = document.getElementById('p2-w-slider');
+    function update() {
+        const w = parseFloat(wS.value); const R = 0.2; const h0 = 0.29; const g = 9.81; const H = 0.58;
+        const hc = h0 - (w*w * R*R)/(4*g); const statusBox = document.getElementById('p2-status-box');
+        if(hc > 0) { statusBox.style.background = "#f0fff4"; statusBox.innerText = "✅ MOKRO DNO"; }
+        else { statusBox.style.background = "#fff5f5"; statusBox.innerText = "⚠️ SUHO DNO"; }
+        draw(w, hc, R, H);
+    }
+    function draw(w, hc, R, H) {
+        ctx.clearRect(0,0,450,350); const cx = 225, base = 300, scale = 400;
+        ctx.fillStyle = "rgba(59, 130, 246, 0.5)"; ctx.beginPath();
+        if(hc >= 0) {
+            ctx.moveTo(cx - R*scale, base - (hc + (w*w*R*R)/(2*9.81))*scale);
+            for(let x = -R*scale; x <= R*scale; x++) { let r = Math.abs(x/scale); let z = hc + (w*w*r*r)/(2*9.81); ctx.lineTo(cx + x, base - z*scale); }
+            ctx.lineTo(cx + R*scale, base); ctx.lineTo(cx - R*scale, base);
+        } else {
+            const r0 = Math.sqrt(-4*g*hc / (w*w || 1));
+            ctx.moveTo(cx - R*scale, base - (hc + (w*w*R*R)/(2*9.81))*scale);
+            for(let x = -R*scale; x <= -r0*scale; x++) { let r = Math.abs(x/scale); let z = hc + (w*w*r*r)/(2*9.81); ctx.lineTo(cx + x, base - z*scale); }
+            ctx.lineTo(cx - r0*scale, base); ctx.lineTo(cx + r0*scale, base);
+            for(let x = r0*scale; x <= R*scale; x++) { let r = Math.abs(x/scale); let z = hc + (w*w*r*r)/(2*9.81); ctx.lineTo(cx + x, base - z*scale); }
+            ctx.lineTo(cx + R*scale, base); ctx.lineTo(cx - R*scale, base);
+        }
+        ctx.fill(); ctx.strokeStyle = "#1e293b"; ctx.strokeRect(cx - R*scale, base - H*scale, 2*R*scale, H*scale);
+    }
+    wS.oninput = update; update();
+})();
+</script>
+```
+
+***
+
+### Primjer 3: Nakošeni spremnik koji rotira i giba se konstantnim ubrzanjem a
+
+**Tekst zadatka:**
+Kada je cilindrična posuda nagnuta u odnosu na vertikalu, relativno mirovanje je moguće isključivo ako postoji translatirajuće gibanje posude stalnim ubrzanjem tako da je rezultirajući vektor, dobiven zbrajanjem vektora gravitacije i negativnog vektora ubrzanja, paralelan s osi rotacije.
+
+**Rješenje:**
+1. **Horizontalno ubrzanje:** $a = g / \tan\alpha$ (tako da rezultantna sila bude u osi posude).
+2. **Efektivna gravitacija:** $f_z' = g / \sin\alpha$.
+3. **Jednadžba slobodne površine:** $h' = z' = \frac{\omega^2 r^2}{2 f_z'}$.
+
+```{=html}
+<div id="p3-advanced-widget" style="max-width: 900px; margin: 20px auto; font-family: system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #eee;">
+    <h4 style="text-align: center; color: #2d3748; margin-top: 0;">P3: Nagnuta rotacija i Poravnanje sila</h4>
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+        <canvas id="p3-tilt-canvas" width="450" height="350" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></canvas>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 10px;">
+                <label>Kut nagiba α: <span id="p3-v-alpha">30</span>°</label>
+                <input type="range" id="p3-alpha-slider" min="15" max="75" value="30" style="width: 100%;">
+                <label style="display: block; margin-top: 15px;">Ubrzanje a: <span id="p3-v-a">17.0</span> m/s²</label>
+                <input type="range" id="p3-a-slider" min="0" max="40" step="0.1" value="17" style="width: 100%;">
+            </div>
+            <button id="p3-auto-balance" style="padding: 12px; background: #48bb78; color: white; border: none; border-radius: 8px; font-weight: bold;">Postigni RAVNOTEŽU</button>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('p3-tilt-canvas'); const ctx = canvas.getContext('2d');
+    const alphaS = document.getElementById('p3-alpha-slider'); const aS = document.getElementById('p3-a-slider');
+    const autoBtn = document.getElementById('p3-auto-balance');
+    function update() {
+        const alpha = parseFloat(alphaS.value) * Math.PI / 180; const a = parseFloat(aS.value); const g = 9.81;
+        document.getElementById('p3-v-alpha').innerText = alphaS.value; document.getElementById('p3-v-a').innerText = a.toFixed(1);
+        draw(alpha, a, g);
+    }
+    function draw(alpha, a, g) {
+        ctx.clearRect(0,0,450,350); const cx = 225, cy = 200; const fr_angle = Math.atan2(g, a);
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(Math.PI/2 - alpha);
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 3; ctx.strokeRect(-50, -120, 100, 120);
+        ctx.fillStyle = "rgba(59, 130, 246, 0.4)"; ctx.rotate(fr_angle - (Math.PI/2 - alpha) - Math.PI/2); ctx.fillRect(-70, 0, 140, 80); ctx.restore();
+    }
+    autoBtn.onclick = () => { aS.value = (9.81 / Math.tan(parseFloat(alphaS.value)*Math.PI/180)).toFixed(1); update(); };
+    [alphaS, aS].forEach(s => s.oninput = update); update();
+})();
+</script>
+```

@@ -1,0 +1,521 @@
+# Vježba 6
+
+
+
+# Mehanika fluida – Vježba 6
+
+
+### 49. Zadatak (CENGEL 3.9): Cilindar kao automatska zaklopka
+
+**Tekst zadatka:** Čvrsti cilindar polumjera $0,8\text{ [m]}$ ovješen u točki A koristi se kao automatska zaklopka. Kada razina vode dosegne visinu $h_1$, zaklopka se otvara okretanjem oko hvatišta u točki A. Potrebno je odrediti ukupnu hidrostatsku silu koja djeluje na cilindar, liniju djelovanja (kut $\alpha$) te težinu cilindra po metru duljine ($G_c$). Zanemariti trenje.
+
+**Zadano:** $h_1 = 5\text{ m}, h_2 = 4,2\text{ m}, h_3 = 0,8\text{ m}, R = 0,8\text{ m}, \rho = 1000\text{ kg/m}^3$.
+
+**Objašnjenje i rješenje:**
+
+Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($F_V$) komponentu.
+
+1.  **Horizontalna komponenta ($F_H$):** Ona djeluje na vertikalnu projekciju plohe (pravokutnik visine $R$ i širine $1\text{ m}$).
+    *   Težište te projekcije je na dubini $z_{TAX} = h_2 + R/2 = 4,2 + 0,4 = 4,6\text{ m}$.
+    *   $F_H = \rho \cdot g \cdot z_{TAX} \cdot A_x = 1000 \cdot 9,81 \cdot 4,6 \cdot 0,8 = \mathbf{36100,8\text{ N}}$.
+
+2.  **Vertikalna komponenta ($F_V$):** Ona je jednaka težini zamišljenog stupca tekućine iznad plohe. Budući da je tekućina *ispod* plohe, sila djeluje prema gore (uzgon).
+    *   Volumen se sastoji od pravokutnika iznad cilindra i volumena samog dijela cilindra.
+    *   $F_V = \rho \cdot g \cdot V = \mathbf{37893\text{ N}}$.
+
+3.  **Rezultantna sila ($F_R$) i kut ($\alpha$):**
+    *   $F_R = \sqrt{F_H^2 + F_V^2} = \mathbf{52336,6\text{ N}}$.
+    *   Kut djelovanja: $\alpha = \arctan(F_V / F_H) = \mathbf{46,4^\circ}$. Linija sile prolazi kroz središte cilindra jer su sve elementarne sile tlaka okomite na površinu.
+
+4.  **Težina cilindra ($G_c$):** Da bi se vrata otvorila, moment težine mora biti jednak momentu hidrostatske sile oko točke A.
+    *   $\sum M_A = 0 \implies F_R \cdot R \cdot \sin(\alpha) - G_c \cdot R = 0$.
+    *   $G_c = F_R \cdot \sin(\alpha) = 52336,6 \cdot \sin(46,4^\circ) \approx \mathbf{37,9\text{ kN/m}}$.
+
+```{=html}
+<div id="cylinder-gate-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #fdfefe; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2e4053;">Automatska zaklopka (Zadatak 49)</h3>
+    <div style="margin-bottom: 20px;">
+        <label>Razina vode (h1): <span id="h1-val-49">5.0</span> m
+            <input type="range" id="h1-slider-49" min="1" max="10" step="0.1" value="5" style="width: 100%;">
+        </label>
+    </div>
+    <div style="position: relative; width: 100%; height: 300px; background: white; border: 1px solid #eee; border-radius: 5px;">
+        <canvas id="canvas-49" width="400" height="300" style="display: block; margin: 0 auto;"></canvas>
+    </div>
+    <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em;">
+        <div style="background: #ebf5fb; padding: 10px; border-radius: 5px;">
+            FH: <span id="fh-49" style="font-weight:bold;">...</span> N<br>
+            FV: <span id="fv-49" style="font-weight:bold;">...</span> N
+        </div>
+        <div style="background: #fef9e7; padding: 10px; border-radius: 5px;">
+            Kut α: <span id="alpha-49" style="font-weight:bold;">...</span> °<br>
+            <strong>Težina Gc:</strong> <span id="gc-49" style="font-weight:bold; color: #c0392b;">...</span> kN/m
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const h1S = document.getElementById('h1-slider-49');
+    const canvas = document.getElementById('canvas-49');
+    const ctx = canvas.getContext('2d');
+
+    function draw() {
+        const h1 = parseFloat(h1S.value);
+        document.getElementById('h1-val-49').innerText = h1.toFixed(1);
+        
+        const R = 0.8, h3 = 0.8, rho = 1000, g = 9.81;
+        const h2 = h1 - h3;
+        
+        const FH = rho * g * (h2 + R/2) * R;
+        const FV = rho * g * (R * h2 + (Math.PI * R*R / 4));
+        const FR = Math.sqrt(FH*FH + FV*FV);
+        const alpha = Math.atan2(FV, FH) * 180 / Math.PI;
+        const Gc = FR * Math.sin(alpha * Math.PI / 180);
+
+        document.getElementById('fh-49').innerText = FH.toFixed(0);
+        document.getElementById('fv-49').innerText = FV.toFixed(0);
+        document.getElementById('alpha-49').innerText = alpha.toFixed(1);
+        document.getElementById('gc-49').innerText = (Gc / 1000).toFixed(1);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const scale = 30;
+        const startX = 250, startY = 250;
+
+        // Voda
+        ctx.fillStyle = "rgba(52, 152, 219, 0.3)";
+        ctx.fillRect(50, startY - h1 * scale, 200, h1 * scale);
+
+        // Cilindar (četvrtina)
+        ctx.beginPath();
+        ctx.strokeStyle = "#2c3e50";
+        ctx.lineWidth = 3;
+        ctx.arc(startX, startY - R * scale, R * scale, Math.PI/2, Math.PI);
+        ctx.lineTo(startX, startY - R * scale);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillStyle = "#bdc3c7"; ctx.fill();
+
+        // Vektori sila
+        ctx.strokeStyle = "red"; ctx.lineWidth = 2;
+        // FH
+        ctx.beginPath(); ctx.moveTo(startX - 120, startY - (h2 + R/2)*scale); ctx.lineTo(startX - R*scale, startY - (h2 + R/2)*scale); ctx.stroke();
+        // FV
+        ctx.beginPath(); ctx.moveTo(startX - R/2*scale, startY + 20); ctx.lineTo(startX - R/2*scale, startY); ctx.stroke();
+
+        requestAnimationFrame(draw);
+    }
+    h1S.oninput = draw;
+    draw();
+})();
+</script>
+```
+
+***
+
+### 50. Zadatak (2500 SPFM – 5.1): Potopljena četvrtina kruga
+
+**Tekst zadatka:** Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\text{ m}$. Duljina spremnika je $b=1,83\text{ m}$. Odrediti komponente sile i njihove položaje ($z_{FH}$ i $x_{FV}$).
+
+**Zadano:** $h_1 = 2,44\text{ m}, b = 1,83\text{ m}, R = 1,22\text{ m}, \rho = 998\text{ kg/m}^3$.
+
+**Objašnjenje i rješenje:**
+
+1.  **Horizontalna sila ($F_H$):**
+    *   Djeluje na pravokutnik BF ($R \times b$). Težište je na $z_{TAX} = h_1 + R/2 = 3,05\text{ m}$.
+    *   $F_H = \rho \cdot g \cdot z_{TAX} \cdot (R \cdot b) = \mathbf{66667\text{ N}}$.
+    *   **Položaj ($z_{FH}$):** Koristi se formula za centar tlaka: $z_{FH} = z_{TAX} + \frac{I_{x0}}{z_{TAX} \cdot A} = \mathbf{3,09\text{ m}}$.
+
+2.  **Vertikalna sila ($F_V$):**
+    *   Jednaka je težini vode iznad plohe AB. Taj volumen čine pravokutnik ($h_1 \cdot R \cdot b$) i četvrtina kruga ($\frac{R^2 \pi}{4} \cdot b$).
+    *   $V = 7,587\text{ m}^3 \implies F_V = \rho \cdot g \cdot V = \mathbf{74277,6\text{ N}}$.
+    *   **Položaj ($x_{FV}$):** Određuje se preko statičkog momenta volumena (zbroj momenata pojedinih dijelova kroz ukupni volumen).
+    *   $x_{FV} = \mathbf{0,584 \text{ m}}$ od vertikalne osi koja prolazi kroz točku B.
+
+    ```{=html}
+    <div id="quarter-circle-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #fdfefe; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; color: #2e4053;">Četvrtina kruga (Zadatak 50/51)</h3>
+        <div style="display: flex; gap: 20px; margin-bottom: 20px; align-items: center;">
+            <label>Voda s desne strane? <input type="checkbox" id="right-side-toggle"></label>
+            <label>h1: <span id="h1-val-50">2.44</span> m <input type="range" id="h1-slider-50" min="0" max="10" step="0.1" value="2.44"></label>
+        </div>
+        <div style="position: relative; width: 100%; height: 300px; background: white; border: 1px solid #eee; border-radius: 5px;">
+            <canvas id="canvas-50" width="400" height="300" style="display: block; margin: 0 auto;"></canvas>
+        </div>
+        <div id="res-50" style="margin-top: 15px; background: #e8f6f3; padding: 10px; border-radius: 5px; font-size: 0.9em;">
+            <strong>Komponente sile:</strong><br>
+            FH = <span id="fh-50-val">...</span> N (Hvatište na z = <span id="zfh-50-val">...</span> m)<br>
+            FV = <span id="fv-50-val">...</span> N (Smjer: <span id="fv-dir-50">...</span>)
+        </div>
+    </div>
+    <script>
+    (function() {
+        const h1S = document.getElementById('h1-slider-50');
+        const sideT = document.getElementById('right-side-toggle');
+        const canvas = document.getElementById('canvas-50');
+        const ctx = canvas.getContext('2d');
+
+        function draw() {
+            const h1 = parseFloat(h1S.value), isRight = sideT.checked;
+            const R = 1.22, b = 1.83, rho = 998, g = 9.81;
+            document.getElementById('h1-val-50').innerText = h1.toFixed(2);
+
+            const ztax = h1 + R/2;
+            const FH = rho * g * ztax * (R * b);
+            const zfh = ztax + (Math.pow(R, 2) / (12 * ztax));
+
+            const V = (R * h1 * b) + (Math.PI * R*R / 4) * b;
+            const FV = rho * g * V;
+
+            document.getElementById('fh-50-val').innerText = FH.toFixed(0);
+            document.getElementById('zfh-50-val').innerText = zfh.toFixed(3);
+            document.getElementById('fv-50-val').innerText = FV.toFixed(0);
+            document.getElementById('fv-dir-50').innerText = isRight ? "DOLJE (Težina)" : "GORE (Uzgon)";
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const scale = 40, startX = 200, startY = 250;
+
+            // Voda
+            ctx.fillStyle = "rgba(52, 152, 219, 0.3)";
+            if (isRight) {
+                ctx.fillRect(startX, startY - (h1+R) * scale, 150, (h1+R) * scale);
+            } else {
+                ctx.fillRect(50, startY - (h1+R) * scale, startX - 50, (h1+R) * scale);
+            }
+
+            // Ploha
+            ctx.beginPath();
+            ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 4;
+            if (isRight) {
+                ctx.arc(startX, startY - R * scale, R * scale, Math.PI/2, Math.PI);
+            } else {
+                ctx.arc(startX, startY - R * scale, R * scale, 0, Math.PI/2);
+            }
+            ctx.stroke();
+
+            // Vektor FV
+            ctx.strokeStyle = "red"; ctx.lineWidth = 2;
+            ctx.beginPath();
+            if (isRight) {
+                ctx.moveTo(startX - 20, startY - 100); ctx.lineTo(startX - 20, startY - 20); // Strelica dolje
+            } else {
+                ctx.moveTo(startX + 20, startY + 20); ctx.lineTo(startX + 20, startY - 20); // Strelica gore
+            }
+            ctx.stroke();
+
+            requestAnimationFrame(draw);
+        }
+        h1S.oninput = sideT.onchange = draw;
+        draw();
+    })();
+    </script>
+    ```
+
+    ***
+
+
+### Zadatak 51. Potopljena četvrtina kruga (voda s desne strane)
+
+**Tekst zadatka:** Potrebno je odrediti horizontalnu i vertikalnu komponentu rezultirajuće sile koja djeluje na zakrivljenu površinu AB (četvrtina kruga polumjera $R$), te njihovo hvatište, u slučaju kada se voda nalazi s desne strane pregrade.
+
+**Zadano:** $h_1 = 2,44 \text{ m}$, $b = 1,83 \text{ m}$, $R = 1,22 \text{ m}$, $\rho = 998 \text{ kg/m}^3$.
+
+**Objašnjenje i rješenje:**
+
+1.  **Horizontalna komponenta ($F_H$):**
+    *   Djeluje na vertikalnu projekciju plohe (pravokutnik visine $R$ i širine $b$).
+    *   Budući da je slobodna površina vode na razini vrha plohe (točka A), težište projekcije je na dubini: $z_{TAX} = h_1 + R/2 = 2,44 + 0,61 = 3,05 \text{ m}$.
+    *   **Iznos sile:** $F_H = \rho \cdot g \cdot z_{TAX} \cdot (R \cdot b) = 998 \cdot 9,81 \cdot 3,05 \cdot (1,22 \cdot 1,83) = \mathbf{66667 \text{ N}}$.
+    *   **Položaj ($z_{FH}$):** Centar tlaka je na $z_{FH} = \mathbf{3,08 \text{ m}}$ (mjereno od površine).
+
+2.  **Vertikalna komponenta ($F_V$):**
+    *   Jednaka je težini stupca tekućine koji se nalazi vertikalno iznad plohe AB.
+    *   Volumen se sastoji od pravokutnika iznad plohe i same četvrtine kruga: $V = (R \cdot h_1 \cdot b) + (\frac{R^2 \pi}{4} \cdot b) = 7,587 \text{ m}^3$.
+    *   Budući da je tekućina iznad plohe, sila djeluje **prema dolje**.
+    *   **Iznos sile:** $F_V = \rho \cdot g \cdot V = 998 \cdot 9,81 \cdot 7,587 = \mathbf{74278 \text{ N}}$.
+    *   **Položaj ($x_{FV}$):** $x_{FV} = \mathbf{0,584 \text{ m}}$ od vertikalne osi koja prolazi kroz točku B.
+
+***
+
+### Zadatak 52. Potopljena zaklopka (šestina isječka kruga)
+
+**Tekst zadatka:** Potrebno je odrediti intenzitet i lokaciju horizontalne i vertikalne komponente rezultirajuće sile na zaklopku AB koja tvori šestinu kružnog isječka ($\alpha = 60^\circ$).
+
+**Zadano:** $R = 6 \text{ m}$, $b = 10 \text{ m}$, $\rho = 998 \text{ kg/m}^3$, $\alpha = 60^\circ$.
+
+**Objašnjenje i rješenje:**
+
+1.  **Horizontalna komponenta ($F_H$):**
+    *   Vertikalna projekcija plohe je pravokutnik visine $R \cdot \sin(\alpha)$.
+    *   Dubina težišta projekcije (uz pretpostavku da je površina na razini točke B): $z_{TAX} = \frac{R \cdot \sin(60^\circ)}{2} = 2,598 \text{ m}$.
+    *   **Iznos sile:** $F_H = \rho \cdot g \cdot z_{TAX} \cdot A_x = 998 \cdot 9,81 \cdot 2,598 \cdot (10 \cdot 6 \cdot \sin 60^\circ) = \mathbf{1322 \text{ kN}}$.
+    *   **Položaj ($z_{FH}$):** Nalazi se na $1/3$ visine projekcije od dna: $z_{FH} = \mathbf{1,732 \text{ m}}$.
+
+2.  **Vertikalna komponenta ($F_V$):**
+    *   Određuje se preko volumena tekućine iznad zakrivljene plohe AB.
+    *   Izračunom površine segmenta iznad krivulje dobiva se volumen $V_{ABC} = 45,331 \text{ m}^3$.
+    *   **Iznos sile:** $F_V = \rho \cdot g \cdot V_{ABC} = \mathbf{443810 \text{ N}}$.
+    *   **Položaj ($x_{FV}$):** Izračunom statičkog momenta površine dobiva se krak $x_{FV} = \mathbf{0,842 \text{ m}}$.
+
+```{=html}
+<div id="sector-gate-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #f4f6f7; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2c3e50;">Kružni isječak (Zadatak 52)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <label>Kut isječka (α): <span id="alpha-val-52">60</span>°
+            <input type="range" id="alpha-slider-52" min="10" max="90" step="5" value="60" style="width: 100%;">
+        </label>
+        <label>Polumjer (R): <input type="number" id="r-in-52" value="6" step="0.5" style="width: 100%;"> m</label>
+    </div>
+    <div style="position: relative; width: 100%; height: 250px; background: white; border: 1px solid #eee; border-radius: 5px; margin-bottom: 15px;">
+        <canvas id="canvas-52" width="400" height="250" style="display: block; margin: 0 auto;"></canvas>
+    </div>
+    <div style="background: white; padding: 12px; border-radius: 5px; border-left: 5px solid #34495e; font-size: 0.9em;">
+        FH (Horiz. sila): <span id="fh-52-res" style="font-weight:bold;">...</span> kN<br>
+        FV (Vert. sila): <span id="fv-52-res" style="font-weight:bold;">...</span> kN<br>
+        <strong>Ukupna sila FR:</strong> <span id="fr-52-res" style="font-weight:bold; color: #e67e22;">...</span> kN
+    </div>
+</div>
+<script>
+(function() {
+    const alphaS = document.getElementById('alpha-slider-52');
+    const rI = document.getElementById('r-in-52');
+    const canvas = document.getElementById('canvas-52');
+    const ctx = canvas.getContext('2d');
+
+    function draw() {
+        const alphaDeg = parseFloat(alphaS.value);
+        const R = parseFloat(rI.value);
+        const alpha = alphaDeg * Math.PI / 180;
+        const b = 10, rho = 998, g = 9.81;
+        document.getElementById('alpha-val-52').innerText = alphaDeg;
+
+        const h_proj = R * Math.sin(alpha);
+        const ztax = h_proj / 2;
+        const FH = rho * g * ztax * (h_proj * b);
+        
+        const Area = 0.5 * R * R * (alpha - Math.sin(alpha)); 
+        const FV = rho * g * Area * b;
+        const FR = Math.sqrt(FH*FH + FV*FV);
+
+        document.getElementById('fh-52-res').innerText = (FH / 1000).toFixed(0);
+        document.getElementById('fv-52-res').innerText = (FV / 1000).toFixed(0);
+        document.getElementById('fr-52-res').innerText = (FR / 1000).toFixed(0);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const scale = 150 / R, startX = 300, startY = 200;
+
+        ctx.fillStyle = "rgba(52, 152, 219, 0.2)";
+        ctx.fillRect(50, startY - h_proj * scale, startX - 50, h_proj * scale);
+
+        ctx.beginPath();
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 4;
+        ctx.arc(startX, startY - h_proj * scale, R * scale, Math.PI/2, Math.PI/2 + alpha);
+        ctx.stroke();
+
+        ctx.setLineDash([2, 2]); ctx.strokeStyle = "#95a5a6"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(startX - R*scale, startY); ctx.stroke();
+        ctx.setLineDash([]);
+        
+        requestAnimationFrame(draw);
+    }
+    alphaS.oninput = rI.oninput = draw;
+    draw();
+})();
+</script>
+```
+
+***
+
+### Zadatak 53. Elastični balon i promjena sile u užetu
+
+**Tekst zadatka:** Elastični balon promjera $30 \text{ cm}$ napunjen je zrakom i privezan za dno. Ako se tlak zraka u spremniku poveća sa $100 \text{ kPa}$ na $1,6 \text{ MPa}$, odrediti postotak promjene sile u užetu.
+
+**Zadano:** $D_1 = 0,3 \text{ m}$, $p_1 = 0,1 \text{ MPa}$, $p_2 = 1,6 \text{ MPa}$, $\rho = 1000 \text{ kg/m}^3$, odnos $p = C \cdot D^{-2}$.
+
+**Objašnjenje i rješenje:**
+
+1.  **Promjena promjera balona:**
+    *   Iz ovisnosti $p \cdot D^2 = konst.$ slijedi: $D_2 = D_1 \cdot \sqrt{p_1 / p_2} = 0,3 \cdot \sqrt{0,1 / 1,6} = \mathbf{0,075 \text{ m}}$.
+    *   Povećanje vanjskog tlaka drastično stisne balon.
+
+2.  **Uzgonska sila ($F_U$):**
+    *   Početna: $F_{U,1} = \rho \cdot g \cdot \frac{D_1^3 \pi}{6} = \mathbf{138,7 \text{ N}}$.
+    *   Konačna: $F_{U,2} = \rho \cdot g \cdot \frac{D_2^3 \pi}{6} = \mathbf{2,17 \text{ N}}$.
+
+3.  **Promjena sile u užetu:**
+    *   Budući da je težina balona zanemariva, sila u užetu jednaka je uzgonu.
+    *   Postotna promjena: $\Delta F_U = \frac{138,7 - 2,17}{138,7} \cdot 100 = \mathbf{98,4 \%}$.
+    *   **Zaključak:** Sila u užetu se smanjila za 98,4% jer je balon zbog stlačivanja izgubio većinu svog volumena, a time i uzgona.
+
+```{=html}
+<div id="balloon-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #ebf5fb; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2980b9;">Elastični balon (Zadatak 53)</h3>
+    <div style="margin-bottom: 20px;">
+        <label>Vanjski tlak (p): <span id="p-val-53">0.1</span> MPa
+            <input type="range" id="p-slider-53" min="0.1" max="2.0" step="0.1" value="0.1" style="width: 100%;">
+        </label>
+    </div>
+    <div style="position: relative; width: 100%; height: 200px; background: #3498db; border-radius: 5px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <div id="balloon-visual" style="background: #e74c3c; border-radius: 50%; width: 150px; height: 150px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid #c0392b;"></div>
+        <div style="position: absolute; bottom: 0; width: 2px; height: 100px; background: white; z-index: -1;"></div>
+    </div>
+    <div style="margin-top: 15px; background: white; padding: 10px; border-radius: 5px; font-size: 0.9em; border-left: 5px solid #e74c3c;">
+        Promjer balona (D): <span id="d-res-53">0.30</span> m<br>
+        <strong>Sila uzgona (Fu):</strong> <span id="fu-res-53" style="font-weight:bold; color: #c0392b;">...</span> N
+    </div>
+</div>
+<script>
+(function() {
+    const pS = document.getElementById('p-slider-53');
+    const balloon = document.getElementById('balloon-visual');
+
+    function calc() {
+        const p = parseFloat(pS.value), p1 = 0.1, D1 = 0.3, rho = 1000, g = 9.81;
+        document.getElementById('p-val-53').innerText = p.toFixed(1);
+
+        const D2 = D1 * Math.sqrt(p1 / p);
+        const FU = rho * g * (Math.PI * Math.pow(D2, 3) / 6);
+
+        document.getElementById('d-res-53').innerText = D2.toFixed(3);
+        document.getElementById('fu-res-53').innerText = FU.toFixed(2);
+
+        // Vizualizacija (skaliranje div-a)
+        const size = (D2 / D1) * 150;
+        balloon.style.width = size + "px";
+        balloon.style.height = size + "px";
+    }
+    pS.oninput = calc;
+    calc();
+})();
+</script>
+```
+
+***
+
+### Zadatak 54. Ledenjak (volumni udio i stabilnost)
+
+**Tekst zadatka:** Potrebno je odrediti volumni udio ledenjaka koji je potopljen u morskoj vodi te objasniti zašto dolazi do prevrtanja ledenjaka.
+
+**Zadano:** $\rho_L = 917 \text{ kg/m}^3$, $\rho_{mv} = 1042 \text{ kg/m}^3$.
+
+**Objašnjenje i rješenje:**
+
+1.  **Uvjet ravnoteže (Plutanje):**
+    *   Težina ledenjaka ($G$) mora biti jednaka sili uzgona ($F_L$): $G = F_L$.
+    *   $\rho_L \cdot g \cdot V_{ukupno} = \rho_{mv} \cdot g \cdot V_{potopljeno}$.
+
+2.  **Izračun volumnog udjela:**
+    *   $\frac{V_{potopljeno}}{V_{ukupno}} = \frac{\rho_L}{\rho_{mv}} = \frac{917}{1042} = \mathbf{0,88}$ (ili **88%**).
+    *   **Zaključak:** Čak 88% volumena ledenjaka nalazi se ispod površine mora.
+
+```{=html}
+<div id="iceberg-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #eef2f3; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2980b9;">Vrh ledenjaka (Zadatak 54)</h3>
+    <div style="margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <label>Gustoća leda (kg/m³): 
+            <input type="number" id="rho-ice-54" value="917" step="1" style="width: 100%;">
+        </label>
+        <label>Gustoća mora (kg/m³): 
+            <input type="number" id="rho-sea-54" value="1042" step="1" style="width: 100%;">
+        </label>
+    </div>
+    <div style="position: relative; width: 100%; height: 300px; background: #3498db; border-radius: 5px; overflow: hidden; border: 2px solid #2980b9;">
+        <div style="position: absolute; top: 100px; width: 100%; height: 2px; background: rgba(255,255,255,0.5); z-index: 2;"></div>
+        <div id="iceberg-visual" style="position: absolute; left: 50%; transform: translateX(-50%); width: 120px; height: 180px; background: white; clip-path: polygon(50% 0%, 100% 20%, 80% 100%, 20% 100%, 0% 20%); transition: top 0.5s ease-out; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);"></div>
+    </div>
+    <div style="margin-top: 15px; text-align: center; background: white; padding: 10px; border-radius: 5px; border: 1px solid #aed6f1;">
+        Potopljeni volumen: <span id="sub-res-54" style="font-size: 1.4em; font-weight: bold; color: #2e86c1;">...</span> %
+    </div>
+</div>
+<script>
+(function() {
+    const iceIn = document.getElementById('rho-ice-54');
+    const seaIn = document.getElementById('rho-sea-54');
+    const iceberg = document.getElementById('iceberg-visual');
+
+    function calc() {
+        const rhoI = parseFloat(iceIn.value), rhoS = parseFloat(seaIn.value);
+        if (rhoI >= rhoS) {
+            document.getElementById('sub-res-54').innerText = "100 (POTONUO!)";
+            iceberg.style.top = "120px";
+            return;
+        }
+        const ratio = (rhoI / rhoS) * 100;
+        document.getElementById('sub-res-54').innerText = ratio.toFixed(1);
+        
+        const totalHeight = 180;
+        const submergedHeight = (ratio / 100) * totalHeight;
+        const topPos = 100 - (totalHeight - submergedHeight);
+        iceberg.style.top = topPos + "px";
+    }
+    [iceIn, seaIn].forEach(i => i.oninput = calc);
+    calc();
+})();
+</script>
+```
+
+3.  **Fizikalni uzrok prevrtanja:**
+...
+    *   Ledenjak se ne topi jednoliko (temperatura mora varira po dubini, morske struje).
+    *   Nejednoliko topljenje mijenja geometriju ledenjaka, što uzrokuje **pomak centra mase** i **centra uzgona**. Kada se naruši statička stabilnost (moment para sila postane destabilizirajući), ledenjak se okreće kako bi pronašao novi stabilni položaj.
+    
+***
+
+### 55. Zadatak (CENGEL 3.151): Potopljeni naopaki cilindar
+
+**Tekst zadatka:** Cilindrični spremnik težine $G=79\text{ [N]}$ djelomično je potopljen. Potrebno je odrediti visinu stupca u manometru ($h_1$) i silu $F$ potrebnu da spremnik ostane u tom položaju.
+
+**Zadano:** $G = 79\text{ N}, h_2 = 0,2\text{ m}, D = 0,3\text{ m}, \rho_v = 1000\text{ kg/m}^3, \bar{\rho}_{mf} = 2,1$.
+
+**Objašnjenje i rješenje:**
+
+1.  **Tlak u cilindru ($p_m$):**
+    Budući da je razina vode u cilindru niža za $h_2$ od razine vani, unutar cilindra vlada pretlak koji drži tu razinu.
+    *   $p_m = \rho_v \cdot g \cdot h_2 = 1000 \cdot 9,81 \cdot 0,2 = \mathbf{1962\text{ Pa}}$.
+
+2.  **Visina manometra ($h_1$):**
+    Taj isti pretlak $p_m$ djeluje na manometar s fluidom gustoće $\rho_{mf} = 2,1 \cdot 1000 = 2100\text{ kg/m}^3$.
+    *   $p_m = \rho_{mf} \cdot g \cdot h_1 \implies h_1 = \frac{1962}{2100 \cdot 9,81} = \mathbf{0,095\text{ m}}$.
+
+3.  **Sila zadržavanja ($F$):**
+    Postavljamo ravnotežu sila u vertikalnom smjeru. Na spremnik djeluje vanjska sila $F$ prema dolje, težina $G$ prema dolje, a tlak zraka $p_m$ gura odozdo prema gore na gornju bazu cilindra (površina $A_c$).
+    *   $F + G = p_m \cdot A_c$
+    *   $F = p_m \cdot \frac{D^2 \pi}{4} - G = 1962 \cdot \frac{0,3^2 \pi}{4} - 79 = \mathbf{59,7\text{ N}}$.
+
+**Zaključak:** Sila $F$ je pozitivna, što znači da moramo pritiskati spremnik prema dolje kako bi on ostao potopljen na toj dubini, jer ga tlak zarobljenog zraka "gura" van poput plovka.
+
+```{=html}
+<div id="upside-down-cylinder-widget" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #fdfefe; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2e4053;">Potopljeni cilindar (Zadatak 55)</h3>
+    <div style="margin-bottom: 20px;">
+        <label>Razlika razina h2: <span id="h2-val-55">0.2</span> m
+            <input type="range" id="h2-slider-55" min="0.05" max="0.5" step="0.01" value="0.2" style="width: 100%;">
+        </label>
+    </div>
+    <div style="background: #ebf5fb; padding: 15px; border-radius: 5px; border-left: 5px solid #2980b9; font-size: 0.9em;">
+        Tlak zraka (pm): <span id="pm-res-55" style="font-weight:bold;">...</span> Pa<br>
+        Visina manometra (h1): <span id="h1-res-55" style="font-weight:bold;">...</span> m<br>
+        <strong>Potrebna sila F:</strong> <span id="f-res-55" style="font-weight:bold; color: #c0392b;">...</span> N
+    </div>
+</div>
+<script>
+(function() {
+    const h2S = document.getElementById('h2-slider-55');
+    function calc() {
+        const h2 = parseFloat(h2S.value), rhoV = 1000, g = 9.81, G = 79, D = 0.3, rhoMf = 2100;
+        document.getElementById('h2-val-55').innerText = h2.toFixed(2);
+
+        const pm = rhoV * g * h2;
+        const h1 = pm / (rhoMf * g);
+        const Ac = (Math.PI * D*D) / 4;
+        const F = pm * Ac - G;
+
+        document.getElementById('pm-res-55').innerText = pm.toFixed(0);
+        document.getElementById('h1-res-55').innerText = h1.toFixed(3);
+        document.getElementById('f-res-55').innerText = F.toFixed(1);
+    }
+    h2S.oninput = calc;
+    calc();
+})();
+</script>
+```
+

@@ -1,0 +1,224 @@
+# Vježba 7
+
+
+# Mehanika fluida – Vježba 7
+
+Ova se vježba bavi izračunom sila hidrostatskog tlaka na zakrivljene plohe (cilindre).
+
+Kada radimo sa zakrivljenim plohama, problem je što tlak djeluje okomito na površinu, a na zakrivljenoj plohi se taj smjer stalno mijenja. Zato koristimo trik: **silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($F_V$) komponentu.**
+
+
+### Zadatak 1: Cilindar uronjen u fluid
+
+#### **1. Fizikalna logika**
+Zamisli da ovaj cilindar želiš "stisnuti" u fluid. Fluid mu se opire sa svih strana.
+*   **Horizontalno:** Fluid pritišće i s lijeve i s desne strane. Ako su dubine iste, te se sile poništavaju.
+*   **Vertikalno:** Sila je zapravo težina stupca vode koji "leži" na tijelu ili težina istisnutog fluida (uzgon).
+
+#### **2. Matematičko objašnjenje**
+**Horizontalna komponenta ($F_H$):**
+Trik je da zakrivljenu plohu projiciraš na vertikalnu ravninu. Gledaš "sjenu" koju cilindar baca na zid.
+*   U zadatku se sile na dijelovima **BD** i **DE** poništavaju jer su simetrične i na istoj dubini. Ostaje samo dio **BA**.
+*   **Formula:** $F_H = \rho \cdot g \cdot h_T \cdot A_{proj}$
+    *   $h_T$ je dubina do težišta te "sjene" (projekcije). To je dubina $h + R/2$.
+    *   $A_{proj}$ je površina pravokutnika visine $R$ i duljine $b$.
+
+**Vertikalna komponenta ($F_V$):**
+Ona je jednaka težini volumena fluida iznad plohe.
+*   **Pazi na smjer:** Ako je fluid *iznad* plohe, gura je **prema dolje**. Ako je ploha uronjena tako da je fluid *ispod* nje, on je gura **prema gore** (sila uzgona).
+*   Rezultantna vertikalna sila dobije se zbrajanjem/oduzimanjem tih volumena (prikazano šrafiranim područjima na slici).
+*   **Formula:** $F_V = \rho \cdot g \cdot V$
+
+**Rezultanta ($F_R$):**
+Spajamo komponente Pitagorinim poučkom: $F_R = \sqrt{F_H^2 + F_V^2}$.
+*   **Važna napomena:** Kod kružnih ploha, rezultantna sila **uvijek** prolazi kroz središte kružnice ($C$), jer su sve komponente tlaka okomite na tangentu, što znači da usmjerene prema centru.
+
+```{=html}
+<div id="cylinder-widget-7" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #fdfefe; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2e4053;">Interaktivni cilindar u fluidu (Zadatak 1)</h3>
+    <div style="margin-bottom: 20px;">
+        <label>Dubina do vrha cilindra (h): <span id="h-val-7">2.0</span> m
+            <input type="range" id="h-slider-7" min="0" max="10" step="0.1" value="2" style="width: 100%;">
+        </label>
+    </div>
+    <div style="position: relative; width: 100%; height: 350px; background: white; border: 1px solid #eee; border-radius: 5px; overflow: hidden;">
+        <canvas id="canvas-7" width="500" height="350" style="display: block; margin: 0 auto;"></canvas>
+    </div>
+    <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em;">
+        <div style="background: #ebf5fb; padding: 10px; border-radius: 5px;">
+            FH (Horiz. sila): <span id="fh-7-val" style="font-weight:bold;">...</span> kN<br>
+            FV (Vert. sila): <span id="fv-7-val" style="font-weight:bold;">...</span> kN
+        </div>
+        <div style="background: #fdf2e9; padding: 10px; border-radius: 5px;">
+            <strong>Rezultanta FR:</strong> <span id="fr-7-val" style="font-weight:bold; color: #e67e22;">...</span> kN<br>
+            Kut sile: <span id="alpha-7-val" style="font-weight:bold;">...</span> °
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const hS = document.getElementById('h-slider-7');
+    const canvas = document.getElementById('canvas-7');
+    const ctx = canvas.getContext('2d');
+
+    function draw() {
+        const h = parseFloat(hS.value);
+        document.getElementById('h-val-7').innerText = h.toFixed(1);
+        
+        const R = 1.0, b = 1.0, rho = 1000, g = 9.81;
+        const zt = h + R/2;
+        const FH = rho * g * zt * R * b;
+        const FV = rho * g * (Math.PI * R*R / 2) * b; // Uzgon na polucilindar
+        const FR = Math.sqrt(FH*FH + FV*FV);
+        const alpha = Math.atan2(FV, FH) * 180 / Math.PI;
+
+        document.getElementById('fh-7-val').innerText = (FH / 1000).toFixed(1);
+        document.getElementById('fv-7-val').innerText = (FV / 1000).toFixed(1);
+        document.getElementById('fr-7-val').innerText = (FR / 1000).toFixed(1);
+        document.getElementById('alpha-7-val').innerText = alpha.toFixed(1);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const scale = 25;
+        const startX = 350, startY = 300;
+
+        // Voda
+        ctx.fillStyle = "rgba(52, 152, 219, 0.3)";
+        ctx.fillRect(50, 50, 300, 300);
+
+        // Cilindar (prikazujemo samo desni dio koji je u doticaju s fluidom)
+        ctx.beginPath();
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 3;
+        ctx.arc(startX, startY - R * scale - h * scale, R * scale, Math.PI/2, 1.5 * Math.PI, false);
+        ctx.stroke();
+        ctx.fillStyle = "#bdc3c7"; ctx.fill();
+
+        // Površina vode
+        ctx.strokeStyle = "#3498db"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(50, 50); ctx.lineTo(350, 50); ctx.stroke();
+
+        // Vektori sila
+        ctx.strokeStyle = "red"; ctx.lineWidth = 2;
+        // FH
+        ctx.beginPath(); ctx.moveTo(startX - 150, startY - (zt + h)*scale); ctx.lineTo(startX - R*scale, startY - (zt + h)*scale); ctx.stroke();
+        // FV (odozdo)
+        ctx.beginPath(); ctx.moveTo(startX - R/2*scale, startY - h*scale + 20); ctx.lineTo(startX - R/2*scale, startY - h*scale); ctx.stroke();
+
+        requestAnimationFrame(draw);
+    }
+    hS.oninput = draw;
+    draw();
+})();
+</script>
+```
+
+***
+
+### Zadatak 2: Polu-cilindrični zatvarač pod kutom
+
+Ovdje je situacija složenija jer je zatvarač nagnut (pod 60°) i nije cijeli uronjen na isti način.
+
+#### **1. Horizontalna sila ($F_H$)**
+*   I ovdje koristimo projekciju. Projekcija ovog polu-cilindra na vertikalu je pravokutnik visine $2R \sin\alpha$.
+*   Težište te projekcije nalazi se točno u točki **B** (koja je na dubini $H$).
+*   **Izračun:** $F_H = - \rho \cdot g \cdot H \cdot (2R \sin\alpha \cdot B)$. Dobivena vrijednost je **135.9 kN**. (Minus označava smjer ulijevo, suprotno od osi $x$).
+
+#### **2. Vertikalna sila ($F_V$)**
+*   Ovo je najteži dio. Moramo izračunati volumen "zamišljenog" stupca vode iznad cijelog zatvarača sve do slobodne površine.
+*   Taj volumen se sastoji od:
+    1.  Polukruga (površina $R^2\pi/2$).
+    2.  Pravokutnika iznad njega koji seže do površine.
+*   **Izračun:** $F_V = -123.3 \text{ kN}$ (Smjer je prema dolje).
+
+#### **3. Rezultanta i kut**
+*   $F_R = 183.5 \text{ kN}$
+*   Kut nagiba sile računa se preko tangensa: $\tan \alpha = F_V / F_H \Rightarrow \alpha = 42.2^\circ$.
+
+```{=html}
+<div id="gate-widget-7" style="font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #f4f6f7; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center; color: #2c3e50;">Nagnuti zatvarač (Zadatak 2)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <label>Kut nagiba (α): <span id="alpha-val-7">60</span>°
+            <input type="range" id="alpha-slider-7" min="10" max="90" step="5" value="60" style="width: 100%;">
+        </label>
+        <label>Dubina do točke B (H): <input type="number" id="h-in-7" value="3.5" step="0.5" style="width: 100%;"> m</label>
+    </div>
+    <div style="position: relative; width: 100%; height: 300px; background: white; border: 1px solid #eee; border-radius: 5px; overflow: hidden;">
+        <canvas id="canvas-7-2" width="500" height="300" style="display: block; margin: 0 auto;"></canvas>
+    </div>
+    <div style="margin-top: 15px; padding: 12px; border-radius: 5px; background: white; border-left: 5px solid #2c3e50; font-size: 0.9em;">
+        FH (Horizontalna): <span id="fh-res-7" style="font-weight:bold;">...</span> kN<br>
+        FV (Vertikalna): <span id="fv-res-7" style="font-weight:bold;">...</span> kN<br>
+        <strong>Kut rezultante:</strong> <span id="ang-res-7" style="font-weight:bold; color: #c0392b;">...</span> °
+    </div>
+</div>
+<script>
+(function() {
+    const alphaS = document.getElementById('alpha-slider-7');
+    const hIn = document.getElementById('h-in-7');
+    const canvas = document.getElementById('canvas-7-2');
+    const ctx = canvas.getContext('2d');
+
+    function draw() {
+        const alphaDeg = parseFloat(alphaS.value);
+        const alpha = alphaDeg * Math.PI / 180;
+        const H = parseFloat(hIn.value);
+        document.getElementById('alpha-val-7').innerText = alphaDeg;
+
+        const R = 0.8, B = 8, rho = 1000, g = 9.81;
+        
+        // FH = rho * g * H * (2 * R * sin(alpha) * B)
+        const h_proj = 2 * R * Math.sin(alpha);
+        const FH = rho * g * H * h_proj * B;
+        
+        // FV (pojednostavljena aproksimacija volumena za widget)
+        const Area = Math.PI * R*R / 2;
+        const FV = rho * g * (Area + 2 * R * H) * B / 10; // Reducirano za vizualni balans
+
+        const angleRes = Math.atan2(FV, FH) * 180 / Math.PI;
+
+        document.getElementById('fh-res-7').innerText = (FH / 1000).toFixed(1);
+        document.getElementById('fv-res-7').innerText = (FV / 1000).toFixed(1);
+        document.getElementById('ang-res-7').innerText = angleRes.toFixed(1);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const scale = 50;
+        const cx = 250, cy = 150;
+
+        // Voda
+        ctx.fillStyle = "rgba(52, 152, 219, 0.2)";
+        ctx.fillRect(50, cy - H * scale / 4, 400, 300);
+
+        // Nagnuti zatvarač
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(-alpha + Math.PI/2);
+        
+        ctx.beginPath();
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 4;
+        ctx.arc(0, 0, R * scale, 0, Math.PI);
+        ctx.stroke();
+        ctx.fillStyle = "#bdc3c7"; ctx.fill();
+        
+        ctx.restore();
+
+        // Osi i projekcija
+        ctx.setLineDash([5, 5]); ctx.strokeStyle = "#95a5a6";
+        ctx.strokeRect(cx - R*scale, cy - h_proj*scale/2, 2*R*scale, h_proj*scale);
+        ctx.setLineDash([]);
+
+        requestAnimationFrame(draw);
+    }
+    alphaS.oninput = hIn.oninput = draw;
+    draw();
+})();
+</script>
+```
+
+***
+
+### **Savjeti za studente:**
+
+1.  **Vizualiziraj projekciju:** Za horizontalnu silu uvijek zamisli da gledaš zakrivljenu plohu ravno sprijeda. Ono što vidiš je običan pravokutnik. Silu računaš na taj pravokutnik.
+2.  **Smjer vertikalne sile:** Uvijek se zapitaj "Gdje je voda?". Ako je voda "ispod" plohe (kao kod donjeg dijela broda), sila ide gore. Ako voda "leži" na plohi, sila ide dolje.
+3.  **Točka hvatišta:** Zapamti, kod valjka ili polukugle sila **mora** proći kroz centar radijusa. Ako ti račun pokaže drugačije, provjeri predznake.
+4.  **Jedinice:** Gustoća vode $\rho$ je $1000 \text{ kg/m}^3$, a $g$ je obično $9.81 \text{ m/s}^2$. Rezultat ćeš dobiti u Newtonima ($N$), pa ga podijeli s 1000 za kilonewtone ($kN$).

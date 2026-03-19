@@ -1,15 +1,131 @@
-# Vježba 7
+# Vježba 7:  Izračun sila hidrostatskog tlaka na zakrivljene plohe
 
-
-# Mehanika fluida – Vježba 7
-
-Ova se vježba bavi izračunom sila hidrostatskog tlaka na zakrivljene plohe (cilindre).
+### Uvod: Simetrija i sile na cilindar
 
 Kada radimo sa zakrivljenim plohama, problem je što tlak djeluje okomito na površinu, a na zakrivljenoj plohi se taj smjer stalno mijenja. Zato koristimo trik: **silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($F_V$) komponentu.**
 
+Kod potpuno uronjenih valjkastih tijela, horizontalne sile se često poništavaju zbog simetrije. Ako tekućina pritišće s lijeve i desne strane na istoj dubini, te se komponente poništavaju.
+
+Ključno je razumjeti:
+1.  **Horizontalno:** Gledamo projekciju. Ako su dubine s obje strane iste, $F_{H,lijevo} = F_{H,desno}$ $\implies \sum F_H = 0$.
+2.  **Vertikalno:** Gornja polovica cilindra osjeća silu prema dolje, a donja polovica (koja je dublje) osjeća veću silu prema gore. Razlika tih sila je **Arhimedov uzgon**.
+
+```{=html}
+<!-- NOVI WIDGET: Simetrija i poništavanje sila na cilindru -->
+<div class="widget-container" id="widget-submerged-sym">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 800px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .canvas-wrapper { position: relative; width: 100%; height: 350px; background: #fdfdfd; border-radius: 8px; border: 1px solid #eee; overflow: hidden; }
+        .info-panel { background: #eaf2f8; padding: 12px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; border-left: 4px solid #3498db; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Subverzija: Zašto se horizontalne sile poništavaju?</h3></div>
+    
+    <div class="controls" style="margin-bottom: 20px;">
+        <div class="control-group">
+            <label>Dubina centra cilindra (zC): <span id="zc-val-7">2.5</span> m</label>
+            <input type="range" id="zc-slider-7" min="1.1" max="5.0" value="2.5" step="0.1" style="width: 100%;">
+        </div>
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas-sym-7" width="750" height="350"></canvas>
+    </div>
+
+    <div class="info-panel">
+        <strong>Uoči:</strong> Vektori tlaka s lijeve i desne strane su identični na svakoj dubini. Ukupna horizontalna rezultanta je nula. Vertikalno, donji vektori su duži (veći tlak), što rezultira silom prema gore (uzgon).
+    </div>
+
+    <script>
+    (function() {
+        const canvas = document.getElementById('canvas-sym-7');
+        const ctx = canvas.getContext('2d');
+        const zcSl = document.getElementById('zc-slider-7');
+
+        function draw() {
+            const zc = parseFloat(zcSl.value);
+            const R = 1.0; const scale = 50;
+            const waterY = 40;
+            const cx = canvas.width / 2;
+            const cy = waterY + zc * scale;
+
+            document.getElementById('zc-val-7').textContent = zc.toFixed(1);
+
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+
+            // Water
+            ctx.fillStyle = '#ebf5fb'; ctx.fillRect(0, waterY, canvas.width, canvas.height);
+            ctx.strokeStyle = '#3498db'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(canvas.width, waterY); ctx.stroke();
+
+            // Cilindar
+            ctx.beginPath(); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 3;
+            ctx.arc(cx, cy, R * scale, 0, Math.PI*2);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(189, 195, 199, 0.5)'; ctx.fill();
+
+            // Vektori tlaka (Radial)
+            for(let a = 0; a < 360; a += 20) {
+                const rad = a * Math.PI / 180;
+                const localZ = Math.sin(rad) * R;
+                const globalZ = zc + localZ;
+                const pLen = globalZ * 15; // length scale
+
+                const xStart = cx + Math.cos(rad) * R * scale;
+                const yStart = cy + Math.sin(rad) * R * scale;
+                const xEnd = xStart + Math.cos(rad) * pLen;
+                const yEnd = yStart + Math.sin(rad) * pLen;
+
+                ctx.strokeStyle = '#e67e22'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(xStart, yStart); ctx.lineTo(xEnd, yEnd); ctx.stroke();
+                
+                // Mala strelica na kraju
+                const angle = Math.atan2(yStart-yEnd, xStart-xEnd);
+                ctx.beginPath();
+                ctx.moveTo(xStart, yStart);
+                ctx.lineTo(xStart + Math.cos(angle-0.3)*8, yStart + Math.sin(angle-0.3)*8);
+                ctx.lineTo(xStart + Math.cos(angle+0.3)*8, yStart + Math.sin(angle+0.3)*8);
+                ctx.fillStyle = '#e67e22'; ctx.fill();
+            }
+
+            // Projekcije (Horizontalne komponente)
+            ctx.setLineDash([4, 4]); ctx.strokeStyle = '#7f8c8d';
+            ctx.strokeRect(cx - R*scale, cy - R*scale, 2*R*scale, 2*R*scale);
+            ctx.setLineDash([]);
+
+            // Resultant Buoyancy (FV)
+            const Buoyancy = 1000 * 9.81 * (Math.PI * R*R);
+            ctx.strokeStyle = '#27ae60'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(cx, cy + R*scale + 10); ctx.lineTo(cx, cy - R*scale - 50); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx, cy - R*scale - 50); ctx.lineTo(cx-10, cy - R*scale - 35); ctx.lineTo(cx+10, cy - R*scale - 35); ctx.fill();
+            ctx.fillStyle = '#27ae60'; ctx.font = 'bold 12px Arial';
+            ctx.fillText(`UZGON FU = ${(Buoyancy/1000).toFixed(1)} kN`, cx + 15, cy - R*scale - 40);
+
+            requestAnimationFrame(draw);
+        }
+        zcSl.oninput = draw;
+        draw();
+    })();
+    </script>
+</div>
 
 ### Zadatak 1: Cilindar uronjen u fluid
 
+**Tekst zadatka:** 
+1. Potrebno je odrediti horizontalnu i vertikalnu komponentu rezultirajuće sile hidrostatskog tlaka na cilindar promjera $D = 2 \text{ m}$ i duljine $b = 1 \text{ m}$, uronjenog u tekućinu na način prikazan na slici. Odrediti hvatište dotične sile.
+
+**Zadano:**
+* $D = 2 \, [m], b = 1 \, [m], h = 2 \, [m], \rho = 1000 \, [kg/m^3]$
+
+**Odrediti:**
+* horizontalnu i vertikalnu komponentu sile $F_H$ i $F_V$
+* rezultantu $F_R$ i hvatište sile
+
+**Rješenje:**
 #### **1. Fizikalna logika**
 Zamisli da ovaj cilindar želiš "stisnuti" u fluid. Fluid mu se opire sa svih strana.
 *   **Horizontalno:** Fluid pritišće i s lijeve i s desne strane. Ako su dubine iste, te se sile poništavaju.
@@ -109,12 +225,24 @@ Spajamo komponente Pitagorinim poučkom: $F_R = \sqrt{F_H^2 + F_V^2}$.
     draw();
 })();
 </script>
+
 ```
 
 ***
 
 ### Zadatak 2: Polu-cilindrični zatvarač pod kutom
 
+**Tekst zadatka:** 
+2. Polu-cilindrični zatvarač polumjera $R = 0,8 \text{ m}$ i duljine $B = 8 \text{ m}$ nagnut je pod kutom $\alpha = 60°$, prikazano na slici. Potrebno je odrediti horizontalnu i vertikalnu komponentu rezultirajuće sile tlaka na zatvarač, kao i njezinu rezultantu i kut nagiba. Dubina do točke B iznosi $H = 3,5 \text{ m}$.
+
+**Zadano:**
+* $R = 0,8 \, [m], B = 8 \, [m], \alpha = 60°, H = 3,5 \, [m], \rho = 1000 \, [kg/m^3]$
+
+**Odrediti:**
+* horizontalnu i vertikalnu komponentu sile $F_H$ i $F_V$
+* rezultantu $F_R$ i kut nagiba sile
+
+**Rješenje:**
 Ovdje je situacija složenija jer je zatvarač nagnut (pod 60°) i nije cijeli uronjen na isti način.
 
 #### **1. Horizontalna sila ($F_H$)**
@@ -212,6 +340,7 @@ Ovdje je situacija složenija jer je zatvarač nagnut (pod 60°) i nije cijeli u
     draw();
 })();
 </script>
+
 ```
 
 ***

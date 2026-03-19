@@ -1,11 +1,209 @@
 # Vježba 5: Hidrostatska sila na ravne plohe
 
-## Mehanika fluida – Vježba 5
+### Osnove: Hidrostatska sila i Centar tlaka
+
+Kada je ravna ploha uronjena u tekućinu, na nju djeluje ukupna sila $F$ koja je produkt tlaka u težištu plohe ($p_T$) i njezine površine ($A$):
+$$F = p_T \cdot A = \rho g z_T \cdot A$$
+
+Međutim, zbog linearnog porasta tlaka s dubinom, hvatište te sile (centar tlaka $z_F$) uvijek se nalazi **ispod** težišta plohe:
+$$z_F = z_T + \frac{I_{x0}}{z_T \cdot A}$$
+
+*   $z_T$ – dubina težišta
+*   $I_{x0}$ – vlastiti moment tromosti plohe za horizontalnu os kroz težište
+*   $A$ – površina plohe
+
+```{=html}
+<!-- UNIVERZALNI WIDGET: Sila na geometrijske plohe -->
+<div class="widget-container" id="widget-geo-force">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 900px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .layout { display: grid; grid-template-columns: 250px 1fr; gap: 20px; }
+        .controls { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .shape-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .shape-btn { padding: 8px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer; text-align: left; transition: 0.2s; }
+        .shape-btn.active { background: #3498db; color: white; border-color: #2980b9; }
+        .canvas-box { position: relative; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .m-card { background: #2c3e50; color: white; padding: 10px; border-radius: 6px; text-align: center; }
+        .m-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; }
+        .m-value { font-family: monospace; font-size: 1.1rem; font-weight: bold; display: block; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Vizualizator centra tlaka na potopljenim plohama</h3></div>
+    
+    <div class="layout">
+        <div class="controls">
+            <div class="shape-selector">
+                <label style="font-weight: bold; font-size: 0.85rem;">Odaberi oblik plohe:</label>
+                <button class="shape-btn active" data-shape="rect">Pravokutnik (b × h)</button>
+                <button class="shape-btn" data-shape="tri">Trokut (b × h)</button>
+                <button class="shape-btn" data-shape="circle">Krug (D)</button>
+                <button class="shape-btn" data-shape="semi">Polukrug (R)</button>
+            </div>
+            <div class="control-group">
+                <label>Dubina vrha (a): <span id="a-val">1.0</span> m</label>
+                <input type="range" id="a-slider" min="0" max="5" value="1.0" step="0.1">
+            </div>
+            <div class="control-group">
+                <label>Visina plohe (h): <span id="h-val">2.0</span> m</label>
+                <input type="range" id="h-slider" min="0.5" max="4" value="2.0" step="0.1">
+            </div>
+        </div>
+
+        <div class="canvas-box">
+            <canvas id="geo-canvas" width="600" height="400"></canvas>
+            <div class="metrics-grid">
+                <div class="m-card"><span class="m-label">Sila F [kN]</span><span class="m-value" id="f-out">0.0</span></div>
+                <div class="m-card"><span class="m-label">Dubina težišta z_T [m]</span><span class="m-value" id="zt-out">0.0</span></div>
+                <div class="m-card" style="background: #e67e22;"><span class="m-label">Centar tlaka z_F [m]</span><span class="m-value" id="zf-out">0.0</span></div>
+                <div class="m-card" style="background: #27ae60;"><span class="m-label">Ekscentricitet e [cm]</span><span class="m-value" id="e-out">0.0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const canvas = document.getElementById('geo-canvas');
+        const ctx = canvas.getContext('2d');
+        const aSl = document.getElementById('a-slider');
+        const hSl = document.getElementById('h-slider');
+        const btns = document.querySelectorAll('.shape-btn');
+        
+        let currentShape = 'rect';
+
+        btns.forEach(b => b.addEventListener('click', () => {
+            btns.forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            currentShape = b.dataset.shape;
+            update();
+        }));
+
+        function update() {
+            const a = parseFloat(aSl.value);
+            const h = parseFloat(hSl.value);
+            const b = 2.0; // Fixed width for visualization
+            
+            let zT, Area, I0, zF;
+
+            switch(currentShape) {
+                case 'rect':
+                    Area = b * h;
+                    zT = a + h/2;
+                    I0 = (b * Math.pow(h, 3)) / 12;
+                    break;
+                case 'tri':
+                    Area = (b * h) / 2;
+                    zT = a + (2/3)*h;
+                    I0 = (b * Math.pow(h, 3)) / 36;
+                    break;
+                case 'circle':
+                    Area = Math.PI * Math.pow(h/2, 2);
+                    zT = a + h/2;
+                    I0 = (Math.PI * Math.pow(h, 4)) / 64;
+                    break;
+                case 'semi':
+                    const R = h;
+                    Area = (Math.PI * R*R) / 2;
+                    const dTez = (4*R)/(3*Math.PI);
+                    zT = a + dTez;
+                    I0 = (0.109757 * Math.pow(R, 4)); // I0 = (pi/8 - 8/9pi)R^4
+                    break;
+            }
+
+            zF = zT + I0 / (zT * Area);
+            const Force = 9.81 * zT * Area;
+
+            document.getElementById('a-val').textContent = a.toFixed(1);
+            document.getElementById('h-val').textContent = h.toFixed(1);
+            document.getElementById('f-out').textContent = Force.toFixed(1);
+            document.getElementById('zt-out').textContent = zT.toFixed(2);
+            document.getElementById('zf-out').textContent = zF.toFixed(2);
+            document.getElementById('e-out').textContent = ((zF - zT)*100).toFixed(1);
+
+            draw(a, h, zT, zF);
+        }
+
+        function draw(a, h, zT, zF) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const scale = 50;
+            const left = 150;
+            const waterY = 40;
+
+            // Water
+            ctx.fillStyle = '#ebf5fb';
+            ctx.fillRect(0, waterY, canvas.width, canvas.height);
+            ctx.strokeStyle = '#3498db'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(canvas.width, waterY); ctx.stroke();
+
+            const yTop = waterY + a * scale;
+            const yBot = yTop + h * scale;
+            const cx = left + 100;
+
+            // Pressure Distribution (Klin)
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.2)';
+            ctx.beginPath();
+            ctx.moveTo(left, waterY);
+            ctx.lineTo(left + (a+h)*scale*0.5, yBot);
+            ctx.lineTo(left, yBot);
+            ctx.fill();
+
+            // Shape Visualization
+            ctx.fillStyle = '#95a5a6';
+            ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            if(currentShape === 'rect') ctx.rect(cx - 50, yTop, 100, h*scale);
+            else if(currentShape === 'tri') {
+                ctx.moveTo(cx, yTop); ctx.lineTo(cx+50, yBot); ctx.lineTo(cx-50, yBot); ctx.closePath();
+            }
+            else if(currentShape === 'circle') ctx.arc(cx, yTop + (h/2)*scale, (h/2)*scale, 0, Math.PI*2);
+            else if(currentShape === 'semi') ctx.arc(cx, yTop, h*scale, 0, Math.PI);
+            ctx.fill(); ctx.stroke();
+
+            // Markers
+            // zT (Center of Gravity)
+            const pyT = waterY + zT * scale;
+            ctx.fillStyle = '#27ae60';
+            ctx.beginPath(); ctx.arc(cx, pyT, 4, 0, Math.PI*2); ctx.fill();
+            ctx.fillText("T (Težište)", cx + 10, pyT + 4);
+
+            // zF (Center of Pressure)
+            const pyF = waterY + zF * scale;
+            ctx.fillStyle = '#e67e22';
+            ctx.beginPath(); ctx.arc(cx, pyF, 6, 0, Math.PI*2); ctx.fill();
+            ctx.fillText("F (Hvatište sile)", cx + 10, pyF + 4);
+
+            // Force Arrow
+            ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(cx - 80, pyF); ctx.lineTo(cx - 10, pyF);
+            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx-10, pyF); ctx.lineTo(cx-20, pyF-5); ctx.lineTo(cx-20, pyF+5); ctx.fill();
+        }
+
+        aSl.oninput = update;
+        hSl.oninput = update;
+        update();
+    })();
+    </script>
+</div>
+
+```
+
+***
 
 ### Zadatak 37: Vertikalni trokut s vrhom na površini
 
 **Tekst zadatka:** 
-Trokut visine $h$ i baze $b$ nalazi se u vertikalnom položaju uronjen u tekućinu tako da mu vrh dotiče slobodnu površinu. Odrediti centar tlaka $z_{Fh}$.
+37. Trokut visine h, baze b, nalazi se u vertikalnom položaju uronjen u tekućinu, pri čemu gornji kut trokuta dotiče površinu tekućine u jednoj točki, prikazano na slici. Potrebno je odrediti izraz za dubinu od površine do središta djelovanja tlačne sile na trokut Ch.
+
+**Zadano:**
+* $h, b, \rho$
+
+**Odrediti:**
+* centar tlaka $z_{Fh}$
 
 **Rješenje:**
 1. $z_T = \frac{2}{3} h$
@@ -17,7 +215,13 @@ Trokut visine $h$ i baze $b$ nalazi se u vertikalnom položaju uronjen u tekući
 ### Zadatak 38: Vertikalni trokut distanciran od površine
 
 **Tekst zadatka:** 
-Trokut visine $h$ i baze $b$ potopljen je tako da mu je vrh na dubini $a$. Odrediti centar tlaka.
+38. Trokut visine h, baze b, vertikalno je potopljen u tekućini, na način prikazan na slici, pri čemu udaljenost gornjeg kuta od površine iznosi a. Potrebno je odrediti izraz za dubinu od površine do središta djelovanja tlačne sile na trokut.
+
+**Zadano:**
+* $h, b, a, \rho$
+
+**Odrediti:**
+* centar tlaka $z_{Fh}$
 
 **Rješenje:**
 1. $z_T = a + \frac{2}{3} h$
@@ -27,6 +231,15 @@ Trokut visine $h$ i baze $b$ potopljen je tako da mu je vrh na dubini $a$. Odred
 
 ### Zadatak 39: Krug i Elipsa dotiču površinu
 
+**Tekst zadatka:** 
+39. Krug promjera d vertikalno je uronjen u tekućinu, pri čemu dotiče površinu tekućine u jednoj točki. Potrebno je odrediti izraz za dubinu od površine do središta djelovanja sile tlaka na krug.
+
+**Zadano:**
+* $d, \rho$
+
+**Odrediti:**
+* centar tlaka $z_{Fh}$
+
 **Rješenje:**
 * **Krug:** $z_T = R = d/2 \implies z_{Fh} = z_T + \frac{\pi R^4 / 4}{R \cdot \pi R^2} = R + \frac{R}{4} = \mathbf{\frac{5}{8} d}$.
 * **Elipsa:** $z_{Fh} = \mathbf{a + \frac{b^2}{4a}}$ (gdje je $a$ vertikalna poluosi).
@@ -35,6 +248,15 @@ Trokut visine $h$ i baze $b$ potopljen je tako da mu je vrh na dubini $a$. Odred
 
 ### Zadatak 40: Polukrug dotiče površinu
 
+**Tekst zadatka:** 
+40. Polukrug promjera d, uronjen je u tekućinu, pri čemu je tetiva polukruga položena u pravcu površine tekućine. Potrebno je odrediti izraz za dubinu do središta djelovanja tlačne sile na polukrug.
+
+**Zadano:**
+* $d, \rho$
+
+**Odrediti:**
+* centar tlaka $z_{Fh}$
+
 **Rješenje:**
 1. Težište polukruga: $z_T = \frac{4R}{3\pi}$.
 2. Centar tlaka: $z_{Fh} = z_T + \frac{I_{x0}}{z_T A} \approx \mathbf{0,589 \cdot r}$.
@@ -42,6 +264,15 @@ Trokut visine $h$ i baze $b$ potopljen je tako da mu je vrh na dubini $a$. Odred
 ***
 
 ### Zadatak 41: Pravokutna vertikalna zaklopka
+
+**Tekst zadatka:** 
+41. Pravokutna zaklopka visine 3 m, širine 6 m ovješena je gornjom stranicom na mjestu A, pri čemu je suprotna stranica naslonjena na izdanak u mjestu B, prikazano na slici. Potrebno je odrediti hidrostatsku silu na zaklopku ukoliko je spremnik napunjen vodom do visine 5 m od dna spremnika, kao i udaljenost pravca djelovanja sile od slobodne površine.
+
+**Zadano:**
+* $h_1 = 3 \, [m], b = 6 \, [m], h_2 = 5 \, [m], \rho = 1000 \, [kg/m^3]$
+
+**Odrediti:**
+* silu $F_h$ i centar tlaka $z_{Fh}$
 
 **Rješenje:**
 1. $z_T = h_2 - h_1/2 = 5 - 1,5 = 3,5 \text{ m}$.
@@ -126,11 +357,21 @@ Trokut visine $h$ i baze $b$ potopljen je tako da mu je vrh na dubini $a$. Odred
     update();
 })();
 </script>
+
 ```
 
 ***
 
 ### Zadatak 42: Nagnuta zaklopka (Ravnoteža momenata)
+
+**Tekst zadatka:** 
+42. Pravokutna zaklopka mase 200 kg, široka (u smjeru slike) 5 m, prikazana na slici, ovješena je u jednom stranicom na mjestu B, pri čemu druga strana dodiruje dno spremnika na mjestu A. Kut između horizontalne osi i zaklopke iznosi 45°. Zaklopka se otvara na način da se na nju djeluje koncentriranom silom F na mjestu težišta ploče, prikazano na slici. Potrebno je odrediti minimalnu silu F koja će omogućiti otvaranje zaklopke. Pretpostavka: s obije strane zaklopke djeluje atmosferski tlak te se u proračunu može ispustiti utjecaj okolnog tlaka. Trenje u zglobu možemo zanemariti.
+
+**Zadano:**
+* $m = 200 \, [kg], b = 5 \, [m], \alpha = 45°, h_1 = 3 \, [m], h_2 = 0,5 \, [m], \rho = 1000 \, [kg/m^3]$
+
+**Odrediti:**
+* minimalnu silu $F_{min}$
 
 **Rješenje:**
 1. $z_T = h_2 + \frac{h_1}{2} = 2 \text{ m}, A = a \cdot b = 4,243 \cdot 5 = 21,215 \text{ m}^2$.
@@ -143,7 +384,13 @@ Trokut visine $h$ i baze $b$ potopljen je tako da mu je vrh na dubini $a$. Odred
 ### Zadatak 43: Brana s nagnutom stjenkom
 
 **Tekst zadatka:** 
-Brana duljine $20 \text{ m}$ zadržava $7 \text{ m}$ vode. Nagib je $60^\circ$. Odrediti silu i centar tlaka.
+43. Brana duljine 20m zadržava 7m visoku razinu vode na način prikazan na slici. Potrebno je odrediti rezultirajuću silu tlaka na branu, kao i visinu od površine do središta djelovanja sile tlaka na branu.
+
+**Zadano:**
+* $h_v = 7 \, [m], \alpha = 60°, L = 20 \, [m], \rho = 998 \, [kg/m^3]$
+
+**Odrediti:**
+* silu $F_p$ i centar tlaka $z_{Fh}$
 
 **Rješenje:**
 1. $A = L \cdot \frac{h_v}{\sin 60^\circ} = 161,66 \text{ m}^2$.
@@ -154,6 +401,15 @@ Brana duljine $20 \text{ m}$ zadržava $7 \text{ m}$ vode. Nagib je $60^\circ$. 
 
 ### Zadatak 44: Ukupna sila (Hidrostatska + Atmosferska)
 
+**Tekst zadatka:** 
+44. Voda se nalazi u spremniku dubokom 25 m, duljine 150m čije su stjenke presjeka jednako straničnog trokuta, prikazano na slici. Potrebno je odrediti ukupnu silu (hidrostatsku + atmosfersku) koja koja djeluje na unutarnje stjenke spremnika, kao i pravac djelovanja sile, te horizontalnu komponentu sile. Atmosferski tlak iznosi 100 kPa.
+
+**Zadano:**
+* $h_v = 25 \, [m], b = 150 \, [m], p_{atm} = 100000 \, [Pa], \rho = 1000 \, [kg/m^3], \alpha = 60°$
+
+**Odrediti:**
+* silu $F_h, F_r, F_R$
+
 **Rješenje:**
 1. Nadomjesna visina: $\Delta h = \frac{p_{atm}}{\rho g} = 10,19 \text{ m}$.
 2. Ukupna sila: $F_R = (p_{atm} + \rho g z_T) A = \mathbf{964 \text{ MN}}$.
@@ -163,6 +419,13 @@ Brana duljine $20 \text{ m}$ zadržava $7 \text{ m}$ vode. Nagib je $60^\circ$. 
 
 ### Zadatak 45-48: Integracijske metode i asimetrične plohe
 
+**Tekst zadatka:** 
+Za spremnik bojila prikazan na slici potrebno je izračunati ukupnu rezultirajuću silu tlaka na zaklopku u obliku pravokutnog trokuta, kao i udaljenost djelovanja pravca sile u smjerovima $z_i$ i $x_i$ od težišta.
+
+**Zadano (Z48):**
+* $h_1 = 12 \, [m], h_2 = 6 \, [m], h_z = 24 \, [m], b_z = 12 \, [m], \alpha = 30°, \rho = 820 \, [kg/m^3]$
+
+**Rješenje:**
 *   **Pravokutnik (45):** $z_{Fh} = z_T + \frac{h^2}{12 z_T} = 3,6 + \frac{1,2^2}{12 \cdot 3,6} = \mathbf{3,633 \text{ m}}$.
 *   **Trokut (46):** $z_{Fh} = 7 + \frac{1,5}{7 \cdot 3} = \mathbf{7,071 \text{ m}}$.
 *   **Nagnuti pravokutnik (47):** $z_{Fh} = \mathbf{9,037 \text{ m}}$.

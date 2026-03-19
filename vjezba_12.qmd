@@ -1,6 +1,146 @@
 # Vježba 12: Količina gibanja - Sateliti, Turbine i Propulzija
 
-## Mehanika fluida – Vježba 12
+### Osnove: Dinamika lopatica (Peltonova turbina)
+
+Kod Peltonovih turbina, mlaz vode udara u žlice koje se kreću brzinom $w$. Snaga koju turbina predaje ovisi o relativnoj brzini mlaza prema žlici:
+$$P = \dot{m} (v - w) w (1 - \cos\beta)$$
+
+Gdje je:
+*   $v$ – brzina mlaza
+*   $w$ – obodna brzina žlice ($r \cdot \omega$)
+*   $\beta$ – kut zakretanja mlaza (obično oko 165°)
+
+**Zlatno pravilo:** Maksimalna snaga se postiže kada je brzina žlice točno **polovica** brzine mlaza ($w = v/2$).
+
+```{=html}
+<!-- NOVI WIDGET: Optimizacija Peltonove turbine -->
+<div class="widget-container" id="widget-pelton-opt">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+        .chart-box { background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px; position: relative; }
+        .viz-box { background: #2c3e50; border-radius: 8px; height: 300px; position: relative; overflow: hidden; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Optimizacija: Brzina žlice vs. Snaga</h3></div>
+    
+    <div class="controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr; gap: 10px;">
+        <label>Brzina mlaza (v): <span id="v-val-pelton">50</span> m/s</label>
+        <input type="range" id="v-slider-pelton" min="20" max="80" value="50" step="1" style="width: 100%;">
+        <label>Brzina turbine (w): <span id="w-val-pelton">10</span> m/s</label>
+        <input type="range" id="w-slider-pelton" min="0" max="80" value="10" step="1" style="width: 100%;">
+    </div>
+
+    <div class="layout">
+        <div class="viz-box">
+            <canvas id="canvas-pelton-viz" width="350" height="300"></canvas>
+            <div style="position:absolute; bottom:10px; width:100%; text-align:center; color:white; font-size:0.8rem;">
+                Relativna brzina (v-w): <span id="vrel-out" style="font-weight:bold; color:#f1c40f;">0</span> m/s
+            </div>
+        </div>
+        <div class="chart-box">
+            <div style="font-size: 0.7rem; font-weight: bold; margin-bottom: 5px;">SNAGA P(w) - Radna točka</div>
+            <canvas id="canvas-pelton-chart" width="400" height="250"></canvas>
+            <div style="text-align: center; margin-top: 10px; font-weight: bold;">P = <span id="p-out-pelton" style="color: #c0392b;">0</span> MW</div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const cViz = document.getElementById('canvas-pelton-viz');
+        const cChart = document.getElementById('canvas-pelton-chart');
+        const ctxV = cViz.getContext('2d');
+        const ctxC = cChart.getContext('2d');
+        
+        const vSl = document.getElementById('v-slider-pelton');
+        const wSl = document.getElementById('w-slider-pelton');
+
+        function update() {
+            const v = parseFloat(vSl.value);
+            const w = parseFloat(wSl.value);
+            const beta = 165 * Math.PI / 180;
+            const m = 150; // kg/s
+
+            const P = m * (v - w) * w * (1 - Math.cos(beta)) / 1e6; // MW
+            const vRel = Math.max(0, v - w);
+
+            document.getElementById('v-val-pelton').textContent = v;
+            document.getElementById('w-val-pelton').textContent = w;
+            document.getElementById('p-out-pelton').textContent = P.toFixed(2);
+            document.getElementById('vrel-out').textContent = vRel.toFixed(1);
+
+            drawViz(v, w, vRel);
+            drawChart(v, w, m, beta);
+        }
+
+        function drawViz(v, w, vRel) {
+            ctxV.clearRect(0,0,350,300);
+            const scale = 3;
+            const cx = 100, cy = 150;
+
+            // Lopatice (u pokretu)
+            const offset = (Date.now() * 0.001 * w * 10) % 100;
+            ctxV.strokeStyle = '#fff'; ctxV.lineWidth = 4;
+            ctxV.beginPath(); ctxV.arc(cx + w*scale + 20, cy, 30, -Math.PI/2, Math.PI/2); ctxV.stroke();
+
+            // Mlaz
+            ctxV.fillStyle = '#3498db';
+            ctxV.fillRect(0, cy-5, cx + w*scale + 20, 10);
+            
+            // Povratni mlaz (ovisi o vRel)
+            ctxV.fillStyle = 'rgba(52, 152, 219, 0.5)';
+            if(vRel > 1) {
+                ctxV.fillRect(cx + w*scale - vRel*scale, cy - 35, vRel*scale + 20, 8);
+                ctxV.fillRect(cx + w*scale - vRel*scale, cy + 27, vRel*scale + 20, 8);
+            }
+        }
+
+        function drawChart(v, wCurrent, m, beta) {
+            ctxC.clearRect(0,0,400,250);
+            const padding = 30;
+            const wMax = v;
+            const pMax = m * (v/2) * (v/2) * (1 - Math.cos(beta)) / 1e6;
+
+            // Axes
+            ctxC.strokeStyle = '#ccc'; ctxC.lineWidth = 1;
+            ctxC.beginPath(); ctxC.moveTo(padding, 220); ctxC.lineTo(380, 220); ctxC.stroke();
+            ctxC.beginPath(); ctxC.moveTo(padding, 220); ctxC.lineTo(padding, 20); ctxC.stroke();
+
+            // Parabola P(w)
+            ctxC.beginPath(); ctxC.strokeStyle = '#3498db'; ctxC.lineWidth = 2;
+            for(let w=0; w<=v; w+=1) {
+                const P = m * (v - w) * w * (1 - Math.cos(beta)) / 1e6;
+                const px = padding + (w / v) * (380 - padding);
+                const py = 220 - (P / pMax) * 180;
+                if(w===0) ctxC.moveTo(px, py); else ctxC.lineTo(px, py);
+            }
+            ctxC.stroke();
+
+            // Current Point
+            const curP = m * (v - wCurrent) * wCurrent * (1 - Math.cos(beta)) / 1e6;
+            const cx = padding + (wCurrent / v) * (380 - padding);
+            const cy = 220 - (curP / pMax) * 180;
+            ctxC.fillStyle = '#c0392b'; ctxC.beginPath(); ctxC.arc(cx, cy, 5, 0, Math.PI*2); ctxC.fill();
+            
+            // Peak Marker
+            ctxC.setLineDash([2,2]); ctxC.strokeStyle = '#27ae60';
+            ctxC.beginPath(); ctxC.moveTo(padding + 0.5*(380-padding), 20); ctxC.lineTo(padding + 0.5*(380-padding), 220); ctxC.stroke();
+            ctxC.setLineDash([]);
+        }
+
+        vSl.oninput = wSl.oninput = update;
+        setInterval(update, 50); // For animation
+    })();
+    </script>
+</div>
+
+```
+
+***
 
 ### Zadatak 104: Potisak satelita
 
@@ -159,4 +299,5 @@ Dokazati izraz za snagu Peltonove turbine: $P = \rho \dot{V} (v-w) w (1 - \cos\b
     frame();
 })();
 </script>
+
 ```

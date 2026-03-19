@@ -1,8 +1,148 @@
 # Vježba 13: Strujanje realnih fluida u cjevovodima
 
-## Mehanika fluida – Vježba 13
+### Osnove: Reynoldsov broj i režimi strujanja
+
+Strujanje u cijevi može biti **laminarno** (uredno, slojevito) ili **turbulentno** (kaotično, s vrtlozima). Odluka o režimu ovisi o **Reynoldsovom broju**:
+$$Re = \frac{\rho v d}{\mu} = \frac{v d}{\nu}$$
+
+*   $Re < 2320$ – Laminarno strujanje
+*   $2320 < Re < 4000$ – Prijelazno područje
+*   $Re > 4000$ – Turbulentno strujanje
+
+**Profil brzine:** U laminarnom strujanju profil je **parabola**, dok je u turbulentnom strujanju profil **plosnat** zbog intenzivnog miješanja čestica.
+
+```{=html}
+<!-- NOVI WIDGET: Režimi strujanja i profili brzine -->
+<div class="widget-container" id="widget-re-regimes">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .canvas-wrapper { position: relative; background: #2c3e50; border-radius: 8px; overflow: hidden; height: 300px; }
+        .controls { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Vizualizacija režima strujanja i profila brzine</h3></div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Brzina strujanja (v): <span id="v-val-re">0.2</span> m/s</label>
+            <input type="range" id="v-slider-re" min="0.01" max="2.0" value="0.2" step="0.01" style="width: 100%;">
+        </div>
+        <div class="control-group">
+            <label>Gustoća fluida (ρ): <span id="rho-val-re">1000</span> kg/m³</label>
+            <input type="range" id="rho-slider-re" min="500" max="1500" value="1000" step="50" style="width: 100%;">
+        </div>
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas-re-flow" width="800" height="300"></canvas>
+    </div>
+
+    <div class="metrics" style="display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7;">REYNOLDSOV BROJ Re</span><span id="re-out-val" style="font-family:monospace; font-weight:bold; font-size: 1.2rem;">0</span></div>
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7;">REŽIM STRUJANJA</span><span id="regime-out-val" style="font-family:monospace; font-weight:bold; font-size: 1.2rem; color: #3498db;">LAMINARNO</span></div>
+    </div>
+
+    <script>
+    (function() {
+        const canvas = document.getElementById('canvas-re-flow');
+        const ctx = canvas.getContext('2d');
+        const vSl = document.getElementById('v-slider-re');
+        const rSl = document.getElementById('rho-slider-re');
+
+        let particles = [];
+        for(let i=0; i<120; i++) {
+            particles.push({ x: Math.random() * canvas.width, y_rel: Math.random(), ox: Math.random()*2*Math.PI });
+        }
+
+        function draw() {
+            const v = parseFloat(vSl.value);
+            const rho = parseFloat(rSl.value);
+            const d = 0.05; const mu = 0.001;
+            const Re = (rho * v * d) / mu;
+
+            document.getElementById('rho-val-re').textContent = rho;
+            document.getElementById('v-val-re').textContent = v.toFixed(2);
+            document.getElementById('re-out-val').textContent = Math.round(Re);
+
+            let regime = "LAMINARNO";
+            let color = "#27ae60";
+            if(Re > 2320 && Re < 4000) { regime = "PRIJELAZNO"; color = "#f1c40f"; }
+            if(Re >= 4000) { regime = "TURBULENTNO"; color = "#e74c3c"; }
+            document.getElementById('regime-out-val').textContent = regime;
+            document.getElementById('regime-out-val').style.color = color;
+
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            const d_px = 180; const cy = 150;
+
+            // Particles
+            particles.forEach(p => {
+                const y_local = (p.y_rel - 0.5) * d_px;
+                const r_ratio = Math.abs(y_local) / (d_px/2);
+                
+                let v_local;
+                if(Re < 2320) {
+                    // Laminar Parabola: v = v_max * (1 - r^2/R^2)
+                    v_local = 2 * v * (1 - r_ratio * r_ratio);
+                } else {
+                    // Turbulent Flat Profile: v = v_max * (1 - r/R)^(1/7)
+                    v_local = 1.2 * v * Math.pow(1 - r_ratio, 1/7);
+                }
+
+                p.x += v_local * 20; // animation
+                if(p.x > canvas.width) p.x = 0;
+
+                let y_world = cy + y_local;
+                if(Re > 2320) {
+                    const jitter = (Re - 2320) / 1000 * Math.sin(p.x*0.1 + Date.now()*0.01 + p.ox);
+                    y_world += jitter;
+                }
+
+                ctx.fillStyle = `rgba(52, 152, 219, ${0.4 + (v_local/(2*v))*0.6})`;
+                ctx.beginPath(); ctx.arc(p.x, y_world, 2.5, 0, Math.PI*2); ctx.fill();
+            });
+
+            // Velocity Profile (Overlay)
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.setLineDash([2,2]);
+            ctx.beginPath();
+            for(let y = -d_px/2; y <= d_px/2; y+=5) {
+                const r_ratio = Math.abs(y) / (d_px/2);
+                const v_l = Re < 2320 ? 2 * v * (1 - r_ratio * r_ratio) : 1.2 * v * Math.pow(1 - r_ratio, 1/7);
+                ctx.lineTo(v_l * 100, cy + y);
+            }
+            ctx.stroke(); ctx.setLineDash([]);
+
+            // Pipe Walls
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 5;
+            ctx.beginPath(); ctx.moveTo(0, cy - d_px/2); ctx.lineTo(800, cy - d_px/2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, cy + d_px/2); ctx.lineTo(800, cy + d_px/2); ctx.stroke();
+
+            requestAnimationFrame(draw);
+        }
+        vSl.oninput = rSl.oninput = draw;
+        draw();
+    })();
+    </script>
+</div>
+
+```
+
+***
 
 ### Zadatak 120: Laminarno strujanje u tankoj cijevi
+
+**Tekst zadatka:** 
+120. Voda temperature 10 °C struji stacionarno u cijevi dugoj 15 m, promjera 2 mm, pri čemu srednja brzina iznosi 1,2 m/s . Potrebno je odrediti ukupan pad tlaka i gubitke specifične mehaničke energije.
+
+**Zadano:**
+* $t = 10 [°C], L = 15[m], d = 0,002[m], v_{sr} = 1,2 [m/s]$
+
+**Odrediti:**
+Pad tlaka $\Delta p = ?$
+Gubitak specifične mehaničke energije: $e_w = \frac{\Delta p^*}{\rho} = ?$
 
 **Rješenje:**
 1. $Re = \frac{\rho v d}{\mu} = \mathbf{1836}$ (Laminarno).
@@ -14,6 +154,16 @@
 
 ### Zadatak 121: Turbulentno strujanje zraka
 
+**Tekst zadatka:** 
+121. Zrak struji 7 m dugim pravokutnim ventilacijski kanalom unutarnjih dimenzija 150mm x 200mm, ventilacijski kanal je izrađen od pocinčanog lima, pri čemu tlak zraka unutar voda iznosi 101325 Pa, temperatura 35°C, a srednja brzina strujanja zraka iznosi 7 m/s . Potrebno je odrediti promjenu tlaka (ventilatora), hrapavost iznosi $k = 4,5 \cdot 10^{-5} \, m$.
+
+**Zadano:**
+* $L = 7[m], b = 0,2[m], h = 0,15[m], p_{atm} = 101325 [Pa], t = 35[°C]$
+* $v_{sr} = 7 [m/s], k = 4,5 \cdot 10^{-5} [m]$
+
+**Odrediti:** 
+Promjenu tlaka $\Delta p = ?$
+
 **Rješenje:**
 1. $d_{ekv} = \frac{4A}{O} = \mathbf{0,1714 \, \text{m}}$.
 2. $Re = \mathbf{72507}$ (Turbulentno).
@@ -24,6 +174,16 @@
 
 ### Zadatak 122: Difuzor s lokalnim gubicima
 
+**Tekst zadatka:** 
+122. Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke dijela koji se širi otklonjene su od horizontalne osi pod kutom od 30°. Srednja brzina i tlak vode prije difuzora iznose 7 m/s i 150 kPa. Potrebno je odrediti pad visine dobave u difuzoru i tlak u cijevi većeg promjera.
+
+**Zadano:**
+* $d_1 = 0,06[m], d_2 = 0,09[m], \alpha = 30°, v_1 = 7 [m/s], p_1 = 150000[Pa]$
+
+**Odrediti:** 
+Pad visine dobave u difuzoru $h_{wm} = ?$
+Tlak $p_2 = ?$
+
 **Rješenje:**
 1. $v_2 = 3,11 \, \text{m/s}$.
 2. $h_{wm} = \zeta \frac{v_1^2}{2g} = \mathbf{0,175 \, \text{m}}$.
@@ -32,6 +192,15 @@
 ***
 
 ### Zadatak 123: Protok između dva spremnika
+
+**Tekst zadatka:** 
+123. Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50 mm izrađene od sivog lijeva, na način prikazan na slici. Potrebno je odrediti geodetsku visinu z1 za koju će volumenski protok iznositi 6 dm3/s . Hrapavost iznosi $2,6 \cdot 10^{-4} \, m$, dok su koeficijenti mjesnih gubitaka redom: $\zeta_u = 0,5$ - ravni rub, $\zeta_k = 0,3$ – koljeno, $\zeta_v = 0,2$ – ventil, $\zeta_i = 1,06$ – izlaz.
+
+**Zadano:**
+* $t = 10[°C], d = 0,05[m], h = 9[m], L = 80[m], \zeta_u = 0,5, \zeta_k = 0,3$
+* $\zeta_v = 0,2 , \zeta_i = 1,06, \dot{V} = 0,006 [\frac{m^3}{s}], k = 0,00026[m], z_2 = 4[m]$
+
+**Odrediti:** $z_1 = ?$
 
 **Rješenje:**
 1. $v = 3,06 \, \text{m/s}, Re = 116865, \lambda = 0,0315$.
@@ -42,6 +211,16 @@
 ***
 
 ### Zadatak 124: Paralelni cjevovodi
+
+**Tekst zadatka:** 
+124. Voda temperature 20°C crpi se iz spremnika A u spremnik B, na način prikazan na slici putem dviju paralelnih cijevi čije duljine su jednake i iznose 36 m. Volumenski protok na izlazu iz pumpe iznosi 30 dm3/s. Zanemarujemo mjesne gubitke na račvi, sastavištu i koljenima, te linijske gubitke od spremnika A do pumpe, gubitke od izlaza iz pumpe do račve te gubitke od sastavišta do spremnika B. Potrebno je odrediti tlak u račvištu $p_R$ i volumenske protoke kroz pojedine ogranke račve. Gustoća vode pri 20°C iznosi 998 kg/m3, dinamička viskoznost iznosi $1,002 \cdot 10^{-3} \, Pas$, hrapavosti čelične cijevi je 0,000045 m.
+
+**Zadano:**
+* $t = 20[°C], L_1 = L_2 = 36[m], d_1 = 0,04[m], d_2 = 0,08[m], z_A = 5[m]$
+* $z_B = 13[m], \dot{V}_{izP} = 0,03 [\frac{m^3}{s}], \rho = 998 [\frac{kg}{m^3}]$
+* $\mu = 1,002 \cdot 10^{-3} [Pas], k = 0,000045, \lambda_1 = 0,022, \lambda_2 = 0,018$
+
+**Odrediti:** $p_{iz} = ?, \dot{V}_1 = ?, \dot{V}_2 = ?$
 
 **Rješenje:**
 1. $v_2 = v_1 \sqrt{\frac{\lambda_1 d_2}{\lambda_2 d_1}} = 1,56 v_1$.
@@ -119,4 +298,5 @@
     update();
 })();
 </script>
+
 ```

@@ -1,15 +1,188 @@
-# Vježba 6
+# Vježba 6: Sile na zakrivljene plohe
 
+### Osnove: Sile na zakrivljene plohe
 
+Za razliku od ravnih ploha, kod zakrivljenih ploha vektori tlaka mijenjaju smjer (uvijek su okomiti na površinu). Zbog toga ukupnu silu izračunavamo preko njezinih komponenti:
 
-# Mehanika fluida – Vježba 6
+1.  **Horizontalna komponenta ($F_H$):** Jednaka je hidrostatskoj sili na **vertikalnu projekciju** zakrivljene plohe.
+2.  **Vertikalna komponenta ($F_V$):** Jednaka je **težini tekućine** (stvarne ili zamišljene) u volumenu iznad zakrivljene plohe.
+3.  **Rezultanta ($F_R$):** $F_R = \sqrt{F_H^2 + F_V^2}$. Kod kružnih ploha, rezultanta uvijek prolazi kroz **centar zakrivljenosti**.
 
+```{=html}
+<!-- NOVI WIDGET: Radijalni tlak na zakrivljenu plohu -->
+<div class="widget-container" id="widget-curved-pressure">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .layout { display: flex; flex-direction: column; gap: 20px; }
+        .canvas-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .canvas-box { border: 1px solid #eee; border-radius: 8px; background: #fdfdfd; position: relative; }
+        .box-label { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; font-weight: bold; color: #7f8c8d; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Vizualizacija sila na zakrivljenu plohu</h3></div>
+    
+    <div class="layout">
+        <div class="controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="control-group">
+                <label>Dubina vrha (h1): <span id="h1-val-curved">2.0</span> m</label>
+                <input type="range" id="h1-slider-curved" min="0" max="6" value="2.0" step="0.2" style="width: 100%;">
+            </div>
+            <div class="control-group">
+                <label>Polumjer (R): <span id="r-val-curved">1.5</span> m</label>
+                <input type="range" id="r-slider-curved" min="0.5" max="2.5" value="1.5" step="0.1" style="width: 100%;">
+            </div>
+        </div>
+
+        <div class="canvas-row">
+            <div class="canvas-box">
+                <div class="box-label">STVARNI VEKTORI TLAKA</div>
+                <canvas id="canvas-radial" width="400" height="350"></canvas>
+            </div>
+            <div class="canvas-box">
+                <div class="box-label">KOMPONENTE (FH i FV)</div>
+                <canvas id="canvas-comp" width="400" height="350"></canvas>
+            </div>
+        </div>
+
+        <div class="metrics" style="display: flex; justify-content: space-around; background: #2c3e50; color: white; padding: 15px; border-radius: 8px;">
+            <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; display:block; opacity: 0.7;">FH [kN]</span><span id="fh-out-curved" style="font-family:monospace; font-weight:bold;">0</span></div>
+            <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; display:block; opacity: 0.7;">FV [kN]</span><span id="fv-out-curved" style="font-family:monospace; font-weight:bold;">0</span></div>
+            <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; display:block; opacity: 0.7;">Kut α [°]</span><span id="alpha-out-curved" style="font-family:monospace; font-weight:bold;">0</span></div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const cRad = document.getElementById('canvas-radial');
+        const cComp = document.getElementById('canvas-comp');
+        const ctxR = cRad.getContext('2d');
+        const ctxC = cComp.getContext('2d');
+        
+        const h1Sl = document.getElementById('h1-slider-curved');
+        const rSl = document.getElementById('r-slider-curved');
+
+        function update() {
+            const h1 = parseFloat(h1Sl.value);
+            const R = parseFloat(rSl.value);
+            const b = 1.0; const rho = 1000; const g = 9.81;
+
+            document.getElementById('h1-val-curved').textContent = h1.toFixed(1);
+            document.getElementById('r-val-curved').textContent = R.toFixed(1);
+
+            // Fizika
+            const FH = (rho * g * (h1 + R/2) * (R * b)) / 1000;
+            const FV = (rho * g * (h1 * R + (Math.PI*R*R/4)) * b) / 1000;
+            const alpha = Math.atan2(FV, FH) * 180 / Math.PI;
+
+            document.getElementById('fh-out-curved').textContent = FH.toFixed(1);
+            document.getElementById('fv-out-curved').textContent = FV.toFixed(1);
+            document.getElementById('alpha-out-curved').textContent = alpha.toFixed(1);
+
+            drawRadial(h1, R);
+            drawComp(h1, R, FH, FV);
+        }
+
+        function drawRadial(h1, R) {
+            ctxR.clearRect(0,0,400,350);
+            const scale = 40; const cx = 300; const cy = 300;
+            const waterY = 50;
+            const yTop = waterY + h1 * scale;
+
+            // Water
+            ctxR.fillStyle = '#ebf5fb'; ctxR.fillRect(0, waterY, 400, 300);
+            ctxR.strokeStyle = '#3498db'; ctxR.lineWidth = 1;
+            ctxR.beginPath(); ctxR.moveTo(0, waterY); ctxR.lineTo(400, waterY); ctxR.stroke();
+
+            // Ploha
+            ctxR.beginPath(); ctxR.strokeStyle = '#2c3e50'; ctxR.lineWidth = 3;
+            ctxR.arc(cx, yTop, R * scale, Math.PI/2, Math.PI);
+            ctxR.stroke();
+
+            // Radial Arrows
+            for(let a = 90; a <= 180; a += 15) {
+                const rad = a * Math.PI / 180;
+                const localZ = Math.sin(rad - Math.PI/2) * R;
+                const globalZ = h1 + localZ;
+                const p = rho * g * globalZ * 0.0001 * scale; // scale factor for arrows
+
+                const xStart = cx + Math.cos(rad) * R * scale;
+                const yStart = yTop + Math.sin(rad) * R * scale;
+                const xEnd = xStart - Math.cos(rad) * p;
+                const yEnd = yStart - Math.sin(rad) * p;
+
+                ctxR.strokeStyle = '#e67e22'; ctxR.lineWidth = 2;
+                ctxR.beginPath(); ctxR.moveTo(xStart, yStart); ctxR.lineTo(xEnd, yEnd); ctxR.stroke();
+            }
+        }
+
+        function drawComp(h1, R, FH, FV) {
+            ctxC.clearRect(0,0,400,350);
+            const scale = 40; const cx = 300; const cy = 300;
+            const waterY = 50;
+            const yTop = waterY + h1 * scale;
+            const yBot = yTop + R * scale;
+
+            // Water
+            ctxC.fillStyle = '#ebf5fb'; ctxC.fillRect(0, waterY, 400, 300);
+
+            // Vertikalna projekcija (Pravokutnik)
+            ctxC.strokeStyle = '#2c3e50'; ctxC.setLineDash([5,5]);
+            ctxC.strokeRect(cx - R*scale, yTop, 5, R*scale);
+            ctxC.setLineDash([]);
+
+            // Volumen tekućine (FV)
+            ctxC.fillStyle = 'rgba(52, 152, 219, 0.4)';
+            ctxC.beginPath();
+            ctxC.moveTo(cx - R*scale, waterY);
+            ctxC.lineTo(cx, waterY);
+            ctxC.lineTo(cx, yTop);
+            ctxC.arc(cx, yTop, R*scale, Math.PI, Math.PI/2, true);
+            ctxC.lineTo(cx - R*scale, yBot);
+            ctxC.closePath(); ctxC.fill();
+
+            // Ploha
+            ctxC.beginPath(); ctxC.strokeStyle = '#2c3e50'; ctxC.lineWidth = 3;
+            ctxC.arc(cx, yTop, R * scale, Math.PI/2, Math.PI); ctxC.stroke();
+
+            // Komponente (Vektori)
+            const fScale = 1.0;
+            // FH
+            ctxC.strokeStyle = '#e74c3c'; ctxC.lineWidth = 3;
+            ctxC.beginPath(); ctxC.moveTo(cx - R*scale - 80, yTop + (R/2)*scale); 
+            ctxC.lineTo(cx - R*scale - 10, yTop + (R/2)*scale); ctxC.stroke();
+            // FV
+            ctxC.strokeStyle = '#27ae60';
+            ctxC.beginPath(); ctxC.moveTo(cx - (R/2)*scale, waterY + 10); 
+            ctxC.lineTo(cx - (R/2)*scale, yTop + (R/2)*scale); ctxC.stroke();
+        }
+
+        const rho = 1000; const g = 9.81;
+        h1Sl.oninput = update;
+        rSl.oninput = update;
+        update();
+    })();
+    </script>
+</div>
+
+```
+
+***
 
 ### 49. Zadatak (CENGEL 3.9): Cilindar kao automatska zaklopka
 
 **Tekst zadatka:** Čvrsti cilindar polumjera $0,8\text{ [m]}$ ovješen u točki A koristi se kao automatska zaklopka. Kada razina vode dosegne visinu $h_1$, zaklopka se otvara okretanjem oko hvatišta u točki A. Potrebno je odrediti ukupnu hidrostatsku silu koja djeluje na cilindar, liniju djelovanja (kut $\alpha$) te težinu cilindra po metru duljine ($G_c$). Zanemariti trenje.
 
-**Zadano:** $h_1 = 5\text{ m}, h_2 = 4,2\text{ m}, h_3 = 0,8\text{ m}, R = 0,8\text{ m}, \rho = 1000\text{ kg/m}^3$.
+**Zadano:**
+* $h_1 = 5\text{ m}, h_2 = 4,2\text{ m}, h_3 = 0,8\text{ m}, R = 0,8\text{ m}, \rho = 1000\text{ kg/m}^3$
+
+**Odrediti:**
+* ukupnu hidrostatsku silu $F_R$
+* liniju djelovanja (kut $\alpha$)
+* težinu cilindra po metru duljine $G_c$
 
 **Objašnjenje i rješenje:**
 
@@ -108,6 +281,7 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
     draw();
 })();
 </script>
+
 ```
 
 ***
@@ -321,6 +495,7 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
     draw();
 })();
 </script>
+
 ```
 
 ***
@@ -387,6 +562,7 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
     calc();
 })();
 </script>
+
 ```
 
 ***
@@ -451,6 +627,7 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
     calc();
 })();
 </script>
+
 ```
 
 3.  **Fizikalni uzrok prevrtanja:**
@@ -517,5 +694,6 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
     calc();
 })();
 </script>
+
 ```
 

@@ -1,7 +1,112 @@
-# Vježba 8
+# Vježba 8: Jednadžba kontinuiteta
 
+### Uvod: Jednadžba kontinuiteta
 
-# Mehanika fluida – Vježba 8
+Jednadžba kontinuiteta temelji se na zakonu o **očuvanju mase**. Za nestlačive fluide (poput vode), volumen koji uđe u cijev u jednoj sekundi mora biti jednak volumenu koji iz nje izađe:
+$$\dot{V}_1 = \dot{V}_2 \implies A_1 v_1 = A_2 v_2$$
+
+To znači da su brzina i poprečni presjek **obrnuto proporcionalni**: tamo gdje je cijev uža, fluid mora strujati brže!
+
+```{=html}
+<!-- NOVI WIDGET: Vizualizacija strujnica i kontinuiteta -->
+<div class="widget-container" id="widget-continuity-flow">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .canvas-wrapper { position: relative; background: #2c3e50; border-radius: 8px; overflow: hidden; height: 250px; }
+        .controls { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Dinamika strujanja: Ubrzanje u suženju</h3></div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Ulazni promjer D1: <span id="d1-val-cont">150</span> mm</label>
+            <input type="range" id="d1-slider-cont" min="50" max="200" value="150" step="10" style="width: 100%;">
+        </div>
+        <div class="control-group">
+            <label>Izlazni promjer D2: <span id="d2-val-cont">80</span> mm</label>
+            <input type="range" id="d2-slider-cont" min="50" max="200" value="80" step="10" style="width: 100%;">
+        </div>
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas-flow" width="800" height="250"></canvas>
+    </div>
+
+    <div class="metrics" style="display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7;">BRZINA v1 [m/s]</span><span id="v1-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.2rem;">1.00</span></div>
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7;">BRZINA v2 [m/s]</span><span id="v2-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.2rem; color: #f1c40f;">0.00</span></div>
+    </div>
+
+    <script>
+    (function() {
+        const canvas = document.getElementById('canvas-flow');
+        const ctx = canvas.getContext('2d');
+        const d1Sl = document.getElementById('d1-slider-cont');
+        const d2Sl = document.getElementById('d2-slider-cont');
+
+        let particles = [];
+        for(let i=0; i<150; i++) {
+            particles.push({ x: Math.random() * canvas.width, y_rel: Math.random() });
+        }
+
+        function draw() {
+            const d1 = parseFloat(d1Sl.value);
+            const d2 = parseFloat(d2Sl.value);
+            const v1 = 1.0; 
+            const v2 = (d1*d1 / (d2*d2)) * v1;
+
+            document.getElementById('d1-val-cont').textContent = d1;
+            document.getElementById('d2-val-cont').textContent = d2;
+            document.getElementById('v1-out-cont').textContent = v1.toFixed(2);
+            document.getElementById('v2-out-cont').textContent = v2.toFixed(2);
+
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            
+            // Pipe shape
+            ctx.fillStyle = '#34495e';
+            ctx.beginPath();
+            ctx.moveTo(0, 125 - d1/2);
+            ctx.lineTo(800, 125 - d2/2);
+            ctx.lineTo(800, 125 + d2/2);
+            ctx.lineTo(0, 125 + d1/2);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Particles
+            particles.forEach(p => {
+                const x_ratio = p.x / canvas.width;
+                const d_local = d1 + (d2 - d1) * x_ratio;
+                const v_local = (d1*d1 / (d_local*d_local)) * v1;
+                
+                p.x += v_local * 5; // animation speed
+                if(p.x > canvas.width) p.x = 0;
+
+                const y_world = 125 + (p.y_rel - 0.5) * d_local;
+                
+                ctx.fillStyle = `rgba(52, 152, 219, ${0.4 + (v_local/v2)*0.6})`;
+                ctx.beginPath();
+                ctx.arc(p.x, y_world, 2, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            requestAnimationFrame(draw);
+        }
+        d1Sl.oninput = d2Sl.oninput = draw;
+        draw();
+    })();
+    </script>
+</div>
+
+```
+
+***
 
 ### ZADATAK 70.
 
@@ -69,6 +174,7 @@
     calc();
 })();
 </script>
+
 ```
 
 ***
@@ -76,14 +182,15 @@
 ### ZADATAK 71.
 
 **Tekst zadatka:**
-(2500 SPFM – 8.6) Voda ustrujava u spremnik za miješanje prikazan na slici pri čemu volumenski protok iznosi $150\text{ dm}^3\text{/s}$ kroz presjek A, istovremeno kroz presjek B ustrujava ulje relativne gustoće $0,8$ volumenskim protokom $30\text{ dm}^3\text{/s}$. Ukoliko su tekućine nestlačive, te ukoliko možemo smatrati mješavinu homogenom, potrebno je odrediti srednju brzinu i gustoću tekućine koja istrujava kroz presjek C čiji promjer iznosi $30\text{ cm}$.
+71. (2500 SPFM – 8.6) Voda ustrujava u spremnik za miješanje prikazan na slici pri čemu volumenski protok iznosi $150\text{ dm}^3\text{/s}$ kroz presjek A, istovremeno kroz presjek B ustrujava ulje relativne gustoće $0,8$ volumenskim protokom $30\text{ dm}^3\text{/s}$. Ukoliko su tekućine nestlačive, te ukoliko možemo smatrati mješavinu homogenom, potrebno je odrediti srednju brzinu i gustoću tekućine koja istrujava kroz presjek C čiji promjer iznosi $30\text{ cm}$.
 
 **Zadano:**
-*   $\dot{V}_A = 0,15\text{ [m}^3\text{/s]}$
-*   $\dot{V}_B = 0,03\text{ [m}^3\text{/s]}$
-*   $D_C = 0,3\text{ [m]}$
-*   $\rho_A = 1000\text{ [kg/m}^3\text{]}$
-*   $\bar{\rho}_B = 0,8 \implies \rho_B = 800\text{ [kg/m}^3\text{]}$
+* $\dot{V}_A = 0,15 \, [m^3/s], \dot{V}_B = 0,03 \, [m^3/s], D_C = 0,3 \, [m]$
+* $\rho_A = 1000 \, [kg/m^3], \bar{\rho}_B = 0,8 \implies \rho_B = 800 \, [kg/m^3]$
+
+**Odrediti:**
+* srednju brzinu $v_{Csr}$
+* gustoću mješavine $\rho_C$
 
 **Objašnjenje i rješenje korak po korak:**
 
@@ -134,6 +241,7 @@
     calc();
 })();
 </script>
+
 ```
 
 ***
@@ -141,20 +249,19 @@
 ### ZADATAK 72. (Spremnik s promjenjivom razinom)
 
 **Tekst zadatka:**
-Voda ustrujava u cilindrični spremnik kroz cijev 1 brzinom $8,3 \text{ m/s}$. Istovremeno, voda istrujava kroz cijevi 2 i 3 brzinama $0,9 \text{ m/s}$ i $3,6 \text{ m/s}$. Cijev 4 je otvorena prema atmosferi. Potrebno je odrediti brzinu promjene razine vode u spremniku ($dh/dt$) te srednju brzinu ustrujavanja zraka kroz cijev 4.
+72. Voda ustrujava u cilindrični spremnik kroz cijev 1 brzinom $8,3 \text{ m/s}$. Istovremeno, voda istrujava kroz cijevi 2 i 3 brzinama $0,9 \text{ m/s}$ i $3,6 \text{ m/s}$. Cijev 4 je otvorena prema atmosferi. Potrebno je odrediti brzinu promjene razine vode u spremniku ($dh/dt$) te srednju brzinu ustrujavanja zraka kroz cijev 4.
 
 **Zadano:**
-*   **Brzine:** $v_1 = 8,3 \text{ m/s}$ (ulaz), $v_2 = 0,9 \text{ m/s}$ (izlaz), $v_3 = 3,6 \text{ m/s}$ (izlaz)
-*   **Promjeri cijevi:** $D_1 = 75 \text{ mm}$, $D_2 = 50 \text{ mm}$, $D_3 = 60 \text{ mm}$, $D_4 = 50 \text{ mm}$
-*   **Promjer spremnika:** $d_s = 0,61 \text{ m}$
-*   **Gustoće:** $\rho_{voda} = 1000 \text{ kg/m}^3$, $\rho_{zrak} = 1,2 \text{ kg/m}^3$
+* $v_1 = 8,3 \text{ m/s}, v_2 = 0,9 \text{ m/s}, v_3 = 3,6 \text{ m/s}$
+* $D_1 = 75 \text{ mm}, D_2 = 50 \text{ mm}, D_3 = 60 \text{ mm}, D_4 = 50 \text{ mm}$
+* $d_s = 0,61 \text{ m}$
+* $\rho_{voda} = 1000 \text{ kg/m}^3, \rho_{zrak} = 1,2 \text{ kg/m}^3$
 
 **Odrediti:**
-*   $dh/dt = ?$, $v_{4sr} = ?$
+* brzinu promjene razine $dh/dt$
+* srednju brzinu ustrujavanja zraka $v_{4sr}$
 
-***
-
-### Objašnjenje i rješenje korak po korak:
+**Objašnjenje i rješenje korak po korak:**
 
 #### **1. Fizikalni koncept (Bilanca mase)**
 Budući da voda ulazi brže nego što izlazi kroz cijevi 2 i 3, masa tekućine unutar spremnika će se povećavati. To uzrokuje podizanje razine vode ($dh/dt$). Prema zakonu o očuvanju mase:
@@ -235,6 +342,7 @@ $$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
     calc();
 })();
 </script>
+
 ```
 
 **Fizikalno objašnjenje:** Zrak istrujava znatno brže ($12,59 \text{ m/s}$) nego što se razina vode podiže ($0,08 \text{ m/s}$) jer je cijev 4 puno uža od samog spremnika. Da bi se istisnuo isti volumen fluida kroz manji presjek, brzina mora bti veća.
@@ -245,13 +353,16 @@ $$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
 ### ZADATAK 73.
 
 **Tekst zadatka:**
-(2500 SPFM – 8.20) U spremnik sa slike ustrujava $10,2\text{ kg/s}$ vode, pri čemu istrujava $5,3\text{ kg/s}$ benzina, relativne gustoće $0,69$. Ukoliko pretpostavimo da su svi fluidi nestlačivi, potrebno je odrediti volumenski protok zraka i njegov smjer. Zrak je temperature $20^\circ\text{C}$ i tlak je atmosferski – $1\text{ bar}$.
+73. (2500 SPFM – 8.20) U spremnik sa slike ustrujava $10,2\text{ kg/s}$ vode, pri čemu istrujava $5,3\text{ kg/s}$ benzina, relativne gustoće $0,69$. Ukoliko pretpostavimo da su svi fluidi nestlačivi, potrebno je odrediti volumenski protok zraka i njegov smjer. Zrak je temperature $20^\circ\text{C}$ i tlak je atmosferski – $1\text{ bar}$.
 
 **Zadano:**
-*   $\dot{m}_1 = 10,2\text{ [kg/s]}$ (voda)
-*   $\dot{m}_2 = 5,3\text{ [kg/s]}$ (benzin)
-*   $\bar{\rho}_b = 0,69$, $\rho_v = 998\text{ [kg/m}^3\text{]}$, $\rho_z = 1,2\text{ [kg/m}^3\text{]}$
-*   $D_3 = 0,05\text{ [m]}$ (otvor za zrak)
+* $\dot{m}_1 = 10,2\text{ [kg/s]}$ (voda), $\dot{m}_2 = 5,3\text{ [kg/s]}$ (benzin)
+* $\bar{\rho}_b = 0,69$, $\rho_v = 998\text{ [kg/m}^3\text{]}$, $\rho_z = 1,2\text{ [kg/m}^3\text{]}$
+* $D_3 = 0,05\text{ [m]}$ (otvor za zrak)
+
+**Odrediti:**
+* volumenski protok zraka $\dot{V}_{zrak}$
+* smjer strujanja zraka
 
 **Objašnjenje i rješenje korak po korak:**
 
@@ -302,6 +413,7 @@ $$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
     calc();
 })();
 </script>
+
 ```
 
 ***
@@ -309,11 +421,14 @@ $$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
 ### ZADATAK 74.
 
 **Tekst zadatka:**
-(2500 SPFM – 8.24) Ispitne stjenke zračnog tunela izrađene su od perforiranog materijala, pri čemu se fluid isisava u svrhu generiranja tankog viskoznog sloja. Stjenka ima $800$ provrta promjera $7\text{ mm}$ po kvadratnom metru površine. Brzina istrujavanja na svakom provrtu iznosi $v_p = 10\text{ m/s}$, pri čemu brzina na ulazu iznosi $v_1 = 46\text{ m/s}$. Ukoliko pretpostavimo da je fluid (zrak) nestlačiv temperature $20^\circ\text{C}$ i tlaka $1\text{ atm}$, potrebno je odrediti ukupne odsisne brzine $v_2$, te $v_f$.
+74. (2500 SPFM – 8.24) Ispitne stjenke zračnog tunela izrađene su od perforiranog materijala, pri čemu se fluid isisava u svrhu generiranja tankog viskoznog sloja. Stjenka ima $800$ provrta promjera $7\text{ mm}$ po kvadratnom metru površine. Brzina istrujavanja na svakom provrtu iznosi $v_p = 10\text{ m/s}$, pri čemu brzina na ulazu iznosi $v_1 = 46\text{ m/s}$. Ukoliko pretpostavimo da je fluid (zrak) nestlačiv temperature $20^\circ\text{C}$ i tlaka $1\text{ atm}$, potrebno je odrediti ukupne odsisne brzine $v_2$, te $v_f$.
 
 **Zadano:**
-*   $v_p = 10\text{ [m/s]}, v_1 = 46\text{ [m/s]}, n_p = 800\text{ [provrta/m}^2\text{]}$
-*   $d_p = 0,007\text{ [m]}, L = 4\text{ [m]}, D_1 = D_2 = 0,9\text{ [m]}, D_0 = 2,6\text{ [m]}, D_f = 2,4\text{ [m]}$
+* $v_p = 10 \, [m/s], v_1 = 46 \, [m/s], n_p = 800 \, [provrta/m^2]$
+* $d_p = 0,007 \, [m], L = 4 \, [m], D_1 = D_2 = 0,9 \, [m], D_0 = 2,6 \, [m], D_f = 2,4 \, [m]$
+
+**Odrediti:**
+* odsisne brzine $v_2$ i $v_f$
 
 **Objašnjenje i rješenje korak po korak:**
 
@@ -368,6 +483,7 @@ $$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
     calc();
 })();
 </script>
+
 ```
 
 ***
@@ -375,11 +491,14 @@ $$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
 ### ZADATAK 75.
 
 **Tekst zadatka:**
-(2500 SPFM – 8.27) Pumpa ubrizgava vodu, prikazano na slici, brzinom $v_1 = 26\text{ m/s}$ kroz cijev promjera $100\text{ mm}$, oko koje struji voda brzinom $2,6\text{ m/s}$. Dva toka se nizstrujno miješaju, pri čemu u presjeku 3 brzina $v_3$ postaje konstantnom. Ukoliko je tok stacionaran i nestlačiv, potrebno je odrediti brzinu $v_3$.
+75. (2500 SPFM – 8.27) Pumpa ubrizgava vodu, prikazano na slici, brzinom $v_1 = 26\text{ m/s}$ kroz cijev promjera $100\text{ mm}$, oko koje struji voda brzinom $2,6\text{ m/s}$. Dva toka se nizstrujno miješaju, pri čemu u presjeku 3 brzina $v_3$ postaje konstantnom. Ukoliko je tok stacionaran i nestlačiv, potrebno je odrediti brzinu $v_3$.
 
 **Zadano:**
-*   $v_1 = 26\text{ [m/s]}, v_2 = 2,6\text{ [m/s]}$
-*   $D_1 = 0,1\text{ [m]}, D_2 = 0,3\text{ [m]}$
+* $v_1 = 26 \, [m/s], v_2 = 2,6 \, [m/s]$
+* $D_1 = 0,1 \, [m], D_2 = 0,3 \, [m]$
+
+**Odrediti:**
+* brzinu $v_3$
 
 **Objašnjenje i rješenje korak po korak:**
 
@@ -422,4 +541,5 @@ $$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
     calc();
 })();
 </script>
+
 ```

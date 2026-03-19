@@ -1,6 +1,126 @@
 # Vježba 11: Zakon očuvanja količine gibanja
 
-## Mehanika fluida – Vježba 11
+### Osnove: Zakon količine gibanja
+
+Sila kojom fluid djeluje na pregradu (lopaticu, koljeno, mlaznicu) jednaka je razlici impulsa u vremenu:
+$$\vec{F} = \dot{m} (\vec{v}_{iz} - \vec{v}_{ul})$$
+
+Kod mlaza koji udara u plohu, sila ovisi o kutu pod kojim se mlaz skreće:
+*   **Ravna ploča:** Mlaz se skreće za 90°, sila je $F = \dot{m} v$.
+*   **Polukružna lopatica:** Mlaz se skreće za 180°, sila je $F = 2 \dot{m} v$. Ovo je razlog zašto žlice turbina imaju zakrivljen oblik.
+
+```{=html}
+<!-- NOVI WIDGET: Sila mlaza (Ravna vs Zakrivljena ploha) -->
+<div class="widget-container" id="widget-jet-impact">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .canvas-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .canvas-box { border: 1px solid #eee; border-radius: 8px; background: #fdfdfd; position: relative; height: 300px; }
+        .label-overlay { position: absolute; top: 10px; width: 100%; text-align: center; font-weight: bold; color: #2c3e50; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Eksperiment: Impuls mlaza na lopatice</h3></div>
+    
+    <div class="controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="control-group">
+            <label>Brzina mlaza (v): <span id="v-val-jet">15</span> m/s</label>
+            <input type="range" id="v-slider-jet" min="5" max="30" value="15" step="1" style="width: 100%;">
+        </div>
+        <div class="control-group">
+            <label>Maseni protok (ṁ): <span id="m-val-jet">5.0</span> kg/s</label>
+            <input type="range" id="m-slider-jet" min="1" max="10" value="5" step="0.5" style="width: 100%;">
+        </div>
+    </div>
+
+    <div class="canvas-row">
+        <div class="canvas-box">
+            <div class="label-overlay">RAVNA PLOČA (90°)</div>
+            <canvas id="canvas-flat" width="400" height="280"></canvas>
+            <div style="position:absolute; bottom:10px; width:100%; text-align:center; font-weight:bold; color:#e67e22;">F = <span id="f-flat-out">0</span> N</div>
+        </div>
+        <div class="canvas-box">
+            <div class="label-overlay">ZAKRIVLJENA LOPATICA (180°)</div>
+            <canvas id="canvas-cup" width="400" height="280"></canvas>
+            <div style="position:absolute; bottom:10px; width:100%; text-align:center; font-weight:bold; color:#c0392b;">F = <span id="f-cup-out">0</span> N</div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const cFlat = document.getElementById('canvas-flat');
+        const cCup = document.getElementById('canvas-cup');
+        const ctxF = cFlat.getContext('2d');
+        const ctxC = cCup.getContext('2d');
+        
+        const vSl = document.getElementById('v-slider-jet');
+        const mSl = document.getElementById('m-slider-jet');
+
+        function update() {
+            const v = parseFloat(vSl.value);
+            const m = parseFloat(mSl.value);
+            
+            const fFlat = m * v;
+            const fCup = 2 * m * v;
+
+            document.getElementById('v-val-jet').textContent = v;
+            document.getElementById('m-val-jet').textContent = m.toFixed(1);
+            document.getElementById('f-flat-out').textContent = Math.round(fFlat);
+            document.getElementById('f-cup-out').textContent = Math.round(fCup);
+
+            drawFlat(v, m);
+            drawCup(v, m);
+        }
+
+        function drawFlat(v, m) {
+            ctxF.clearRect(0,0,400,280);
+            // Mlaz
+            ctxF.fillStyle = '#3498db';
+            ctxF.fillRect(0, 130, 200, 20); // dolazni mlaz
+            // Ploča
+            ctxF.fillStyle = '#2c3e50';
+            ctxF.fillRect(200, 80, 10, 120);
+            // Raspršivanje
+            ctxF.fillStyle = 'rgba(52, 152, 219, 0.6)';
+            ctxF.fillRect(200, 130, 10, 50); ctxF.fillRect(200, 100, 10, 30);
+            
+            // Sila strelica
+            ctxF.strokeStyle = '#e67e22'; ctxF.lineWidth = 4;
+            ctxF.beginPath(); ctxF.moveTo(215, 140); ctxF.lineTo(215 + v*3, 140); ctxF.stroke();
+        }
+
+        function drawCup(v, m) {
+            ctxC.clearRect(0,0,400,280);
+            // Mlaz
+            ctxC.fillStyle = '#3498db';
+            ctxC.fillRect(0, 130, 200, 20);
+            // Lopatica (U-oblik)
+            ctxC.strokeStyle = '#2c3e50'; ctxC.lineWidth = 8;
+            ctxC.beginPath();
+            ctxC.arc(220, 140, 40, -Math.PI/2, Math.PI/2);
+            ctxC.stroke();
+            // Povratni mlaz
+            ctxC.fillStyle = 'rgba(52, 152, 219, 0.6)';
+            ctxC.fillRect(100, 95, 100, 15);
+            ctxC.fillRect(100, 170, 100, 15);
+
+            // Sila strelica
+            ctxC.strokeStyle = '#c0392b'; ctxC.lineWidth = 4;
+            ctxC.beginPath(); ctxC.moveTo(265, 140); ctxC.lineTo(265 + v*6, 140); ctxC.stroke();
+        }
+
+        vSl.oninput = mSl.oninput = update;
+        update();
+    })();
+    </script>
+</div>
+
+```
+
+***
 
 ### Zadatak 97: Vrijeme pražnjenja spremnika
 
@@ -112,6 +232,7 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
     update();
 })();
 </script>
+
 ```
 
 ***

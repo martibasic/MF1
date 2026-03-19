@@ -1,6 +1,116 @@
 # Vježba 10: Dinamika realnog fluida i mjerenje protoka
 
-## Mehanika fluida – Vježba 10
+### Osnove: Mjerenje brzine i protoka
+
+Za mjerenje brzine strujanja koristimo **Pitot-statičku cijev** (Prandtlovu cijev). Ona koristi razliku između ukupnog i statičkog tlaka:
+1.  **Statički tlak ($p$):** Tlak koji fluid vrši na stijenke (mjeri se bočnim otvorima).
+2.  **Ukupni (stagnacijski) tlak ($p_0$):** Tlak na mjestu gdje se fluid potpuno zaustavi ($v=0$).
+3.  **Dinamički tlak:** Razlika $p_0 - p = \frac{\rho v^2}{2}$.
+
+Iz te razlike direktno računamo brzinu: $v = \sqrt{\frac{2(p_0 - p)}{\rho}}$.
+
+```{=html}
+<!-- NOVI WIDGET: Pitot-Prandtl Cijev -->
+<div class="widget-container" id="widget-pitot-tube">
+    <style>
+        .widget-container {
+            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .canvas-wrapper { position: relative; background: #fdfdfd; border-radius: 8px; border: 1px solid #eee; overflow: hidden; height: 300px; }
+        .data-display { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .data-card { background: #2c3e50; color: white; padding: 10px; border-radius: 6px; text-align: center; }
+    </style>
+
+    <div class="widget-header"><h3 class="widget-title">Laboratorij: Pitot-Prandtlova cijev</h3></div>
+    
+    <div class="controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <label>Brzina strujanja zraka (v): <span id="v-val-pitot">20</span> m/s</label>
+        <input type="range" id="v-slider-pitot" min="5" max="100" value="20" step="1" style="width: 100%;">
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas-pitot" width="800" height="300"></canvas>
+    </div>
+
+    <div class="data-display">
+        <div class="data-card"><span style="font-size:0.7rem; opacity:0.7;">STATIČKI TLAK</span><br><span id="p-stat-out">101325</span> Pa</div>
+        <div class="data-card" style="background:#e67e22;"><span style="font-size:0.7rem; opacity:0.7;">DINAMIČKI TLAK</span><br><span id="p-dyn-out">0</span> Pa</div>
+        <div class="data-card" style="background:#c0392b;"><span style="font-size:0.7rem; opacity:0.7;">UKUPNI TLAK (p0)</span><br><span id="p-tot-out">0</span> Pa</div>
+    </div>
+
+    <script>
+    (function() {
+        const canvas = document.getElementById('canvas-pitot');
+        const ctx = canvas.getContext('2d');
+        const vSl = document.getElementById('v-slider-pitot');
+
+        let particles = [];
+        for(let i=0; i<80; i++) particles.push({ x: Math.random()*800, y: 50 + Math.random()*200 });
+
+        function draw() {
+            const v = parseFloat(vSl.value);
+            const rho = 1.225; // zrak
+            const pStat = 101325;
+            const pDyn = 0.5 * rho * v * v;
+            const pTot = pStat + pDyn;
+
+            document.getElementById('v-val-pitot').textContent = v;
+            document.getElementById('p-stat-out').textContent = Math.round(pStat);
+            document.getElementById('p-dyn-out').textContent = Math.round(pDyn);
+            document.getElementById('p-tot-out').textContent = Math.round(pTot);
+
+            ctx.clearRect(0,0,800,300);
+
+            // Particles
+            ctx.fillStyle = '#3498db';
+            particles.forEach(p => {
+                p.x += v * 0.2;
+                if(p.x > 800) p.x = 0;
+                // Avoid the tube tip
+                if(p.x > 350 && p.x < 450 && Math.abs(p.y - 150) < 20) {
+                    p.y += (p.y > 150 ? 1 : -1) * 2;
+                }
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+            });
+
+            // Pitot Tube
+            ctx.strokeStyle = '#7f8c8d'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(600, 150); ctx.lineTo(400, 150); // main body
+            ctx.stroke();
+            
+            // Tip hole (Stagnation)
+            ctx.fillStyle = '#c0392b';
+            ctx.beginPath(); ctx.arc(400, 150, 4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#2c3e50'; ctx.font = 'bold 10px Arial';
+            ctx.fillText("Stagnacijska točka (v=0)", 350, 135);
+
+            // U-Manometar (Symbolic)
+            const h = pDyn * 0.15; // scaling for visual
+            ctx.lineWidth = 10; ctx.strokeStyle = '#34495e';
+            ctx.beginPath();
+            ctx.moveTo(500, 150); ctx.lineTo(500, 250); ctx.arc(550, 250, 50, Math.PI, 0, true); ctx.lineTo(600, 150);
+            ctx.stroke();
+
+            // Liquid in Manometer
+            ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(500, 200 + h/2); ctx.lineTo(500, 250); ctx.arc(550, 250, 50, Math.PI, 0, true); ctx.lineTo(600, 200 - h/2);
+            ctx.stroke();
+
+            requestAnimationFrame(draw);
+        }
+        vSl.oninput = draw;
+        draw();
+    })();
+    </script>
+</div>
+
+```
+
+***
 
 ### Zadatak 86: Sifon s realnim fluidom
 
@@ -117,4 +227,5 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
     draw();
 })();
 </script>
+
 ```

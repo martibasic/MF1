@@ -127,6 +127,160 @@ Kod mlaza koji udara u plohu, sila ovisi o kutu pod kojim se mlaz skreće:
 **Rješenje:**
 $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{0,5}{0,025} \right)^2 \frac{2 \sqrt{0,5}}{\sqrt{19,62}} = \mathbf{127,7 \, \text{s}}$.
 
+```{=html}
+<!-- WIDGET: Spojeni spremnici -->
+<div id="v11-connected-tanks-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">⏳ Nestacionarno pražnjenje: Spojeni spremnici</h4>
+    
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px;">
+        <!-- Animacija -->
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
+            <canvas id="v11-tanks-canvas" width="500" height="400" style="width: 100%; height: 100%;"></canvas>
+            <div style="position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; font-size: 0.75rem; border: 1px solid #cbd5e0;">
+                H₁: <span id="v11-h1-live">---</span> m | H₂: <span id="v11-h2-live">---</span> m
+            </div>
+        </div>
+
+        <!-- Graf i Kontrole -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="height: 200px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 10px;">
+                <canvas id="v11-graph-canvas" width="300" height="180" style="width: 100%; height: 100%;"></canvas>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button id="v11-btn-start" style="padding: 12px; background: #3182ce; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">POKRENI</button>
+                <button id="v11-btn-reset" style="padding: 12px; background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">RESET</button>
+            </div>
+
+            <div style="padding: 15px; background: #f1f5f9; border-radius: 12px; font-size: 0.85rem;">
+                <label style="display:block; margin-bottom:5px;">Početna visina H₁: <span id="v11-v-h1">2.0</span> m</label>
+                <input type="range" id="v11-h1-slider" min="0.5" max="3" step="0.1" value="2" style="width: 100%;">
+                
+                <label style="display:block; margin-top:10px; margin-bottom:5px;">Promjer cijevi d: <span id="v11-v-d">40</span> mm</label>
+                <input type="range" id="v11-d-slider" min="10" max="100" step="5" value="40" style="width: 100%;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v11-tanks-canvas');
+    const ctx = canvas.getContext('2d');
+    const graphCanvas = document.getElementById('v11-graph-canvas');
+    const gCtx = graphCanvas.getContext('2d');
+    
+    const h1S = document.getElementById('v11-h1-slider');
+    const dS = document.getElementById('v11-d-slider');
+    const startBtn = document.getElementById('v11-btn-start');
+    const resetBtn = document.getElementById('v11-btn-reset');
+
+    let h1, h2, t = 0, running = false;
+    let history = [];
+    const D1 = 1.0, D2 = 1.0, g = 9.81, Cd = 0.62;
+
+    function init() {
+        h1 = parseFloat(h1S.value);
+        h2 = 0.5; t = 0; running = false;
+        history = [];
+        updateUI();
+        draw();
+        drawGraph();
+    }
+
+    function updateUI() {
+        document.getElementById('v11-v-h1').innerText = parseFloat(h1S.value).toFixed(1);
+        document.getElementById('v11-v-d').innerText = dS.value;
+        document.getElementById('v11-h1-live').innerText = h1.toFixed(2);
+        document.getElementById('v11-h2-live').innerText = h2.toFixed(2);
+    }
+
+    function step() {
+        if(!running) return;
+        
+        const d = parseFloat(dS.value) / 1000;
+        const A1 = Math.PI * D1 * D1 / 4;
+        const A2 = Math.PI * D2 * D2 / 4;
+        const Ad = Math.PI * d * d / 4;
+        
+        const dh = h1 - h2;
+        if(Math.abs(dh) < 0.001) { running = false; return; }
+        
+        const dt = 0.05;
+        const Q = Cd * Ad * Math.sqrt(2 * g * Math.abs(dh)) * (dh > 0 ? 1 : -1);
+        
+        h1 -= (Q / A1) * dt;
+        h2 += (Q / A2) * dt;
+        t += dt;
+        
+        history.push({t, h1, h2});
+        if(history.length > 300) history.shift();
+        
+        updateUI();
+        draw();
+        drawGraph();
+        requestAnimationFrame(step);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, 500, 400);
+        const scale = 100;
+        const base = 350;
+        
+        // Tanks
+        ctx.strokeStyle = "#2d3748"; ctx.lineWidth = 3;
+        ctx.strokeRect(50, base - 300, 150, 300); // Tank 1
+        ctx.strokeRect(300, base - 300, 150, 300); // Tank 2
+        
+        // Connecting Pipe
+        ctx.strokeRect(200, base - 30, 100, 30);
+        
+        // Water Tank 1
+        ctx.fillStyle = "rgba(49, 130, 206, 0.6)";
+        ctx.fillRect(50, base - h1 * scale, 150, h1 * scale);
+        
+        // Water Tank 2
+        ctx.fillRect(300, base - h2 * scale, 150, h2 * scale);
+        
+        // Water in pipe
+        ctx.fillRect(200, base - 30, 100, 30);
+    }
+
+    function drawGraph() {
+        gCtx.clearRect(0, 0, 300, 180);
+        if(history.length < 2) return;
+        
+        gCtx.lineWidth = 2;
+        // H1 Curve
+        gCtx.strokeStyle = "#3182ce";
+        gCtx.beginPath();
+        history.forEach((p, i) => {
+            const x = (i / 300) * 300;
+            const y = 180 - (p.h1 / 3) * 180;
+            if(i === 0) gCtx.moveTo(x, y); else gCtx.lineTo(x, y);
+        });
+        gCtx.stroke();
+        
+        // H2 Curve
+        gCtx.strokeStyle = "#e53e3e";
+        gCtx.beginPath();
+        history.forEach((p, i) => {
+            const x = (i / 300) * 300;
+            const y = 180 - (p.h2 / 3) * 180;
+            if(i === 0) gCtx.moveTo(x, y); else gCtx.lineTo(x, y);
+        });
+        gCtx.stroke();
+    }
+
+    startBtn.onclick = () => { running = true; step(); };
+    resetBtn.onclick = init;
+    h1S.oninput = init;
+    dS.oninput = updateUI;
+    init();
+})();
+</script>
+```
+
 ***
 
 ### Zadatak 98: Kinematika dva mlaza

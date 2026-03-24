@@ -11,6 +11,153 @@ $$Re = \frac{\rho v d}{\mu} = \frac{v d}{\nu}$$
 
 **Profil brzine:** U laminarnom strujanju profil je **parabola**, dok je u turbulentnom strujanju profil **plosnat** zbog intenzivnog miješanja čestica.
 
+***
+
+### Interaktivni Moodyjev dijagram
+
+Moodyjev dijagram je ključni alat u mehanici fluida za određivanje koeficijenta trenja $\lambda$. Ovisi o Reynoldsovom broju ($Re$) i relativnoj hrapavosti cijevi ($k/D$).
+
+```{=html}
+<!-- WIDGET: Moodyjev Dijagram -->
+<div id="v13-moody-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📊 Moodyjev Dijagram: Istraživanje otpora</h4>
+    
+    <div style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 30px;">
+        <!-- Dijagram -->
+        <div style="position: relative; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; height: 500px;">
+            <canvas id="v13-moody-canvas" width="600" height="500" style="width: 100%; height: 100%;"></canvas>
+        </div>
+
+        <!-- Kontrole i Rezultati -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Reynolds (log Re): <span id="v13-v-re" style="color:#2563eb;">5.0</span> (Re ≈ 10⁵)</label>
+                <input type="range" id="v13-re-slider" min="3" max="8" step="0.01" value="5" style="width: 100%;">
+                
+                <label style="display: block; font-weight: 700; margin-top: 25px; margin-bottom: 10px; color: #475569;">Rel. hrapavost k/D: <span id="v13-v-kd" style="color:#2563eb;">0.001</span></label>
+                <input type="range" id="v13-kd-slider" min="-6" max="-1.3" step="0.1" value="-3" style="width: 100%;">
+            </div>
+
+            <div style="background: #2d3748; color: white; padding: 25px; border-radius: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
+                <div style="font-weight: 800; font-size: 0.75rem; color: #a0aec0; text-transform: uppercase; margin-bottom: 15px;">Izračunati koeficijent:</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: #f6e05e; text-align: center;">
+                        λ = <span id="v13-res-lambda">---</span>
+                    </div>
+                    <div style="text-align: center; color: #cbd5e0; font-size: 0.9rem;">
+                        Režim: <b id="v13-res-regime" style="color: #fff;">---</b>
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size: 0.8rem; color: #64748b; font-style: italic; line-height: 1.4;">
+                *Za turbulentno područje koristi se Colebrook-White jednadžba. Crvena točka na grafu prati vaše trenutne parametre.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v13-moody-canvas');
+    const ctx = canvas.getContext('2d');
+    const reS = document.getElementById('v13-re-slider');
+    const kdS = document.getElementById('v13-kd-slider');
+
+    function solveColebrook(Re, kd) {
+        if (Re < 2320) return 64 / Re;
+        // Newton-Raphson for Colebrook
+        let f = 0.02;
+        for (let i = 0; i < 10; i++) {
+            let next_f = 1 / Math.pow(-2 * Math.log10(kd / 3.7 + 2.51 / (Re * Math.sqrt(f))), 2);
+            if (Math.abs(next_f - f) < 0.00001) break;
+            f = next_f;
+        }
+        return f;
+    }
+
+    function update() {
+        const logRe = parseFloat(reS.value);
+        const Re = Math.pow(10, logRe);
+        const logKd = parseFloat(kdS.value);
+        const kd = Math.pow(10, logKd);
+
+        const lambda = solveColebrook(Re, kd);
+
+        document.getElementById('v13-v-re').innerText = logRe.toFixed(2);
+        document.getElementById('v13-v-kd').innerText = kd.toExponential(2);
+        document.getElementById('v13-res-lambda').innerText = lambda.toFixed(4);
+
+        let regime = "Turbulentno";
+        if(Re < 2320) regime = "Laminarno";
+        else if(Re < 4000) regime = "Prijelazno";
+        document.getElementById('v13-res-regime').innerText = regime;
+
+        draw(logRe, lambda);
+    }
+
+    function draw(activeLogRe, activeLambda) {
+        ctx.clearRect(0, 0, 600, 500);
+        const pad = 50;
+        const w = 600 - 2*pad, h = 500 - 2*pad;
+
+        // Map Re (3 to 8) -> x
+        const getX = (lRe) => pad + (lRe - 3) / 5 * w;
+        // Map Lambda (0.008 to 0.1) -> y (Log scale)
+        const getY = (lam) => pad + h - (Math.log10(lam) - Math.log10(0.008)) / (Math.log10(0.1) - Math.log10(0.008)) * h;
+
+        // Background Regions
+        ctx.fillStyle = "rgba(72, 187, 120, 0.05)"; ctx.fillRect(getX(3), pad, getX(Math.log10(2320)) - getX(3), h);
+        ctx.fillStyle = "rgba(236, 201, 75, 0.05)"; ctx.fillRect(getX(Math.log10(2320)), pad, getX(Math.log10(4000)) - getX(Math.log10(2320)), h);
+
+        // Grid
+        ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
+        for(let i=3; i<=8; i++) {
+            let x = getX(i);
+            ctx.beginPath(); ctx.moveTo(x, pad); ctx.lineTo(x, pad+h); ctx.stroke();
+            ctx.fillStyle = "#94a3b8"; ctx.font = "10px Arial";
+            ctx.fillText(`10${String.fromCharCode(179+i-3)}`, x-10, pad+h+15);
+        }
+
+        // Curves
+        ctx.lineWidth = 1.5;
+        // Laminar
+        ctx.strokeStyle = "#48bb78";
+        ctx.beginPath();
+        for(let lr=3; lr<=Math.log10(2320); lr+=0.1) {
+            let x = getX(lr); let y = getY(64/Math.pow(10, lr));
+            if(lr===3) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Roughness Curves
+        const kds = [0, 0.00001, 0.0001, 0.001, 0.01, 0.05];
+        kds.forEach(k => {
+            ctx.strokeStyle = k === 0 ? "#3182ce" : "#cbd5e0";
+            ctx.beginPath();
+            for(let lr=Math.log10(4000); lr<=8; lr+=0.1) {
+                let lam = solveColebrook(Math.pow(10, lr), k);
+                let x = getX(lr); let y = getY(lam);
+                if(lr===Math.log10(4000)) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        });
+
+        // Active Point
+        const curX = getX(activeLogRe);
+        const curY = getY(activeLambda);
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath(); ctx.arc(curX, curY, 6, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+    }
+
+    [reS, kdS].forEach(s => s.oninput = update);
+    update();
+})();
+</script>
+
+***
+
 ```{=html}
 <!-- NOVI WIDGET: Režimi strujanja i profili brzine -->
 <div class="widget-container" id="widget-re-regimes">

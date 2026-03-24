@@ -377,7 +377,134 @@ $$z_F = z_T + \frac{I_{x0}}{z_T \cdot A}$$
 1. $z_T = h_2 + \frac{h_1}{2} = 2 \text{ m}, A = a \cdot b = 4,243 \cdot 5 = 21,215 \text{ m}^2$.
 2. $F_h = \rho g z_T A = 416,2 \text{ kN}$.
 3. $z_{Fhi} = z_{Ti} + \frac{I_{x0}}{z_{Ti} A} = 3,359 \text{ m} \implies z_p = z_{Fhi} - h_{2i} = 2,652 \text{ m}$.
-4. $\sum M_B = 0 \implies \mathbf{F = 521 \text{ kN}}$.
+4. $\sum M_B = 0 \implies \mathbf{F = 5 2 1 \text{ kN}}$.
+
+```{=html}
+<!-- WIDGET Z42: Nakošena zaklopka -->
+<div id="z42-inclined-gate-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📐 Analiza nakošene zaklopke (Z42)</h4>
+    
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
+            <canvas id="z42-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="padding: 15px; background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #475569;">Kut α: <span id="z42-v-alpha">45</span>°</label>
+                <input type="range" id="z42-alpha" min="15" max="75" value="45" style="width: 100%;">
+                
+                <label style="display: block; font-weight: 700; margin-top: 10px; margin-bottom: 5px; color: #475569;">Dubina vode h₁: <span id="z42-v-h1">3.0</span> m</label>
+                <input type="range" id="z42-h1" min="0" max="6" step="0.1" value="3.0" style="width: 100%;">
+                
+                <label style="display: block; font-weight: 700; margin-top: 10px; margin-bottom: 5px; color: #475569;">Visina zaklopke L: <span id="z42-v-L">4.24</span> m</label>
+                <input type="range" id="z42-L" min="1" max="6" step="0.1" value="4.24" style="width: 100%;">
+            </div>
+
+            <div style="background: #fff5f5; padding: 15px; border-radius: 12px; border-left: 5px solid #f56565;">
+                <div style="font-weight: 800; font-size: 0.75rem; color: #c53030; text-transform: uppercase; margin-bottom: 8px;">Rezultati (Momentna ravnoteža):</div>
+                <div style="font-size: 0.9rem; color: #4a5568;">
+                    Sila vode Fₕ: <b id="z42-fh">---</b> kN<br>
+                    Centar tlaka z_Fh: <b id="z42-zf">---</b> m<br>
+                    <hr style="margin: 8px 0; border: 0; border-top: 1px solid #feb2b2;">
+                    <span style="color: #c53030; font-weight: 800;">Potrebna sila F: <span id="z42-f-req">---</span> kN</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('z42-canvas'); const ctx = canvas.getContext('2d');
+    const alphaS = document.getElementById('z42-alpha');
+    const h1S = document.getElementById('z42-h1');
+    const lS = document.getElementById('z42-L');
+
+    function update() {
+        const alpha_deg = parseFloat(alphaS.value);
+        const alpha = alpha_deg * Math.PI / 180;
+        const h1 = parseFloat(h1S.value);
+        const L = parseFloat(lS.value);
+        const b = 5.0; const rho = 1000; const g = 9.81;
+
+        const h2 = h1 + L * Math.sin(alpha);
+        const zT = h1 + (L/2) * Math.sin(alpha);
+        const Area = L * b;
+        const Fh = rho * g * zT * Area / 1000; // kN
+        
+        const zTi = h1 / Math.sin(alpha) + L/2;
+        const I0 = (b * Math.pow(L, 3)) / 12;
+        const zFi = zTi + I0 / (zTi * Area);
+        
+        // Moment balance about B (top hinge)
+        // F * (L/2) = Fh * (zFi - h1/sin(alpha))
+        const d_arm = zFi - h1 / Math.sin(alpha);
+        const F_req = (Fh * d_arm) / (L/2);
+
+        document.getElementById('z42-v-alpha').innerText = alpha_deg;
+        document.getElementById('z42-v-h1').innerText = h1.toFixed(1);
+        document.getElementById('z42-v-L').innerText = L.toFixed(2);
+        document.getElementById('z42-fh').innerText = Fh.toFixed(1);
+        document.getElementById('z42-zf').innerText = (zFi * Math.sin(alpha)).toFixed(2);
+        document.getElementById('z42-f-req').innerText = F_req.toFixed(1);
+
+        draw(alpha, h1, L, zTi, zFi);
+    }
+
+    function draw(alpha, h1, L, zTi, zFi) {
+        ctx.clearRect(0, 0, 500, 450);
+        const scale = 40; const ox = 100, oy = 50;
+        
+        // Water
+        ctx.fillStyle = "rgba(49, 130, 206, 0.2)";
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + 350, oy);
+        ctx.lineTo(ox + 350, 400); ctx.lineTo(ox, 400); ctx.fill();
+        ctx.strokeStyle = "#3182ce"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + 350, oy); ctx.stroke();
+
+        // Gate
+        const Bx = ox + 150; const By = oy + h1 * scale;
+        const Ax = Bx + L * scale * Math.cos(alpha);
+        const Ay = By + L * scale * Math.sin(alpha);
+
+        ctx.strokeStyle = "#2d3748"; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(Bx, By); ctx.lineTo(Ax, Ay); ctx.stroke();
+        
+        // Hinge at B
+        ctx.fillStyle = "#e53e3e"; ctx.beginPath(); ctx.arc(Bx, By, 6, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#2d3748"; ctx.fillText("B (Zglob)", Bx - 50, By - 10);
+
+        // Forces
+        const pyFi = (zFi - h1/Math.sin(alpha)) * scale;
+        const Fx = Bx + pyFi * Math.cos(alpha);
+        const Fy = By + pyFi * Math.sin(alpha);
+
+        // Resultant Force Arrow
+        const arrowLen = 60;
+        const nx = Math.sin(alpha); const ny = -Math.cos(alpha);
+        ctx.strokeStyle = "#3182ce"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(Fx - nx*arrowLen, Fy - ny*arrowLen); ctx.lineTo(Fx, Fy); ctx.stroke();
+        // Arrow head
+        ctx.beginPath(); ctx.moveTo(Fx, Fy);
+        ctx.lineTo(Fx - 10*Math.cos(alpha-0.5+Math.PI/2), Fy - 10*Math.sin(alpha-0.5+Math.PI/2));
+        ctx.lineTo(Fx - 10*Math.cos(alpha+0.5+Math.PI/2), Fy - 10*Math.sin(alpha+0.5+Math.PI/2));
+        ctx.closePath(); ctx.fillStyle = "#3182ce"; ctx.fill();
+        ctx.fillText("Fh", Fx - 40, Fy - 20);
+
+        // Opening Force F
+        const Tx = Bx + (L/2)*scale*Math.cos(alpha);
+        const Ty = By + (L/2)*scale*Math.sin(alpha);
+        ctx.strokeStyle = "#e53e3e"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(Tx + nx*arrowLen, Ty + ny*arrowLen); ctx.lineTo(Tx, Ty); ctx.stroke();
+        ctx.fillText("F (Sila otvaranja)", Tx + 10, Ty + 40);
+    }
+
+    [alphaS, h1S, lS].forEach(s => s.oninput = update);
+    update();
+})();
+</script>
+```
 
 ***
 

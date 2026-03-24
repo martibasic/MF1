@@ -9,6 +9,131 @@ Za mjerenje brzine strujanja koristimo **Pitot-statičku cijev** (Prandtlovu cij
 
 Iz te razlike direktno računamo brzinu: $v = \sqrt{\frac{2(p_0 - p)}{\rho}}$.
 
+***
+
+### Energetska bilanca: Idealni vs. Realni fluid
+
+Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja. Ovaj widget zorno prikazuje razliku u energetskim linijama (EGL) između idealnog slučaja bez gubitaka i realnog slučaja s gubicima.
+
+```{=html}
+<!-- WIDGET: Ideal vs Real Fluid -->
+<div id="v10-ideal-real-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 25px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📉 Vizualizacija gubitaka: Idealni vs. Realni fluid</h4>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Lijevo: Idealno -->
+        <div style="background: #f8fafc; border-radius: 15px; padding: 15px; border: 1px solid #e2e8f0;">
+            <h5 style="text-align: center; margin: 0 0 15px 0; color: #3b82f6;">IDEALNI FLUID (hw = 0)</h5>
+            <canvas id="ideal-canvas" width="400" height="300" style="width: 100%; border-radius: 8px; background: white;"></canvas>
+        </div>
+        <!-- Desno: Realno -->
+        <div style="background: #fef2f2; border-radius: 15px; padding: 15px; border: 1px solid #fee2e2;">
+            <h5 style="text-align: center; margin: 0 0 15px 0; color: #ef4444;">REALNI FLUID (Darcy-Weisbach)</h5>
+            <canvas id="real-canvas" width="400" height="300" style="width: 100%; border-radius: 8px; background: white;"></canvas>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 25px; padding: 20px; background: #f1f5f9; border-radius: 15px;">
+        <div class="control-group">
+            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Faktor trenja λ: <span id="v10-v-f" style="color:#ef4444;">0.030</span></label>
+            <input type="range" id="v10-f-slider" min="0.01" max="0.08" step="0.005" value="0.03" style="width: 100%;">
+        </div>
+        <div class="control-group">
+            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Duljina cijevi L: <span id="v10-v-L" style="color:#2563eb;">20</span> m</label>
+            <input type="range" id="v10-L-slider" min="5" max="50" step="1" value="20" style="width: 100%;">
+        </div>
+        <div class="control-group">
+            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Brzina v₀: <span id="v10-v-v" style="color:#2563eb;">2.0</span> m/s</label>
+            <input type="range" id="v10-v-slider" min="0.5" max="5" step="0.1" value="2" style="width: 100%;">
+        </div>
+    </div>
+
+    <div id="v10-loss-summary" style="margin-top: 20px; padding: 15px; background: #2d3748; color: white; border-radius: 12px; text-align: center;">
+        Ukupni gubitak visine dobave <b>h<sub>w</sub></b> = <span id="v10-hw-out" style="color:#fc8181; font-size: 1.2rem;">---</span> m
+    </div>
+</div>
+
+<script>
+(function() {
+    const fS = document.getElementById('v10-f-slider');
+    const lS = document.getElementById('v10-L-slider');
+    const vS = document.getElementById('v10-v-slider');
+    
+    const cIdeal = document.getElementById('ideal-canvas');
+    const cReal = document.getElementById('real-canvas');
+    const ctxI = cIdeal.getContext('2d');
+    const ctxR = cReal.getContext('2d');
+
+    function update() {
+        const f = parseFloat(fS.value);
+        const L = parseFloat(lS.value);
+        const v = parseFloat(vS.value);
+        const D = 0.1; const g = 9.81;
+
+        const hw = f * (L / D) * (v * v / (2 * g));
+
+        document.getElementById('v10-v-f').innerText = f.toFixed(3);
+        document.getElementById('v10-v-L').innerText = L;
+        document.getElementById('v10-v-v').innerText = v.toFixed(1);
+        document.getElementById('v10-hw-out').innerText = hw.toFixed(2);
+
+        draw(ctxI, 0, v, L, D);
+        draw(ctxR, hw, v, L, D);
+    }
+
+    function draw(ctx, totalHw, v, L, D) {
+        ctx.clearRect(0, 0, 400, 300);
+        const g = 9.81;
+        const scaleH = 200 / 10; // 10m height = 200px
+        const scaleW = 350 / 50; // 50m length = 350px
+        
+        const ox = 25, oy = 250;
+        const EGL_start = 200;
+        const v_head = (v*v / (2*g)) * scaleH;
+
+        // Pipe
+        ctx.fillStyle = "#f1f5f9";
+        ctx.fillRect(ox, oy - 20, L * scaleW, 20);
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 2;
+        ctx.strokeRect(ox, oy - 20, L * scaleW, 20);
+
+        // Energy Grade Line (EGL)
+        ctx.beginPath();
+        ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3;
+        ctx.moveTo(ox, oy - EGL_start);
+        ctx.lineTo(ox + L * scaleW, oy - EGL_start + totalHw * scaleH);
+        ctx.stroke();
+        ctx.fillStyle = "#ef4444"; ctx.font = "bold 10px Arial";
+        ctx.fillText("EGL", ox + 10, oy - EGL_start - 10);
+
+        // Hydraulic Grade Line (HGL)
+        ctx.beginPath();
+        ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+        ctx.moveTo(ox, oy - EGL_start + v_head);
+        ctx.lineTo(ox + L * scaleW, oy - EGL_start + totalHw * scaleH + v_head);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#3b82f6";
+        ctx.fillText("HGL", ox + 10, oy - EGL_start + v_head - 10);
+
+        // Labels
+        if(totalHw > 0) {
+            ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(ox + L * scaleW + 5, oy - EGL_start);
+            ctx.lineTo(ox + L * scaleW + 5, oy - EGL_start + totalHw * scaleH);
+            ctx.stroke();
+            ctx.fillText("hw", ox + L * scaleW + 10, oy - EGL_start + (totalHw*scaleH)/2);
+        }
+    }
+
+    [fS, lS, vS].forEach(s => s.oninput = update);
+    update();
+})();
+</script>
+
+***
+
 ```{=html}
 <!-- NOVI WIDGET: Pitot-Prandtl Cijev -->
 <div class="widget-container" id="widget-pitot-tube">

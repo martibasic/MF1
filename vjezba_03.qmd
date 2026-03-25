@@ -1,5 +1,147 @@
 # Vježba 3: Statika fluida - Manometri i Ubrzani spremnici
 
+## Fizikalni uvod i principi
+
+Statika fluida proučava fluide u stanju mirovanja. Za razliku od krutina, fluidi u mirovanju ne mogu izdržati tangencijalna naprezanja; stoga je sila na bilo koju površinu unutar fluida uvijek okomita na tu površinu.
+
+### Temeljni principi
+
+1.  **Fundamentalna jednadžba hidrostatike:** Iz Eulerove jednadžbe gibanja za fluid u mirovanju ($\vec{a} = 0$) dobivamo:
+    $$\nabla p = \rho \vec{f}$$
+    gdje je $\vec{f}$ vektor masene sile (najčešće gravitacija $\vec{g}$). Za nestlačive fluide, integracija daje linearnu raspodjelu: **$p = p_0 + \rho g h$**.
+
+2.  **Relativno mirovanje (Ubrzani spremnici):** Kada se spremnik giba konstantnim ubrzanjem $\vec{a}$, fluid miruje relativno u odnosu na stijenke. Na fluid tada djeluje **efektivna gravitacija**:
+    $$\vec{g}_{eff} = \vec{g} - \vec{a}$$
+    Slobodna površina tekućine i sve izobare postavljaju se uvijek **okomito na vektor $\vec{g}_{eff}$**. Nagib površine $\alpha$ iznosi $\tan \alpha = a_x / g$.
+
+3.  **Arhimedov zakon i Uzgon:** Svako tijelo uronjeno u tekućinu gubi na težini onoliko koliko iznosi težina istisnute tekućine:
+    $$F_u = \rho_{fluid} \cdot g \cdot V_{istisnut}$$
+    Sila uzgona djeluje prema gore kroz težište istisnutog volumena.
+
+```{=html}
+<div id="v3-intro-widget" style="max-width: 900px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 16px; padding: 25px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+    <div style="display: flex; gap: 15px; margin-bottom: 20px; justify-content: center;">
+        <button onclick="switchV3Tab('manometar')" id="v3-btn-mano" style="padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: #3182ce; color: white; font-weight: 600; transition: 0.3s;">Manometarski balans</button>
+        <button onclick="switchV3Tab('ubrzanje')" id="v3-btn-acc" style="padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: #edf2f7; color: #4a5568; font-weight: 600; transition: 0.3s;">Relativno mirovanje</button>
+    </div>
+
+    <div style="display: flex; gap: 20px; align-items: center; min-height: 280px;">
+        <div style="flex: 1.2; position: relative; height: 280px; background: #fdfdfd; border-radius: 12px; border: 1px solid #edf2f7; overflow: hidden;">
+            <canvas id="v3-intro-canvas" width="400" height="280" style="width: 100%; height: 100%;"></canvas>
+        </div>
+        <div style="flex: 1; padding: 10px;">
+            <div id="v3-text-mano">
+                <h5 style="color: #2c5282; margin-top: 0;">Hidrostatska ravnoteža</h5>
+                <p style="font-size: 0.85rem; color: #4a5568; line-height: 1.5;">U spojnim posudama s različitim fluidima, razina se postavlja tako da su tlakovi u referentnoj ravnini jednaki.</p>
+                <div style="background: #ebf8ff; padding: 12px; border-radius: 10px; border-left: 4px solid #3182ce;">
+                    <label style="font-size: 0.75rem; font-weight: bold; color: #2c5282;">Gustoća fluida 2 (ρ₂):</label>
+                    <input type="range" id="v3-intro-rho" min="500" max="2000" step="50" value="1300" style="width: 100%; margin-top: 5px;">
+                </div>
+            </div>
+            <div id="v3-text-acc" style="display: none;">
+                <h5 style="color: #c53030; margin-top: 0;">Vektorski zbroj sile</h5>
+                <p style="font-size: 0.85rem; color: #4a5568; line-height: 1.5;">Površina je okomita na rezultantu gravitacije i inercijalne sile. Što je $a_x$ veće, to je nagib površine strmiji.</p>
+                <div style="background: #fff5f5; padding: 12px; border-radius: 10px; border-left: 4px solid #e53e3e;">
+                    <label style="font-size: 0.75rem; font-weight: bold; color: #c53030;">Horizontalno ubrzanje aₓ:</label>
+                    <input type="range" id="v3-intro-acc" min="0" max="10" step="0.5" value="2.5" style="width: 100%; margin-top: 5px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v3-intro-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const rhoS = document.getElementById('v3-intro-rho');
+    const accS = document.getElementById('v3-intro-acc');
+    let currentTab = 'manometar';
+
+    window.switchV3Tab = function(tab) {
+        currentTab = tab;
+        document.getElementById('v3-btn-mano').style.background = tab === 'manometar' ? '#3182ce' : '#edf2f7';
+        document.getElementById('v3-btn-mano').style.color = tab === 'manometar' ? 'white' : '#4a5568';
+        document.getElementById('v3-btn-acc').style.background = tab === 'ubrzanje' ? '#3182ce' : '#edf2f7';
+        document.getElementById('v3-btn-acc').style.color = tab === 'ubrzanje' ? 'white' : '#4a5568';
+        document.getElementById('v3-text-mano').style.display = tab === 'manometar' ? 'block' : 'none';
+        document.getElementById('v3-text-acc').style.display = tab === 'ubrzanje' ? 'block' : 'none';
+    };
+
+    function animate() {
+        if(!document.getElementById('v3-intro-canvas')) return;
+        ctx.clearRect(0, 0, 400, 280);
+
+        if (currentTab === 'manometar') {
+            const rho1 = 1000;
+            const rho2 = parseFloat(rhoS.value);
+            const h1 = 150;
+            const h2 = h1 * (rho1 / rho2);
+            
+            // Draw U-tube
+            ctx.lineWidth = 25; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#e2e8f0';
+            ctx.beginPath(); ctx.moveTo(100, 50); ctx.lineTo(100, 200); ctx.lineTo(250, 200); ctx.lineTo(250, 50); ctx.stroke();
+            
+            // Fluid 1 (Blue)
+            ctx.strokeStyle = '#3182ce'; ctx.beginPath();
+            ctx.moveTo(100, 200 - h1); ctx.lineTo(100, 200); ctx.lineTo(175, 200); ctx.stroke();
+            
+            // Fluid 2 (Darker)
+            ctx.strokeStyle = '#2d3748'; ctx.beginPath();
+            ctx.moveTo(175, 200); ctx.lineTo(250, 200); ctx.lineTo(250, 200 - h2); ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#4a5568'; ctx.font = 'bold 12px Inter';
+            ctx.fillText('ρ₁ = 1000', 60, 200-h1-10);
+            ctx.fillText('ρ₂ = ' + rho2, 210, 200-h2-10);
+            
+        } else {
+            const ax = parseFloat(accS.value);
+            const g = 9.81;
+            const alpha = Math.atan(ax / g);
+            
+            // Tank
+            ctx.strokeStyle = '#2d3748'; ctx.lineWidth = 3;
+            ctx.strokeRect(100, 80, 200, 120);
+            
+            // Fluid
+            const hMid = 140;
+            const L = 200;
+            const dy = (L/2) * Math.tan(alpha);
+            
+            ctx.fillStyle = 'rgba(49, 130, 206, 0.2)';
+            ctx.beginPath();
+            ctx.moveTo(100, hMid + dy); ctx.lineTo(300, hMid - dy);
+            ctx.lineTo(300, 200); ctx.lineTo(100, 200); ctx.closePath(); ctx.fill();
+            
+            // Vector Diagram
+            const vx = 340, vy = 100;
+            drawArrow(ctx, vx, vy, vx, vy+50, '#718096', 'g');
+            drawArrow(ctx, vx, vy, vx-(ax/10)*50, vy, '#e53e3e', '-a');
+            drawArrow(ctx, vx, vy, vx-(ax/10)*50, vy+50, '#3182ce', 'g_eff');
+        }
+        requestAnimationFrame(animate);
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+        const headlen = 8; const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-Math.PI/6), y2-headlen*Math.sin(angle-Math.PI/6));
+        ctx.lineTo(x2-headlen*Math.cos(angle+Math.PI/6), y2-headlen*Math.sin(angle+Math.PI/6));
+        ctx.fill();
+        if(label) { ctx.font = 'bold 10px Inter'; ctx.fillText(label, x2+5, y2+5); }
+    }
+
+    animate();
+})();
+</script>
+```
+
+***
+
 ### Zadatak 23: Diferencijalni manometar s morskom vodom
 
 **Tekst zadatka:** 
@@ -332,47 +474,48 @@ $p_{pm} + \rho_v g h_1 - \rho_u g h_3 = \rho_{Hg} g h_2 \implies h_2 = \frac{650
             const time = Date.now() * 0.005; const arrowY = y3_end - 15 + Math.sin(time) * 5;
             ctx.beginPath(); ctx.moveTo(ox2, arrowY); ctx.lineTo(ox2, arrowY + 10); ctx.lineTo(ox2-5, arrowY+5); ctx.moveTo(ox2, arrowY+10); ctx.lineTo(ox2+5, arrowY+5); ctx.strokeStyle = "#e53e3e"; ctx.lineWidth = 2; ctx.stroke();
 
-            requestAnimationFrame(() => draw(p, h1, h2, h3));
-        }
-        slP.oninput = slH1.oninput = slH3.oninput = update;
-        update();
-        })();
-        </script>
-        </div>
-        ```
+        requestAnimationFrame(() => draw(p, h1, h2, h3));
+    }
+    slP.oninput = slH1.oninput = slH3.oninput = update;
+    update();
+    })();
+    </script>
+</div>
+```
 
-        ***
+***
 
-        ### Zadatak 25: Ravnoteža klipa i tlak u komorama
+### Zadatak 25: Ravnoteža klipa i tlak u komorama
 
-        **Tekst zadatka:**
-        Dvije komore koje međusobno povezuje istovrstan fluid (voda gustoće $\rho_v$) odvojene su međusobno putem klipa čija težina iznosi 25[N], prikazano na slici. Potrebno je odrediti pretlak u komorama A i B. Zanemariti utjecaj visine stupca zraka.
+**Tekst zadatka:** 
+Dvije komore koje međusobno povezuje istovrstan fluid (voda gustoće $\rho_v$) odvojene su međusobno putem klipa čija težina iznosi 25[N], prikazano na slici. Potrebno je odrediti pretlak u komorama A i B. Zanemariti utjecaj visine stupca zraka.
 
-        **Zadano:**
-        * $G_k = 25 \, [N], \rho_v = 1000 \, [kg/m^3], d_1 = 0,3 \, [m], d_2 = 0,3 \, [m], d_3 = 0,9 \, [m], h_1 = 0,25 \, [m], h_2 = 0,5 \, [m]$
+**Zadano:**
+* $G_k = 25 \, [N], \rho_v = 1000 \, [kg/m^3], d_1 = 0,3 \, [m], d_2 = 0,3 \, [m], d_3 = 0,9 \, [m], h_1 = 0,25 \, [m], h_2 = 0,5 \, [m]$
 
-        **Odrediti pretlak u komorama:** $p_A = ?, p_B = ?$
+**Odrediti pretlak u komorama:** $p_A = ?, p_B = ?$
 
-        **Rješenje:**
-        1. **Pretlak pod klipom:** $p_c^* = \frac{G_k}{A_k} = \frac{25}{0,0707} = \mathbf{353,6 \, \text{Pa}}$.
-        2. **Pretlak A:** $p_A^* = p_c^* + \rho_v g h_1 = \mathbf{2806 \, \text{Pa}}$.
-        3. **Pretlak B:** $p_B^* = p_c^* - \rho_v g (h_2 - h_1) = \mathbf{-2099 \, \text{Pa}}$ (vakuum).
+**Rješenje:**
+1. **Pretlak pod klipom:** $p_c^* = \frac{G_k}{A_k} = \frac{25}{0,0707} = \mathbf{353,6 \, \text{Pa}}$.
+2. **Pretlak A:** $p_A^* = p_c^* + \rho_v g h_1 = \mathbf{2806 \, \text{Pa}}$.
+3. **Pretlak B:** $p_B^* = p_c^* - \rho_v g (h_2 - h_1) = \mathbf{-2099 \, \text{Pa}}$ (vakuum).
 
-        ```{=html}
-        <!-- ZADATAK 25: Redizajnirani simulator balansa klipa -->
-        <div class="widget-container" id="widget-z25-v3" style="max-width: 950px; margin: 2rem auto; padding: 30px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 15px 45px rgba(0,0,0,0.1);">    <style>
+```{=html}
+<!-- ZADATAK 25: Redizajnirani simulator balansa klipa -->
+<div class="widget-container" id="widget-z25-v3" style="max-width: 950px; margin: 2rem auto; padding: 30px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 15px 45px rgba(0,0,0,0.1);">
+        <style>
         .z25-v3-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
         @media (max-width: 850px) { .z25-v3-grid { grid-template-columns: 1fr; } }
         .z25-v3-panel { background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #edf2f7; }
         .z25-v3-visual { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 500px; overflow: hidden; }
         .gauge-v3 { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .p-badge-v3 { padding: 15px; border-radius: 12px; text-align: center; color: white; font-weight: 800; }
-    </style>
+        </style>
 
-    <div class="lab-header" style="text-align:center; margin-bottom:25px;">
+        <div class="lab-header" style="text-align:center; margin-bottom:25px;">
         <h3 style="margin:0; color:#1a202c; font-weight:900; letter-spacing:-0.5px;">⚖️ Laboratorij: Balans klipa i gradijent tlaka</h3>
         <p style="font-size:0.95rem; color:#64748b; margin-top:5px;">Međudjelovanje težine krutine i statičkog tlaka fluida</p>
-    </div>
+        </div>
 
     <div class="z25-v3-grid">
         <div class="z25-v3-panel">

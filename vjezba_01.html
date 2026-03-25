@@ -143,7 +143,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Predgovor</span></a>
+ <span class="menu-text">Predgovor:</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -263,8 +263,132 @@ window.Quarto = {
 </header>
 
 
-<section id="ručna-hidraulična-dizalica" class="level3" data-number="1.0.1">
-<h3 data-number="1.0.1" class="anchored" data-anchor-id="ručna-hidraulična-dizalica"><span class="header-section-number">1.0.1</span> 1. Ručna hidraulična dizalica</h3>
+<section id="fizikalni-uvod" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="fizikalni-uvod"><span class="header-section-number">1.1</span> Fizikalni uvod</h2>
+<p>Mehanika fluida proučava ponašanje tekućina i plinova u mirovanju (<strong>hidrostatika</strong>) i gibanju (<strong>hidrodinamika</strong>). Fluidi su tvari koje nemaju stalan oblik i neprestano se deformiraju pod utjecajem i najmanjeg tangencijalnog naprezanja. Ova vježba obrađuje temeljne stupove mehanike fluida:</p>
+<ol type="1">
+<li><strong>Pascalov zakon:</strong> Tlak narinut u bilo kojoj točki zatvorenog fluida prenosi se nepromijenjen u svim smjerovima. To omogućuje transformaciju malih sila u velike, što je temelj rada hidrauličkih strojeva.</li>
+<li><strong>Stlačivost i temperatura:</strong> Iako se tekućine često smatraju nestlačivima, pri visokim tlakovima (npr. dubine oceana) gustoća se mijenja. Također, promjena temperature značajno utječe na volumen i viskoznost fluida.</li>
+<li><strong>Newtonov zakon viskoznosti:</strong> Definira unutarnje trenje u fluidu. Tangencijalno naprezanje <span class="math inline">\(\tau\)</span> proporcionalno je brzini deformacije (gradijentu brzine), a koeficijent proporcionalnosti je dinamička viskoznost <span class="math inline">\(\mu\)</span>.</li>
+</ol>
+<div id="v1-intro-widget" style="max-width: 900px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 16px; padding: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+    <div style="display: flex; gap: 15px; margin-bottom: 20px; justify-content: center;">
+        <button onclick="switchV1Tab('pascal')" id="btn-pascal" style="padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: #3182ce; color: white; font-weight: 600; transition: 0.3s;">Pascalov zakon</button>
+        <button onclick="switchV1Tab('newton')" id="btn-newton" style="padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: #edf2f7; color: #4a5568; font-weight: 600; transition: 0.3s;">Newtonov zakon</button>
+    </div>
+
+    <div style="display: flex; gap: 20px; align-items: center; min-height: 250px;">
+        <div style="flex: 1; position: relative; height: 250px; background: #fdfdfd; border-radius: 12px; border: 1px solid #edf2f7; overflow: hidden;">
+            <canvas id="v1-intro-canvas" width="400" height="250" style="width: 100%; height: 100%;"></canvas>
+        </div>
+        <div style="flex: 1; padding: 10px;">
+            <div id="text-pascal">
+                <h5 style="color: #2c5282; margin-top: 0;" class="anchored">Hidraulički multiplikator</h5>
+                <p style="font-size: 0.85rem; color: #4a5568; line-height: 1.5;">Budući da je tlak $p$ isti u cijelom sustavu, sila $F_2$ na velikom klipu bit će onoliko puta veća od sile $F_1$ koliko je površina $A_2$ veća od $A_1$.</p>
+                <div style="background: #ebf8ff; padding: 10px; border-radius: 8px; border-left: 4px solid #3182ce; font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; text-align: center;">
+                    F₂ = F₁ · (A₂ / A₁)
+                </div>
+            </div>
+            <div id="text-newton" style="display: none;">
+                <h5 style="color: #7b341e; margin-top: 0;" class="anchored">Unutarnje trenje (τ)</h5>
+                <p style="font-size: 0.85rem; color: #4a5568; line-height: 1.5;">Viskoznost fluida uzrokuje otpor gibanju. Sloj uz stijenku miruje, dok se ostali slojevi "kližu" jedan preko drugoga stvarajući linearni ili parabolični profil brzine.</p>
+                <div style="background: #fffaf0; padding: 10px; border-radius: 8px; border-left: 4px solid #dd6b20; font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; text-align: center;">
+                    τ = μ · (dv / dy)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v1-intro-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let currentTab = 'pascal';
+    let frame = 0;
+
+    window.switchV1Tab = function(tab) {
+        currentTab = tab;
+        document.getElementById('btn-pascal').style.background = tab === 'pascal' ? '#3182ce' : '#edf2f7';
+        document.getElementById('btn-pascal').style.color = tab === 'pascal' ? 'white' : '#4a5568';
+        document.getElementById('btn-newton').style.background = tab === 'newton' ? '#3182ce' : '#edf2f7';
+        document.getElementById('btn-newton').style.color = tab === 'newton' ? 'white' : '#4a5568';
+        document.getElementById('text-pascal').style.display = tab === 'pascal' ? 'block' : 'none';
+        document.getElementById('text-newton').style.display = tab === 'newton' ? 'block' : 'none';
+    };
+
+    function animate() {
+        if(!document.getElementById('v1-intro-canvas')) return;
+        ctx.clearRect(0, 0, 400, 250);
+        frame++;
+
+        if (currentTab === 'pascal') {
+            // Draw Pascal's setup
+            ctx.fillStyle = "rgba(49, 130, 206, 0.15)";
+            ctx.beginPath();
+            ctx.moveTo(80, 50); ctx.lineTo(80, 200); ctx.lineTo(320, 200); ctx.lineTo(320, 50);
+            ctx.lineTo(280, 50); ctx.lineTo(280, 160); ctx.lineTo(120, 160); ctx.lineTo(120, 50);
+            ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = "#cbd5e0"; ctx.lineWidth = 2; ctx.stroke();
+
+            // Small piston
+            let off1 = Math.sin(frame*0.05)*15;
+            ctx.fillStyle = "#4a5568";
+            ctx.fillRect(82, 100 + off1, 36, 10);
+            // Large piston
+            ctx.fillRect(282, 100 - off1*0.3, 36, 10);
+            
+            // Forces
+            drawArrow(ctx, 100, 50 + off1, 100, 95 + off1, "#3182ce", "F₁");
+            drawArrow(ctx, 300, 95 - off1*0.3, 300, 20 - off1*0.3, "#e53e3e", "F₂");
+        } else {
+            // Draw Newton's setup
+            const h = 120; const y0 = 190;
+            ctx.fillStyle = "rgba(49, 130, 206, 0.1)";
+            ctx.fillRect(50, y0-h, 300, h);
+            
+            ctx.strokeStyle = "#4a5568"; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(50, y0); ctx.lineTo(350, y0); ctx.stroke(); // Bottom
+            ctx.fillStyle = "#2d3748"; 
+            let plateOff = (frame*0.5)%50;
+            ctx.fillRect(50, y0-h-10, 300, 10); // Top plate
+
+            // Velocity profile
+            ctx.strokeStyle = "#3182ce"; ctx.lineWidth = 1; ctx.setLineDash([5,3]);
+            ctx.beginPath(); ctx.moveTo(100, y0); ctx.lineTo(250, y0-h); ctx.stroke();
+            ctx.setLineDash([]);
+            
+            for(let i=0; i<=h; i+=30) {
+                let v = (i/h) * 150;
+                drawArrow(ctx, 100, y0-i, 100+v, y0-i, "#3182ce");
+            }
+            // Shear Stress Arrows
+            drawArrow(ctx, 350, y0-h-5, 380, y0-h-5, "#e53e3e", "τ");
+        }
+        requestAnimationFrame(animate);
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+        const headlen = 8; const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-Math.PI/6), y2-headlen*Math.sin(angle-Math.PI/6));
+        ctx.lineTo(x2-headlen*Math.cos(angle+Math.PI/6), y2-headlen*Math.sin(angle+Math.PI/6));
+        ctx.fill();
+        if(label) { 
+            ctx.font = "bold 12px Inter, sans-serif"; 
+            ctx.fillText(label, x2 + (x2>x1?5:-25), y2 + (y2>y1?15:-5)); 
+        }
+    }
+
+    animate();
+})();
+</script>
+<hr>
+<section id="ručna-hidraulična-dizalica" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="ručna-hidraulična-dizalica"><span class="header-section-number">1.1.1</span> 1. Ručna hidraulična dizalica</h3>
 <p><strong>Tekst zadatka:</strong> Ručna hidraulična dizalica na slici napunjena je uljem. Ukoliko zanemarimo težinu klipova i preostalih elemenata, te mehaničke gubitke, potrebno je odrediti silu F koja će održavati sustav u ravnoteži kada teret ima masu m=1000 kg. Pretpostaviti konstantan tlak u čitavoj komori. Promjer većeg klipa <span class="math inline">\(d_v = 100 \, mm\)</span>, a manjeg <span class="math inline">\(d_m = 30 \, mm\)</span>. Sila F djeluje na manji klip na kraku b=400mm i oslonjena je u osloncu A (duljina a=30mm) kako je prikazano na slici.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(m = 1000 \, [kg]\)</span> * <span class="math inline">\(d_v = 0,1 \, [m]\)</span> * <span class="math inline">\(d_m = 0,03 \, [m]\)</span> * <span class="math inline">\(a = 0,03 \, [m]\)</span> * <span class="math inline">\(b = 0,4 \, [m]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(F = ?\)</span></p>
@@ -415,8 +539,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="težina-klipa-i-manometarski-tlak" class="level3" data-number="1.0.2">
-<h3 data-number="1.0.2" class="anchored" data-anchor-id="težina-klipa-i-manometarski-tlak"><span class="header-section-number">1.0.2</span> 2. Težina klipa i manometarski tlak</h3>
+<section id="težina-klipa-i-manometarski-tlak" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="težina-klipa-i-manometarski-tlak"><span class="header-section-number">1.1.2</span> 2. Težina klipa i manometarski tlak</h3>
 <p><strong>Tekst zadatka:</strong> Za sustav na slici potrebno je odrediti težinu klipa kada manometarsko očitanje tlaka iznosi 70,0 kPa. U sustavnu se nalazi ulje gustoće <span class="math inline">\(\rho=860 \, kg/m^3\)</span>. Klip je promjera <span class="math inline">\(d_k=1m\)</span>.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(p_m = 70000 \, [Pa]\)</span> * <span class="math inline">\(\rho = 860 \, [kg/m^3]\)</span> * <span class="math inline">\(d_k = 1 \, [m]\)</span> * <span class="math inline">\(h = 1 \, [m]\)</span></p>
 <p><strong>Odrediti:</strong> a) Težinu klipa <span class="math inline">\(G = ?\)</span> b) Visinu klipa <span class="math inline">\(h_k = ?\)</span> ako je klip od željeza (<span class="math inline">\(\rho_{Fe} = 7870 \, [\frac{kg}{m^3}]\)</span>)</p>
@@ -476,8 +600,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="toplinsko-širenje-vode-i-staklene-posude" class="level3" data-number="1.0.3">
-<h3 data-number="1.0.3" class="anchored" data-anchor-id="toplinsko-širenje-vode-i-staklene-posude"><span class="header-section-number">1.0.3</span> 3. Toplinsko širenje vode i staklene posude</h3>
+<section id="toplinsko-širenje-vode-i-staklene-posude" class="level3" data-number="1.1.3">
+<h3 data-number="1.1.3" class="anchored" data-anchor-id="toplinsko-širenje-vode-i-staklene-posude"><span class="header-section-number">1.1.3</span> 3. Toplinsko širenje vode i staklene posude</h3>
 <p><strong>Tekst zadatka:</strong> Vertikalni stakleni cilindar sadrži 900 ml vode temperature 10 °C, pri čemu visina stupca vode iznosi 90 cm. Voda i stakleni cilindar se zagrijavaju na temperaturu 80 °C. Ukoliko pretpostavimo da nema isparavanja, kolika će biti visina stupca vode ukoliko je linearni koeficijent toplinskog širenja stakla <span class="math inline">\(3,6 \cdot 10^{-6} \, K^{-1}\)</span>. Koeficijent volumenskog toplinskog širenja vode pri temperaturi od 10 °C iznosi <span class="math inline">\(0,088 \cdot 10^{-3} \, K^{-1}\)</span>, dok pri temperaturi 80 °C iznosi <span class="math inline">\(0,643 \cdot 10^{-3} \, K^{-1}\)</span>, gustoća vode pri 10 °C iznosi 999,7 <span class="math inline">\(kg/m^3\)</span>. Potrebno je usporediti proračunski dobivenu gustoću vode pri temperaturi sa tabličnom koja za 80 °C iznosi 971,8 <span class="math inline">\(kg/m^3\)</span>. Potrebno je odrediti koliko će se vode preliti iz spremnika za proračunatu i tabličnu gustoću ukoliko je pri početnoj temperaturi spremnik bio napunjen do samoga vrha.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(V_{H2O10} = V_{sp10} = 0,0009 \, [m^3], t_{v1} = 10[°C], h_{v10} = 0,9[m], \rho_{vt10} = 999,7 \, [\frac{kg}{m^3}]\)</span> * <span class="math inline">\(t_{v2} = 80[°C], \rho_{vt80} = 971,8 \, [\frac{kg}{m^3}], \alpha_s = 3,6 \cdot 10^{-6} [K^{-1}]\)</span> * <span class="math inline">\(\beta_{H2O10} = 0,088 \cdot 10^{-3} [K^{-1}], \beta_{H2O80} = 0,643 \cdot 10^{-3} [K^{-1}]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(V_{vt80} = ?\)</span> (tablična), <span class="math inline">\(V_{vp80} = ?\)</span> (proračunska), <span class="math inline">\(V_{sp80} = ?\)</span> (posuda)</p>
@@ -517,16 +641,16 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="modul-stlačivosti-tekućine" class="level3" data-number="1.0.4">
-<h3 data-number="1.0.4" class="anchored" data-anchor-id="modul-stlačivosti-tekućine"><span class="header-section-number">1.0.4</span> 4. Modul stlačivosti tekućine</h3>
+<section id="modul-stlačivosti-tekućine" class="level3" data-number="1.1.4">
+<h3 data-number="1.1.4" class="anchored" data-anchor-id="modul-stlačivosti-tekućine"><span class="header-section-number">1.1.4</span> 4. Modul stlačivosti tekućine</h3>
 <p><strong>Tekst zadatka:</strong> Tekućina stlačena u cilindru zauzima početni volumen od 1000 cm3 pri tlaku od 1MPa, dok pri tlaku od 2MPa zauzima volumen od 995 cm3. Potrebno je odrediti modul stlačivosti tekućine.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(V_1 = 1000 \cdot 10^{-6} \, [m^3], p_1 = 1 \, [MPa]\)</span> * <span class="math inline">\(V_2 = 995 \cdot 10^{-6} \, [m^3], p_2 = 2 \, [MPa]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(E = ?\)</span></p>
 <p><strong>RJEŠENJE:</strong> <span class="math display">\[E = - \frac{dp}{dV/V} = - \frac{(p_2 - p_1) \cdot V_1}{V_2 - V_1} = - \frac{1 \cdot 10^6 \cdot 1000}{995 - 1000} = \mathbf{200 \, [MPa]}\]</span></p>
 <hr>
 </section>
-<section id="gustoća-oceana-na-velikim-dubinama" class="level3" data-number="1.0.5">
-<h3 data-number="1.0.5" class="anchored" data-anchor-id="gustoća-oceana-na-velikim-dubinama"><span class="header-section-number">1.0.5</span> 5. Gustoća oceana na velikim dubinama</h3>
+<section id="gustoća-oceana-na-velikim-dubinama" class="level3" data-number="1.1.5">
+<h3 data-number="1.1.5" class="anchored" data-anchor-id="gustoća-oceana-na-velikim-dubinama"><span class="header-section-number">1.1.5</span> 5. Gustoća oceana na velikim dubinama</h3>
 <p><strong>Tekst zadatka:</strong> Na dubini od 7km u oceanu tlak iznosi 71,6 MPa. Gustoća na površini iznosi ρ=1025 kg/m3, pri čemu modul stlačivosti iznosi 2,34 GPa za dotični raspon tlaka. Potrebno je odrediti gustoću fluida na dubini od 7km i postotak promjene gustoće fluida između površine i dubine od 7 km.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(h = 7000[m], p_h = 71,6[MPa], \rho_0 = 1025 \, [\frac{kg}{m^3}], E_0 = 2,34[GPa]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(\rho_h = ?, \Delta \rho = ?\)</span></p>
@@ -603,8 +727,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="profil-brzine-u-cijevi" class="level3" data-number="1.0.6">
-<h3 data-number="1.0.6" class="anchored" data-anchor-id="profil-brzine-u-cijevi"><span class="header-section-number">1.0.6</span> 6. Profil brzine u cijevi</h3>
+<section id="profil-brzine-u-cijevi" class="level3" data-number="1.1.6">
+<h3 data-number="1.1.6" class="anchored" data-anchor-id="profil-brzine-u-cijevi"><span class="header-section-number">1.1.6</span> 6. Profil brzine u cijevi</h3>
 <p><strong>Tekst zadatka:</strong> Voda struji kroz cijev. Profil brzine u poprečnom presjeku zadan je izrazom <span class="math inline">\(v = (\frac{\beta}{4\mu}) (\frac{d^2}{4} - r^2)\)</span>, pri čemu je v - brzina vode ovisna o polumjeru r, β - konstanta, μ - viskoznost vode, d – promjer cijevi, a r - radijalna udaljenost od središnje osi cijevi. Odrediti tangencijalno naprezanje na stjenkama cijevi uslijed strujanja vode. Odrediti tangencijalno naprezanje na polumjeru <span class="math inline">\(r = \frac{d}{4}\)</span>. Ukoliko ukupna duljina cijevi iznosi L, odrediti ukupnu tangencijalnu silu na stijenkama cijevi.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(v = (\frac{\beta}{4\mu})(\frac{d^2}{4} - r^2)\)</span>, <span class="math inline">\(r = \frac{d}{4}\)</span></p>
 <p><strong>Odrediti:</strong> a) Tangencijalno naprezanje na stjenki <span class="math inline">\(\tau_s = ?\)</span> b) Tangencijalno naprezanje na polumjeru d/4 <span class="math inline">\(\tau_{d/4} = ?\)</span> c) Tangencijalnu silu na stijenkama cijevi <span class="math inline">\(F_{\tau s} = ?\)</span></p>
@@ -729,16 +853,16 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="blok-koji-klizi-niz-kosinu" class="level3" data-number="1.0.7">
-<h3 data-number="1.0.7" class="anchored" data-anchor-id="blok-koji-klizi-niz-kosinu"><span class="header-section-number">1.0.7</span> 7. Blok koji klizi niz kosinu</h3>
+<section id="blok-koji-klizi-niz-kosinu" class="level3" data-number="1.1.7">
+<h3 data-number="1.1.7" class="anchored" data-anchor-id="blok-koji-klizi-niz-kosinu"><span class="header-section-number">1.1.7</span> 7. Blok koji klizi niz kosinu</h3>
 <p><strong>Tekst zadatka:</strong> Blok kvadratnog presjeka težine 1,1 [kN], duljine bridova 250 [mm] klizi kosinom koja sa horizontalnom osi zatvara kut od 20° po sloju ulja debljine 6 μm. Ukoliko pretpostavimo linearan profil brzine i konstantnu debljinu sloja ulja, potrebno je odrediti ustaljenu brzinu bloka. Dinamička viskoznost ulja iznosi 7 [mPa s].</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(F_G = 1100 \, [N], a = 0,25 \, [m], \alpha = 20°, \delta_u = 6 \cdot 10^{-6} \, [m], \mu = 0,007 \, [Pa s]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(v_B = ?\)</span></p>
 <p><strong>RJEŠENJE:</strong> Sila koja uzrokuje gibanje: <span class="math inline">\(F_x = F_G \cdot \sin\alpha = 1100 \cdot \sin 20° = 376,2 \, [N]\)</span> Otpor uslijed viskoznosti: <span class="math inline">\(F_\tau = \tau \cdot A = \mu \cdot \frac{v}{\delta_u} \cdot a^2\)</span> Izjednačavanjem: <span class="math inline">\(F_x = F_\tau \implies v_B = \frac{F_G \cdot \sin\alpha \cdot \delta_u}{\mu \cdot a^2} = \mathbf{5,16 \, [m/s]}\)</span></p>
 <hr>
 </section>
-<section id="sila-na-rotirajuće-vratilo" class="level3" data-number="1.0.8">
-<h3 data-number="1.0.8" class="anchored" data-anchor-id="sila-na-rotirajuće-vratilo"><span class="header-section-number">1.0.8</span> 8. Sila na rotirajuće vratilo</h3>
+<section id="sila-na-rotirajuće-vratilo" class="level3" data-number="1.1.8">
+<h3 data-number="1.1.8" class="anchored" data-anchor-id="sila-na-rotirajuće-vratilo"><span class="header-section-number">1.1.8</span> 8. Sila na rotirajuće vratilo</h3>
 <p><strong>Tekst zadatka:</strong> Vratilo promjera 70[mm] i duljine 250 [mm] giba se brzinom od 400 [mm/s] duž rukavca ležaja promjera 70,2 [mm]. Pretpostavljena je jednolika zračnost ispunjena uljem temperature 20°C, pri čemu kinematička viskoznost iznosi 0,005 [m2/s], dok je relativna gustoća ulja 0,9. Potrebno je odrediti silu kojom ulje djeluje na vratilo.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(D_v = 0,07 \, [m], v = 0,4 \, [m/s], D_L = 0,0702 \, [m], L_L = 0,25 \, [m], \nu = 0,005 \, [m^2/s], \bar{\rho}_u = 0,9\)</span></p>
 <p><strong>Odrediti silu kojom ulje djeluje na vratilo:</strong> <span class="math inline">\(F_\tau = ?\)</span></p>
@@ -864,8 +988,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="utjecaj-temperature-na-silu-pomicanja-klipa" class="level3" data-number="1.0.9">
-<h3 data-number="1.0.9" class="anchored" data-anchor-id="utjecaj-temperature-na-silu-pomicanja-klipa"><span class="header-section-number">1.0.9</span> 9. Utjecaj temperature na silu pomicanja klipa</h3>
+<section id="utjecaj-temperature-na-silu-pomicanja-klipa" class="level3" data-number="1.1.9">
+<h3 data-number="1.1.9" class="anchored" data-anchor-id="utjecaj-temperature-na-silu-pomicanja-klipa"><span class="header-section-number">1.1.9</span> 9. Utjecaj temperature na silu pomicanja klipa</h3>
 <p><strong>Tekst zadatka:</strong> Klip promjera 70 [mm] giba se unutar cilindra promjera 70,1 [mm]. Potrebno je odrediti postotak smanjenja sile potrebne za pomicanje klipa kada se ulje zagrije sa temperature 0 [°C] na temperaturu 120 [°C]. Dinamička viskoznost ulja pri 0 [°C] iznosi 0,01820[Pa s], odnosno 0,00206[Pa s] pri temperaturi 120[°C].</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(D_k = 0,07[m], D_c = 0,0701[m], t_p = 0[°C], t_k = 120[°C]\)</span> * <span class="math inline">\(\mu_0 = 0,0182[Pa s], \mu_{120} = 0,00206[Pa s]\)</span></p>
 <p><strong>Odrediti postotak smanjenja sile:</strong> <span class="math inline">\(\frac{\Delta F_\tau}{F_{\tau 0}}\)</span></p>
@@ -913,6 +1037,7 @@ window.startZ9Race = startZ9Race;
 
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -1318,8 +1443,8 @@ window.startZ9Race = startZ9Race;
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./index.html" class="pagination-link" aria-label="Predgovor">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Predgovor</span>
+      <a href="./index.html" class="pagination-link" aria-label="Predgovor:">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Predgovor:</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

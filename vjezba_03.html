@@ -143,7 +143,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Predgovor</span></a>
+ <span class="menu-text">Predgovor:</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -263,8 +263,139 @@ window.Quarto = {
 </header>
 
 
-<section id="zadatak-23-diferencijalni-manometar-s-morskom-vodom" class="level3" data-number="3.0.1">
-<h3 data-number="3.0.1" class="anchored" data-anchor-id="zadatak-23-diferencijalni-manometar-s-morskom-vodom"><span class="header-section-number">3.0.1</span> Zadatak 23: Diferencijalni manometar s morskom vodom</h3>
+<section id="fizikalni-uvod-i-principi" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="fizikalni-uvod-i-principi"><span class="header-section-number">3.1</span> Fizikalni uvod i principi</h2>
+<p>Statika fluida proučava fluide u stanju mirovanja. Za razliku od krutina, fluidi u mirovanju ne mogu izdržati tangencijalna naprezanja; stoga je sila na bilo koju površinu unutar fluida uvijek okomita na tu površinu.</p>
+<section id="temeljni-principi" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="temeljni-principi"><span class="header-section-number">3.1.1</span> Temeljni principi</h3>
+<ol type="1">
+<li><p><strong>Fundamentalna jednadžba hidrostatike:</strong> Iz Eulerove jednadžbe gibanja za fluid u mirovanju (<span class="math inline">\(\vec{a} = 0\)</span>) dobivamo: <span class="math display">\[\nabla p = \rho \vec{f}\]</span> gdje je <span class="math inline">\(\vec{f}\)</span> vektor masene sile (najčešće gravitacija <span class="math inline">\(\vec{g}\)</span>). Za nestlačive fluide, integracija daje linearnu raspodjelu: <strong><span class="math inline">\(p = p_0 + \rho g h\)</span></strong>.</p></li>
+<li><p><strong>Relativno mirovanje (Ubrzani spremnici):</strong> Kada se spremnik giba konstantnim ubrzanjem <span class="math inline">\(\vec{a}\)</span>, fluid miruje relativno u odnosu na stijenke. Na fluid tada djeluje <strong>efektivna gravitacija</strong>: <span class="math display">\[\vec{g}_{eff} = \vec{g} - \vec{a}\]</span> Slobodna površina tekućine i sve izobare postavljaju se uvijek <strong>okomito na vektor <span class="math inline">\(\vec{g}_{eff}\)</span></strong>. Nagib površine <span class="math inline">\(\alpha\)</span> iznosi <span class="math inline">\(\tan \alpha = a_x / g\)</span>.</p></li>
+<li><p><strong>Arhimedov zakon i Uzgon:</strong> Svako tijelo uronjeno u tekućinu gubi na težini onoliko koliko iznosi težina istisnute tekućine: <span class="math display">\[F_u = \rho_{fluid} \cdot g \cdot V_{istisnut}\]</span> Sila uzgona djeluje prema gore kroz težište istisnutog volumena.</p></li>
+</ol>
+<div id="v3-intro-widget" style="max-width: 900px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 16px; padding: 25px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+    <div style="display: flex; gap: 15px; margin-bottom: 20px; justify-content: center;">
+        <button onclick="switchV3Tab('manometar')" id="v3-btn-mano" style="padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: #3182ce; color: white; font-weight: 600; transition: 0.3s;">Manometarski balans</button>
+        <button onclick="switchV3Tab('ubrzanje')" id="v3-btn-acc" style="padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: #edf2f7; color: #4a5568; font-weight: 600; transition: 0.3s;">Relativno mirovanje</button>
+    </div>
+
+    <div style="display: flex; gap: 20px; align-items: center; min-height: 280px;">
+        <div style="flex: 1.2; position: relative; height: 280px; background: #fdfdfd; border-radius: 12px; border: 1px solid #edf2f7; overflow: hidden;">
+            <canvas id="v3-intro-canvas" width="400" height="280" style="width: 100%; height: 100%;"></canvas>
+        </div>
+        <div style="flex: 1; padding: 10px;">
+            <div id="v3-text-mano">
+                <h5 style="color: #2c5282; margin-top: 0;" class="anchored">Hidrostatska ravnoteža</h5>
+                <p style="font-size: 0.85rem; color: #4a5568; line-height: 1.5;">U spojnim posudama s različitim fluidima, razina se postavlja tako da su tlakovi u referentnoj ravnini jednaki.</p>
+                <div style="background: #ebf8ff; padding: 12px; border-radius: 10px; border-left: 4px solid #3182ce;">
+                    <label style="font-size: 0.75rem; font-weight: bold; color: #2c5282;">Gustoća fluida 2 (ρ₂):</label>
+                    <input type="range" id="v3-intro-rho" min="500" max="2000" step="50" value="1300" style="width: 100%; margin-top: 5px;">
+                </div>
+            </div>
+            <div id="v3-text-acc" style="display: none;">
+                <h5 style="color: #c53030; margin-top: 0;" class="anchored">Vektorski zbroj sile</h5>
+                <p style="font-size: 0.85rem; color: #4a5568; line-height: 1.5;">Površina je okomita na rezultantu gravitacije i inercijalne sile. Što je $a_x$ veće, to je nagib površine strmiji.</p>
+                <div style="background: #fff5f5; padding: 12px; border-radius: 10px; border-left: 4px solid #e53e3e;">
+                    <label style="font-size: 0.75rem; font-weight: bold; color: #c53030;">Horizontalno ubrzanje aₓ:</label>
+                    <input type="range" id="v3-intro-acc" min="0" max="10" step="0.5" value="2.5" style="width: 100%; margin-top: 5px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v3-intro-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const rhoS = document.getElementById('v3-intro-rho');
+    const accS = document.getElementById('v3-intro-acc');
+    let currentTab = 'manometar';
+
+    window.switchV3Tab = function(tab) {
+        currentTab = tab;
+        document.getElementById('v3-btn-mano').style.background = tab === 'manometar' ? '#3182ce' : '#edf2f7';
+        document.getElementById('v3-btn-mano').style.color = tab === 'manometar' ? 'white' : '#4a5568';
+        document.getElementById('v3-btn-acc').style.background = tab === 'ubrzanje' ? '#3182ce' : '#edf2f7';
+        document.getElementById('v3-btn-acc').style.color = tab === 'ubrzanje' ? 'white' : '#4a5568';
+        document.getElementById('v3-text-mano').style.display = tab === 'manometar' ? 'block' : 'none';
+        document.getElementById('v3-text-acc').style.display = tab === 'ubrzanje' ? 'block' : 'none';
+    };
+
+    function animate() {
+        if(!document.getElementById('v3-intro-canvas')) return;
+        ctx.clearRect(0, 0, 400, 280);
+
+        if (currentTab === 'manometar') {
+            const rho1 = 1000;
+            const rho2 = parseFloat(rhoS.value);
+            const h1 = 150;
+            const h2 = h1 * (rho1 / rho2);
+            
+            // Draw U-tube
+            ctx.lineWidth = 25; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#e2e8f0';
+            ctx.beginPath(); ctx.moveTo(100, 50); ctx.lineTo(100, 200); ctx.lineTo(250, 200); ctx.lineTo(250, 50); ctx.stroke();
+            
+            // Fluid 1 (Blue)
+            ctx.strokeStyle = '#3182ce'; ctx.beginPath();
+            ctx.moveTo(100, 200 - h1); ctx.lineTo(100, 200); ctx.lineTo(175, 200); ctx.stroke();
+            
+            // Fluid 2 (Darker)
+            ctx.strokeStyle = '#2d3748'; ctx.beginPath();
+            ctx.moveTo(175, 200); ctx.lineTo(250, 200); ctx.lineTo(250, 200 - h2); ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#4a5568'; ctx.font = 'bold 12px Inter';
+            ctx.fillText('ρ₁ = 1000', 60, 200-h1-10);
+            ctx.fillText('ρ₂ = ' + rho2, 210, 200-h2-10);
+            
+        } else {
+            const ax = parseFloat(accS.value);
+            const g = 9.81;
+            const alpha = Math.atan(ax / g);
+            
+            // Tank
+            ctx.strokeStyle = '#2d3748'; ctx.lineWidth = 3;
+            ctx.strokeRect(100, 80, 200, 120);
+            
+            // Fluid
+            const hMid = 140;
+            const L = 200;
+            const dy = (L/2) * Math.tan(alpha);
+            
+            ctx.fillStyle = 'rgba(49, 130, 206, 0.2)';
+            ctx.beginPath();
+            ctx.moveTo(100, hMid + dy); ctx.lineTo(300, hMid - dy);
+            ctx.lineTo(300, 200); ctx.lineTo(100, 200); ctx.closePath(); ctx.fill();
+            
+            // Vector Diagram
+            const vx = 340, vy = 100;
+            drawArrow(ctx, vx, vy, vx, vy+50, '#718096', 'g');
+            drawArrow(ctx, vx, vy, vx-(ax/10)*50, vy, '#e53e3e', '-a');
+            drawArrow(ctx, vx, vy, vx-(ax/10)*50, vy+50, '#3182ce', 'g_eff');
+        }
+        requestAnimationFrame(animate);
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+        const headlen = 8; const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-Math.PI/6), y2-headlen*Math.sin(angle-Math.PI/6));
+        ctx.lineTo(x2-headlen*Math.cos(angle+Math.PI/6), y2-headlen*Math.sin(angle+Math.PI/6));
+        ctx.fill();
+        if(label) { ctx.font = 'bold 10px Inter'; ctx.fillText(label, x2+5, y2+5); }
+    }
+
+    animate();
+})();
+</script>
+<hr>
+</section>
+<section id="zadatak-23-diferencijalni-manometar-s-morskom-vodom" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="zadatak-23-diferencijalni-manometar-s-morskom-vodom"><span class="header-section-number">3.1.2</span> Zadatak 23: Diferencijalni manometar s morskom vodom</h3>
 <p><strong>Tekst zadatka:</strong> Slatka i morska voda struje duž paralelnih horizontalnih cjevovoda povezanih međusobno pomoću manometarske cijevi oblikovane u obliku dvostrukog slova U, prikazano na slici. Potrebno je odrediti razliku tlaka između dotičnih cjevovoda. Prilikom proračuna uzeti vrijednost gustoće morske vode od 1035 [kg/m3]. Odrediti kolika pogreška nastaje zanemarivanja stupca zraka prilikom proračuna.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(\rho_v = 1000 \, [kg/m^3], \rho_{mv} = 1035 \, [kg/m^3], \rho_{zr} = 1,2 \, [kg/m^3], \rho_{Hg} = 13600 \, [kg/m^3]\)</span> * <span class="math inline">\(h_1 = 0,6 \, [m], h_2 = 0,1 \, [m], h_3 = 0,7 \, [m], h_4 = 0,4 \, [m]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(p_1 - p_2 = ?, \Delta p_{gr} = ?\)</span></p>
@@ -419,8 +550,8 @@ window.Quarto = {
 </div>
 <hr>
 </section>
-<section id="zadatak-24-manometar-s-više-fluida-prirodni-plin" class="level3" data-number="3.0.2">
-<h3 data-number="3.0.2" class="anchored" data-anchor-id="zadatak-24-manometar-s-više-fluida-prirodni-plin"><span class="header-section-number">3.0.2</span> Zadatak 24: Manometar s više fluida (Prirodni plin)</h3>
+<section id="zadatak-24-manometar-s-više-fluida-prirodni-plin" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="zadatak-24-manometar-s-više-fluida-prirodni-plin"><span class="header-section-number">3.1.3</span> Zadatak 24: Manometar s više fluida (Prirodni plin)</h3>
 <p><strong>Tekst zadatka:</strong> Izmjereni pretlak sustava na slici iznosi 65 [kPa]. Potrebno je odrediti visinu stupca žive h2. Pretpostavke: Fluid je nestlačiv. Tlak prirodnog plina je uslijed male gustoće jednoliko raspodijeljen u spremniku i u cijevi.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(\bar{\rho}_{Hg} = 13,6, \bar{\rho}_u = 0,72, \rho_v = 1000 \, [kg/m^3], h_1 = 0,3 \, [m], h_3 = 0,75 \, [m]\)</span> * <span class="math inline">\(p_{pm} = 65 \, [kPa], p_{atm} = 101325 \, [Pa]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(h_2 = ?\)</span></p>
@@ -566,47 +697,36 @@ window.Quarto = {
             const time = Date.now() * 0.005; const arrowY = y3_end - 15 + Math.sin(time) * 5;
             ctx.beginPath(); ctx.moveTo(ox2, arrowY); ctx.lineTo(ox2, arrowY + 10); ctx.lineTo(ox2-5, arrowY+5); ctx.moveTo(ox2, arrowY+10); ctx.lineTo(ox2+5, arrowY+5); ctx.strokeStyle = "#e53e3e"; ctx.lineWidth = 2; ctx.stroke();
 
-            requestAnimationFrame(() => draw(p, h1, h2, h3));
-        }
-        slP.oninput = slH1.oninput = slH3.oninput = update;
-        update();
-        })();
-        </script>
-        </div>
-        ```
-
-        ***
-
-        ### Zadatak 25: Ravnoteža klipa i tlak u komorama
-
-        **Tekst zadatka:**
-        Dvije komore koje međusobno povezuje istovrstan fluid (voda gustoće $\rho_v$) odvojene su međusobno putem klipa čija težina iznosi 25[N], prikazano na slici. Potrebno je odrediti pretlak u komorama A i B. Zanemariti utjecaj visine stupca zraka.
-
-        **Zadano:**
-        * $G_k = 25 \, [N], \rho_v = 1000 \, [kg/m^3], d_1 = 0,3 \, [m], d_2 = 0,3 \, [m], d_3 = 0,9 \, [m], h_1 = 0,25 \, [m], h_2 = 0,5 \, [m]$
-
-        **Odrediti pretlak u komorama:** $p_A = ?, p_B = ?$
-
-        **Rješenje:**
-        1. **Pretlak pod klipom:** $p_c^* = \frac{G_k}{A_k} = \frac{25}{0,0707} = \mathbf{353,6 \, \text{Pa}}$.
-        2. **Pretlak A:** $p_A^* = p_c^* + \rho_v g h_1 = \mathbf{2806 \, \text{Pa}}$.
-        3. **Pretlak B:** $p_B^* = p_c^* - \rho_v g (h_2 - h_1) = \mathbf{-2099 \, \text{Pa}}$ (vakuum).
-
-        ```{=html}
-        <!-- ZADATAK 25: Redizajnirani simulator balansa klipa -->
-        <div class="widget-container" id="widget-z25-v3" style="max-width: 950px; margin: 2rem auto; padding: 30px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 15px 45px rgba(0,0,0,0.1);">    <style>
+        requestAnimationFrame(() => draw(p, h1, h2, h3));
+    }
+    slP.oninput = slH1.oninput = slH3.oninput = update;
+    update();
+    })();
+    </script>
+</div>
+<hr>
+</section>
+<section id="zadatak-25-ravnoteža-klipa-i-tlak-u-komorama" class="level3" data-number="3.1.4">
+<h3 data-number="3.1.4" class="anchored" data-anchor-id="zadatak-25-ravnoteža-klipa-i-tlak-u-komorama"><span class="header-section-number">3.1.4</span> Zadatak 25: Ravnoteža klipa i tlak u komorama</h3>
+<p><strong>Tekst zadatka:</strong> Dvije komore koje međusobno povezuje istovrstan fluid (voda gustoće <span class="math inline">\(\rho_v\)</span>) odvojene su međusobno putem klipa čija težina iznosi 25[N], prikazano na slici. Potrebno je odrediti pretlak u komorama A i B. Zanemariti utjecaj visine stupca zraka.</p>
+<p><strong>Zadano:</strong> * <span class="math inline">\(G_k = 25 \, [N], \rho_v = 1000 \, [kg/m^3], d_1 = 0,3 \, [m], d_2 = 0,3 \, [m], d_3 = 0,9 \, [m], h_1 = 0,25 \, [m], h_2 = 0,5 \, [m]\)</span></p>
+<p><strong>Odrediti pretlak u komorama:</strong> <span class="math inline">\(p_A = ?, p_B = ?\)</span></p>
+<p><strong>Rješenje:</strong> 1. <strong>Pretlak pod klipom:</strong> <span class="math inline">\(p_c^* = \frac{G_k}{A_k} = \frac{25}{0,0707} = \mathbf{353,6 \, \text{Pa}}\)</span>. 2. <strong>Pretlak A:</strong> <span class="math inline">\(p_A^* = p_c^* + \rho_v g h_1 = \mathbf{2806 \, \text{Pa}}\)</span>. 3. <strong>Pretlak B:</strong> <span class="math inline">\(p_B^* = p_c^* - \rho_v g (h_2 - h_1) = \mathbf{-2099 \, \text{Pa}}\)</span> (vakuum).</p>
+<!-- ZADATAK 25: Redizajnirani simulator balansa klipa -->
+<div class="widget-container" id="widget-z25-v3" style="max-width: 950px; margin: 2rem auto; padding: 30px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 15px 45px rgba(0,0,0,0.1);">
+        <style>
         .z25-v3-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
         @media (max-width: 850px) { .z25-v3-grid { grid-template-columns: 1fr; } }
         .z25-v3-panel { background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #edf2f7; }
         .z25-v3-visual { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 500px; overflow: hidden; }
         .gauge-v3 { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .p-badge-v3 { padding: 15px; border-radius: 12px; text-align: center; color: white; font-weight: 800; }
-    </style>
+        </style>
 
-    <div class="lab-header" style="text-align:center; margin-bottom:25px;">
+        <div class="lab-header" style="text-align:center; margin-bottom:25px;">
         <h3 style="margin:0; color:#1a202c; font-weight:900; letter-spacing:-0.5px;" class="anchored">⚖️ Laboratorij: Balans klipa i gradijent tlaka</h3>
         <p style="font-size:0.95rem; color:#64748b; margin-top:5px;">Međudjelovanje težine krutine i statičkog tlaka fluida</p>
-    </div>
+        </div>
 
     <div class="z25-v3-grid">
         <div class="z25-v3-panel">
@@ -729,8 +849,8 @@ window.Quarto = {
 </div>
 <hr>
 </section>
-<section id="zadatak-26-nagnuti-živin-manometar" class="level3" data-number="3.0.3">
-<h3 data-number="3.0.3" class="anchored" data-anchor-id="zadatak-26-nagnuti-živin-manometar"><span class="header-section-number">3.0.3</span> Zadatak 26: Nagnuti živin manometar</h3>
+<section id="zadatak-26-nagnuti-živin-manometar" class="level3" data-number="3.1.5">
+<h3 data-number="3.1.5" class="anchored" data-anchor-id="zadatak-26-nagnuti-živin-manometar"><span class="header-section-number">3.1.5</span> Zadatak 26: Nagnuti živin manometar</h3>
 <p><strong>Tekst zadatka:</strong> Dva spremnika vode međusobno su povezana putem živinog manometra sa cijevima položenima pod kutom <span class="math inline">\(\alpha\)</span> spram horizontalne osi, prikazano na slici. Ukoliko razlika tlaka između spremnika A i B iznosi 20 kPa, potrebno je odrediti visinu h i kut <span class="math inline">\(\alpha\)</span>.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(a = 0,268 \, [m], \Delta p_{A-B} = 20 \, [kPa], \bar{\rho}_{Hg} = 13,6, \rho_v = 1000 \, [kg/m^3]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(\alpha = ?, h = ?\)</span></p>
@@ -852,8 +972,8 @@ window.Quarto = {
 </div>
 <hr>
 </section>
-<section id="zadatak-27-više-fluidni-spremnik-i-u-cijev" class="level3" data-number="3.0.4">
-<h3 data-number="3.0.4" class="anchored" data-anchor-id="zadatak-27-više-fluidni-spremnik-i-u-cijev"><span class="header-section-number">3.0.4</span> Zadatak 27: Više-fluidni spremnik i U-cijev</h3>
+<section id="zadatak-27-više-fluidni-spremnik-i-u-cijev" class="level3" data-number="3.1.6">
+<h3 data-number="3.1.6" class="anchored" data-anchor-id="zadatak-27-više-fluidni-spremnik-i-u-cijev"><span class="header-section-number">3.1.6</span> Zadatak 27: Više-fluidni spremnik i U-cijev</h3>
 <p><strong>Tekst zadatka:</strong> Više-fluidni spremnik povezan je sa U-cijevi kao što je prikazano na slici. Za zadane relativne gustoće i visine stupaca fluida, potrebno je odrediti pretlak u točki A. Također je potrebno odrediti visinu stupca žive koja bi prouzrokovala jednak pretlak onome u točki A.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(h_u = 0,7 \, [m], h_v = 0,3 \, [m], h_g = 0,2 \, [m], h_1 = 0,15 \, [m], h_2 = 0,9 \, [m]\)</span> * <span class="math inline">\(\bar{\rho}_u = 0,9, \bar{\rho}_g = 1,26, \bar{\rho}_{Hg} = 13,6\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(p_A = ?, h_{Hg} = ?\)</span></p>
@@ -951,8 +1071,8 @@ window.Quarto = {
 </div>
 <hr>
 </section>
-<section id="zadatak-28-solarna-jezera-nelinearna-gustoća" class="level3" data-number="3.0.5">
-<h3 data-number="3.0.5" class="anchored" data-anchor-id="zadatak-28-solarna-jezera-nelinearna-gustoća"><span class="header-section-number">3.0.5</span> Zadatak 28: Solarna jezera (nelinearna gustoća)</h3>
+<section id="zadatak-28-solarna-jezera-nelinearna-gustoća" class="level3" data-number="3.1.7">
+<h3 data-number="3.1.7" class="anchored" data-anchor-id="zadatak-28-solarna-jezera-nelinearna-gustoća"><span class="header-section-number">3.1.7</span> Zadatak 28: Solarna jezera (nelinearna gustoća)</h3>
 <p><strong>Tekst zadatka:</strong> Solarna jezera su umjetna jezera manjih zapremnina duboka nekoliko metara, a koriste se za pohranjivanje solarne energije. Podizanje zagrijane vode (smanjene gustoće) prema površini sprečava se dodavanjem soli na dnu jezera. Kod uobičajenih izvedbi gradijentnih solarnih jezera, gustoća vode se povećava u gradijentnoj zoni, kao što je prikazano na slici, pri čemu je promjena gustoće zadana izrazom <span class="math inline">\(\rho = \rho_0 \cdot \sqrt{1 + \tan^2 \left(\frac{\pi z}{4 h}\right)}\)</span>, pri čemu je <span class="math inline">\(\rho_0\)</span> - gustoća vode pri površini, z - vertikalna udaljenost mjerena u negativnom vertikalnom smjeru, dok je h geodetska visina gradijentne zone. Ukoliko imamo zadane vrijednosti h = 4 [m], <span class="math inline">\(\rho_0 = 1040 [kg/m^3]\)</span> , pri čemu debljina površinskog sloja iznosi 0,8 [m], potrebno je odrediti pretlak na donjem rubu gradijentne zone, na slici označeno brojem 2. Prilikom proračuna pretpostaviti gustoću površinskog sloja konstantnom.</p>
 <p><strong>Zadano:</strong> * Jednadžba promjene gustoće u gradijentnoj zoni: <span class="math inline">\(\rho = \rho_0 \cdot \sqrt{1 + \tan^2 (\frac{\pi z}{4 h})}\)</span> * <span class="math inline">\(h = 4 \, [m], h_0 = 0,8 \, [m], \rho_0 = 1040 \, [kg/m^3]\)</span></p>
 <p><strong>Odrediti:</strong> pretlak <span class="math inline">\(p_2\)</span></p>
@@ -1152,8 +1272,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="zadatak-29-naftovod-spremnik-zraka-i-manometar" class="level3" data-number="3.0.6">
-<h3 data-number="3.0.6" class="anchored" data-anchor-id="zadatak-29-naftovod-spremnik-zraka-i-manometar"><span class="header-section-number">3.0.6</span> Zadatak 29: Naftovod, spremnik zraka i manometar</h3>
+<section id="zadatak-29-naftovod-spremnik-zraka-i-manometar" class="level3" data-number="3.1.8">
+<h3 data-number="3.1.8" class="anchored" data-anchor-id="zadatak-29-naftovod-spremnik-zraka-i-manometar"><span class="header-section-number">3.1.8</span> Zadatak 29: Naftovod, spremnik zraka i manometar</h3>
 <p><strong>Tekst zadatka:</strong> Naftovod i spremnik zraka volumena 1,3[m3] povezani su međusobno manometrom na način kao što je prikazano na slici. Ukoliko spremnik sadrži 15 [kg] zraka temperature 80[°C], potrebno je odrediti apsolutan tlak u naftovodu, kao i promjenu razlike visina <span class="math inline">\(\Delta h_{Hg2}\)</span> koja će nastupiti kada se temperatura u spremniku zraka smanji na 20[°C]. Pretpostaviti konstantan tlak u naftovodu, volumen zraka u manometru zanemariti zbog relativno niskog udjela naspram volumena spremnika.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(V_z = 1,3 \, [m^3], m_z = 15 \, [kg], t_{z1} = 80°C, t_{z2} = 20°C, h_n = 0,75 \, [m], \Delta h_{Hg} = 0,2 \, [m]\)</span> * <span class="math inline">\(D = 0,004 \, [m], \alpha = 50°, \bar{\rho}_{nv} = 2,68, \bar{\rho}_{Hgv} = 13,6\)</span> * <span class="math inline">\(\rho_v = 1000 \, [kg/m^3], R_z = 287 \, [J/kgK]\)</span></p>
 <p><strong>Odrediti:</strong> apsolutni tlak u naftovodu <span class="math inline">\(p_n\)</span>, promjenu visine uslijed temperature <span class="math inline">\(t_{z2} \implies \Delta h_{Hg2}\)</span></p>
@@ -1365,8 +1485,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="zadatak-30-areometar" class="level3" data-number="3.0.7">
-<h3 data-number="3.0.7" class="anchored" data-anchor-id="zadatak-30-areometar"><span class="header-section-number">3.0.7</span> Zadatak 30: Areometar</h3>
+<section id="zadatak-30-areometar" class="level3" data-number="3.1.9">
+<h3 data-number="3.1.9" class="anchored" data-anchor-id="zadatak-30-areometar"><span class="header-section-number">3.1.9</span> Zadatak 30: Areometar</h3>
 <p><strong>Tekst zadatka:</strong> Gustoću tekućine potrebno je odrediti starim areometrom prikazanim na slici čiji promjer iznosi <span class="math inline">\(d = 1 [\text{cm}]\)</span>, a oznake su potpuno izblijedile. Areometar se prvo uranja u vodu, pri čemu se obilježava mjesto na kojemu areometar izvire iz vode (pazeći pri tome da označimo očitanje meniskusa). Potom se areometar ubacuje u drugu tekućinu, te se primjećuje da je očitanje sada na mjestu koje je za <span class="math inline">\(h_2 = 0,5 [\text{cm}]\)</span> geodetski više od prethodnog očitanja. Ukoliko je visina očitanja od dna areometra do oznake za vodu iznosila <span class="math inline">\(h_1 = 10 [\text{cm}]\)</span>, potrebno je odrediti gustoću druge tekućine.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(d = 0,01 \, [m], h_1 = 0,1 \, [m], h_2 = 0,005 \, [m]\)</span></p>
 <p><strong>Odrediti:</strong> gustoću nepoznate tekućine <span class="math inline">\(\rho_? = ?\)</span></p>
@@ -1544,8 +1664,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="zadatak-31-ubrzanje-spremnika---orijentacija" class="level3" data-number="3.0.8">
-<h3 data-number="3.0.8" class="anchored" data-anchor-id="zadatak-31-ubrzanje-spremnika---orijentacija"><span class="header-section-number">3.0.8</span> Zadatak 31: Ubrzanje spremnika - Orijentacija</h3>
+<section id="zadatak-31-ubrzanje-spremnika---orijentacija" class="level3" data-number="3.1.10">
+<h3 data-number="3.1.10" class="anchored" data-anchor-id="zadatak-31-ubrzanje-spremnika---orijentacija"><span class="header-section-number">3.1.10</span> Zadatak 31: Ubrzanje spremnika - Orijentacija</h3>
 <p><strong>Tekst zadatka:</strong> 80 [cm] visok spremnik pravokutnog presjeka 2[m] x 0,6 [m] napunjenog vodom potrebno je transportirati vozilom. Vozilo jednoliko ubrzava od stanja mirovanja do brzine od 90 [km/h] u vremenu od 10 [s]. Potrebno je odrediti dopuštenu inicijalnu visinu vode u spremniku, pri kojoj neće doći do prelijevanja vode izvan spremnika. Potrebno je odrediti orijentaciju spremnika naspram smjera vožnje koja je povoljnija u vidu većeg mogućeg punjenja spremnika.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(h_s = 0,8 \, [m], l = 2 \, [m], b = 0,6 \, [m], v_0 = 0 \, [m/s], v_k = 90 \, [km/h], \Delta t = 10 \, [s]\)</span></p>
 <p><strong>Odrediti:</strong> <span class="math inline">\(h_{vmax \: l \times b} = ?, h_{vmax \: b \times l} = ?\)</span></p>
@@ -1695,8 +1815,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="zadatak-32-otvoreni-ubrzani-spremnik-tlak-na-dnu" class="level3" data-number="3.0.9">
-<h3 data-number="3.0.9" class="anchored" data-anchor-id="zadatak-32-otvoreni-ubrzani-spremnik-tlak-na-dnu"><span class="header-section-number">3.0.9</span> Zadatak 32: Otvoreni ubrzani spremnik: tlak na dnu</h3>
+<section id="zadatak-32-otvoreni-ubrzani-spremnik-tlak-na-dnu" class="level3" data-number="3.1.11">
+<h3 data-number="3.1.11" class="anchored" data-anchor-id="zadatak-32-otvoreni-ubrzani-spremnik-tlak-na-dnu"><span class="header-section-number">3.1.11</span> Zadatak 32: Otvoreni ubrzani spremnik: tlak na dnu</h3>
 <p><strong>Tekst zadatka:</strong> Otvoreni spremnik pravokutnog presjeka giba se pravocrtno u smjeru dulje baze jednolikim ubrzanjem iznosa 2,4 [m/s²]. Duljina, širina i visina spremnika iznose 6 [m], 2,5 [m] i 2 [m], poimence. Ukoliko je spremnik ispunjen vodom do visine 1 [m], potrebno je odrediti nagib slobodne površine uslijed pravocrtnog ubrzanja, kao i iznose maksimalnog i minimalnog tlaka na dnu spremnika.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(a = 2,4 \, [m/s^2], l = 6 \, [m], b = 2,5 \, [m], h_s = 2 \, [m], h = 1 \, [m]\)</span></p>
 <p><strong>Odrediti:</strong> Nagib slobodne površine <span class="math inline">\(\alpha, p_{dmax} = ?, p_{dmin} = ?\)</span></p>
@@ -1852,8 +1972,8 @@ window.Quarto = {
 
 <hr>
 </section>
-<section id="zadatak-33-cisterna-mlijeka-tlak-u-zatvorenom-spremniku" class="level3" data-number="3.0.10">
-<h3 data-number="3.0.10" class="anchored" data-anchor-id="zadatak-33-cisterna-mlijeka-tlak-u-zatvorenom-spremniku"><span class="header-section-number">3.0.10</span> Zadatak 33: Cisterna mlijeka: tlak u zatvorenom spremniku</h3>
+<section id="zadatak-33-cisterna-mlijeka-tlak-u-zatvorenom-spremniku" class="level3" data-number="3.1.12">
+<h3 data-number="3.1.12" class="anchored" data-anchor-id="zadatak-33-cisterna-mlijeka-tlak-u-zatvorenom-spremniku"><span class="header-section-number">3.1.12</span> Zadatak 33: Cisterna mlijeka: tlak u zatvorenom spremniku</h3>
 <p><strong>Tekst zadatka:</strong> 33. Mlijeko gustoće <span class="math inline">\(\rho_m = 1020 \left[\frac{\text{kg}}{\text{m}^3}\right]\)</span> transportira se pravocrtno cestom konstantnog nagiba 0° spram horizontalne osi unutar spremnika cisterne promjera <span class="math inline">\(d = 3 [\text{m}]\)</span>, duljine <span class="math inline">\(l = 7 [\text{m}]\)</span>. Spremnik je potpuno ispunjen mlijekom (volumen zraka zanemariv), pri čemu cisterna konstantno ubrzava intenzitetom <span class="math inline">\(a = 2,5 \left[\frac{\text{m}}{\text{s}^2}\right]\)</span>. Ukoliko minimalan tlak u spremniku iznosi <span class="math inline">\(p_{min} = 100 [\text{kPa}]\)</span>, potrebno je odrediti maksimalan pretlak u spremniku, te mjesto na kojemu će se pojaviti.</p>
 <p><strong>Zadano:</strong> * <span class="math inline">\(\rho_m = 1020 \, [kg/m^3], d = 3 \, [m], l = 7 \, [m], a = 2,5 \, [m/s^2], p_{min} = 100000 \, [Pa]\)</span></p>
 <p><strong>Odrediti:</strong> maksimalan pretlak <span class="math inline">\(p_{max} = ?\)</span>, mjesto maksimalnog pretlaka.</p>
@@ -2062,10 +2182,11 @@ window.Quarto = {
 </script>
 
 </section>
-<section id="napredni-interaktivni-koncepti-statike-fluida" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="napredni-interaktivni-koncepti-statike-fluida"><span class="header-section-number">3.1</span> Napredni interaktivni koncepti statike fluida</h2>
-<section id="n1-stabilnost-plovnih-tijela-metacentar" class="level3" data-number="3.1.1">
-<h3 data-number="3.1.1" class="anchored" data-anchor-id="n1-stabilnost-plovnih-tijela-metacentar"><span class="header-section-number">3.1.1</span> N1: Stabilnost plovnih tijela (Metacentar)</h3>
+</section>
+<section id="napredni-interaktivni-koncepti-statike-fluida" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="napredni-interaktivni-koncepti-statike-fluida"><span class="header-section-number">3.2</span> Napredni interaktivni koncepti statike fluida</h2>
+<section id="n1-stabilnost-plovnih-tijela-metacentar" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="n1-stabilnost-plovnih-tijela-metacentar"><span class="header-section-number">3.2.1</span> N1: Stabilnost plovnih tijela (Metacentar)</h3>
 <p>Kada se plovno tijelo nagne, centar uzgona (<span class="math inline">\(B\)</span>) pomiče se u smjeru nagiba. Sjecište okomice kroz novi centar uzgona i osi simetrije naziva se <strong>metacentar (<span class="math inline">\(M\)</span>)</strong>. Ako je <span class="math inline">\(M\)</span> iznad težišta (<span class="math inline">\(G\)</span>), tijelo je stabilno i stvara se moment ispravljanja. U protivnom, tijelo se prevrće.</p>
 <div id="z-n1-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;" class="anchored">N1: Metacentarska visina i stabilnost broda</h4>
@@ -2170,8 +2291,8 @@ window.Quarto = {
 </script>
 
 </section>
-<section id="n2-pascalov-princip-i-hidrostatski-paradoks" class="level3" data-number="3.1.2">
-<h3 data-number="3.1.2" class="anchored" data-anchor-id="n2-pascalov-princip-i-hidrostatski-paradoks"><span class="header-section-number">3.1.2</span> N2: Pascalov princip i hidrostatski paradoks</h3>
+<section id="n2-pascalov-princip-i-hidrostatski-paradoks" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="n2-pascalov-princip-i-hidrostatski-paradoks"><span class="header-section-number">3.2.2</span> N2: Pascalov princip i hidrostatski paradoks</h3>
 <p>Pritisak na tekućinu u zatvorenoj posudi prenosi se nesmanjen u sve dijelove tekućine. Ovaj widget pokazuje kako pritisak na jedan klip ravnomjerno podiže razinu u spojenim posudama različitih oblika.</p>
 <div id="z-n2-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;" class="anchored">N2: Hidrostatski paradoks i prijenos tlaka</h4>
@@ -2239,8 +2360,8 @@ window.Quarto = {
 </script>
 
 </section>
-<section id="n3-sila-hidrostatskog-tlaka-na-ravnu-stijenu-branu" class="level3" data-number="3.1.3">
-<h3 data-number="3.1.3" class="anchored" data-anchor-id="n3-sila-hidrostatskog-tlaka-na-ravnu-stijenu-branu"><span class="header-section-number">3.1.3</span> N3: Sila hidrostatskog tlaka na ravnu stijenu (Branu)</h3>
+<section id="n3-sila-hidrostatskog-tlaka-na-ravnu-stijenu-branu" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="n3-sila-hidrostatskog-tlaka-na-ravnu-stijenu-branu"><span class="header-section-number">3.2.3</span> N3: Sila hidrostatskog tlaka na ravnu stijenu (Branu)</h3>
 <p>Hidrostatski tlak raste linearno s dubinom, što rezultira trokutastom raspodjelom tlaka. Ukupna sila djeluje u točki koja se naziva <strong>centar tlaka</strong>, a nalazi se na <span class="math inline">\(2/3\)</span> dubine od površine (odnosno <span class="math inline">\(h/3\)</span> od dna).</p>
 <div id="z-n3-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;" class="anchored">N3: Raspodjela tlaka na vertikalnu branu</h4>
@@ -2317,8 +2438,8 @@ window.Quarto = {
 </script>
 
 </section>
-<section id="n4-dinamičko-ljuljanje-tekućine-sloshing" class="level3" data-number="3.1.4">
-<h3 data-number="3.1.4" class="anchored" data-anchor-id="n4-dinamičko-ljuljanje-tekućine-sloshing"><span class="header-section-number">3.1.4</span> N4: Dinamičko ljuljanje tekućine (Sloshing)</h3>
+<section id="n4-dinamičko-ljuljanje-tekućine-sloshing" class="level3" data-number="3.2.4">
+<h3 data-number="3.2.4" class="anchored" data-anchor-id="n4-dinamičko-ljuljanje-tekućine-sloshing"><span class="header-section-number">3.2.4</span> N4: Dinamičko ljuljanje tekućine (Sloshing)</h3>
 <p>Ubrzani spremnici iz prethodnih zadataka prikazuju <strong>stacionarno</strong> stanje. Međutim, kada se kamion naglo zaustavi ili krene, tekućina oscilira prije nego se smiri.</p>
 <div id="z-n4-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;" class="anchored">N4: Osciliranje tekućine pri nagloj promjeni ubrzanja</h4>
@@ -2382,8 +2503,8 @@ window.Quarto = {
 </script>
 
 </section>
-<section id="n5-barometarska-formula-tlak-u-atmosferi" class="level3" data-number="3.1.5">
-<h3 data-number="3.1.5" class="anchored" data-anchor-id="n5-barometarska-formula-tlak-u-atmosferi"><span class="header-section-number">3.1.5</span> N5: Barometarska formula (Tlak u atmosferi)</h3>
+<section id="n5-barometarska-formula-tlak-u-atmosferi" class="level3" data-number="3.2.5">
+<h3 data-number="3.2.5" class="anchored" data-anchor-id="n5-barometarska-formula-tlak-u-atmosferi"><span class="header-section-number">3.2.5</span> N5: Barometarska formula (Tlak u atmosferi)</h3>
 <p>Atmosferski zrak je stlačiv plin. Za razliku od nestlačivih kapljevina kod kojih tlak raste linearno, kod plinova u izotermnim uvjetima gustoća raste proporcionalno tlaku, što rezultira <strong>eksponencijalnim</strong> padom tlaka s visinom.</p>
 <div id="z-n5-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;" class="anchored">N5: Tlak zraka s visinom (Altimetar)</h4>
@@ -2457,8 +2578,8 @@ window.Quarto = {
 </script>
 
 </section>
-<section id="n6-rezultantna-sila-na-kružni-segment-i-ekscentricitet" class="level3" data-number="3.1.6">
-<h3 data-number="3.1.6" class="anchored" data-anchor-id="n6-rezultantna-sila-na-kružni-segment-i-ekscentricitet"><span class="header-section-number">3.1.6</span> N6: Rezultantna sila na kružni segment i ekscentricitet</h3>
+<section id="n6-rezultantna-sila-na-kružni-segment-i-ekscentricitet" class="level3" data-number="3.2.6">
+<h3 data-number="3.2.6" class="anchored" data-anchor-id="n6-rezultantna-sila-na-kružni-segment-i-ekscentricitet"><span class="header-section-number">3.2.6</span> N6: Rezultantna sila na kružni segment i ekscentricitet</h3>
 <p>Kod proračuna sila na zakrivljene plohe, važno je uočiti razliku između dvije ključne točke: 1. <strong>Težište plohe (<span class="math inline">\(G\)</span>):</strong> Točka koja predstavlja geometrijsko središte zakrivljene plohe. 2. <strong>Hvatište sile (<span class="math inline">\(CP\)</span> - Centar tlaka):</strong> Točka u kojoj rezultantna sila zapravo djeluje na plohu.</p>
 <p><strong>Zašto se one ne podudaraju?</strong> Hidrostatski tlak raste s dubinom (<span class="math inline">\(p = \rho g h\)</span>). To znači da donja polovica zakrivljenog segmenta “osjeća” znatno veću silu nego gornja polovica. Zbog te neravnomjerne raspodjele, rezultantna sila se uvijek pomiče <strong>prema dolje</strong> (prema zoni većeg tlaka) u odnosu na geometrijsko težište. Taj pomak nazivamo ekscentricitet.</p>
 <p><em>Napomena: Iako hvatište na plohi nije u težištu, kod kružnog segmenta rezultanta <span class="math inline">\(F_R\)</span> i dalje mora prolaziti kroz centar zakrivljenosti (<span class="math inline">\(O\)</span>) jer su sve lokalne sile radijalne.</em></p>
@@ -2610,8 +2731,8 @@ window.Quarto = {
 </script>
 
 </section>
-<section id="n7-kompozitna-stijenka-ravna-zakrivljena" class="level3" data-number="3.1.7">
-<h3 data-number="3.1.7" class="anchored" data-anchor-id="n7-kompozitna-stijenka-ravna-zakrivljena"><span class="header-section-number">3.1.7</span> N7: Kompozitna stijenka (Ravna + Zakrivljena)</h3>
+<section id="n7-kompozitna-stijenka-ravna-zakrivljena" class="level3" data-number="3.2.7">
+<h3 data-number="3.2.7" class="anchored" data-anchor-id="n7-kompozitna-stijenka-ravna-zakrivljena"><span class="header-section-number">3.2.7</span> N7: Kompozitna stijenka (Ravna + Zakrivljena)</h3>
 <p>Inženjerske konstrukcije često se sastoje od više segmenata. Kod proračuna takve stijenke, ukupna sila je vektorski zbroj sila na pojedinim dijelovima: 1. <strong>Ravni dio:</strong> Tlak raste linearno (trokut). Težište <span class="math inline">\(G_1\)</span> je na polovici visine, dok je hvatište <span class="math inline">\(CP_1\)</span> na <span class="math inline">\(2/3\)</span> dubine. 2. <strong>Zakrivljeni dio:</strong> Tlak nastavlja rasti radijalno. Ima svoje geometrijsko težište <span class="math inline">\(G_2\)</span> i svoje hvatište <span class="math inline">\(CP_2\)</span> pomaknuto prema dolje.</p>
 <p>Ukupna rezultantna sila sustava djeluje u točki koja se određuje pomoću <strong>Varignonovog poučka</strong> (momentni balans svih parcijalnih sila).</p>
 <!-- WIDGET N7: Kompozitna brana G vs CP -->
@@ -2768,8 +2889,8 @@ window.Quarto = {
 })();
 </script>
 </section>
-<section id="n8-sila-uzgona-na-cilindrični-zatvarač" class="level3" data-number="3.1.8">
-<h3 data-number="3.1.8" class="anchored" data-anchor-id="n8-sila-uzgona-na-cilindrični-zatvarač"><span class="header-section-number">3.1.8</span> N8: Sila uzgona na cilindrični zatvarač</h3>
+<section id="n8-sila-uzgona-na-cilindrični-zatvarač" class="level3" data-number="3.2.8">
+<h3 data-number="3.2.8" class="anchored" data-anchor-id="n8-sila-uzgona-na-cilindrični-zatvarač"><span class="header-section-number">3.2.8</span> N8: Sila uzgona na cilindrični zatvarač</h3>
 <p>Arhimedov zakon za zakrivljene plohe definira vertikalnu silu (uzgon) kao težinu istisnute tekućine. Kod vodoravno položenog valjka koji je djelomično uronjen, sila uzgona <span class="math inline">\(F_v\)</span> jednaka je težini vode volumena istisnutog kružnog odsječka.</p>
 <p><span class="math display">\[F_v = \rho \cdot g \cdot A_{odsječak} \cdot L\]</span></p>
 <p>Gdje je površina odsječka <span class="math inline">\(A = R^2 \cos^{-1}\left(\frac{R-h}{R}\right) - (R-h)\sqrt{2Rh-h^2}\)</span> za <span class="math inline">\(h \le R\)</span>.</p>

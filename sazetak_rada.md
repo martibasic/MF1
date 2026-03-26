@@ -18,17 +18,29 @@ U ovoj sesiji fokus je bio na popunjavanju preostalih vježbi interaktivnim sadr
 ### 3. Sesija: Finalizacija i humanizacija (Vježba 1 - 3)
 Ova sesija zaokružila je cjelinu dodavanjem uvodnih koncepata i prilagodbom tona skripte studentima.
 - **Fizikalni uvodi:** Implementirani interaktivni "pre-lab" widgeti na početak Vježbi 1 i 3.
-  - *V1 (Pascal/Newton):* Vizualna usporedba hidrauličke multiplikacije sile i profila brzine kod viskoznog trenja.
-  - *V3 (Statika):* Widget za manometarski balans te vektorski prikaz efektivne gravitacije u ubrzanim sustavima.
-- **Humanizacija (index.qmd):** Redizajniran predgovor. Suhoparni tehnički opis zamijenjen je motivirajućim, "ljudskim" tekstom koji potiče inženjersku intuiciju kroz igru s parametrima.
-- **Tehnički remont V3:** Riješen kritičan problem s uvlakama u `vjezba_03.qmd` koji je uzrokovao loš ispis zadataka (Markdown kôd-blokovi umjesto teksta).
-- **GitHub Automatizacija:** Sve promjene su uspješno commitane i pushane na repozitorij uz sinkronizaciju svih popratnih widgeta.
+- **Humanizacija (index.qmd):** Redizajniran predgovor koji potiče inženjersku intuiciju.
+- **Tehnički remont V3:** Riješen problem s formatiranjem Markdown kôd-blokova.
 
-### 4. UI/UX i Tehnička optimizacija
-- **Moderni UI:** Uveden `Inter` font, gradijenti, glassmorphism efekti i "Dark Mode Dashboard" za rezultate.
-- **Fizikalna intuitivnost:** Svaki widget sada sadrži "Fizikalni uvid" ili "Savjet" (💡) koji povezuje sliku s teorijom.
+### 4. Sesija: Premium remont statike (Vježbe 5, 6 i 7)
+Najnovija sesija donijela je dubinsku nadogradnju ključnih poglavlja statike s fokusom na fizikalnu intuiciju i matematičku transparentnost.
+- **Vježba 5 (Ravne plohe):** 
+    - Implementirane **integracijske animacije** (Z45, Z46) koje vizualiziraju sumiranje diferencijalnih sila $dF$.
+    - Novi widgeti za nagnute zaklopke s izračunom reakcija u zglobovima i momentnom ravnotežom.
+    - Specijalizirani prikazi za krug i polukrug s automatskim koracima proračuna.
+- **Vježba 6 (Zakrivljene plohe 1):** 
+    - Dodana **dekompozicija volumena** na stvarne i zamišljene komponente uz vizualno šrafiranje.
+    - Interaktivni grafikon ovisnosti uzgona o tlaku (Z53) i simulacija prevrtanja ledenjaka uslijed asimetrije topljenja (Z54).
+- **Vježba 7 (Zakrivljene plohe 2):** 
+    - Implementiran **Arc Explorer** s draggable selektorom luka za analizu sila na bilo kojem dijelu kružnice.
+    - **3D Intuicija:** Polarni grafikon rezultante $F_R$ u ovisnosti o kutu uranjanja cilindra.
+    - Vizualizacija tlačnog polja pomoću normalnih vektora koji se sumiraju u komponente $F_H$ i $F_V$.
+
+### 5. UI/UX i Tehnička optimizacija
+- **MF1 Standard:** Potpuna primjena `Inter` fonta, glassmorphism efekata i modernih gradijenata na sve widgete.
+- **Fizikalna intuitivnost:** Svaki widget sadrži legendu, dinamičke formule i "Fizikalni uvid" (💡).
+- **Kontekstna izolacija:** Korištenje IIFE blokova osigurava stabilnost skripte bez obzira na broj elemenata na stranici.
 
 ## Tehničke napomene
-- **Canvas Clipping:** Korištenje `ctx.clip()` za realističan prikaz tekućine unutar spremnika bez obzira na kut nagiba.
-- **Vektorska grafika:** Implementirane funkcije za dinamičko iscrtavanje vektora s "glow" efektima i automatskim labeliranjem.
-- **Kontekstna izolacija:** Svaki widget radi u vlastitom `IIFE` bloku kako bi se izbjegli konflikti varijabli.
+- **Integracija i Animacija:** Korištenje `setInterval` za glatke prikaze integracije i fizikalnih kretanja (npr. otvaranje zaklopki).
+- **Vektorska grafika:** Dinamičko skaliranje vektora sila u stvarnom vremenu s vizualnim "glow" efektima.
+- **GitHub Automatizacija:** Kontinuirana sinkronizacija i commitanje promjena na repozitorij.

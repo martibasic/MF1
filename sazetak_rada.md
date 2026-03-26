@@ -11,29 +11,22 @@ Glavni cilj bio je transformirati statične `.qmd` datoteke vježbi u interaktiv
 
 ### 2. Sesija: Masovna implementacija i vizualno poliranje (Vježbe 4 - 13)
 U ovoj sesiji fokus je bio na popunjavanju preostalih vježbi interaktivnim sadržajem uz podizanje estetske razine cijelog portala.
+- **Vježba 4 (Relativno mirovanje):** Dodan widget "Efektivna gravitacija" i 3D Paraboloid Tlaka.
+- **Vježba 5 - 7 (Statika):** Nakošena zaklopka (Z42) i Arc Explorer (V7) za analizu sila na zakrivljene plohe.
+- **Vježba 8 - 13 (Dinamika):** Venturijeva cijev, energetski gubici (Moody), propulzija i nestacionarno pražnjenje.
 
-#### Vježba 4 (Relativno mirovanje - Redizajn)
-- **Teorijski uvod:** Dodan widget "Efektivna gravitacija" na sam početak koji vizualno objašnjava Eulerovu jednadžbu zbrajanjem vektora $g$ i $-a$.
-- **Laboratorij kolica:** Potpuni vizualni redizajn s gradijentima vode, clipping efektima i oznakama svih karakterističnih točaka (1, 2, 3, 4, E).
-- **Centrifugalni manometar (Z36):** Izuzetno intuitivan prikaz s "brdašcima tlaka", strelicama sila Fc i objašnjenjem ravnoteže gustoća.
-- **3D Paraboloid Tlaka:** Moderni 2.5D prikaz u svijetloj temi s prozirnim volumenima isobara, tooltipom za tlak u prostoru i "spin-up" animacijom.
-- **Usporedni panel:** Fizikalno unaprijeđen prikaz mirovanja, translacije i rotacije s vektorskom analizom u realnom vremenu.
+### 3. Sesija: Finalizacija i humanizacija (Vježba 1 - 3)
+Ova sesija zaokružila je cjelinu dodavanjem uvodnih koncepata i prilagodbom tona skripte studentima.
+- **Fizikalni uvodi:** Implementirani interaktivni "pre-lab" widgeti na početak Vježbi 1 i 3.
+  - *V1 (Pascal/Newton):* Vizualna usporedba hidrauličke multiplikacije sile i profila brzine kod viskoznog trenja.
+  - *V3 (Statika):* Widget za manometarski balans te vektorski prikaz efektivne gravitacije u ubrzanim sustavima.
+- **Humanizacija (index.qmd):** Redizajniran predgovor. Suhoparni tehnički opis zamijenjen je motivirajućim, "ljudskim" tekstom koji potiče inženjersku intuiciju kroz igru s parametrima.
+- **Tehnički remont V3:** Riješen kritičan problem s uvlakama u `vjezba_03.qmd` koji je uzrokovao loš ispis zadataka (Markdown kôd-blokovi umjesto teksta).
+- **GitHub Automatizacija:** Sve promjene su uspješno commitane i pushane na repozitorij uz sinkronizaciju svih popratnih widgeta.
 
-#### Vježba 5 - 7 (Statika i Zakrivljene plohe)
-- **Nakošena zaklopka (Z42):** Interaktivni rješavač s momentnom ravnotežom oko zgloba.
-- **Arc Explorer (V7):** Alat za slobodno definiranje kružnog luka i analizu nastanka horizontalne i vertikalne komponente sile kroz projekcije.
-
-#### Vježba 8 - 13 (Dinamika i Realni fluidi)
-- **Venturijeva cijev (V9):** Vizualizacija mjerenja protoka pomoću pada tlaka i manometarskih stupaca.
-- **Energetski gubici (V10):** Usporedni prikaz Idealnog vs. Realnog fluida s jasnim padom EGL i HGL linija.
-- **Spojeni spremnici (V11):** Simulator nestacionarnog pražnjenja s dinamičkim grafikonima razina tekućine.
-- **Propulzija (V12):** Implementacija Tsiolkovskyjeve raketne jednadžbe s animacijom potrošnje goriva i logaritamskim grafom.
-- **Moodyjev Dijagram (V13):** Potpuno funkcionalni interaktivni dijagram s Colebrook-White rješavačem i praćenjem radne točke.
-
-### 3. UI/UX i Tehnička optimizacija
+### 4. UI/UX i Tehnička optimizacija
 - **Moderni UI:** Uveden `Inter` font, gradijenti, glassmorphism efekti i "Dark Mode Dashboard" za rezultate.
-- **Fizikalna intuitivnost:** Svaki widget sada sadrži "Fizikalni uvid" ili "Savjet" koji povezuje sliku s teorijom.
-- **Stabilnost i Objava:** Riješeni problemi dupliciranja koda i ispravno formatirani HTML blokovi. Sve promjene su uspješno objavljene na **GitHubu**.
+- **Fizikalna intuitivnost:** Svaki widget sada sadrži "Fizikalni uvid" ili "Savjet" (💡) koji povezuje sliku s teorijom.
 
 ## Tehničke napomene
 - **Canvas Clipping:** Korištenje `ctx.clip()` za realističan prikaz tekućine unutar spremnika bez obzira na kut nagiba.

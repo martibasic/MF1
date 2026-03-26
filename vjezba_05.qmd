@@ -305,102 +305,608 @@ simulator dekonstruira hidrostatsku silu na njezine sastavne dijelove $F_x$ i $F
 ## 5. Zadaci za vježbu
 
 ### Zadatak 37: Vertikalni trokut s vrhom na površini
-Trokut visine h, baze b, nalazi se u vertikalnom položaju uronjen u tekućinu, pri čemu gornji kut trokuta dotiče površinu tekućine u jednoj točki, prikazano na slici. Potrebno je odrediti izraz za dubinu od površine do središta djelovanja tlačne sile na trokut $C_h$.
+Trokut visine $h$, baze $b$, nalazi se u vertikalnom položaju uronjen u tekućinu, pri čemu gornji kut trokuta dotiče površinu tekućine u jednoj točki. Potrebno je odrediti izraz za dubinu od površine do središta djelovanja tlačne sile na trokut $C_h$.
 
 ```{=html}
-<!-- WIDGET: TRIANGLE TASK VIZ -->
-<div id="v5-tri-task-viz" style="max-width: 800px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 25px; background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-    <div style="display: grid; grid-template-columns: 1fr 220px; gap: 25px;">
-        <div style="background: white; border-radius: 15px; border: 1px solid #e2e8f0; height: 300px; position: relative; overflow: hidden;">
-            <canvas id="v5-tri-task-canvas" width="400" height="300" style="width: 100%; height: 100%;"></canvas>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="background: #f1f5f9; padding: 12px; border-radius: 10px;">
-                <label style="display: block; font-weight: 700; font-size: 0.7rem; color: #475569; margin-bottom: 5px;">DUBINA VRHA a</label>
-                <input type="range" id="v5-tri-a-sl" min="0" max="100" value="0" style="width: 100%;">
-                <div style="text-align: right; font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #3b82f6;"><span id="v5-tri-a-val">0.0</span> m</div>
+<!-- WIDGET: Z37 TRIANGLE APEX ON SURFACE -->
+<div id="v5-z37-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 37: Trokut s vrhom na površini</h4>
+        <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">z_Fh = 3h/4</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 35px;">
+        <!-- Canvas Area -->
+        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 450px; overflow: hidden;">
+            <canvas id="v5-z37-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+            
+            <!-- Legend Overlay -->
+            <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6;"></div>
+                    <span style="font-weight: 600; color: #475569;">Težište T (2h/3)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
+                    <span style="font-weight: 600; color: #475569;">Centar tlaka Ch (3h/4)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 20px; height: 2px; background: #2563eb;"></div>
+                    <span style="font-weight: 600; color: #475569;">Profil tlaka p(z)</span>
+                </div>
             </div>
-            <div style="background: #0f172a; padding: 15px; border-radius: 12px; color: white;">
-                <span style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; font-weight: 800;">Hvatište z_F</span>
-                <div id="v5-tri-zf-val" style="font-size: 1.2rem; font-weight: 900; color: #f87171; font-family: monospace;">--- m</div>
+        </div>
+
+        <!-- Controls Area -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f1f5f9; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0;">
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.8rem;">VISINA TROKUTA h</label>
+                        <span id="v5-z37-h-val" style="color: #3b82f6; font-weight: 800; font-family: monospace;">3.0 m</span>
+                    </div>
+                    <input type="range" id="v5-z37-h-slider" min="1.0" max="5.0" step="0.1" value="3.0" style="width: 100%;">
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.8rem;">GUSTOĆA FLUIDA ρ</label>
+                        <span id="v5-z37-rho-val" style="color: #3b82f6; font-weight: 800; font-family: monospace;">1000 kg/m³</span>
+                    </div>
+                    <input type="range" id="v5-z37-rho-slider" min="800" max="1200" step="10" value="1000" style="width: 100%;">
+                </div>
+            </div>
+
+            <div style="background: #0f172a; padding: 25px; border-radius: 24px; color: white;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #94a3b8; font-size: 0.85rem;">HIDROSTATSKA SILA Fₕ</span>
+                    <span id="v5-z37-f-val" style="font-family: monospace; font-weight: 900; font-size: 1.4rem; color: #38bdf8;">0.00 kN</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <span style="color: #94a3b8; font-size: 0.75rem; display: block; margin-bottom: 4px;">Dubina centra tlaka z_Fh</span>
+                        <span id="v5-z37-zf-val" style="font-family: monospace; font-weight: 800; color: #f87171;">2.25 m</span>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; font-size: 0.8rem; color: #94a3b8; font-style: italic; border-top: 1px dashed #334155; padding-top: 15px;">
+                    💡 Savjet: Kod trokuta s vrhom na površini, sila djeluje na 3/4 visine od vrha.
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
 (function() {
-    const canvas = document.getElementById('v5-tri-task-canvas'); const ctx = canvas.getContext('2d');
-    const slider = document.getElementById('v5-tri-a-sl');
+    const canvas = document.getElementById('v5-z37-canvas');
+    const ctx = canvas.getContext('2d');
+    const hS = document.getElementById('v5-z37-h-slider');
+    const rS = document.getElementById('v5-z37-rho-slider');
+
     function update() {
-        const a = parseFloat(slider.value) / 20; const h = 3.0;
-        const zT = a + (2/3)*h; const zF = zT + (h*h)/(18*zT);
-        document.getElementById('v5-tri-a-val').innerText = a.toFixed(1);
-        document.getElementById('v5-tri-zf-val').innerText = zF.toFixed(3) + " m";
-        draw(a, h, zT, zF);
+        const h = parseFloat(hS.value);
+        const rho = parseFloat(rS.value);
+        const g = 9.81;
+        const b = 2.0; // Fiksna baza za vizualizaciju
+
+        const zT = (2/3) * h;
+        const zFh = (3/4) * h;
+        const Area = (b * h) / 2;
+        const Fh = (rho * g * zT * Area) / 1000; // kN
+
+        document.getElementById('v5-z37-h-val').innerText = h.toFixed(1) + ' m';
+        document.getElementById('v5-z37-rho-val').innerText = rho.toFixed(0) + ' kg/m³';
+        document.getElementById('v5-z37-f-val').innerText = Fh.toFixed(2) + ' kN';
+        document.getElementById('v5-z37-zf-val').innerText = zFh.toFixed(2) + ' m';
+
+        draw(h, rho, zT, zFh, Fh);
     }
-    function draw(a, h, zT, zF) {
-        ctx.clearRect(0,0,400,300); const scale = 40; const ox = 150; const oy = 40;
-        ctx.fillStyle='#e0f2fe'; ctx.fillRect(0, oy, 400, 260);
-        ctx.strokeStyle='#0ea5e9'; ctx.beginPath(); ctx.moveTo(0,oy); ctx.lineTo(400,oy); ctx.stroke();
-        const ty = oy + a*scale; const by = ty + h*scale;
-        ctx.fillStyle='#94a3b8'; ctx.strokeStyle='#1e293b'; ctx.lineWidth=3;
-        ctx.beginPath(); ctx.moveTo(ox, ty); ctx.lineTo(ox+40, by); ctx.lineTo(ox-40, by); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle='#3b82f6'; ctx.beginPath(); ctx.arc(ox, oy+zT*scale, 4, 0, 7); ctx.fill();
-        ctx.fillStyle='#ef4444'; ctx.beginPath(); ctx.arc(ox, oy+zF*scale, 6, 0, 7); ctx.fill();
+
+    function draw(h, rho, zT, zFh, Fh) {
+        ctx.clearRect(0, 0, 500, 450);
+        const scale = 70;
+        const ox = 180;
+        const oy = 40;
+        const b = 2.0;
+
+        // Water
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+        ctx.fillRect(0, oy, 500, 410);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+
+        // Pressure Gradient lines
+        for(let i=0.2; i<=h; i+=0.3) {
+            let z = oy + i*scale;
+            let pLen = (i/h) * 150 * (rho/1000);
+            drawArrow(ctx, ox - 120, z, ox - 120 + pLen, z, 'rgba(37, 99, 235, 0.3)', 1);
+        }
+        // Pressure Triangle outline
+        ctx.strokeStyle = 'rgba(37, 99, 235, 0.6)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ox - 120, oy);
+        ctx.lineTo(ox - 120 + 150*(rho/1000), oy + h*scale);
+        ctx.lineTo(ox - 120, oy + h*scale);
+        ctx.closePath();
+        ctx.stroke();
+
+        // The Triangle
+        ctx.fillStyle = '#94a3b8';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.lineTo(ox + (b/2)*scale, oy + h*scale);
+        ctx.lineTo(ox - (b/2)*scale, oy + h*scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Labeled Dots
+        const ty = oy + zT * scale;
+        const fy = oy + zFh * scale;
+
+        // T
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath(); ctx.arc(ox, ty, 5, 0, 7); ctx.fill();
+        ctx.fillStyle = '#1e293b'; ctx.font = 'bold 12px Inter';
+        ctx.fillText('T', ox + 10, ty + 4);
+
+        // Ch
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(ox, fy, 7, 0, 7); ctx.fill();
+        ctx.fillText('Ch', ox + 12, fy + 4);
+
+        // Resultant Force Arrow
+        const fArrowLen = Math.min(200, Fh * 3);
+        drawArrow(ctx, ox - 150, fy, ox - 150 + fArrowLen, fy, '#ef4444', 4);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillText('Fₕ', ox - 150 + fArrowLen + 5, fy + 4);
     }
-    slider.oninput = update; update();
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
+        const headlen = 10;
+        const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5));
+        ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5));
+        ctx.fillStyle = color; ctx.fill();
+    }
+
+    hS.oninput = update;
+    rS.oninput = update;
+    update();
 })();
 </script>
 ```
 
-### Zadatak 39: Krug i Elipsa dotiču površinu
-Krug promjera d vertikalno je uronjen u tekućinu, pri čemu dotiče površinu tekućine u jednoj točki. Potrebno je odrediti izraz za dubinu od površine do središta djelovanja sile tlaka na krug.
+### Zadatak 38: Trokut uronjen na dubini a
+Trokut visine $h$ i baze $b$ uronjen je vertikalno u tekućinu tako da mu se vrh (ili baza) nalazi na dubini $a$ ispod slobodne površine. Potrebno je odrediti dubinu do centra tlaka $z_{Fh}$.
 
 ```{=html}
-<!-- WIDGET: CURVE EXPLORER -->
-<div id="v5-curve-task-viz" style="max-width: 800px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 25px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0;">
-    <div style="display: grid; grid-template-columns: 1fr 220px; gap: 25px;">
-        <canvas id="v5-curve-task-canvas" width="400" height="300" style="background:white; border-radius:15px; border:1px solid #e2e8f0;"></canvas>
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <button onclick="window.v5_setCurve('circle')" class="v5-c-btn active" id="v5-btn-circle">Krug</button>
-                <button onclick="window.v5_setCurve('semi')" class="v5-c-btn" id="v5-btn-semi">Polukrug</button>
+<!-- WIDGET: Z38 TRIANGLE AT DEPTH A -->
+<div id="v5-z38-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #10b981 0%, #065f46 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 38: Trokut na dubini a</h4>
+        <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; backdrop-filter: blur(5px);">Trapezni profil tlaka</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 35px;">
+        <!-- Canvas Area -->
+        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 480px; overflow: hidden;">
+            <canvas id="v5-z38-canvas" width="500" height="480" style="width: 100%; height: 100%;"></canvas>
+            
+            <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></div>
+                    <span style="font-weight: 600; color: #475569;">Težište T</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
+                    <span style="font-weight: 600; color: #475569;">Centar tlaka Ch</span>
+                </div>
             </div>
-            <div style="background: #0f172a; padding: 15px; border-radius: 12px; color: white;">
-                <span style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Centar tlaka z_F</span>
-                <div id="v5-curve-zf" style="font-size: 1.2rem; font-weight: 900; color: #f87171; font-family: monospace;">---</div>
+        </div>
+
+        <!-- Controls Area -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem;">DUBINA VRHA a</label>
+                        <span id="v5-z38-a-val" style="color: #10b981; font-weight: 800; font-family: monospace;">1.0 m</span>
+                    </div>
+                    <input type="range" id="v5-z38-a-slider" min="0.5" max="3.0" step="0.1" value="1.0" style="width: 100%;">
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem;">VISINA h</label>
+                        <span id="v5-z38-h-val" style="color: #10b981; font-weight: 800; font-family: monospace;">2.0 m</span>
+                    </div>
+                    <input type="range" id="v5-z38-h-slider" min="1.0" max="4.0" step="0.1" value="2.0" style="width: 100%;">
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem;">BAZA b</label>
+                        <span id="v5-z38-b-val" style="color: #10b981; font-weight: 800; font-family: monospace;">1.5 m</span>
+                    </div>
+                    <input type="range" id="v5-z38-b-slider" min="0.5" max="3.0" step="0.1" value="1.5" style="width: 100%;">
+                </div>
+            </div>
+
+            <div style="background: #0f172a; padding: 20px; border-radius: 24px; color: white;">
+                <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px;">Analiza rezultata</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Površina A:</span>
+                        <span id="v5-z38-area" style="font-family: monospace; font-weight: 700;">1.50 m²</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Dubina zT:</span>
+                        <span id="v5-z38-zt" style="font-family: monospace; font-weight: 700;">2.33 m</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #334155;">
+                        <span style="color: #38bdf8; font-weight: 800; font-size: 0.85rem;">Hvatište z_Fh:</span>
+                        <span id="v5-z38-zf" style="font-family: monospace; font-weight: 900; color: #f87171; font-size: 1.1rem;">2.45 m</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #fdf2f8; padding: 15px; border-radius: 12px; border: 1px solid #fce7f3; font-size: 0.75rem; color: #9d174d; line-height: 1.4;">
+                <b>Formula:</b><br>
+                z_Fh = (6a² + 8ah + 3h²) / (6(a + 2h/3))
             </div>
         </div>
     </div>
 </div>
-<style>.v5-c-btn { padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; font-size: 0.75rem; font-weight: 700; transition: 0.2s; } .v5-c-btn.active { background: #3b82f6; color: white; }</style>
+
 <script>
 (function() {
-    const canvas = document.getElementById('v5-curve-task-canvas'); const ctx = canvas.getContext('2d');
-    let mode = 'circle';
-    window.v5_setCurve = (m) => { 
-        mode = m; 
-        document.querySelectorAll('.v5-c-btn').forEach(b => b.classList.toggle('active', b.id.includes(m)));
-        update(); 
-    };
+    const canvas = document.getElementById('v5-z38-canvas');
+    const ctx = canvas.getContext('2d');
+    const aS = document.getElementById('v5-z38-a-slider');
+    const hS = document.getElementById('v5-z38-h-slider');
+    const bS = document.getElementById('v5-z38-b-slider');
+
     function update() {
-        const R = 2.0; let zT, zF;
-        if(mode === 'circle') { zT = R; zF = 1.25 * R; }
-        else { zT = (4*R)/(3*Math.PI); zF = zT + (0.1098*R**4)/(zT * (Math.PI*R*R/2)); }
-        document.getElementById('v5-curve-zf').innerText = zF.toFixed(3) + " m";
-        draw(R, zT, zF);
+        const a = parseFloat(aS.value);
+        const h = parseFloat(hS.value);
+        const b = parseFloat(bS.value);
+
+        const Area = (b * h) / 2;
+        const zT = a + (2/3) * h;
+        const zFh = (6*a*a + 8*a*h + 3*h*h) / (6 * (a + 2*h/3));
+
+        document.getElementById('v5-z38-a-val').innerText = a.toFixed(1) + ' m';
+        document.getElementById('v5-z38-h-val').innerText = h.toFixed(1) + ' m';
+        document.getElementById('v5-z38-b-val').innerText = b.toFixed(1) + ' m';
+        document.getElementById('v5-z38-area').innerText = Area.toFixed(2) + ' m²';
+        document.getElementById('v5-z38-zt').innerText = zT.toFixed(2) + ' m';
+        document.getElementById('v5-z38-zf').innerText = zFh.toFixed(3) + ' m';
+
+        draw(a, h, b, zT, zFh);
     }
-    function draw(R, zT, zF) {
-        ctx.clearRect(0,0,400,300); const scale = 50; const ox = 200; const oy = 40;
-        ctx.fillStyle='#e0f2fe'; ctx.fillRect(0, oy, 400, 260);
-        ctx.fillStyle='#94a3b8'; ctx.strokeStyle='#1e293b'; ctx.lineWidth=3;
+
+    function draw(a, h, b, zT, zFh) {
+        ctx.clearRect(0, 0, 500, 480);
+        const scale = 70;
+        const ox = 200;
+        const oy = 40;
+
+        // Water
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
+        ctx.fillRect(0, oy, 500, 440);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+
+        const ty = oy + a * scale;
+        const by = ty + h * scale;
+
+        // Pressure Trapezoid
+        const pTop = a * 40;
+        const pBot = (a + h) * 40;
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.1)';
         ctx.beginPath();
-        if(mode==='circle') ctx.arc(ox, oy + R*scale, R*scale, 0, Math.PI*2);
-        else ctx.arc(ox, oy, R*scale, 0, Math.PI);
-        ctx.fill(); ctx.stroke();
-        ctx.fillStyle='#3b82f6'; ctx.beginPath(); ctx.arc(ox, oy+zT*scale, 4, 0, 7); ctx.fill();
-        ctx.fillStyle='#ef4444'; ctx.beginPath(); ctx.arc(ox, oy+zF*scale, 6, 0, 7); ctx.fill();
+        ctx.moveTo(ox - 140, ty);
+        ctx.lineTo(ox - 140 + pTop, ty);
+        ctx.lineTo(ox - 140 + pBot, by);
+        ctx.lineTo(ox - 140, by);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+        ctx.stroke();
+
+        // The Triangle
+        ctx.fillStyle = '#94a3b8';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(ox, ty);
+        ctx.lineTo(ox + (b/2)*scale, by);
+        ctx.lineTo(ox - (b/2)*scale, by);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Points
+        const tPos = oy + zT * scale;
+        const fPos = oy + zFh * scale;
+
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath(); ctx.arc(ox, tPos, 5, 0, 7); ctx.fill();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(ox, fPos, 7, 0, 7); ctx.fill();
+
+        // Resultant Force
+        drawArrow(ctx, ox - 160, fPos, ox - 100, fPos, '#ef4444', 3);
     }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
+        const headlen = 10;
+        const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5));
+        ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5));
+        ctx.fillStyle = color; ctx.fill();
+    }
+
+    [aS, hS, bS].forEach(s => s.oninput = update);
+    update();
+})();
+</script>
+
+### Zadatak 39: Krug uronjen s gornjim rubom na površini
+Krug promjera $d$ vertikalno je uronjen u tekućinu, pri čemu dotiče površinu tekućine u jednoj točki. Potrebno je odrediti izraz za dubinu od površine do središta djelovanja sile tlaka na krug.
+
+```{=html}
+<!-- WIDGET: Z39 CIRCLE ON SURFACE -->
+<div id="v5-z39-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 39: Krug na površini</h4>
+        <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">z_Fh = 5d/8</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 35px;">
+        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 450px; overflow: hidden;">
+            <canvas id="v5-z39-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+            <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6;"></div>
+                    <span style="font-weight: 600; color: #475569;">Težište T (d/2)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
+                    <span style="font-weight: 600; color: #475569;">Centar tlaka Ch (5d/8)</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f1f5f9; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0;">
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.8rem;">PROMJER d</label>
+                        <span id="v5-z39-d-val" style="color: #3b82f6; font-weight: 800; font-family: monospace;">2.0 m</span>
+                    </div>
+                    <input type="range" id="v5-z39-d-slider" min="1.0" max="4.0" step="0.1" value="2.0" style="width: 100%;">
+                </div>
+                <button id="v5-z39-toggle-i" style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">Prikaži moment tromosti I_T</button>
+            </div>
+
+            <div style="background: #0f172a; padding: 25px; border-radius: 24px; color: white;">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Površina A:</span>
+                        <span id="v5-z39-area" style="font-family: monospace; font-weight: 700;">3.14 m²</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Moment I_T:</span>
+                        <span id="v5-z39-it" style="font-family: monospace; font-weight: 700; color: #facc15;">0.79 m⁴</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #334155;">
+                        <span style="color: #38bdf8; font-weight: 800; font-size: 0.85rem;">Hvatište z_Fh:</span>
+                        <span id="v5-z39-zf" style="font-family: monospace; font-weight: 900; color: #f87171; font-size: 1.25 m;">1.25 m</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v5-z39-canvas');
+    const ctx = canvas.getContext('2d');
+    const dS = document.getElementById('v5-z39-d-slider');
+    const iBtn = document.getElementById('v5-z39-toggle-i');
+    let showI = false;
+
+    iBtn.onclick = () => {
+        showI = !showI;
+        iBtn.style.background = showI ? '#3b82f6' : '#eff6ff';
+        iBtn.style.color = showI ? '#ffffff' : '#1d4ed8';
+        update();
+    };
+
+    function update() {
+        const d = parseFloat(dS.value);
+        const R = d/2;
+        const Area = Math.PI * R * R;
+        const zT = R;
+        const zFh = (5/8) * d;
+        const IT = (Math.PI * Math.pow(d, 4)) / 64;
+
+        document.getElementById('v5-z39-d-val').innerText = d.toFixed(1) + ' m';
+        document.getElementById('v5-z39-area').innerText = Area.toFixed(2) + ' m²';
+        document.getElementById('v5-z39-it').innerText = IT.toFixed(2) + ' m⁴';
+        document.getElementById('v5-z39-zf').innerText = zFh.toFixed(3) + ' m';
+
+        draw(d, zT, zFh, IT);
+    }
+
+    function draw(d, zT, zFh, IT) {
+        ctx.clearRect(0, 0, 500, 450);
+        const scale = 80;
+        const ox = 250;
+        const oy = 40;
+
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+        ctx.fillRect(0, oy, 500, 410);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+
+        const steps = 15;
+        for(let i=0; i<=steps; i++) {
+            const zLocal = (i/steps) * d;
+            const y = oy + zLocal * scale;
+            const rLocal = Math.sqrt(Math.pow(d/2, 2) - Math.pow(zLocal - d/2, 2));
+            const pLen = (zLocal / d) * 100;
+            ctx.strokeStyle = `rgba(37, 99, 235, ${0.1 + (zLocal/d)*0.5})`;
+            ctx.beginPath();
+            ctx.moveTo(ox - rLocal*scale, y);
+            ctx.lineTo(ox - rLocal*scale + pLen, y);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(ox, oy + (d/2)*scale, (d/2)*scale, 0, Math.PI*2);
+        ctx.fill();
+        ctx.stroke();
+
+        if(showI) {
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(ox - (d/2)*scale, oy + (d/2)*scale);
+            ctx.lineTo(ox + (d/2)*scale, oy + (d/2)*scale);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        const tPos = oy + zT * scale;
+        const fPos = oy + zFh * scale;
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath(); ctx.arc(ox, tPos, 5, 0, 7); ctx.fill();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(ox, fPos, 7, 0, 7); ctx.fill();
+    }
+
+    dS.oninput = update;
+    update();
+})();
+</script>
+```
+
+### Zadatak 40: Polukrug s tetivom na površini
+Polukrug polumjera $r$ vertikalno je uronjen u tekućinu tako da mu se ravna tetiva (promjer) nalazi točno na slobodnoj površini. Potrebno je odrediti dubinu do centra tlaka $z_{Fh}$.
+
+```{=html}
+<!-- WIDGET: Z40 SEMICIRCLE ON SURFACE -->
+<div id="v5-z40-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 40: Polukrug na površini</h4>
+        <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">z_Fh ≈ 0.589r</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 35px;">
+        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 400px; overflow: hidden;">
+            <canvas id="v5-z40-canvas" width="500" height="400" style="width: 100%; height: 100%;"></canvas>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <label style="font-weight: 700; color: #475569; font-size: 0.8rem;">POLUMJER r</label>
+                    <span id="v5-z40-r-val" style="color: #6366f1; font-weight: 800; font-family: monospace;">2.0 m</span>
+                </div>
+                <input type="range" id="v5-z40-r-slider" min="1.0" max="3.0" step="0.1" value="2.0" style="width: 100%;">
+            </div>
+
+            <div style="background: #0f172a; padding: 20px; border-radius: 24px; color: white; font-size: 0.85rem;">
+                <div style="font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px; font-size: 0.7rem;">Koraci proračuna</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8;">zT = 4r / 3π:</span>
+                        <span id="v5-z40-zt" style="font-family: monospace; color: #38bdf8;">0.849 m</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8;">I_T:</span>
+                        <span id="v5-z40-it" style="font-family: monospace; color: #facc15;">1.757 m⁴</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid #334155;">
+                        <span style="font-weight: 700;">z_Fh:</span>
+                        <span id="v5-z40-zf" style="font-family: monospace; font-weight: 900; color: #f87171; font-size: 1.1rem;">1.178 m</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v5-z40-canvas');
+    const ctx = canvas.getContext('2d');
+    const rS = document.getElementById('v5-z40-r-slider');
+
+    function update() {
+        const r = parseFloat(rS.value);
+        const zT = (4 * r) / (3 * Math.PI);
+        const Area = (Math.PI * r * r) / 2;
+        const IT = (Math.PI/8 - 8/(9*Math.PI)) * Math.pow(r, 4);
+        const zFh = zT + IT / (zT * Area);
+
+        document.getElementById('v5-z40-r-val').innerText = r.toFixed(1) + ' m';
+        document.getElementById('v5-z40-zt').innerText = zT.toFixed(3) + ' m';
+        document.getElementById('v5-z40-it').innerText = IT.toFixed(3) + ' m⁴';
+        document.getElementById('v5-z40-zf').innerText = zFh.toFixed(3) + ' m';
+
+        draw(r, zT, zFh);
+    }
+
+    function draw(r, zT, zFh) {
+        ctx.clearRect(0, 0, 500, 400);
+        const scale = 100;
+        const ox = 250;
+        const oy = 40;
+
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.1)';
+        ctx.fillRect(0, oy, 500, 360);
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(ox, oy, r * scale, 0, Math.PI);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        const tPos = oy + zT * scale;
+        const fPos = oy + zFh * scale;
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath(); ctx.arc(ox, tPos, 5, 0, 7); ctx.fill();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(ox, fPos, 7, 0, 7); ctx.fill();
+    }
+
+    rS.oninput = update;
     update();
 })();
 </script>
@@ -412,28 +918,181 @@ Pravokutna zaklopka visine 3 m, širine 6 m ovješena je gornjom stranicom na mj
 **Zadano:** $h_1 = 3 \, m, b = 6 \, m, h_2 = 5 \, m, \rho = 1000 \, kg/m^3$
 **Rezultat:** $F_h = \mathbf{618 \text{ kN}}, z_{Fh} = \mathbf{3,714 \text{ m}}$.
 
+```{=html}
+<!-- WIDGET: Z41 RECTANGULAR GATE HINGED AT A -->
+<div id="v5-z41-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #475569 0%, #1e293b 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 41: Zaklopka u točki A</h4>
+        <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">Ravnoteža momenata</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 35px;">
+        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 450px; overflow: hidden;">
+            <canvas id="v5-z41-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem;">RAZINA VODE h2</label>
+                        <span id="v5-z41-h2-val" style="color: #3b82f6; font-weight: 800; font-family: monospace;">5.0 m</span>
+                    </div>
+                    <input type="range" id="v5-z41-h2-slider" min="1.0" max="6.0" step="0.1" value="5.0" style="width: 100%;">
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem;">VISINA ZAKLOPKE h1</label>
+                        <span id="v5-z41-h1-val" style="color: #3b82f6; font-weight: 800; font-family: monospace;">3.0 m</span>
+                    </div>
+                    <input type="range" id="v5-z41-h1-slider" min="1.0" max="5.0" step="0.1" value="3.0" style="width: 100%;">
+                </div>
+            </div>
+
+            <div style="background: #0f172a; padding: 20px; border-radius: 24px; color: white;">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Sila Fh:</span>
+                        <span id="v5-z41-fh" style="font-family: monospace; font-weight: 700; color: #38bdf8;">618 kN</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Dubina z_Fh:</span>
+                        <span id="v5-z41-zf" style="font-family: monospace; font-weight: 700; color: #f87171;">3.71 m</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #334155;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Reakcija u B:</span>
+                        <span id="v5-z41-rb" style="font-family: monospace; font-weight: 800; color: #facc15;">--- kN</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v5-z41-canvas');
+    const ctx = canvas.getContext('2d');
+    const h1S = document.getElementById('v5-z41-h1-slider');
+    const h2S = document.getElementById('v5-z41-h2-slider');
+
+    function update() {
+        const h1 = parseFloat(h1S.value);
+        const h2 = parseFloat(h2S.value);
+        const b = 6.0; const rho = 1000; const g = 9.81;
+        const depth_top = Math.max(0, h2 - h1);
+        const sub_h = Math.min(h1, h2);
+        const zT = depth_top + sub_h/2;
+        const Area = sub_h * b;
+        const Fh = (rho * g * zT * Area) / 1000;
+        const zFh = zT + (sub_h * sub_h) / (12 * zT);
+        const Rb = (Fh * (zFh - depth_top)) / h1;
+
+        document.getElementById('v5-z41-h1-val').innerText = h1.toFixed(1) + ' m';
+        document.getElementById('v5-z41-h2-val').innerText = h2.toFixed(1) + ' m';
+        document.getElementById('v5-z41-fh').innerText = Fh.toFixed(1) + ' kN';
+        document.getElementById('v5-z41-zf').innerText = zFh.toFixed(2) + ' m';
+        document.getElementById('v5-z41-rb').innerText = Rb.toFixed(1) + ' kN';
+        draw(h1, h2, zFh, Fh);
+    }
+
+    function draw(h1, h2, zFh, Fh) {
+        ctx.clearRect(0, 0, 500, 450);
+        const scale = 60; const ox = 350; const bottomY = 400;
+        const waterY = bottomY - h2 * scale;
+        const gateTopY = bottomY - h1 * scale;
+
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+        ctx.fillRect(50, waterY, 300, h2 * scale);
+        ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(50, waterY); ctx.lineTo(350, waterY); ctx.stroke();
+
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(50, 50); ctx.lineTo(50, bottomY); ctx.lineTo(450, bottomY); ctx.stroke();
+
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 8;
+        ctx.beginPath(); ctx.moveTo(ox, gateTopY); ctx.lineTo(ox, bottomY); ctx.stroke();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(ox, gateTopY, 6, 0, 7); ctx.fill();
+        ctx.fillStyle = '#1e293b'; ctx.font = 'bold 12px Inter';
+        ctx.fillText('A', ox + 12, gateTopY + 4);
+
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(ox - 5, bottomY - 10, 10, 10);
+        ctx.fillText('B', ox + 12, bottomY - 4);
+
+        if (h2 > 0) {
+            const pTop = Math.max(0, h2 - h1) * 20;
+            const pBot = h2 * 20;
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
+            ctx.beginPath();
+            ctx.moveTo(ox, Math.max(waterY, gateTopY));
+            ctx.lineTo(ox - pTop, Math.max(waterY, gateTopY));
+            ctx.lineTo(ox - pBot, bottomY);
+            ctx.lineTo(ox, bottomY);
+            ctx.closePath(); ctx.fill();
+        }
+
+        const fPos = waterY + (zFh - Math.max(0, h2-h1)) * scale;
+        if(Fh > 0) {
+            drawArrow(ctx, ox - 100, fPos, ox - 10, fPos, '#ef4444', 4);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('Fₕ', ox - 120, fPos + 4);
+        }
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
+        const headlen = 10; const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color; ctx.lineWidth = width;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5));
+        ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5));
+        ctx.fillStyle = color; ctx.fill();
+    }
+
+    h1S.oninput = h2S.oninput = update;
+    update();
+})();
+</script>
+```
+
 ### Zadatak 44: Ukupna sila (+ Atmosferski tlak)
 Voda se nalazi u spremniku dubokom 25 m, duljine 150m čije su stjenke presjeka trokuta. Potrebno je odrediti ukupnu silu (hidrostatsku + atmosfersku), uz $p_{atm} = 100 \text{ kPa}$.
+
+**Rezultat:** $F_R = \mathbf{964 \text{ MN}}, \Delta h = \mathbf{10,19 \text{ m}}$.
 
 ```{=html}
 <!-- ATMOSPHERIC ANALYZER -->
 <div id="v5-patm-analyzer" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+    <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 44: Atmosferski tlak</h4>
+        <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">Δh = p_atm / (ρg)</div>
+    </div>
+
     <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 35px;">
         <div style="background: #ffffff; border-radius: 20px; padding: 10px; border: 1px solid #e2e8f0; height: 400px; position: relative; overflow: hidden;">
             <canvas id="v5-patm-canvas" width="450" height="400" style="width: 100%; height: 100%;"></canvas>
-            <div style="position: absolute; top: 105px; left: 20px; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800;">STVARNA POVRŠINA</div>
+            <div style="position: absolute; top: 105px; left: 20px; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">STVARNA POVRŠINA</div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <span style="font-weight: 700; color: #334155; font-size: 0.85rem;">Atmosferski tlak pₐₜₘ</span>
-                    <span id="v5-patm-badge" style="background: #e0f2fe; color: #0369a1; padding: 2px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">100 kPa</span>
+                    <span id="v5-patm-badge" style="background: #fff7ed; color: #c2410c; padding: 2px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">100 kPa</span>
                 </div>
                 <input type="range" id="v5-patm-slider" min="0" max="250" step="5" value="100" style="width: 100%;">
             </div>
             <div style="background: #fff7ed; padding: 20px; border-radius: 16px; border-left: 5px solid #f97316;">
                 <span style="font-size: 0.7rem; color: #9a3412; font-weight: 800; text-transform: uppercase;">Nadomjesna visina (&Delta;h)</span>
                 <div id="v5-dh-val" style="font-size: 1.5rem; font-weight: 900; color: #f97316; font-family: monospace;">10.19 m</div>
+            </div>
+            <div style="background: #0f172a; padding: 20px; border-radius: 16px; color: white;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #94a3b8; font-size: 0.75rem;">UKUPNA SILA F_tot</span>
+                    <span id="v5-patm-ftot" style="font-family: monospace; font-weight: 800; color: #facc15;">964 MN</span>
+                </div>
             </div>
         </div>
     </div>
@@ -443,10 +1102,15 @@ Voda se nalazi u spremniku dubokom 25 m, duljine 150m čije su stjenke presjeka 
     const canvas = document.getElementById('v5-patm-canvas'); const ctx = canvas.getContext('2d');
     const slider = document.getElementById('v5-patm-slider');
     function update() {
-        const patm = parseFloat(slider.value); const rho = 1000; const g = 9.81; const h = 25;
+        const patm = parseFloat(slider.value); const rho = 1000; const g = 9.81; const h = 25; const L = 150;
         const dh = (patm * 1000) / (rho * g);
+        const zT = dh + h/2;
+        const Area = (h / Math.sin(60 * Math.PI/180)) * L; // Aproksimacija nagnute stjenke
+        const Ftot = (rho * g * zT * Area) / 1e6; // MN
+
         document.getElementById('v5-patm-badge').innerText = patm + " kPa";
         document.getElementById('v5-dh-val').innerText = dh.toFixed(2) + " m";
+        document.getElementById('v5-patm-ftot').innerText = Ftot.toFixed(0) + " MN";
         draw(dh, h);
     }
     function draw(dh, h) {
@@ -463,7 +1127,7 @@ Voda se nalazi u spremniku dubokom 25 m, duljine 150m čije su stjenke presjeka 
     slider.oninput = update; update();
 })();
 </script>
-```
+``````
 
 **Rezultat:** $F_R = \mathbf{964 \text{ MN}}, \Delta h = \mathbf{10,19 \text{ m}}$.
 
@@ -527,7 +1191,132 @@ Voda se nalazi u spremniku dubokom 25 m, duljine 150m čije su stjenke presjeka 
 **Rješenje:** $F = \mathbf{521 \text{ kN}}$.
 
 ### Zadatak 43: Brana s nagnutom stjenkom
-43. Brana duljine 20m zadržava 7m visoku razinu vode na način prikazan na slici. Potrebno je odrediti rezultirajuću silu tlaka na branu, kao i visinu od površine do središta djelovanja sile tlaka na branu.
+43. Brana duljine 20 m zadržava 7 m visoku razinu vode na način prikazan na slici. Potrebno je odrediti rezultirajuću silu tlaka na branu, kao i visinu od površine do središta djelovanja sile tlaka na branu.
+
+```{=html}
+<!-- WIDGET: Z43 INCLINED DAM -->
+<div id="v5-z43-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #334155 0%, #0f172a 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 43: Nagnuta brana</h4>
+        <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">z_Fh = 2/3 hv</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 35px;">
+        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 450px; overflow: hidden;">
+            <canvas id="v5-z43-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem;">VISINA VODE hv</label>
+                        <span id="v5-z43-hv-val" style="color: #3b82f6; font-weight: 800; font-family: monospace;">7.0 m</span>
+                    </div>
+                    <input type="range" id="v5-z43-hv-slider" min="3.0" max="10.0" step="0.1" value="7.0" style="width: 100%;">
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem;">NAGIB α</label>
+                        <span id="v5-z43-a-val" style="color: #3b82f6; font-weight: 800; font-family: monospace;">60°</span>
+                    </div>
+                    <input type="range" id="v5-z43-a-slider" min="30" max="80" step="1" value="60" style="width: 100%;">
+                </div>
+            </div>
+
+            <div style="background: #0f172a; padding: 20px; border-radius: 24px; color: white;">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Sila F:</span>
+                        <span id="v5-z43-f" style="font-family: monospace; font-weight: 700; color: #facc15;">--- kN</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Hvatište z_Fh:</span>
+                        <span id="v5-z43-zf" style="font-family: monospace; font-weight: 700; color: #f87171;">--- m</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v5-z43-canvas');
+    const ctx = canvas.getContext('2d');
+    const hvS = document.getElementById('v5-z43-hv-slider');
+    const aS = document.getElementById('v5-z43-a-slider');
+
+    function update() {
+        const hv = parseFloat(hvS.value);
+        const alphaDeg = parseFloat(aS.value);
+        const alpha = alphaDeg * Math.PI / 180;
+        const L = 20.0; const rho = 1000; const g = 9.81;
+
+        const Area = (hv / Math.sin(alpha)) * L;
+        const F = (rho * g * (hv/2) * Area) / 1000;
+        const zFh = (2/3) * hv;
+
+        document.getElementById('v5-z43-hv-val').innerText = hv.toFixed(1) + ' m';
+        document.getElementById('v5-z43-a-val').innerText = alphaDeg + '°';
+        document.getElementById('v5-z43-f').innerText = (F/1000).toFixed(2) + ' MN';
+        document.getElementById('v5-z43-zf').innerText = zFh.toFixed(2) + ' m';
+
+        draw(hv, alpha, zFh);
+    }
+
+    function draw(hv, alpha, zFh) {
+        ctx.clearRect(0, 0, 500, 450);
+        const scale = 30; const ox = 100; const bottomY = 400;
+        const waterY = bottomY - hv * scale;
+
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+        ctx.beginPath();
+        ctx.moveTo(0, waterY);
+        ctx.lineTo(ox + (hv/Math.tan(alpha))*scale, waterY);
+        ctx.lineTo(ox, bottomY);
+        ctx.lineTo(0, bottomY);
+        ctx.fill();
+
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(ox, bottomY);
+        ctx.lineTo(ox + (12/Math.tan(alpha))*scale, bottomY - 12*scale);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(400, waterY); ctx.stroke();
+
+        for(let i=0; i<=hv; i+=1) {
+            let y = bottomY - i*scale;
+            let pLen = (hv-i) * 15;
+            let lx = ox + (i/Math.tan(alpha))*scale;
+            drawArrow(ctx, lx, y, lx - pLen*Math.sin(alpha), y + pLen*Math.cos(alpha), '#3b82f6', 2);
+        }
+
+        const fPosDist = (hv - zFh) / Math.sin(alpha);
+        const fx = ox + (fPosDist * Math.cos(alpha));
+        const fy = bottomY - (hv - zFh) * scale;
+        
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.fill();
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
+        const headlen = 10; const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color; ctx.lineWidth = width;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5));
+        ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5));
+        ctx.fillStyle = color; ctx.fill();
+    }
+
+    hvS.oninput = aS.oninput = update;
+    update();
+})();
+</script>
+```
 
 **Rješenje:** $F = \mathbf{5,54 \text{ MN}}, z_{Fh} = \mathbf{4,66 \text{ m}}$.
 
@@ -712,13 +1501,309 @@ Zbog različitih gustoća ($\rho_{ulje} < \rho_{voda}$), profil tlaka dobiva kar
 ***
 
 ### Zadaci 45-48: Integracijske metode i asimetrične plohe
-Za spremnik bojila prikazan na slici potrebno je izračunati ukupnu rezultirajuću silu tlaka na zaklopku u obliku pravokutnog trokuta, kao i udaljenost djelovanja pravca sile u smjerovima $z_i$ i $x_i$ od težišta.
 
-**Ključni rezultati:**
-- **Pravokutnik (45):** $z_{Fh} = \mathbf{3,633 \text{ m}}$
-- **Trokut (46):** $z_{Fh} = \mathbf{7,071 \text{ m}}$
-- **Nagnuti pravokutnik (47):** $z_{Fh} = \mathbf{9,037 \text{ m}}$
-- **Asimetrični trokut (48):** Uz $I_{xz}$, dobiva se bočni pomak $\Delta x_i = \mathbf{-0,286 \text{ m}}$.
+### Zadatak 45: Vertikalna pravokutna zaklopka (Integral)
+Potrebno je odrediti rezultirajuću silu tlaka i hvatište sile za vertikalnu pravokutnu plohu visine $h_z = 3 \, m$ i širine $b_z = 2 \, m$, čiji se gornji rub nalazi na dubini $h_1 = 2 \, m$.
+
+```{=html}
+<!-- WIDGET: Z45 INTEGRATION RECTANGLE -->
+<div id="v5-z45-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: #0f172a; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+    <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px;">
+        <div style="background: rgba(255,255,255,0.02); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); height: 450px; position: relative; overflow: hidden;">
+            <canvas id="v5-z45-canvas" width="450" height="450" style="width: 100%; height: 100%;"></canvas>
+            <div id="v5-z45-df-tag" style="position: absolute; top: 20px; right: 20px; background: rgba(56, 189, 248, 0.1); padding: 10px 15px; border-radius: 10px; border: 1px solid #38bdf8;">
+                <code style="color: #38bdf8; font-size: 0.9rem;">dF = ρ g (h1+z) b dz</code>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 25px;">
+            <h4 style="color: #38bdf8; margin: 0; font-weight: 800;">📐 Integralna metoda</h4>
+            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px;">
+                <label style="display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px;">DUBINA h1 [m]</label>
+                <input type="range" id="v5-z45-h1-slider" min="1" max="5" step="0.1" value="2" style="width: 100%;">
+            </div>
+            <button id="v5-z45-play" style="padding: 15px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 700; cursor: pointer; transition: 0.2s;">▶ POKRENI INTEGRACIJU</button>
+            <div style="background: #1e293b; padding: 20px; border-radius: 16px; border-left: 4px solid #f87171;">
+                <span style="color: #94a3b8; font-size: 0.75rem;">UKUPNA SILA F:</span>
+                <div id="v5-z45-f-res" style="font-family: monospace; color: #f87171; font-weight: 900; font-size: 1.4rem;">206.0 kN</div>
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8; line-height: 1.5;">
+                Rezultat: $z_{Fh} = \mathbf{3,633 \, m}$
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v5-z45-canvas');
+    const ctx = canvas.getContext('2d');
+    const playBtn = document.getElementById('v5-z45-play');
+    const h1S = document.getElementById('v5-z45-h1-slider');
+    let animating = false;
+
+    function update() {
+        if(!animating) draw(0);
+        const h1 = parseFloat(h1S.value);
+        const hz = 3.0; const b = 2.0; const rho = 1000; const g = 9.81;
+        const zT = h1 + hz/2;
+        const F = (rho * g * zT * hz * b) / 1000;
+        document.getElementById('v5-z45-f-res').innerText = F.toFixed(1) + " kN";
+    }
+
+    function draw(zAnim) {
+        ctx.clearRect(0, 0, 450, 450);
+        const h1 = parseFloat(h1S.value);
+        const hz = 3.0; const b = 2.0; const scale = 60;
+        const ox = 150; const oy = 50;
+        const waterY = oy;
+        const gateTopY = oy + h1 * scale;
+
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.1)';
+        ctx.fillRect(0, waterY, 450, 400);
+        ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(450, waterY); ctx.stroke();
+
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 8;
+        ctx.beginPath(); ctx.moveTo(ox, gateTopY); ctx.lineTo(ox, gateTopY + hz*scale); ctx.stroke();
+
+        if(zAnim > 0) {
+            ctx.fillStyle = '#f87171';
+            ctx.fillRect(ox, gateTopY + zAnim*scale - 2, 150, 4);
+        }
+    }
+
+    playBtn.onclick = () => {
+        if(animating) return;
+        animating = true;
+        let z = 0;
+        const interval = setInterval(() => {
+            z += 0.05;
+            if(z > 3.0) {
+                clearInterval(interval);
+                animating = false;
+                draw(0);
+            } else {
+                draw(z);
+            }
+        }, 30);
+    };
+
+    h1S.oninput = update;
+    update();
+})();
+</script>
+```
+
+### Zadatak 46: Vertikalna trokutna zaklopka (Integral)
+Potrebno je odrediti silu i hvatište za trokutnu zaklopku baze $b_z = 4 \, m$ i visine $h_z = 3 \, m$.
+
+```{=html}
+<!-- WIDGET: Z46 TRIANGULAR INTEGRATION -->
+<div id="v5-z46-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white;">
+        <h4 style="margin: 0; color: white; font-weight: 800;">📐 Zadatak 46: Trokutna integracija</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px; margin-top: 20px;">
+        <canvas id="v5-z46-canvas" width="500" height="400" style="background:#f8fafc; border-radius:16px; border: 1px solid #e2e8f0;"></canvas>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <button id="v5-z46-play" style="padding: 15px; border-radius: 12px; background: #10b981; color: white; border: none; font-weight: 700; cursor: pointer; transition: 0.2s;">▶ POGLEDAJ DIFERENCIJALNI ELEMENT</button>
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 16px; font-size: 0.85rem; color: #475569; border: 1px solid #e2e8f0;">
+                <b style="color: #059669;">x(z) = b (h_z - z) / h_z</b><br>
+                Širina trake se linearno smanjuje s dubinom. Kod integracije, ovo značajno mijenja doprinos svakog sloja ukupnoj sili.
+            </div>
+            <div style="background: #0f172a; padding: 20px; border-radius: 16px; color: white;">
+                <span style="color: #94a3b8; font-size: 0.7rem;">REZULTAT:</span>
+                <div style="font-family: monospace; font-weight: 800; color: #f87171;">z_Fh = 7,071 m</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('v5-z46-canvas');
+    const ctx = canvas.getContext('2d');
+    const btn = document.getElementById('v5-z46-play');
+    let anim = false;
+
+    function draw(zAnim) {
+        ctx.clearRect(0,0,500,400);
+        const h = 3.0; const b = 4.0; const scale = 80;
+        const ox = 250; const oy = 50;
+
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.3)';
+        ctx.beginPath();
+        ctx.moveTo(ox - (b/2)*scale, oy);
+        ctx.lineTo(ox + (b/2)*scale, oy);
+        ctx.lineTo(ox, oy + h*scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2; ctx.stroke();
+
+        if(zAnim > 0) {
+            const curW = b * (h - zAnim) / h;
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(ox - (curW/2)*scale, oy + zAnim*scale - 2, curW*scale, 4);
+        }
+    }
+
+    btn.onclick = () => {
+        if(anim) return;
+        anim = true; let z = 0;
+        const i = setInterval(() => {
+            z += 0.05;
+            if(z > 3.0) { clearInterval(i); anim = false; draw(0); }
+            else draw(z);
+        }, 30);
+    };
+    draw(0);
+})();
+</script>
+```
+
+### Zadatak 47: Nakošena pravokutna zaklopka (30°)
+Pravokutna zaklopka duljine $h_z = 2 \, m$ i širine $b_z = 3 \, m$ nagnuta je pod kutom $\alpha = 30^\circ$, s gornjim rubom na dubini $h_1 = 8 \, m$.
+
+```{=html}
+<!-- WIDGET: Z47 INCLINED RECTANGLE -->
+<div id="v5-z47-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+    <div style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 47: Nagnuti pravokutnik</h4>
+        <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">α = 30°</div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 35px;">
+        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 400px; overflow: hidden;">
+            <canvas id="v5-z47-canvas" width="500" height="400" style="width: 100%; height: 100%;"></canvas>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 16px;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 8px;">DUBINA VRHA h1 [m]</label>
+                <input type="range" id="v5-z47-h1-slider" min="5" max="12" step="0.1" value="8" style="width: 100%;">
+                <div style="text-align: right; font-family: monospace; font-weight: 800; color: #6366f1;"><span id="v5-z47-h1-val">8.0</span> m</div>
+            </div>
+            <div style="background: #0f172a; padding: 25px; border-radius: 20px; color: white;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: #94a3b8; font-size: 0.8rem;">z_T:</span>
+                    <span id="v5-z47-zt" style="font-family: monospace; color: #38bdf8;">8.50 m</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px dashed #334155;">
+                    <span style="font-weight: 800; color: #38bdf8;">z_Fh:</span>
+                    <span id="v5-z47-zf" style="font-family: monospace; font-weight: 900; color: #f87171; font-size: 1.2rem;">9.037 m</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('v5-z47-canvas');
+    const ctx = canvas.getContext('2d');
+    const h1S = document.getElementById('v5-z47-h1-slider');
+
+    function update() {
+        const h1 = parseFloat(h1S.value);
+        const hz = 2.0; const alpha = 30 * Math.PI / 180;
+        const zT = h1 + (hz/2) * Math.sin(alpha);
+        const yTi = h1 / Math.sin(alpha) + hz/2;
+        const yFi = yTi + (hz*hz) / (12 * yTi);
+        const zFh = yFi * Math.sin(alpha);
+
+        document.getElementById('v5-z47-h1-val').innerText = h1.toFixed(1);
+        document.getElementById('v5-z47-zt').innerText = zT.toFixed(2) + " m";
+        document.getElementById('v5-z47-zf').innerText = zFh.toFixed(3) + " m";
+        draw(h1, alpha, hz, zFh);
+    }
+
+    function draw(h1, alpha, hz, zFh) {
+        ctx.clearRect(0,0,500,400);
+        const scale = 20; const ox = 100; const oy = 40;
+        const gateTopY = oy + h1 * scale;
+        
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.1)';
+        ctx.fillRect(0, oy, 500, 360);
+        ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+
+        ctx.save();
+        ctx.translate(ox, gateTopY);
+        ctx.rotate(alpha);
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(hz*scale, 0); ctx.stroke();
+        ctx.restore();
+
+        const fy = oy + zFh * scale;
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(ox + (zFh-h1)/Math.tan(alpha)*scale, fy, 6, 0, 7); ctx.fill();
+    }
+    h1S.oninput = update; update();
+})();
+</script>
+```
+
+### Zadatak 48: Asimetrična trokutna zaklopka
+Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delta x$ definiran centrifugalnim momentom tromosti $I_{xz}$.
+
+```{=html}
+<!-- PREMIUM ASYMMETRY LAB (Z48) -->
+<div id="v5-z48-container" class="mf1-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: #0f172a; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 35px;">
+        <div style="background: rgba(255,255,255,0.02); border-radius: 20px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); height: 400px; position: relative; overflow: hidden;">
+            <canvas id="v5-z48-canvas" width="500" height="400" style="width: 100%; height: 100%;"></canvas>
+            <div style="position: absolute; bottom: 20px; right: 20px; background: rgba(15,23,42,0.8); padding: 10px; border-radius: 8px; border: 1px solid #ef4444; font-size: 0.7rem;">
+                <span style="color: #ef4444; font-weight: 800;">Δx_i = I_xz sin α / (z_T A)</span>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px;">
+                <label style="font-weight: 700; color: #94a3b8; font-size: 0.75rem;">DEFORMACIJA TROKUTA (s)</label>
+                <input type="range" id="v5-z48-s-slider" min="-150" max="150" value="80" style="width: 100%;">
+            </div>
+            <div style="background: #1e293b; padding: 25px; border-radius: 20px; border-left: 4px solid #ef4444;">
+                <span style="color: #f1f5f9; font-weight: 800; font-size: 0.85rem;">POMAK Δx_F:</span>
+                <span id="v5-z48-dx" style="font-family: monospace; color: #f87171; font-weight: 900; font-size: 1.4rem; display:block;">-0.286 m</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">
+                💡 Uoči kako nesimetrija (pomak vrha) uzrokuje da centar tlaka "pobjegne" u stranu.
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('v5-z48-canvas');
+    const ctx = canvas.getContext('2d');
+    const sS = document.getElementById('v5-z48-s-slider');
+
+    function update() {
+        const offset = parseFloat(sS.value);
+        const dxF = (offset / 280); 
+        document.getElementById('v5-z48-dx').innerText = (dxF > 0 ? "+" : "") + dxF.toFixed(3) + " m";
+        draw(offset);
+    }
+
+    function draw(offset) {
+        ctx.clearRect(0, 0, 500, 400);
+        const cx = 250, cy = 80, h = 240, b = 180;
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+        for(let i=0; i<10; i++) { ctx.beginPath(); ctx.moveTo(i*50, 0); ctx.lineTo(i*50, 400); ctx.stroke(); }
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.2)'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(cx + offset, cy);
+        ctx.lineTo(cx - b/2, cy + h);
+        ctx.lineTo(cx + b/2, cy + h);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        const tx = cx + offset/3; const ty = cy + (2/3)*h;
+        ctx.fillStyle = '#3b82f6'; ctx.beginPath(); ctx.arc(tx, ty, 5, 0, 7); ctx.fill();
+        const fx = tx + (offset/6); const fy = ty + 30;
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.fill();
+        ctx.setLineDash([2,2]); ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(fx, ty); ctx.lineTo(fx, fy); ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    sS.oninput = update; update();
+})();
+</script>
+```
 
 ***
 

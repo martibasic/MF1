@@ -44,7 +44,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-44ee0976171e9be92e6ebe9be850cd66.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-66c9649715f74f1e4324758aa2390964.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -417,17 +417,32 @@ window.Quarto = {
                 <button id="z1-press-btn" style="width: 100%; padding: 10px; background: #3182ce; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;">PRITISNI (Fm)</button>
             </div>
 
-            <div style="background: #f0fdf4; padding: 15px; border-radius: 12px; border: 1px solid #bbf7d0;">
-                <div style="font-size: 0.7rem; color: #166534; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Sila na velikom klipu:</div>
-                <div style="font-size: 1.4rem; font-weight: 800; color: #166534;"><span id="z1-res-fv">9810</span> N</div>
-                
-                <div style="font-size: 0.7rem; color: #1e40af; font-weight: 700; text-transform: uppercase; margin-top: 10px; margin-bottom: 4px;">Potrebna sila Fm:</div>
-                <div style="font-size: 1.4rem; font-weight: 800; color: #1e40af;"><span id="z1-res-fm">883</span> N</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: #f0fdf4; padding: 14px; border-radius: 12px; border: 1px solid #bbf7d0;">
+                    <div style="font-size: 0.7rem; color: #166534; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Sila tereta Fv</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: #166534;"><span id="z1-res-fv">9810</span> N</div>
+                </div>
+                <div style="background: #eff6ff; padding: 14px; border-radius: 12px; border: 1px solid #bfdbfe;">
+                    <div style="font-size: 0.7rem; color: #1d4ed8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Tlak p</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: #1d4ed8;"><span id="z1-res-p-side">1.25</span> MPa</div>
+                </div>
+                <div style="background: #eef2ff; padding: 14px; border-radius: 12px; border: 1px solid #c7d2fe;">
+                    <div style="font-size: 0.7rem; color: #3730a3; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Sila na malom klipu Fm</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: #3730a3;"><span id="z1-res-fm">883</span> N</div>
+                </div>
+                <div style="background: #fff7ed; padding: 14px; border-radius: 12px; border: 1px solid #fdba74;">
+                    <div style="font-size: 0.7rem; color: #c2410c; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Sila na ručki F</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: #c2410c;"><span id="z1-res-handle">61.6</span> N</div>
+                </div>
             </div>
 
             <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
                 💡 <b>Fizikalni uvid:</b> Pascalov zakon kaže da je tlak u tekućini isti. Veći omjer promjera omogućuje dizanje ogromnih tereta malom silom.
             </p>
+            <div style="background: #f8fafc; padding: 12px 14px; border-radius: 12px; border-left: 4px solid #3182ce; line-height: 1.45; color: #334155;">
+                <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #1d4ed8; margin-bottom: 4px;">Kako čitati widget</div>
+                <div style="font-size: 0.8rem;">Najprije jednaki tlak u ulju određuje silu <b>Fm</b> na malom klipu, a zatim poluga pretvara tu silu u manju silu ruke <b>F</b>. Tako je jasna veza između Pascalova zakona i statike poluge.</div>
+            </div>
         </div>
     </div>
 </div>
@@ -448,23 +463,28 @@ window.Quarto = {
         const ratio = parseFloat(rS.value);
         const dv = 0.1; 
         const dm = dv / ratio;
+        const a = 0.03;
+        const b = 0.4;
         
         const Fv = m * 9.81;
         const Av = dv*dv*Math.PI/4;
         const Am = dm*dm*Math.PI/4;
         const p = Fv / Av;
         const Fm = p * Am;
+        const F = a * Fm / (a + b);
         
         document.getElementById('z1-v-m').innerText = m;
         document.getElementById('z1-v-ratio').innerText = ratio.toFixed(1);
         document.getElementById('z1-res-fv').innerText = Fv.toFixed(0);
         document.getElementById('z1-res-fm').innerText = Fm.toFixed(0);
         document.getElementById('z1-res-p').innerText = (p/1e6).toFixed(2);
+        document.getElementById('z1-res-p-side').innerText = (p/1e6).toFixed(2);
+        document.getElementById('z1-res-handle').innerText = F.toFixed(1);
         
-        draw(m, ratio, p, Fm, Fv);
+        draw(m, ratio, p, Fm, Fv, F);
     }
 
-    function draw(m, ratio, p, Fm, Fv) {
+    function draw(m, ratio, p, Fm, Fv, F) {
         ctx.clearRect(0, 0, 500, 350);
         const ox = 50, oy = 280;
         
@@ -499,9 +519,40 @@ window.Quarto = {
         ctx.fillStyle = "#475569";
         ctx.fillRect(ox+350 + (50-smWidth)/2, oy-210 + smallOff, smWidth, 15);
 
+        // Lever and pivot
+        const pivotX = ox + 335;
+        const pivotY = oy - 225;
+        const handleEndX = pivotX + 75;
+        const handleEndY = pivotY - 35;
+        const linkX = ox + 375;
+        const linkTopY = oy - 235 + smallOff;
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(pivotX, pivotY);
+        ctx.lineTo(handleEndX, handleEndY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pivotX + 12, pivotY - 6);
+        ctx.lineTo(linkX, linkTopY);
+        ctx.stroke();
+        ctx.fillStyle = "#1e293b";
+        ctx.beginPath();
+        ctx.arc(pivotX, pivotY, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.font = "bold 11px Inter";
+        ctx.fillStyle = "#475569";
+        ctx.fillText("A", pivotX - 18, pivotY + 5);
+
         // Force Arrows
         drawArrow(ctx, ox+75, oy-150 + largeOff, ox+75, oy-80 + largeOff, "#3b82f6", "Fv", Fv/2000);
         drawArrow(ctx, ox+375, oy-280 + smallOff, ox+375, oy-215 + smallOff, "#ef4444", "Fm", Fm/500);
+        drawArrow(ctx, handleEndX, handleEndY - 55, handleEndX, handleEndY - 4, "#f97316", "F", Math.max(F / 120, 0.5));
+
+        ctx.font = "11px Inter";
+        ctx.fillStyle = "#64748b";
+        ctx.fillText("poluga", pivotX + 22, pivotY - 28);
 
         if(isPressing) {
             pressAnim += 0.05;
@@ -1016,7 +1067,7 @@ window.Quarto = {
     <h4 style="text-align: center; color: #1e293b; margin-top: 0; font-weight: 700;" class="anchored">Z6: Newtonov zakon viskoznosti (Poiseuilleov tok)</h4>
     
     <div style="position: relative; margin-bottom: 20px;">
-        <canvas id="z6-main-canvas" width="800" height="300" style="width: 100%; height: 300px; border-radius: 12px; background: #ffffff; border: 1px solid #e2e8f0; cursor: crosshair;"></canvas>
+        <canvas id="z6-main-canvas" width="800" height="320" style="width: 100%; height: 320px; border-radius: 12px; background: #ffffff; border: 1px solid #e2e8f0; cursor: crosshair;"></canvas>
         <div id="z6-inspect-tooltip" style="position: absolute; display: none; background: rgba(15, 23, 42, 0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; pointer-events: none; backdrop-filter: blur(4px); z-index: 10;">
             <b>Radijalni položaj:</b> <span id="z6-tt-r">0</span> mm<br>
             <b>Brzina v:</b> <span id="z6-tt-v">0</span> m/s<br>
@@ -1037,6 +1088,33 @@ window.Quarto = {
             <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600; color: #475569;">Promjer (d): <span id="z6-v-d">100</span> mm</label>
             <input type="range" id="z6-d" min="40" max="150" step="5" value="100" style="width: 100%; accent-color: #3b82f6;">
         </div>
+        <div>
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600; color: #475569;">Duljina cijevi (L): <span id="z6-v-l">2.0</span> m</label>
+            <input type="range" id="z6-l" min="0.5" max="10" step="0.5" value="2" style="width: 100%; accent-color: #3b82f6;">
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 15px;">
+        <div style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #b91c1c; text-transform: uppercase; margin-bottom: 4px;">Naprezanje na stijenci</div>
+            <div style="font-size: 1.35rem; font-weight: 800; color: #991b1b;"><span id="z6-res-tau-wall">2.50</span> Pa</div>
+            <div style="font-size: 0.78rem; color: #7f1d1d;">tau_s = beta d / 4</div>
+        </div>
+        <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 14px;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #c2410c; text-transform: uppercase; margin-bottom: 4px;">Naprezanje na r = d/4</div>
+            <div style="font-size: 1.35rem; font-weight: 800; color: #9a3412;"><span id="z6-res-tau-quarter">1.25</span> Pa</div>
+            <div style="font-size: 0.78rem; color: #9a3412;">tau_d/4 = beta d / 8</div>
+        </div>
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #1d4ed8; text-transform: uppercase; margin-bottom: 4px;">Ukupna sila na stijenci</div>
+            <div style="font-size: 1.35rem; font-weight: 800; color: #1e40af;"><span id="z6-res-force-wall">1.57</span> N</div>
+            <div style="font-size: 0.78rem; color: #1e3a8a;">F_tau = tau_s pi d L</div>
+        </div>
+        <div style="background: #ecfeff; border: 1px solid #a5f3fc; border-radius: 12px; padding: 14px;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #0f766e; text-transform: uppercase; margin-bottom: 4px;">Maksimalna brzina na osi</div>
+            <div style="font-size: 1.35rem; font-weight: 800; color: #115e59;"><span id="z6-res-vmax">1.56</span> m/s</div>
+            <div style="font-size: 0.78rem; color: #134e4a;">v_max u središtu presjeka</div>
+        </div>
     </div>
 
     <div style="margin-top: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6; font-size: 0.8rem; line-height: 1.5; color: #334155;">
@@ -1051,10 +1129,16 @@ window.Quarto = {
     const muS = document.getElementById('z6-mu');
     const betaS = document.getElementById('z6-beta');
     const dS = document.getElementById('z6-d');
+    const lS = document.getElementById('z6-l');
     const tooltip = document.getElementById('z6-inspect-tooltip');
 
-    let particles = Array.from({length: 60}, () => ({ r: 0, x: Math.random()*800 }));
+    let particles = Array.from({length: 70}, () => ({
+        x: Math.random(),
+        y: Math.random() * 2 - 1,
+        size: 1.8 + Math.random() * 1.6
+    }));
     let mousePos = null;
+    let frame = 0;
 
     canvas.onmousemove = (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -1062,92 +1146,290 @@ window.Quarto = {
     };
     canvas.onmouseleave = () => { mousePos = null; tooltip.style.display = 'none'; };
 
-    function update() {
-        const mu = parseFloat(muS.value) / 1000;
-        const beta = parseFloat(betaS.value);
-        const d_mm = parseFloat(dS.value);
-        const R = d_mm / 2;
-        
-        document.getElementById('z6-v-mu').innerText = (mu*1000).toFixed(0);
-        document.getElementById('z6-v-beta').innerText = beta;
-        document.getElementById('z6-v-d').innerText = d_mm;
-
-        ctx.clearRect(0,0,800,300);
-        const cy = 150;
-        const drawR = R * 1.5; // Scale mm to px
-
-        // Walls
-        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(0, cy-drawR); ctx.lineTo(800, cy-drawR); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0, cy+drawR); ctx.lineTo(800, cy+drawR); ctx.stroke();
-        
-        // Parabola
-        ctx.strokeStyle = "rgba(59, 130, 246, 0.5)"; ctx.lineWidth = 2; ctx.beginPath();
-        const v_max = (beta * (d_mm/1000)**2) / (16 * mu);
-        const x_scale = 100 / v_max; 
-        
-        ctx.moveTo(50, cy-drawR);
-        for(let y = -drawR; y <= drawR; y++) {
-            const r_local = (y / drawR) * (d_mm/2);
-            const v = (beta / (4*mu)) * ((d_mm/2000)**2 - (r_local/1000)**2);
-            ctx.lineTo(50 + v * 500, cy + y);
-        }
-        ctx.stroke();
-
-        // Particles
-        ctx.fillStyle = "#3b82f6";
-        particles.forEach((p, i) => {
-            if(p.r === 0) p.r = (Math.random() - 0.5) * d_mm;
-            const r_m = p.r / 1000;
-            const v = (beta / (4*mu)) * ((d_mm/2000)**2 - r_m**2);
-            p.x += v * 50; 
-            if(p.x > 800) p.x = 0;
-            ctx.beginPath(); ctx.arc(p.x, cy + p.r*1.5, 2, 0, Math.PI*2); ctx.fill();
-        });
-
-        // Inspect Tooltip & Visuals
-        if(mousePos) {
-            const my = mousePos.y - cy;
-            const r_inspect_mm = my / 1.5;
-            if(Math.abs(r_inspect_mm) <= d_mm/2) {
-                const r_m = r_inspect_mm / 1000;
-                const v = (beta / (4*mu)) * ((d_mm/2000)**2 - r_m**2);
-                const tau = Math.abs(beta * r_m / 2);
-                
-                tooltip.style.display = 'block';
-                tooltip.style.left = (mousePos.x + 15) + 'px';
-                tooltip.style.top = (mousePos.y + 15) + 'px';
-                document.getElementById('z6-tt-r').innerText = r_inspect_mm.toFixed(1);
-                document.getElementById('z6-tt-v').innerText = v.toFixed(3);
-                document.getElementById('z6-tt-tau').innerText = tau.toFixed(2);
-
-                // Draw tau arrow at mouse
-                const tau_len = tau * 10;
-                drawArrow(ctx, mousePos.x, mousePos.y, mousePos.x + tau_len, mousePos.y, "#ef4444");
-            } else {
-                tooltip.style.display = 'none';
-            }
-        }
-
-        // Stress indication on walls
-        ctx.fillStyle = "rgba(239, 68, 68, 0.2)";
-        ctx.fillRect(0, cy-drawR-5, 800, 5);
-        ctx.fillRect(0, cy+drawR, 800, 5);
-        
-        requestAnimationFrame(update);
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
     }
 
-    function drawArrow(ctx, x1, y1, x2, y2, color) {
-        const headlen = 8; const angle = Math.atan2(y2-y1, x2-x1);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
+    function panel(ctx, x, y, w, h, title, accent) {
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#dbeafe";
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, x, y, w, h, 16, true, true);
+        ctx.fillStyle = accent;
+        ctx.font = "600 13px Inter";
+        ctx.fillText(title, x + 14, y + 24);
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+        if (fill) ctx.fill();
+        if (stroke) ctx.stroke();
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, width = 2) {
+        const headlen = 8;
+        const angle = Math.atan2(y2-y1, x2-x1);
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
         ctx.lineTo(x2-headlen*Math.cos(angle-Math.PI/6), y2-headlen*Math.sin(angle-Math.PI/6));
         ctx.lineTo(x2-headlen*Math.cos(angle+Math.PI/6), y2-headlen*Math.sin(angle+Math.PI/6));
         ctx.fill();
     }
 
-    update();
+    function draw() {
+        frame += 1;
+        const mu = parseFloat(muS.value) / 1000;
+        const beta = parseFloat(betaS.value);
+        const d_mm = parseFloat(dS.value);
+        const L = parseFloat(lS.value);
+        const R = d_mm / 2;
+        const d_m = d_mm / 1000;
+        const tauWall = beta * d_m / 4;
+        const tauQuarter = beta * d_m / 8;
+        const v_max = (beta * d_m * d_m) / (16 * mu);
+        const F_tau = tauWall * Math.PI * d_m * L;
+
+        document.getElementById('z6-v-mu').innerText = (mu*1000).toFixed(0);
+        document.getElementById('z6-v-beta').innerText = beta;
+        document.getElementById('z6-v-d').innerText = d_mm;
+        document.getElementById('z6-v-l').innerText = L.toFixed(1);
+        document.getElementById('z6-res-tau-wall').innerText = tauWall.toFixed(2);
+        document.getElementById('z6-res-tau-quarter').innerText = tauQuarter.toFixed(2);
+        document.getElementById('z6-res-force-wall').innerText = F_tau.toFixed(2);
+        document.getElementById('z6-res-vmax').innerText = v_max.toFixed(2);
+
+        const w = canvas.width;
+        const h = canvas.height;
+        const left = { x: 24, y: 22, w: 318, h: 276 };
+        const right = { x: 366, y: 22, w: 410, h: 276 };
+        const channel = {
+            x: left.x + 26,
+            y: left.y + 46,
+            w: left.w - 52,
+            h: left.h - 88
+        };
+        const cy = channel.y + channel.h / 2;
+        const drawR = Math.min(channel.h * 0.43, 92);
+        const topWall = cy - drawR;
+        const bottomWall = cy + drawR;
+        const chart = {
+            x: right.x + 54,
+            y: right.y + 34,
+            w: right.w - 88,
+            h: right.h - 68
+        };
+
+        ctx.clearRect(0, 0, w, h);
+
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+        bgGrad.addColorStop(0, "#f8fbff");
+        bgGrad.addColorStop(1, "#eef6ff");
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        panel(ctx, left.x, left.y, left.w, left.h, "Tok u cijevi", "#0f766e");
+        panel(ctx, right.x, right.y, right.w, right.h, "Profil brzine v(r)", "#1d4ed8");
+
+        // Left panel: channel
+        const fluidGrad = ctx.createLinearGradient(channel.x, topWall, channel.x, bottomWall);
+        fluidGrad.addColorStop(0, "rgba(191, 219, 254, 0.55)");
+        fluidGrad.addColorStop(0.5, "rgba(59, 130, 246, 0.18)");
+        fluidGrad.addColorStop(1, "rgba(191, 219, 254, 0.55)");
+        ctx.fillStyle = fluidGrad;
+        roundRect(ctx, channel.x, topWall, channel.w, bottomWall - topWall, 18, true, false);
+
+        ctx.fillStyle = "#334155";
+        ctx.fillRect(channel.x, topWall - 12, channel.w, 10);
+        ctx.fillRect(channel.x, bottomWall + 2, channel.w, 10);
+
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(channel.x, cy);
+        ctx.lineTo(channel.x + channel.w, cy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = "12px Inter";
+        ctx.fillStyle = "#475569";
+        ctx.fillText("os cijevi", channel.x + 6, cy - 8);
+        ctx.fillText("stijenka", channel.x + 6, topWall - 16);
+        ctx.fillText("stijenka", channel.x + 6, bottomWall + 28);
+
+        // Layer arrows
+        for (let i = 0; i <= 8; i++) {
+            const y = topWall + (i / 8) * (bottomWall - topWall);
+            const r_mm = ((y - cy) / drawR) * R;
+            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - (r_mm/1000)**2));
+            const len = clamp((v / Math.max(v_max, 1e-6)) * 120, 8, 120);
+            const alpha = 0.2 + 0.55 * (v / Math.max(v_max, 1e-6));
+            drawArrow(ctx, channel.x + 18, y, channel.x + 18 + len, y, `rgba(37, 99, 235, ${alpha})`, 2.5);
+        }
+
+        // Particles
+        particles.forEach((p) => {
+            const r_mm = p.y * R;
+            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - (r_mm/1000)**2));
+            const speedRatio = v / Math.max(v_max, 1e-6);
+            p.x += 0.003 + speedRatio * 0.018;
+            if (p.x > 1.05) p.x = -0.05;
+            const px = channel.x + p.x * channel.w;
+            const py = cy + p.y * drawR;
+            ctx.fillStyle = `rgba(14, 116, 144, ${0.25 + 0.6 * speedRatio})`;
+            ctx.beginPath();
+            ctx.arc(px, py, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Small formula badge
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
+        ctx.strokeStyle = "#dbeafe";
+        roundRect(ctx, channel.x + channel.w - 150, topWall + 14, 136, 34, 10, true, true);
+        ctx.fillStyle = "#1e40af";
+        ctx.font = "600 12px Inter";
+        ctx.fillText("v(r) = vmax (1 - (r/R)^2)", channel.x + channel.w - 140, topWall + 36);
+
+        // Right panel: chart axes
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(chart.x, chart.y);
+        ctx.lineTo(chart.x, chart.y + chart.h);
+        ctx.lineTo(chart.x + chart.w, chart.y + chart.h);
+        ctx.stroke();
+
+        ctx.setLineDash([4, 6]);
+        for (let i = 0; i <= 4; i++) {
+            const gy = chart.y + (i / 4) * chart.h;
+            ctx.beginPath();
+            ctx.moveTo(chart.x, gy);
+            ctx.lineTo(chart.x + chart.w, gy);
+            ctx.stroke();
+        }
+        ctx.setLineDash([]);
+
+        ctx.font = "11px Inter";
+        ctx.fillStyle = "#64748b";
+        ctx.fillText("+R", chart.x - 24, chart.y + 4);
+        ctx.fillText("0", chart.x - 16, chart.y + chart.h / 2 + 4);
+        ctx.fillText("-R", chart.x - 24, chart.y + chart.h);
+        ctx.fillText("r", chart.x - 10, chart.y - 8);
+        ctx.fillText("v", chart.x + chart.w + 8, chart.y + chart.h + 4);
+
+        // Profile fill and curve
+        ctx.beginPath();
+        ctx.moveTo(chart.x, chart.y);
+        for (let i = 0; i <= 120; i++) {
+            const t = i / 120;
+            const r_mm = R - 2 * R * t;
+            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - (r_mm/1000)**2));
+            const px = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+            const py = chart.y + t * chart.h;
+            ctx.lineTo(px, py);
+        }
+        ctx.lineTo(chart.x, chart.y + chart.h);
+        ctx.closePath();
+        const chartFill = ctx.createLinearGradient(chart.x, chart.y, chart.x + chart.w, chart.y);
+        chartFill.addColorStop(0, "rgba(191, 219, 254, 0.15)");
+        chartFill.addColorStop(1, "rgba(59, 130, 246, 0.32)");
+        ctx.fillStyle = chartFill;
+        ctx.fill();
+
+        ctx.strokeStyle = "#2563eb";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let i = 0; i <= 120; i++) {
+            const t = i / 120;
+            const r_mm = R - 2 * R * t;
+            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - (r_mm/1000)**2));
+            const px = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+            const py = chart.y + t * chart.h;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        // Centerline and wall stress bars
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.9)";
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(chart.x, chart.y + chart.h / 2);
+        ctx.lineTo(chart.x + chart.w, chart.y + chart.h / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const stressBarW = clamp(16 + tauWall * 10, 16, 74);
+        ctx.fillStyle = "rgba(239, 68, 68, 0.18)";
+        ctx.fillRect(chart.x + chart.w - stressBarW, chart.y, stressBarW, 12);
+        ctx.fillRect(chart.x + chart.w - stressBarW, chart.y + chart.h - 12, stressBarW, 12);
+        ctx.fillStyle = "#b91c1c";
+        ctx.font = "600 11px Inter";
+        ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + 10);
+        ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + chart.h - 2);
+
+        // Interactive highlight by radial position
+        if (mousePos && mousePos.y >= topWall && mousePos.y <= bottomWall) {
+            const r_inspect_mm = ((mousePos.y - cy) / drawR) * R;
+            const r_m = r_inspect_mm / 1000;
+            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - r_m**2));
+            const tau = Math.abs(beta * r_m / 2);
+            const inspectYChart = chart.y + ((R - r_inspect_mm) / (2 * R)) * chart.h;
+            const inspectXChart = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+
+            tooltip.style.display = 'block';
+            tooltip.style.left = (mousePos.x + 15) + 'px';
+            tooltip.style.top = (mousePos.y + 15) + 'px';
+            document.getElementById('z6-tt-r').innerText = r_inspect_mm.toFixed(1);
+            document.getElementById('z6-tt-v').innerText = v.toFixed(3);
+            document.getElementById('z6-tt-tau').innerText = tau.toFixed(2);
+
+            ctx.strokeStyle = "rgba(239, 68, 68, 0.42)";
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(channel.x, mousePos.y);
+            ctx.lineTo(chart.x + chart.w, mousePos.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = "#ef4444";
+            ctx.beginPath();
+            ctx.arc(channel.x + 14, mousePos.y, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(inspectXChart, inspectYChart, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            drawArrow(ctx, channel.x + channel.w - 86, mousePos.y, channel.x + channel.w - 86 + Math.min(58, 14 + tau * 9), mousePos.y, "#ef4444", 2.5);
+        } else {
+            tooltip.style.display = 'none';
+        }
+
+        // Bottom legends
+        ctx.fillStyle = "#64748b";
+        ctx.font = "12px Inter";
+        ctx.fillText("sporije uz stijenku", channel.x, left.y + left.h - 18);
+        ctx.fillText("najbrže na osi", channel.x + channel.w - 92, left.y + left.h - 18);
+        ctx.fillText("parabolični profil", chart.x, right.y + right.h - 14);
+        ctx.fillText("tau raste prema stijenci", chart.x + chart.w - 138, right.y + right.h - 14);
+
+        requestAnimationFrame(draw);
+    }
+
+    draw();
 })();
 </script>
 <p><br></p>

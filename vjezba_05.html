@@ -44,7 +44,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-44ee0976171e9be92e6ebe9be850cd66.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-66c9649715f74f1e4324758aa2390964.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -669,19 +669,35 @@ window.Quarto = {
     const hS = document.getElementById('v5-z37-h-slider');
     const rS = document.getElementById('v5-z37-rho-slider');
 
+    function drawArrow(x1, y1, x2, y2, color, width) {
+        const headlen = 10;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
+        ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
     function update() {
         const h = parseFloat(hS.value);
         const rho = parseFloat(rS.value);
         const g = 9.81;
-        const b = 2.0; // Fiksna baza za vizualizaciju
-
-        const zT = (2/3) * h;
-        const zFh = (3/4) * h;
-        const Area = (b * h) / 2;
-        const Fh = (rho * g * zT * Area) / 1000; // kN
+        const b = 2.0;
+        const zT = (2 / 3) * h;
+        const zFh = (3 / 4) * h;
+        const area = (b * h) / 2;
+        const Fh = (rho * g * zT * area) / 1000;
 
         document.getElementById('v5-z37-h-val').innerText = h.toFixed(1) + ' m';
-        document.getElementById('v5-z37-rho-val').innerText = rho.toFixed(0) + ' kg/m³';
+        document.getElementById('v5-z37-rho-val').innerText = rho.toFixed(0) + ' kg/mÂ³';
         document.getElementById('v5-z37-f-val').innerText = Fh.toFixed(2) + ' kN';
         document.getElementById('v5-z37-zf-val').innerText = zFh.toFixed(2) + ' m';
 
@@ -690,78 +706,111 @@ window.Quarto = {
 
     function draw(h, rho, zT, zFh, Fh) {
         ctx.clearRect(0, 0, 500, 450);
-        const scale = 70;
-        const ox = 180;
+        const scale = Math.min(82, 300 / h);
+        const ox = 260;
         const oy = 40;
-        const b = 2.0;
+        const halfBase = scale;
+        const bottomY = oy + h * scale;
 
-        // Water
-        ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
         ctx.fillRect(0, oy, 500, 410);
         ctx.strokeStyle = '#2563eb';
         ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, oy);
+        ctx.lineTo(500, oy);
+        ctx.stroke();
+        ctx.fillStyle = '#2563eb';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('slobodna povrÅ¡ina', 18, oy - 10);
 
-        // Pressure Gradient lines
-        for(let i=0.2; i<=h; i+=0.3) {
-            let z = oy + i*scale;
-            let pLen = (i/h) * 150 * (rho/1000);
-            drawArrow(ctx, ox - 120, z, ox - 120 + pLen, z, 'rgba(37, 99, 235, 0.3)', 1);
+        for (let i = 0.15; i <= h; i += 0.18) {
+            const y = oy + i * scale;
+            const frac = i / h;
+            const localHalfWidth = frac * halfBase;
+            ctx.strokeStyle = `rgba(37, 99, 235, ${0.18 + 0.42 * frac})`;
+            ctx.lineWidth = 1 + 1.2 * frac;
+            ctx.beginPath();
+            ctx.moveTo(ox - localHalfWidth, y);
+            ctx.lineTo(ox + localHalfWidth, y);
+            ctx.stroke();
+            drawArrow(ox - 145, y, ox - 145 + frac * 150 * (rho / 1000), y, `rgba(37, 99, 235, ${0.24 + 0.35 * frac})`, 1 + frac);
         }
-        // Pressure Triangle outline
+
         ctx.strokeStyle = 'rgba(37, 99, 235, 0.6)';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(ox - 120, oy);
-        ctx.lineTo(ox - 120 + 150*(rho/1000), oy + h*scale);
-        ctx.lineTo(ox - 120, oy + h*scale);
+        ctx.moveTo(ox - 145, oy);
+        ctx.lineTo(ox - 145 + 150 * (rho / 1000), bottomY);
+        ctx.lineTo(ox - 145, bottomY);
         ctx.closePath();
         ctx.stroke();
 
-        // The Triangle
-        ctx.fillStyle = '#94a3b8';
+        const fill = ctx.createLinearGradient(0, oy, 0, bottomY);
+        fill.addColorStop(0, 'rgba(191, 219, 254, 0.45)');
+        fill.addColorStop(1, 'rgba(30, 64, 175, 0.18)');
+        ctx.fillStyle = fill;
         ctx.strokeStyle = '#1e293b';
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(ox, oy);
-        ctx.lineTo(ox + (b/2)*scale, oy + h*scale);
-        ctx.lineTo(ox - (b/2)*scale, oy + h*scale);
+        ctx.lineTo(ox + halfBase, bottomY);
+        ctx.lineTo(ox - halfBase, bottomY);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Labeled Dots
         const ty = oy + zT * scale;
         const fy = oy + zFh * scale;
-
-        // T
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.moveTo(58, ty);
+        ctx.lineTo(ox - 16, ty);
+        ctx.stroke();
+        ctx.strokeStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(58, fy);
+        ctx.lineTo(ox - 16, fy);
+        ctx.stroke();
+        ctx.setLineDash([]);
         ctx.fillStyle = '#3b82f6';
-        ctx.beginPath(); ctx.arc(ox, ty, 5, 0, 7); ctx.fill();
-        ctx.fillStyle = '#1e293b'; ctx.font = 'bold 12px Inter';
-        ctx.fillText('T', ox + 10, ty + 4);
-
-        // Ch
+        ctx.font = 'bold 11px Inter';
+        ctx.fillText('z_T', 60, ty - 6);
         ctx.fillStyle = '#ef4444';
-        ctx.beginPath(); ctx.arc(ox, fy, 7, 0, 7); ctx.fill();
+        ctx.fillText('z_Fh', 60, fy - 6);
+
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(ox, ty, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('T', ox + 12, ty + 4);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(ox, fy, 8, 0, Math.PI * 2);
+        ctx.fill();
         ctx.fillText('Ch', ox + 12, fy + 4);
 
-        // Resultant Force Arrow
-        const fArrowLen = Math.min(200, Fh * 3);
-        drawArrow(ctx, ox - 150, fy, ox - 150 + fArrowLen, fy, '#ef4444', 4);
+        const fArrowLen = Math.min(190, 38 + Fh * 2.2);
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(ox, fy);
+        ctx.lineTo(ox - 160, fy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawArrow(ox - 160, fy, ox - 160 + fArrowLen, fy, '#ef4444', 4);
         ctx.fillStyle = '#ef4444';
-        ctx.fillText('Fₕ', ox - 150 + fArrowLen + 5, fy + 4);
-    }
+        ctx.fillText('Fâ‚•', ox - 160 + fArrowLen + 6, fy + 4);
 
-    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
-        const headlen = 10;
-        const angle = Math.atan2(y2-y1, x2-x1);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5));
-        ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5));
-        ctx.fillStyle = color; ctx.fill();
+        drawArrow(40, oy + 10, 40, bottomY, '#475569', 2);
+        ctx.fillStyle = '#334155';
+        ctx.fillText('z', 30, bottomY + 14);
     }
 
     hS.oninput = update;
@@ -857,19 +906,35 @@ window.Quarto = {
     const hS = document.getElementById('v5-z38-h-slider');
     const bS = document.getElementById('v5-z38-b-slider');
 
+    function drawArrow(x1, y1, x2, y2, color, width) {
+        const headlen = 10;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
+        ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
     function update() {
         const a = parseFloat(aS.value);
         const h = parseFloat(hS.value);
         const b = parseFloat(bS.value);
-
-        const Area = (b * h) / 2;
-        const zT = a + (2/3) * h;
-        const zFh = (6*a*a + 8*a*h + 3*h*h) / (6 * (a + 2*h/3));
+        const area = (b * h) / 2;
+        const zT = a + (2 / 3) * h;
+        const zFh = (6 * a * a + 8 * a * h + 3 * h * h) / (6 * (a + 2 * h / 3));
 
         document.getElementById('v5-z38-a-val').innerText = a.toFixed(1) + ' m';
         document.getElementById('v5-z38-h-val').innerText = h.toFixed(1) + ' m';
         document.getElementById('v5-z38-b-val').innerText = b.toFixed(1) + ' m';
-        document.getElementById('v5-z38-area').innerText = Area.toFixed(2) + ' m²';
+        document.getElementById('v5-z38-area').innerText = area.toFixed(2) + ' mÂ²';
         document.getElementById('v5-z38-zt').innerText = zT.toFixed(2) + ' m';
         document.getElementById('v5-z38-zf').innerText = zFh.toFixed(3) + ' m';
 
@@ -878,69 +943,106 @@ window.Quarto = {
 
     function draw(a, h, b, zT, zFh) {
         ctx.clearRect(0, 0, 500, 480);
-        const scale = 70;
-        const ox = 200;
+        const scale = Math.min(68, 360 / (a + h));
+        const ox = 260;
         const oy = 40;
+        const topY = oy + a * scale;
+        const bottomY = topY + h * scale;
+        const halfBase = (b / 2) * scale;
 
-        // Water
         ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
         ctx.fillRect(0, oy, 500, 440);
         ctx.strokeStyle = '#2563eb';
         ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, oy);
+        ctx.lineTo(500, oy);
+        ctx.stroke();
+        ctx.fillStyle = '#2563eb';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('slobodna povrÅ¡ina', 18, oy - 10);
 
-        const ty = oy + a * scale;
-        const by = ty + h * scale;
-
-        // Pressure Trapezoid
         const pTop = a * 40;
         const pBot = (a + h) * 40;
-        ctx.fillStyle = 'rgba(16, 185, 129, 0.1)';
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.12)';
         ctx.beginPath();
-        ctx.moveTo(ox - 140, ty);
-        ctx.lineTo(ox - 140 + pTop, ty);
-        ctx.lineTo(ox - 140 + pBot, by);
-        ctx.lineTo(ox - 140, by);
+        ctx.moveTo(ox - 145, topY);
+        ctx.lineTo(ox - 145 + pTop, topY);
+        ctx.lineTo(ox - 145 + pBot, bottomY);
+        ctx.lineTo(ox - 145, bottomY);
         ctx.closePath();
         ctx.fill();
-        ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.45)';
         ctx.stroke();
 
-        // The Triangle
-        ctx.fillStyle = '#94a3b8';
+        for (let i = 0; i <= 14; i++) {
+            const frac = i / 14;
+            const y = topY + frac * (bottomY - topY);
+            const intensity = (a + frac * h) / (a + h);
+            const localHalfWidth = frac * halfBase;
+            ctx.strokeStyle = `rgba(16, 185, 129, ${0.18 + 0.42 * intensity})`;
+            ctx.lineWidth = 1 + 1.15 * intensity;
+            ctx.beginPath();
+            ctx.moveTo(ox - localHalfWidth, y);
+            ctx.lineTo(ox + localHalfWidth, y);
+            ctx.stroke();
+        }
+
+        const fill = ctx.createLinearGradient(0, topY, 0, bottomY);
+        fill.addColorStop(0, 'rgba(167, 243, 208, 0.36)');
+        fill.addColorStop(1, 'rgba(5, 150, 105, 0.16)');
+        ctx.fillStyle = fill;
         ctx.strokeStyle = '#1e293b';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(ox, ty);
-        ctx.lineTo(ox + (b/2)*scale, by);
-        ctx.lineTo(ox - (b/2)*scale, by);
+        ctx.moveTo(ox, topY);
+        ctx.lineTo(ox + halfBase, bottomY);
+        ctx.lineTo(ox - halfBase, bottomY);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Points
         const tPos = oy + zT * scale;
         const fPos = oy + zFh * scale;
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = '#10b981';
+        ctx.beginPath(); ctx.moveTo(58, tPos); ctx.lineTo(ox - 16, tPos); ctx.stroke();
+        ctx.strokeStyle = '#ef4444';
+        ctx.beginPath(); ctx.moveTo(58, fPos); ctx.lineTo(ox - 16, fPos); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#10b981';
+        ctx.font = 'bold 11px Inter';
+        ctx.fillText('z_T', 60, tPos - 6);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillText('z_Fh', 60, fPos - 6);
 
         ctx.fillStyle = '#10b981';
-        ctx.beginPath(); ctx.arc(ox, tPos, 5, 0, 7); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ox, tPos, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('T', ox + 12, tPos + 4);
         ctx.fillStyle = '#ef4444';
-        ctx.beginPath(); ctx.arc(ox, fPos, 7, 0, 7); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ox, fPos, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillText('Ch', ox + 12, fPos + 4);
 
-        // Resultant Force
-        drawArrow(ctx, ox - 160, fPos, ox - 100, fPos, '#ef4444', 3);
-    }
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(ox, fPos);
+        ctx.lineTo(ox - 165, fPos);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawArrow(ox - 165, fPos, ox - 95, fPos, '#ef4444', 3.5);
 
-    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
-        const headlen = 10;
-        const angle = Math.atan2(y2-y1, x2-x1);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5));
-        ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5));
-        ctx.fillStyle = color; ctx.fill();
+        drawArrow(42, oy + 10, 42, bottomY, '#475569', 2);
+        ctx.fillStyle = '#334155';
+        ctx.fillText('z', 32, bottomY + 14);
     }
 
     [aS, hS, bS].forEach(s => s.oninput = update);
@@ -1014,6 +1116,23 @@ Krug promjera $d$ vertikalno je uronjen u tekućinu, pri čemu dotiče površinu
     const iBtn = document.getElementById('v5-z39-toggle-i');
     let showI = false;
 
+    function drawArrow(x1, y1, x2, y2, color, width) {
+        const headlen = 10;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
+        ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
     iBtn.onclick = () => {
         showI = !showI;
         iBtn.style.background = showI ? '#3b82f6' : '#eff6ff';
@@ -1023,70 +1142,117 @@ Krug promjera $d$ vertikalno je uronjen u tekućinu, pri čemu dotiče površinu
 
     function update() {
         const d = parseFloat(dS.value);
-        const R = d/2;
-        const Area = Math.PI * R * R;
+        const R = d / 2;
+        const area = Math.PI * R * R;
         const zT = R;
-        const zFh = (5/8) * d;
+        const zFh = (5 / 8) * d;
         const IT = (Math.PI * Math.pow(d, 4)) / 64;
 
         document.getElementById('v5-z39-d-val').innerText = d.toFixed(1) + ' m';
-        document.getElementById('v5-z39-area').innerText = Area.toFixed(2) + ' m²';
-        document.getElementById('v5-z39-it').innerText = IT.toFixed(2) + ' m⁴';
+        document.getElementById('v5-z39-area').innerText = area.toFixed(2) + ' mÂ²';
+        document.getElementById('v5-z39-it').innerText = IT.toFixed(2) + ' mâ´';
         document.getElementById('v5-z39-zf').innerText = zFh.toFixed(3) + ' m';
 
-        draw(d, zT, zFh, IT);
+        draw(d, zT, zFh);
     }
 
-    function draw(d, zT, zFh, IT) {
+    function draw(d, zT, zFh) {
         ctx.clearRect(0, 0, 500, 450);
-        const scale = 80;
+        const scale = Math.min(96, 320 / d);
         const ox = 250;
         const oy = 40;
+        const radius = (d / 2) * scale;
+        const centerY = oy + radius;
 
         ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
         ctx.fillRect(0, oy, 500, 410);
         ctx.strokeStyle = '#2563eb';
         ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, oy);
+        ctx.lineTo(500, oy);
+        ctx.stroke();
+        ctx.fillStyle = '#2563eb';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('slobodna povrÅ¡ina', 18, oy - 10);
 
-        const steps = 15;
-        for(let i=0; i<=steps; i++) {
-            const zLocal = (i/steps) * d;
+        for (let i = 0; i <= 15; i++) {
+            const zLocal = (i / 15) * d;
             const y = oy + zLocal * scale;
-            const rLocal = Math.sqrt(Math.pow(d/2, 2) - Math.pow(zLocal - d/2, 2));
-            const pLen = (zLocal / d) * 100;
-            ctx.strokeStyle = `rgba(37, 99, 235, ${0.1 + (zLocal/d)*0.5})`;
+            const rLocal = Math.sqrt(Math.pow(d / 2, 2) - Math.pow(zLocal - d / 2, 2));
+            const frac = zLocal / d;
+            ctx.strokeStyle = `rgba(37, 99, 235, ${0.1 + frac * 0.5})`;
+            ctx.lineWidth = 1 + 1.15 * frac;
             ctx.beginPath();
-            ctx.moveTo(ox - rLocal*scale, y);
-            ctx.lineTo(ox - rLocal*scale + pLen, y);
+            ctx.moveTo(ox - rLocal * scale, y);
+            ctx.lineTo(ox + rLocal * scale, y);
             ctx.stroke();
+            drawArrow(ox - radius - 122, y, ox - radius - 122 + 20 + 95 * frac, y, `rgba(37, 99, 235, ${0.18 + frac * 0.42})`, 1 + frac);
         }
 
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
+        const fill = ctx.createLinearGradient(0, oy, 0, oy + d * scale);
+        fill.addColorStop(0, 'rgba(191, 219, 254, 0.28)');
+        fill.addColorStop(1, 'rgba(30, 64, 175, 0.18)');
+        ctx.fillStyle = fill;
         ctx.strokeStyle = '#1e293b';
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.arc(ox, oy + (d/2)*scale, (d/2)*scale, 0, Math.PI*2);
+        ctx.arc(ox, centerY, radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        if(showI) {
+        if (showI) {
             ctx.strokeStyle = '#facc15';
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            ctx.moveTo(ox - (d/2)*scale, oy + (d/2)*scale);
-            ctx.lineTo(ox + (d/2)*scale, oy + (d/2)*scale);
+            ctx.moveTo(ox - radius, centerY);
+            ctx.lineTo(ox + radius, centerY);
             ctx.stroke();
             ctx.setLineDash([]);
         }
 
         const tPos = oy + zT * scale;
         const fPos = oy + zFh * scale;
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = '#3b82f6';
+        ctx.beginPath(); ctx.moveTo(58, tPos); ctx.lineTo(ox - 16, tPos); ctx.stroke();
+        ctx.strokeStyle = '#ef4444';
+        ctx.beginPath(); ctx.moveTo(58, fPos); ctx.lineTo(ox - 16, fPos); ctx.stroke();
+        ctx.setLineDash([]);
         ctx.fillStyle = '#3b82f6';
-        ctx.beginPath(); ctx.arc(ox, tPos, 5, 0, 7); ctx.fill();
+        ctx.font = 'bold 11px Inter';
+        ctx.fillText('z_T', 60, tPos - 6);
         ctx.fillStyle = '#ef4444';
-        ctx.beginPath(); ctx.arc(ox, fPos, 7, 0, 7); ctx.fill();
+        ctx.fillText('z_Fh', 60, fPos - 6);
+
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(ox, tPos, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('T', ox + 12, tPos + 4);
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(ox, fPos, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillText('Ch', ox + 12, fPos + 4);
+
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(ox, fPos);
+        ctx.lineTo(ox - radius - 130, fPos);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawArrow(ox - radius - 130, fPos, ox - radius - 58, fPos, '#ef4444', 3.5);
+
+        drawArrow(40, oy + 10, 40, oy + d * scale, '#475569', 2);
+        ctx.fillStyle = '#334155';
+        ctx.fillText('z', 30, oy + d * scale + 14);
     }
 
     dS.oninput = update;
@@ -1145,16 +1311,33 @@ Krug promjera $d$ vertikalno je uronjen u tekućinu, pri čemu dotiče površinu
     const ctx = canvas.getContext('2d');
     const rS = document.getElementById('v5-z40-r-slider');
 
+    function drawArrow(x1, y1, x2, y2, color, width) {
+        const headlen = 10;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
+        ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
     function update() {
         const r = parseFloat(rS.value);
         const zT = (4 * r) / (3 * Math.PI);
-        const Area = (Math.PI * r * r) / 2;
-        const IT = (Math.PI/8 - 8/(9*Math.PI)) * Math.pow(r, 4);
-        const zFh = zT + IT / (zT * Area);
+        const area = (Math.PI * r * r) / 2;
+        const IT = (Math.PI / 8 - 8 / (9 * Math.PI)) * Math.pow(r, 4);
+        const zFh = zT + IT / (zT * area);
 
         document.getElementById('v5-z40-r-val').innerText = r.toFixed(1) + ' m';
         document.getElementById('v5-z40-zt').innerText = zT.toFixed(3) + ' m';
-        document.getElementById('v5-z40-it').innerText = IT.toFixed(3) + ' m⁴';
+        document.getElementById('v5-z40-it').innerText = IT.toFixed(3) + ' mâ´';
         document.getElementById('v5-z40-zf').innerText = zFh.toFixed(3) + ' m';
 
         draw(r, zT, zFh);
@@ -1162,31 +1345,89 @@ Krug promjera $d$ vertikalno je uronjen u tekućinu, pri čemu dotiče površinu
 
     function draw(r, zT, zFh) {
         ctx.clearRect(0, 0, 500, 400);
-        const scale = 100;
+        const scale = Math.min(110, 290 / r);
         const ox = 250;
         const oy = 40;
+        const radius = r * scale;
 
         ctx.fillStyle = 'rgba(99, 102, 241, 0.1)';
         ctx.fillRect(0, oy, 500, 360);
         ctx.strokeStyle = '#6366f1';
         ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(500, oy); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, oy);
+        ctx.lineTo(500, oy);
+        ctx.stroke();
+        ctx.fillStyle = '#6366f1';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('slobodna povrÅ¡ina / tetiva', 18, oy - 10);
 
-        ctx.fillStyle = '#94a3b8';
+        for (let i = 0.08; i <= r; i += Math.max(0.08, r / 14)) {
+            const y = oy + i * scale;
+            const halfWidth = Math.sqrt(Math.max(r * r - i * i, 0)) * scale;
+            const frac = i / r;
+            ctx.strokeStyle = `rgba(99, 102, 241, ${0.16 + 0.42 * frac})`;
+            ctx.lineWidth = 1 + 1.15 * frac;
+            ctx.beginPath();
+            ctx.moveTo(ox - halfWidth, y);
+            ctx.lineTo(ox + halfWidth, y);
+            ctx.stroke();
+            drawArrow(ox - radius - 118, y, ox - radius - 118 + 18 + 90 * frac, y, `rgba(99, 102, 241, ${0.18 + 0.35 * frac})`, 1 + frac);
+        }
+
+        const fill = ctx.createLinearGradient(0, oy, 0, oy + radius);
+        fill.addColorStop(0, 'rgba(199, 210, 254, 0.34)');
+        fill.addColorStop(1, 'rgba(79, 70, 229, 0.18)');
+        ctx.fillStyle = fill;
         ctx.strokeStyle = '#1e293b';
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.arc(ox, oy, r * scale, 0, Math.PI);
+        ctx.arc(ox, oy, radius, 0, Math.PI);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
         const tPos = oy + zT * scale;
         const fPos = oy + zFh * scale;
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = '#3b82f6';
+        ctx.beginPath(); ctx.moveTo(58, tPos); ctx.lineTo(ox - 16, tPos); ctx.stroke();
+        ctx.strokeStyle = '#ef4444';
+        ctx.beginPath(); ctx.moveTo(58, fPos); ctx.lineTo(ox - 16, fPos); ctx.stroke();
+        ctx.setLineDash([]);
         ctx.fillStyle = '#3b82f6';
-        ctx.beginPath(); ctx.arc(ox, tPos, 5, 0, 7); ctx.fill();
+        ctx.font = 'bold 11px Inter';
+        ctx.fillText('z_T', 60, tPos - 6);
         ctx.fillStyle = '#ef4444';
-        ctx.beginPath(); ctx.arc(ox, fPos, 7, 0, 7); ctx.fill();
+        ctx.fillText('z_Fh', 60, fPos - 6);
+
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(ox, tPos, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('T', ox + 12, tPos + 4);
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(ox, fPos, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillText('Ch', ox + 12, fPos + 4);
+
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(ox, fPos);
+        ctx.lineTo(ox - radius - 128, fPos);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawArrow(ox - radius - 128, fPos, ox - radius - 58, fPos, '#ef4444', 3.5);
+
+        drawArrow(40, oy + 10, 40, oy + radius, '#475569', 2);
+        ctx.fillStyle = '#334155';
+        ctx.fillText('z', 30, oy + radius + 14);
     }
 
     rS.oninput = update;
@@ -1255,80 +1496,177 @@ Krug promjera $d$ vertikalno je uronjen u tekućinu, pri čemu dotiče površinu
     const h1S = document.getElementById('v5-z41-h1-slider');
     const h2S = document.getElementById('v5-z41-h2-slider');
 
+    function drawArrow(x1, y1, x2, y2, color, width) {
+        const headlen = 10;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
+        ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
     function update() {
         const h1 = parseFloat(h1S.value);
         const h2 = parseFloat(h2S.value);
-        const b = 6.0; const rho = 1000; const g = 9.81;
-        const depth_top = Math.max(0, h2 - h1);
-        const sub_h = Math.min(h1, h2);
-        const zT = depth_top + sub_h/2;
-        const Area = sub_h * b;
-        const Fh = (rho * g * zT * Area) / 1000;
-        const zFh = zT + (sub_h * sub_h) / (12 * zT);
-        const Rb = (Fh * (zFh - depth_top)) / h1;
+        const b = 6.0;
+        const rho = 1000;
+        const g = 9.81;
+        const depthTop = Math.max(0, h2 - h1);
+        const subH = Math.min(h1, h2);
+        const zT = depthTop + subH / 2;
+        const area = subH * b;
+        const Fh = subH > 0 ? (rho * g * zT * area) / 1000 : 0;
+        const zFh = subH > 0 ? zT + (subH * subH) / (12 * zT) : 0;
+        const arm = subH > 0 ? zFh - depthTop : 0;
+        const Rb = h1 > 0 ? (Fh * arm) / h1 : 0;
 
         document.getElementById('v5-z41-h1-val').innerText = h1.toFixed(1) + ' m';
         document.getElementById('v5-z41-h2-val').innerText = h2.toFixed(1) + ' m';
         document.getElementById('v5-z41-fh').innerText = Fh.toFixed(1) + ' kN';
-        document.getElementById('v5-z41-zf').innerText = zFh.toFixed(2) + ' m';
+        document.getElementById('v5-z41-zf').innerText = subH > 0 ? zFh.toFixed(2) + ' m' : '---';
         document.getElementById('v5-z41-rb').innerText = Rb.toFixed(1) + ' kN';
-        draw(h1, h2, zFh, Fh);
+
+        draw(h1, h2, depthTop, subH, zT, zFh, Fh, Rb);
     }
 
-    function draw(h1, h2, zFh, Fh) {
+    function draw(h1, h2, depthTop, subH, zT, zFh, Fh, Rb) {
         ctx.clearRect(0, 0, 500, 450);
-        const scale = 60; const ox = 350; const bottomY = 400;
+        const scale = 60;
+        const bottomY = 400;
+        const gateX = 350;
+        const leftWallX = 50;
         const waterY = bottomY - h2 * scale;
         const gateTopY = bottomY - h1 * scale;
+        const wetTopY = bottomY - subH * scale;
 
         ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-        ctx.fillRect(50, waterY, 300, h2 * scale);
-        ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(50, waterY); ctx.lineTo(350, waterY); ctx.stroke();
+        ctx.fillRect(leftWallX, waterY, gateX - leftWallX, h2 * scale);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(leftWallX, waterY);
+        ctx.lineTo(gateX, waterY);
+        ctx.stroke();
+        ctx.fillStyle = '#2563eb';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('slobodna povrsina', 62, waterY - 10);
 
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(50, 50); ctx.lineTo(50, bottomY); ctx.lineTo(450, bottomY); ctx.stroke();
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(leftWallX, 50);
+        ctx.lineTo(leftWallX, bottomY);
+        ctx.lineTo(450, bottomY);
+        ctx.stroke();
 
-        ctx.strokeStyle = '#475569'; ctx.lineWidth = 8;
-        ctx.beginPath(); ctx.moveTo(ox, gateTopY); ctx.lineTo(ox, bottomY); ctx.stroke();
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(gateX, gateTopY);
+        ctx.lineTo(gateX, bottomY);
+        ctx.stroke();
 
         ctx.fillStyle = '#ef4444';
-        ctx.beginPath(); ctx.arc(ox, gateTopY, 6, 0, 7); ctx.fill();
-        ctx.fillStyle = '#1e293b'; ctx.font = 'bold 12px Inter';
-        ctx.fillText('A', ox + 12, gateTopY + 4);
-
+        ctx.beginPath();
+        ctx.arc(gateX, gateTopY, 6, 0, Math.PI * 2);
+        ctx.fill();
         ctx.fillStyle = '#1e293b';
-        ctx.fillRect(ox - 5, bottomY - 10, 10, 10);
-        ctx.fillText('B', ox + 12, bottomY - 4);
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('A', gateX + 12, gateTopY + 4);
+        ctx.fillRect(gateX - 5, bottomY - 10, 10, 10);
+        ctx.fillText('B', gateX + 12, bottomY - 4);
 
-        if (h2 > 0) {
-            const pTop = Math.max(0, h2 - h1) * 20;
-            const pBot = h2 * 20;
+        if (subH > 0) {
+            const pTop = depthTop * 20;
+            const pBot = (depthTop + subH) * 20;
             ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
             ctx.beginPath();
-            ctx.moveTo(ox, Math.max(waterY, gateTopY));
-            ctx.lineTo(ox - pTop, Math.max(waterY, gateTopY));
-            ctx.lineTo(ox - pBot, bottomY);
-            ctx.lineTo(ox, bottomY);
-            ctx.closePath(); ctx.fill();
-        }
+            ctx.moveTo(gateX, wetTopY);
+            ctx.lineTo(gateX - pTop, wetTopY);
+            ctx.lineTo(gateX - pBot, bottomY);
+            ctx.lineTo(gateX, bottomY);
+            ctx.closePath();
+            ctx.fill();
 
-        const fPos = waterY + (zFh - Math.max(0, h2-h1)) * scale;
-        if(Fh > 0) {
-            drawArrow(ctx, ox - 100, fPos, ox - 10, fPos, '#ef4444', 4);
+            for (let i = 0; i <= 12; i++) {
+                const frac = i / 12;
+                const y = wetTopY + frac * (bottomY - wetTopY);
+                const depth = depthTop + frac * subH;
+                const len = depth * 20;
+                ctx.strokeStyle = `rgba(37, 99, 235, ${0.16 + 0.42 * frac})`;
+                ctx.lineWidth = 1 + frac;
+                ctx.beginPath();
+                ctx.moveTo(gateX - len, y);
+                ctx.lineTo(gateX, y);
+                ctx.stroke();
+            }
+
+            const tPos = waterY + zT * scale - depthTop * scale;
+            const fPos = waterY + zFh * scale - depthTop * scale;
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1.4;
+            ctx.strokeStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.moveTo(82, tPos);
+            ctx.lineTo(gateX - 14, tPos);
+            ctx.stroke();
+            ctx.strokeStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(82, fPos);
+            ctx.lineTo(gateX - 14, fPos);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#3b82f6';
+            ctx.font = 'bold 11px Inter';
+            ctx.fillText('z_T', 86, tPos - 6);
             ctx.fillStyle = '#ef4444';
-            ctx.fillText('Fₕ', ox - 120, fPos + 4);
-        }
-    }
+            ctx.fillText('z_Fh', 86, fPos - 6);
 
-    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
-        const headlen = 10; const angle = Math.atan2(y2-y1, x2-x1);
-        ctx.strokeStyle = color; ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5));
-        ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5));
-        ctx.fillStyle = color; ctx.fill();
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(gateX, tPos, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 12px Inter';
+            ctx.fillText('T', gateX + 12, tPos + 4);
+
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(gateX, fPos, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText('Ch', gateX + 12, fPos + 4);
+
+            ctx.setLineDash([6, 6]);
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(gateX, fPos);
+            ctx.lineTo(gateX - 120, fPos);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            drawArrow(gateX - 120, fPos, gateX - 14, fPos, '#ef4444', 4);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('Fh', gateX - 142, fPos + 4);
+
+            drawArrow(gateX + 18, gateTopY, gateX + 18 + Math.min(72, 10 + Rb * 0.08), gateTopY, '#f59e0b', 3.5);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText('R_A', gateX + 22, gateTopY - 10);
+            drawArrow(gateX + 18, bottomY - 4, gateX + 18 + Math.min(90, 10 + Rb * 0.12), bottomY - 4, '#facc15', 3.5);
+            ctx.fillStyle = '#ca8a04';
+            ctx.fillText('R_B', gateX + 22, bottomY - 14);
+        }
+
+        drawArrow(30, 60, 30, bottomY, '#475569', 2);
+        ctx.fillStyle = '#334155';
+        ctx.fillText('z', 22, bottomY + 14);
     }
 
     h1S.oninput = h2S.oninput = update;

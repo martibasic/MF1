@@ -44,7 +44,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-44ee0976171e9be92e6ebe9be850cd66.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-66c9649715f74f1e4324758aa2390964.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -310,80 +310,109 @@ window.Quarto = {
 </div>
 
 <script>
-(function() {
-    const fS = document.getElementById('v10-f-slider');
-    const lS = document.getElementById('v10-L-slider');
-    const vS = document.getElementById('v10-v-slider');
+// ... (existing script for Ideal vs Real)
+</script>
+
+***
+
+### Fizikalne osnove: Darcy-Weisbachova jednadžba
+
+Gubitak energije (visine dobave) pri strujanju realnog fluida kroz ravnu cijev opisuje se **Darcy-Weisbachovom jednadžbom**:
+$$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
+
+Ovaj widget omogućuje istraživanje osjetljivosti gubitaka na promjenu pojedinih parametara.
+
+```{=html}
+<!-- WIDGET: Darcy-Weisbach Explorer -->
+<div id="v10-darcy-explorer" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;" class="anchored">🧪 Darcy-Weisbach: Analiza osjetljivosti</h4>
     
-    const cIdeal = document.getElementById('ideal-canvas');
-    const cReal = document.getElementById('real-canvas');
-    const ctxI = cIdeal.getContext('2d');
-    const ctxR = cReal.getContext('2d');
+    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px;">
+        <!-- Left: Sliders -->
+        <div style="display: flex; flex-direction: column; gap: 15px; padding: 20px; background: #f8fafc; border-radius: 15px; border: 1px solid #e2e8f0;">
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 5px;">Duljina L: <span id="dw-v-L">50</span> m</label>
+                <input type="range" id="dw-L-slider" min="10" max="200" step="5" value="50" style="width: 100%;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 5px;">Promjer D: <span id="dw-v-D">100</span> mm</label>
+                <input type="range" id="dw-D-slider" min="50" max="300" step="10" value="100" style="width: 100%;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 5px;">Brzina v: <span id="dw-v-v">2.0</span> m/s</label>
+                <input type="range" id="dw-v-slider" min="0.5" max="8" step="0.1" value="2" style="width: 100%;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 5px;">Trenje λ: <span id="dw-v-lam">0.025</span></label>
+                <input type="range" id="dw-lam-slider" min="0.01" max="0.06" step="0.001" value="0.025" style="width: 100%;">
+            </div>
+        </div>
+
+        <!-- Right: Visualization -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #0f172a; padding: 25px; border-radius: 15px; color: white;">
+                <div style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 15px;">Ukupni gubitak:</div>
+                <div style="display: flex; align-items: baseline; gap: 10px;">
+                    <span style="font-size: 3rem; font-weight: 800; color: #38bdf8;">h<sub>w</sub> =</span>
+                    <span id="dw-res-hw" style="font-size: 3.5rem; font-weight: 800; color: #ffffff;">5.10</span>
+                    <span style="font-size: 1.5rem; font-weight: 600; color: #94a3b8;">m</span>
+                </div>
+                <div style="font-size: 0.9rem; color: #cbd5e0; margin-top: 10px;">
+                    Ekvivalentni pad tlaka Δp: <b id="dw-res-dp" style="color:#38bdf8;">50.0</b> kPa
+                </div>
+            </div>
+
+            <!-- Effect Bars -->
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 15px;">
+                <div style="font-weight: 800; font-size: 0.75rem; color: #475569; text-transform: uppercase; margin-bottom: 15px;">Utjecaj na gubitke (kvadratični v²!):</div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="font-size: 0.8rem; display: flex; align-items: center; gap: 10px;">
+                        <span style="width: 60px;">Brzina:</span>
+                        <div style="flex: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
+                            <div id="dw-impact-v" style="width: 40%; height: 100%; background: #ef4444;"></div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.8rem; display: flex; align-items: center; gap: 10px;">
+                        <span style="width: 60px;">Geometrija:</span>
+                        <div style="flex: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
+                            <div id="dw-impact-geo" style="width: 60%; height: 100%; background: #3b82f6;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const lS = document.getElementById('dw-L-slider'), dS = document.getElementById('dw-D-slider');
+    const vS = document.getElementById('dw-v-slider'), lamS = document.getElementById('dw-lam-slider');
 
     function update() {
-        const f = parseFloat(fS.value);
-        const L = parseFloat(lS.value);
-        const v = parseFloat(vS.value);
-        const D = 0.1; const g = 9.81;
+        const L = parseFloat(lS.value), D = parseFloat(dS.value)/1000;
+        const v = parseFloat(vS.value), lam = parseFloat(lamS.value);
+        const g = 9.81, rho = 1000;
 
-        const hw = f * (L / D) * (v * v / (2 * g));
+        const hw = lam * (L / D) * (v * v / (2 * g));
+        const dp = rho * g * hw / 1000;
 
-        document.getElementById('v10-v-f').innerText = f.toFixed(3);
-        document.getElementById('v10-v-L').innerText = L;
-        document.getElementById('v10-v-v').innerText = v.toFixed(1);
-        document.getElementById('v10-hw-out').innerText = hw.toFixed(2);
-
-        draw(ctxI, 0, v, L, D);
-        draw(ctxR, hw, v, L, D);
-    }
-
-    function draw(ctx, totalHw, v, L, D) {
-        ctx.clearRect(0, 0, 400, 300);
-        const g = 9.81;
-        const scaleH = 200 / 10; // 10m height = 200px
-        const scaleW = 350 / 50; // 50m length = 350px
+        document.getElementById('dw-v-L').innerText = L;
+        document.getElementById('dw-v-D').innerText = parseFloat(dS.value);
+        document.getElementById('dw-v-v').innerText = v.toFixed(1);
+        document.getElementById('dw-v-lam').innerText = lam.toFixed(3);
         
-        const ox = 25, oy = 250;
-        const EGL_start = 200;
-        const v_head = (v*v / (2*g)) * scaleH;
+        document.getElementById('dw-res-hw').innerText = hw.toFixed(2);
+        document.getElementById('dw-res-dp').innerText = dp.toFixed(1);
 
-        // Pipe
-        ctx.fillStyle = "#f1f5f9";
-        ctx.fillRect(ox, oy - 20, L * scaleW, 20);
-        ctx.strokeStyle = "#475569"; ctx.lineWidth = 2;
-        ctx.strokeRect(ox, oy - 20, L * scaleW, 20);
-
-        // Energy Grade Line (EGL)
-        ctx.beginPath();
-        ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3;
-        ctx.moveTo(ox, oy - EGL_start);
-        ctx.lineTo(ox + L * scaleW, oy - EGL_start + totalHw * scaleH);
-        ctx.stroke();
-        ctx.fillStyle = "#ef4444"; ctx.font = "bold 10px Arial";
-        ctx.fillText("EGL", ox + 10, oy - EGL_start - 10);
-
-        // Hydraulic Grade Line (HGL)
-        ctx.beginPath();
-        ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
-        ctx.moveTo(ox, oy - EGL_start + v_head);
-        ctx.lineTo(ox + L * scaleW, oy - EGL_start + totalHw * scaleH + v_head);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = "#3b82f6";
-        ctx.fillText("HGL", ox + 10, oy - EGL_start + v_head - 10);
-
-        // Labels
-        if(totalHw > 0) {
-            ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(ox + L * scaleW + 5, oy - EGL_start);
-            ctx.lineTo(ox + L * scaleW + 5, oy - EGL_start + totalHw * scaleH);
-            ctx.stroke();
-            ctx.fillText("hw", ox + L * scaleW + 10, oy - EGL_start + (totalHw*scaleH)/2);
-        }
+        // Impact visualization (Roughly proportional to terms)
+        const v_impact = (v*v / 64) * 100; // v² impact
+        const geo_impact = (L / (D*1000)) * 50; 
+        document.getElementById('dw-impact-v').style.width = Math.min(v_impact, 100) + "%";
+        document.getElementById('dw-impact-geo').style.width = Math.min(geo_impact, 100) + "%";
     }
 
-    [fS, lS, vS].forEach(s => s.oninput = update);
+    [lS, dS, vS, lamS].forEach(s => s.oninput = update);
     update();
 })();
 </script>
@@ -495,93 +524,843 @@ window.Quarto = {
 <h3 data-number="10.0.3" class="anchored" data-anchor-id="zadatak-86-sifon-s-realnim-fluidom"><span class="header-section-number">10.0.3</span> Zadatak 86: Sifon s realnim fluidom</h3>
 <p><strong>Tekst zadatka:</strong> Sifon prenosi vodu protokom <span class="math inline">\(150 \, \text{dm}^3/\text{s}\)</span>. Odrediti ukupni gubitak visine dobave <span class="math inline">\(h_w\)</span> i tlak u tjemenu sifona (točka 2). Pretpostaviti da se 2/3 gubitaka događa do točke 2.</p>
 <p><strong>Rješenje:</strong> 1. <strong>Brzina:</strong> <span class="math inline">\(v = \frac{0,15}{\pi \cdot 0,1^2} = \mathbf{4,775 \, \text{m/s}}\)</span>. 2. <strong>Ukupni gubitak:</strong> <span class="math inline">\(h_{w1-3} = (z_1 - z_3) - \frac{v^2}{2g} = 1,5 - 1,162 = \mathbf{0,338 \, \text{m}}\)</span>. 3. <strong>Tlak u točki 2:</strong> <span class="math inline">\(\frac{p_2}{\rho g} = (z_1 - z_2) - \frac{v^2}{2g} - \frac{2}{3}h_{w1-3} = -2 - 1,162 - 0,225 = -3,387 \, \text{m} \implies p_2 = \mathbf{-33,2 \, \text{kPa}}\)</span> (podtlak).</p>
+<!-- WIDGET: Sifon s gubicima (EGL/HGL) -->
+<div id="z86-siphon-losses-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<pre><code>&lt;h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;"&gt;🌀 Sifon s gubicima: EGL, HGL i raspodjela tlaka&lt;/h4&gt;
+
+&lt;div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;"&gt;
+    &lt;!-- Visualization Canvas --&gt;
+    &lt;div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;"&gt;
+        &lt;canvas id="z86-canvas" width="550" height="450" style="width: 100%; height: 100%;"&gt;&lt;/canvas&gt;
+
+        &lt;!-- Pressure at Apex Gauge (Mini) --&gt;
+        &lt;div style="position: absolute; right: 20px; top: 20px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 10px; border: 1px solid #cbd5e0; text-align: center;"&gt;
+            &lt;div style="font-size: 0.6rem; font-weight: 800; color: #64748b;"&gt;TLAK U TOČKI 2&lt;/div&gt;
+            &lt;div id="z86-p2-val" style="font-size: 1.1rem; font-weight: 800; color: #ef4444;"&gt;-33.2 kPa&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Controls and Metrics --&gt;
+    &lt;div style="display: flex; flex-direction: column; gap: 15px;"&gt;
+        &lt;div style="padding: 18px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;"&gt;
+            &lt;label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;"&gt;Raspodjela gubitaka (f): &lt;span id="z86-v-f" style="color:#2563eb;"&gt;67%&lt;/span&gt;&lt;/label&gt;
+            &lt;input type="range" id="z86-f-slider" min="0" max="1" step="0.05" value="0.67" style="width: 100%;"&gt;
+            &lt;p style="font-size: 0.7rem; color: #64748b; margin-top: 5px;"&gt;Dio ukupnih gubitaka koji nastaje do tjemena (točke 2).&lt;/p&gt;
+
+            &lt;label style="display: block; font-weight: 700; margin-top: 15px; margin-bottom: 8px; color: #475569;"&gt;Protok V̇: &lt;span id="z86-v-vdot" style="color:#2563eb;"&gt;150&lt;/span&gt; L/s&lt;/label&gt;
+            &lt;input type="range" id="z86-vdot-slider" min="50" max="250" step="5" value="150" style="width: 100%;"&gt;
+        &lt;/div&gt;
+
+        &lt;div style="background: #ebf8ff; padding: 18px; border-radius: 15px; border-left: 6px solid #3182ce;"&gt;
+            &lt;div style="font-weight: 800; font-size: 0.75rem; color: #2c5282; text-transform: uppercase; margin-bottom: 10px;"&gt;Bilanca gubitaka:&lt;/div&gt;
+            &lt;div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;"&gt;
+                &lt;div style="display: flex; justify-content: space-between;"&gt;&lt;span&gt;hw (1→2):&lt;/span&gt; &lt;b id="z86-hw12" style="color:#2b6cb0;"&gt;0.225 m&lt;/b&gt;&lt;/div&gt;
+                &lt;div style="display: flex; justify-content: space-between;"&gt;&lt;span&gt;hw (2→3):&lt;/span&gt; &lt;b id="z86-hw23" style="color:#2b6cb0;"&gt;0.113 m&lt;/b&gt;&lt;/div&gt;
+                &lt;div style="display: flex; justify-content: space-between; border-top: 1px solid #bee3f8; padding-top: 5px;"&gt;&lt;span&gt;Ukupni hw:&lt;/span&gt; &lt;b id="z86-hwtotal"&gt;0.338 m&lt;/b&gt;&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;"&gt;
+            💡 &lt;b&gt;Fizikalni uvid:&lt;/b&gt; Što je veći otpor u usisnom kraku sifona (1→2), to je tlak u tjemenu 2 &lt;b&gt;niži&lt;/b&gt; (veći vakuum). Zato se usisni dio uvijek nastoji izvesti što kraće i šire.
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z86-canvas'), ctx = canvas.getContext('2d');
+    const fS = document.getElementById('z86-f-slider'), vdotS = document.getElementById('z86-vdot-slider');
+
+    let particles = [];
+    for(let i=0; i<100; i++) particles.push(Math.random());
+
+    function update() {
+        const f = parseFloat(fS.value), vdot_l = parseFloat(vdotS.value);
+        const rho = 1000, g = 9.81, d = 0.2; // 200mm promjer iz rješenja? (r=0.1)
+        const A = Math.PI * d * d / 4;
+        const v = (vdot_l / 1000) / A;
+
+        // Geometry from task
+        const z1 = 1.5, z3 = 0, z2 = 3.5; // Relativne visine (z1-z3=1.5, z2-z1=2)
+        const v_head = v*v / (2*g);
+        const hw_total = (z1 - z3) - v_head; 
+
+        const hw12 = f * hw_total;
+        const hw23 = (1-f) * hw_total;
+        const p2_head = (z1 - z2) - v_head - hw12;
+        const p2 = p2_head * rho * g;
+
+        document.getElementById('z86-v-f').innerText = (f*100).toFixed(0) + "%";
+        document.getElementById('z86-v-vdot').innerText = vdot_l;
+        document.getElementById('z86-hw12').innerText = hw12.toFixed(3) + " m";
+        document.getElementById('z86-hw23').innerText = hw23.toFixed(3) + " m";
+        document.getElementById('z86-hwtotal').innerText = hw_total.toFixed(3) + " m";
+        document.getElementById('z86-p2-val').innerText = (p2/1000).toFixed(1) + " kPa";
+
+        draw(z1, z2, z3, v_head, hw12, hw23, v);
+    }
+
+    function draw(z1, z2, z3, vh, hw12, hw23, v) {
+        ctx.clearRect(0, 0, 550, 450);
+        const scale = 80, ox = 100, oy = 350;
+
+        // Coordinates
+        const p1x = 100, p1y = oy - z1*scale;
+        const p2x = 275, p2y = oy - z2*scale;
+        const p3x = 450, p3y = oy - z3*scale;
+
+        // Tanks
+        ctx.fillStyle = "#ebf8ff"; ctx.fillRect(20, p1y, 100, (oy-p1y)+20);
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 3; ctx.strokeRect(20, p1y, 100, (oy-p1y)+20);
+
+        // Siphon Tube
+        ctx.lineCap = "round"; ctx.lineJoin = "round";
+        ctx.strokeStyle = "#cbd5e0"; ctx.lineWidth = 15;
+        ctx.beginPath(); ctx.moveTo(ox, p1y+50); ctx.lineTo(ox, p2y+20); ctx.arc(ox+20, p2y+20, 20, Math.PI, 1.5*Math.PI);
+        ctx.lineTo(p3x-20, p2y); ctx.arc(p3x-20, p2y+20, 20, 1.5*Math.PI, 2*Math.PI); ctx.lineTo(p3x, p3y); ctx.stroke();
+
+        // EGL Line (Red)
+        const egl1 = p1y;
+        const egl2 = p1y + hw12*scale;
+        const egl3 = p1y + (hw12+hw23)*scale;
+
+        ctx.setLineDash([]); ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(ox, egl1); ctx.lineTo(p2x, egl2); ctx.lineTo(p3x, egl3); ctx.stroke();
+        ctx.fillStyle = "#ef4444"; ctx.font = "bold 10px Inter"; ctx.fillText("EGL", ox-30, egl1);
+
+        // HGL Line (Blue Dashed)
+        ctx.setLineDash([5, 5]); ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(ox, egl1 + vh*scale); ctx.lineTo(p2x, egl2 + vh*scale); ctx.lineTo(p3x, egl3 + vh*scale); ctx.stroke();
+        ctx.fillStyle = "#3b82f6"; ctx.fillText("HGL", ox-30, egl1 + vh*scale + 15);
+
+        // Centerline Labels
+        ctx.fillStyle = "#1e293b"; ctx.font = "bold 12px Inter";
+        ctx.fillText("1", ox-15, p1y); ctx.fillText("2", p2x, p2y - 15); ctx.fillText("3", p3x + 10, p3y);
+
+        // Particles
+        particles.forEach((p, i) => {
+            particles[i] += v * 0.005; if(particles[i] > 1) particles[i] = 0;
+            const pos = particles[i];
+            let px, py;
+            if(pos < 0.4) { px = ox; py = (p1y+50) - (pos/0.4)*(p1y+50-p2y); }
+            else if(pos < 0.7) { px = ox + (pos-0.4)/0.3 * (p3x-ox); py = p2y; }
+            else { px = p3x; py = p2y + (pos-0.7)/0.3 * (p3y-p2y); }
+            ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        requestAnimationFrame(() => update());
+    }
+
+    fS.oninput = update; vdotS.oninput = update; update();
+})();
+</script>
 <hr>
 </section>
 <section id="zadatak-87-visina-mlaza-iz-sapnice" class="level3" data-number="10.0.4">
 <h3 data-number="10.0.4" class="anchored" data-anchor-id="zadatak-87-visina-mlaza-iz-sapnice"><span class="header-section-number">10.0.4</span> Zadatak 87: Visina mlaza iz sapnice</h3>
 <p><strong>Rješenje:</strong> 1. <span class="math inline">\(v_A = 2,43 \, \text{m/s}, v_{is} = 4 v_A = 9,72 \, \text{m/s}\)</span>. 2. Energija u A: <span class="math inline">\(H_A = \frac{p_A}{\rho g} + \frac{v_A^2}{2g} + z_A = 5,62 + 0,3 + 0 = 5,92 \, \text{m}\)</span>. 3. Visina mlaza <span class="math inline">\(h_1\)</span>: <span class="math inline">\(z_{vrh} = H_A \implies h_1 + h_2 = 5,92 \implies h_1 = \mathbf{4,82 \, \text{m}}\)</span>.</p>
+<!-- WIDGET: Sapnica i Vertikalni Mlaz -->
+<div id="z87-nozzle-jet-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<pre><code>&lt;h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;"&gt;🚀 Pretvorba energije: Sapnica i visina mlaza&lt;/h4&gt;
+
+&lt;div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;"&gt;
+    &lt;!-- Fountain Visualization --&gt;
+    &lt;div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 500px;"&gt;
+        &lt;canvas id="z87-canvas" width="500" height="500" style="width: 100%; height: 100%;"&gt;&lt;/canvas&gt;
+        
+        &lt;!-- Jet Height Indicator --&gt;
+        &lt;div style="position: absolute; right: 20px; top: 100px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 8px; border: 2px solid #3b82f6;"&gt;
+            &lt;div style="font-size: 0.65rem; font-weight: 800; color: #64748b;"&gt;VISINA MLAZA h₁&lt;/div&gt;
+            &lt;div id="z87-h1-val" style="font-size: 1.3rem; font-weight: 800; color: #1e40af;"&gt;4.82 m&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Controls and Energy Bars --&gt;
+    &lt;div style="display: flex; flex-direction: column; gap: 20px;"&gt;
+        &lt;div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;"&gt;
+            &lt;label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;"&gt;Tlak u točki A (pAm): &lt;span id="z87-v-pa" style="color:#2563eb;"&gt;55&lt;/span&gt; kPa&lt;/label&gt;
+            &lt;input type="range" id="z87-pa-slider" min="10" max="100" step="1" value="55" style="width: 100%;"&gt;
+            
+            &lt;label style="display: block; font-weight: 700; margin-top: 15px; margin-bottom: 8px; color: #475569;"&gt;Promjer sapnice D₂: &lt;span id="z87-v-d2" style="color:#2563eb;"&gt;50&lt;/span&gt; mm&lt;/label&gt;
+            &lt;input type="range" id="z87-d2-slider" min="30" max="80" step="2" value="50" style="width: 100%;"&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Energy Component Bars --&gt;
+        &lt;div style="background: #ebf8ff; padding: 20px; border-radius: 15px; border-left: 6px solid #3182ce;"&gt;
+            &lt;div style="font-weight: 800; font-size: 0.75rem; color: #2c5282; text-transform: uppercase; margin-bottom: 12px;"&gt;Sastav energije u točki A:&lt;/div&gt;
+            &lt;div style="display: flex; flex-direction: column; gap: 10px;"&gt;
+                &lt;div style="height: 30px; background: #e2e8f0; border-radius: 6px; overflow: hidden; display: flex;"&gt;
+                    &lt;div id="z87-bar-p" style="width: 80%; background: #3b82f6; height: 100%;" title="Tlačna visina"&gt;&lt;/div&gt;
+                    &lt;div id="z87-bar-v" style="width: 20%; background: #10b981; height: 100%;" title="Brzinska visina"&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 600;"&gt;
+                    &lt;span style="color: #3b82f6;"&gt;TLAK (p/ρg)&lt;/span&gt;
+                    &lt;span style="color: #059669;"&gt;BRZINA (v²/2g)&lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;p style="font-size: 0.75rem; color: #64748b; line-height: 1.5; font-style: italic;"&gt;
+            💡 &lt;b&gt;Fizikalni uvid:&lt;/b&gt; Sapnica pretvara &lt;b&gt;tlačnu energiju&lt;/b&gt; u &lt;b&gt;kinetičku energiju&lt;/b&gt; (veliku brzinu mlaza). Ukupna energija u sustavu ostaje ista, pa mlaz doseže visinu koja odgovara ukupnoj visini energije (H) umanjenoj za položaj sapnice.
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z87-canvas'), ctx = canvas.getContext('2d');
+    const paS = document.getElementById('z87-pa-slider'), d2S = document.getElementById('z87-d2-slider');
+
+    let particles = [];
+    for(let i=0; i<150; i++) particles.push({ x: 0, y: 0, state: 'pipe', t: Math.random() });
+
+    function update() {
+        const pa_kpa = parseFloat(paS.value), d2_mm = parseFloat(d2S.value);
+        const rho = 1000, g = 9.81, d1 = 0.1; // 100mm pipe
+        
+        // Bernoulli calculations
+        const p_head = (pa_kpa * 1000) / (rho * g);
+        const d2 = d2_mm / 1000;
+        // From Task 87: pA/rhog + vA^2/2g + zA = v_is^2/2g + z_is
+        // Also continuity: vA * A1 = v_is * A2 -> vA = v_is * (d2/d1)^2
+        // Sub: p_head + (v_is^2/2g)*(d2/d1)^4 = v_is^2/2g + h2
+        const h2 = 1.1; // Fixed geometry for widget
+        const ratio = Math.pow(d2/d1, 4);
+        const v_is_head = (p_head - h2) / (1 - ratio);
+        const v_is = Math.sqrt(2 * g * v_is_head);
+        const vA_head = v_is_head * ratio;
+        
+        const h1 = v_is_head; // In ideal case, jet rises to its velocity head height
+
+        document.getElementById('z87-v-pa').innerText = pa_kpa;
+        document.getElementById('z87-v-d2').innerText = d2_mm;
+        document.getElementById('z87-h1-val').innerText = h1.toFixed(2) + " m";
+        
+        // Update bars
+        const total = p_head + vA_head;
+        document.getElementById('z87-bar-p').style.width = (p_head/total * 100) + "%";
+        document.getElementById('z87-bar-v').style.width = (vA_head/total * 100) + "%";
+
+        draw(h1, h2, v_is, ratio);
+    }
+
+    function draw(h1, h2, v_is, ratio) {
+        ctx.clearRect(0, 0, 500, 500);
+        const scale = 60, ox = 250, oy = 450;
+        
+        // Pipe and Nozzle geometry
+        ctx.fillStyle = "#f1f5f9"; ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
+        // Horizontal pipe
+        ctx.beginPath(); ctx.moveTo(50, oy); ctx.lineTo(ox-30, oy); ctx.lineTo(ox-30, oy-h2*scale);
+        // Nozzle taper
+        ctx.lineTo(ox-15, oy-h2*scale-20); ctx.lineTo(ox+15, oy-h2*scale-20);
+        // Back down
+        ctx.lineTo(ox+30, oy-h2*scale); ctx.lineTo(ox+30, oy); ctx.lineTo(50, oy);
+        ctx.stroke();
+
+        // Particles
+        particles.forEach(p => {
+            p.t += 0.01 * (p.state === 'pipe' ? 1 : 2);
+            if(p.t > 1) {
+                p.t = 0; p.state = Math.random() > 0.3 ? 'pipe' : 'jet';
+            }
+
+            let px, py;
+            if(p.state === 'pipe') {
+                // Simplified pipe path
+                px = 50 + p.t * (ox-50); py = oy - 15;
+            } else {
+                // Jet path (vertical rise and fall)
+                const v0 = Math.sqrt(2 * 9.81 * h1);
+                const time_to_top = v0 / 9.81;
+                const total_time = 2 * time_to_top;
+                const ct = p.t * total_time;
+                
+                px = ox + (Math.random()-0.5)*10;
+                py = (oy - h2*scale - 20) - (v0*ct - 0.5*9.81*ct*ct)*scale;
+            }
+            
+            ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        requestAnimationFrame(() => update());
+    }
+
+    paS.oninput = update; d2S.oninput = update; update();
+})();
+</script>
 <hr>
 </section>
 <section id="zadatak-89-istjecanje-iz-velikog-spremnika" class="level3" data-number="10.0.5">
 <h3 data-number="10.0.5" class="anchored" data-anchor-id="zadatak-89-istjecanje-iz-velikog-spremnika"><span class="header-section-number">10.0.5</span> Zadatak 89: Istjecanje iz velikog spremnika</h3>
 <p><strong>Tekst zadatka:</strong> Za veliki spremnik s otvorom na dubini <span class="math inline">\(h=5 \, \text{m}\)</span>, odrediti brzinu istjecanja <span class="math inline">\(v_2\)</span> (idealan fluid).</p>
 <p><strong>Rješenje:</strong> <span class="math inline">\(v_2 = \sqrt{2gh} = \sqrt{2 \cdot 9,81 \cdot 5} = \mathbf{9,9 \, \text{m/s}}\)</span>.</p>
+<!-- WIDGET: Istjecanje iz spremnika (Multi-hole) -->
+<div id="z89-discharge-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<pre><code>&lt;h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;"&gt;🚰 Torricellijev zakon i domet mlaza&lt;/h4&gt;
+
+&lt;div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;"&gt;
+    &lt;div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;"&gt;
+        &lt;canvas id="z89-canvas" width="550" height="450" style="width: 100%; height: 100%; cursor: crosshair;"&gt;&lt;/canvas&gt;
+        &lt;div style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; border: 1px solid #cbd5e0;"&gt;
+            &lt;b&gt;Kliknite na stijenku za promjenu otvora&lt;/b&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div style="display: flex; flex-direction: column; gap: 20px;"&gt;
+        &lt;div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;"&gt;
+            &lt;label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;"&gt;Ukupna visina H: &lt;span id="z89-v-H" style="color:#2563eb;"&gt;5.0&lt;/span&gt; m&lt;/label&gt;
+            &lt;input type="range" id="z89-H-slider" min="2" max="10" step="0.5" value="5" style="width: 100%;"&gt;
+            
+            &lt;div style="margin-top: 20px; display: flex; align-items: center; gap: 10px;"&gt;
+                &lt;input type="checkbox" id="z89-multi-mode"&gt;
+                &lt;label for="z89-multi-mode" style="font-size: 0.85rem; font-weight: 600; color: #475569;"&gt;Prikaži više otvora (analiza dometa)&lt;/label&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div style="background: #f0f9ff; padding: 20px; border-radius: 15px; border-left: 6px solid #0ea5e9;"&gt;
+            &lt;div style="font-weight: 800; font-size: 0.75rem; color: #0369a1; text-transform: uppercase; margin-bottom: 12px;"&gt;Trenutni podaci:&lt;/div&gt;
+            &lt;div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;"&gt;
+                &lt;div style="display: flex; justify-content: space-between;"&gt;&lt;span&gt;Dubina otvora h:&lt;/span&gt; &lt;b id="z89-res-h"&gt;--- m&lt;/b&gt;&lt;/div&gt;
+                &lt;div style="display: flex; justify-content: space-between;"&gt;&lt;span&gt;Brzina v:&lt;/span&gt; &lt;b id="z89-res-v"&gt;--- m/s&lt;/b&gt;&lt;/div&gt;
+                &lt;div style="display: flex; justify-content: space-between; border-top: 1px solid #bae6fd; padding-top: 8px; margin-top: 4px;"&gt;
+                    &lt;span&gt;Domet x:&lt;/span&gt; &lt;b id="z89-res-x" style="color: #0284c7;"&gt;--- m&lt;/b&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;p style="font-size: 0.75rem; color: #64748b; line-height: 1.4;"&gt;
+            💡 &lt;b&gt;Fizikalni uvid:&lt;/b&gt; Brzina istjecanja ovisi o dubini otvora (h), dok ukupni domet x ovisi o umnošku brzine i vremena pada (h_hole). Domet je najveći za otvor na polovici visine spremnika.
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z89-canvas'), ctx = canvas.getContext('2d');
+    const hSl = document.getElementById('z89-H-slider'), multiC = document.getElementById('z89-multi-mode');
+
+    let currentHoleY = 3.5; // Relativno od dna
+    let particles = [];
+    for(let i=0; i<100; i++) particles.push({ t: Math.random(), hole: 0 });
+
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        const scale = 400 / parseFloat(hSl.value);
+        const y_from_bot = (400 - y) / scale;
+        if(y_from_bot >= 0 && y_from_bot <= parseFloat(hSl.value)) {
+            currentHoleY = y_from_bot;
+            update();
+        }
+    });
+
+    function update() {
+        const H = parseFloat(hSl.value);
+        const hole_h = H - currentHoleY; // Dubina otvora
+        const v = Math.sqrt(2 * 9.81 * hole_h);
+        const x = 2 * Math.sqrt(currentHoleY * hole_h);
+
+        document.getElementById('z89-v-H').innerText = H.toFixed(1);
+        document.getElementById('z89-res-h').innerText = hole_h.toFixed(2);
+        document.getElementById('z89-res-v').innerText = v.toFixed(2);
+        document.getElementById('z89-res-x').innerText = x.toFixed(2);
+
+        draw(H, currentHoleY, multiC.checked);
+    }
+
+    function draw(H, activeHoleY, multi) {
+        ctx.clearRect(0, 0, 550, 450);
+        const scale = 400 / H;
+        const x0 = 100, oy = 420;
+
+        // Ground
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(20, oy); ctx.lineTo(530, oy); ctx.stroke();
+
+        // Tank
+        ctx.fillStyle = "rgba(14, 165, 233, 0.1)";
+        ctx.fillRect(x0 - 60, oy - H*scale, 60, H*scale);
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 3;
+        ctx.strokeRect(x0 - 60, oy - H*scale, 60, H*scale);
+        
+        // Water
+        ctx.fillStyle = "rgba(14, 165, 233, 0.4)";
+        ctx.fillRect(x0 - 60, oy - H*scale, 60, H*scale);
+
+        const drawJet = (h_bot, color, alpha) => {
+            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.globalAlpha = alpha;
+            ctx.beginPath(); ctx.moveTo(x0, oy - h_bot*scale);
+            const v0 = Math.sqrt(2 * 9.81 * (H - h_bot));
+            for(let t = 0; t < 2; t += 0.02) {
+                let px = v0 * t;
+                let py = 0.5 * 9.81 * t*t;
+                if(py > h_bot) break;
+                ctx.lineTo(x0 + px*scale, (oy - h_bot*scale) + py*scale);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+        };
+
+        if(multi) {
+            const steps = [0.1, 0.3, 0.5, 0.7, 0.9];
+            const colors = ["#f59e0b", "#ef4444", "#8b5cf6", "#10b981", "#3b82f6"];
+            steps.forEach((s, i) => drawJet(H*s, colors[i], 0.3));
+        }
+
+        drawJet(activeHoleY, "#0ea5e9", 1.0);
+        
+        // Hole marker
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath(); ctx.arc(x0, oy - activeHoleY*scale, 4, 0, Math.PI*2); ctx.fill();
+    }
+
+    hSl.oninput = update;
+    multiC.onchange = update;
+    update();
+})();
+</script>
 <hr>
 </section>
 <section id="zadatak-90-pitot-statička-cijev-prandtl" class="level3" data-number="10.0.6">
 <h3 data-number="10.0.6" class="anchored" data-anchor-id="zadatak-90-pitot-statička-cijev-prandtl"><span class="header-section-number">10.0.6</span> Zadatak 90: Pitot-statička cijev (Prandtl)</h3>
 <p><strong>Rješenje:</strong> <span class="math inline">\(\Delta p = (\rho_{Hg} - \rho_v) g \Delta h_{Hg} = 7850 \, \text{Pa}\)</span>. <span class="math inline">\(v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}\)</span>.</p>
-<hr>
-</section>
-<section id="zadatak-92-protočna-sapnica-u-cijevi" class="level3" data-number="10.0.7">
-<h3 data-number="10.0.7" class="anchored" data-anchor-id="zadatak-92-protočna-sapnica-u-cijevi"><span class="header-section-number">10.0.7</span> Zadatak 92: Protočna sapnica u cijevi</h3>
-<p><strong>Tekst zadatka:</strong> Odrediti protok <span class="math inline">\(\dot{V}\)</span> kroz cijev <span class="math inline">\(d_c=200 \, \text{mm}\)</span> sa sapnicom <span class="math inline">\(d_s=30 \, \text{mm}\)</span> ako je razlika u Hg manometru <span class="math inline">\(20 \, \text{mm}\)</span> (<span class="math inline">\(c_c=0,95\)</span>).</p>
-<p><strong>Rješenje:</strong> 1. <span class="math inline">\(\Delta p = (\rho_{Hg}-\rho_v)g h = 2472 \, \text{Pa}\)</span>. 2. <span class="math inline">\(\dot{V} = c_c \frac{A_s}{\sqrt{1-(A_s/A_c)^2}} \sqrt{\frac{2\Delta p}{\rho_v}} = \mathbf{1,5 \, \text{dm}^3\text{/s}}\)</span>.</p>
-<hr>
-</section>
-<section id="zadatak-94-95-venturi-cijev-i-podizanje-tekućine" class="level3" data-number="10.0.8">
-<h3 data-number="10.0.8" class="anchored" data-anchor-id="zadatak-94-95-venturi-cijev-i-podizanje-tekućine"><span class="header-section-number">10.0.8</span> Zadatak 94-95: Venturi cijev i podizanje tekućine</h3>
-<p><strong>Rješenje (95):</strong> <span class="math inline">\(v_2 = \mathbf{2,536 \, \text{m/s}}\)</span> (uz gubike), <span class="math inline">\(\dot{V} = \mathbf{0,0448 \, \text{m}^3\text{/s}}\)</span>.</p>
-<!-- Venturi Effect Widget -->
-<div id="venturi-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #fcfcfc;">
-    <h3 style="text-align: center;" class="anchored">Venturijev efekt i mjerenje protoka</h3>
-    <div style="display: flex; flex-direction: column; gap: 20px;">
-        <canvas id="venturi-canvas" width="600" height="200" style="width: 100%; border: 1px solid #eee; background: white;"></canvas>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div>
-                <label>Protok (L/s): <span id="q-vent-val">45</span></label>
-                <input type="range" id="q-vent-slider" min="10" max="100" step="1" value="45" style="width: 100%;">
-            </div>
-            <div style="background: #fff3cd; padding: 10px; border-radius: 8px; font-size: 0.9em;">
-                <strong>Fizika:</strong> U suženju cijevi brzina <i>raste</i>, a statički tlak <i>pada</i>. Ta razlika tlakova (h) direktno nam govori koliki je protok.
-            </div>
-        </div>
-    </div>
-</div>
+<!-- WIDGET: Pitotova cijev (Premium) -->
+<div id="z90-pitot-premium-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<pre><code>&lt;h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;"&gt;📍 Pitot-statička cijev: Stagnacija i mjerenje brzine&lt;/h4&gt;
 
+&lt;div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;"&gt;
+    &lt;div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;"&gt;
+        &lt;canvas id="z90-canvas" width="550" height="400" style="width: 100%; height: 100%;"&gt;&lt;/canvas&gt;
+        
+        &lt;!-- Stagnation Tooltip --&gt;
+        &lt;div id="z90-stagnation-label" style="position: absolute; left: 330px; top: 180px; background: rgba(239, 68, 68, 0.9); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; pointer-events: none;"&gt;
+            STAGNACIJA (v=0)
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div style="display: flex; flex-direction: column; gap: 20px;"&gt;
+        &lt;div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;"&gt;
+            &lt;label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;"&gt;Brzina strujanja v: &lt;span id="z90-v-v" style="color:#2563eb;"&gt;4.0&lt;/span&gt; m/s&lt;/label&gt;
+            &lt;input type="range" id="z90-v-slider" min="1" max="10" step="0.1" value="4" style="width: 100%;"&gt;
+            
+            &lt;label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;"&gt;Gustoća fluida ρ: &lt;span id="z90-v-rho" style="color:#2563eb;"&gt;1000&lt;/span&gt; kg/m³&lt;/label&gt;
+            &lt;input type="range" id="z90-rho-slider" min="800" max="1200" step="10" value="1000" style="width: 100%;"&gt;
+        &lt;/div&gt;
+
+        &lt;div style="background: #f8fafc; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0;"&gt;
+            &lt;div style="font-weight: 800; font-size: 0.75rem; color: #475569; text-transform: uppercase; margin-bottom: 12px;"&gt;Očitanje manometra (Hg):&lt;/div&gt;
+            &lt;div style="display: flex; align-items: center; justify-content: center; gap: 15px;"&gt;
+                &lt;div id="z90-hg-display" style="font-size: 2rem; font-weight: 800; color: #1e293b;"&gt;63&lt;/div&gt;
+                &lt;div style="font-size: 1rem; color: #64748b; font-weight: 600;"&gt;mm Hg&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div style="font-size: 0.8rem; color: #64748b; text-align: center; margin-top: 10px;"&gt;
+                Δp = &lt;span id="z90-res-dp"&gt;8000&lt;/span&gt; Pa
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;"&gt;
+            💡 &lt;b&gt;Fizikalni uvid:&lt;/b&gt; Pitotova cijev mjeri &lt;b&gt;ukupni tlak&lt;/b&gt; na vrhu (stagnacijska točka) i &lt;b&gt;statički tlak&lt;/b&gt; na obodu. Razlika tih tlakova je dinamički tlak (ρv²/2) iz kojeg dobivamo brzinu.
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
 <script>
 (function() {
-    const qS = document.getElementById('q-vent-slider');
-    const canvas = document.getElementById('venturi-canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('z90-canvas'), ctx = canvas.getContext('2d');
+    const vSl = document.getElementById('z90-v-slider'), rSl = document.getElementById('z90-rho-slider');
 
-    function draw() {
-        const Q = parseFloat(qS.value) / 1000;
-        document.getElementById('q-vent-val').innerText = qS.value;
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cy = 100; const d1 = 60; const d2 = 30;
-        
-        // Cijev outline
-        ctx.beginPath();
-        ctx.moveTo(50, cy - d1/2); ctx.lineTo(250, cy - d1/2);
-        ctx.lineTo(300, cy - d2/2); ctx.lineTo(350, cy - d2/2);
-        ctx.lineTo(400, cy - d1/2); ctx.lineTo(550, cy - d1/2);
-        ctx.lineTo(550, cy + d1/2); ctx.lineTo(400, cy + d1/2);
-        ctx.lineTo(350, cy + d2/2); ctx.lineTo(300, cy + d2/2);
-        ctx.lineTo(250, cy + d1/2); ctx.lineTo(50, cy + d1/2);
-        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 2; ctx.stroke();
+    let particles = [];
+    for(let i=0; i<100; i++) particles.push({ x: Math.random()*550, y: 50 + Math.random()*300 });
 
-        // Fluid flow
-        ctx.fillStyle = "#3498db"; ctx.globalAlpha = 0.3;
-        ctx.fill(); ctx.globalAlpha = 1.0;
+    function update() {
+        const v = parseFloat(vSl.value), rho = parseFloat(rSl.value);
+        const rhoHg = 13600, g = 9.81;
+        
+        const dp = 0.5 * rho * v * v;
+        const dhHg = dp / (g * (rhoHg - rho));
 
-        // Manometar levels (symbolic)
-        const h_diff = (Q*Q) * 5000; // Simplified scaling
-        ctx.fillStyle = "#e74c3c";
-        ctx.fillRect(150, cy - d1/2 - 20, 5, 20); // Level 1
-        ctx.fillRect(325, cy - d2/2 - 20 - h_diff, 5, 20 + h_diff); // Level 2
-        
-        ctx.font = "12px Arial"; ctx.fillStyle = "#2c3e50";
-        ctx.fillText("p1 (visok)", 130, 50);
-        ctx.fillText("p2 (nizak)", 310, 50 - h_diff);
-        
-        requestAnimationFrame(draw);
+        document.getElementById('z90-v-v').innerText = v.toFixed(1);
+        document.getElementById('z90-v-rho').innerText = rho;
+        document.getElementById('z90-hg-display').innerText = (dhHg * 1000).toFixed(0);
+        document.getElementById('z90-res-dp').innerText = Math.round(dp);
+
+        draw(v, dhHg);
     }
-    draw();
+
+    function draw(v, dhHg) {
+        ctx.clearRect(0, 0, 550, 450);
+        const cy = 200;
+
+        // Flow particles
+        ctx.fillStyle = "rgba(59, 130, 246, 0.5)";
+        particles.forEach(p => {
+            p.x += v * 2; if(p.x > 550) p.x = 0;
+            // Diverge around tip
+            let py = p.y;
+            if(p.x > 280 && p.x < 420 && Math.abs(p.y - cy) < 25) {
+                py = cy + (p.y > cy ? 1 : -1) * 30;
+            }
+            ctx.beginPath(); ctx.arc(p.x, py, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Pipe/Background
+        ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 2;
+        ctx.strokeRect(0, 50, 550, 300);
+
+        // Pitot Tube (Simplified Prandtl)
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 12; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(500, cy); ctx.lineTo(350, cy); ctx.stroke(); // Main
+        
+        // Static port hole
+        ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(420, cy-6, 3, 0, Math.PI*2); ctx.fill();
+
+        // U-Manometer
+        const mx = 420, my = 350, mw = 80;
+        const h_px = dhHg * 1500; // Scaling mm to pixels
+
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(mx, cy-6); ctx.lineTo(mx, my);
+        ctx.arc(mx + mw/2, my, mw/2, Math.PI, 0, true);
+        ctx.lineTo(mx + mw, cy); ctx.stroke();
+
+        // Mercury (Hg)
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(mx, my - 20 + h_px/2); ctx.lineTo(mx, my);
+        ctx.arc(mx + mw/2, my, mw/2, Math.PI, 0, true);
+        ctx.lineTo(mx + mw, my - 20 - h_px/2); ctx.stroke();
+
+        requestAnimationFrame(() => update());
+    }
+
+    vSl.oninput = update; rSl.oninput = update; update();
 })();
 </script>
+<hr>
+</section>
+<section id="zadatak-91-stratificirani-višefazni-spremnik---istjecanje" class="level3" data-number="10.0.7">
+<h3 data-number="10.0.7" class="anchored" data-anchor-id="zadatak-91-stratificirani-višefazni-spremnik---istjecanje"><span class="header-section-number">10.0.7</span> Zadatak 91: Stratificirani višefazni spremnik - istjecanje</h3>
+<p><strong>Tekst zadatka:</strong> Veliki zatvoreni spremnik ispunjen je slojevima vode (<span class="math inline">\(h_1=2 \, \text{m}\)</span>), ulja (<span class="math inline">\(h_2=3 \, \text{m}\)</span>) i benzina (<span class="math inline">\(h_3=1,5 \, \text{m}\)</span>). Iznad benzina je zrak pod pretlakom <span class="math inline">\(p_m=80 \, \text{kPa}\)</span>. Odrediti brzinu istjecanja ulja <span class="math inline">\(v_2\)</span> kroz otvor na dnu sloja ulja.</p>
+<p><strong>Rješenje:</strong> 1. Tlak na gornjoj plohi ulja: <span class="math inline">\(p_{u1} = p_m + \rho_b g h_3 = 80000 + 720 \cdot 9,81 \cdot 1,5 = \mathbf{90,6 \, \text{kPa}}\)</span>. 2. Bernoulli za ulje (od vrha do otvora): <span class="math inline">\(\frac{p_{u1}}{\rho_u g} + h_2 = \frac{p_{atm}}{\rho_u g} + \frac{v_2^2}{2g}\)</span>. 3. Brzina: <span class="math inline">\(v_2 = \sqrt{2 \frac{p_{u1,m}}{\rho_u} + 2 g h_2} = \sqrt{2 \frac{90600}{850} + 2 \cdot 9,81 \cdot 3} = \mathbf{16,5 \, \text{m/s}}\)</span>.</p>
+```{=html} <!-- WIDGET: Višefazni spremnik (Voda, Ulje, Benzin, Zrak) -->
+<div id="z91-multiphase-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<pre><code>&lt;h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;"&gt;🛢️ Višefazni spremnik: Istjecanje stratificiranih fluida&lt;/h4&gt;
 
+&lt;div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;"&gt;
+    &lt;div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 500px;"&gt;
+        &lt;canvas id="z91-canvas" width="500" height="500" style="width: 100%; height: 100%;"&gt;&lt;/canvas&gt;
+        &lt;div style="position: absolute; left: 10px; top: 10px; font-size: 0.65rem; color: #64748b; background: rgba(255,255,255,0.8); padding: 5px; border-radius: 4px;"&gt;&lt;b&gt;Slojevi fluida&lt;/b&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div style="display: flex; flex-direction: column; gap: 15px;"&gt;
+        &lt;div style="padding: 18px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;"&gt;
+            &lt;label style="display: block; font-weight: 700; color: #475569;"&gt;Pretlak zraka pm: &lt;span id="z91-v-pm"&gt;80&lt;/span&gt; kPa&lt;/label&gt;
+            &lt;input type="range" id="z91-pm-slider" min="0" max="200" step="5" value="80" style="width: 100%;"&gt;
+            &lt;label style="display: block; font-weight: 700; margin-top: 15px; color: #475569;"&gt;Visina ulja h₂: &lt;span id="z91-v-h2"&gt;3.0&lt;/span&gt; m&lt;/label&gt;
+            &lt;input type="range" id="z91-h2-slider" min="1" max="5" step="0.1" value="3" style="width: 100%;"&gt;
+            &lt;label style="display: block; font-weight: 700; margin-top: 15px; color: #475569;"&gt;Visina benzina h₃: &lt;span id="z91-v-h3"&gt;1.5&lt;/span&gt; m&lt;/label&gt;
+            &lt;input type="range" id="z91-h3-slider" min="0.5" max="3" step="0.1" value="1.5" style="width: 100%;"&gt;
+        &lt;/div&gt;
+        &lt;div style="background: #fff7ed; padding: 18px; border-radius: 15px; border-left: 6px solid #f97316;"&gt;
+            &lt;div style="font-weight: 800; font-size: 0.75rem; color: #9a3412;"&gt;PRORAČUN (ULJE):&lt;/div&gt;
+            &lt;div style="font-size: 0.95rem; margin-top: 5px;"&gt;Tlak pu1: &lt;b id="z91-res-pu1"&gt;90.6 kPa&lt;/b&gt;&lt;/div&gt;
+            &lt;div style="font-size: 1.1rem; margin-top: 5px;"&gt;Brzina v₂: &lt;b id="z91-res-v2" style="color: #c2410c;"&gt;16.5 m/s&lt;/b&gt;&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z91-canvas'), ctx = canvas.getContext('2d');
+    const pmS = document.getElementById('z91-pm-slider'), h2S = document.getElementById('z91-h2-slider'), h3S = document.getElementById('z91-h3-slider');
+    let particles = []; for(let i=0; i<100; i++) particles.push({ t: Math.random() });
+    function update() {
+        const pm = parseFloat(pmS.value), h2 = parseFloat(h2S.value), h3 = parseFloat(h3S.value), g = 9.81, rho_b = 720, rho_u = 850;
+        const pu1 = pm*1000 + rho_b*g*h3, v2 = Math.sqrt(2*pu1/rho_u + 2*g*h2);
+        document.getElementById('z91-v-pm').innerText = pm;
+        document.getElementById('z91-v-h2').innerText = h2.toFixed(1);
+        document.getElementById('z91-v-h3').innerText = h3.toFixed(1);
+        document.getElementById('z91-res-pu1').innerText = (pu1/1000).toFixed(1) + " kPa";
+        document.getElementById('z91-res-v2').innerText = v2.toFixed(1) + " m/s";
+        draw(2.0, h2, h3, v2);
+    }
+    function draw(h1, h2, h3, v2) {
+        ctx.clearRect(0,0,500,500); const scale = 40, w = 250, ox = 100, oy = 450;
+        ctx.fillStyle="#3b82f6"; ctx.fillRect(ox,oy-h1*scale,w,h1*scale);
+        ctx.fillStyle="#f59e0b"; ctx.fillRect(ox,oy-(h1+h2)*scale,w,h2*scale);
+        ctx.fillStyle="#facc15"; ctx.fillRect(ox,oy-(h1+h2+h3)*scale,w,h3*scale);
+        ctx.fillStyle="#e2e8f0"; ctx.fillRect(ox,oy-400,w,400-(h1+h2+h3)*scale);
+        ctx.strokeStyle="#1e293b"; ctx.lineWidth=3; ctx.strokeRect(ox,oy-400,w,400);
+        const pY = oy-h1*scale; ctx.fillStyle="#1e293b"; ctx.fillRect(ox+w,pY-10,10,20);
+        particles.forEach(p => {
+            p.t+=0.01*(v2/10); if(p.t>1) p.t=0;
+            ctx.fillStyle="#f59e0b"; ctx.beginPath(); ctx.arc(ox+w+p.t*150, pY+0.5*9.81*Math.pow(p.t*0.5,2)*scale, 2, 0, Math.PI*2); ctx.fill();
+        });
+        requestAnimationFrame(() => update());
+    }
+    [pmS, h2S, h3S].forEach(s => s.oninput = update); update();
+})();
+</script>
+<hr>
+</section>
+<section id="zadatak-92-protočna-sapnica-u-cijevi" class="level3" data-number="10.0.8">
+<h3 data-number="10.0.8" class="anchored" data-anchor-id="zadatak-92-protočna-sapnica-u-cijevi"><span class="header-section-number">10.0.8</span> Zadatak 92: Protočna sapnica u cijevi</h3>
+<p><strong>Tekst zadatka:</strong> Odrediti protok <span class="math inline">\(\dot{V}\)</span> kroz cijev <span class="math inline">\(d_c=200 \, \text{mm}\)</span> sa sapnicom <span class="math inline">\(d_s=30 \, \text{mm}\)</span> ako je razlika u Hg manometru <span class="math inline">\(20 \, \text{mm}\)</span> (<span class="math inline">\(c_c=0,95\)</span>).</p>
+<p><strong>Rješenje:</strong> 1. <span class="math inline">\(\Delta p = (\rho_{Hg}-\rho_v)g h = 2472 \, \text{Pa}\)</span>. 2. <span class="math inline">\(\dot{V} = c_c \frac{A_s}{\sqrt{1-(A_s/A_c)^2}} \sqrt{\frac{2\Delta p}{\rho_v}} = \mathbf{1,5 \, \text{dm}^3\text{/s}}\)</span>.</p>
+```{=html} <!-- WIDGET: Protočna sapnica i Vena Contracta -->
+<div id="z92-nozzle-contracta-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<pre><code>&lt;h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;"&gt;📏 Protočna sapnica i Vena Contracta&lt;/h4&gt;
+
+&lt;div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;"&gt;
+    &lt;div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;"&gt;
+        &lt;canvas id="z92-canvas" width="550" height="400" style="width: 100%; height: 100%;"&gt;&lt;/canvas&gt;
+        
+        &lt;!-- Vena Contracta Highlight --&gt;
+        &lt;div id="z92-vena-label" style="position: absolute; left: 300px; top: 220px; background: rgba(239, 68, 68, 0.9); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; pointer-events: none; opacity: 0.8;"&gt;
+            VENA CONTRACTA
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div style="display: flex; flex-direction: column; gap: 20px;"&gt;
+        &lt;div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;"&gt;
+            &lt;label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;"&gt;Koeficijent kontrakcije Cc: &lt;span id="z92-v-cc" style="color:#2563eb;"&gt;0.95&lt;/span&gt;&lt;/label&gt;
+            &lt;input type="range" id="z92-cc-slider" min="0.6" max="1.0" step="0.01" value="0.95" style="width: 100%;"&gt;
+            
+            &lt;label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;"&gt;Razlika razina h (Hg): &lt;span id="z92-v-h" style="color:#2563eb;"&gt;20&lt;/span&gt; mm&lt;/label&gt;
+            &lt;input type="range" id="z92-h-slider" min="5" max="100" step="1" value="20" style="width: 100%;"&gt;
+        &lt;/div&gt;
+
+        &lt;div style="background: #fff7ed; padding: 20px; border-radius: 15px; border-left: 6px solid #f97316;"&gt;
+            &lt;div style="font-weight: 800; font-size: 0.75rem; color: #9a3412; text-transform: uppercase; margin-bottom: 12px;"&gt;Proračun protoka:&lt;/div&gt;
+            &lt;div style="display: flex; flex-direction: column; gap: 8px; font-size: 1.1rem; color: #9a3412;"&gt;
+                Stvarni protok V̇: &lt;b id="z92-res-vdot"&gt;1.50 L/s&lt;/b&gt;
+            &lt;/div&gt;
+            &lt;div style="font-size: 0.8rem; color: #c2410c; margin-top: 8px;"&gt;
+                Efektivni presjek struje je manji od geometrijskog otvora sapnice.
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;"&gt;
+            💡 &lt;b&gt;Fizikalni uvid:&lt;/b&gt; Zbog tromosti fluida, strujnice se nastavljaju sužavati i nakon prolaska kroz sapnicu. Najmanji presjek struje (vena contracta) određuje stvarni protok.
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z92-canvas'), ctx = canvas.getContext('2d');
+    const ccS = document.getElementById('z92-cc-slider'), hS = document.getElementById('z92-h-slider');
+
+    let particles = [];
+    for(let i=0; i<120; i++) particles.push({ x: Math.random()*550, y_rel: Math.random() });
+
+    function update() {
+        const cc = parseFloat(ccS.value), h_mm = parseFloat(hS.value);
+        const rho = 1000, rhoHg = 13600, g = 9.81;
+        const dc = 0.2, ds = 0.03;
+        
+        const dp = (rhoHg - rho) * g * (h_mm / 1000);
+        const area_s = Math.PI * ds * ds / 4;
+        const area_c = Math.PI * dc * dc / 4;
+        
+        const vdot = cc * (area_s / Math.sqrt(1 - Math.pow(area_s/area_c, 2))) * Math.sqrt(2 * dp / rho);
+
+        document.getElementById('z92-v-cc').innerText = cc.toFixed(2);
+        document.getElementById('z92-v-h').innerText = h_mm;
+        document.getElementById('z92-res-vdot').innerText = (vdot * 1000).toFixed(2) + " L/s";
+
+        draw(cc, h_mm);
+    }
+
+    function draw(cc, h_mm) {
+        ctx.clearRect(0, 0, 550, 450);
+        const cy = 200, scale = 1500;
+        const dc_px = 150, ds_px = 40;
+        const d_vena = ds_px * cc;
+
+        // Pipe
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 2;
+        ctx.strokeRect(0, cy - dc_px/2, 550, dc_px);
+
+        // Nozzle (Orifice Plate style for clarity)
+        ctx.fillStyle = "#94a3b8";
+        ctx.fillRect(250, cy - dc_px/2, 10, (dc_px - ds_px)/2);
+        ctx.fillRect(250, cy + ds_px/2, 10, (dc_px - ds_px)/2);
+
+        // Streamlines and Vena Contracta shape
+        ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+        ctx.beginPath();
+        ctx.moveTo(0, cy - dc_px/2);
+        ctx.lineTo(250, cy - dc_px/2);
+        ctx.bezierCurveTo(270, cy - dc_px/2, 280, cy - d_vena/2, 310, cy - d_vena/2);
+        ctx.lineTo(550, cy - d_vena/2);
+        ctx.lineTo(550, cy + d_vena/2);
+        ctx.lineTo(310, cy + d_vena/2);
+        ctx.bezierCurveTo(280, cy + d_vena/2, 270, cy + dc_px/2, 250, cy + dc_px/2);
+        ctx.lineTo(0, cy + dc_px/2);
+        ctx.fill();
+
+        // Particles
+        particles.forEach(p => {
+            let local_d = dc_px;
+            if(p.x < 250) local_d = dc_px;
+            else if(p.x < 310) {
+                const t = (p.x - 250) / 60;
+                local_d = dc_px - (dc_px - d_vena) * t;
+            } else local_d = d_vena;
+
+            p.x += (dc_px / local_d) * 2;
+            if(p.x > 550) p.x = 0;
+            const py = cy + (p.y_rel - 0.5) * local_d * 0.9;
+            ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(p.x, py, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        // U-Manometer (Simplified)
+        const mx = 150, my = 350, mw = 150;
+        const h_px = h_mm * 1.5;
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 10;
+        ctx.beginPath(); ctx.moveTo(mx, cy + dc_px/2); ctx.lineTo(mx, my);
+        ctx.arc(mx + mw/2, my, mw/2, Math.PI, 0, true); ctx.lineTo(mx + mw + 50, cy + dc_px/2); ctx.stroke();
+        
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(mx, my - 20 + h_px/2); ctx.lineTo(mx, my);
+        ctx.arc(mx + mw/2, my, mw/2, Math.PI, 0, true);
+        ctx.lineTo(mx + mw, my - 20 - h_px/2); ctx.stroke();
+
+        requestAnimationFrame(() => update());
+    }
+
+    ccS.oninput = update; hS.oninput = update; update();
+})();
+</script>
+<hr>
+</section>
+<section id="zadatak-94-95-venturi-cijev-i-podizanje-tekućine" class="level3" data-number="10.0.9">
+<h3 data-number="10.0.9" class="anchored" data-anchor-id="zadatak-94-95-venturi-cijev-i-podizanje-tekućine"><span class="header-section-number">10.0.9</span> Zadatak 94-95: Venturi cijev i podizanje tekućine</h3>
+<p><strong>Rješenje (95):</strong> <span class="math inline">\(v_2 = \mathbf{2,536 \, \text{m/s}}\)</span> (uz gubike), <span class="math inline">\(\dot{V} = \mathbf{0,0448 \, \text{m}^3\text{/s}}\)</span>.</p>
+```{=html} <!-- WIDGET: Venturi Ejektor (Usis) -->
+<div id="z94-ejector-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<pre><code>&lt;h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;"&gt;🌬️ Venturi ejektor: Podizanje tekućine podtlakom&lt;/h4&gt;
+
+&lt;div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;"&gt;
+    &lt;div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;"&gt;
+        &lt;canvas id="z94-canvas" width="550" height="400" style="width: 100%; height: 100%;"&gt;&lt;/canvas&gt;
+        
+        &lt;!-- Pressure/Suction Gauge --&gt;
+        &lt;div id="z94-suction-info" style="position: absolute; left: 275px; top: 20px; transform: translateX(-50%); background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 10px; border: 2px solid #3b82f6; text-align: center;"&gt;
+            &lt;div style="font-size: 0.6rem; font-weight: 800; color: #64748b;"&gt;TLAK U GRLU (gauge)&lt;/div&gt;
+            &lt;div id="z94-p-throat" style="font-size: 1.2rem; font-weight: 800; color: #ef4444;"&gt;-15.2 kPa&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div style="display: flex; flex-direction: column; gap: 20px;"&gt;
+        &lt;div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;"&gt;
+            &lt;label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;"&gt;Ulazna brzina v₁: &lt;span id="z94-v-v1" style="color:#2563eb;"&gt;2.0&lt;/span&gt; m/s&lt;/label&gt;
+            &lt;input type="range" id="z94-v1-slider" min="0.5" max="10" step="0.1" value="2" style="width: 100%;"&gt;
+            
+            &lt;label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;"&gt;Visina usisa h: &lt;span id="z94-v-h" style="color:#2563eb;"&gt;1.0&lt;/span&gt; m&lt;/label&gt;
+            &lt;input type="range" id="z94-h-slider" min="0.2" max="3" step="0.1" value="1" style="width: 100%;"&gt;
+        &lt;/div&gt;
+
+        &lt;div id="z94-status-card" style="background: #f0fdf4; padding: 20px; border-radius: 15px; border-left: 6px solid #22c55e;"&gt;
+            &lt;div id="z94-status-text" style="font-weight: 800; font-size: 0.9rem; color: #166534; text-align: center;"&gt;TEKUĆINA SE PODIŽE! ✅&lt;/div&gt;
+            &lt;div style="font-size: 0.75rem; color: #15803d; margin-top: 8px; line-height: 1.4; text-align: center;"&gt;
+                Tlak u grlu je manji od hidrostatskog tlaka stupca h.
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;"&gt;
+            💡 &lt;b&gt;Fizikalni uvid:&lt;/b&gt; Velika brzina u grlu Venturijeve cijevi stvara zonu niskog tlaka (Bernoullijev princip). Ako je taj tlak dovoljno nizak, atmosferski tlak će "pogurati" tekućinu iz donjeg spremnika prema gore.
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+<script>
+(function() {
+    const canvas = document.getElementById('z94-canvas'), ctx = canvas.getContext('2d');
+    const v1S = document.getElementById('z94-v1-slider'), hS = document.getElementById('z94-h-slider');
+
+    let particles = [];
+    for(let i=0; i<100; i++) particles.push({ x: Math.random()*550, y_rel: Math.random() });
+
+    function update() {
+        const v1 = parseFloat(v1S.value), h = parseFloat(hS.value);
+        const rho = 1000, g = 9.81, d1 = 0.1, d2 = 0.04;
+        
+        const v2 = v1 * Math.pow(d1/d2, 2);
+        const dp = 0.5 * rho * (v1*v1 - v2*v2); // p2 - p1 (gauge, p1=0)
+        const p_throat_kpa = dp / 1000;
+        
+        const p_needed_kpa = -rho * g * h / 1000;
+        const isSucking = p_throat_kpa < p_needed_kpa;
+
+        document.getElementById('z94-v-v1').innerText = v1.toFixed(1);
+        document.getElementById('z94-v-h').innerText = h.toFixed(1);
+        document.getElementById('z94-p-throat').innerText = p_throat_kpa.toFixed(1) + " kPa";
+        
+        const statusCard = document.getElementById('z94-status-card');
+        const statusText = document.getElementById('z94-status-text');
+        if(isSucking) {
+            statusCard.style.background = "#f0fdf4"; statusCard.style.borderLeftColor = "#22c55e";
+            statusText.innerText = "TEKUĆINA SE PODIŽE! ✅"; statusText.style.color = "#166534";
+        } else {
+            statusCard.style.background = "#fef2f2"; statusCard.style.borderLeftColor = "#ef4444";
+            statusText.innerText = "NEDOVOLJAN PODTLAK ❌"; statusText.style.color = "#991b1b";
+        }
+
+        draw(v1, v2, h, isSucking, p_throat_kpa, p_needed_kpa);
+    }
+
+    function draw(v1, v2, h, isSucking, p_throat, p_needed) {
+        ctx.clearRect(0, 0, 550, 450);
+        const cy = 150, scale = 60;
+        const d1_px = 60, d2_px = 20;
+
+        // Lower Reservoir
+        ctx.fillStyle = "#ebf8ff"; ctx.fillRect(225, 350, 100, 40);
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 2; ctx.strokeRect(225, 350, 100, 40);
+
+        // Suction Tube
+        ctx.strokeStyle = "#cbd5e0"; ctx.lineWidth = 8;
+        ctx.beginPath(); ctx.moveTo(275, cy + d2_px/2); ctx.lineTo(275, 370); ctx.stroke();
+
+        // Venturi Pipe
+        ctx.fillStyle = "rgba(241, 245, 249, 0.8)";
+        ctx.beginPath();
+        ctx.moveTo(0, cy - d1_px/2); ctx.lineTo(150, cy - d1_px/2);
+        ctx.bezierCurveTo(220, cy - d1_px/2, 230, cy - d2_px/2, 275, cy - d2_px/2);
+        ctx.bezierCurveTo(320, cy - d2_px/2, 330, cy - d1_px/2, 400, cy - d1_px/2);
+        ctx.lineTo(550, cy - d1_px/2); ctx.lineTo(550, cy + d1_px/2); ctx.lineTo(400, cy + d1_px/2);
+        ctx.bezierCurveTo(330, cy + d1_px/2, 320, cy + d2_px/2, 275, cy + d2_px/2);
+        ctx.bezierCurveTo(230, cy + d2_px/2, 220, cy + d1_px/2, 150, cy + d1_px/2);
+        ctx.lineTo(0, cy + d1_px/2); ctx.fill(); ctx.stroke();
+
+        // Liquid in Suction Tube
+        const rise_perc = Math.min(p_throat / p_needed, 1.0);
+        const current_h_px = (370 - (cy + d2_px/2)) * Math.max(rise_perc, 0);
+        ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(275, 370); ctx.lineTo(275, 370 - current_h_px); ctx.stroke();
+
+        // Particles
+        particles.forEach(p => {
+            let local_d = d1_px;
+            if(p.x > 150 && p.x < 400) {
+                const t = Math.abs(p.x - 275) / 125;
+                local_d = d2_px + (d1_px - d2_px) * (t * t);
+            }
+            p.x += (d1_px / local_d) * v1 * 3;
+            if(p.x > 550) p.x = 0;
+            const py = cy + (p.y_rel - 0.5) * local_d * 0.8;
+            ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(p.x, py, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        requestAnimationFrame(() => update());
+    }
+
+    v1S.oninput = update; hS.oninput = update; update();
+})();
+</script>
 
 
 </section>

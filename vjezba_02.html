@@ -44,7 +44,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-44ee0976171e9be92e6ebe9be850cd66.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-66c9649715f74f1e4324758aa2390964.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -275,41 +275,53 @@ window.Quarto = {
 <!-- WIDGET: Osnove viskoznosti (Newtonov zakon) -->
 <div class="widget-container" id="widget-visc-basics">
     <style>
-        #widget-visc-basics { max-width: 800px; margin: 20px auto; font-family: 'Segoe UI', sans-serif; }
-        #widget-visc-basics .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        #widget-visc-basics .canvas-wrapper { width: 100%; position: relative; overflow: hidden; background: #fff; border: 1px solid #eee; border-radius: 8px; }
+        #widget-visc-basics { max-width: 920px; margin: 24px auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 28px; background: linear-gradient(145deg, #ffffff 0%, #f7fbff 100%); border: 1px solid #dbeafe; box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08); }
+        #widget-visc-basics .widget-title { margin: 0 0 8px; font-size: 1.25rem; font-weight: 800; color: #0f172a; text-align: center; }
+        #widget-visc-basics .widget-subtitle { margin: 0 0 22px; text-align: center; color: #475569; font-size: 0.92rem; line-height: 1.55; }
+        #widget-visc-basics .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; background: rgba(255,255,255,0.78); backdrop-filter: blur(8px); padding: 16px; border-radius: 18px; margin-bottom: 18px; border: 1px solid #e2e8f0; }
+        #widget-visc-basics .control-card { background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; }
+        #widget-visc-basics .control-card label { display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 10px; }
+        #widget-visc-basics .control-card span { color: #1d4ed8; }
+        #widget-visc-basics input[type="range"] { width: 100%; accent-color: #2563eb; }
+        #widget-visc-basics .canvas-wrapper { width: 100%; position: relative; overflow: hidden; background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #dbeafe; border-radius: 18px; }
         #widget-visc-basics canvas { width: 100%; height: auto; display: block; }
-        #widget-visc-basics .metrics { display: flex; justify-content: space-around; background: #34495e; color: white; padding: 12px; border-radius: 8px; margin-top: 15px; }
-        #widget-visc-basics .metric-item { text-align: center; }
-        #widget-visc-basics .metric-label { font-size: 0.7rem; opacity: 0.8; display: block; text-transform: uppercase; }
-        #widget-visc-basics .metric-value { font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: bold; }
+        #widget-visc-basics .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
+        #widget-visc-basics .metric-item { text-align: center; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: white; padding: 14px 12px; border-radius: 16px; border: 1px solid rgba(148, 163, 184, 0.2); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+        #widget-visc-basics .metric-label { font-size: 0.72rem; opacity: 0.82; display: block; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        #widget-visc-basics .metric-value { font-family: 'Courier New', monospace; font-size: 1.15rem; font-weight: bold; color: #93c5fd; }
+        #widget-visc-basics .reading-note { margin-top: 14px; padding: 14px 16px; border-left: 4px solid #2563eb; border-radius: 14px; background: #f8fafc; color: #334155; font-size: 0.86rem; line-height: 1.55; }
     </style>
 
-    <div class="widget-header"><h3 class="widget-title anchored">Vizualizacija Newtonovog zakona viskoznosti</h3></div>
+    <div class="widget-header">
+        <h3 class="widget-title anchored">Vizualizacija Newtonovog zakona viskoznosti</h3>
+        <p class="widget-subtitle">Gornja ploča povlači fluid, slojevi klize jedan preko drugoga, a linearni profil brzine stvara smično naprezanje <strong>τ = μ dv/dy</strong>.</p>
+    </div>
     
     <div class="controls">
-        <div class="control-group">
+        <div class="control-card">
             <label>Brzina gornje ploče (v): <span id="v-val">1.0</span> m/s</label>
             <input type="range" id="v-slider" min="0.1" max="5.0" value="1.0" step="0.1" style="width:100%;">
         </div>
-        <div class="control-group">
+        <div class="control-card">
             <label>Viskoznost (μ): <span id="mu-val">0.1</span> Pa·s</label>
             <input type="range" id="mu-slider" min="0.01" max="1.0" value="0.1" step="0.01" style="width:100%;">
         </div>
-        <div class="control-group">
+        <div class="control-card">
             <label>Zračnost (δ): <span id="h-slider-val">10</span> mm</label>
             <input type="range" id="h-slider" min="2" max="30" value="10" step="1" style="width:100%;">
         </div>
     </div>
 
     <div class="canvas-wrapper">
-        <canvas id="visc-canvas" width="800" height="250"></canvas>
+        <canvas id="visc-canvas" width="860" height="320"></canvas>
     </div>
 
     <div class="metrics">
         <div class="metric-item"><span class="metric-label">Gradijent brzine (dv/dy)</span><span class="metric-value" id="grad-out">100</span> s⁻¹</div>
         <div class="metric-item"><span class="metric-label">Smicajno naprezanje (τ)</span><span class="metric-value" id="tau-out">10.0</span> Pa</div>
     </div>
+
+    <div class="reading-note"><strong>Kako čitati widget:</strong> Što je gornja ploča brža ili je razmak među pločama manji, to je gradijent brzine strmiji. Veća viskoznost zatim taj gradijent pretvara u veće smično naprezanje.</div>
 
     <script>
     (function() {
@@ -320,18 +332,48 @@ window.Quarto = {
         const hSl = document.getElementById('h-slider');
 
         let particles = [];
-        for(let i=0; i<100; i++) {
+        for (let i = 0; i < 120; i++) {
             particles.push({
-                x: Math.random() * 800,
-                y: Math.random()
+                x: Math.random(),
+                y: Math.random(),
+                size: 1.4 + Math.random() * 1.6
             });
+        }
+
+        function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+            if (fill) ctx.fill();
+            if (stroke) ctx.stroke();
+        }
+
+        function drawArrow(x1, y1, x2, y2, color, width) {
+            const headlen = 8;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            ctx_b.strokeStyle = color;
+            ctx_b.fillStyle = color;
+            ctx_b.lineWidth = width;
+            ctx_b.beginPath();
+            ctx_b.moveTo(x1, y1);
+            ctx_b.lineTo(x2, y2);
+            ctx_b.stroke();
+            ctx_b.beginPath();
+            ctx_b.moveTo(x2, y2);
+            ctx_b.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+            ctx_b.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+            ctx_b.fill();
         }
 
         function draw_b() {
             const v = parseFloat(vSl.value);
             const mu = parseFloat(muSl.value);
             const h_mm = parseFloat(hSl.value);
-            const h_px = h_mm * 5; 
+            const h_px = h_mm * 5.2; 
             
             const dv_dy = v / (h_mm / 1000);
             const tau = mu * dv_dy;
@@ -343,59 +385,116 @@ window.Quarto = {
             document.getElementById('tau-out').textContent = tau.toFixed(1);
 
             ctx_b.clearRect(0, 0, canvas.width, canvas.height);
-            const centerY = canvas.height / 2;
+            const centerY = canvas.height / 2 + 8;
             const topY = centerY - h_px/2;
             const botY = centerY + h_px/2;
+            const chamberLeft = 110;
+            const chamberWidth = 560;
+            const chamberRight = chamberLeft + chamberWidth;
 
-            // Fluid
-            ctx_b.fillStyle = `rgba(52, 152, 219, ${0.1 + mu * 0.5})`;
-            ctx_b.fillRect(0, topY, canvas.width, h_px);
+            const bgGrad = ctx_b.createLinearGradient(0, 0, 0, canvas.height);
+            bgGrad.addColorStop(0, "#f8fbff");
+            bgGrad.addColorStop(1, "#eef6ff");
+            ctx_b.fillStyle = bgGrad;
+            ctx_b.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx_b.fillStyle = "#ffffff";
+            ctx_b.strokeStyle = "#dbeafe";
+            roundRect(ctx_b, 26, 20, canvas.width - 52, canvas.height - 40, 20, true, true);
+
+            const fluidGrad = ctx_b.createLinearGradient(0, topY, 0, botY);
+            fluidGrad.addColorStop(0, `rgba(125, 211, 252, ${0.25 + mu * 0.18})`);
+            fluidGrad.addColorStop(0.5, `rgba(59, 130, 246, ${0.14 + mu * 0.3})`);
+            fluidGrad.addColorStop(1, `rgba(125, 211, 252, ${0.25 + mu * 0.18})`);
+            ctx_b.fillStyle = fluidGrad;
+            roundRect(ctx_b, chamberLeft, topY, chamberWidth, h_px, 18, true, false);
 
             // Donja ploča
-            ctx_b.fillStyle = '#95a5a6';
-            ctx_b.fillRect(0, botY, canvas.width, 20);
-            ctx_b.strokeStyle = '#7f8c8d'; ctx_b.lineWidth = 1;
-            for(let x=0; x<800; x+=10) {
-                ctx_b.beginPath(); ctx_b.moveTo(x, botY+20); ctx_b.lineTo(x+10, botY); ctx_b.stroke();
+            ctx_b.fillStyle = '#64748b';
+            roundRect(ctx_b, chamberLeft, botY + 4, chamberWidth, 18, 8, true, false);
+            ctx_b.strokeStyle = 'rgba(255,255,255,0.2)'; ctx_b.lineWidth = 1;
+            for(let x = chamberLeft; x < chamberRight; x += 14) {
+                ctx_b.beginPath(); ctx_b.moveTo(x, botY + 22); ctx_b.lineTo(x + 12, botY + 4); ctx_b.stroke();
             }
 
             // Gornja ploča
-            const offset = (Date.now() * 0.001 * v * 100) % 40;
-            ctx_b.fillStyle = '#34495e';
-            ctx_b.fillRect(0, topY - 20, canvas.width, 20);
+            const offset = (Date.now() * 0.0012 * v * 120) % 34;
+            ctx_b.fillStyle = '#0f172a';
+            roundRect(ctx_b, chamberLeft, topY - 22, chamberWidth, 18, 8, true, false);
             
-            ctx_b.strokeStyle = '#2c3e50'; ctx_b.lineWidth = 2;
-            for(let x = -40; x < 840; x += 40) {
-                ctx_b.beginPath(); ctx_b.moveTo(x + offset, topY - 20); ctx_b.lineTo(x + offset + 10, topY); ctx_b.stroke();
+            ctx_b.strokeStyle = 'rgba(255,255,255,0.18)'; ctx_b.lineWidth = 2;
+            for(let x = chamberLeft - 36; x < chamberRight + 36; x += 34) {
+                ctx_b.beginPath(); ctx_b.moveTo(x + offset, topY - 22); ctx_b.lineTo(x + offset + 12, topY - 4); ctx_b.stroke();
             }
 
             // Particles
-            particles.forEach(p => {
-                const u = v * (1 - p.y); 
-                p.x += u * 2;
-                if(p.x > 800) p.x = 0;
+            particles.forEach((p) => {
+                const u = v * (1 - p.y);
+                const speedRatio = u / Math.max(v, 0.0001);
+                p.x += 0.0015 + speedRatio * 0.012;
+                if (p.x > 1.03) p.x = -0.03;
+                const px = chamberLeft + p.x * chamberWidth;
                 const py = topY + p.y * h_px;
-                ctx_b.fillStyle = '#2980b9';
-                ctx_b.beginPath(); ctx_b.arc(p.x, py, 2, 0, Math.PI*2); ctx_b.fill();
+                ctx_b.fillStyle = `rgba(3, 105, 161, ${0.2 + speedRatio * 0.65})`;
+                ctx_b.beginPath(); ctx_b.arc(px, py, p.size, 0, Math.PI*2); ctx_b.fill();
             });
 
-            // Velocity Profile
-            ctx_b.strokeStyle = '#e67e22'; ctx_b.lineWidth = 3;
-            ctx_b.beginPath(); ctx_b.moveTo(100, botY); ctx_b.lineTo(100 + v*40, topY); ctx_b.stroke();
+            ctx_b.strokeStyle = 'rgba(148, 163, 184, 0.9)';
+            ctx_b.lineWidth = 1;
+            ctx_b.setLineDash([5, 5]);
+            ctx_b.beginPath();
+            ctx_b.moveTo(chamberLeft, centerY);
+            ctx_b.lineTo(chamberRight, centerY);
+            ctx_b.stroke();
+            ctx_b.setLineDash([]);
 
-            for(let i=0; i<=5; i++) {
-                const f = i/5;
-                const y = botY - f*h_px;
-                const arrowL = f * v * 40;
-                if(arrowL > 2) {
-                    ctx_b.beginPath(); ctx_b.moveTo(100, y); ctx_b.lineTo(100 + arrowL, y);
-                    ctx_b.lineTo(100 + arrowL - 5, y - 3); ctx_b.moveTo(100+arrowL, y); ctx_b.lineTo(100 + arrowL - 5, y + 3);
-                    ctx_b.stroke();
-                }
+            for (let i = 0; i <= 6; i++) {
+                const f = i / 6;
+                const y = botY - f * h_px;
+                const arrowL = Math.max(12, f * v * 42);
+                drawArrow(chamberLeft + 24, y, chamberLeft + 24 + arrowL, y, `rgba(37, 99, 235, ${0.28 + f * 0.7})`, 2.4);
             }
-            
-            ctx_b.fillStyle = '#e67e22'; ctx_b.font = 'bold 12px Arial';
-            ctx_b.fillText('Profil u(y)', 80, botY + 35);
+
+            const profileX = 700;
+            const profileTop = topY - 8;
+            const profileHeight = h_px + 16;
+            const profileWidth = 118;
+            ctx_b.fillStyle = "rgba(255,255,255,0.92)";
+            ctx_b.strokeStyle = "#dbeafe";
+            roundRect(ctx_b, profileX, profileTop, profileWidth, profileHeight, 16, true, true);
+
+            ctx_b.strokeStyle = '#1d4ed8';
+            ctx_b.lineWidth = 3;
+            ctx_b.beginPath();
+            for (let i = 0; i <= 60; i++) {
+                const f = i / 60;
+                const y = botY - f * h_px;
+                const x = profileX + 18 + f * v * 12;
+                if (i === 0) ctx_b.moveTo(x, y);
+                else ctx_b.lineTo(x, y);
+            }
+            ctx_b.stroke();
+
+            ctx_b.fillStyle = '#1d4ed8';
+            ctx_b.font = '700 12px Inter';
+            ctx_b.fillText('profil u(y)', profileX + 14, profileTop + profileHeight + 18);
+
+            ctx_b.fillStyle = '#475569';
+            ctx_b.font = '12px Inter';
+            ctx_b.fillText('v = 0', chamberRight + 12, botY + 8);
+            ctx_b.fillText('v = vmax', chamberRight + 12, topY - 8);
+            ctx_b.fillText('gornja ploča', chamberLeft, topY - 32);
+            ctx_b.fillText('mirna ploča', chamberLeft, botY + 42);
+            ctx_b.fillText('δ', chamberLeft - 38, centerY + 4);
+
+            drawArrow(chamberLeft - 24, topY, chamberLeft - 24, botY, '#0f172a', 1.8);
+            drawArrow(chamberLeft - 24, botY, chamberLeft - 24, topY, '#0f172a', 1.8);
+
+            const tauLen = Math.min(78, 20 + tau * 0.16);
+            drawArrow(chamberRight - 92, topY - 34, chamberRight - 92 + tauLen, topY - 34, '#ef4444', 2.8);
+            ctx_b.fillStyle = '#b91c1c';
+            ctx_b.font = '700 12px Inter';
+            ctx_b.fillText('τ raste s μ i dv/dy', chamberRight - 92, topY - 44);
 
             requestAnimationFrame(draw_b);
         }
@@ -403,6 +502,174 @@ window.Quarto = {
     })();
     </script>
 </div>
+
+***
+
+### Proširenje: Nenewtonski fluidi
+
+U inženjerskoj praksi mnogi fluidi ne slijede linearni Newtonov zakon. Njihovo ponašanje opisuje se **Power-law modelom**:
+$$\tau = K \cdot \left( \frac{dv}{dy} \right)^n$$
+
+*   **n = 1:** Newtonski fluid (voda, zrak, ulje)
+*   **n &lt; 1:** Pseudoplastični (shear-thinning) - npr. boja, krv, kečap (postaju rjeđi pri miješanju)
+*   **n &gt; 1:** Dilatantni (shear-thickening) - npr. mješavina škroba i vode (postaju gušći pri miješanju)
+*   **Binghamova plastika:** Potreban je početni naprezanje $\tau_0$ da bi uopće potekli (npr. pasta za zube)
+
+```{=html}
+<!-- WIDGET: Nenewtonski fluidi Explorer -->
+<div id="v2-non-newtonian-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;" class="anchored">🧪 Reologija: Newtonski vs. Nenewtonski fluidi</h4>
+    
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px;">
+        <!-- Flow Visualization -->
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 350px;">
+            <canvas id="v2-nn-canvas" width="450" height="350" style="width: 100%; height: 100%;"></canvas>
+            <div id="v2-nn-label" style="position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; color: #1e40af; border: 1px solid #3b82f6;">NEWTONSKI</div>
+        </div>
+
+        <!-- Controls and Graph -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Odaberi tip fluida:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button onclick="setNNType('newtonian', 1, 0)" class="nn-btn active" id="nn-btn-newt">Newtonski</button>
+                    <button onclick="setNNType('pseudoplastic', 0.5, 0)" class="nn-btn" id="nn-btn-pseudo">Pseudoplastični</button>
+                    <button onclick="setNNType('dilatant', 1.8, 0)" class="nn-btn" id="nn-btn-dilat">Dilatantni</button>
+                    <button onclick="setNNType('bingham', 1, 20)" class="nn-btn" id="nn-btn-bingh">Bingham</button>
+                </div>
+                
+                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Brzina smicanja (dv/dy): <span id="v2-nn-v" style="color:#2563eb;">2.0</span> s⁻¹</label>
+                <input type="range" id="v2-nn-slider" min="0.1" max="10" step="0.1" value="2" style="width: 100%;">
+            </div>
+
+            <div style="background: #fff; border-radius: 15px; border: 1px solid #e2e8f0; height: 180px; padding: 10px;">
+                <canvas id="v2-nn-graph" width="300" height="160" style="width: 100%; height: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.nn-btn { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e0; background: white; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.nn-btn:hover { background: #f8fafc; }
+.nn-btn.active { background: #3b82f6; color: white; border-color: #2563eb; }
+</style>
+
+<script>
+(function() {
+    const canvas = document.getElementById('v2-nn-canvas'), ctx = canvas.getContext('2d');
+    const gCanvas = document.getElementById('v2-nn-graph'), gCtx = gCanvas.getContext('2d');
+    const slider = document.getElementById('v2-nn-slider');
+    const label = document.getElementById('v2-nn-label');
+
+    let currentParams = { type: 'newtonian', n: 1, tau0: 0 };
+    let particles = [];
+    for(let i=0; i<100; i++) particles.push({ x: Math.random()*450, y_rel: Math.random() });
+
+    window.setNNType = (type, n, tau0) => {
+        currentParams = { type, n, tau0 };
+        document.querySelectorAll('.nn-btn').forEach(b => b.classList.remove('active'));
+        if(type === 'newtonian') document.getElementById('nn-btn-newt').classList.add('active');
+        if(type === 'pseudoplastic') document.getElementById('nn-btn-pseudo').classList.add('active');
+        if(type === 'dilatant') document.getElementById('nn-btn-dilat').classList.add('active');
+        if(type === 'bingham') document.getElementById('nn-btn-bingh').classList.add('active');
+        label.innerText = type.toUpperCase();
+    };
+
+    function update() {
+        const dvdy = parseFloat(slider.value);
+        document.getElementById('v2-nn-v').innerText = dvdy.toFixed(1);
+        
+        drawFlow(dvdy);
+        drawGraph(dvdy);
+    }
+
+    function drawFlow(dvdy) {
+        ctx.clearRect(0, 0, 450, 350);
+        const cy = 175, h = 200;
+        
+        // Walls
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(0, cy - h/2); ctx.lineTo(450, cy - h/2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, cy + h/2); ctx.lineTo(450, cy + h/2); ctx.stroke();
+
+        // Particles
+        particles.forEach(p => {
+            const y = p.y_rel * h - h/2;
+            const dist = Math.abs(y);
+            const r_rel = dist / (h/2);
+            
+            // Simplified velocity profiles
+            let v_factor = 0;
+            if(currentParams.type === 'newtonian') v_factor = 1 - r_rel;
+            else if(currentParams.type === 'pseudoplastic') v_factor = 1 - Math.pow(r_rel, 0.5);
+            else if(currentParams.type === 'dilatant') v_factor = 1 - Math.pow(r_rel, 3);
+            else if(currentParams.type === 'bingham') {
+                const yield_r = 0.3; // Plug flow region
+                v_factor = r_rel < yield_r ? 1 : (1 - r_rel)/(1 - yield_r);
+            }
+
+            p.x += v_factor * dvdy * 2;
+            if(p.x > 450) p.x = 0;
+            
+            ctx.fillStyle = "#3b82f6";
+            ctx.beginPath(); ctx.arc(p.x, cy + y, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Profile Line
+        ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2;
+        ctx.beginPath();
+        for(let y = -h/2; y <= h/2; y += 5) {
+            const r_rel = Math.abs(y) / (h/2);
+            let v_f = 0;
+            if(currentParams.type === 'newtonian') v_f = 1 - r_rel;
+            else if(currentParams.type === 'pseudoplastic') v_f = 1 - Math.pow(r_rel, 0.5);
+            else if(currentParams.type === 'dilatant') v_f = 1 - Math.pow(r_rel, 3);
+            else if(currentParams.type === 'bingham') {
+                const yr = 0.3; v_f = r_rel < yr ? 1 : (1 - r_rel)/(1 - yr);
+            }
+            ctx.lineTo(50 + v_f * dvdy * 20, cy + y);
+        }
+        ctx.stroke();
+
+        requestAnimationFrame(() => update());
+    }
+
+    function drawGraph(activeVal) {
+        gCtx.clearRect(0, 0, 300, 160);
+        const ox = 40, oy = 140;
+        
+        // Axes
+        gCtx.strokeStyle = "#94a3b8"; gCtx.lineWidth = 1;
+        gCtx.beginPath(); gCtx.moveTo(ox, 10); gCtx.lineTo(ox, oy); gCtx.lineTo(280, oy); gCtx.stroke();
+        gCtx.font = "8px Inter"; gCtx.fillStyle = "#64748b";
+        gCtx.fillText("dv/dy", 260, oy + 10); gCtx.fillText("τ", ox - 15, 15);
+
+        const drawCurve = (type, n, tau0, color, active) => {
+            gCtx.strokeStyle = color; gCtx.lineWidth = active ? 3 : 1;
+            gCtx.globalAlpha = active ? 1.0 : 0.3;
+            gCtx.beginPath();
+            for(let x=0; x<=10; x+=0.5) {
+                let y_val = tau0 + Math.pow(x, n) * 10;
+                const gx = ox + (x/10) * 220;
+                const gy = oy - (y_val/100) * 120;
+                if(x===0) gCtx.moveTo(gx, gy); else gCtx.lineTo(gx, gy);
+            }
+            gCtx.stroke();
+            gCtx.globalAlpha = 1.0;
+        };
+
+        drawCurve('newtonian', 1, 0, "#3b82f6", currentParams.type === 'newtonian');
+        drawCurve('pseudoplastic', 0.5, 0, "#10b981", currentParams.type === 'pseudoplastic');
+        drawCurve('dilatant', 1.8, 0, "#f59e0b", currentParams.type === 'dilatant');
+        drawCurve('bingham', 1, 30, "#ef4444", currentParams.type === 'bingham');
+    }
+
+    slider.oninput = update;
+    update();
+})();
+</script>
+
 <hr>
 </section>
 <section id="zadatak-10-okretni-moment-na-krnjem-stošcu-izvod" class="level3" data-number="2.0.2">

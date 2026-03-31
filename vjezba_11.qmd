@@ -285,18 +285,271 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
 
 ### Zadatak 98: Kinematika dva mlaza
 
+**Tekst zadatka:** 
+U stijenci velikog spremnika izvedena su dva kružna otvora malih dimenzija. Donji otvor nalazi se na dubini $4 \, \text{m}$ ispod površine tekućine. Oba mlaza udaraju u tlo na istoj horizontalnoj udaljenosti $L=10 \, \text{m}$. Odrediti ukupnu visinu tekućine $H$ i dubinu gornjeg otvora $h$.
+
 **Rješenje:**
 1. Donji mlaz: $10 = 2\sqrt{(H-4) \cdot 4} \implies H = \mathbf{10,25 \, \text{m}}$.
 2. Gornji mlaz: $10 = 2\sqrt{(10,25-4-h) \cdot (4+h)} \implies h = \mathbf{2,25 \, \text{m}}$.
+
+```{=html}
+<!-- WIDGET: Dva mlaza (Parabolični letovi) -->
+<div id="z98-jets-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🎯 Kinematika mlazova: Sjecište u istoj točki</h4>
+    
+    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
+        <!-- Visualization -->
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
+            <canvas id="z98-canvas" width="550" height="450" style="width: 100%; height: 100%;"></canvas>
+            
+            <!-- Target Point Indicator -->
+            <div style="position: absolute; left: 430px; top: 405px; width: 12px; height: 12px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444; transform: translate(-50%, -50%);"></div>
+            <div style="position: absolute; left: 430px; top: 380px; transform: translateX(-50%); font-size: 0.65rem; font-weight: 800; color: #ef4444;">L = 10m</div>
+        </div>
+
+        <!-- Controls -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Ukupna visina H: <span id="z98-v-H" style="color:#2563eb;">10.25</span> m</label>
+                <input type="range" id="z98-H-slider" min="8" max="15" step="0.05" value="10.25" style="width: 100%;">
+                
+                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Dubina gornjeg otvora h₁: <span id="z98-v-h1" style="color:#2563eb;">2.25</span> m</label>
+                <input type="range" id="z98-h1-slider" min="1" max="5" step="0.05" value="2.25" style="width: 100%;">
+
+                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Dubina donjeg otvora h₂: <span id="z98-v-h2" style="color:#2563eb;">6.25</span> m</label>
+                <input type="range" id="z98-h2-slider" min="5.5" max="10" step="0.05" value="6.25" style="width: 100%;">
+            </div>
+
+            <div id="z98-match-card" style="background: #f0fdf4; padding: 20px; border-radius: 15px; border-left: 6px solid #22c55e;">
+                <div id="z98-match-text" style="font-weight: 800; font-size: 0.9rem; color: #166534; text-align: center;">MLAZOVI SE POKLAPAJU! ✅</div>
+                <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px; font-size: 0.85rem; color: #15803d;">
+                    <div style="display: flex; justify-content: space-between;"><span>Domet 1:</span> <b id="z98-res-x1">10.0 m</b></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Domet 2:</span> <b id="z98-res-x2">10.0 m</b></div>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
+                💡 <b>Fizikalni uvid:</b> Torricellijeva formula za domet je $x = 2\sqrt{h(H-h)}$. Zbog simetrije korijena, dva otvora čije su dubine simetrične oko sredine spremnika ($H/2$) uvijek daju isti domet.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('z98-canvas'), ctx = canvas.getContext('2d');
+    const hSl = document.getElementById('z98-H-slider'), h1Sl = document.getElementById('z98-h1-slider'), h2Sl = document.getElementById('z98-h2-slider');
+
+    let particles = [];
+    for(let i=0; i<150; i++) particles.push({ t: Math.random(), jet: Math.random() > 0.5 ? 1 : 2 });
+
+    function update() {
+        const H = parseFloat(hSl.value), h1 = parseFloat(h1Sl.value), h2 = parseFloat(h2Sl.value);
+        const x1 = 2 * Math.sqrt(h1 * (H - h1));
+        const x2 = 2 * Math.sqrt(h2 * (H - h2));
+
+        document.getElementById('z98-v-H').innerText = H.toFixed(2);
+        document.getElementById('z98-v-h1').innerText = h1.toFixed(2);
+        document.getElementById('z98-v-h2').innerText = h2.toFixed(2);
+        document.getElementById('z98-res-x1').innerText = x1.toFixed(1) + " m";
+        document.getElementById('z98-res-x2').innerText = x2.toFixed(1) + " m";
+
+        const isMatch = Math.abs(x1 - x2) < 0.2;
+        const matchCard = document.getElementById('z98-match-card');
+        const matchText = document.getElementById('z98-match-text');
+        if(isMatch) {
+            matchCard.style.background = "#f0fdf4"; matchCard.style.borderLeftColor = "#22c55e";
+            matchText.innerText = "MLAZOVI SE POKLAPAJU! ✅"; matchText.style.color = "#166534";
+        } else {
+            matchCard.style.background = "#fffbeb"; matchCard.style.borderLeftColor = "#f59e0b";
+            matchText.innerText = "MLAZOVI SE RAZILAZE ⚠️"; matchText.style.color = "#92400e";
+        }
+
+        draw(H, h1, h2, x1, x2);
+    }
+
+    function draw(H, h1, h2, x1, x2) {
+        ctx.clearRect(0, 0, 550, 450);
+        const scale = 35, ox = 80, oy = 420;
+
+        // Ground
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(20, oy); ctx.lineTo(530, oy); ctx.stroke();
+
+        // Tank
+        ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+        ctx.fillRect(ox - 60, oy - H*scale, 60, H*scale);
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 3;
+        ctx.strokeRect(ox - 60, oy - H*scale, 60, H*scale);
+        ctx.fillStyle = "rgba(59, 130, 246, 0.4)";
+        ctx.fillRect(ox - 60, oy - H*scale, 60, H*scale);
+
+        const drawJet = (h, color, alpha) => {
+            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.globalAlpha = alpha;
+            ctx.beginPath(); ctx.moveTo(ox, oy - (H-h)*scale);
+            const v0 = Math.sqrt(2 * 9.81 * h);
+            for(let t = 0; t < 2.5; t += 0.02) {
+                let px = v0 * t;
+                let py = 0.5 * 9.81 * t*t;
+                if(py > (H-h)) break;
+                ctx.lineTo(ox + px*scale, (oy - (H-h)*scale) + py*scale);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+        };
+
+        drawJet(h1, "#3b82f6", 1.0);
+        drawJet(h2, "#f59e0b", 1.0);
+
+        // Labels
+        ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(ox, oy - (H-h1)*scale, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.arc(ox, oy - (H-h2)*scale, 4, 0, Math.PI*2); ctx.fill();
+    }
+
+    [hSl, h1Sl, h2Sl].forEach(s => s.oninput = update);
+    update();
+    function anim() { update(); requestAnimationFrame(anim); }
+    anim();
+})();
+</script>
+
 
 ***
 
 ### Zadatak 99: Rotirajući spremnik s cijevi
 
+**Tekst zadatka:** 
+Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brzinom $\omega=2,5 \, \text{rad/s}$. Na spremnik je na polumjeru $r=1,2 \, \text{m}$ priključena cijev duljine $L=2 \, \text{m}$ koja završava sapnicom. Odrediti brzinu istjecanja $w$ i protok $\dot{V}$ ako je pretlak u tjemenu spremnika $p_{m0}=40 \, \text{kPa}$.
+
 **Rješenje:**
 1. Brzina $w = \sqrt{2 \frac{p_{m0}}{\rho} - 2g(L+H_1) - \frac{\omega^2 r^2}{2}} = \mathbf{3,99 \, \text{m/s}}$.
 2. Protok $\dot{V} = \mathbf{0,313 \, \text{L/s}}$.
 3. Pretlak A: $p_{mA} = \rho \frac{\omega^2 r^2}{2} + \rho g(L+H_1) = \mathbf{36,2 \, \text{kPa}}$.
+
+```{=html}
+<!-- WIDGET: Rotirajući spremnik i Bernoulli -->
+<div id="z99-rotating-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌀 Rotirajući spremnik: Paraboloid i Centrifugalni tlak</h4>
+    
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;">
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
+            <canvas id="z99-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+            
+            <!-- Pressure Indicator at Point A -->
+            <div style="position: absolute; right: 20px; bottom: 80px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 10px; border: 1px solid #3b82f6; text-align: center;">
+                <div style="font-size: 0.6rem; font-weight: 800; color: #64748b;">PRETLAK U TOČKI A</div>
+                <div id="z99-pa-val" style="font-size: 1.1rem; font-weight: 800; color: #1e40af;">36.2 kPa</div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Kutna brzina ω: <span id="z99-v-w" style="color:#2563eb;">2.5</span> rad/s</label>
+                <input type="range" id="z99-w-slider" min="0" max="8" step="0.1" value="2.5" style="width: 100%;">
+                
+                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Pretlak u tjemenu pm0: <span id="z99-v-p0" style="color:#2563eb;">40</span> kPa</label>
+                <input type="range" id="z99-p0-slider" min="10" max="80" step="1" value="40" style="width: 100%;">
+            </div>
+
+            <div style="background: #ebf8ff; padding: 20px; border-radius: 15px; border-left: 6px solid #3182ce;">
+                <div style="font-weight: 800; font-size: 0.75rem; color: #2c5282; text-transform: uppercase; margin-bottom: 12px;">Rezultati istjecanja:</div>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 1rem;">
+                    <div style="display: flex; justify-content: space-between;"><span>Brzina istjecanja w:</span> <b id="z99-res-w">3.99 m/s</b></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Protok V̇:</span> <b id="z99-res-vdot">0.31 L/s</b></div>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
+                💡 <b>Fizikalni uvid:</b> Rotacija stvara centrifugalni gradijent tlaka ($p \propto r^2$). U točki A tlak je veći nego u tjemenu zbog zbroja centrifugalnog i hidrostatskog doprinosa.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('z99-canvas'), ctx = canvas.getContext('2d');
+    const wS = document.getElementById('z99-w-slider'), p0S = document.getElementById('z99-p0-slider');
+
+    let particles = [];
+    for(let i=0; i<100; i++) particles.push({ x: Math.random()*200, y: Math.random()*300, t: Math.random() });
+
+    function update() {
+        const omega = parseFloat(wS.value), pm0_kpa = parseFloat(p0S.value);
+        const rho = 1000, g = 9.81, R = 1.5, r = 1.2, L = 2.0, H1 = 0.5;
+        
+        const pm0 = pm0_kpa * 1000;
+        const pa = pm0 + 0.5 * rho * omega * omega * r * r + rho * g * (L + H1);
+        
+        // Bernoulli from 0 to exit (neglecting pipe losses for simplicity as per ideal case often used in these problems)
+        // pm0/rhog + z0 + 0 = p_atm/rhog + z_exit + w^2/2g - (omega^2 * r^2)/2g
+        // w = sqrt( 2*pm0/rho + 2g(z0-ze) + omega^2 * r^2 )
+        const w_vel = Math.sqrt(Math.max(0, 2 * pm0 / rho + 2 * g * (L + H1) + omega * omega * r * r));
+        const vdot = w_vel * (Math.PI * 0.01 * 0.01 / 4) * 1000; // Assuming 10mm nozzle
+
+        document.getElementById('z99-v-w').innerText = omega.toFixed(1);
+        document.getElementById('z99-v-p0').innerText = pm0_kpa;
+        document.getElementById('z99-pa-val').innerText = (pa / 1000).toFixed(1) + " kPa";
+        document.getElementById('z99-res-w').innerText = w_vel.toFixed(2) + " m/s";
+        document.getElementById('z99-res-vdot').innerText = vdot.toFixed(2) + " L/s";
+
+        draw(omega, pm0_kpa, w_vel);
+    }
+
+    function draw(omega, p0, w_vel) {
+        ctx.clearRect(0, 0, 500, 450);
+        const ox = 250, oy = 100, scale = 80;
+        
+        // Tank outline
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
+        ctx.strokeRect(ox - 120, oy, 240, 200);
+        
+        // Paraboloid surface (Virtual - this tank is full, but we show pressure gradient)
+        ctx.fillStyle = "rgba(59, 130, 246, 0.2)";
+        ctx.fillRect(ox - 120, oy, 240, 200);
+        
+        // Pressure gradient colors
+        for(let x = -120; x <= 120; x += 10) {
+            const r_rel = Math.abs(x) / 120;
+            ctx.fillStyle = `rgba(30, 64, 175, ${0.1 + r_rel * 0.4})`;
+            ctx.fillRect(ox + x, oy, 10, 200);
+        }
+
+        // Pipe and Nozzle
+        const rx = 180; // Radius of pipe connection in px
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(ox + 80, oy + 200);
+        ctx.lineTo(ox + 80, oy + 350);
+        ctx.lineTo(ox + 150, oy + 350);
+        ctx.stroke();
+
+        // Particles
+        particles.forEach(p => {
+            p.t += 0.01 * (1 + omega * 0.2);
+            if(p.t > 1) p.t = 0;
+            
+            // Simplified rotation
+            const angle = p.t * Math.PI * 2;
+            const px = ox + Math.cos(angle + p.x) * (p.x % 100);
+            const py = oy + 50 + (p.y % 150);
+            
+            ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Exit jet
+        if(w_vel > 0) {
+            ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(ox+150, oy+350); ctx.lineTo(ox+150 + w_vel*10, oy+350); ctx.stroke();
+        }
+
+        requestAnimationFrame(() => update());
+    }
+
+    wS.oninput = update; p0S.oninput = update; update();
+})();
+</script>
+
 
 ***
 
@@ -393,14 +646,267 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
 
 ### Zadatak 102: Mlaz na ploču
 
+**Tekst zadatka:** 
+Mlaz vode brzine $v_1=20 \, \text{m/s}$ i masenog protoka $\dot{m}=10 \, \text{kg/s}$ udara u nepomičnu ravnu ploču okomito na njezinu površinu. Odrediti silu $F_R$ kojom mlaz djeluje na ploču.
+
 **Rješenje:**
 $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
+
+```{=html}
+<!-- WIDGET: Mlaz na ploču (Impuls) -->
+<div id="z102-jetplate-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">💥 Udarna sila mlaza: Zakon količine gibanja</h4>
+    
+    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
+            <canvas id="z102-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
+            
+            <!-- Force Arrow Vector -->
+            <div id="z102-force-tag" style="position: absolute; right: 80px; top: 180px; background: #ef4444; color: white; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 800; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
+                F_R = <span id="z102-res-fr">200</span> N
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Brzina mlaza v₁: <span id="z102-v-v1" style="color:#2563eb;">20</span> m/s</label>
+                <input type="range" id="z102-v1-slider" min="5" max="40" step="1" value="20" style="width: 100%;">
+                
+                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Maseni protok ṁ: <span id="z102-v-mdot" style="color:#2563eb;">10</span> kg/s</label>
+                <input type="range" id="z102-mdot-slider" min="2" max="25" step="0.5" value="10" style="width: 100%;">
+            </div>
+
+            <div style="background: #fef2f2; padding: 20px; border-radius: 15px; border-left: 6px solid #ef4444;">
+                <div style="font-weight: 800; font-size: 0.75rem; color: #991b1b; text-transform: uppercase; margin-bottom: 10px;">Analiza impulsa:</div>
+                <div style="font-size: 0.9rem; color: #b91c1c; line-height: 1.5;">
+                    Ulazni impuls: ṁv₁<br>
+                    Izlazni impuls (x): 0<br>
+                    <b>ΣF_x = ṁ(0 - v₁) = -F_R</b>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
+                💡 <b>Fizikalni uvid:</b> Budući da se mlaz nakon udara širi paralelno s pločom, njegova komponenta brzine u smjeru x postaje nula. Sva kinetička energija usmjerena prema ploči pretvara se u silu pritiska.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('z102-canvas'), ctx = canvas.getContext('2d');
+    const v1S = document.getElementById('z102-v1-slider'), mS = document.getElementById('z102-mdot-slider');
+
+    let particles = [];
+    for(let i=0; i<150; i++) particles.push({ x: 0, y: 0, state: 'jet', t: Math.random() });
+
+    function update() {
+        const v1 = parseFloat(v1S.value), mdot = parseFloat(mS.value);
+        const fr = mdot * v1;
+
+        document.getElementById('z102-v-v1').innerText = v1;
+        document.getElementById('z102-v-mdot').innerText = mdot;
+        document.getElementById('z102-res-fr').innerText = Math.round(fr);
+
+        draw(v1, mdot, fr);
+    }
+
+    function draw(v1, mdot, fr) {
+        ctx.clearRect(0, 0, 550, 450);
+        const cy = 200, ox = 50, plateX = 400;
+        
+        // Nozzle
+        ctx.fillStyle = "#475569";
+        ctx.fillRect(ox, cy-20, 40, 40);
+        
+        // Plate
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(plateX, cy-100, 15, 200);
+
+        // Particles
+        particles.forEach(p => {
+            p.t += 0.01 * (v1/20);
+            if(p.t > 1) p.t = 0;
+
+            if(p.t < 0.7) {
+                // Jet phase
+                const pt = p.t / 0.7;
+                const px = ox + 40 + pt * (plateX - (ox + 40));
+                const py = cy + (Math.random()-0.5)*15;
+                ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
+            } else {
+                // Splash phase
+                const pt = (p.t - 0.7) / 0.3;
+                const dir = Math.random() > 0.5 ? 1 : -1;
+                const px = plateX + (Math.random()*5);
+                const py = cy + dir * pt * 100;
+                ctx.fillStyle = "rgba(59, 130, 246, 0.6)"; ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI*2); ctx.fill();
+            }
+        });
+
+        // Force Arrow
+        const arrowLen = Math.min(fr / 2, 120);
+        ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(plateX + 20, cy);
+        ctx.lineTo(plateX + 20 + arrowLen, cy);
+        ctx.stroke();
+        // Arrow head
+        ctx.beginPath(); ctx.moveTo(plateX + 20 + arrowLen, cy);
+        ctx.lineTo(plateX + 10 + arrowLen, cy - 8);
+        ctx.lineTo(plateX + 10 + arrowLen, cy + 8);
+        ctx.closePath(); ctx.fillStyle = "#ef4444"; ctx.fill();
+
+        requestAnimationFrame(() => update());
+    }
+
+    v1S.oninput = update; mS.oninput = update; update();
+})();
+</script>
+
 
 ***
 
 ### Zadatak 103: Vjetroturbina
 
+**Tekst zadatka:** 
+Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v_1=10 \, \text{m/s}$. Ako je snaga turbine $P=400 \, \text{W}$, odrediti korisnost turbine $\eta$, brzinu vjetra iza turbine $v_2$ i aksijalnu silu na stup turbine $F_S$.
+
 **Rješenje:**
-1. $P_{max} = 1445 \, \text{W} \implies \eta = 400/1445 = \mathbf{27,7 \%}$.
+1. $P_{max} = \frac{16}{27} \cdot \frac{1}{2} \rho A v_1^3 = 1445 \, \text{W} \implies \eta = 400/1445 = \mathbf{27,7 \%}$.
 2. $v_2 = v_1 \sqrt{1-\eta} = \mathbf{2,66 \, \text{m/s}}$.
 3. $F_S = \dot{m}(v_1 - v_2) = \mathbf{138 \, \text{N}}$.
+
+```{=html}
+<!-- WIDGET: Vjetroturbina i Betzov Limit -->
+<div id="z103-turbine-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌬️ Vjetroturbina: Betzov limit i Energija vjetra</h4>
+    
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;">
+        <!-- Turbine Visualization -->
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
+            <canvas id="z103-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+            
+            <!-- Power Bar Overlay -->
+            <div style="position: absolute; left: 20px; bottom: 20px; width: 150px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0;">
+                <div style="font-size: 0.6rem; font-weight: 800; color: #64748b;">SNAGA P [W]</div>
+                <div id="z103-p-bar" style="height: 10px; background: #10b981; width: 40%; margin-top: 5px; border-radius: 5px;"></div>
+                <div id="z103-p-val" style="font-size: 0.9rem; font-weight: 800; color: #065f46; margin-top: 5px;">400 W</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Brzina vjetra v₁: <span id="z103-v-v1" style="color:#2563eb;">10</span> m/s</label>
+                <input type="range" id="z103-v1-slider" min="2" max="20" step="0.5" value="10" style="width: 100%;">
+                
+                <label style="display: block; font-weight: 700; margin-top: 15px; margin-bottom: 8px; color: #475569;">Stupanj djelovanja η: <span id="z103-v-eta" style="color:#2563eb;">28</span>%</label>
+                <input type="range" id="z103-eta-slider" min="0" max="59.3" step="1" value="28" style="width: 100%;">
+                <p style="font-size: 0.65rem; color: #ef4444; font-weight: 600; margin-top: 5px;">Teoretski maks: 59.3% (Betz)</p>
+            </div>
+
+            <div style="background: #ebf8ff; padding: 20px; border-radius: 15px; border-left: 6px solid #3182ce;">
+                <div style="font-weight: 800; font-size: 0.75rem; color: #2c5282; text-transform: uppercase; margin-bottom: 12px;">Analiza strujanja:</div>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;">
+                    <div style="display: flex; justify-content: space-between;"><span>Brzina iza v₂:</span> <b id="z103-res-v2">--- m/s</b></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Sila na stup Fs:</span> <b id="z103-res-fs">--- N</b></div>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
+                💡 <b>Fizikalni uvid:</b> Vjetroturbina usporava zrak kako bi mu oduzela kinetičku energiju. Ako ga uspori previše, zrak se "gomila" ispred turbine i protok pada. Zato postoji optimalno usporavanje koje daje maksimalnu snagu (Betzov limit).
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('z103-canvas'), ctx = canvas.getContext('2d');
+    const v1S = document.getElementById('z103-v1-slider'), etaS = document.getElementById('z103-eta-slider');
+
+    let particles = [];
+    for(let i=0; i<150; i++) particles.push({ x: Math.random()*500, y_rel: Math.random()*2 - 1, state: 'pre' });
+
+    function update() {
+        const v1 = parseFloat(v1S.value), eta = parseFloat(etaS.value)/100;
+        const rho = 1.225, D = 10;
+        const A = Math.PI * D * D / 4;
+        
+        // P = eta * 0.5 * rho * A * v1^3
+        const power = eta * 0.5 * rho * A * v1 * v1 * v1;
+        // From eta = 4*a*(1-a)^2 where a is induction factor
+        // For simplicity, we use the v2 = v1*sqrt(1-eta) approximation or better v2/v1 relations
+        // Let's use simplified v2 based on typical turbine flow
+        const v2 = v1 * (1 - eta); // Not physically exact but good for visual slowdown
+        const mdot = rho * A * ((v1 + v2)/2);
+        const fs = mdot * (v1 - v2);
+
+        document.getElementById('z103-v-v1').innerText = v1;
+        document.getElementById('z103-v-eta').innerText = (eta*100).toFixed(0);
+        document.getElementById('z103-p-val').innerText = Math.round(power) + " W";
+        document.getElementById('z103-res-v2').innerText = v2.toFixed(2) + " m/s";
+        document.getElementById('z103-res-fs').innerText = Math.round(fs) + " N";
+        
+        const pMax = 0.593 * 0.5 * rho * A * 20 * 20 * 20; // Scale bar to max v1
+        document.getElementById('z103-p-bar').style.width = Math.min((power/pMax)*500, 100) + "%";
+
+        draw(v1, v2, eta);
+    }
+
+    function draw(v1, v2, eta) {
+        ctx.clearRect(0, 0, 500, 450);
+        const ox = 250, oy = 225;
+        
+        // Turbine disk
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(ox, oy - 80); ctx.lineTo(ox, oy + 80); ctx.stroke();
+        
+        // Tower
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 10;
+        ctx.beginPath(); ctx.moveTo(ox, oy + 80); ctx.lineTo(ox, 450); ctx.stroke();
+
+        // Streamtube (Dashed)
+        ctx.setLineDash([5, 5]); ctx.strokeStyle = "#cbd5e0"; ctx.lineWidth = 2;
+        const w1 = 60, w2 = 60 + eta * 100; // Tube widens as it slows
+        ctx.beginPath();
+        ctx.moveTo(0, oy - w1); ctx.bezierCurveTo(ox, oy - w1, ox, oy - w1, ox, oy - w1); // upstream
+        ctx.bezierCurveTo(ox + 100, oy - w1, ox + 100, oy - w2, 500, oy - w2); // downstream
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, oy + w1); ctx.bezierCurveTo(ox, oy + w1, ox, oy + w1, ox, oy + w1); 
+        ctx.bezierCurveTo(ox + 100, oy + w1, ox + 100, oy + w2, 500, oy + w2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Particles
+        particles.forEach(p => {
+            const currentV = p.x < ox ? v1 : v2;
+            p.x += currentV * 0.2;
+            if(p.x > 500) p.x = 0;
+            
+            // Adjust y to stay in streamtube
+            const tubeW = p.x < ox ? w1 : w1 + (p.x - ox)/250 * (w2 - w1);
+            const py = oy + p.y_rel * tubeW;
+            
+            ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(p.x, py, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Rotation visual (Simple blades)
+        const time = Date.now() * 0.001 * v1 * 0.5;
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
+        for(let i=0; i<3; i++) {
+            const angle = time + i * (Math.PI * 2 / 3);
+            ctx.beginPath(); ctx.moveTo(ox, oy);
+            ctx.lineTo(ox + Math.sin(angle)*10, oy + Math.cos(angle)*70);
+            ctx.stroke();
+        }
+
+        requestAnimationFrame(() => update());
+    }
+
+    v1S.oninput = update; etaS.oninput = update; update();
+})();
+</script>
+

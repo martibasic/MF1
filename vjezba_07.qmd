@@ -30,9 +30,9 @@ Ključno je razumjeti:
         <p style="margin: 6px 0 0 0; opacity: 0.7; font-size: 0.95rem;">Zašto se horizontalne sile poništavaju kod uronjenih tijela?</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 0;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
         <!-- Controls Section -->
-        <div style="padding: 25px; background: #f8fafc; border-right: 1px solid #e2e8f0;">
+        <div style="padding: 25px; background: #f8fafc; border-top: 1px solid #e2e8f0; order: 2;">
             <div style="display: flex; flex-direction: column; gap: 24px;">
 
                 <div class="control-group">
@@ -62,7 +62,7 @@ Ključno je razumjeti:
         </div>
 
         <!-- Canvas Area -->
-        <div style="padding: 25px; background: white; display: flex; flex-direction: column; gap: 20px;">
+        <div style="padding: 25px; background: white; display: flex; flex-direction: column; gap: 20px; order: 1;">
             <div style="position: relative; width: 100%; height: 380px; background: #fdfdfd; border-radius: 20px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);">
                 <canvas id="canvas-sym-7" width="550" height="380" style="width: 100%; height: 100%;"></canvas>
                 
@@ -170,7 +170,7 @@ Cilindar polumjera $R$ i duljine $b$ postavljen je uz vertikalni zid tako da flu
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 320px; gap: 0;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
         <!-- Canvas Area -->
         <div style="background: #f8fafc; padding: 2rem; position: relative; min-height: 450px; display: flex; align-items: center; justify-content: center;">
             <canvas id="v7-t1-canvas" width="500" height="450" style="max-width: 100%; height: auto;"></canvas>
@@ -189,7 +189,10 @@ Cilindar polumjera $R$ i duljine $b$ postavljen je uz vertikalni zid tako da flu
         </div>
 
         <!-- Controls Area -->
-        <div style="background: #ffffff; padding: 1.5rem; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 1.25rem;">
+        <div style="background: #ffffff; padding: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 1.25rem;">
+            <div style="padding: 0.95rem 1rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
+                <strong>Fizikalni smisao:</strong> Horizontalna komponenta dolazi od vertikalne projekcije cilindra, a vertikalna od težine zamišljenog stupca tekućine iznad zakrivljene plohe. Zato rezultanta prolazi kroz središte cilindra.
+            </div>
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Dubina h [m]: <span id="v7-t1-h-val" style="color: #3b82f6;">2.0</span></label>
                 <input type="range" id="v7-t1-h-slider" min="0.5" max="4.0" step="0.1" value="2.0" style="width: 100%;">
@@ -401,6 +404,277 @@ Cilindar polumjera $R$ i duljine $b$ postavljen je uz vertikalni zid tako da flu
 </script>
 ```
 
+### Widget F: Moment ravnoteže zaklopke
+
+Ovaj widget pokazuje kada se zakrivljena zaklopka počinje otvarati: tlak vode stvara moment otvaranja, a težina zaklopke moment zatvaranja.
+
+```{=html}
+<div id="v7-widget-f-container" class="widget-container" style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 1050px; margin: 2rem auto; background: #ffffff; border-radius: 22px; overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #0f766e 0%, #0ea5e9 100%); padding: 1.5rem 1.75rem; color: white;">
+        <h3 style="margin: 0; color: white; border: none; background: none; padding: 0; font-size: 1.45rem; font-weight: 800;">Moment ravnoteže zaklopke</h3>
+        <p style="margin: 0.45rem 0 0 0; opacity: 0.92; font-size: 0.95rem;">Četvrt-kružna zaklopka s hvatištem u vrhu: usporedba momenata vode i težine.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
+        <div style="padding: 1.25rem; background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);">
+            <canvas id="v7-widget-f-canvas" width="680" height="520" style="width: 100%; height: auto; display: block;"></canvas>
+        </div>
+
+        <div style="padding: 1.25rem 1.25rem 1.5rem; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="padding: 0.95rem 1rem; border-radius: 14px; background: #ecfeff; border: 1px solid #a5f3fc; color: #155e75; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Fizikalni smisao:</strong> Zaklopka se otvara tek kad moment sile vode nadmaši moment vlastite težine. Promatraj gdje djeluju <code>F_H</code>, <code>F_V</code> i <code>G</code>, jer položaj hvatišta jednako je važan kao i sama veličina sile.
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Razina vode H: <span id="v7-wf-h-val" style="color: #0891b2;">2.5 m</span></label>
+                <input id="v7-wf-h" type="range" min="0" max="5" step="0.1" value="2.5" style="width: 100%;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Polumjer zaklopke R: <span id="v7-wf-r-val" style="color: #0891b2;">1.2 m</span></label>
+                <input id="v7-wf-r" type="range" min="0.5" max="2.0" step="0.1" value="1.2" style="width: 100%;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Širina b: <span id="v7-wf-b-val" style="color: #0891b2;">1.0 m</span></label>
+                <input id="v7-wf-b" type="range" min="0.5" max="3.0" step="0.1" value="1.0" style="width: 100%;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Masa zaklopke m: <span id="v7-wf-m-val" style="color: #0891b2;">220 kg/m</span></label>
+                <input id="v7-wf-m" type="range" min="50" max="600" step="10" value="220" style="width: 100%;">
+            </div>
+
+            <div style="padding: 1rem; border-radius: 14px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Horizontalna sila F_H</span><strong id="v7-wf-fh" style="color: #2563eb;">0.0 kN</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Vertikalna sila F_V</span><strong id="v7-wf-fv" style="color: #16a34a;">0.0 kN</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Težina G</span><strong id="v7-wf-g" style="color: #ef4444;">0.0 kN</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; padding-top: 0.45rem; border-top: 1px solid #dbeafe;"><span style="color: #0f172a; font-weight: 700;">Rezultanta F_R</span><strong id="v7-wf-fr" style="color: #0f766e;">0.0 kN</strong></div>
+            </div>
+
+            <div style="padding: 1rem; border-radius: 14px; background: #fff7ed; border: 1px solid #fed7aa;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #9a3412;">Moment vode</span><strong id="v7-wf-mw" style="color: #ea580c;">0.0 kNm</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #9a3412;">Moment težine</span><strong id="v7-wf-mg" style="color: #dc2626;">0.0 kNm</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; padding-top: 0.45rem; border-top: 1px solid #fdba74;"><span style="color: #7c2d12; font-weight: 700;">Kritična razina</span><strong id="v7-wf-hcrit" style="color: #c2410c;">0.0 m</strong></div>
+            </div>
+
+            <div id="v7-wf-status" style="padding: 0.85rem 1rem; border-radius: 14px; font-weight: 800; text-align: center; background: #dcfce7; color: #166534;">
+                Zaklopka je zatvorena
+            </div>
+
+            <div style="display: grid; gap: 0.5rem;">
+                <div style="font-size: 0.75rem; color: #475569; font-weight: 700;">Ravnoteža momenata</div>
+                <div style="height: 16px; border-radius: 999px; background: #e2e8f0; overflow: hidden; position: relative;">
+                    <div id="v7-wf-bar-water" style="height: 100%; width: 0%; background: linear-gradient(90deg, #38bdf8, #0284c7);"></div>
+                </div>
+                <div style="height: 16px; border-radius: 999px; background: #e2e8f0; overflow: hidden; position: relative;">
+                    <div id="v7-wf-bar-gravity" style="height: 100%; width: 0%; background: linear-gradient(90deg, #f87171, #dc2626);"></div>
+                </div>
+                <div style="font-size: 0.72rem; color: #64748b;">Plava traka: moment otvaranja vode. Crvena traka: moment zatvaranja težine.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const canvas = document.getElementById('v7-widget-f-canvas');
+        const ctx = canvas.getContext('2d');
+        const hS = document.getElementById('v7-wf-h');
+        const rS = document.getElementById('v7-wf-r');
+        const bS = document.getElementById('v7-wf-b');
+        const mS = document.getElementById('v7-wf-m');
+        const rho = 1000;
+        const g = 9.81;
+
+        function cpDepth(H, R) {
+            return H + 2 * R / 3;
+        }
+
+        function centroidX(H, R) {
+            const aRect = Math.max(H, 0) * R;
+            const aQuarter = Math.PI * R * R / 4;
+            const xRect = R / 2;
+            const xQuarter = 4 * R / (3 * Math.PI);
+            return (aRect * xRect + aQuarter * xQuarter) / Math.max(aRect + aQuarter, 1e-6);
+        }
+
+        function momentWater(H, R, b) {
+            const FH = rho * g * b * R * (H + R / 2);
+            const FV = rho * g * b * (Math.max(H, 0) * R + Math.PI * R * R / 4);
+            const zcp = cpDepth(H, R);
+            const xfv = centroidX(H, R);
+            return FH * zcp + FV * xfv;
+        }
+
+        function solveCriticalHeight(R, b, m) {
+            const mg = (m * g) * (0.62 * R);
+            let lo = 0;
+            let hi = 5;
+            for (let i = 0; i < 40; i++) {
+                const mid = (lo + hi) / 2;
+                if (momentWater(mid, R, b) > mg) hi = mid;
+                else lo = mid;
+            }
+            return (lo + hi) / 2;
+        }
+
+        function drawArrow(x1, y1, x2, y2, color, width, label) {
+            const head = 10;
+            const ang = Math.atan2(y2 - y1, x2 - x1);
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - head * Math.cos(ang - Math.PI / 6), y2 - head * Math.sin(ang - Math.PI / 6));
+            ctx.lineTo(x2 - head * Math.cos(ang + Math.PI / 6), y2 - head * Math.sin(ang + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+            if (label) {
+                ctx.font = 'bold 15px Inter';
+                ctx.fillText(label, x2 + 8, y2 - 6);
+            }
+        }
+
+        function update() {
+            const H = parseFloat(hS.value);
+            const R = parseFloat(rS.value);
+            const b = parseFloat(bS.value);
+            const m = parseFloat(mS.value);
+
+            const FH = rho * g * b * R * (H + R / 2);
+            const FV = rho * g * b * (Math.max(H, 0) * R + Math.PI * R * R / 4);
+            const FR = Math.sqrt(FH * FH + FV * FV);
+            const G = m * g;
+            const zcp = cpDepth(H, R);
+            const xfv = centroidX(H, R);
+            const xg = 0.62 * R;
+            const Mwater = FH * zcp + FV * xfv;
+            const Mgravity = G * xg;
+            const Hcrit = solveCriticalHeight(R, b, m);
+            const openRatio = Math.max(0, Math.min(1, (Mwater - Mgravity) / Math.max(Mgravity, 1)));
+
+            document.getElementById('v7-wf-h-val').textContent = H.toFixed(1) + ' m';
+            document.getElementById('v7-wf-r-val').textContent = R.toFixed(1) + ' m';
+            document.getElementById('v7-wf-b-val').textContent = b.toFixed(1) + ' m';
+            document.getElementById('v7-wf-m-val').textContent = m.toFixed(0) + ' kg/m';
+            document.getElementById('v7-wf-fh').textContent = (FH / 1000).toFixed(1) + ' kN';
+            document.getElementById('v7-wf-fv').textContent = (FV / 1000).toFixed(1) + ' kN';
+            document.getElementById('v7-wf-g').textContent = (G / 1000).toFixed(2) + ' kN';
+            document.getElementById('v7-wf-fr').textContent = (FR / 1000).toFixed(1) + ' kN';
+            document.getElementById('v7-wf-mw').textContent = (Mwater / 1000).toFixed(1) + ' kNm';
+            document.getElementById('v7-wf-mg').textContent = (Mgravity / 1000).toFixed(1) + ' kNm';
+            document.getElementById('v7-wf-hcrit').textContent = Hcrit.toFixed(2) + ' m';
+            document.getElementById('v7-wf-bar-water').style.width = Math.min(100, (Mwater / Math.max(Mgravity, Mwater, 1)) * 100).toFixed(1) + '%';
+            document.getElementById('v7-wf-bar-gravity').style.width = Math.min(100, (Mgravity / Math.max(Mgravity, Mwater, 1)) * 100).toFixed(1) + '%';
+
+            const status = document.getElementById('v7-wf-status');
+            if (Mwater > Mgravity) {
+                status.textContent = 'Zaklopka se otvara';
+                status.style.background = '#fee2e2';
+                status.style.color = '#b91c1c';
+            } else {
+                status.textContent = 'Zaklopka je zatvorena';
+                status.style.background = '#dcfce7';
+                status.style.color = '#166534';
+            }
+
+            drawScene(H, R, openRatio, FH, FV, G, zcp, xfv, xg);
+        }
+
+        function drawScene(H, R, openRatio, FH, FV, G, zcp, xfv, xg) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = 120;
+            const hingeX = 210;
+            const hingeY = 120;
+            const waterX = 100;
+            const floorY = hingeY + R * scale + 70;
+            const waterLevelY = hingeY - H * scale;
+            const openAngle = -openRatio * 0.32;
+
+            ctx.fillStyle = '#e0f2fe';
+            ctx.fillRect(0, waterLevelY, waterX + 160, floorY - waterLevelY);
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, waterLevelY);
+            ctx.lineTo(waterX + 160, waterLevelY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(0, floorY, canvas.width, canvas.height - floorY);
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(hingeX - 20, hingeY - 20, 22, R * scale + 95);
+
+            ctx.save();
+            ctx.translate(hingeX, hingeY);
+            ctx.rotate(openAngle);
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(0, R * scale, R * scale, -Math.PI / 2, 0);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(hingeX, hingeY, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.font = 'bold 15px Inter';
+            ctx.fillText('A', hingeX - 18, hingeY - 12);
+
+            const samples = 6;
+            for (let i = 0; i <= samples; i++) {
+                const t = i / samples;
+                const ang = -Math.PI / 2 + t * (Math.PI / 2) + openAngle;
+                const px = hingeX + Math.cos(ang) * R * scale;
+                const py = hingeY + R * scale + Math.sin(ang) * R * scale;
+                const nx = -Math.cos(ang);
+                const ny = -Math.sin(ang);
+                const depth = Math.max(0, (hingeY - py) / -scale + H);
+                const len = 10 + depth * 9;
+                drawArrow(px + nx * len, py + ny * len, px, py, '#38bdf8', 2);
+            }
+
+            const yFH = hingeY + zcp * scale;
+            drawArrow(hingeX - 130, yFH, hingeX - 20, yFH, '#2563eb', 4, 'F_H');
+
+            const xFV = hingeX + xfv * scale * Math.cos(openAngle);
+            const yFV = hingeY + (R * 0.85) * scale;
+            drawArrow(xFV, yFV - 110, xFV, yFV, '#16a34a', 4, 'F_V');
+
+            const xG = hingeX + xg * scale * Math.cos(openAngle);
+            const yG = hingeY + (R * 0.78) * scale;
+            drawArrow(xG, yG - 90, xG, yG, '#ef4444', 4, 'G');
+
+            const frScale = 0.0017;
+            const frEndX = hingeX - FH * frScale;
+            const frEndY = hingeY + R * scale + FV * frScale * 0.8;
+            drawArrow(hingeX + 20, hingeY + R * scale - 10, frEndX, frEndY, '#0f766e', 5, 'F_R');
+
+            ctx.setLineDash([6, 5]);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.beginPath();
+            ctx.moveTo(hingeX, hingeY);
+            ctx.lineTo(hingeX, floorY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#334155';
+            ctx.font = '13px Inter';
+            ctx.fillText('Linija hvatišta', hingeX + 10, hingeY + 28);
+            ctx.fillText('H', 26, waterLevelY - 8);
+            ctx.fillText('R', hingeX + 45, hingeY + R * scale / 2);
+        }
+
+        [hS, rS, bS, mS].forEach(el => el.addEventListener('input', update));
+        update();
+    })();
+    </script>
+</div>
+```
+
 ***
 
 
@@ -426,7 +700,7 @@ Zatvarač u obliku kružnog luka (sektora) polumjera $R$ i duljine $B$ nagnut je
         </button>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 320px; gap: 0;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
         <!-- Canvas Area -->
         <div style="background: #f8fafc; padding: 2rem; position: relative; min-height: 450px; display: flex; align-items: center; justify-content: center;">
             <canvas id="v7-t2-canvas" width="500" height="450" style="max-width: 100%; height: auto;"></canvas>
@@ -439,7 +713,10 @@ Zatvarač u obliku kružnog luka (sektora) polumjera $R$ i duljine $B$ nagnut je
         </div>
 
         <!-- Controls Area -->
-        <div style="background: #ffffff; padding: 1.5rem; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 1.1rem;">
+        <div style="background: #ffffff; padding: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 1.1rem;">
+            <div style="padding: 0.95rem 1rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
+                <strong>Fizikalni smisao:</strong> <code>F_H</code> ovisi o visini vertikalne projekcije luka, dok <code>F_V</code> dobivaš iz razlike volumena iznad zakrivljene plohe. Zato isti luk može imati sličnu projekciju, ali vrlo različit vertikalni doprinos.
+            </div>
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.4rem;">Dubina H [m]: <span id="v7-t2-h-val" style="color: #3b82f6;">3.5</span></label>
                 <input type="range" id="v7-t2-h-slider" min="1.0" max="7.0" step="0.1" value="3.5" style="width: 100%;">
@@ -655,7 +932,7 @@ Ovaj widget omogućuje slobodno definiranje potopljenog kružnog luka i analizu 
 <div id="v7-arc-explorer-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🎯 Explorer: Komponente na kružnom luku</h4>
 
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 25px;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 500px;">
             <canvas id="v7-arc-canvas" width="550" height="500" style="width: 100%; height: 100%;"></canvas>
 
@@ -668,6 +945,9 @@ Ovaj widget omogućuje slobodno definiranje potopljenog kružnog luka i analizu 
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="padding: 16px 18px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
+                <strong>Fizikalni smisao:</strong> Mijenjanjem početnog i završnog kuta mijenjaš i projekcije luka. Crvena projekcija vodi prema <code>F_H</code>, a plava zona iznad luka prema <code>F_V</code>.
+            </div>
             <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
                 <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Početni kut: <span id="v7-v-a1" style="color:#2563eb;">0</span>°</label>
                 <input type="range" id="v7-a1-slider" min="0" max="360" value="90" style="width: 100%;">
@@ -827,7 +1107,7 @@ Ovaj istraživač omogućuje precizno definiranje luka pomoću kutova $\alpha_1$
         <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">Analiza F<sub>H</sub> i F<sub>V</sub> za bilo koji segment kružnice.</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 0;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
         <div style="background: #f8fafc; padding: 1.5rem; position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center;">
             <canvas id="v7-widget-a-canvas" width="550" height="500" style="max-width: 100%; cursor: crosshair;"></canvas>
             
@@ -843,7 +1123,10 @@ Ovaj istraživač omogućuje precizno definiranje luka pomoću kutova $\alpha_1$
             </div>
         </div>
 
-        <div style="padding: 1.5rem; border-left: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.25rem;">
+        <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.25rem;">
+            <div style="padding: 0.95rem 1rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
+                <strong>Kako čitati widget:</strong> Vertikalna crvena projekcija daje ulaz za <code>F_H</code>, a vodeni volumen iznad luka daje <code>F_V</code>. Kad razvučeš luk, ne rastu nužno obje komponente istim tempom.
+            </div>
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Početni kut α₁: <span id="v7-wa-a1-val" style="color: #3b82f6;">0°</span></label>
                 <input type="range" id="v7-wa-a1-slider" min="0" max="360" value="45" style="width: 100%;">
@@ -1004,7 +1287,7 @@ Ovaj widget vizualizira kako tlak djeluje okomito na svaki dio zakrivljene plohe
         <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">Vizualizacija smjera i intenziteta tlaka po površini.</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 0;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
         <div style="background: #f8fafc; padding: 1.5rem; position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center;">
             <canvas id="v7-widget-b-canvas" width="550" height="500" style="max-width: 100%;"></canvas>
             <div id="v7-wb-overlay" style="position: absolute; top: 1rem; left: 1rem; background: rgba(255,255,255,0.8); padding: 0.5rem; border-radius: 8px; font-size: 0.75rem; border: 1px solid #e2e8f0;">
@@ -1012,7 +1295,7 @@ Ovaj widget vizualizira kako tlak djeluje okomito na svaki dio zakrivljene plohe
             </div>
         </div>
 
-        <div style="padding: 1.5rem; border-left: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.25rem;">
+        <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.25rem;">
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Vodotaj h [m]: <span id="v7-wb-h-val" style="color: #0284c7;">1.0</span></label>
                 <input type="range" id="v7-wb-h-slider" min="0" max="4" step="0.1" value="1.0" style="width: 100%;">
@@ -1134,6 +1417,9 @@ Ovaj widget pokazuje zašto je horizontalna sila ista za obje plohe, dok se vert
     </div>
 
     <div style="background: #f8fafc; padding: 2rem;">
+        <div style="margin-bottom: 1.5rem; padding: 0.95rem 1rem; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 14px; color: #9a3412; font-size: 0.82rem; line-height: 1.5;">
+            <strong>Fizikalni smisao:</strong> Ako su projekcije iste, horizontalna komponenta ostaje ista. Razlika nastaje zato što zakrivljena ploha nosi i dodatni vodeni volumen pa se pojavljuje vertikalna komponenta.
+        </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
             <div style="background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 1rem; position: relative;">
                 <div style="position: absolute; top: 10px; left: 10px; font-weight: 700; color: #f59e0b; font-size: 0.8rem;">RAVNA PLOHA</div>
@@ -1273,13 +1559,16 @@ Istražite kako se rezultantna sila F<sub>R</sub> rotira i mijenja dok se cilind
         <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">Dinamička promjena kuta rezultante F<sub>R</sub>.</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 0;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
         <div style="background: #f8fafc; padding: 1.5rem; position: relative; height: 450px;">
             <canvas id="v7-wd-canvas-main" width="400" height="400" style="position: absolute; left: 20px; top: 25px;"></canvas>
             <canvas id="v7-wd-canvas-polar" width="200" height="200" style="position: absolute; right: 20px; bottom: 20px; background: rgba(255,255,255,0.8); border-radius: 50%; border: 1px solid #e2e8f0;"></canvas>
         </div>
 
-        <div style="padding: 1.5rem; border-left: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.5rem;">
+        <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.5rem;">
+            <div style="padding: 0.95rem 1rem; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; color: #5b21b6; font-size: 0.82rem; line-height: 1.5;">
+                <strong>Kako čitati widget:</strong> Kako raste uronjeni kut, mijenja se odnos između <code>F_H</code> i <code>F_V</code>, pa se zato zakreće i rezultanta <code>F_R</code>. Polarni prikaz desno sažima samo smjer rezultante.
+            </div>
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Kut potapanja [°]: <span id="v7-wd-angle-val" style="color: #8b5cf6;">180°</span></label>
                 <input type="range" id="v7-wd-angle-slider" min="1" max="360" value="180" style="width: 100%;">
@@ -1391,12 +1680,15 @@ Shvatite uzgon ne samo kao Arhimedov zakon, već kao zbroj svih sila pritiska ko
         <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">Kako razlika tlaka stvara silu prema gore.</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 0;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
         <div style="background: #f8fafc; padding: 1.5rem; position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center;">
             <canvas id="v7-widget-e-canvas" width="550" height="500" style="max-width: 100%;"></canvas>
         </div>
 
-        <div style="padding: 1.5rem; border-left: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.25rem;">
+        <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.25rem;">
+            <div style="padding: 0.95rem 1rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; color: #065f46; font-size: 0.82rem; line-height: 1.5;">
+                <strong>Fizikalni smisao:</strong> Uzgon nije posebna sila koja se pojavljuje niotkuda, nego razlika između većeg tlaka na dnu i manjeg tlaka na vrhu tijela. Kad uključiš Arhimedov ekvivalent, ta se razlika sažme u jednu rezultantnu silu prema gore.
+            </div>
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Dubina potapanja: <span id="v7-we-h-val" style="color: #059669;">2.0 m</span></label>
                 <input type="range" id="v7-we-h-slider" min="1" max="4" step="0.1" value="2.0" style="width: 100%;">
@@ -1500,4 +1792,4 @@ Shvatite uzgon ne samo kao Arhimedov zakon, već kao zbroj svih sila pritiska ko
     update();
 })();
 </script>
-
+```

@@ -19,7 +19,7 @@ Gdje je:
         .widget-container {
             border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
         }
         .layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
         .chart-box { background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px; position: relative; }
@@ -58,45 +58,51 @@ Gdje je:
         
         const vSl = document.getElementById('v-slider-pelton');
         const wSl = document.getElementById('w-slider-pelton');
+        const state = { v: 50, w: 10, vRel: 40, m: 150, beta: 165 * Math.PI / 180 };
 
         function update() {
             const v = parseFloat(vSl.value);
             const w = parseFloat(wSl.value);
-            const beta = 165 * Math.PI / 180;
-            const m = 150; // kg/s
 
-            const P = m * (v - w) * w * (1 - Math.cos(beta)) / 1e6; // MW
+            const P = state.m * (v - w) * w * (1 - Math.cos(state.beta)) / 1e6; // MW
             const vRel = Math.max(0, v - w);
+            state.v = v;
+            state.w = w;
+            state.vRel = vRel;
 
             document.getElementById('v-val-pelton').textContent = v;
             document.getElementById('w-val-pelton').textContent = w;
             document.getElementById('p-out-pelton').textContent = P.toFixed(2);
             document.getElementById('vrel-out').textContent = vRel.toFixed(1);
 
-            drawViz(v, w, vRel);
-            drawChart(v, w, m, beta);
+            drawChart(v, w, state.m, state.beta);
         }
 
-        function drawViz(v, w, vRel) {
+        function drawViz() {
             ctxV.clearRect(0,0,350,300);
             const scale = 3;
             const cx = 100, cy = 150;
 
             // Lopatice (u pokretu)
-            const offset = (Date.now() * 0.001 * w * 10) % 100;
+            const offset = (Date.now() * 0.001 * state.w * 10) % 100;
             ctxV.strokeStyle = '#fff'; ctxV.lineWidth = 4;
-            ctxV.beginPath(); ctxV.arc(cx + w*scale + 20, cy, 30, -Math.PI/2, Math.PI/2); ctxV.stroke();
+            ctxV.beginPath(); ctxV.arc(cx + state.w*scale + 20, cy, 30, -Math.PI/2, Math.PI/2); ctxV.stroke();
 
             // Mlaz
             ctxV.fillStyle = '#3498db';
-            ctxV.fillRect(0, cy-5, cx + w*scale + 20, 10);
+            ctxV.fillRect(0, cy-5, cx + state.w*scale + 20, 10);
             
             // Povratni mlaz (ovisi o vRel)
             ctxV.fillStyle = 'rgba(52, 152, 219, 0.5)';
-            if(vRel > 1) {
-                ctxV.fillRect(cx + w*scale - vRel*scale, cy - 35, vRel*scale + 20, 8);
-                ctxV.fillRect(cx + w*scale - vRel*scale, cy + 27, vRel*scale + 20, 8);
+            if(state.vRel > 1) {
+                ctxV.fillRect(cx + state.w*scale - state.vRel*scale, cy - 35, state.vRel*scale + 20, 8);
+                ctxV.fillRect(cx + state.w*scale - state.vRel*scale, cy + 27, state.vRel*scale + 20, 8);
             }
+            ctxV.fillStyle = '#f8fafc';
+            ctxV.font = 'bold 11px Inter';
+            ctxV.fillText('w', cx + state.w*scale + 56, cy - 4);
+            ctxV.fillText('v', 20, cy - 14);
+            ctxV.fillText('v - w', Math.max(8, cx + state.w*scale - state.vRel*scale), cy - 46);
         }
 
         function drawChart(v, wCurrent, m, beta) {
@@ -132,8 +138,14 @@ Gdje je:
             ctxC.setLineDash([]);
         }
 
+        function animate() {
+            drawViz();
+            requestAnimationFrame(animate);
+        }
+
         vSl.oninput = wSl.oninput = update;
-        setInterval(update, 50); // For animation
+        update();
+        animate();
     })();
     </script>
 </div>
@@ -144,6 +156,9 @@ Gdje je:
 
 ### Zadatak 104: Potisak satelita
 
+**Tekst zadatka:** 
+Satelit u orbiti mase 5000 kg putuje konstantnom brzinom v0. Da bi skrenuo sa putanje, raketni pogon ispušta 100 kg ispušnih plinova uslijed izgaranja krutog goriva relativnom brzinom spram satelita 3000 m/s, suprotnog smjera od v0. Gorivo se ispušta konstantno u vremenu trajanja od 2 s. Potrebno je odrediti ubrzanje satelita tijekom dotičnog perioda, promjenu brzine satelita tijekom dotičnog perioda, te silu potiska na satelit.
+
 **Rješenje:**
 1. $F_p = \dot{m} v_i = 50 \cdot 3000 = \mathbf{150 \, \text{kN}}$.
 2. $a_s = F_p / m_s = \mathbf{30 \, \text{m/s}^2}$.
@@ -151,7 +166,7 @@ Gdje je:
 
 ```{=html}
 <!-- WIDGET: Raketna jednadžba -->
-<div id="v12-rocket-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #0f172a; color: white; box-shadow: 0 15px 45px rgba(0,0,0,0.3);">
+<div id="v12-rocket-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #0f172a; color: white; box-shadow: 0 15px 45px rgba(0,0,0,0.3);">
     <h4 style="text-align: center; color: #f1f5f9; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🚀 Dinamika propulzije: Tsiolkovsky</h4>
     
     <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
@@ -270,7 +285,7 @@ Gdje je:
 ### Zadatak 105: Sila na prirubnici slavine
 
 **Tekst zadatka:** 
-Odrediti silu kojom je potrebno držati prirubnicu slavine (ventil) kroz koju struji voda protoka $1,17 \, \text{L/s}$. Promjer cijevi je $20 \, \text{mm}$, a pretlak na ulazu $40 \, \text{kPa}$. Masa slavine s vodom je $4,5 \, \text{kg}$.
+Volumenski protok vode iznosi 0,07 m3/min kroz djelomično zatvoreni ventil. Unutarnji promjer cijevi na mjestu prirubnice iznosi 20 mm, pri čemu pretlak na dotičnom mjestu iznosi 89,6 kPa. Ukupna masa sustava i vode iznosi 5,8 kg. Potrebno je odrediti ukupnu silu na prirubnici.
 
 **Rješenje:**
 1. $v_1 = v_2 = \frac{0,00117}{\pi \cdot 0,01^2} = \mathbf{3,724 \, \text{m/s}}$.
@@ -299,7 +314,7 @@ Odrediti silu kojom je potrebno držati prirubnicu slavine (ventil) kroz koju st
 
         <div style="display: flex; flex-direction: column; gap: 20px;">
             <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Protok V̇: <span id="z105-v-vdot" style="color:#2563eb;">1.17</span> L/s</label>
+                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Protok Q: <span id="z105-v-vdot" style="color:#2563eb;">1.17</span> L/s</label>
                 <input type="range" id="z105-vdot-slider" min="0.5" max="5" step="0.1" value="1.17" style="width: 100%;">
                 
                 <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Pretlak pm: <span id="z105-v-pm" style="color:#2563eb;">40</span> kPa</label>
@@ -407,12 +422,14 @@ Odrediti silu kojom je potrebno držati prirubnicu slavine (ventil) kroz koju st
 })();
 </script>
 
+```
+
 ***
 
 ### Zadatak 106: Konzolni cjevovod - Moment savijanja
 
 **Tekst zadatka:** 
-L-oblikovana cijev učvršćena je u točki A. Vertikalni dio je visine $H=2 \, \text{m}$, a horizontalni duljine $L=1,5 \, \text{m}$. Kroz cijev struji voda brzinom $v=5 \, \text{m/s}$ (promjer $100 \, \text{mm}$). Odrediti moment savijanja u osloncu A ako je masa cijevi s vodom $15 \, \text{kg/m}$.
+Podzemnim cjevovodom crpi se voda na određenu visinu, pri čemu unutarnji promjer cjevovoda iznosi 100 mm. Dimenzije cjevovoda prikazane su na slici. Voda se ispušta u okolinu u kojoj vlada atmosferski tlak. Brzina istrujavanja iznosi 3 m/s, masa horizontalnog dijela cjevovoda napunjenog vodom iznosi 12 kg/m. Cijev je konzolno pričvršćena za tlo. Potrebno je odrediti: a) moment savijanja u točki A, b) potrebnu duljinu horizontalnog dijela cjevovoda da bi moment u točki A bio jednak nuli.
 
 **Rješenje:**
 1. $\dot{m} = \rho A v = 1000 \cdot 0,00785 \cdot 5 = \mathbf{39,25 \, \text{kg/s}}$.
@@ -468,8 +485,9 @@ L-oblikovana cijev učvršćena je u točki A. Vertikalni dio je visine $H=2 \, 
 
     let particles = [];
     for(let i=0; i<100; i++) particles.push({ t: Math.random() });
+    const state = { L: 1.5, H: 2.0, v: 5 };
 
-    function update() {
+    function recalculate() {
         const L = parseFloat(lS.value), v = parseFloat(vS.value);
         const H = 2.0, rho = 1000, d = 0.1, m_lin = 15, g = 9.81;
         
@@ -481,50 +499,48 @@ L-oblikovana cijev učvršćena je u točki A. Vertikalni dio je visine $H=2 \, 
         const m_grav = gl * (L / 2);
         const ma = m_imp + m_grav;
 
+        state.L = L;
+        state.H = H;
+        state.v = v;
+
         document.getElementById('z106-v-L').innerText = L.toFixed(1);
         document.getElementById('z106-v-v').innerText = v.toFixed(1);
         document.getElementById('z106-ma-val').innerText = Math.round(ma) + " Nm";
-
-        draw(L, H, v);
     }
 
-    function draw(L, H, v) {
+    function draw() {
         ctx.clearRect(0, 0, 550, 450);
         const ox = 150, oy = 400, scale = 80;
         
-        // Wall/Support
         ctx.fillStyle = "#cbd5e0"; ctx.fillRect(ox - 20, oy, 40, 30);
         
-        // Pipe L-shape
         ctx.strokeStyle = "#475569"; ctx.lineWidth = 15; ctx.lineCap = "butt"; ctx.lineJoin = "round";
         ctx.beginPath();
         ctx.moveTo(ox, oy);
-        ctx.lineTo(ox, oy - H * scale);
-        ctx.lineTo(ox + L * scale, oy - H * scale);
+        ctx.lineTo(ox, oy - state.H * scale);
+        ctx.lineTo(ox + state.L * scale, oy - state.H * scale);
         ctx.stroke();
 
-        // Particles
         particles.forEach(p => {
-            p.t += 0.005 * v; if(p.t > 1) p.t = 0;
+            p.t += 0.005 * state.v; if(p.t > 1) p.t = 0;
             let px, py;
-            if(p.t < 0.5) { px = ox; py = oy - (p.t/0.5)*(H*scale); }
-            else { px = ox + ((p.t-0.5)/0.5)*(L*scale); py = oy - H*scale; }
+            if(p.t < 0.5) { px = ox; py = oy - (p.t/0.5)*(state.H*scale); }
+            else { px = ox + ((p.t-0.5)/0.5)*(state.L*scale); py = oy - state.H*scale; }
             ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
         });
 
-        // Moment Arrow in A
         ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.arc(ox, oy, 30, Math.PI, 1.5*Math.PI); ctx.stroke();
-        // Arrow head for moment
         ctx.fillStyle = "#38bdf8";
         ctx.beginPath(); ctx.moveTo(ox, oy - 30); ctx.lineTo(ox + 5, oy - 35); ctx.lineTo(ox + 5, oy - 25); ctx.fill();
 
-        // Flow vectors
         ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3;
-        drawArrow(ctx, ox + L*scale, oy - H*scale, ox + L*scale + 50, oy - H*scale); // Exit momentum
-        ctx.fillStyle = "#ef4444"; ctx.font = "bold 10px Inter"; ctx.fillText("ṁv", ox + L*scale + 10, oy - H*scale - 10);
-
-        requestAnimationFrame(() => update());
+        drawArrow(ctx, ox + state.L*scale, oy - state.H*scale, ox + state.L*scale + 50, oy - state.H*scale);
+        ctx.fillStyle = "#ef4444"; ctx.font = "bold 10px Inter"; ctx.fillText("momentum", ox + state.L*scale - 5, oy - state.H*scale - 10);
+        ctx.fillStyle = "#475569"; ctx.font = "bold 11px Inter";
+        ctx.fillText("A", ox - 16, oy + 22);
+        ctx.fillText("L", ox + state.L*scale/2, oy - state.H*scale - 18);
+        ctx.fillText("H", ox - 24, oy - state.H*scale/2);
     }
 
     function drawArrow(ctx, x1, y1, x2, y2) {
@@ -536,14 +552,24 @@ L-oblikovana cijev učvršćena je u točki A. Vertikalni dio je visine $H=2 \, 
         ctx.fill();
     }
 
-    lS.oninput = update; vS.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    lS.oninput = recalculate; vS.oninput = recalculate; recalculate(); animate();
 })();
 </script>
 
 
+```
+
 ***
 
 ### Zadatak 107: Snaga rotirajuće prskalice
+
+**Tekst zadatka:** 
+Prskalica za vodu prenamijenjena je u turbinu za generiranje električne energije postavljanjem rotirajuće glavčine na vratilo generatora, na način prikazan na slici. Volumenski protok vode na ulazu u prskalicu iznosi 20 dm$^3$/s, pri čemu istrujava iz prskalice u tangencijalnom smjeru. Broj okretaja prskalice iznosi 300 o/min u horizontalnoj ravnini. Promjer svakog mlaza iznosi 1 cm, pri čemu je normalna udaljenost između osi rotacije i središta sapnica 0,6 m. Potrebno je odrediti snagu prskalice.
 
 **Rješenje:**
 1. $v_{rel} = 63,66 \, \text{m/s}, v_{oboda} = 18,85 \, \text{m/s} \implies v_{aps} = 44,81 \, \text{m/s}$.
@@ -555,7 +581,7 @@ L-oblikovana cijev učvršćena je u točki A. Vertikalni dio je visine $H=2 \, 
 ### Zadatak 108: Komercijalne vjetroturbine
 
 **Tekst zadatka:** 
-Vjetroturbina promjera $90 \, \text{m}$ generira snagu pri brzini vjetra $25 \, \text{km/h}$ uz učinkovitost $32\%$. Odrediti snagu i silu na stup.
+Komercijalne vjetroturbine promjera lopatica 100 m generiraju električnu snagu preko 3MW u režimu maksimalne učinkovitosti. Za vjetroturbinu promjera lopatica 90 m, pri čemu brzina vjetra iznosi 25 km/h, a učinkovitost iznosi 32%, potrebno je odrediti generiranu snagu i horizontalnu komponentu sile na stup vjetroturbine. Prilikom proračuna zrak je idealan fluid, gustoće 1,25 kg/m3.
 
 **Rješenje:**
 1. $v_1 = 6,94 \, \text{m/s}, \dot{m} = 55223 \, \text{kg/s}$.
@@ -566,6 +592,9 @@ Vjetroturbina promjera $90 \, \text{m}$ generira snagu pri brzini vjetra $25 \, 
 
 ### Zadatak 109: Snaga helikoptera
 
+**Tekst zadatka:** 
+Rasterećeni helikopter mase 10 t lebdi iznad razine mora za vrijeme ukrcaja. Za vrijeme rasterećenog lebdjenja, elise se rotiraju brzinom 400 o/min. Horizontalne lopatice iznad helikoptera uzrokuju gibanje zračne mase promjera 15m u smjeru slobodne površine mora srednjom brzinom koja je proporcionalna broju okretaja u minuti. Helikopter se opterećuje teretom mase 15t, nakon čega helikopter polagano uzdiže teret. Potrebno je odrediti volumenski protok zraka u smjeru slobodne površine mora prilikom rasterećenog lebdjenja i potrebnu snagu. Potrebno je odrediti potrebnu snagu za opterećeno lebdjenje i pripadajući broj okretaja lopatica. Gustoća zraka iznosi 1,18 kg/m3.
+
 **Rješenje:**
 1. Prazan: $v = 21,7 \, \text{m/s} \implies P = \mathbf{1064 \, \text{kW}}$.
 2. S teretom: $v = 34,3 \, \text{m/s} \implies P = \mathbf{4205 \, \text{kW}}$.
@@ -575,7 +604,7 @@ Vjetroturbina promjera $90 \, \text{m}$ generira snagu pri brzini vjetra $25 \, 
 ### Zadatak 110: Brana s razlikom razina - Sila na ustavu
 
 **Tekst zadatka:** 
-Odrediti horizontalnu silu $F$ kojom voda djeluje na vertikalnu ustavu (branu) širine $b=2 \, \text{m}$. Dubina ispred ustave je $h_1=3 \, \text{m}$, a iza ustave $h_2=0,5 \, \text{m}$. Pretpostaviti idealno strujanje.
+Maseni protok vode regulira se pomoću brane, podizanjem ili spuštanjem vertikalne ploče. Uslijed razlike visine stupaca vode dolazi do pojave sile na branu, pri čemu srednja brzina strujanja na strani više razine vode iznosi v1, dok na strani niže razine iznosi v2. Ukoliko je fluid idealan, pri čemu je strujanje stacionarno, potrebno je odrediti izraz za određivanje v1 i v2, te iznos sile koja djeluje na branu po jedinici duljine b (dimenzija okomita na sliku).
 
 **Rješenje:**
 1. Bernoulli (1-2) + Kontinuitet: $v_1 h_1 = v_2 h_2$.
@@ -629,13 +658,18 @@ Odrediti horizontalnu silu $F$ kojom voda djeluje na vertikalnu ustavu (branu) �
 
     let particles = [];
     for(let i=0; i<150; i++) particles.push({ x: Math.random()*550, y_rel: Math.random() });
+    const state = { h1: 3, h2: 0.5, v1: 0, v2: 0 };
 
-    function update() {
+    function recalculate() {
         const h1 = parseFloat(h1S.value), h2 = parseFloat(h2S.value);
         const rho = 1000, g = 9.81, b = 2.0;
 
         const v1 = Math.sqrt( (2 * g * (h1 - h2)) / (Math.pow(h1/h2, 2) - 1) );
         const v2 = v1 * (h1 / h2);
+        state.h1 = h1;
+        state.h2 = h2;
+        state.v1 = v1;
+        state.v2 = v2;
 
         const f_hydro = 0.5 * rho * g * b * (h1*h1 - h2*h2) / 1000; // kN
         const f_dyn = rho * b * (h1 * v1 * v1 - h2 * v2 * v2) / 1000; // kN
@@ -646,38 +680,38 @@ Odrediti horizontalnu silu $F$ kojom voda djeluje na vertikalnu ustavu (branu) �
         document.getElementById('z110-res-ph').innerText = f_hydro.toFixed(1) + " kN";
         document.getElementById('z110-res-pi').innerText = f_dyn.toFixed(1) + " kN";
         document.getElementById('z110-force-val').innerText = f_total.toFixed(1) + " kN";
-
-        draw(h1, h2, v1, v2);
     }
 
-    function draw(h1, h2, v1, v2) {
+    function draw() {
         ctx.clearRect(0, 0, 550, 450);
         const scale = 70, ox = 275, oy = 400;
 
         ctx.fillStyle = "rgba(59, 130, 246, 0.4)";
-        ctx.fillRect(0, oy - h1*scale, ox, h1*scale);
-        ctx.fillRect(ox, oy - h2*scale, 550-ox, h2*scale);
+        ctx.fillRect(0, oy - state.h1*scale, ox, state.h1*scale);
+        ctx.fillRect(ox, oy - state.h2*scale, 550-ox, state.h2*scale);
 
         ctx.fillStyle = "#1e293b";
-        ctx.fillRect(ox - 10, 0, 20, oy - h2*scale - 10);
+        ctx.fillRect(ox - 10, 0, 20, oy - state.h2*scale - 10);
 
         ctx.strokeStyle = "rgba(30, 64, 175, 0.5)"; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(ox-10, oy); ctx.lineTo(ox-10-h1*20, oy); ctx.lineTo(ox-10, oy-h1*scale); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(ox+10, oy); ctx.lineTo(ox+10+h2*20, oy); ctx.lineTo(ox+10, oy-h2*scale); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(ox-10, oy); ctx.lineTo(ox-10-state.h1*20, oy); ctx.lineTo(ox-10, oy-state.h1*scale); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(ox+10, oy); ctx.lineTo(ox+10+state.h2*20, oy); ctx.lineTo(ox+10, oy-state.h2*scale); ctx.fill();
 
         particles.forEach(p => {
-            const currentV = p.x < ox ? v1 : v2;
+            const currentV = p.x < ox ? state.v1 : state.v2;
             p.x += currentV * 2; if(p.x > 550) p.x = 0;
             let py;
-            if(p.x < ox) py = oy - p.y_rel * h1 * scale;
-            else py = oy - p.y_rel * h2 * scale;
+            if(p.x < ox) py = oy - p.y_rel * state.h1 * scale;
+            else py = oy - p.y_rel * state.h2 * scale;
             ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(p.x, py, 2, 0, Math.PI*2); ctx.fill();
         });
 
         ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 4;
-        drawArrow(ctx, ox - 100, oy - h1*scale/2, ox - 20, oy - h1*scale/2);
-
-        requestAnimationFrame(() => update());
+        drawArrow(ctx, ox - 100, oy - state.h1*scale/2, ox - 20, oy - state.h1*scale/2);
+        ctx.fillStyle = "#475569"; ctx.font = "bold 11px Inter";
+        ctx.fillText("h1", 28, oy - state.h1*scale + 16);
+        ctx.fillText("h2", ox + 26, oy - state.h2*scale + 16);
+        ctx.fillText("ustava", ox - 22, 20);
     }
 
     function drawArrow(ctx, x1, y1, x2, y2) {
@@ -689,18 +723,24 @@ Odrediti horizontalnu silu $F$ kojom voda djeluje na vertikalnu ustavu (branu) �
         ctx.fill();
     }
 
-    h1S.oninput = update; h2S.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    h1S.oninput = recalculate; h2S.oninput = recalculate; recalculate(); animate();
 })();
 </script>
 
+
+```
 
 ***
 
 ### Zadatak 111: Peltonova turbina
 
 **Tekst zadatka:** 
-...
-Dokazati izraz za snagu Peltonove turbine: $P = \rho \dot{V} (v-w) w (1 - \cos\beta)$. Odrediti snagu za $v=50 \, \text{m/s}, \dot{V}=150 \, \text{L/s}, r=2 \, \text{m}, n=150 \, \text{o/min}, \beta=160^\circ$.
+Potrebno je dokazati da je snaga proizvedena pomoću Pelton turbine polumjera r, koja rotira konstantnom kutnom brzinom ω iznosi: $P = \rho \cdot \omega \cdot r \cdot \dot{V} \cdot (v - \omega \cdot r)(1 - \cos\beta)$. Pri čemu je ρ gustoća tekućine, a $\dot{V}$ volumenski protok. Potrebno je odrediti snagu ukoliko je zadano: $\rho = 1000[\frac{kg}{m^3}]$, $r = 2[m]$, $\dot{V} = 10[\frac{m^3}{s}]$, $n = 150[\frac{o}{min}] = 2,5[\frac{o}{s}]$, $\beta = 160^\circ$, $v = 50[\frac{m}{s}]$.
 
 **Rješenje:**
 1. $w = r \omega = 31,42 \, \text{m/s}$.
@@ -710,13 +750,16 @@ Dokazati izraz za snagu Peltonove turbine: $P = \rho \dot{V} (v-w) w (1 - \cos\b
 
 ### Zadatak 112: Flyboard dinamika
 
+**Tekst zadatka:** 
+Osoba na Flyboard-u penje se na visinu 10 metara. Četiri sapnice promjera 5cm koje su pričvršćene za noge omogućuju podizanje osobe i sustava Flyboard ukupne mase 150kg. Odrediti minimalnu brzinu mlaza kako bi se postigla visina 10m. Ukoliko je brzina mlaza 15m/s odrediti potrebno vrijeme za postizanje zadane visine te brzinu podizanja. Odrediti koliko će se sustav podignuti iznad potrebne visine ukoliko je dotok vode prekinut točno kada se dosegne visina od 10m, te za koliko vremena će se osoba zadržati iznad visine od 10m.
+
 **Rješenje:**
 1. Za lebdenje ($150 \, \text{kg}$): $v_{min} = \mathbf{13,69 \, \text{m/s}}$.
 2. Pri $15 \, \text{m/s}$: $a = \mathbf{1,97 \, \text{m/s}^2}$.
 
 ```{=html}
 <!-- Flyboard / Rocket Widget -->
-<div id="flyboard-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #f0f7ff;">
+<div id="flyboard-widget" style="max-width: 800px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #f0f7ff;">
     <h3 style="text-align: center;">Dinamika potiska (Flyboard)</h3>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
         <canvas id="fly-canvas" width="300" height="400" style="background: white; border-radius: 8px; flex: 1;"></canvas>

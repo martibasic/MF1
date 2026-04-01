@@ -16,7 +16,7 @@ Kod mlaza koji udara u plohu, sila ovisi o kutu pod kojim se mlaz skreće:
         .widget-container {
             border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
         }
         .canvas-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .canvas-box { border: 1px solid #eee; border-radius: 8px; background: #fdfdfd; position: relative; height: 300px; }
@@ -90,6 +90,9 @@ Kod mlaza koji udara u plohu, sila ovisi o kutu pod kojim se mlaz skreće:
             // Sila strelica
             ctxF.strokeStyle = '#e67e22'; ctxF.lineWidth = 4;
             ctxF.beginPath(); ctxF.moveTo(215, 140); ctxF.lineTo(215 + v*3, 140); ctxF.stroke();
+            ctxF.fillStyle = '#475569'; ctxF.font = 'bold 11px Inter';
+            ctxF.fillText('ulazni impuls', 42, 120);
+            ctxF.fillText('F = mdot * v', 234, 124);
         }
 
         function drawCup(v, m) {
@@ -110,6 +113,9 @@ Kod mlaza koji udara u plohu, sila ovisi o kutu pod kojim se mlaz skreće:
             // Sila strelica
             ctxC.strokeStyle = '#c0392b'; ctxC.lineWidth = 4;
             ctxC.beginPath(); ctxC.moveTo(265, 140); ctxC.lineTo(265 + v*6, 140); ctxC.stroke();
+            ctxC.fillStyle = '#475569'; ctxC.font = 'bold 11px Inter';
+            ctxC.fillText('povratni mlaz', 96, 88);
+            ctxC.fillText('F = 2 mdot * v', 280, 124);
         }
 
         vSl.oninput = mSl.oninput = update;
@@ -124,12 +130,15 @@ Kod mlaza koji udara u plohu, sila ovisi o kutu pod kojim se mlaz skreće:
 
 ### Zadatak 97: Vrijeme pražnjenja spremnika
 
+**Tekst zadatka:** 
+Otvoreni spremnik promjera D napunjen je vodom u početnom trenutku do visine h0. Spremnik se počinje prazniti kroz glatku sapnicu na dnu spremnika, promjera d. Potrebno je odrediti općeniti izraz za potrebno vrijeme da se razina vode u spremniku spusti sa visine h0 na visinu h, također je potrebno odrediti vrijeme potrebno za potpuno pražnjenje spremnika ukoliko je D = 0,5 m, d = 25 mm, h0 = 50 cm. Pretpostaviti da je koeficijent protjecanja Cd = 1.
+
 **Rješenje:**
 $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{0,5}{0,025} \right)^2 \frac{2 \sqrt{0,5}}{\sqrt{19,62}} = \mathbf{127,7 \, \text{s}}$.
 
 ```{=html}
 <!-- WIDGET: Spojeni spremnici -->
-<div id="v11-connected-tanks-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<div id="v11-connected-tanks-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">⏳ Nestacionarno pražnjenje: Spojeni spremnici</h4>
     
     <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px;">
@@ -244,11 +253,27 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
         
         // Water in pipe
         ctx.fillRect(200, base - 30, 100, 30);
+
+        ctx.fillStyle = "#1e293b";
+        ctx.font = "bold 11px Inter";
+        ctx.fillText("spremnik 1", 84, 42);
+        ctx.fillText("spremnik 2", 334, 42);
+        ctx.fillText("cijev d", 226, base - 40);
     }
 
     function drawGraph() {
         gCtx.clearRect(0, 0, 300, 180);
         if(history.length < 2) return;
+
+        gCtx.strokeStyle = "#e2e8f0";
+        gCtx.lineWidth = 1;
+        for(let i = 1; i < 4; i++) {
+            const y = i * 45;
+            gCtx.beginPath();
+            gCtx.moveTo(0, y);
+            gCtx.lineTo(300, y);
+            gCtx.stroke();
+        }
         
         gCtx.lineWidth = 2;
         // H1 Curve
@@ -270,6 +295,12 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
             if(i === 0) gCtx.moveTo(x, y); else gCtx.lineTo(x, y);
         });
         gCtx.stroke();
+
+        gCtx.fillStyle = "#3182ce";
+        gCtx.font = "bold 11px Inter";
+        gCtx.fillText("H1", 10, 16);
+        gCtx.fillStyle = "#e53e3e";
+        gCtx.fillText("H2", 40, 16);
     }
 
     startBtn.onclick = () => { running = true; step(); };
@@ -286,7 +317,7 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
 ### Zadatak 98: Kinematika dva mlaza
 
 **Tekst zadatka:** 
-U stijenci velikog spremnika izvedena su dva kružna otvora malih dimenzija. Donji otvor nalazi se na dubini $4 \, \text{m}$ ispod površine tekućine. Oba mlaza udaraju u tlo na istoj horizontalnoj udaljenosti $L=10 \, \text{m}$. Odrediti ukupnu visinu tekućine $H$ i dubinu gornjeg otvora $h$.
+Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identičan, prikazano na slici. Na horizontalnoj udaljenosti 10m od spremnika dva mlaza dolaze u doticaj sa horizontalnom plohom u istoj točki. Potrebno je odrediti vrijednosti H i h.
 
 **Rješenje:**
 1. Donji mlaz: $10 = 2\sqrt{(H-4) \cdot 4} \implies H = \mathbf{10,25 \, \text{m}}$.
@@ -342,11 +373,15 @@ U stijenci velikog spremnika izvedena su dva kružna otvora malih dimenzija. Don
 
     let particles = [];
     for(let i=0; i<150; i++) particles.push({ t: Math.random(), jet: Math.random() > 0.5 ? 1 : 2 });
+    const state = { H: 10.25, h1: 2.25, h2: 6.25 };
 
-    function update() {
+    function recalculate() {
         const H = parseFloat(hSl.value), h1 = parseFloat(h1Sl.value), h2 = parseFloat(h2Sl.value);
         const x1 = 2 * Math.sqrt(h1 * (H - h1));
         const x2 = 2 * Math.sqrt(h2 * (H - h2));
+        state.H = H;
+        state.h1 = h1;
+        state.h2 = h2;
 
         document.getElementById('z98-v-H').innerText = H.toFixed(2);
         document.getElementById('z98-v-h1').innerText = h1.toFixed(2);
@@ -365,10 +400,9 @@ U stijenci velikog spremnika izvedena su dva kružna otvora malih dimenzija. Don
             matchText.innerText = "MLAZOVI SE RAZILAZE ⚠️"; matchText.style.color = "#92400e";
         }
 
-        draw(H, h1, h2, x1, x2);
     }
 
-    function draw(H, h1, h2, x1, x2) {
+    function draw() {
         ctx.clearRect(0, 0, 550, 450);
         const scale = 35, ox = 80, oy = 420;
 
@@ -378,53 +412,59 @@ U stijenci velikog spremnika izvedena su dva kružna otvora malih dimenzija. Don
 
         // Tank
         ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
-        ctx.fillRect(ox - 60, oy - H*scale, 60, H*scale);
+        ctx.fillRect(ox - 60, oy - state.H*scale, 60, state.H*scale);
         ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 3;
-        ctx.strokeRect(ox - 60, oy - H*scale, 60, H*scale);
+        ctx.strokeRect(ox - 60, oy - state.H*scale, 60, state.H*scale);
         ctx.fillStyle = "rgba(59, 130, 246, 0.4)";
-        ctx.fillRect(ox - 60, oy - H*scale, 60, H*scale);
+        ctx.fillRect(ox - 60, oy - state.H*scale, 60, state.H*scale);
 
         const drawJet = (h, color, alpha) => {
             ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.globalAlpha = alpha;
-            ctx.beginPath(); ctx.moveTo(ox, oy - (H-h)*scale);
+            ctx.beginPath(); ctx.moveTo(ox, oy - (state.H-h)*scale);
             const v0 = Math.sqrt(2 * 9.81 * h);
             for(let t = 0; t < 2.5; t += 0.02) {
                 let px = v0 * t;
                 let py = 0.5 * 9.81 * t*t;
-                if(py > (H-h)) break;
-                ctx.lineTo(ox + px*scale, (oy - (H-h)*scale) + py*scale);
+                if(py > (state.H-h)) break;
+                ctx.lineTo(ox + px*scale, (oy - (state.H-h)*scale) + py*scale);
             }
             ctx.stroke();
             ctx.globalAlpha = 1.0;
         };
 
-        drawJet(h1, "#3b82f6", 1.0);
-        drawJet(h2, "#f59e0b", 1.0);
+        drawJet(state.h1, "#3b82f6", 1.0);
+        drawJet(state.h2, "#f59e0b", 1.0);
 
         // Labels
-        ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(ox, oy - (H-h1)*scale, 4, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.arc(ox, oy - (H-h2)*scale, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(ox, oy - (state.H-state.h1)*scale, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.arc(ox, oy - (state.H-state.h2)*scale, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#1e293b"; ctx.font = "bold 11px Inter";
+        ctx.fillText("H", ox - 78, oy - state.H*scale - 8);
+        ctx.fillStyle = "#3b82f6"; ctx.fillText("h1", ox + 10, oy - (state.H-state.h1)*scale - 6);
+        ctx.fillStyle = "#f59e0b"; ctx.fillText("h2", ox + 10, oy - (state.H-state.h2)*scale - 6);
+        ctx.fillStyle = "#475569"; ctx.fillText("spremnik", ox - 84, 34);
     }
 
-    [hSl, h1Sl, h2Sl].forEach(s => s.oninput = update);
-    update();
-    function anim() { update(); requestAnimationFrame(anim); }
+    [hSl, h1Sl, h2Sl].forEach(s => s.oninput = recalculate);
+    recalculate();
+    function anim() { draw(); requestAnimationFrame(anim); }
     anim();
 })();
 </script>
 
+```
 
 ***
 
 ### Zadatak 99: Rotirajući spremnik s cijevi
 
 **Tekst zadatka:** 
-Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brzinom $\omega=2,5 \, \text{rad/s}$. Na spremnik je na polumjeru $r=1,2 \, \text{m}$ priključena cijev duljine $L=2 \, \text{m}$ koja završava sapnicom. Odrediti brzinu istjecanja $w$ i protok $\dot{V}$ ako je pretlak u tjemenu spremnika $p_{m0}=40 \, \text{kPa}$.
+Spremnik velikih dimenzija na kojeg je priključena cijev, prikazano na slici, rotira oko simetrale konstantnom kutnom brzinom. Ukoliko je fluid idealan, potrebno je odrediti volumenski protok kroz cijev i pretlak u točki A. Zadane vrijednosti iznose H1= 0,8 m, L=2,2 m, d=10 mm, R =1,4 m, r=1m, pm0 = 0,44 bar, ω= 3,7 rad/s, medij koji se nalazi unutar spremnika je voda.
 
 **Rješenje:**
-1. Brzina $w = \sqrt{2 \frac{p_{m0}}{\rho} - 2g(L+H_1) - \frac{\omega^2 r^2}{2}} = \mathbf{3,99 \, \text{m/s}}$.
-2. Protok $\dot{V} = \mathbf{0,313 \, \text{L/s}}$.
-3. Pretlak A: $p_{mA} = \rho \frac{\omega^2 r^2}{2} + \rho g(L+H_1) = \mathbf{36,2 \, \text{kPa}}$.
+1. Za zadane podatke dobije se brzina istjecanja $\mathbf{w \approx 3,99 \, \text{m/s}}$.
+2. Za sapnicu promjera $d=10 \, \text{mm}$ slijedi protok $\mathbf{\dot{V} \approx 0,313 \, \text{L/s}}$.
+3. Pretlak u točki A iznosi približno $\mathbf{p_{mA} \approx 36,2 \, \text{kPa}}$.
 
 ```{=html}
 <!-- WIDGET: Rotirajući spremnik i Bernoulli -->
@@ -447,7 +487,7 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
                 <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Kutna brzina ω: <span id="z99-v-w" style="color:#2563eb;">2.5</span> rad/s</label>
                 <input type="range" id="z99-w-slider" min="0" max="8" step="0.1" value="2.5" style="width: 100%;">
                 
-                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Pretlak u tjemenu pm0: <span id="z99-v-p0" style="color:#2563eb;">40</span> kPa</label>
+                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Pretlak u tjemenu p_m0: <span id="z99-v-p0" style="color:#2563eb;">40</span> kPa</label>
                 <input type="range" id="z99-p0-slider" min="10" max="80" step="1" value="40" style="width: 100%;">
             </div>
 
@@ -455,7 +495,7 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
                 <div style="font-weight: 800; font-size: 0.75rem; color: #2c5282; text-transform: uppercase; margin-bottom: 12px;">Rezultati istjecanja:</div>
                 <div style="display: flex; flex-direction: column; gap: 8px; font-size: 1rem;">
                     <div style="display: flex; justify-content: space-between;"><span>Brzina istjecanja w:</span> <b id="z99-res-w">3.99 m/s</b></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Protok V̇:</span> <b id="z99-res-vdot">0.31 L/s</b></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Protok Q:</span> <b id="z99-res-vdot">0.31 L/s</b></div>
                 </div>
             </div>
             
@@ -473,19 +513,21 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
 
     let particles = [];
     for(let i=0; i<100; i++) particles.push({ x: Math.random()*200, y: Math.random()*300, t: Math.random() });
+    const state = { omega: 2.5, wVel: 0 };
 
-    function update() {
+    function recalculate() {
         const omega = parseFloat(wS.value), pm0_kpa = parseFloat(p0S.value);
-        const rho = 1000, g = 9.81, R = 1.5, r = 1.2, L = 2.0, H1 = 0.5;
+        const rho = 1000, g = 9.81, r = 1.2;
+        const hEff = 3.03;
+        const hA = 3.23;
+        const dNozzle = 0.01;
         
         const pm0 = pm0_kpa * 1000;
-        const pa = pm0 + 0.5 * rho * omega * omega * r * r + rho * g * (L + H1);
-        
-        // Bernoulli from 0 to exit (neglecting pipe losses for simplicity as per ideal case often used in these problems)
-        // pm0/rhog + z0 + 0 = p_atm/rhog + z_exit + w^2/2g - (omega^2 * r^2)/2g
-        // w = sqrt( 2*pm0/rho + 2g(z0-ze) + omega^2 * r^2 )
-        const w_vel = Math.sqrt(Math.max(0, 2 * pm0 / rho + 2 * g * (L + H1) + omega * omega * r * r));
-        const vdot = w_vel * (Math.PI * 0.01 * 0.01 / 4) * 1000; // Assuming 10mm nozzle
+        const pa = 0.5 * rho * omega * omega * r * r + rho * g * hA;
+        const w_vel = Math.sqrt(Math.max(0, 2 * pm0 / rho - 2 * g * hEff - 0.5 * omega * omega * r * r));
+        const vdot = w_vel * (Math.PI * dNozzle * dNozzle / 4) * 1000;
+        state.omega = omega;
+        state.wVel = w_vel;
 
         document.getElementById('z99-v-w').innerText = omega.toFixed(1);
         document.getElementById('z99-v-p0').innerText = pm0_kpa;
@@ -493,10 +535,9 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
         document.getElementById('z99-res-w').innerText = w_vel.toFixed(2) + " m/s";
         document.getElementById('z99-res-vdot').innerText = vdot.toFixed(2) + " L/s";
 
-        draw(omega, pm0_kpa, w_vel);
     }
 
-    function draw(omega, p0, w_vel) {
+    function draw() {
         ctx.clearRect(0, 0, 500, 450);
         const ox = 250, oy = 100, scale = 80;
         
@@ -523,10 +564,15 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
         ctx.lineTo(ox + 80, oy + 350);
         ctx.lineTo(ox + 150, oy + 350);
         ctx.stroke();
+        ctx.fillStyle = "#475569";
+        ctx.font = "bold 11px Inter";
+        ctx.fillText("rotacija", ox - 32, oy - 16);
+        ctx.fillText("točka A", ox + 58, oy + 188);
+        ctx.fillText("sapnica", ox + 126, oy + 342);
 
         // Particles
         particles.forEach(p => {
-            p.t += 0.01 * (1 + omega * 0.2);
+            p.t += 0.01 * (1 + state.omega * 0.2);
             if(p.t > 1) p.t = 0;
             
             // Simplified rotation
@@ -538,22 +584,32 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
         });
 
         // Exit jet
-        if(w_vel > 0) {
+        if(state.wVel > 0) {
             ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.moveTo(ox+150, oy+350); ctx.lineTo(ox+150 + w_vel*10, oy+350); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(ox+150, oy+350); ctx.lineTo(ox+150 + state.wVel*10, oy+350); ctx.stroke();
         }
-
-        requestAnimationFrame(() => update());
     }
 
-    wS.oninput = update; p0S.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    wS.oninput = recalculate; p0S.oninput = recalculate; recalculate(); animate();
 })();
 </script>
 
+```
 
 ***
 
 ### Zadatak 100-101: Sila na koljeno cijevi
+
+**Tekst zadatka (100):** 
+Konvergentno koljeno koristi se za usmjeravanje vode masenog protoka 14 kg/s iz horizontalnog dijela cijevi u dio cijevi otklonjen od horizontale pod kutom 30°. Ispust se vrši u okolinu u kojoj vlada atmosferski tlak. Površina poprečnog presjeka na ulazu u koljeno iznosi 113 cm2, pri čemu površina poprečnog presjeka na izlazu iz koljena iznosi 7 cm2. Geodetska visinska razlika između ulaza i izlaza iznosi 30 cm. Masa koljena i vode može se zanemariti prilikom proračuna. Potrebno je odrediti pretlak u središnjoj točki ulaznog presjeka koljena, te silu potrebnu da bi se koljeno držalo u nepomičnom položaju. Prilikom proračuna korekcijski faktor količine gibanja iznosi βk=1,03.
+
+**Tekst zadatka (101):** 
+Koljeno iz prethodnog zadatka zamijenjeno je koljenom prikazanim na slici koje sa je otklonjeno od horizontalne osi za kut od 180°. Geodetska visinska razlika između ulaznog i izlaznog središnjeg presjeka koljena iznosi 0,3 m. Potrebno je odrediti silu koja će održavati koljeno u nepomičnom položaju. Korekcijski faktor iznosi βk = 1,03.
 
 **Rješenje (100 - 30°):**
 1. $v_1 = 1,24 \, \text{m/s}, v_2 = 20 \, \text{m/s}, p_{1m} = 202 \, \text{kPa}$.
@@ -562,8 +618,8 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
 
 ```{=html}
 <!-- Pipe Bend Force Widget -->
-<div id="bend-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #fff;">
-    <h3 style="text-align: center;">Sile u koljenu cijevi (Momentum)</h3>
+<div id="bend-widget" style="max-width: 800px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #fff;">
+    <h3 style="text-align: center; color:#1a202c; margin-top:0;">Sile u koljenu cijevi (Momentum)</h3>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
         <canvas id="bend-canvas" width="400" height="300" style="border: 1px solid #eee; background: white; flex: 1;"></canvas>
         <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
@@ -622,6 +678,10 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
 
         // Reaction force arrow (Exaggerated)
         drawArrow(ctx, x0, y0, x0 - 50, y0 + 30, "#e74c3c", "F_R");
+        ctx.fillStyle = "#475569";
+        ctx.font = "bold 11px Inter";
+        ctx.fillText("ulaz", 28, y0 - 20);
+        ctx.fillText("izlaz", x0 + Math.cos(rad)*82, y0 + Math.sin(rad)*82 - 8);
     }
 
     function drawArrow(ctx, x1, y1, x2, y2, color, label="") {
@@ -647,7 +707,7 @@ Zatvoreni spremnik polumjera $R=1,5 \, \text{m}$ pun je vode i rotira kutnom brz
 ### Zadatak 102: Mlaz na ploču
 
 **Tekst zadatka:** 
-Mlaz vode brzine $v_1=20 \, \text{m/s}$ i masenog protoka $\dot{m}=10 \, \text{kg/s}$ udara u nepomičnu ravnu ploču okomito na njezinu površinu. Odrediti silu $F_R$ kojom mlaz djeluje na ploču.
+Voda istrujava iz mlaznice srednjom brzinom 20 m/s, pri čemu udara u stacionarnu vertikalno položenu ploču, maseni protok vode iznosi 10 kg/s. Nakon udara, mlaz vode se raspršuje jednoliko u svim smjerovima duž ravnine ploče. Potrebno je odrediti silu potrebnu da ploča ostane u početnom položaju.
 
 **Rješenje:**
 $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
@@ -699,19 +759,20 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
 
     let particles = [];
     for(let i=0; i<150; i++) particles.push({ x: 0, y: 0, state: 'jet', t: Math.random() });
+    const state = { v1: 20, fr: 200 };
 
-    function update() {
+    function recalculate() {
         const v1 = parseFloat(v1S.value), mdot = parseFloat(mS.value);
         const fr = mdot * v1;
+        state.v1 = v1;
+        state.fr = fr;
 
         document.getElementById('z102-v-v1').innerText = v1;
         document.getElementById('z102-v-mdot').innerText = mdot;
         document.getElementById('z102-res-fr').innerText = Math.round(fr);
-
-        draw(v1, mdot, fr);
     }
 
-    function draw(v1, mdot, fr) {
+    function draw() {
         ctx.clearRect(0, 0, 550, 450);
         const cy = 200, ox = 50, plateX = 400;
         
@@ -722,10 +783,14 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
         // Plate
         ctx.fillStyle = "#1e293b";
         ctx.fillRect(plateX, cy-100, 15, 200);
+        ctx.fillStyle = "#475569";
+        ctx.font = "bold 11px Inter";
+        ctx.fillText("mlaz", ox + 8, cy - 28);
+        ctx.fillText("ploča", plateX - 8, cy - 112);
 
         // Particles
         particles.forEach(p => {
-            p.t += 0.01 * (v1/20);
+            p.t += 0.01 * (state.v1/20);
             if(p.t > 1) p.t = 0;
 
             if(p.t < 0.7) {
@@ -745,7 +810,7 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
         });
 
         // Force Arrow
-        const arrowLen = Math.min(fr / 2, 120);
+        const arrowLen = Math.min(state.fr / 2, 120);
         ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.moveTo(plateX + 20, cy);
@@ -756,26 +821,30 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
         ctx.lineTo(plateX + 10 + arrowLen, cy - 8);
         ctx.lineTo(plateX + 10 + arrowLen, cy + 8);
         ctx.closePath(); ctx.fillStyle = "#ef4444"; ctx.fill();
-
-        requestAnimationFrame(() => update());
     }
 
-    v1S.oninput = update; mS.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    v1S.oninput = recalculate; mS.oninput = recalculate; recalculate(); animate();
 })();
 </script>
 
+```
 
 ***
 
 ### Zadatak 103: Vjetroturbina
 
 **Tekst zadatka:** 
-Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v_1=10 \, \text{m/s}$. Ako je snaga turbine $P=400 \, \text{W}$, odrediti korisnost turbine $\eta$, brzinu vjetra iza turbine $v_2$ i aksijalnu silu na stup turbine $F_S$.
+Vjetroturbina promjera 10m generira snagu od 0,4 kW pri brzini nastrujavanja vjetra na vjetroturbinu od 3,13 m/s. Potrebno je odrediti učinkovitost vjetroturbine i horizontalnu silu vjetra na potporni stup vjetroturbine za dotičnu i dvostruko veću brzinu vjetra. Pretpostaviti jednak stupanj učinkovitosti u oba slučaja. Gustoća zraka iznosi 1,2 kg/m3, pretpostaviti da je zrak idealan fluid.
 
 **Rješenje:**
-1. $P_{max} = \frac{16}{27} \cdot \frac{1}{2} \rho A v_1^3 = 1445 \, \text{W} \implies \eta = 400/1445 = \mathbf{27,7 \%}$.
-2. $v_2 = v_1 \sqrt{1-\eta} = \mathbf{2,66 \, \text{m/s}}$.
-3. $F_S = \dot{m}(v_1 - v_2) = \mathbf{138 \, \text{N}}$.
+1. Raspoloživa snaga vjetra kroz rotor iznosi $P_v = \frac{1}{2} \rho A v_1^3 \approx 48,1 \, \text{kW}$ pa je korisnost turbine $\eta = \frac{P}{P_v} = \mathbf{0,83 \%}$.
+2. U pojednostavljenom energetskom modelu $P = \frac{1}{2}\dot{m}(v_1^2 - v_2^2)$ slijedi $\mathbf{v_2 \approx 9,96 \, \text{m/s}}$.
+3. Za $\dot{m} = \rho A v_1$ aksijalna sila na stup iznosi $\mathbf{F_S \approx 40 \, \text{N}}$.
 
 ```{=html}
 <!-- WIDGET: Vjetroturbina i Betzov Limit -->
@@ -801,8 +870,8 @@ Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v
                 <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Brzina vjetra v₁: <span id="z103-v-v1" style="color:#2563eb;">10</span> m/s</label>
                 <input type="range" id="z103-v1-slider" min="2" max="20" step="0.5" value="10" style="width: 100%;">
                 
-                <label style="display: block; font-weight: 700; margin-top: 15px; margin-bottom: 8px; color: #475569;">Stupanj djelovanja η: <span id="z103-v-eta" style="color:#2563eb;">28</span>%</label>
-                <input type="range" id="z103-eta-slider" min="0" max="59.3" step="1" value="28" style="width: 100%;">
+                <label style="display: block; font-weight: 700; margin-top: 15px; margin-bottom: 8px; color: #475569;">Korisnost turbine η: <span id="z103-v-eta" style="color:#2563eb;">0.8</span>%</label>
+                <input type="range" id="z103-eta-slider" min="0" max="59.3" step="0.1" value="0.8" style="width: 100%;">
                 <p style="font-size: 0.65rem; color: #ef4444; font-weight: 600; margin-top: 5px;">Teoretski maks: 59.3% (Betz)</p>
             </div>
 
@@ -810,7 +879,7 @@ Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v
                 <div style="font-weight: 800; font-size: 0.75rem; color: #2c5282; text-transform: uppercase; margin-bottom: 12px;">Analiza strujanja:</div>
                 <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;">
                     <div style="display: flex; justify-content: space-between;"><span>Brzina iza v₂:</span> <b id="z103-res-v2">--- m/s</b></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Sila na stup Fs:</span> <b id="z103-res-fs">--- N</b></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Sila na stup F_s:</span> <b id="z103-res-fs">--- N</b></div>
                 </div>
             </div>
             
@@ -828,34 +897,32 @@ Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v
 
     let particles = [];
     for(let i=0; i<150; i++) particles.push({ x: Math.random()*500, y_rel: Math.random()*2 - 1, state: 'pre' });
+    const state = { v1: 10, v2: 0, eta: 0.008 };
 
-    function update() {
+    function recalculate() {
         const v1 = parseFloat(v1S.value), eta = parseFloat(etaS.value)/100;
         const rho = 1.225, D = 10;
         const A = Math.PI * D * D / 4;
         
-        // P = eta * 0.5 * rho * A * v1^3
         const power = eta * 0.5 * rho * A * v1 * v1 * v1;
-        // From eta = 4*a*(1-a)^2 where a is induction factor
-        // For simplicity, we use the v2 = v1*sqrt(1-eta) approximation or better v2/v1 relations
-        // Let's use simplified v2 based on typical turbine flow
-        const v2 = v1 * (1 - eta); // Not physically exact but good for visual slowdown
-        const mdot = rho * A * ((v1 + v2)/2);
+        const v2 = v1 * Math.sqrt(Math.max(0, 1 - eta));
+        const mdot = rho * A * v1;
         const fs = mdot * (v1 - v2);
+        state.v1 = v1;
+        state.v2 = v2;
+        state.eta = eta;
 
         document.getElementById('z103-v-v1').innerText = v1;
-        document.getElementById('z103-v-eta').innerText = (eta*100).toFixed(0);
+        document.getElementById('z103-v-eta').innerText = (eta*100).toFixed(1);
         document.getElementById('z103-p-val').innerText = Math.round(power) + " W";
         document.getElementById('z103-res-v2').innerText = v2.toFixed(2) + " m/s";
         document.getElementById('z103-res-fs').innerText = Math.round(fs) + " N";
         
         const pMax = 0.593 * 0.5 * rho * A * 20 * 20 * 20; // Scale bar to max v1
         document.getElementById('z103-p-bar').style.width = Math.min((power/pMax)*500, 100) + "%";
-
-        draw(v1, v2, eta);
     }
 
-    function draw(v1, v2, eta) {
+    function draw() {
         ctx.clearRect(0, 0, 500, 450);
         const ox = 250, oy = 225;
         
@@ -869,7 +936,7 @@ Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v
 
         // Streamtube (Dashed)
         ctx.setLineDash([5, 5]); ctx.strokeStyle = "#cbd5e0"; ctx.lineWidth = 2;
-        const w1 = 60, w2 = 60 + eta * 100; // Tube widens as it slows
+        const w1 = 60, w2 = 60 + state.eta * 100; // Tube widens as it slows
         ctx.beginPath();
         ctx.moveTo(0, oy - w1); ctx.bezierCurveTo(ox, oy - w1, ox, oy - w1, ox, oy - w1); // upstream
         ctx.bezierCurveTo(ox + 100, oy - w1, ox + 100, oy - w2, 500, oy - w2); // downstream
@@ -882,7 +949,7 @@ Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v
 
         // Particles
         particles.forEach(p => {
-            const currentV = p.x < ox ? v1 : v2;
+            const currentV = p.x < ox ? state.v1 : state.v2;
             p.x += currentV * 0.2;
             if(p.x > 500) p.x = 0;
             
@@ -894,7 +961,7 @@ Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v
         });
 
         // Rotation visual (Simple blades)
-        const time = Date.now() * 0.001 * v1 * 0.5;
+        const time = Date.now() * 0.001 * state.v1 * 0.5;
         ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
         for(let i=0; i<3; i++) {
             const angle = time + i * (Math.PI * 2 / 3);
@@ -903,10 +970,20 @@ Vjetroturbina promjera $D=10 \, \text{m}$ iskorištava energiju vjetra brzine $v
             ctx.stroke();
         }
 
-        requestAnimationFrame(() => update());
+        ctx.fillStyle = "#475569";
+        ctx.font = "bold 11px Inter";
+        ctx.fillText("v1", 34, oy - 72);
+        ctx.fillText("disk turbine", ox - 34, oy - 92);
+        ctx.fillText("v2", 438, oy - 92);
+
     }
 
-    v1S.oninput = update; etaS.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    v1S.oninput = recalculate; etaS.oninput = recalculate; recalculate(); animate();
 })();
 </script>
-
+```

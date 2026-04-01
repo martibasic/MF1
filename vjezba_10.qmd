@@ -17,7 +17,7 @@ Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja.
 
 ```{=html}
 <!-- WIDGET: Ideal vs Real Fluid -->
-<div id="v10-ideal-real-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 25px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<div id="v10-ideal-real-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 25px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📉 Vizualizacija gubitaka: Idealni vs. Realni fluid</h4>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -54,8 +54,143 @@ Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja.
 </div>
 
 <script>
-// ... (existing script for Ideal vs Real)
+(function() {
+    const idealCanvas = document.getElementById('ideal-canvas');
+    const realCanvas = document.getElementById('real-canvas');
+    const idealCtx = idealCanvas.getContext('2d');
+    const realCtx = realCanvas.getContext('2d');
+    const fSlider = document.getElementById('v10-f-slider');
+    const lSlider = document.getElementById('v10-L-slider');
+    const vSlider = document.getElementById('v10-v-slider');
+
+    const state = {
+        lam: parseFloat(fSlider.value),
+        length: parseFloat(lSlider.value),
+        velocity: parseFloat(vSlider.value),
+        headLoss: 0
+    };
+    const particles = Array.from({ length: 28 }, (_, index) => ({
+        t: index / 28,
+        offset: (index % 3) - 1
+    }));
+
+    function updateState() {
+        state.lam = parseFloat(fSlider.value);
+        state.length = parseFloat(lSlider.value);
+        state.velocity = parseFloat(vSlider.value);
+
+        const g = 9.81;
+        const diameter = 0.15;
+        state.headLoss = state.lam * (state.length / diameter) * (state.velocity * state.velocity / (2 * g));
+
+        document.getElementById('v10-v-f').innerText = state.lam.toFixed(3);
+        document.getElementById('v10-v-L').innerText = state.length.toFixed(0);
+        document.getElementById('v10-v-v').innerText = state.velocity.toFixed(1);
+        document.getElementById('v10-hw-out').innerText = state.headLoss.toFixed(2);
+    }
+
+    function drawScene(ctx, isReal) {
+        const width = ctx.canvas.width;
+        const height = ctx.canvas.height;
+        const marginX = 34;
+        const surfaceY = 92;
+        const baseY = 236;
+        const pipeY = 206;
+        const pipeStart = 82;
+        const pipeEnd = 330;
+        const outletX = 352;
+        const outletY = 224;
+        const g = 9.81;
+        const velocityHead = state.velocity * state.velocity / (2 * g);
+        const energyScale = 16;
+        const headLossPx = isReal ? state.headLoss * energyScale : 0;
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.fillStyle = isReal ? "#fff1f2" : "#eff6ff";
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(marginX, baseY + 34);
+        ctx.lineTo(width - marginX, baseY + 34);
+        ctx.stroke();
+
+        ctx.fillStyle = "#dbeafe";
+        ctx.fillRect(marginX, surfaceY, 66, baseY - surfaceY);
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(marginX, surfaceY, 66, baseY - surfaceY);
+
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 16;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(pipeStart, pipeY);
+        ctx.lineTo(pipeEnd, pipeY);
+        ctx.lineTo(outletX, outletY);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#ef4444";
+        ctx.lineWidth = 3;
+        const eglInletY = surfaceY;
+        const eglOutletY = eglInletY + headLossPx;
+        ctx.beginPath();
+        ctx.moveTo(pipeStart, eglInletY);
+        ctx.lineTo(pipeEnd, eglOutletY);
+        ctx.lineTo(outletX + 14, eglOutletY);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#2563eb";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([7, 6]);
+        ctx.beginPath();
+        ctx.moveTo(pipeStart, eglInletY - velocityHead * energyScale);
+        ctx.lineTo(pipeEnd, eglOutletY - velocityHead * energyScale);
+        ctx.lineTo(outletX + 14, eglOutletY - velocityHead * energyScale);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = "#ef4444";
+        ctx.font = "bold 11px Inter";
+        ctx.fillText("EGL", pipeStart - 34, eglInletY + 4);
+        ctx.fillStyle = "#2563eb";
+        ctx.fillText("HGL", pipeStart - 34, eglInletY - velocityHead * energyScale + 4);
+
+        particles.forEach((particle) => {
+            particle.t += 0.0025 * state.velocity;
+            if (particle.t > 1) particle.t -= 1;
+            const x = pipeStart + particle.t * (outletX - pipeStart);
+            const localSlope = (outletY - pipeY) / (outletX - pipeStart);
+            const yCenter = pipeY + (x - pipeStart) * localSlope;
+            const y = yCenter + particle.offset * 3;
+            ctx.fillStyle = isReal ? "#ef4444" : "#3b82f6";
+            ctx.beginPath();
+            ctx.arc(x, y, 2.3, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "600 11px Inter";
+        ctx.fillText(isReal ? "Pad energije zbog trenja" : "Bez gubitka energije", 124, 30);
+        ctx.fillText("hw = " + (isReal ? state.headLoss.toFixed(2) : "0.00") + " m", 250, 282);
+    }
+
+    function animate() {
+        drawScene(idealCtx, false);
+        drawScene(realCtx, true);
+        requestAnimationFrame(animate);
+    }
+
+    [fSlider, lSlider, vSlider].forEach((slider) => slider.addEventListener('input', updateState));
+    updateState();
+    animate();
+})();
 </script>
+```
 
 ***
 
@@ -160,108 +295,6 @@ Ovaj widget omogućuje istraživanje osjetljivosti gubitaka na promjenu pojedini
     update();
 })();
 </script>
-
-***
-
-```{=html}
-<!-- NOVI WIDGET: Pitot-Prandtl Cijev -->
-<div class="widget-container" id="widget-pitot-tube">
-    <style>
-        .widget-container {
-            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        .canvas-wrapper { position: relative; background: #fdfdfd; border-radius: 8px; border: 1px solid #eee; overflow: hidden; height: 300px; }
-        .data-display { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .data-card { background: #2c3e50; color: white; padding: 10px; border-radius: 6px; text-align: center; }
-    </style>
-
-    <div class="widget-header"><h3 class="widget-title">Laboratorij: Pitot-Prandtlova cijev</h3></div>
-    
-    <div class="controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-        <label>Brzina strujanja zraka (v): <span id="v-val-pitot">20</span> m/s</label>
-        <input type="range" id="v-slider-pitot" min="5" max="100" value="20" step="1" style="width: 100%;">
-    </div>
-
-    <div class="canvas-wrapper">
-        <canvas id="canvas-pitot" width="800" height="300"></canvas>
-    </div>
-
-    <div class="data-display">
-        <div class="data-card"><span style="font-size:0.7rem; opacity:0.7;">STATIČKI TLAK</span><br><span id="p-stat-out">101325</span> Pa</div>
-        <div class="data-card" style="background:#e67e22;"><span style="font-size:0.7rem; opacity:0.7;">DINAMIČKI TLAK</span><br><span id="p-dyn-out">0</span> Pa</div>
-        <div class="data-card" style="background:#c0392b;"><span style="font-size:0.7rem; opacity:0.7;">UKUPNI TLAK (p0)</span><br><span id="p-tot-out">0</span> Pa</div>
-    </div>
-
-    <script>
-    (function() {
-        const canvas = document.getElementById('canvas-pitot');
-        const ctx = canvas.getContext('2d');
-        const vSl = document.getElementById('v-slider-pitot');
-
-        let particles = [];
-        for(let i=0; i<80; i++) particles.push({ x: Math.random()*800, y: 50 + Math.random()*200 });
-
-        function draw() {
-            const v = parseFloat(vSl.value);
-            const rho = 1.225; // zrak
-            const pStat = 101325;
-            const pDyn = 0.5 * rho * v * v;
-            const pTot = pStat + pDyn;
-
-            document.getElementById('v-val-pitot').textContent = v;
-            document.getElementById('p-stat-out').textContent = Math.round(pStat);
-            document.getElementById('p-dyn-out').textContent = Math.round(pDyn);
-            document.getElementById('p-tot-out').textContent = Math.round(pTot);
-
-            ctx.clearRect(0,0,800,300);
-
-            // Particles
-            ctx.fillStyle = '#3498db';
-            particles.forEach(p => {
-                p.x += v * 0.2;
-                if(p.x > 800) p.x = 0;
-                // Avoid the tube tip
-                if(p.x > 350 && p.x < 450 && Math.abs(p.y - 150) < 20) {
-                    p.y += (p.y > 150 ? 1 : -1) * 2;
-                }
-                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
-            });
-
-            // Pitot Tube
-            ctx.strokeStyle = '#7f8c8d'; ctx.lineWidth = 8; ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(600, 150); ctx.lineTo(400, 150); // main body
-            ctx.stroke();
-            
-            // Tip hole (Stagnation)
-            ctx.fillStyle = '#c0392b';
-            ctx.beginPath(); ctx.arc(400, 150, 4, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#2c3e50'; ctx.font = 'bold 10px Arial';
-            ctx.fillText("Stagnacijska točka (v=0)", 350, 135);
-
-            // U-Manometar (Symbolic)
-            const h = pDyn * 0.15; // scaling for visual
-            ctx.lineWidth = 10; ctx.strokeStyle = '#34495e';
-            ctx.beginPath();
-            ctx.moveTo(500, 150); ctx.lineTo(500, 250); ctx.arc(550, 250, 50, Math.PI, 0, true); ctx.lineTo(600, 150);
-            ctx.stroke();
-
-            // Liquid in Manometer
-            ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.moveTo(500, 200 + h/2); ctx.lineTo(500, 250); ctx.arc(550, 250, 50, Math.PI, 0, true); ctx.lineTo(600, 200 - h/2);
-            ctx.stroke();
-
-            requestAnimationFrame(draw);
-        }
-        vSl.oninput = draw;
-        draw();
-    })();
-    </script>
-</div>
-
 ```
 
 ***
@@ -269,7 +302,7 @@ Ovaj widget omogućuje istraživanje osjetljivosti gubitaka na promjenu pojedini
 ### Zadatak 86: Sifon s realnim fluidom
 
 **Tekst zadatka:** 
-Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubitak visine dobave $h_w$ i tlak u tjemenu sifona (točka 2). Pretpostaviti da se 2/3 gubitaka događa do točke 2.
+Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s]. Potrebno je odrediti gubitak visine dobave od točke 1 do točke 3 preko izraza $\frac{v^2}{2g}$. Potrebno je odrediti tlak u točki 2 ukoliko se dvije trećine ukupnih gubitaka visine dobave odvijaju između točke 1 i 2.
 
 **Rješenje:**
 1. **Brzina:** $v = \frac{0,15}{\pi \cdot 0,1^2} = \mathbf{4,775 \, \text{m/s}}$.
@@ -327,8 +360,9 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
 
     let particles = [];
     for(let i=0; i<100; i++) particles.push(Math.random());
+    const state = { z1: 1.5, z2: 3.5, z3: 0, vHead: 0, hw12: 0, hw23: 0, velocity: 0 };
 
-    function update() {
+    function recalculate() {
         const f = parseFloat(fS.value), vdot_l = parseFloat(vdotS.value);
         const rho = 1000, g = 9.81, d = 0.2; // 200mm promjer iz rješenja? (r=0.1)
         const A = Math.PI * d * d / 4;
@@ -337,12 +371,20 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
         // Geometry from task
         const z1 = 1.5, z3 = 0, z2 = 3.5; // Relativne visine (z1-z3=1.5, z2-z1=2)
         const v_head = v*v / (2*g);
-        const hw_total = (z1 - z3) - v_head; 
+        const hw_total = Math.max((z1 - z3) - v_head, 0);
 
         const hw12 = f * hw_total;
         const hw23 = (1-f) * hw_total;
         const p2_head = (z1 - z2) - v_head - hw12;
         const p2 = p2_head * rho * g;
+
+        state.z1 = z1;
+        state.z2 = z2;
+        state.z3 = z3;
+        state.vHead = v_head;
+        state.hw12 = hw12;
+        state.hw23 = hw23;
+        state.velocity = v;
 
         document.getElementById('z86-v-f').innerText = (f*100).toFixed(0) + "%";
         document.getElementById('z86-v-vdot').innerText = vdot_l;
@@ -350,18 +392,16 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
         document.getElementById('z86-hw23').innerText = hw23.toFixed(3) + " m";
         document.getElementById('z86-hwtotal').innerText = hw_total.toFixed(3) + " m";
         document.getElementById('z86-p2-val').innerText = (p2/1000).toFixed(1) + " kPa";
-
-        draw(z1, z2, z3, v_head, hw12, hw23, v);
     }
 
-    function draw(z1, z2, z3, vh, hw12, hw23, v) {
+    function draw() {
         ctx.clearRect(0, 0, 550, 450);
         const scale = 80, ox = 100, oy = 350;
 
         // Coordinates
-        const p1x = 100, p1y = oy - z1*scale;
-        const p2x = 275, p2y = oy - z2*scale;
-        const p3x = 450, p3y = oy - z3*scale;
+        const p1x = 100, p1y = oy - state.z1*scale;
+        const p2x = 275, p2y = oy - state.z2*scale;
+        const p3x = 450, p3y = oy - state.z3*scale;
 
         // Tanks
         ctx.fillStyle = "#ebf8ff"; ctx.fillRect(20, p1y, 100, (oy-p1y)+20);
@@ -375,8 +415,8 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
 
         // EGL Line (Red)
         const egl1 = p1y;
-        const egl2 = p1y + hw12*scale;
-        const egl3 = p1y + (hw12+hw23)*scale;
+        const egl2 = p1y + state.hw12*scale;
+        const egl3 = p1y + (state.hw12 + state.hw23)*scale;
 
         ctx.setLineDash([]); ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.moveTo(ox, egl1); ctx.lineTo(p2x, egl2); ctx.lineTo(p3x, egl3); ctx.stroke();
@@ -384,16 +424,20 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
 
         // HGL Line (Blue Dashed)
         ctx.setLineDash([5, 5]); ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(ox, egl1 + vh*scale); ctx.lineTo(p2x, egl2 + vh*scale); ctx.lineTo(p3x, egl3 + vh*scale); ctx.stroke();
-        ctx.fillStyle = "#3b82f6"; ctx.fillText("HGL", ox-30, egl1 + vh*scale + 15);
+        ctx.beginPath(); ctx.moveTo(ox, egl1 + state.vHead*scale); ctx.lineTo(p2x, egl2 + state.vHead*scale); ctx.lineTo(p3x, egl3 + state.vHead*scale); ctx.stroke();
+        ctx.fillStyle = "#3b82f6"; ctx.fillText("HGL", ox-30, egl1 + state.vHead*scale + 15);
 
         // Centerline Labels
         ctx.fillStyle = "#1e293b"; ctx.font = "bold 12px Inter";
         ctx.fillText("1", ox-15, p1y); ctx.fillText("2", p2x, p2y - 15); ctx.fillText("3", p3x + 10, p3y);
+        ctx.font = "11px Inter";
+        ctx.fillText("ulazni spremnik", 18, p1y - 10);
+        ctx.fillText("tje me sifona", p2x - 28, p2y - 32);
+        ctx.fillText("ispust", p3x - 10, p3y + 24);
 
         // Particles
         particles.forEach((p, i) => {
-            particles[i] += v * 0.005; if(particles[i] > 1) particles[i] = 0;
+            particles[i] += state.velocity * 0.005; if(particles[i] > 1) particles[i] = 0;
             const pos = particles[i];
             let px, py;
             if(pos < 0.4) { px = ox; py = (p1y+50) - (pos/0.4)*(p1y+50-p2y); }
@@ -401,18 +445,26 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
             else { px = p3x; py = p2y + (pos-0.7)/0.3 * (p3y-p2y); }
             ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
         });
-
-        requestAnimationFrame(() => update());
     }
 
-    fS.oninput = update; vdotS.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    fS.oninput = recalculate; vdotS.oninput = recalculate; recalculate(); animate();
 })();
 </script>
+```
 
 
 ***
 
 ### Zadatak 87: Visina mlaza iz sapnice
+
+**Tekst zadatka:** 
+Za sustav na slici, potrebno je odrediti do koje će visine iznad sapnice dospjeti mlaz vode. Prilikom 
+proračuna pretpostaviti da je fluid idealan. Mjerenjem je utvrđen tlak u točki A $p_{Am} = 55 \, \text{kPa}$.
 
 **Rješenje:**
 1. $v_A = 2,43 \, \text{m/s}, v_{is} = 4 v_A = 9,72 \, \text{m/s}$.
@@ -475,8 +527,9 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
 
     let particles = [];
     for(let i=0; i<150; i++) particles.push({ x: 0, y: 0, state: 'pipe', t: Math.random() });
+    const state = { h1: 0, h2: 1.1, vIs: 0 };
 
-    function update() {
+    function recalculate() {
         const pa_kpa = parseFloat(paS.value), d2_mm = parseFloat(d2S.value);
         const rho = 1000, g = 9.81, d1 = 0.1; // 100mm pipe
         
@@ -488,11 +541,15 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
         // Sub: p_head + (v_is^2/2g)*(d2/d1)^4 = v_is^2/2g + h2
         const h2 = 1.1; // Fixed geometry for widget
         const ratio = Math.pow(d2/d1, 4);
-        const v_is_head = (p_head - h2) / (1 - ratio);
+        const v_is_head = Math.max((p_head - h2) / (1 - ratio), 0);
         const v_is = Math.sqrt(2 * g * v_is_head);
         const vA_head = v_is_head * ratio;
         
         const h1 = v_is_head; // In ideal case, jet rises to its velocity head height
+
+        state.h1 = h1;
+        state.h2 = h2;
+        state.vIs = v_is;
 
         document.getElementById('z87-v-pa').innerText = pa_kpa;
         document.getElementById('z87-v-d2').innerText = d2_mm;
@@ -502,23 +559,34 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
         const total = p_head + vA_head;
         document.getElementById('z87-bar-p').style.width = (p_head/total * 100) + "%";
         document.getElementById('z87-bar-v').style.width = (vA_head/total * 100) + "%";
-
-        draw(h1, h2, v_is, ratio);
     }
 
-    function draw(h1, h2, v_is, ratio) {
+    function draw() {
         ctx.clearRect(0, 0, 500, 500);
         const scale = 60, ox = 250, oy = 450;
         
         // Pipe and Nozzle geometry
         ctx.fillStyle = "#f1f5f9"; ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
         // Horizontal pipe
-        ctx.beginPath(); ctx.moveTo(50, oy); ctx.lineTo(ox-30, oy); ctx.lineTo(ox-30, oy-h2*scale);
+        ctx.beginPath(); ctx.moveTo(50, oy); ctx.lineTo(ox-30, oy); ctx.lineTo(ox-30, oy-state.h2*scale);
         // Nozzle taper
-        ctx.lineTo(ox-15, oy-h2*scale-20); ctx.lineTo(ox+15, oy-h2*scale-20);
+        ctx.lineTo(ox-15, oy-state.h2*scale-20); ctx.lineTo(ox+15, oy-state.h2*scale-20);
         // Back down
-        ctx.lineTo(ox+30, oy-h2*scale); ctx.lineTo(ox+30, oy); ctx.lineTo(50, oy);
+        ctx.lineTo(ox+30, oy-state.h2*scale); ctx.lineTo(ox+30, oy); ctx.lineTo(50, oy);
         ctx.stroke();
+
+        ctx.strokeStyle = "#93c5fd";
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(330, oy - state.h2*scale - 20);
+        ctx.lineTo(330, oy - (state.h1 + state.h2)*scale - 20);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#1d4ed8";
+        ctx.font = "bold 11px Inter";
+        ctx.fillText("h1", 336, oy - (state.h1 * 0.5 + state.h2)*scale - 20);
+        ctx.fillStyle = "#475569";
+        ctx.fillText("sapnica", ox - 18, oy - state.h2*scale - 30);
 
         // Particles
         particles.forEach(p => {
@@ -533,24 +601,29 @@ Sifon prenosi vodu protokom $150 \, \text{dm}^3/\text{s}$. Odrediti ukupni gubit
                 px = 50 + p.t * (ox-50); py = oy - 15;
             } else {
                 // Jet path (vertical rise and fall)
-                const v0 = Math.sqrt(2 * 9.81 * h1);
+                const v0 = Math.sqrt(2 * 9.81 * state.h1);
                 const time_to_top = v0 / 9.81;
                 const total_time = 2 * time_to_top;
                 const ct = p.t * total_time;
                 
                 px = ox + (Math.random()-0.5)*10;
-                py = (oy - h2*scale - 20) - (v0*ct - 0.5*9.81*ct*ct)*scale;
+                py = (oy - state.h2*scale - 20) - (v0*ct - 0.5*9.81*ct*ct)*scale;
             }
             
             ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
         });
 
-        requestAnimationFrame(() => update());
     }
 
-    paS.oninput = update; d2S.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    paS.oninput = recalculate; d2S.oninput = recalculate; recalculate(); animate();
 })();
 </script>
+```
 
 
 ***
@@ -627,6 +700,7 @@ $v_2 = \sqrt{2gh} = \sqrt{2 \cdot 9,81 \cdot 5} = \mathbf{9,9 \, \text{m/s}}$.
 
     function update() {
         const H = parseFloat(hSl.value);
+        currentHoleY = Math.min(Math.max(currentHoleY, 0.05 * H), 0.95 * H);
         const hole_h = H - currentHoleY; // Dubina otvora
         const v = Math.sqrt(2 * 9.81 * hole_h);
         const x = 2 * Math.sqrt(currentHoleY * hole_h);
@@ -690,6 +764,7 @@ $v_2 = \sqrt{2gh} = \sqrt{2 \cdot 9,81 \cdot 5} = \mathbf{9,9 \, \text{m/s}}$.
     update();
 })();
 </script>
+```
 
 
 ***
@@ -749,30 +824,32 @@ $v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
 
     let particles = [];
     for(let i=0; i<100; i++) particles.push({ x: Math.random()*550, y: 50 + Math.random()*300 });
+    const state = { velocity: 4, dhHg: 0 };
 
-    function update() {
+    function recalculate() {
         const v = parseFloat(vSl.value), rho = parseFloat(rSl.value);
         const rhoHg = 13600, g = 9.81;
         
         const dp = 0.5 * rho * v * v;
         const dhHg = dp / (g * (rhoHg - rho));
 
+        state.velocity = v;
+        state.dhHg = dhHg;
+
         document.getElementById('z90-v-v').innerText = v.toFixed(1);
         document.getElementById('z90-v-rho').innerText = rho;
         document.getElementById('z90-hg-display').innerText = (dhHg * 1000).toFixed(0);
         document.getElementById('z90-res-dp').innerText = Math.round(dp);
-
-        draw(v, dhHg);
     }
 
-    function draw(v, dhHg) {
+    function draw() {
         ctx.clearRect(0, 0, 550, 450);
         const cy = 200;
 
         // Flow particles
         ctx.fillStyle = "rgba(59, 130, 246, 0.5)";
         particles.forEach(p => {
-            p.x += v * 2; if(p.x > 550) p.x = 0;
+            p.x += state.velocity * 2; if(p.x > 550) p.x = 0;
             // Diverge around tip
             let py = p.y;
             if(p.x > 280 && p.x < 420 && Math.abs(p.y - cy) < 25) {
@@ -791,10 +868,23 @@ $v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
         
         // Static port hole
         ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(420, cy-6, 3, 0, Math.PI*2); ctx.fill();
+        ctx.font = "11px Inter";
+        ctx.fillStyle = "#475569";
+        ctx.fillText("statički otvor", 392, cy - 20);
+        ctx.fillText("smjer strujanja", 34, 76);
+        ctx.beginPath();
+        ctx.moveTo(130, 70);
+        ctx.lineTo(180, 70);
+        ctx.lineTo(172, 64);
+        ctx.moveTo(180, 70);
+        ctx.lineTo(172, 76);
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
         // U-Manometer
         const mx = 420, my = 350, mw = 80;
-        const h_px = dhHg * 1500; // Scaling mm to pixels
+        const h_px = state.dhHg * 1500; // Scaling mm to pixels
 
         ctx.strokeStyle = "#475569"; ctx.lineWidth = 10;
         ctx.beginPath();
@@ -809,12 +899,17 @@ $v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
         ctx.arc(mx + mw/2, my, mw/2, Math.PI, 0, true);
         ctx.lineTo(mx + mw, my - 20 - h_px/2); ctx.stroke();
 
-        requestAnimationFrame(() => update());
     }
 
-    vSl.oninput = update; rSl.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    vSl.oninput = recalculate; rSl.oninput = recalculate; recalculate(); animate();
 })();
 </script>
+```
 
 ***
 
@@ -860,33 +955,45 @@ Veliki zatvoreni spremnik ispunjen je slojevima vode ($h_1=2 \, \text{m}$), ulja
     const canvas = document.getElementById('z91-canvas'), ctx = canvas.getContext('2d');
     const pmS = document.getElementById('z91-pm-slider'), h2S = document.getElementById('z91-h2-slider'), h3S = document.getElementById('z91-h3-slider');
     let particles = []; for(let i=0; i<100; i++) particles.push({ t: Math.random() });
-    function update() {
+    const state = { h1: 2.0, h2: 3.0, h3: 1.5, v2: 0 };
+    function recalculate() {
         const pm = parseFloat(pmS.value), h2 = parseFloat(h2S.value), h3 = parseFloat(h3S.value), g = 9.81, rho_b = 720, rho_u = 850;
         const pu1 = pm*1000 + rho_b*g*h3, v2 = Math.sqrt(2*pu1/rho_u + 2*g*h2);
+        state.h2 = h2;
+        state.h3 = h3;
+        state.v2 = v2;
         document.getElementById('z91-v-pm').innerText = pm;
         document.getElementById('z91-v-h2').innerText = h2.toFixed(1);
         document.getElementById('z91-v-h3').innerText = h3.toFixed(1);
         document.getElementById('z91-res-pu1').innerText = (pu1/1000).toFixed(1) + " kPa";
         document.getElementById('z91-res-v2').innerText = v2.toFixed(1) + " m/s";
-        draw(2.0, h2, h3, v2);
     }
-    function draw(h1, h2, h3, v2) {
+    function draw() {
         ctx.clearRect(0,0,500,500); const scale = 40, w = 250, ox = 100, oy = 450;
-        ctx.fillStyle="#3b82f6"; ctx.fillRect(ox,oy-h1*scale,w,h1*scale);
-        ctx.fillStyle="#f59e0b"; ctx.fillRect(ox,oy-(h1+h2)*scale,w,h2*scale);
-        ctx.fillStyle="#facc15"; ctx.fillRect(ox,oy-(h1+h2+h3)*scale,w,h3*scale);
-        ctx.fillStyle="#e2e8f0"; ctx.fillRect(ox,oy-400,w,400-(h1+h2+h3)*scale);
+        ctx.fillStyle="#3b82f6"; ctx.fillRect(ox,oy-state.h1*scale,w,state.h1*scale);
+        ctx.fillStyle="#f59e0b"; ctx.fillRect(ox,oy-(state.h1+state.h2)*scale,w,state.h2*scale);
+        ctx.fillStyle="#facc15"; ctx.fillRect(ox,oy-(state.h1+state.h2+state.h3)*scale,w,state.h3*scale);
+        ctx.fillStyle="#e2e8f0"; ctx.fillRect(ox,oy-400,w,400-(state.h1+state.h2+state.h3)*scale);
         ctx.strokeStyle="#1e293b"; ctx.lineWidth=3; ctx.strokeRect(ox,oy-400,w,400);
-        const pY = oy-h1*scale; ctx.fillStyle="#1e293b"; ctx.fillRect(ox+w,pY-10,10,20);
+        const pY = oy-state.h1*scale; ctx.fillStyle="#1e293b"; ctx.fillRect(ox+w,pY-10,10,20);
+        ctx.fillStyle="#1e293b"; ctx.font = "bold 11px Inter";
+        ctx.fillText("zrak", ox + 12, oy - 380);
+        ctx.fillStyle="#fef3c7"; ctx.fillText("benzin", ox + 12, oy-(state.h1+state.h2+0.45*state.h3)*scale);
+        ctx.fillStyle="#7c2d12"; ctx.fillText("ulje", ox + 12, oy-(state.h1+0.55*state.h2)*scale);
+        ctx.fillStyle="#1d4ed8"; ctx.fillText("voda", ox + 12, oy-0.55*state.h1*scale);
         particles.forEach(p => {
-            p.t+=0.01*(v2/10); if(p.t>1) p.t=0;
+            p.t+=0.01*(state.v2/10); if(p.t>1) p.t=0;
             ctx.fillStyle="#f59e0b"; ctx.beginPath(); ctx.arc(ox+w+p.t*150, pY+0.5*9.81*Math.pow(p.t*0.5,2)*scale, 2, 0, Math.PI*2); ctx.fill();
         });
-        requestAnimationFrame(() => update());
     }
-    [pmS, h2S, h3S].forEach(s => s.oninput = update); update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+    [pmS, h2S, h3S].forEach(s => s.oninput = recalculate); recalculate(); animate();
 })();
 </script>
+```
 
 
 
@@ -949,8 +1056,9 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
 
     let particles = [];
     for(let i=0; i<120; i++) particles.push({ x: Math.random()*550, y_rel: Math.random() });
+    const state = { cc: 0.95, hMm: 20 };
 
-    function update() {
+    function recalculate() {
         const cc = parseFloat(ccS.value), h_mm = parseFloat(hS.value);
         const rho = 1000, rhoHg = 13600, g = 9.81;
         const dc = 0.2, ds = 0.03;
@@ -961,18 +1069,19 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
         
         const vdot = cc * (area_s / Math.sqrt(1 - Math.pow(area_s/area_c, 2))) * Math.sqrt(2 * dp / rho);
 
+        state.cc = cc;
+        state.hMm = h_mm;
+
         document.getElementById('z92-v-cc').innerText = cc.toFixed(2);
         document.getElementById('z92-v-h').innerText = h_mm;
         document.getElementById('z92-res-vdot').innerText = (vdot * 1000).toFixed(2) + " L/s";
-
-        draw(cc, h_mm);
     }
 
-    function draw(cc, h_mm) {
+    function draw() {
         ctx.clearRect(0, 0, 550, 450);
-        const cy = 200, scale = 1500;
+        const cy = 200;
         const dc_px = 150, ds_px = 40;
-        const d_vena = ds_px * cc;
+        const d_vena = ds_px * state.cc;
 
         // Pipe
         ctx.strokeStyle = "#475569"; ctx.lineWidth = 2;
@@ -982,6 +1091,10 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
         ctx.fillStyle = "#94a3b8";
         ctx.fillRect(250, cy - dc_px/2, 10, (dc_px - ds_px)/2);
         ctx.fillRect(250, cy + ds_px/2, 10, (dc_px - ds_px)/2);
+        ctx.fillStyle = "#475569";
+        ctx.font = "11px Inter";
+        ctx.fillText("sapnica", 232, cy - dc_px/2 - 10);
+        ctx.fillText("vena contracta", 320, cy - d_vena/2 - 10);
 
         // Streamlines and Vena Contracta shape
         ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
@@ -1013,7 +1126,7 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
 
         // U-Manometer (Simplified)
         const mx = 150, my = 350, mw = 150;
-        const h_px = h_mm * 1.5;
+        const h_px = state.hMm * 1.5;
         ctx.strokeStyle = "#475569"; ctx.lineWidth = 10;
         ctx.beginPath(); ctx.moveTo(mx, cy + dc_px/2); ctx.lineTo(mx, my);
         ctx.arc(mx + mw/2, my, mw/2, Math.PI, 0, true); ctx.lineTo(mx + mw + 50, cy + dc_px/2); ctx.stroke();
@@ -1023,12 +1136,17 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
         ctx.arc(mx + mw/2, my, mw/2, Math.PI, 0, true);
         ctx.lineTo(mx + mw, my - 20 - h_px/2); ctx.stroke();
 
-        requestAnimationFrame(() => update());
     }
 
-    ccS.oninput = update; hS.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    ccS.oninput = recalculate; hS.oninput = recalculate; recalculate(); animate();
 })();
 </script>
+```
 
 
 ***
@@ -1084,8 +1202,9 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
 
     let particles = [];
     for(let i=0; i<100; i++) particles.push({ x: Math.random()*550, y_rel: Math.random() });
+    const state = { v1: 2, h: 1, v2: 0, isSucking: false, pThroat: 0, pNeeded: 0 };
 
-    function update() {
+    function recalculate() {
         const v1 = parseFloat(v1S.value), h = parseFloat(hS.value);
         const rho = 1000, g = 9.81, d1 = 0.1, d2 = 0.04;
         
@@ -1095,6 +1214,13 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
         
         const p_needed_kpa = -rho * g * h / 1000;
         const isSucking = p_throat_kpa < p_needed_kpa;
+
+        state.v1 = v1;
+        state.h = h;
+        state.v2 = v2;
+        state.isSucking = isSucking;
+        state.pThroat = p_throat_kpa;
+        state.pNeeded = p_needed_kpa;
 
         document.getElementById('z94-v-v1').innerText = v1.toFixed(1);
         document.getElementById('z94-v-h').innerText = h.toFixed(1);
@@ -1109,13 +1235,11 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
             statusCard.style.background = "#fef2f2"; statusCard.style.borderLeftColor = "#ef4444";
             statusText.innerText = "NEDOVOLJAN PODTLAK ❌"; statusText.style.color = "#991b1b";
         }
-
-        draw(v1, v2, h, isSucking, p_throat_kpa, p_needed_kpa);
     }
 
-    function draw(v1, v2, h, isSucking, p_throat, p_needed) {
+    function draw() {
         ctx.clearRect(0, 0, 550, 450);
-        const cy = 150, scale = 60;
+        const cy = 150;
         const d1_px = 60, d2_px = 20;
 
         // Lower Reservoir
@@ -1136,9 +1260,13 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
         ctx.bezierCurveTo(330, cy + d1_px/2, 320, cy + d2_px/2, 275, cy + d2_px/2);
         ctx.bezierCurveTo(230, cy + d2_px/2, 220, cy + d1_px/2, 150, cy + d1_px/2);
         ctx.lineTo(0, cy + d1_px/2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#475569";
+        ctx.font = "11px Inter";
+        ctx.fillText("grlo", 262, cy - d2_px/2 - 10);
+        ctx.fillText("usis", 286, 318);
 
         // Liquid in Suction Tube
-        const rise_perc = Math.min(p_throat / p_needed, 1.0);
+        const rise_perc = Math.min(state.pThroat / state.pNeeded, 1.0);
         const current_h_px = (370 - (cy + d2_px/2)) * Math.max(rise_perc, 0);
         ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 5;
         ctx.beginPath(); ctx.moveTo(275, 370); ctx.lineTo(275, 370 - current_h_px); ctx.stroke();
@@ -1150,15 +1278,19 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
                 const t = Math.abs(p.x - 275) / 125;
                 local_d = d2_px + (d1_px - d2_px) * (t * t);
             }
-            p.x += (d1_px / local_d) * v1 * 3;
+            p.x += (d1_px / local_d) * state.v1 * 3;
             if(p.x > 550) p.x = 0;
             const py = cy + (p.y_rel - 0.5) * local_d * 0.8;
             ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(p.x, py, 2, 0, Math.PI*2); ctx.fill();
         });
-
-        requestAnimationFrame(() => update());
     }
 
-    v1S.oninput = update; hS.oninput = update; update();
+    function animate() {
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    v1S.oninput = recalculate; hS.oninput = recalculate; recalculate(); animate();
 })();
 </script>
+```

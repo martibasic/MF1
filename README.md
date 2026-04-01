@@ -2,7 +2,7 @@
 
 Ovaj repozitorij sadrži objedinjenu Quarto skriptu za kolegij **Mehanika fluida 1**.
 
-**Zadnja sinkronizacija:** 1. travnja 2026. (Usklađeno s PDF-ovima, očišćen repozitorij)
+**Zadnja sinkronizacija:** 1. travnja 2026. (Finalno čišćenje i re-deploy)
 
 ## Sadržaj
 - `index.qmd`: Početna stranica skripte.

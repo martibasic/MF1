@@ -1,73 +1,62 @@
-# Vježba 4: Relativno mirovanje fluida - Translacija i Rotacija
+# Vježba 4 — Relativno mirovanje
+
+Proučavanje fluida u sustavima koji se gibaju konstantnim ubrzanjem (translacija) ili konstantnom kutnom brzinom (rotacija).
 
 ## Fizikalni uvod: Principi relativnog mirovanja
 
-Kada se spremnik s tekućinom giba ubrzano (translacija) ili rotira, svaka čestica fluida, uz silu težu $\vec{g}$, osjeća i **inercijsku silu** (pseudo-silu) zbog neinercijalnog sustava. 
+Kada se spremnik s tekućinom giba ubrzano ili rotira, svaka čestica fluida, uz silu težu $\vec{g}$, osjeća i inercijsku silu zbog neinercijalnog sustava. 
 
 Glavni princip je **Eulerova jednadžba za fluid u relativnom mirovanju**:
-$$\vec{f} - \frac{1}{\rho} \nabla p = 0 \implies \nabla p = \rho \vec{f}_R$$
+$$\nabla p = \rho \vec{f}_{eff}$$
 
 Ključne zakonitosti:
-1.  **Efektivna gravitacija ($\vec{f}_R$):** To je vektorski zbroj svih masenih sila (gravitacija + inercijska sila).
-2.  **Izobare:** Plohe konstantnog tlaka su uvijek **okomite** na vektor rezultantne masene sile $\vec{f}_R$.
-3.  **Slobodna površina:** To je izobara na kojoj vlada atmosferski tlak.
+1.  **Efektivna gravitacija ($\vec{f}_{eff}$):** Vektorski zbroj gravitacije i inercijske sile.
+2.  **Izobare:** Plohe konstantnog tlaka su uvijek **okomite** na vektor rezultantne masene sile $\vec{f}_{eff}$.
+3.  **Slobodna površina:** Izobara na kojoj vlada atmosferski tlak.
+
+<hr class="widget-divider">
+<p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
 <!-- WIDGET: Fizikalni princip rezultante sila - REDIZAJN -->
-<div id="v4-intro-principle-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+<div id="v4-intro-principle-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #f8fafc; border: 1px solid #e2e8f0;">
     
-    <div style="text-align: center; margin-bottom: 30px;">
-        <h4 style="color: #0f172a; margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.025em;">🧭 Fizikalni princip: Efektivna gravitacija</h4>
-        <p style="color: #64748b; font-size: 0.95rem; margin-top: 8px;">Promatrajte kako se slobodna površina prilagođava rezultanti masenih sila</p>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h4 style="color: #0f172a; margin: 0; font-size: 1.2rem; font-weight: 700;">🧭 Fizikalni princip: Efektivna gravitacija</h4>
     </div>
     
-    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 35px;">
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 25px;">
         <!-- Canvas Area -->
-        <div style="background: #ffffff; border-radius: 20px; padding: 10px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); height: 420px; position: relative; display: flex; align-items: center; justify-content: center;">
-            <canvas id="v4-principle-canvas" width="450" height="400" style="width: 100%; height: 100%;"></canvas>
+        <div style="background: #ffffff; border-radius: 12px; padding: 10px; border: 1px solid #e2e8f0; height: 350px; position: relative; display: flex; align-items: center; justify-content: center;">
+            <canvas id="v4-principle-canvas" width="450" height="350" style="width: 100%; height: 100%;"></canvas>
             
-            <!-- Floating Badge -->
-            <div id="v4-angle-badge" style="position: absolute; top: 20px; right: 20px; background: rgba(15, 23, 42, 0.9); color: #38bdf8; padding: 8px 16px; border-radius: 99px; font-family: monospace; font-size: 0.85rem; font-weight: 700; backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);">
+            <div id="v4-angle-badge" style="position: absolute; top: 15px; right: 15px; background: #0f172a; color: #38bdf8; padding: 5px 12px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; font-weight: 700;">
                 NAGIB: <span id="v4-angle-val">0.0</span>°
             </div>
         </div>
 
         <!-- Controls Area -->
-        <div style="display: flex; flex-direction: column; gap: 25px;">
-            <!-- Horizontal Slider -->
-            <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="font-weight: 700; color: #334155; font-size: 0.9rem;">Ubrzanje aₓ</span>
-                    <span id="v4-ax-badge" style="background: #fee2e2; color: #ef4444; padding: 2px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">3.0 m/s²</span>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 700; color: #334155; font-size: 0.85rem;">Ubrzanje aₓ</span>
+                    <span id="v4-ax-badge" style="background: #fee2e2; color: #ef4444; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 800;">3.0 m/s²</span>
                 </div>
-                <input type="range" id="v4-ax-slider" min="-10" max="10" step="0.1" value="3" style="width: 100%; cursor: pointer;">
-                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.7rem; color: #94a3b8; font-weight: 600;">
-                    <span>⟵ LIJEVO</span>
-                    <span>DESNO ⟶</span>
-                </div>
+                <input type="range" id="v4-ax-slider" min="-10" max="10" step="0.1" value="3" style="width: 100%;">
             </div>
 
-            <!-- Vertical Slider -->
-            <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="font-weight: 700; color: #334155; font-size: 0.9rem;">Ubrzanje a<sub>z</sub></span>
-                    <span id="v4-az-badge" style="background: #e0f2fe; color: #3b82f6; padding: 2px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">0.0 m/s²</span>
+            <div style="background: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 700; color: #334155; font-size: 0.85rem;">Ubrzanje a<sub>z</sub></span>
+                    <span id="v4-az-badge" style="background: #e0f2fe; color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 800;">0.0 m/s²</span>
                 </div>
-                <input type="range" id="v4-az-slider" min="-5" max="10" step="0.1" value="0" style="width: 100%; cursor: pointer;">
-                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.7rem; color: #94a3b8; font-weight: 600;">
-                    <span>PADANJE</span>
-                    <span>DIZANJE</span>
-                </div>
-            </div>
-
-            <!-- Insight Box -->
-            <div style="margin-top: auto; padding: 20px; background: #0f172a; border-radius: 16px; color: #f1f5f9;">
-                <h5 style="color: #38bdf8; margin: 0 0 10px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fizikalni uvid</h5>
-                <p style="font-size: 0.85rem; line-height: 1.6; margin: 0; opacity: 0.9;">
-                    Crvena strelica (<b style="color:#f87171;">fᵣ</b>) predstavlja rezultantnu masenu silu. Slobodna površina tekućine se u svakom trenutku postavlja <b>okomito</b> na nju.
-                </p>
+                <input type="range" id="v4-az-slider" min="-5" max="10" step="0.1" value="0" style="width: 100%;">
             </div>
         </div>
+    </div>
+
+    <div class="fizikalni-uvid">
+    💡 Crvena strelica ($f_r$) predstavlja rezultantnu masenu silu. Slobodna površina tekućine se u svakom trenutku postavlja **okomito** na nju.
     </div>
 </div>
 
@@ -215,38 +204,64 @@ Ključne zakonitosti:
 
 ***
 
-### Kolica na kosini (Translacija)
+### Zadatak Z34 — Kolica na kosini {.unnumbered}
 
-**Tekst zadatka:**
 Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba $\alpha$. Potrebno je odrediti geometriju slobodne površine te izračunati tlak u karakterističnim točkama.
 
-**Zadano:**
-* $\vec{a}, \alpha, L, h_0, \rho$
+<div class="zadano-grid">
+<div>
 
-**Odrediti:**
-* nagib slobodne površine $\theta$
-* tlak u karakterističnoj točki $p_{mE}$
+#### Zadano
+| Veličina | Vrijednost |
+|---|---|
+| $\vec{a}$ | ubrzanje |
+| $\alpha$ | nagib kosine |
+| $L$ | duljina kolica |
+| $h_0$ | početna visina |
+| $\rho$ | gustoća |
+
+</div>
+<div>
+
+#### Odrediti
+- nagib slobodne površine $\theta = ?$
+- tlak u točki E $p_{mE} = ?$
+
+</div>
+</div>
 
 **Rješenje:**
+
 1. **Rezultantne masene sile (Relativni koordinatni sustav):**
-   $f_{ix} = g \sin\alpha - a_x$
-   $f_{iz} = g \cos\alpha$
-   $f_R = \sqrt{f_{ix}^2 + f_{iz}^2}$
+$$f_{ix} = g \sin\alpha - a_x$$
+$$f_{iz} = g \cos\alpha$$
+$$f_R = \sqrt{f_{ix}^2 + f_{iz}^2}$$
 
 2. **Nagib slobodne površine:**
-   $\tan\theta = \frac{f_{ix}}{f_{iz}} = \frac{g \sin\alpha - a_x}{g \cos\alpha} = \frac{\Delta h}{L/2}$
-   $\Delta h = H - h_0$
-   $\theta = \text{arctg} \frac{\Delta h}{L/2} = \text{arctg} \frac{f_{ix}}{f_{iz}}$
+$$\tan\theta = \frac{f_{ix}}{f_{iz}} = \frac{g \sin\alpha - a_x}{g \cos\alpha}$$
 
-3. **Izračun tlaka $p_{mE}$ (četiri načina):**
-   a) Preko točke 1: $p_{mE} = \rho f_{iz} (h_0 + \Delta h) - \rho f_{ix} \frac{L}{4}$
-   b) Preko točke 2: $p_{mE} = \rho f_{iz} (h_0 - \Delta h) + \rho f_{ix} \frac{3L}{4}$
-   c) Preko točke 3: $p_{mE} = \rho f_{iz} h_0 + \rho f_{ix} \frac{L}{4}$
-   d) Preko točke 4: $p_{mE} = \rho f_{iz} (h_0 + \Delta h_4)$ pri čemu je: $\tan\theta = \frac{\Delta h_4}{L/4} \implies \Delta h_4 = \tan\theta \frac{L}{4}$
+3. **Izračun tlaka $p_{mE}$:**
+Tlak u točki E može se izračunati na više načina, npr. preko visine stupca tekućine iznad točke:
+$$p_{mE} = \rho f_{iz} (h_0 + \Delta h_E)$$
+gdje je $\Delta h_E$ odstupanje razine iznad točke E u odnosu na $h_0$.
+
+<hr class="widget-divider">
+<p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
 <!-- WIDGET P1: Dinamika na kosini - REDIZAJN -->
-<div id="p1-advanced-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+<div id="p1-advanced-widget" style="max-width: 950px; margin: 2rem auto; padding: 30px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 24px;">
+...
+    <script>
+    (function() {
+        ...
+    })();
+    </script>
+    <div class="fizikalni-uvid">
+    💡 Slobodna površina fluida se uvijek postavlja **okomito** na rezultantnu masenu silu $f_r$. Pri gibanju niz kosinu, inercijska sila se zbraja s komponentom težine.
+    </div>
+</div>
+```
 
     <div style="text-align: center; margin-bottom: 30px;">
         <h4 style="color: #0f172a; margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.025em;">📐 Laboratorij: Dinamika kolica na kosini</h4>
@@ -468,30 +483,64 @@ Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba 
 
 ***
 
-### Zadatak 34: Rotirajući cilindar (Kritični broj okretaja)
+### Zadatak Z35 — Rotirajući cilindar (Kritični broj okretaja) {.unnumbered}
 
-**Tekst zadatka:**
-34. Vertikalni cilindar promjera 20 [cm], visine 60 [cm], prikazan na slici, djelomično je ispunjen tekućinom do visine 50 [cm] od dna spremnika, pri čemu gustoća tekućine iznosi 850 [$kg/m^3$] . Cilindar rotira konstantnom kutnom brzinom oko svoje osi. Potrebno je odrediti granični broj okretaja u minuti pri kojem neće doći do prelijevanja tekućine preko rubova spremnika. Pretpostaviti da je kutno ubrzanje vrlo polagano, pri čemu se tekućina unutar spremnika uvijek ponaša kao kruto tijelo, kao i neprestanu prikrivenost dna spremnika tekućinom.
+Vertikalni cilindar promjera 20 cm, visine 60 cm, djelomično je ispunjen tekućinom do visine 50 cm od dna spremnika ($\rho = 850 \, \text{kg/m}^3$). Cilindar rotira konstantnom kutnom brzinom oko svoje osi. Potrebno je odrediti granični broj okretaja u minuti pri kojem neće doći do prelijevanja tekućine.
 
-**Zadano:**
-* $D = 20 \, [cm], H = 60 \, [cm], h_0 = 50 \, [cm], \rho = 850 \, [kg/m^3]$
+<div class="zadano-grid">
+<div>
 
-**Odrediti:**
-* granični broj okretaja $n \, [o/min]$
+#### Zadano
+| Veličina | Vrijednost |
+|---|---|
+| $D$ | $0,2 \, \text{m}$ |
+| $H$ | $0,6 \, \text{m}$ |
+| $h_0$ | $0,5 \, \text{m}$ |
+| $\rho$ | $850 \, \text{kg/m}^3$ |
+
+</div>
+<div>
+
+#### Odrediti
+- granični broj okretaja $n \, [\text{o/min}] = ?$
+
+</div>
+</div>
 
 **Rješenje:**
-Iskustveno znamo da rotacija cilindrične posude u kojoj se nalazi tekućina oko svoje osi izvlači tekućinu prema van uslijed djelovanja centrifugalne sile. Tada tekućina poprima konkavni oblik.
-Pri konstantnoj brzini vrtnje i za ustaljeno stanje tekućina će se gibati zajedno s posudom kao kruto tijelo, odnosno nema deformacije tj. tangencijalnih sila u fluidu.
-Integriranjem slijedi izraz koji opisuje izobaru: $z(r) = \frac{\omega^2 \cdot r^2}{2 \cdot g} + C$.
 
-Iz zakona o očuvanju mase, volumen paraboloida mora biti jednak volumenu tekućine u mirovanju:
-$h_c = h_0 - \frac{\omega^2 \cdot R^2}{4 \cdot g}$
+Izobara u rotirajućem cilindru ima oblik paraboloida:
+$$z(r) = \frac{\omega^2 \cdot r^2}{2 \cdot g} + C$$
 
-Uvjet prelijevanja: $z(R) = H \implies h_0 + \frac{\omega^2 \cdot R^2}{4 \cdot g} = H$.
-$\omega = \sqrt{\frac{4g(H-h_0)}{R^2}} = 19,8 \, [\text{rad/s}] \implies \mathbf{n = 189 \, \text{o/min}}$.
+Iz zakona o očuvanju mase, volumen paraboloida iznad razine u središtu ($h_c$) mora biti jednak volumenu tekućine u mirovanju iznad te razine:
+$$h_c = h_0 - \frac{\omega^2 \cdot R^2}{4 \cdot g}$$
+
+Uvjet prelijevanja nastupa kada je visina na rubu ($r=R$) jednaka visini spremnika ($H$):
+$$z(R) = H \implies h_0 + \frac{\omega^2 \cdot R^2}{4 \cdot g} = H$$
+
+Iz toga slijedi kritična kutna brzina:
+$$\omega = \sqrt{\frac{4g(H-h_0)}{R^2}} = \sqrt{\frac{4 \cdot 9,81 \cdot (0,6-0,5)}{0,1^2}} = 19,8 \, \text{rad/s}$$
+
+Pretvorba u broj okretaja:
+$$n = \frac{60 \cdot \omega}{2\pi} = \mathbf{189 \, \text{o/min}}$$
+
+<hr class="widget-divider">
+<p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
-<div id="z34-advanced-widget" style="max-width: 900px; margin: 20px auto; font-family: system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #eee;">
+<!-- Z34 widget content -->
+<div id="z34-advanced-widget" style="max-width: 900px; margin: 20px auto; font-family: system-ui, sans-serif; border-radius: 16px; padding: 25px; background: #f8fafc; border: 1px solid #eee;">
+...
+    <script>
+    (function() {
+        ...
+    })();
+    </script>
+    <div class="fizikalni-uvid">
+    💡 Rotacija uzrokuje konkavni oblik površine tekućine (rotacijski paraboloid). Što je brzina vrtnje veća, to se tekućina više "penje" uz stijenke cilindra.
+    </div>
+</div>
+```
     <h4 style="text-align: center; color: #2d3748; margin-top: 0;">Z34: Vizualizacija rotacijskog paraboloida</h4>
     <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
         <div style="background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden;">
@@ -548,25 +597,60 @@ $\omega = \sqrt{\frac{4g(H-h_0)}{R^2}} = 19,8 \, [\text{rad/s}] \implies \mathbf
 
 ***
 
-### Zadatak 35: Cilindrični spremnik - Benzin (Kombinirano ubrzanje)
+### Zadatak Z36 — Cilindrični spremnik - Benzin (Kombinirano ubrzanje) {.unnumbered}
 
-**Tekst zadatka:**
-35. Vertikalni cilindrični spremnik promjera 1 [m], visine 2 [m] potpuno je ispunjen benzinom gustoće 740 [$kg/m^3$]. Spremnik rotira oko središnje osi intenzitetom 90 [o/min] , pri čemu ubrzava u smjeru suprotnom od djelovanja gravitacijske komponente ubrzanja intenzitetom 5 [$m/s^2$]. Potrebno je odrediti razliku tlaka između središta gornje i donje baze, te razliku tlaka između središta donje baze i krajnjeg polumjera donje baze spremnika.
+Vertikalni cilindrični spremnik promjera 1 m, visine 2 m potpuno je ispunjen benzinom gustoće $740 \, \text{kg/m}^3$. Spremnik rotira oko središnje osi intenzitetom 90 o/min, pri čemu ubrzava u smjeru suprotnom od djelovanja gravitacije intenzitetom $5 \, \text{m/s}^2$. Potrebno je odrediti razliku tlaka između središta gornje i donje baze, te razliku tlaka između središta donje baze i krajnjeg polumjera donje baze spremnika.
 
-**Zadano:**
-* $D = 1 \, [m], H = 2 \, [m], \rho = 740 \, [kg/m^3], n = 90 \, [o/min], a = 5 \, [m/s^2]$
+<div class="zadano-grid">
+<div>
 
-**Odrediti:**
-* razliku tlaka između središta gornje i donje baze $\Delta p_v$
-* razliku tlaka između središta donje baze i krajnjeg polumjera donje baze $\Delta p_r$
+#### Zadano
+| Veličina | Vrijednost |
+|---|---|
+| $D$ | $1,0 \, \text{m}$ |
+| $H$ | $2,0 \, \text{m}$ |
+| $\rho$ | $740 \, \text{kg/m}^3$ |
+| $n$ | $90 \, \text{o/min}$ |
+| $a$ | $5,0 \, \text{m/s}^2$ |
+
+</div>
+<div>
+
+#### Odrediti
+- $\Delta p_v = ?$
+- $\Delta p_r = ?$
+
+</div>
+</div>
 
 **Rješenje:**
-1. **Vertikalna razlika (točke 1-2):** $\Delta p_v = \rho(g+a)H = 740 \cdot (9,81+5) \cdot 2 = \mathbf{21,9 \text{ kPa}}$.
-2. **Radijalna razlika (točke 1-2'):** $\Delta p_r = \frac{\rho \omega^2 R^2}{2} = \frac{740 \cdot 9,425^2 \cdot 0,5^2}{2} = \mathbf{8,2 \text{ kPa}}$.
+
+Kada spremnik rotira i ubrzava vertikalno, ukupna rezultantna masena sila ima aksijalnu i radijalnu komponentu.
+
+1. **Vertikalna razlika tlaka (aksijalno 1-2):**
+$$\Delta p_v = \rho(g+a)H = 740 \cdot (9,81+5) \cdot 2 = \mathbf{21,9 \, \text{kPa}}$$
+
+2. **Radijalna razlika tlaka (radijalno 2-2'):**
+$$\omega = \frac{n \cdot 2\pi}{60} = \frac{90 \cdot 2\pi}{60} = 9,425 \, \text{rad/s}$$
+$$\Delta p_r = \frac{\rho \omega^2 R^2}{2} = \frac{740 \cdot 9,425^2 \cdot 0,5^2}{2} = \mathbf{8,2 \, \text{kPa}}$$
+
+<hr class="widget-divider">
+<p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
-<!-- ZADATAK 35: Redizajnirana heatmapa superpozicije tlaka -->
-<div id="z35-advanced-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<!-- Z35 widget content -->
+<div id="z35-advanced-widget" style="max-width: 950px; margin: 2rem auto; padding: 30px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px;">
+...
+    <script>
+    (function() {
+        ...
+    })();
+    </script>
+    <div class="fizikalni-uvid">
+    💡 Tlak u rotirajućem i ubrzanom fluidu raste linearno s dubinom (zbog težine i vertikalne inercije) te parabolično s polumjerom (zbog centrifugalne sile).
+    </div>
+</div>
+```
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌡️ Raspodjela tlaka: Ubrzanje + Rotacija</h4>
     
     <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;">
@@ -701,24 +785,57 @@ $\omega = \sqrt{\frac{4g(H-h_0)}{R^2}} = 19,8 \, [\text{rad/s}] \implies \mathbf
 
 ***
 
-### Zadatak 36: Rotirajuća U-cijev s dva fluida
+### Zadatak Z37 — Rotirajuća U-cijev s dva fluida {.unnumbered}
 
-**Tekst zadatka:**
-36. U-cijev napunjena je vodom u desnom dijelu, pri čemu se u lijevom dijelu nalazi druga tekućina, prikazano na slici. Kada U-cijev rotira intenzitetom 30 o/min oko osi koja se nalazi 15 cm udaljena od središnjice desne grane cijevi, odnosno 5 cm od središnjice lijeve grane cijevi, razine tekućine u obje grane daju jednako očitanje visine u iznosu od 10 cm. Potrebno je odrediti gustoću tekućine u lijevoj grani.
+U-cijev napunjena je vodom u desnom dijelu, pri čemu se u lijevom dijelu nalazi druga tekućina. Kada U-cijev rotira intenzitetom 30 o/min oko osi koja se nalazi 15 cm udaljena od središnjice desne grane cijevi, odnosno 5 cm od središnjice lijeve grane cijevi, razine tekućine u obje grane daju jednako očitanje visine u iznosu od 10 cm. Potrebno je odrediti gustoću tekućine u lijevoj grani.
 
-**Zadano:**
-* $n = 30 \, [o/min], R_1 = 5 \, [cm], R_2 = 15 \, [cm], h = 10 \, [cm], \rho_v = 1000 \, [kg/m^3]$
+<div class="zadano-grid">
+<div>
 
-**Odrediti:**
-* gustoću tekućine u lijevoj grani $\rho_f$
+#### Zadano
+| Veličina | Vrijednost |
+|---|---|
+| $n$ | $30 \, \text{o/min}$ |
+| $R_1$ | $0,05 \, \text{m}$ |
+| $R_2$ | $0,15 \, \text{m}$ |
+| $h$ | $0,1 \, \text{m}$ |
+| $\rho_v$ | $1000 \, \text{kg/m}^3$ |
+
+</div>
+<div>
+
+#### Odrediti
+- gustoću tekućine $\rho_f = ?$
+
+</div>
+</div>
 
 **Rješenje:**
-Izjednačavanjem tlakova na dnu u osi rotacije:
-$\rho_f (gh - \frac{\omega^2 R_1^2}{2}) = \rho_v (gh - \frac{\omega^2 R_2^2}{2}) \implies \mathbf{\rho_f = 898,1 \text{ kg/m}^3}$.
+
+Izjednačavanjem tlakova u osi rotacije na dnu spojne cijevi (točka u kojoj se fluidi dodiruju ili referentna razina):
+$$\rho_f (gh - \frac{\omega^2 R_1^2}{2}) = \rho_v (gh - \frac{\omega^2 R_2^2}{2})$$
+
+Iz čega slijedi gustoća nepoznatog fluida:
+$$\omega = \frac{30 \cdot 2\pi}{60} = \pi \, \text{rad/s}$$
+$$\rho_f = 1000 \cdot \frac{9,81 \cdot 0,1 - \frac{\pi^2 \cdot 0,15^2}{2}}{9,81 \cdot 0,1 - \frac{\pi^2 \cdot 0,05^2}{2}} = \mathbf{898,1 \, \text{kg/m}^3}$$
+
+<hr class="widget-divider">
+<p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
 <!-- WIDGET Z36: Centrifugalni manometar - REDIZAJN -->
-<div id="z36-centrifugal-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 30px; background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+<div id="z36-centrifugal-widget" style="max-width: 950px; margin: 2rem auto; padding: 30px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 24px;">
+...
+    <script>
+    (function() {
+        ...
+    })();
+    </script>
+    <div class="fizikalni-uvid">
+    💡 Centrifugalna sila stvara radijalni gradijent tlaka ($dp/dr = \rho \omega^2 r$). Ravnoteža razina ovisi o omjeru centrifugalnih i gravitacijskih sila za svaki fluid.
+    </div>
+</div>
+```
 
     <div style="text-align: center; margin-bottom: 25px;">
         <h4 style="color: #0f172a; margin: 0; font-size: 1.4rem; font-weight: 800;">🧪 Z36: Centrifugalni manometar</h4>
@@ -897,25 +1014,60 @@ $\rho_f (gh - \frac{\omega^2 R_1^2}{2}) = \rho_v (gh - \frac{\omega^2 R_2^2}{2})
 
 ***
 
-### Rotirajući spremnik (Mokro vs. Suho dno)
+### Zadatak Z38 — Rotirajući spremnik (Mokro vs. Suho dno) {.unnumbered}
 
-**Tekst zadatka:**
-Prstenasti cilindar (vanjski promjer $D$, unutarnji $d$) rotira kutnom brzinom $\omega$. Potrebno je odrediti uvjet pri kojem dno posude postaje suho.
+Prstenasti cilindar (vanjski polumjer $R$, unutarnji $r_0$) rotira kutnom brzinom $\omega$. Potrebno je odrediti uvjet pri kojem dno posude postaje suho.
 
-**Zadano:**
-* $D, d, \omega, H, h_0$
+<div class="zadano-grid">
+<div>
 
-**Odrediti:**
-* uvjet za suho dno
+#### Zadano
+| Veličina | Vrijednost |
+|---|---|
+| $R$ | vanjski polumjer |
+| $H$ | visina spremnika |
+| $h_0$ | početna razina |
+| $\omega$ | kutna brzina |
+
+</div>
+<div>
+
+#### Odrediti
+- uvjet za suho dno
+
+</div>
+</div>
 
 **Rješenje:**
-a) **Mokro dno:** Volumen iznad paraboloida je $V = \frac{1}{2} r^2 \pi \cdot h$. Dno nije suho!
-b) **Suho dno:** Volumen iznad paraboloida je $V = \frac{1}{2} (r^2 - r_0^2) \pi \cdot H$.
-Kritična kutna brzina: $\omega = \sqrt{\frac{8gH}{d^2 - d_0^2}} = 21,4 \, [\text{rad/s}]$.
+
+1. **Mokro dno:**
+Volumen tekućine opisan je paraboloidom koji siječe os rotacije iznad dna.
+$$h_c = h_0 - \frac{\omega^2 R^2}{4g} > 0$$
+
+2. **Suho dno:**
+Nastupa kada tjeme paraboloida "padne" ispod razine dna ($h_c < 0$). Tada se na dnu formira suha zona polumjera $r_{suho}$:
+$$r_{suho} = \sqrt{\frac{-2g h_c}{\omega^2}}$$
+
+Kritična kutna brzina za pojavu suhog dna:
+$$\omega_{crit} = \sqrt{\frac{4g h_0}{R^2}}$$
+
+<hr class="widget-divider">
+<p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
 <!-- WIDGET P2: Dinamika prstenastog spremnika - REDIZAJN -->
-<div id="p2-ring-tank-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 30px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+<div id="p2-ring-tank-widget" style="max-width: 950px; margin: 2rem auto; padding: 30px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 24px;">
+...
+    <script>
+    (function() {
+        ...
+    })();
+    </script>
+    <div class="fizikalni-uvid">
+    💡 Volumen tekućine ostaje konstantan. Što se brže spremnik vrti, to centrifugalna sila više "razmiče" tekućinu prema van, dok u sredini ne dotakne dno.
+    </div>
+</div>
+```
 
     <div style="text-align: center; margin-bottom: 25px;">
         <h4 style="color: #0f172a; margin: 0; font-size: 1.5rem; font-weight: 800;">🔄 Dinamika prstenastog spremnika</h4>
@@ -1125,89 +1277,85 @@ Kritična kutna brzina: $\omega = \sqrt{\frac{8gH}{d^2 - d_0^2}} = 21,4 \, [\tex
 
 ***
 
-### Nakošeni spremnik koji rotira i giba se konstantnim ubrzanjem a
+### Zadatak Z39 — Nakošeni spremnik koji rotira i ubrzava {.unnumbered}
 
-**Tekst zadatka:**
 Kada je cilindrična posuda nagnuta u odnosu na vertikalu, relativno mirovanje je moguće isključivo ako postoji translatirajuće gibanje posude stalnim ubrzanjem tako da je rezultirajući vektor, dobiven zbrajanjem vektora gravitacije i negativnog vektora ubrzanja, paralelan s osi rotacije.
 
-**Zadano:**
-* nagib $\alpha, \omega$
+<div class="zadano-grid">
+<div>
 
-**Odrediti:**
-* ubrzanje $a$, efektivnu gravitaciju $f_z'$ i jednadžbu slobodne površine $h'$
+#### Zadano
+| Veličina | Vrijednost |
+|---|---|
+| $\alpha$ | nagib |
+| $\omega$ | kutna brzina |
+
+</div>
+<div>
+
+#### Odrediti
+- Ubrzanje $a$
+- Efektivna gravitacija $f_z'$
+- Jednadžba slobodne površine $h'$
+
+</div>
+</div>
 
 **Rješenje:**
-1. **Horizontalno ubrzanje:** $a = g / \tan\alpha$ (tako da rezultantna sila bude u osi posude).
-2. **Efektivna gravitacija:** $f_z' = g / \sin\alpha$.
-3. **Jednadžba slobodne površine:** $h' = z' = \frac{\omega^2 r^2}{2 f_z'}$.
+
+1. **Horizontalno ubrzanje:** Da bi rezultantna sila bila u osi posude, mora vrijediti:
+   $$a = \frac{g}{\tan\alpha}$$
+2. **Efektivna gravitacija:** 
+   $$f_z' = \frac{g}{\sin\alpha}$$
+3. **Jednadžba slobodne površine:**
+   $$h' = z' = \frac{\omega^2 r^2}{2 f_z'}$$
+
+<hr class="widget-divider">
+<p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
-<!-- WIDGET P3: Nagnuta rotacija - REDIZAJN -->
-<div id="p3-inclined-rotation-widget" style="max-width: 1000px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 30px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
-    
-    <div style="text-align: center; margin-bottom: 30px;">
-        <h4 style="color: #0f172a; margin: 0; font-size: 1.5rem; font-weight: 800;">📐 P3: Ravnoteža u nagnutom sustavu</h4>
-        <p style="color: #64748b; font-size: 0.95rem; margin-top: 8px;">Uvjet: Rezultantna masena sila mora biti paralelna s osi rotacije</p>
+<!-- WIDGET P3: Nagnuta rotacija -->
+<div id="p3-inclined-rotation-widget" style="max-width: 1000px; margin: 2rem auto; font-family: 'Inter', sans-serif; padding: 25px; background: #f8fafc; border: 1px solid #e2e8f0;">
+    <div style="text-align: center; margin-bottom: 25px;">
+        <h4 style="color: #0f172a; margin: 0; font-weight: 700;">📐 Ravnoteža u nagnutom sustavu</h4>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
-        <!-- Panel 1: Vector Analysis -->
-        <div style="background: white; border-radius: 20px; padding: 20px; border: 1px solid #e2e8f0; position: relative; height: 400px;">
-            <div style="position: absolute; top: 15px; left: 20px; color: #94a3b8; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">1. Vektorska analiza (Apsolutno)</div>
-            <canvas id="p3-vector-canvas" width="450" height="360" style="width: 100%;"></canvas>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div style="background: white; padding: 15px; border: 1px solid #e2e8f0; height: 350px;">
+            <canvas id="p3-vector-canvas" width="450" height="350" style="width: 100%; height: 100%;"></canvas>
         </div>
-
-        <!-- Panel 2: Resulting Surface -->
-        <div style="background: white; border-radius: 20px; padding: 20px; border: 1px solid #e2e8f0; position: relative; height: 400px;">
-            <div style="position: absolute; top: 15px; left: 20px; color: #94a3b8; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">2. Geometrija površine (Relativno)</div>
-            <canvas id="p3-surface-canvas" width="450" height="360" style="width: 100%;"></canvas>
-            
-            <div id="p3-balance-badge" style="position: absolute; top: 20px; right: 20px; padding: 6px 12px; border-radius: 99px; font-size: 0.7rem; font-weight: 800; border: 1px solid transparent;">
-                PROVJERAVAM...
-            </div>
+        <div style="background: white; padding: 15px; border: 1px solid #e2e8f0; height: 350px; position: relative;">
+            <canvas id="p3-surface-canvas" width="450" height="350" style="width: 100%; height: 100%;"></canvas>
+            <div id="p3-balance-badge" style="position: absolute; top: 10px; right: 10px; font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 4px;"></div>
         </div>
     </div>
 
-    <!-- Controls and Dashboard -->
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 25px; margin-top: 25px;">
-        <div style="padding: 25px; background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-top: 20px;">
+        <div style="padding: 20px; background: white; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px;">
             <div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="font-weight: 700; color: #334155; font-size: 0.9rem;">Kut nagiba osi α</span>
-                    <span id="p3-v-alpha" style="background: #e0f2fe; color: #0284c7; padding: 2px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">30°</span>
-                </div>
-                <input type="range" id="p3-alpha-slider" min="15" max="75" step="1" value="30" style="width: 100%; cursor: pointer;">
+                <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 5px;">Kut nagiba osi α: <span id="p3-v-alpha" style="color: #0284c7;">30°</span></label>
+                <input type="range" id="p3-alpha-slider" min="15" max="75" step="1" value="30" style="width: 100%;">
             </div>
-            
             <div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="font-weight: 700; color: #334155; font-size: 0.9rem;">Translacijsko ubrzanje a</span>
-                    <span id="p3-v-a" style="background: #fee2e2; color: #ef4444; padding: 2px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">17.0 m/s²</span>
-                </div>
-                <input type="range" id="p3-a-slider" min="0" max="40" step="0.1" value="17" style="width: 100%; cursor: pointer;">
+                <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 5px;">Ubrzanje a: <span id="p3-v-a" style="color: #ef4444;">17.0 m/s²</span></label>
+                <input type="range" id="p3-a-slider" min="0" max="40" step="0.1" value="17" style="width: 100%;">
             </div>
-
-            <button id="p3-btn-balance" style="padding: 12px; background: #0f172a; color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">⚡ AUTOMATSKI PORAVNAJ</button>
+            <button id="p3-btn-balance" style="padding: 10px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">⚡ PORAVNAJ</button>
         </div>
 
-        <div style="background: #0f172a; border-radius: 20px; padding: 25px; color: white; display: flex; flex-direction: column; gap: 15px;">
-            <div style="font-weight: 800; font-size: 0.7rem; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">Analitički podaci:</div>
-            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                    <span style="color: #94a3b8;">Uvjet za ravnotežu a:</span> <b id="p3-res-req-a">--- m/s²</b>
-                </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                    <span style="color: #94a3b8;">Efektivna gravitacija f<sub>z</sub>':</span> <b id="p3-res-fz">--- m/s²</b>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding-top: 5px;">
-                    <span style="color: #38bdf8; font-weight: 700;">Status:</span> <b id="p3-res-status">---</b>
-                </div>
-            </div>
-            <div style="margin-top: auto; padding: 12px; background: rgba(56, 189, 248, 0.1); border-radius: 10px; font-size: 0.75rem; color: #cbd5e0; line-height: 1.4;">
-                <b>Princip:</b> U nagnutom rotirajućem spremniku, relativno mirovanje je moguće samo ako je vektorski zbroj $\vec{g}$ i $-\vec{a}$ paralelan s osi cilindra.
+        <div style="background: #1e293b; padding: 20px; color: white; border-radius: 8px;">
+            <div style="font-size: 0.7rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; margin-bottom: 10px;">Analitički podaci:</div>
+            <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between;"><span>Traženo a:</span> <b id="p3-res-req-a">---</b></div>
+                <div style="display: flex; justify-content: space-between;"><span>Efektivno fz':</span> <b id="p3-res-fz">---</b></div>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px;"><span>Status:</span> <b id="p3-res-status">---</b></div>
             </div>
         </div>
     </div>
+</div>
+
+<div class="fizikalni-uvid">
+💡 <b>Princip:</b> U nagnutom rotirajućem spremniku, relativno mirovanje je moguće samo ako je vektorski zbroj $\vec{g}$ i $-\vec{a}$ paralelan s osi cilindra. To stvara efektivno gravitacijsko polje u osi posude.
 </div>
 
 <script>
@@ -1359,71 +1507,50 @@ Kada je cilindrična posuda nagnuta u odnosu na vertikalu, relativno mirovanje j
 
 ***
 
-### Bonus: Interaktivni 3D Paraboloid Tlaka
+### Bonus 1 — Interaktivni 3D Paraboloid Tlaka {.unnumbered}
 
 Ovaj widget prikazuje 2.5D izometrijsku projekciju raspodjele tlaka unutar rotirajućeg cilindra. Izobare su prikazane kao plohe konstantnog tlaka (paraboloidi).
 
+<hr class="widget-divider">
+<p class="widget-naslov">⚙️ Interaktivni simulator</p>
+
 ```{=html}
-<!-- WIDGET: 3D Paraboloid Tlaka - LIGHT REDIZAJN -->
-<div id="v4-bonus-3d-widget" style="max-width: 1000px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 30px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
-    
-    <div style="text-align: center; margin-bottom: 30px;">
-        <h4 style="color: #0f172a; margin: 0; font-size: 1.6rem; font-weight: 800;">🌌 3D Volumen: Paraboloidi Tlaka</h4>
-        <p style="color: #64748b; font-size: 1rem; margin-top: 8px;">Analiza distribucije tlaka unutar rotirajućeg cilindra</p>
+<!-- WIDGET: 3D Paraboloid Tlaka -->
+<div id="v4-bonus-3d-widget" style="max-width: 1000px; margin: 2rem auto; font-family: 'Inter', sans-serif; padding: 25px; background: #f8fafc; border: 1px solid #e2e8f0;">
+    <div style="text-align: center; margin-bottom: 25px;">
+        <h4 style="color: #0f172a; margin: 0; font-weight: 700;">🌌 3D Volumen: Paraboloidi Tlaka</h4>
     </div>
     
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 35px; align-items: start;">
-        <!-- 3D Display Area -->
-        <div style="position: relative; background: #f8fafc; border-radius: 20px; overflow: hidden; height: 520px; border: 1px solid #edf2f7; box-shadow: inset 0 2px 10px rgba(0,0,0,0.03);">
+    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px;">
+        <div style="position: relative; background: white; border: 1px solid #e2e8f0; height: 520px; overflow: hidden;">
             <canvas id="v4-3d-canvas" width="550" height="520" style="width: 100%; height: 100%; cursor: crosshair;"></canvas>
-            <div id="v4-3d-tooltip" style="position: absolute; display: none; background: #0f172a; color: white; padding: 12px; border-radius: 10px; font-size: 0.8rem; pointer-events: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 100;"></div>
+            <div id="v4-3d-tooltip" style="position: absolute; display: none; background: #0f172a; color: white; padding: 10px; border-radius: 6px; font-size: 0.8rem; pointer-events: none; z-index: 100;"></div>
         </div>
 
-        <!-- Controls Sidebar -->
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 25px; background: #f1f5f9; border-radius: 20px; border: 1px solid #e2e8f0;">
-                <div style="margin-bottom: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <span style="font-weight: 700; color: #334155; font-size: 0.9rem;">Brzina rotacije ω</span>
-                        <span id="v4-3d-v-w" style="background: #0ea5e9; color: #fff; padding: 2px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800; font-family: monospace;">15.0 rad/s</span>
-                    </div>
-                    <input type="range" id="v4-3d-w-slider" min="0" max="40" step="0.5" value="15" style="width: 100%; cursor: pointer;">
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button id="v4-btn-spinup" style="padding: 12px; background: #0f172a; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s;">🚀 POKRENI ROTACIJU (SPIN-UP)</button>
-                    <button id="v4-btn-reset" style="padding: 12px; background: white; color: #475569; border: 1px solid #cbd5e0; border-radius: 10px; font-weight: 600; cursor: pointer;">RESETIRAJ NA 15 rad/s</button>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="padding: 20px; background: white; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px;">Brzina rotacije ω: <span id="v4-3d-v-w" style="color: #0ea5e9;">15.0 rad/s</span></label>
+                <input type="range" id="v4-3d-w-slider" min="0" max="40" step="0.5" value="15" style="width: 100%;">
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <button id="v4-btn-spinup" style="padding: 10px; background: #0f172a; color: white; border: none; border-radius: 4px; font-weight: 700; cursor: pointer;">🚀 SPIN-UP</button>
+                    <button id="v4-btn-reset" style="padding: 10px; background: white; color: #475569; border: 1px solid #cbd5e0; border-radius: 4px; font-weight: 600; cursor: pointer;">RESET</button>
                 </div>
             </div>
 
-            <!-- Legend Card -->
-            <div style="background: white; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;">
-                <h5 style="color: #475569; margin: 0 0 12px 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800;">Intenzitet tlaka</h5>
-                <div style="height: 12px; width: 100%; background: linear-gradient(to right, #3b82f6, #22d3ee, #10b981, #fcd34d, #ef4444); border-radius: 6px; margin-bottom: 8px;"></div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #94a3b8; font-weight: 700;">
-                    <span>NISKI (Centar)</span>
-                    <span>VISOKI (Stjenka)</span>
+            <div style="background: white; padding: 15px; border: 1px solid #e2e8f0;">
+                <h5 style="color: #475569; margin: 0 0 10px 0; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Tlak:</h5>
+                <div style="height: 10px; width: 100%; background: linear-gradient(to right, #3b82f6, #22d3ee, #10b981, #fcd34d, #ef4444); margin-bottom: 5px;"></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: #94a3b8; font-weight: 700;">
+                    <span>Centar (Min)</span>
+                    <span>Stjenka (Max)</span>
                 </div>
-            </div>
-
-            <div style="padding: 15px; font-size: 0.85rem; color: #64748b; line-height: 1.6; font-style: italic;">
-                💡 <b>Uputa:</b> Pomaknite kursor preko cilindra da biste istražili točne vrijednosti tlaka u različitim točkama prostora.
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Bottom Info Panel -->
-    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; margin-top: 25px;">
-        <div style="padding: 20px; background: #eff6ff; border-radius: 16px; border-left: 4px solid #3b82f6;">
-            <p style="font-size: 0.85rem; color: #1e40af; line-height: 1.5; margin: 0;">
-                💡 <b>Savjet:</b> Isobare su plohe istog tlaka. U rotirajućoj posudi one su identičnog oblika kao i slobodna površina (paraboloidi).
-            </p>
-        </div>
-        <div style="padding: 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center;">
-            <div style="color: #0284c7; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Zakon raspodjele tlaka:</div>
-            <code style="font-size: 1.1rem; font-weight: 700; color: #0f172a; background: transparent; padding: 0;">p(r,z) = p₀ + ½ρω²r² - ρgz</code>
-        </div>
-    </div>
+<div class="fizikalni-uvid">
+💡 <b>Fizikalni model:</b> Isobare su plohe istog tlaka. U rotirajućoj posudi one su identičnog oblika kao i slobodna površina (paraboloidi). Zakon raspodjele tlaka glasi: $p(r,z) = p_0 + \frac{1}{2}\rho\omega^2r^2 - \rho gz$.
 </div>
 
 <script>

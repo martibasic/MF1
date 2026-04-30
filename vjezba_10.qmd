@@ -35,8 +35,12 @@ Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja.
 <!-- WIDGET: Ideal vs Real Fluid -->
 <div id="v10-ideal-real-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 25px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📉 Vizualizacija gubitaka: Idealni vs. Realni fluid</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati usporedbu:</strong> U oba slučaja ista brzina daje istu brzinsku visinu <strong>v²/2g</strong>, ali samo realni fluid gubi dodatni dio energije kroz <strong>h<sub>w</sub></strong>. Zato u desnom panelu EGL pada niz cijev, a njegov nagib <strong>I = h<sub>w</sub>/L</strong> izravno mjeri koliko se energije gubi po metru cijevi.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
         <!-- Lijevo: Idealno -->
         <div style="background: #f8fafc; border-radius: 15px; padding: 15px; border: 1px solid #e2e8f0;">
             <h5 style="text-align: center; margin: 0 0 15px 0; color: #3b82f6;">IDEALNI FLUID (hw = 0)</h5>
@@ -49,7 +53,7 @@ Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja.
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 25px; padding: 20px; background: #f1f5f9; border-radius: 15px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; margin-top: 25px; padding: 20px; background: #f1f5f9; border-radius: 15px;">
         <div class="control-group">
             <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Faktor trenja λ: <span id="v10-v-f" style="color:#ef4444;">0.030</span></label>
             <input type="range" id="v10-f-slider" min="0.01" max="0.08" step="0.005" value="0.03" style="width: 100%;">
@@ -64,8 +68,31 @@ Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja.
         </div>
     </div>
 
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 20px;">
+        <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v²/2g</div>
+            <div id="v10-vhead-out" style="font-family: monospace; font-size: 0.98rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+        </div>
+        <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">h_w</div>
+            <div id="v10-hw-card" style="font-family: monospace; font-size: 0.98rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+        </div>
+        <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Hidraulički nagib I</div>
+            <div id="v10-slope-out" style="font-family: monospace; font-size: 0.98rem; font-weight: 800; color: #0f172a;">0.000</div>
+        </div>
+        <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">D/L utjecaj</div>
+            <div id="v10-ld-out" style="font-family: monospace; font-size: 0.98rem; font-weight: 800; color: #0f172a;">0.0</div>
+        </div>
+    </div>
+
     <div id="v10-loss-summary" style="margin-top: 20px; padding: 15px; background: #2d3748; color: white; border-radius: 12px; text-align: center;">
         Ukupni gubitak visine dobave <b>h<sub>w</sub></b> = <span id="v10-hw-out" style="color:#fc8181; font-size: 1.2rem;">---</span> m
+    </div>
+
+    <div style="margin-top: 16px; padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+        <strong>Tumačenje scene:</strong> <span id="v10-explainer"></span>
     </div>
 </div>
 
@@ -97,12 +124,19 @@ Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja.
 
         const g = 9.81;
         const diameter = 0.15;
-        state.headLoss = state.lam * (state.length / diameter) * (state.velocity * state.velocity / (2 * g));
+        const vHead = state.velocity * state.velocity / (2 * g);
+        state.headLoss = state.lam * (state.length / diameter) * vHead;
+        const slope = state.headLoss / state.length;
 
         document.getElementById('v10-v-f').innerText = state.lam.toFixed(3);
         document.getElementById('v10-v-L').innerText = state.length.toFixed(0);
         document.getElementById('v10-v-v').innerText = state.velocity.toFixed(1);
         document.getElementById('v10-hw-out').innerText = state.headLoss.toFixed(2);
+        document.getElementById('v10-vhead-out').innerText = vHead.toFixed(2) + ' m';
+        document.getElementById('v10-hw-card').innerText = state.headLoss.toFixed(2) + ' m';
+        document.getElementById('v10-slope-out').innerText = slope.toFixed(3);
+        document.getElementById('v10-ld-out').innerText = (state.length / diameter).toFixed(1);
+        document.getElementById('v10-explainer').textContent = `Za brzinu ${state.velocity.toFixed(1)} m/s brzinska visina iznosi ${vHead.toFixed(2)} m. U realnom slučaju faktor trenja λ = ${state.lam.toFixed(3)} i omjer L/D = ${(state.length / diameter).toFixed(1)} pretvaraju tu energiju u ukupni gubitak ${state.headLoss.toFixed(2)} m, pa EGL pada nagibom I = ${slope.toFixed(3)} m/m duž cijevi.`;
     }
 
     function drawScene(ctx, isReal) {
@@ -212,116 +246,39 @@ Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja.
 
 ### Fizikalne osnove: Darcy-Weisbachova jednadžba
 
-Gubitak energije (visine dobave) pri strujanju realnog fluida kroz ravnu cijev opisuje se **Darcy-Weisbachovom jednadžbom**:
+Gubitak energije pri strujanju realnog fluida kroz ravnu cijev opisuje se **Darcy-Weisbachovom jednadžbom**:
 $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
-Ovaj widget omogućuje istraživanje osjetljivosti gubitaka na promjenu pojedinih parametara.
-
-<hr class="widget-divider">
-<p class="widget-naslov">⚙️ Interaktivni simulator</p>
-
 ```{=html}
-<!-- WIDGET: Darcy-Weisbach Explorer -->
-<div id="v10-darcy-explorer" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🧪 Darcy-Weisbach: Analiza osjetljivosti</h4>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px;">
-        <!-- Left: Sliders -->
-        <div style="display: flex; flex-direction: column; gap: 15px; padding: 20px; background: #f8fafc; border-radius: 15px; border: 1px solid #e2e8f0;">
-            <div>
-                <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 5px;">Duljina L: <span id="dw-v-L">50</span> m</label>
-                <input type="range" id="dw-L-slider" min="10" max="200" step="5" value="50" style="width: 100%;">
-            </div>
-            <div>
-                <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 5px;">Promjer D: <span id="dw-v-D">100</span> mm</label>
-                <input type="range" id="dw-D-slider" min="50" max="300" step="10" value="100" style="width: 100%;">
-            </div>
-            <div>
-                <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 5px;">Brzina v: <span id="dw-v-v">2.0</span> m/s</label>
-                <input type="range" id="dw-v-slider" min="0.5" max="8" step="0.1" value="2" style="width: 100%;">
-            </div>
-            <div>
-                <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 5px;">Trenje λ: <span id="dw-v-lam">0.025</span></label>
-                <input type="range" id="dw-lam-slider" min="0.01" max="0.06" step="0.001" value="0.025" style="width: 100%;">
-            </div>
-        </div>
-
-        <!-- Right: Visualization -->
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="background: #0f172a; padding: 25px; border-radius: 15px; color: white;">
-                <div style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 15px;">Ukupni gubitak:</div>
-                <div style="display: flex; align-items: baseline; gap: 10px;">
-                    <span style="font-size: 3rem; font-weight: 800; color: #38bdf8;">h<sub>w</sub> =</span>
-                    <span id="dw-res-hw" style="font-size: 3.5rem; font-weight: 800; color: #ffffff;">5.10</span>
-                    <span style="font-size: 1.5rem; font-weight: 600; color: #94a3b8;">m</span>
-                </div>
-                <div style="font-size: 0.9rem; color: #cbd5e0; margin-top: 10px;">
-                    Ekvivalentni pad tlaka Δp: <b id="dw-res-dp" style="color:#38bdf8;">50.0</b> kPa
-                </div>
-            </div>
-
-            <!-- Effect Bars -->
-            <div style="background: #f1f5f9; padding: 20px; border-radius: 15px;">
-                <div style="font-weight: 800; font-size: 0.75rem; color: #475569; text-transform: uppercase; margin-bottom: 15px;">Utjecaj na gubitke (kvadratični v²!):</div>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div style="font-size: 0.8rem; display: flex; align-items: center; gap: 10px;">
-                        <span style="width: 60px;">Brzina:</span>
-                        <div style="flex: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
-                            <div id="dw-impact-v" style="width: 40%; height: 100%; background: #ef4444;"></div>
-                        </div>
-                    </div>
-                    <div style="font-size: 0.8rem; display: flex; align-items: center; gap: 10px;">
-                        <span style="width: 60px;">Geometrija:</span>
-                        <div style="flex: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
-                            <div id="dw-impact-geo" style="width: 60%; height: 100%; background: #3b82f6;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="mf1-bridge">
+    <h4>Konceptualni most</h4>
+    <p>Uvodni widget iznad već pokazuje fizičku posljedicu gubitaka kroz pad EGL i HGL. Darcy-Weisbach ovdje služi kao kompaktan računski model: brzina ulazi kvadratno, geometrija kroz omjer $L/D$, a faktor trenja sažima utjecaj stijenke i režima strujanja.</p>
+</div>
+<div class="mf1-note-grid">
+    <div class="mf1-kriterij">
+        <h4>Kriterij primjene</h4>
+        <ul>
+            <li>Za ravne dionice prvo odvoji linijske gubitke od lokalnih gubitaka na ventilima, koljenima i suženjima.</li>
+            <li>Ako brzinu udvostručiš, Darcy-Weisbachov gubitak raste približno četiri puta jer ulazi član $v^2$.</li>
+            <li>Prije uvrštavanja pazi koristiš li promjer u metrima i jesu li svi članovi izraženi u visini energije po jediničnoj težini fluida.</li>
+        </ul>
+    </div>
+    <div class="mf1-warning">
+        <h4>Česta pogreška</h4>
+        <p>Najčešća pogreška je zbrajati lokalne i linijske gubitke bez jasnog razdvajanja ili ubaciti tlakni pad $\Delta p$ kao da je već izražen u metrima stupca fluida. Prvo odluči radiš li u paskalima ili u visini dobave, pa tek onda pretvaraj.</p>
     </div>
 </div>
-
-<script>
-(function() {
-    const lS = document.getElementById('dw-L-slider'), dS = document.getElementById('dw-D-slider');
-    const vS = document.getElementById('dw-v-slider'), lamS = document.getElementById('dw-lam-slider');
-
-    function update() {
-        const L = parseFloat(lS.value), D = parseFloat(dS.value)/1000;
-        const v = parseFloat(vS.value), lam = parseFloat(lamS.value);
-        const g = 9.81, rho = 1000;
-
-        const hw = lam * (L / D) * (v * v / (2 * g));
-        const dp = rho * g * hw / 1000;
-
-        document.getElementById('dw-v-L').innerText = L;
-        document.getElementById('dw-v-D').innerText = parseFloat(dS.value);
-        document.getElementById('dw-v-v').innerText = v.toFixed(1);
-        document.getElementById('dw-v-lam').innerText = lam.toFixed(3);
-        
-        document.getElementById('dw-res-hw').innerText = hw.toFixed(2);
-        document.getElementById('dw-res-dp').innerText = dp.toFixed(1);
-
-        // Impact visualization (Roughly proportional to terms)
-        const v_impact = (v*v / 64) * 100; // v² impact
-        const geo_impact = (L / (D*1000)) * 50; 
-        document.getElementById('dw-impact-v').style.width = Math.min(v_impact, 100) + "%";
-        document.getElementById('dw-impact-geo').style.width = Math.min(geo_impact, 100) + "%";
-    }
-
-    [lS, dS, vS, lamS].forEach(s => s.oninput = update);
-    update();
-})();
-</script>
 ```
 
 ***
 
-### Zadatak Z86 â€” Sifon s realnim fluidom {.unnumbered}
+### Zadatak Z86 — Sifon s realnim fluidom {.unnumbered}
 
- 
+
 Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s]. Potrebno je odrediti gubitak visine dobave od točke 1 do točke 3 preko izraza $\frac{v^2}{2g}$. Potrebno je odrediti tlak u točki 2 ukoliko se dvije trećine ukupnih gubitaka visine dobave odvijaju između točke 1 i 2.
+
+**Zadano:** $\dot{V} = 150 \, \text{dm}^3\text{/s}, d = 200 \, \text{mm}, z_1 = 1,5 \, \text{m}, z_2 = 3,5 \, \text{m}, z_3 = 0 \, \text{m}$, voda  
+**Odrediti:** $h_{w1-3}, p_2$
 
 **Rješenje:**
 1. **Brzina:** $v = \frac{0,15}{\pi \cdot 0,1^2} = \mathbf{4,775 \, \text{m/s}}$.
@@ -336,7 +293,11 @@ Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s].
 <div id="z86-siphon-losses-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌀 Sifon s gubicima: EGL, HGL i raspodjela tlaka</h4>
 
-    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati zadatak:</strong> Iz protoka najprije dobivaš brzinu i brzinsku visinu <strong>v²/2g</strong>. Zatim se ukupni gubitak <strong>h<sub>w1-3}</sub></strong> dijeli između krakova 1→2 i 2→3, pa upravo gubitak u usisnom kraku dodatno snižava tlak u tjemenu sifona.
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <!-- Visualization Canvas -->
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
             <canvas id="z86-canvas" width="550" height="450" style="width: 100%; height: 100%;"></canvas>
@@ -368,9 +329,24 @@ Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s].
                 </div>
             </div>
 
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Što je veći otpor u usisnom kraku sifona (1→2), to je tlak u tjemenu 2 <b>niži</b> (veći vakuum). Zato se usisni dio uvijek nastoji izvesti što kraće i šire.
-            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Brzina v</div>
+                    <div id="z86-v-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v²/2g</div>
+                    <div id="z86-vhead-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">p₂/ρg</div>
+                    <div id="z86-p2head-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+            </div>
+
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z86-explainer">Što je veći otpor u usisnom kraku sifona (1→2), to je tlak u tjemenu 2 niži (veći vakuum). Zato se usisni dio uvijek nastoji izvesti što kraće i šire.</span>
+            </div>
         </div>
     </div>
 </div>
@@ -382,7 +358,7 @@ Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s].
 
     let particles = [];
     for(let i=0; i<100; i++) particles.push(Math.random());
-    const state = { z1: 1.5, z2: 3.5, z3: 0, vHead: 0, hw12: 0, hw23: 0, velocity: 0 };
+    const state = { z1: 1.5, z2: 3.5, z3: 0, vHead: 0, hw12: 0, hw23: 0, velocity: 0, p2Head: 0 };
 
     function recalculate() {
         const f = parseFloat(fS.value), vdot_l = parseFloat(vdotS.value);
@@ -407,6 +383,7 @@ Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s].
         state.hw12 = hw12;
         state.hw23 = hw23;
         state.velocity = v;
+        state.p2Head = p2_head;
 
         document.getElementById('z86-v-f').innerText = (f*100).toFixed(0) + "%";
         document.getElementById('z86-v-vdot').innerText = vdot_l;
@@ -414,6 +391,10 @@ Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s].
         document.getElementById('z86-hw23').innerText = hw23.toFixed(3) + " m";
         document.getElementById('z86-hwtotal').innerText = hw_total.toFixed(3) + " m";
         document.getElementById('z86-p2-val').innerText = (p2/1000).toFixed(1) + " kPa";
+        document.getElementById('z86-v-out').innerText = v.toFixed(2) + " m/s";
+        document.getElementById('z86-vhead-out').innerText = v_head.toFixed(3) + " m";
+        document.getElementById('z86-p2head-out').innerText = p2_head.toFixed(3) + " m";
+        document.getElementById('z86-explainer').textContent = `Za protok ${vdot_l.toFixed(0)} L/s brzina u sifonu iznosi ${v.toFixed(2)} m/s, pa brzinska visina iznosi ${v_head.toFixed(3)} m. Od ukupnog gubitka ${hw_total.toFixed(3)} m, u kraku 1→2 otpada ${hw12.toFixed(3)} m, pa se glava tlaka u tjemenu spušta na ${p2_head.toFixed(3)} m, odnosno tlak na ${(p2/1000).toFixed(1)} kPa.`;
     }
 
     function draw() {
@@ -482,11 +463,14 @@ Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s].
 
 ***
 
-### Zadatak Z87 â€” Visina mlaza iz sapnice {.unnumbered}
+### Zadatak Z87 — Visina mlaza iz sapnice {.unnumbered}
 
- 
+
 Za sustav na slici, potrebno je odrediti do koje će visine iznad sapnice dospjeti mlaz vode. Prilikom 
 proračuna pretpostaviti da je fluid idealan. Mjerenjem je utvrđen tlak u točki A $p_{Am} = 55 \, \text{kPa}$.
+
+**Zadano:** $p_{Am} = 55 \, \text{kPa}, d_{cijevi}=100 \, \text{mm}, d_{sapnice}=50 \, \text{mm}, h_2=1,1 \, \text{m}$, idealan fluid, voda  
+**Odrediti:** visina mlaza $h_1$
 
 **Rješenje:**
 1. $v_A = 2,43 \, \text{m/s}, v_{is} = 4 v_A = 9,72 \, \text{m/s}$.
@@ -500,8 +484,12 @@ proračuna pretpostaviti da je fluid idealan. Mjerenjem je utvrđen tlak u točk
 <!-- WIDGET: Sapnica i Vertikalni Mlaz -->
 <div id="z87-nozzle-jet-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🚀 Pretvorba energije: Sapnica i visina mlaza</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati sapnicu:</strong> Tlak u točki A daje tlačnu visinu <strong>p<sub>A</sub>/(ρg)</strong>, dio energije već je u brzini u cijevi, a u sapnici se veći dio te energije pretvara u izlaznu brzinu <strong>v<sub>is</sub></strong>. Vertikalni mlaz zatim tu kinetičku energiju pretvara natrag u visinu <strong>h₁</strong>.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <!-- Fountain Visualization -->
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 500px;">
             <canvas id="z87-canvas" width="500" height="500" style="width: 100%; height: 100%;"></canvas>
@@ -538,9 +526,28 @@ proračuna pretpostaviti da je fluid idealan. Mjerenjem je utvrđen tlak u točk
                 </div>
             </div>
 
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.5; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Sapnica pretvara <b>tlačnu energiju</b> u <b>kinetičku energiju</b> (veliku brzinu mlaza). Ukupna energija u sustavu ostaje ista, pa mlaz doseže visinu koja odgovara ukupnoj visini energije (H) umanjenoj za položaj sapnice.
-            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">p_A/ρg</div>
+                    <div id="z87-phead-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v_A</div>
+                    <div id="z87-va-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v_is</div>
+                    <div id="z87-vis-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">H_A</div>
+                    <div id="z87-ha-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+            </div>
+
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z87-explainer">Sapnica pretvara tlačnu energiju u kinetičku energiju (veliku brzinu mlaza). Ukupna energija u sustavu ostaje ista, pa mlaz doseže visinu koja odgovara ukupnoj visini energije H umanjenoj za položaj sapnice.</span>
+            </div>
         </div>
     </div>
 </div>
@@ -569,6 +576,8 @@ proračuna pretpostaviti da je fluid idealan. Mjerenjem je utvrđen tlak u točk
         const v_is_head = Math.max((p_head - h2) / (1 - ratio), 0);
         const v_is = Math.sqrt(2 * g * v_is_head);
         const vA_head = v_is_head * ratio;
+        const vA = Math.sqrt(2 * g * vA_head);
+        const hA = p_head + vA_head;
         
         const h1 = v_is_head; // In ideal case, jet rises to its velocity head height
 
@@ -579,6 +588,11 @@ proračuna pretpostaviti da je fluid idealan. Mjerenjem je utvrđen tlak u točk
         document.getElementById('z87-v-pa').innerText = pa_kpa;
         document.getElementById('z87-v-d2').innerText = d2_mm;
         document.getElementById('z87-h1-val').innerText = h1.toFixed(2) + " m";
+        document.getElementById('z87-phead-out').innerText = p_head.toFixed(2) + " m";
+        document.getElementById('z87-va-out').innerText = vA.toFixed(2) + " m/s";
+        document.getElementById('z87-vis-out').innerText = v_is.toFixed(2) + " m/s";
+        document.getElementById('z87-ha-out').innerText = hA.toFixed(2) + " m";
+        document.getElementById('z87-explainer').textContent = `Tlak u točki A daje tlačnu visinu ${p_head.toFixed(2)} m, a zbog kontinuiteta je brzina u cijevi ${vA.toFixed(2)} m/s, dok u užoj sapnici raste na ${v_is.toFixed(2)} m/s. Ukupna energija u točki A iznosi ${hA.toFixed(2)} m, pa nakon oduzimanja geodetske visine sapnice h₂ = ${h2.toFixed(1)} m mlaz može dosegnuti visinu ${h1.toFixed(2)} m.`;
         
         // Update bars
         const total = p_head + vA_head;
@@ -650,154 +664,57 @@ proračuna pretpostaviti da je fluid idealan. Mjerenjem je utvrđen tlak u točk
 </script>
 ```
 
+***
+
+### Zadatak Z88 — Linijski gubici u cijevi {.unnumbered}
+
+Voda struji kroz cijev duljine 100 m i promjera 50 mm brzinom 2 m/s. Koeficijent trenja je 0,02. Odrediti pad tlaka.
+
+**Zadano:** $L=100 \, \text{m}, D=50 \, \text{mm}, v=2 \, \text{m/s}, \lambda=0,02$  
+**Odrediti:** $\Delta p$
 
 ***
 
-### Zadatak Z89 â€” Istjecanje iz velikog spremnika {.unnumbered}
+### Zadatak Z89 — Istjecanje iz velikog spremnika {.unnumbered}
 
  
 Za veliki spremnik s otvorom na dubini $h=5 \, \text{m}$, odrediti brzinu istjecanja $v_2$ (idealan fluid).
 
+**Zadano:** $h = 5 \, \text{m}$, idealan fluid  
+**Odrediti:** $v_2$
+
 **Rješenje:**
 $v_2 = \sqrt{2gh} = \sqrt{2 \cdot 9,81 \cdot 5} = \mathbf{9,9 \, \text{m/s}}$.
 
-<hr class="widget-divider">
-<p class="widget-naslov">⚙️ Interaktivni simulator</p>
-
 ```{=html}
-<!-- WIDGET: Istjecanje iz spremnika (Multi-hole) -->
-<div id="z89-discharge-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🚰 Torricellijev zakon i domet mlaza</h4>
-    
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
-            <canvas id="z89-canvas" width="550" height="450" style="width: 100%; height: 100%; cursor: crosshair;"></canvas>
-            <div style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; border: 1px solid #cbd5e0;">
-                <b>Kliknite na stijenku za promjenu otvora</b>
-            </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Ukupna visina H: <span id="z89-v-H" style="color:#2563eb;">5.0</span> m</label>
-                <input type="range" id="z89-H-slider" min="2" max="10" step="0.5" value="5" style="width: 100%;">
-                
-                <div style="margin-top: 20px; display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="z89-multi-mode">
-                    <label for="z89-multi-mode" style="font-size: 0.85rem; font-weight: 600; color: #475569;">Prikaži više otvora (analiza dometa)</label>
-                </div>
-            </div>
-
-            <div style="background: #f0f9ff; padding: 20px; border-radius: 15px; border-left: 6px solid #0ea5e9;">
-                <div style="font-weight: 800; font-size: 0.75rem; color: #0369a1; text-transform: uppercase; margin-bottom: 12px;">Trenutni podaci:</div>
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;">
-                    <div style="display: flex; justify-content: space-between;"><span>Dubina otvora h:</span> <b id="z89-res-h">--- m</b></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Brzina v:</span> <b id="z89-res-v">--- m/s</b></div>
-                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #bae6fd; padding-top: 8px; margin-top: 4px;">
-                        <span>Domet x:</span> <b id="z89-res-x" style="color: #0284c7;">--- m</b>
-                    </div>
-                </div>
-            </div>
-            
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4;">
-                💡 <b>Fizikalni uvid:</b> Brzina istjecanja ovisi o dubini otvora (h), dok ukupni domet x ovisi o umnošku brzine i vremena pada (h_hole). Domet je najveći za otvor na polovici visine spremnika.
-            </p>
-        </div>
+<div class="mf1-bridge">
+    <h4>Idealni kontrast</h4>
+    <p>Ovaj zadatak namjerno ostaje u idealnom obliku kako bi se jasno vidjelo odakle kreće realni Bernoulli: Torricellijeva formula daje gornju granicu brzine istjecanja kada gubitke zanemarimo. U stvarnim sustavima isti račun zatim korigiramo linijskim i lokalnim gubicima.</p>
+</div>
+<div class="mf1-note-grid">
+    <div class="mf1-kriterij">
+        <h4>Kriterij primjene</h4>
+        <ul>
+            <li>Koristi Torricellijev zakon samo kada je spremnik velik, izlaz na atmosferi i gubici su zanemarivi ili eksplicitno izostavljeni.</li>
+            <li>Ako zadatak uvodi duljinu cijevi, hrapavost, ventil ili koeficijent gubitka, više nisi u čistom idealnom slučaju i trebaš prijeći na realni Bernoulli.</li>
+        </ul>
+    </div>
+    <div class="mf1-warning">
+        <h4>Česta pogreška</h4>
+        <p>Najčešća greška je uzeti $v = \sqrt{2gh}$ kao univerzalnu formulu istjecanja i primijeniti je i onda kada je već zadano da sustav ima disipaciju energije.</p>
     </div>
 </div>
-
-<script>
-(function() {
-    const canvas = document.getElementById('z89-canvas'), ctx = canvas.getContext('2d');
-    const hSl = document.getElementById('z89-H-slider'), multiC = document.getElementById('z89-multi-mode');
-
-    let currentHoleY = 3.5; // Relativno od dna
-    let particles = [];
-    for(let i=0; i<100; i++) particles.push({ t: Math.random(), hole: 0 });
-
-    canvas.addEventListener('mousedown', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const y = e.clientY - rect.top;
-        const scale = 400 / parseFloat(hSl.value);
-        const y_from_bot = (400 - y) / scale;
-        if(y_from_bot >= 0 && y_from_bot <= parseFloat(hSl.value)) {
-            currentHoleY = y_from_bot;
-            update();
-        }
-    });
-
-    function update() {
-        const H = parseFloat(hSl.value);
-        currentHoleY = Math.min(Math.max(currentHoleY, 0.05 * H), 0.95 * H);
-        const hole_h = H - currentHoleY; // Dubina otvora
-        const v = Math.sqrt(2 * 9.81 * hole_h);
-        const x = 2 * Math.sqrt(currentHoleY * hole_h);
-
-        document.getElementById('z89-v-H').innerText = H.toFixed(1);
-        document.getElementById('z89-res-h').innerText = hole_h.toFixed(2);
-        document.getElementById('z89-res-v').innerText = v.toFixed(2);
-        document.getElementById('z89-res-x').innerText = x.toFixed(2);
-
-        draw(H, currentHoleY, multiC.checked);
-    }
-
-    function draw(H, activeHoleY, multi) {
-        ctx.clearRect(0, 0, 550, 450);
-        const scale = 400 / H;
-        const x0 = 100, oy = 420;
-
-        // Ground
-        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(20, oy); ctx.lineTo(530, oy); ctx.stroke();
-
-        // Tank
-        ctx.fillStyle = "rgba(14, 165, 233, 0.1)";
-        ctx.fillRect(x0 - 60, oy - H*scale, 60, H*scale);
-        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 3;
-        ctx.strokeRect(x0 - 60, oy - H*scale, 60, H*scale);
-        
-        // Water
-        ctx.fillStyle = "rgba(14, 165, 233, 0.4)";
-        ctx.fillRect(x0 - 60, oy - H*scale, 60, H*scale);
-
-        const drawJet = (h_bot, color, alpha) => {
-            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.globalAlpha = alpha;
-            ctx.beginPath(); ctx.moveTo(x0, oy - h_bot*scale);
-            const v0 = Math.sqrt(2 * 9.81 * (H - h_bot));
-            for(let t = 0; t < 2; t += 0.02) {
-                let px = v0 * t;
-                let py = 0.5 * 9.81 * t*t;
-                if(py > h_bot) break;
-                ctx.lineTo(x0 + px*scale, (oy - h_bot*scale) + py*scale);
-            }
-            ctx.stroke();
-            ctx.globalAlpha = 1.0;
-        };
-
-        if(multi) {
-            const steps = [0.1, 0.3, 0.5, 0.7, 0.9];
-            const colors = ["#f59e0b", "#ef4444", "#8b5cf6", "#10b981", "#3b82f6"];
-            steps.forEach((s, i) => drawJet(H*s, colors[i], 0.3));
-        }
-
-        drawJet(activeHoleY, "#0ea5e9", 1.0);
-        
-        // Hole marker
-        ctx.fillStyle = "#ef4444";
-        ctx.beginPath(); ctx.arc(x0, oy - activeHoleY*scale, 4, 0, Math.PI*2); ctx.fill();
-    }
-
-    hSl.oninput = update;
-    multiC.onchange = update;
-    update();
-})();
-</script>
 ```
 
 
 ***
 
-### Zadatak Z90 â€” Pitot-statička cijev (Prandtl) {.unnumbered}
+### Zadatak Z90 — Pitot-statička cijev (Prandtl) {.unnumbered}
+
+Prandtlova cijev u struji vode ($\rho=1000 \, \text{kg/m}^3$) spojena je na živin manometar ($\rho_{Hg}=13600 \, \text{kg/m}^3$). Odrediti brzinu ako je $\Delta h_{Hg}=63 \, \text{mm}$.
+
+**Zadano:** $\Delta h_{Hg}=63 \, \text{mm}, \rho_v=1000 \, \text{kg/m}^3, \rho_{Hg}=13600 \, \text{kg/m}^3$  
+**Odrediti:** $v$
 
 **Rješenje:**
 $\Delta p = (\rho_{Hg} - \rho_v) g \Delta h_{Hg} = 7850 \, \text{Pa}$.
@@ -810,8 +727,12 @@ $v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
 <!-- WIDGET: Pitotova cijev (Premium) -->
 <div id="z90-pitot-premium-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📍 Pitot-statička cijev: Stagnacija i mjerenje brzine</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati Pitot:</strong> Na vrhu sonde tok se zaustavlja pa se brzina pretvara u porast tlaka. Manometar taj porast čita kao razliku razina žive <strong>Δh<sub>Hg</sub></strong>, iz koje prvo dobivaš <strong>Δp</strong>, a zatim i brzinu iz relacije <strong>v = √(2Δp/ρ)</strong>.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
             <canvas id="z90-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
             
@@ -840,10 +761,21 @@ $v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
                     Δp = <span id="z90-res-dp">8000</span> Pa
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Dinamička visina</div>
+                    <div id="z90-res-head" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v iz manometra</div>
+                    <div id="z90-res-vcalc" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+            </div>
             
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Pitotova cijev mjeri <b>ukupni tlak</b> na vrhu (stagnacijska točka) i <b>statički tlak</b> na obodu. Razlika tih tlakova je dinamički tlak (ρv²/2) iz kojeg dobivamo brzinu.
-            </p>
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z90-explainer">Pitotova cijev mjeri ukupni tlak na vrhu i statički tlak na obodu. Razlika tih tlakova je dinamički tlak iz kojeg dobivamo brzinu.</span>
+            </div>
         </div>
     </div>
 </div>
@@ -863,6 +795,8 @@ $v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
         
         const dp = 0.5 * rho * v * v;
         const dhHg = dp / (g * (rhoHg - rho));
+        const dynHead = dp / (rho * g);
+        const vCalc = Math.sqrt((2 * dp) / rho);
 
         state.velocity = v;
         state.dhHg = dhHg;
@@ -871,6 +805,9 @@ $v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
         document.getElementById('z90-v-rho').innerText = rho;
         document.getElementById('z90-hg-display').innerText = (dhHg * 1000).toFixed(0);
         document.getElementById('z90-res-dp').innerText = Math.round(dp);
+        document.getElementById('z90-res-head').innerText = dynHead.toFixed(2) + " m";
+        document.getElementById('z90-res-vcalc').innerText = vCalc.toFixed(2) + " m/s";
+        document.getElementById('z90-explainer').textContent = `Za brzinu ${v.toFixed(2)} m/s dinamički tlak iznosi ${Math.round(dp)} Pa, što daje dinamičku visinu ${dynHead.toFixed(2)} m. U živinom manometru to se vidi kao razlika razina ${(dhHg * 1000).toFixed(0)} mm Hg, a povratnim računom opet dobivaš brzinu ${vCalc.toFixed(2)} m/s.`;
     }
 
     function draw() {
@@ -944,10 +881,13 @@ $v = \sqrt{\frac{2 \Delta p}{\rho_v}} = \mathbf{3,97 \, \text{m/s}}$.
 
 ***
 
-### Zadatak Z91 â€” Stratificirani višefazni spremnik - istjecanje {.unnumbered}
+### Zadatak Z91 — Stratificirani višefazni spremnik - istjecanje {.unnumbered}
 
  
 Veliki zatvoreni spremnik ispunjen je slojevima vode ($h_1=2 \, \text{m}$), ulja ($h_2=3 \, \text{m}$) i benzina ($h_3=1,5 \, \text{m}$). Iznad benzina je zrak pod pretlakom $p_m=80 \, \text{kPa}$. Odrediti brzinu istjecanja ulja $v_2$ kroz otvor na dnu sloja ulja.
+
+**Zadano:** $h_1=2 \, \text{m}, h_2=3 \, \text{m}, h_3=1,5 \, \text{m}, p_m=80 \, \text{kPa}, \rho_b=720 \, \text{kg/m}^3, \rho_u=850 \, \text{kg/m}^3$  
+**Odrediti:** $v_2$
 
 **Rješenje:**
 1. Tlak na gornjoj plohi ulja: $p_{u1} = p_m + \rho_b g h_3 = 80000 + 720 \cdot 9,81 \cdot 1,5 = \mathbf{90,6 \, \text{kPa}}$.
@@ -961,8 +901,12 @@ Veliki zatvoreni spremnik ispunjen je slojevima vode ($h_1=2 \, \text{m}$), ulja
 <!-- WIDGET: Višefazni spremnik (Voda, Ulje, Benzin, Zrak) -->
 <div id="z91-multiphase-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🛢️ Višefazni spremnik: Istjecanje stratificiranih fluida</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati višefazni spremnik:</strong> Ulje na otvoru ne “osjeća” cijeli spremnik jednako, nego samo tlak na svojoj gornjoj plohi i vlastitu geodetsku razliku do otvora. Zato se brzina ulja ovdje gradi iz <strong>pretlaka zraka</strong>, doprinosa sloja <strong>benzina</strong> i visine samog <strong>uljnog stupca</strong>, dok donji vodeni sloj ne ulazi u Bernoullijevu vezu za ovaj otvor.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 500px;">
             <canvas id="z91-canvas" width="500" height="500" style="width: 100%; height: 100%;"></canvas>
             <div style="position: absolute; left: 10px; top: 10px; font-size: 0.65rem; color: #64748b; background: rgba(255,255,255,0.8); padding: 5px; border-radius: 4px;"><b>Slojevi fluida</b></div>
@@ -981,6 +925,25 @@ Veliki zatvoreni spremnik ispunjen je slojevima vode ($h_1=2 \, \text{m}$), ulja
                 <div style="font-size: 0.95rem; margin-top: 5px;">Tlak pu1: <b id="z91-res-pu1">90.6 kPa</b></div>
                 <div style="font-size: 1.1rem; margin-top: 5px;">Brzina v₂: <b id="z91-res-v2" style="color: #c2410c;">16.5 m/s</b></div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">p_m/ρ_u g</div>
+                    <div id="z91-res-pmhead" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">ρ_b g h₃ / ρ_u g</div>
+                    <div id="z91-res-benzhead" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂²/2g</div>
+                    <div id="z91-res-vhead" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+            </div>
+
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z91-explainer"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -992,7 +955,11 @@ Veliki zatvoreni spremnik ispunjen je slojevima vode ($h_1=2 \, \text{m}$), ulja
     const state = { h1: 2.0, h2: 3.0, h3: 1.5, v2: 0 };
     function recalculate() {
         const pm = parseFloat(pmS.value), h2 = parseFloat(h2S.value), h3 = parseFloat(h3S.value), g = 9.81, rho_b = 720, rho_u = 850;
-        const pu1 = pm*1000 + rho_b*g*h3, v2 = Math.sqrt(2*pu1/rho_u + 2*g*h2);
+        const pu1 = pm*1000 + rho_b*g*h3;
+        const pmHead = (pm * 1000) / (rho_u * g);
+        const benzHead = (rho_b * g * h3) / (rho_u * g);
+        const v2 = Math.sqrt(2*pu1/rho_u + 2*g*h2);
+        const vHead = v2 * v2 / (2 * g);
         state.h2 = h2;
         state.h3 = h3;
         state.v2 = v2;
@@ -1001,6 +968,10 @@ Veliki zatvoreni spremnik ispunjen je slojevima vode ($h_1=2 \, \text{m}$), ulja
         document.getElementById('z91-v-h3').innerText = h3.toFixed(1);
         document.getElementById('z91-res-pu1').innerText = (pu1/1000).toFixed(1) + " kPa";
         document.getElementById('z91-res-v2').innerText = v2.toFixed(1) + " m/s";
+        document.getElementById('z91-res-pmhead').innerText = pmHead.toFixed(2) + " m";
+        document.getElementById('z91-res-benzhead').innerText = benzHead.toFixed(2) + " m";
+        document.getElementById('z91-res-vhead').innerText = vHead.toFixed(2) + " m";
+        document.getElementById('z91-explainer').textContent = `Pretlak zraka doprinosi s ${pmHead.toFixed(2)} m uljne visine, a sloj benzina dodaje još ${benzHead.toFixed(2)} m. Kad se tome pridruži geodetska visina ulja h₂ = ${h2.toFixed(1)} m, ukupna raspoloživa energija daje brzinsku visinu ${vHead.toFixed(2)} m, odnosno izlaznu brzinu ulja ${v2.toFixed(2)} m/s.`;
     }
     function draw() {
         ctx.clearRect(0,0,500,500); const scale = 40, w = 250, ox = 100, oy = 450;
@@ -1033,10 +1004,13 @@ Veliki zatvoreni spremnik ispunjen je slojevima vode ($h_1=2 \, \text{m}$), ulja
 
 ***
 
-### Zadatak Z92 â€” Protočna sapnica u cijevi {.unnumbered}
+### Zadatak Z92 — Protočna sapnica u cijevi {.unnumbered}
 
  
 Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 \, \text{mm}$ ako je razlika u Hg manometru $20 \, \text{mm}$ ($c_c=0,95$).
+
+**Zadano:** $d_c=200 \, \text{mm}, d_s=30 \, \text{mm}, \Delta h_{Hg} = 20 \, \text{mm}, c_c=0,95$  
+**Odrediti:** $\dot{V}$
 
 **Rješenje:**
 1. $\Delta p = (\rho_{Hg}-\rho_v)g h = 2472 \, \text{Pa}$.
@@ -1049,8 +1023,12 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
 <!-- WIDGET: Protočna sapnica i Vena Contracta -->
 <div id="z92-nozzle-contracta-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📏 Protočna sapnica i Vena Contracta</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati sapnicu:</strong> Manometar najprije daje tlačni pad <strong>Δp</strong>, zatim geometrija određuje idealni presjek sapnice <strong>A<sub>s</sub></strong>, a koeficijent kontrakcije <strong>C<sub>c</sub></strong> ga smanjuje na efektivni presjek vene contracte. Upravo taj manji presjek određuje stvarni protok.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
             <canvas id="z92-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
             
@@ -1078,10 +1056,25 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
                     Efektivni presjek struje je manji od geometrijskog otvora sapnice.
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δp</div>
+                    <div id="z92-res-dp" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0 Pa</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">A_s</div>
+                    <div id="z92-res-as" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000 m²</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">C_c A_s</div>
+                    <div id="z92-res-aeff" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000 m²</div>
+                </div>
+            </div>
             
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Zbog tromosti fluida, strujnice se nastavljaju sužavati i nakon prolaska kroz sapnicu. Najmanji presjek struje (vena contracta) određuje stvarni protok.
-            </p>
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z92-explainer">Zbog tromosti fluida, strujnice se nastavljaju sužavati i nakon prolaska kroz sapnicu. Najmanji presjek struje određuje stvarni protok.</span>
+            </div>
         </div>
     </div>
 </div>
@@ -1103,6 +1096,7 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
         const dp = (rhoHg - rho) * g * (h_mm / 1000);
         const area_s = Math.PI * ds * ds / 4;
         const area_c = Math.PI * dc * dc / 4;
+        const area_eff = cc * area_s;
         
         const vdot = cc * (area_s / Math.sqrt(1 - Math.pow(area_s/area_c, 2))) * Math.sqrt(2 * dp / rho);
 
@@ -1112,6 +1106,10 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
         document.getElementById('z92-v-cc').innerText = cc.toFixed(2);
         document.getElementById('z92-v-h').innerText = h_mm;
         document.getElementById('z92-res-vdot').innerText = (vdot * 1000).toFixed(2) + " L/s";
+        document.getElementById('z92-res-dp').innerText = Math.round(dp) + " Pa";
+        document.getElementById('z92-res-as').innerText = area_s.toFixed(4) + " m²";
+        document.getElementById('z92-res-aeff').innerText = area_eff.toFixed(4) + " m²";
+        document.getElementById('z92-explainer').textContent = `Razlika razina ${h_mm.toFixed(0)} mm Hg daje tlačni pad ${Math.round(dp)} Pa. Geometrijski presjek sapnice je ${area_s.toFixed(4)} m², ali zbog koeficijenta kontrakcije ${cc.toFixed(2)} efektivni presjek pada na ${area_eff.toFixed(4)} m², pa stvarni protok iznosi ${(vdot * 1000).toFixed(2)} L/s.`;
     }
 
     function draw() {
@@ -1185,10 +1183,28 @@ Odrediti protok $\dot{V}$ kroz cijev $d_c=200 \, \text{mm}$ sa sapnicom $d_s=30 
 </script>
 ```
 
+***
+
+### Zadatak Z93 — Lokalni gubitak (Koljeno) {.unnumbered}
+
+Voda struji brzinom 3 m/s kroz koljeno 90° (ζ=0,5). Odrediti pad tlaka u koljenu.
+
+**Zadano:** $v=3 \, \text{m/s}, \zeta=0,5$  
+**Odrediti:** $\Delta p$
 
 ***
 
-### Zadatak Z94 â€” -95: Venturi cijev i podizanje tekućine {.unnumbered}
+### Zadatak Z94 — -95: Venturi cijev i podizanje tekućine {.unnumbered}
+
+**Z94:** Odrediti minimalnu brzinu u Venturi cijevi potrebnu da se podigne voda iz spremnika na visinu od 1 m.
+
+**Zadano:** $h=1 \, \text{m}, d_1=100 \, \text{mm}, d_2=40 \, \text{mm}$  
+**Odrediti:** $v_{min}$
+
+**Z95:** Cjevovod s tri koljena i ventilom spaja dva spremnika. Odrediti protok uzimajući u obzir sve gubitke.
+
+**Zadano:** $\Delta z=10 \, \text{m}, L=50 \, \text{m}, d=100 \, \text{mm}, \Sigma\zeta=2,5$  
+**Odrediti:** $\dot{V}$
 
 **Rješenje (95):**
 $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \text{m}^3\text{/s}}$.
@@ -1200,8 +1216,12 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
 <!-- WIDGET: Venturi Ejektor (Usis) -->
 <div id="z94-ejector-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌬️ Venturi ejektor: Podizanje tekućine podtlakom</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati ejektor:</strong> Kontinuitet prvo poveća brzinu u grlu na <strong>v₂</strong>, Bernoulli zatim snižava tlak u grlu na <strong>p_grlo</strong>, a onda taj podtlak uspoređuješ s potrebnim hidrostatskim tlakom stupca <strong>-ρgh</strong>. Minimalna brzina <strong>v₁,min</strong> je upravo ona pri kojoj ta dva uvjeta postanu jednaka.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
             <canvas id="z94-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
             
@@ -1227,10 +1247,25 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
                     Tlak u grlu je manji od hidrostatskog tlaka stupca h.
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂ u grlu</div>
+                    <div id="z94-v2-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Potreban tlak</div>
+                    <div id="z94-pneed-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0 kPa</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₁,min</div>
+                    <div id="z94-vmin-out" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+            </div>
             
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Velika brzina u grlu Venturijeve cijevi stvara zonu niskog tlaka (Bernoullijev princip). Ako je taj tlak dovoljno nizak, atmosferski tlak će "pogurati" tekućinu iz donjeg spremnika prema gore.
-            </p>
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z94-explainer">Velika brzina u grlu Venturijeve cijevi stvara zonu niskog tlaka. Ako je taj tlak dovoljno nizak, atmosferski tlak pogurat će tekućinu iz donjeg spremnika prema gore.</span>
+            </div>
         </div>
     </div>
 </div>
@@ -1253,6 +1288,8 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
         const p_throat_kpa = dp / 1000;
         
         const p_needed_kpa = -rho * g * h / 1000;
+        const ratio = Math.pow(d1 / d2, 4);
+        const v1Min = Math.sqrt((2 * g * h) / Math.max(ratio - 1, 1e-6));
         const isSucking = p_throat_kpa < p_needed_kpa;
 
         state.v1 = v1;
@@ -1265,6 +1302,10 @@ $v_2 = \mathbf{2,536 \, \text{m/s}}$ (uz gubike), $\dot{V} = \mathbf{0,0448 \, \
         document.getElementById('z94-v-v1').innerText = v1.toFixed(1);
         document.getElementById('z94-v-h').innerText = h.toFixed(1);
         document.getElementById('z94-p-throat').innerText = p_throat_kpa.toFixed(1) + " kPa";
+        document.getElementById('z94-v2-out').innerText = v2.toFixed(2) + " m/s";
+        document.getElementById('z94-pneed-out').innerText = p_needed_kpa.toFixed(1) + " kPa";
+        document.getElementById('z94-vmin-out').innerText = v1Min.toFixed(2) + " m/s";
+        document.getElementById('z94-explainer').textContent = `Ulazna brzina ${v1.toFixed(2)} m/s daje brzinu u grlu ${v2.toFixed(2)} m/s, pa tlak u grlu pada na ${p_throat_kpa.toFixed(1)} kPa. Za podizanje stupca visine ${h.toFixed(1)} m potreban je tlak barem ${p_needed_kpa.toFixed(1)} kPa, pa je minimalna ulazna brzina ${v1Min.toFixed(2)} m/s${isSucking ? ' i uvjet je zadovoljen.' : ', zato trenutačni režim još ne usisava tekućinu.'}`;
         
         const statusCard = document.getElementById('z94-status-card');
         const statusText = document.getElementById('z94-status-text');

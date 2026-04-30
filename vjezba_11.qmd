@@ -25,14 +25,18 @@ Ovaj fenomen je temelj rada hidrauličkih strojeva – upravo zato lopatice Pelt
             box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
             font-family: 'Inter', system-ui, sans-serif;
         }
-        .canvas-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .canvas-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
         .canvas-box { border: 1px solid #eee; border-radius: 8px; background: #fdfdfd; position: relative; height: 300px; }
         .label-overlay { position: absolute; top: 10px; width: 100%; text-align: center; font-weight: bold; color: #2c3e50; }
     </style>
 
     <div class="widget-header"><h3 class="widget-title">Eksperiment: Impuls mlaza na lopatice</h3></div>
+
+    <div style="padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 15px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
+        <strong>Kako čitati usporedbu:</strong> Sila ne ovisi samo o iznosu brzine, nego o promjeni njezine x-komponente. Ravna ploča svodi izlaznu x-brzinu na nulu, dok zakrivljena lopatica vraća mlaz natrag pa izlazna komponenta postaje negativna i promjena količine gibanja postaje dvostruko veća.
+    </div>
     
-    <div class="controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
         <div class="control-group">
             <label>Brzina mlaza (v): <span id="v-val-jet">15</span> m/s</label>
             <input type="range" id="v-slider-jet" min="5" max="30" value="15" step="1" style="width: 100%;">
@@ -46,14 +50,37 @@ Ovaj fenomen je temelj rada hidrauličkih strojeva – upravo zato lopatice Pelt
     <div class="canvas-row">
         <div class="canvas-box">
             <div class="label-overlay">RAVNA PLOČA (90°)</div>
-            <canvas id="canvas-flat" width="400" height="280"></canvas>
+            <canvas id="canvas-flat" width="400" height="280" style="width: 100%; height: 100%; display: block;"></canvas>
             <div style="position:absolute; bottom:10px; width:100%; text-align:center; font-weight:bold; color:#e67e22;">F = <span id="f-flat-out">0</span> N</div>
         </div>
         <div class="canvas-box">
             <div class="label-overlay">ZAKRIVLJENA LOPATICA (180°)</div>
-            <canvas id="canvas-cup" width="400" height="280"></canvas>
+            <canvas id="canvas-cup" width="400" height="280" style="width: 100%; height: 100%; display: block;"></canvas>
             <div style="position:absolute; bottom:10px; width:100%; text-align:center; font-weight:bold; color:#c0392b;">F = <span id="f-cup-out">0</span> N</div>
         </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 15px;">
+        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Ravna: v_ul,x</div>
+            <div id="jet-flat-vin" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+        </div>
+        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Ravna: v_iz,x</div>
+            <div id="jet-flat-vout" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+        </div>
+        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Zakrivljena: v_iz,x</div>
+            <div id="jet-cup-vout" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+        </div>
+        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
+            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δ(ṁv_x)</div>
+            <div id="jet-dmom-out" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 N</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 14px; padding: 12px 14px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; color: #7c2d12; font-size: 0.82rem; line-height: 1.5;">
+        <strong>Tumačenje scene:</strong> <span id="jet-impact-explainer"></span>
     </div>
 
     <script>
@@ -77,6 +104,11 @@ Ovaj fenomen je temelj rada hidrauličkih strojeva – upravo zato lopatice Pelt
             document.getElementById('m-val-jet').textContent = m.toFixed(1);
             document.getElementById('f-flat-out').textContent = Math.round(fFlat);
             document.getElementById('f-cup-out').textContent = Math.round(fCup);
+            document.getElementById('jet-flat-vin').textContent = v.toFixed(2) + ' m/s';
+            document.getElementById('jet-flat-vout').textContent = '0.00 m/s';
+            document.getElementById('jet-cup-vout').textContent = (-v).toFixed(2) + ' m/s';
+            document.getElementById('jet-dmom-out').textContent = (m * (0 - v)).toFixed(1) + ' N';
+            document.getElementById('jet-impact-explainer').textContent = `Za brzinu ${v.toFixed(1)} m/s i maseni protok ${m.toFixed(1)} kg/s ravna ploča mijenja x-komponentu brzine s ${v.toFixed(1)} na 0 m/s, pa je sila ${fFlat.toFixed(1)} N. Zakrivljena lopatica vraća mlaz na ${(-v).toFixed(1)} m/s u x-smjeru, pa je promjena impulsa dvostruko veća i sila raste na ${fCup.toFixed(1)} N.`;
 
             drawFlat(v, m);
             drawCup(v, m);
@@ -133,12 +165,30 @@ Ovaj fenomen je temelj rada hidrauličkih strojeva – upravo zato lopatice Pelt
 
 ```
 
+```{=html}
+<div class="mf1-note-grid">
+    <div class="mf1-kriterij">
+        <h4>Kriterij primjene</h4>
+        <ul>
+            <li>Zakon količine gibanja primjenjuj kada je glavni cilj odrediti silu ili reakciju iz promjene brzine fluida kroz kontrolni volumen.</li>
+            <li>Prije računa uvijek jasno odvoji ulazni i izlazni smjer brzine, jer predznak komponenata izravno određuje smjer rezultantne sile.</li>
+        </ul>
+    </div>
+    <div class="mf1-warning">
+        <h4>Česta pogreška</h4>
+        <p>Najčešća greška je računati samo promjenu iznosa brzine, a zanemariti da impulsna jednadžba prati promjenu vektora brzine i zato ovisi o smjeru skretanja mlaza.</p>
+    </div>
+</div>
+```
+
 ***
 
-### Zadatak Z97 â€” Vrijeme pražnjenja spremnika {.unnumbered}
+### Zadatak Z97 — Vrijeme pražnjenja spremnika {.unnumbered}
 
- 
 Otvoreni spremnik promjera D napunjen je vodom u početnom trenutku do visine h0. Spremnik se počinje prazniti kroz glatku sapnicu na dnu spremnika, promjera d. Potrebno je odrediti općeniti izraz za potrebno vrijeme da se razina vode u spremniku spusti sa visine h0 na visinu h, također je potrebno odrediti vrijeme potrebno za potpuno pražnjenje spremnika ukoliko je D = 0,5 m, d = 25 mm, h0 = 50 cm. Pretpostaviti da je koeficijent protjecanja Cd = 1.
+
+**Zadano:** $D=0,5\,\text{m}$, $d=25\,\text{mm}$, $h_0=50\,\text{cm}$, $C_d=1$
+**Odrediti:** općeniti izraz za vrijeme $T$, vrijeme za potpuno pražnjenje
 
 **Rješenje:**
 $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{0,5}{0,025} \right)^2 \frac{2 \sqrt{0,5}}{\sqrt{19,62}} = \mathbf{127,7 \, \text{s}}$.
@@ -150,8 +200,12 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
 <!-- WIDGET: Spojeni spremnici -->
 <div id="v11-connected-tanks-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">⏳ Nestacionarno pražnjenje: Spojeni spremnici</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati prijelaz:</strong> Trenutačnu dinamiku određuje razlika razina <strong>ΔH = H₁ - H₂</strong>. Iz nje dobivaš trenutačni protok <strong>Q</strong> kroz spojnu cijev, a tek taj protok određuje koliko brzo H₁ pada i H₂ raste u svakom vremenskom koraku.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <!-- Animacija -->
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
             <canvas id="v11-tanks-canvas" width="500" height="400" style="width: 100%; height: 100%;"></canvas>
@@ -166,7 +220,7 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
                 <canvas id="v11-graph-canvas" width="300" height="180" style="width: 100%; height: 100%;"></canvas>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
                 <button id="v11-btn-start" style="padding: 12px; background: #3182ce; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">POKRENI</button>
                 <button id="v11-btn-reset" style="padding: 12px; background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">RESET</button>
             </div>
@@ -177,6 +231,25 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
                 
                 <label style="display:block; margin-top:10px; margin-bottom:5px;">Promjer cijevi d: <span id="v11-v-d">40</span> mm</label>
                 <input type="range" id="v11-d-slider" min="10" max="100" step="5" value="40" style="width: 100%;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">ΔH</div>
+                    <div id="v11-dh-live" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Q</div>
+                    <div id="v11-q-live" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000 m³/s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">dH₁/dt</div>
+                    <div id="v11-dhdt-live" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000 m/s</div>
+                </div>
+            </div>
+
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="v11-explainer"></span>
             </div>
         </div>
     </div>
@@ -197,21 +270,30 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
     let h1, h2, t = 0, running = false;
     let history = [];
     const D1 = 1.0, D2 = 1.0, g = 9.81, Cd = 0.62;
+    let lastQ = 0;
 
     function init() {
         h1 = parseFloat(h1S.value);
         h2 = 0.5; t = 0; running = false;
         history = [];
+        lastQ = 0;
         updateUI();
         draw();
         drawGraph();
     }
 
     function updateUI() {
+        const A1 = Math.PI * D1 * D1 / 4;
+        const dh = h1 - h2;
+        const dhdt = -(lastQ / A1);
         document.getElementById('v11-v-h1').innerText = parseFloat(h1S.value).toFixed(1);
         document.getElementById('v11-v-d').innerText = dS.value;
         document.getElementById('v11-h1-live').innerText = h1.toFixed(2);
         document.getElementById('v11-h2-live').innerText = h2.toFixed(2);
+        document.getElementById('v11-dh-live').innerText = dh.toFixed(3) + ' m';
+        document.getElementById('v11-q-live').innerText = lastQ.toFixed(4) + ' m³/s';
+        document.getElementById('v11-dhdt-live').innerText = dhdt.toFixed(4) + ' m/s';
+        document.getElementById('v11-explainer').textContent = `Trenutačna razlika razina iznosi ${dh.toFixed(3)} m, pa kroz spojnu cijev teče ${lastQ.toFixed(4)} m³/s. Zato prvi spremnik pada brzinom ${Math.abs(dhdt).toFixed(4)} m/s, dok drugi istim mehanizmom raste sve dok se razine ne izjednače.`;
     }
 
     function step() {
@@ -227,6 +309,7 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
         
         const dt = 0.05;
         const Q = Cd * Ad * Math.sqrt(2 * g * Math.abs(dh)) * (dh > 0 ? 1 : -1);
+        lastQ = Q;
         
         h1 -= (Q / A1) * dt;
         h2 += (Q / A2) * dt;
@@ -324,10 +407,12 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
 
 ***
 
-### Zadatak Z98 â€” Kinematika dva mlaza {.unnumbered}
+### Zadatak Z98 — Kinematika dva mlaza {.unnumbered}
 
- 
 Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identičan, prikazano na slici. Na horizontalnoj udaljenosti 10m od spremnika dva mlaza dolaze u doticaj sa horizontalnom plohom u istoj točki. Potrebno je odrediti vrijednosti H i h.
+
+**Zadano:** $L=10\,\text{m}$, dva mlaza na istoj točki
+**Odrediti:** $H$, $h$
 
 **Rješenje:**
 1. Donji mlaz: $10 = 2\sqrt{(H-4) \cdot 4} \implies H = \mathbf{10,25 \, \text{m}}$.
@@ -340,8 +425,12 @@ Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identič
 <!-- WIDGET: Dva mlaza (Parabolični letovi) -->
 <div id="z98-jets-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🎯 Kinematika mlazova: Sjecište u istoj točki</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati simetriju:</strong> Domet ovisi o produktu <strong>h(H-h)</strong>, a ne o samoj dubini zasebno. Zato dva otvora simetrična oko sredine spremnika imaju isti produkt i zato njihovi mlazovi imaju isti domet, iako izlaze iz različitih visina.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <!-- Visualization -->
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
             <canvas id="z98-canvas" width="550" height="450" style="width: 100%; height: 100%;"></canvas>
@@ -371,10 +460,25 @@ Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identič
                     <div style="display: flex; justify-content: space-between;"><span>Domet 2:</span> <b id="z98-res-x2">10.0 m</b></div>
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">h₁(H-h₁)</div>
+                    <div id="z98-prod1" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">h₂(H-h₂)</div>
+                    <div id="z98-prod2" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Razlika dometa</div>
+                    <div id="z98-dx" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+                </div>
+            </div>
             
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Torricellijeva formula za domet je $x = 2\sqrt{h(H-h)}$. Zbog simetrije korijena, dva otvora čije su dubine simetrične oko sredine spremnika ($H/2$) uvijek daju isti domet.
-            </p>
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z98-explainer">Torricellijeva formula za domet je x = 2√(h(H-h)). Zbog simetrije izraza, dubine simetrične oko H/2 daju isti domet.</span>
+            </div>
         </div>
     </div>
 </div>
@@ -392,6 +496,8 @@ Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identič
         const H = parseFloat(hSl.value), h1 = parseFloat(h1Sl.value), h2 = parseFloat(h2Sl.value);
         const x1 = 2 * Math.sqrt(h1 * (H - h1));
         const x2 = 2 * Math.sqrt(h2 * (H - h2));
+        const prod1 = h1 * (H - h1);
+        const prod2 = h2 * (H - h2);
         state.H = H;
         state.h1 = h1;
         state.h2 = h2;
@@ -401,6 +507,10 @@ Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identič
         document.getElementById('z98-v-h2').innerText = h2.toFixed(2);
         document.getElementById('z98-res-x1').innerText = x1.toFixed(1) + " m";
         document.getElementById('z98-res-x2').innerText = x2.toFixed(1) + " m";
+        document.getElementById('z98-prod1').innerText = prod1.toFixed(2);
+        document.getElementById('z98-prod2').innerText = prod2.toFixed(2);
+        document.getElementById('z98-dx').innerText = Math.abs(x1 - x2).toFixed(2) + " m";
+        document.getElementById('z98-explainer').textContent = `Za H = ${H.toFixed(2)} m prvi otvor daje produkt ${prod1.toFixed(2)}, a drugi ${prod2.toFixed(2)}. Kad su ti produkti jednaki, dometi su isti; zato ovdje mlazovi daju ${x1.toFixed(2)} m i ${x2.toFixed(2)} m.`;
 
         const isMatch = Math.abs(x1 - x2) < 0.2;
         const matchCard = document.getElementById('z98-match-card');
@@ -469,10 +579,12 @@ Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identič
 
 ***
 
-### Zadatak Z99 â€” Rotirajući spremnik s cijevi {.unnumbered}
+### Zadatak Z99 — Rotirajući spremnik s cijevi {.unnumbered}
 
- 
 Spremnik velikih dimenzija na kojeg je priključena cijev, prikazano na slici, rotira oko simetrale konstantnom kutnom brzinom. Ukoliko je fluid idealan, potrebno je odrediti volumenski protok kroz cijev i pretlak u točki A. Zadane vrijednosti iznose H1= 0,8 m, L=2,2 m, d=10 mm, R =1,4 m, r=1m, pm0 = 0,44 bar, ω= 3,7 rad/s, medij koji se nalazi unutar spremnika je voda.
+
+**Zadano:** $H_1=0,8\,\text{m}$, $L=2,2\,\text{m}$, $d=10\,\text{mm}$, $R=1,4\,\text{m}$, $r=1\,\text{m}$, $p_{m0}=0,44\,\text{bar}$, $\omega=3,7\,\text{rad/s}$, voda
+**Odrediti:** $\dot{V}$, $p_{mA}$
 
 **Rješenje:**
 1. Za zadane podatke dobije se brzina istjecanja $\mathbf{w \approx 3,99 \, \text{m/s}}$.
@@ -619,13 +731,21 @@ Spremnik velikih dimenzija na kojeg je priključena cijev, prikazano na slici, r
 
 ***
 
-### Zadatak Z100 â€” -101: Sila na koljeno cijevi {.unnumbered}
+### Zadatak Z100 — -101: Sila na koljeno cijevi {.unnumbered}
 
-**Tekst zadatka (100):** 
+Za dvije izvedbe koljena cijevi potrebno je odrediti silu potrebnu da koljeno ostane u nepomičnom položaju, a za prvi slučaj i pretlak na ulazu.
+
+**Zadatak Z100:**
 Konvergentno koljeno koristi se za usmjeravanje vode masenog protoka 14 kg/s iz horizontalnog dijela cijevi u dio cijevi otklonjen od horizontale pod kutom 30°. Ispust se vrši u okolinu u kojoj vlada atmosferski tlak. Površina poprečnog presjeka na ulazu u koljeno iznosi 113 cm2, pri čemu površina poprečnog presjeka na izlazu iz koljena iznosi 7 cm2. Geodetska visinska razlika između ulaza i izlaza iznosi 30 cm. Masa koljena i vode može se zanemariti prilikom proračuna. Potrebno je odrediti pretlak u središnjoj točki ulaznog presjeka koljena, te silu potrebnu da bi se koljeno držalo u nepomičnom položaju. Prilikom proračuna korekcijski faktor količine gibanja iznosi βk=1,03.
 
-**Tekst zadatka (101):** 
-Koljeno iz prethodnog zadatka zamijenjeno je koljenom prikazanim na slici koje sa je otklonjeno od horizontalne osi za kut od 180°. Geodetska visinska razlika između ulaznog i izlaznog središnjeg presjeka koljena iznosi 0,3 m. Potrebno je odrediti silu koja će održavati koljeno u nepomičnom položaju. Korekcijski faktor iznosi βk = 1,03.
+**Zadano:** $\dot{m}=14\,\text{kg/s}$, $\alpha=30^\circ$, $A_1=113\,\text{cm}^2$, $A_2=7\,\text{cm}^2$, $\Delta z=30\,\text{cm}$, $\beta_k=1,03$
+**Odrediti:** $p_{1m}$, $\vec{F}$
+
+**Zadatak Z101:**
+Koljeno iz prethodnog zadatka zamijenjeno je koljenom prikazanim na slici koje je otklonjeno od horizontalne osi za kut od 180°. Geodetska visinska razlika između ulaznog i izlaznog središnjeg presjeka koljena iznosi 0,3 m. Potrebno je odrediti silu koja će održavati koljeno u nepomičnom položaju. Korekcijski faktor iznosi βk = 1,03.
+
+**Zadano:** $\alpha=180^\circ$, $\Delta z=0,3\,\text{m}$, $\beta_k=1,03$, ostali podaci iz Z100
+**Odrediti:** $\vec{F}$
 
 **Rješenje (100 - 30°):**
 1. $v_1 = 1,24 \, \text{m/s}, v_2 = 20 \, \text{m/s}, p_{1m} = 202 \, \text{kPa}$.
@@ -639,8 +759,11 @@ Koljeno iz prethodnog zadatka zamijenjeno je koljenom prikazanim na slici koje s
 <!-- Pipe Bend Force Widget -->
 <div id="bend-widget" style="max-width: 800px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #fff;">
     <h3 style="text-align: center; color:#1a202c; margin-top:0;">Sile u koljenu cijevi (Momentum)</h3>
+    <div style="padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 15px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
+        <strong>Kako čitati koljeno:</strong> Reakcijska sila dolazi iz promjene vektora brzine između ulaza i izlaza. Povećanjem kuta skretanja mijenjaš izlazne komponente brzine, pa zato istodobno raste i bočna i vertikalna komponenta reakcije na koljeno.
+    </div>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <canvas id="bend-canvas" width="400" height="300" style="border: 1px solid #eee; background: white; flex: 1;"></canvas>
+        <canvas id="bend-canvas" width="400" height="300" style="border: 1px solid #eee; background: white; flex: 1; width: 100%; max-width: 400px;"></canvas>
         <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
             <div>
                 <label>Kut skretanja &alpha;: <span id="alpha-bend-val">30</span>°</label>
@@ -650,6 +773,25 @@ Koljeno iz prethodnog zadatka zamijenjeno je koljenom prikazanim na slici koje s
                 <strong>Reakcijska sila F<sub>R</sub>:</strong>
                 <p style="font-size: 0.9em;">Što je veći kut skretanja, to je veća sila kojom fluid "gura" koljeno (princip mlaznog motora).</p>
                 <div id="force-vector-res" style="font-weight: bold; color: #c0392b;"></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
+                <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δv_x</div>
+                    <div id="bend-dvx" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+                <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δv_z</div>
+                    <div id="bend-dvz" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+                <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">|F_R|</div>
+                    <div id="bend-frmag" style="font-family: monospace; font-weight: 800; color: #0f172a;">0 N</div>
+                </div>
+            </div>
+
+            <div style="padding: 12px 14px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; color: #7c2d12; font-size: 0.82rem; line-height: 1.5;">
+                <strong>Tumačenje scene:</strong> <span id="bend-explainer"></span>
             </div>
         </div>
     </div>
@@ -669,8 +811,15 @@ Koljeno iz prethodnog zadatka zamijenjeno je koljenom prikazanim na slici koje s
         const v = 20; const m_dot = 14;
         const Frx = m_dot * (v * Math.cos(alpha * Math.PI / 180) - 1.24);
         const Frz = m_dot * (v * Math.sin(alpha * Math.PI / 180));
+        const deltaVx = v * Math.cos(alpha * Math.PI / 180) - 1.24;
+        const deltaVz = v * Math.sin(alpha * Math.PI / 180);
+        const frMag = Math.sqrt(Frx * Frx + Frz * Frz);
         
         document.getElementById('force-vector-res').innerHTML = `F_x &approx; ${(-Frx).toFixed(0)} N <br> F_z &approx; ${Frz.toFixed(0)} N`;
+        document.getElementById('bend-dvx').textContent = deltaVx.toFixed(2) + ' m/s';
+        document.getElementById('bend-dvz').textContent = deltaVz.toFixed(2) + ' m/s';
+        document.getElementById('bend-frmag').textContent = frMag.toFixed(0) + ' N';
+        document.getElementById('bend-explainer').textContent = `Za kut ${alpha.toFixed(0)}° izlazna brzina dobiva promjenu Δv_x = ${deltaVx.toFixed(2)} m/s i Δv_z = ${deltaVz.toFixed(2)} m/s. To daje reakcijske komponente približno ${(-Frx).toFixed(0)} N u x-smjeru i ${Frz.toFixed(0)} N u z-smjeru, pa rezultanta raste kako se skretanje približava 180°.`;
         
         draw(alpha);
     }
@@ -723,10 +872,12 @@ Koljeno iz prethodnog zadatka zamijenjeno je koljenom prikazanim na slici koje s
 
 ***
 
-### Zadatak Z102 â€” Mlaz na ploču {.unnumbered}
+### Zadatak Z102 — Mlaz na ploču {.unnumbered}
 
- 
 Voda istrujava iz mlaznice srednjom brzinom 20 m/s, pri čemu udara u stacionarnu vertikalno položenu ploču, maseni protok vode iznosi 10 kg/s. Nakon udara, mlaz vode se raspršuje jednoliko u svim smjerovima duž ravnine ploče. Potrebno je odrediti silu potrebnu da ploča ostane u početnom položaju.
+
+**Zadano:** $v=20\,\text{m/s}$, $\dot{m}=10\,\text{kg/s}$, voda
+**Odrediti:** $F_R$
 
 **Rješenje:**
 $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
@@ -738,8 +889,12 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
 <!-- WIDGET: Mlaz na ploču (Impuls) -->
 <div id="z102-jetplate-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">💥 Udarna sila mlaza: Zakon količine gibanja</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati udar:</strong> U ovom slučaju mlaz nakon udara više nema x-komponentu brzine. Zato je sila na ploču izravno povezana s time koliko ulaznog impulsa po sekundi dovodiš prema ploči, odnosno s veličinom <strong>ṁv₁</strong>.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
             <canvas id="z102-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
             
@@ -766,10 +921,25 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
                     <b>ΣF_x = ṁ(0 - v₁) = -F_R</b>
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">ṁv₁</div>
+                    <div id="z102-mdotv" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">200 N</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂,x</div>
+                    <div id="z102-voutx" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0 m/s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δ(ṁv_x)</div>
+                    <div id="z102-dmom" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">-200 N</div>
+                </div>
+            </div>
             
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Budući da se mlaz nakon udara širi paralelno s pločom, njegova komponenta brzine u smjeru x postaje nula. Sva kinetička energija usmjerena prema ploči pretvara se u silu pritiska.
-            </p>
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z102-explainer"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -792,6 +962,10 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
         document.getElementById('z102-v-v1').innerText = v1;
         document.getElementById('z102-v-mdot').innerText = mdot;
         document.getElementById('z102-res-fr').innerText = Math.round(fr);
+        document.getElementById('z102-mdotv').textContent = fr.toFixed(0) + ' N';
+        document.getElementById('z102-voutx').textContent = '0.0 m/s';
+        document.getElementById('z102-dmom').textContent = (-fr).toFixed(0) + ' N';
+        document.getElementById('z102-explainer').textContent = `Maseni protok ${mdot.toFixed(1)} kg/s pri brzini ${v1.toFixed(1)} m/s dovodi prema ploči ${fr.toFixed(0)} N x-impulsa u sekundi. Nakon udara je v₂,x = 0, pa je promjena količine gibanja ${(-fr).toFixed(0)} N i ploča mora pružiti jednaku reakciju suprotnog smjera.`;
     }
 
     function draw() {
@@ -858,10 +1032,12 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
 
 ***
 
-### Zadatak Z103 â€” Vjetroturbina {.unnumbered}
+### Zadatak Z103 — Vjetroturbina {.unnumbered}
 
- 
 Vjetroturbina promjera 10m generira snagu od 0,4 kW pri brzini nastrujavanja vjetra na vjetroturbinu od 3,13 m/s. Potrebno je odrediti učinkovitost vjetroturbine i horizontalnu silu vjetra na potporni stup vjetroturbine za dotičnu i dvostruko veću brzinu vjetra. Pretpostaviti jednak stupanj učinkovitosti u oba slučaja. Gustoća zraka iznosi 1,2 kg/m3, pretpostaviti da je zrak idealan fluid.
+
+**Zadano:** $D=10\,\text{m}$, $P=0,4\,\text{kW}$, $v_1=3,13\,\text{m/s}$, $\rho=1,2\,\text{kg/m}^3$
+**Odrediti:** $\eta$, $F_S$ (za $v_1$ i $2v_1$)
 
 **Rješenje:**
 1. Raspoloživa snaga vjetra kroz rotor iznosi $P_v = \frac{1}{2} \rho A v_1^3 \approx 48,1 \, \text{kW}$ pa je korisnost turbine $\eta = \frac{P}{P_v} = \mathbf{0,83 \%}$.
@@ -875,8 +1051,12 @@ Vjetroturbina promjera 10m generira snagu od 0,4 kW pri brzini nastrujavanja vje
 <!-- WIDGET: Vjetroturbina i Betzov Limit -->
 <div id="z103-turbine-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌬️ Vjetroturbina: Betzov limit i Energija vjetra</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati turbinu:</strong> Najprije od brzine vjetra i rotorske površine dobivaš raspoloživu snagu toka <strong>P_v</strong>. Korisnost određuje koliki dio toga zaista uzimaš, a to povlači usporavanje struje na <strong>v₂</strong> i stvara aksijalnu silu <strong>F_S</strong> na stupu.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
         <!-- Turbine Visualization -->
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
             <canvas id="z103-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
@@ -907,10 +1087,25 @@ Vjetroturbina promjera 10m generira snagu od 0,4 kW pri brzini nastrujavanja vje
                     <div style="display: flex; justify-content: space-between;"><span>Sila na stup F_s:</span> <b id="z103-res-fs">--- N</b></div>
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">P_v</div>
+                    <div id="z103-pavail" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0 W</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">P = ηP_v</div>
+                    <div id="z103-pextract" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0 W</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">ṁ</div>
+                    <div id="z103-mdot" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0 kg/s</div>
+                </div>
+            </div>
             
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Vjetroturbina usporava zrak kako bi mu oduzela kinetičku energiju. Ako ga uspori previše, zrak se "gomila" ispred turbine i protok pada. Zato postoji optimalno usporavanje koje daje maksimalnu snagu (Betzov limit).
-            </p>
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z103-explainer"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -929,7 +1124,8 @@ Vjetroturbina promjera 10m generira snagu od 0,4 kW pri brzini nastrujavanja vje
         const rho = 1.225, D = 10;
         const A = Math.PI * D * D / 4;
         
-        const power = eta * 0.5 * rho * A * v1 * v1 * v1;
+        const pAvail = 0.5 * rho * A * v1 * v1 * v1;
+        const power = eta * pAvail;
         const v2 = v1 * Math.sqrt(Math.max(0, 1 - eta));
         const mdot = rho * A * v1;
         const fs = mdot * (v1 - v2);
@@ -942,6 +1138,10 @@ Vjetroturbina promjera 10m generira snagu od 0,4 kW pri brzini nastrujavanja vje
         document.getElementById('z103-p-val').innerText = Math.round(power) + " W";
         document.getElementById('z103-res-v2').innerText = v2.toFixed(2) + " m/s";
         document.getElementById('z103-res-fs').innerText = Math.round(fs) + " N";
+        document.getElementById('z103-pavail').textContent = Math.round(pAvail) + ' W';
+        document.getElementById('z103-pextract').textContent = Math.round(power) + ' W';
+        document.getElementById('z103-mdot').textContent = mdot.toFixed(1) + ' kg/s';
+        document.getElementById('z103-explainer').textContent = `Za vjetar ${v1.toFixed(1)} m/s kroz rotor prolazi raspoloživa snaga ${Math.round(pAvail)} W. Turbina pri korisnosti ${(eta * 100).toFixed(1)}% uzima ${Math.round(power)} W, usporava tok na ${v2.toFixed(2)} m/s i zato stvara aksijalnu silu oko ${Math.round(fs)} N na stupu.`;
         
         const pMax = 0.593 * 0.5 * rho * A * 20 * 20 * 20; // Scale bar to max v1
         document.getElementById('z103-p-bar').style.width = Math.min((power/pMax)*500, 100) + "%";

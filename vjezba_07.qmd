@@ -51,8 +51,16 @@ Razumijevanje ove interakcije ključno je za projektiranje brana, podvodnih tune
                 </div>
 
                 <div style="margin-top: 10px; padding: 15px; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                    <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">Ukupni uzgon</div>
+                    <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">Lanac simetrije</div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span style="color: #64748b;">V_istisnuto:</span>
+                            <span id="v-res-sym" style="font-weight: 700; color: #1e293b;">0.0 m³</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span style="color: #64748b;">ΣF_H:</span>
+                            <span id="fh-res-sym" style="font-weight: 700; color: #1e293b;">0.0 kN</span>
+                        </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
                             <span style="color: #64748b;">F_U (Uzgon):</span>
                             <span id="fu-res-sym" style="font-weight: 700; color: #10b981;">0.0 kN</span>
@@ -82,6 +90,11 @@ Razumijevanje ove interakcije ključno je za projektiranje brana, podvodnih tune
                         <div style="width: 12px; height: 3px; background: #10b981;"></div> Rezultantni uzgon
                     </div>
                 </div>
+            </div>
+
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 16px; color: #7c2d12;">
+                <div style="font-weight: 800; margin-bottom: 6px;">Tumačenje scene</div>
+                <p id="sym-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.55;"></p>
             </div>
         </div>
     </div>
@@ -130,8 +143,12 @@ Razumijevanje ove interakcije ključno je za projektiranje brana, podvodnih tune
             }
 
             // Resultant Buoyancy (FV)
-            const Buoyancy = 1000 * 9.81 * (Math.PI * R*R);
+            const volume = Math.PI * R * R;
+            const Buoyancy = 1000 * 9.81 * volume;
+            document.getElementById('v-res-sym').innerText = volume.toFixed(2) + ' m³';
+            document.getElementById('fh-res-sym').innerText = '0.0 kN';
             document.getElementById('fu-res-sym').innerText = (Buoyancy/1000).toFixed(1) + ' kN';
+            document.getElementById('sym-explainer').innerText = `Na istoj dubini lijevi i desni tlakovi daju jednake, suprotne horizontalne doprinose pa je ΣF_H = 0. Ostaje samo uzgon koji odgovara istisnutom volumenu ${volume.toFixed(2)} m³, pa je F_U = ${(Buoyancy/1000).toFixed(1)} kN.`;
             
             drawArrow(ctx, cx, cy + R*scale + 20, cx, cy - R*scale - 50, '#10b981', 4);
             ctx.fillStyle = '#10b981'; ctx.font = 'bold 12px Inter';
@@ -155,16 +172,12 @@ Razumijevanje ove interakcije ključno je za projektiranje brana, podvodnih tune
     </script>
 </div>
 
-### Zadatak Z1 â€” Cilindar na granici fluida {.unnumbered}
+### Zadatak Z1 — Cilindar na granici fluida {.unnumbered}
 
- 
-Cilindar polumjera $R$ i duljine $b$ postavljen je uz vertikalni zid tako da fluid ispunjava samo lijevu polovicu prostora oko njega. Desna strana i donji dio cilindra su pod atmosferskim tlakom. Potrebno je odrediti horizontalnu i vertikalnu komponentu sile hidrostatskog tlaka, te rezultantu koja prolazi kroz središte cilindra.
+Cilindar polumjera $R$ i duljine $b$ postavljen je uz vertikalni zid tako da fluid ispunjava samo lijevu polovicu prostora oko njega. Desna strana i donji dio cilindra su pod atmosferskim tlakom. 
 
-**Zadano:**
-* $h$ - dubina fluida iznad centra cilindra
-* $R$ - polumjer cilindra
-* $b$ - duljina cilindra (okomito na sliku)
-* $\rho$ - gustoća fluida
+**Zadano:** $h$ - dubina fluida iznad centra cilindra, $R$ - polumjer cilindra, $b$ - duljina cilindra, $\rho$ - gustoća fluida  
+**Odrediti:** horizontalnu i vertikalnu komponentu sile hidrostatskog tlaka, te rezultantu koja prolazi kroz središte cilindra
 
 <hr class="widget-divider">
 <p class="widget-naslov">⚙️ Interaktivni simulator</p>
@@ -223,6 +236,14 @@ Cilindar polumjera $R$ i duljine $b$ postavljen je uz vertikalni zid tako da flu
             <!-- Results -->
             <div style="margin-top: auto; background: #f1f5f9; padding: 1rem; border-radius: 12px; display: flex; flex-direction: column; gap: 0.75rem;">
                 <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.85rem; color: #475569;">A_proj:</span>
+                    <span id="v7-t1-area-res" style="font-weight: 700; color: #1e293b;">- m²</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.85rem; color: #475569;">V_polucil:</span>
+                    <span id="v7-t1-vol-res" style="font-weight: 700; color: #1e293b;">- m³</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
                     <span style="font-size: 0.85rem; color: #475569;">F<sub>H</sub>:</span>
                     <span id="v7-t1-fh-res" style="font-weight: 700; color: #1e293b;">- kN</span>
                 </div>
@@ -238,6 +259,9 @@ Cilindar polumjera $R$ i duljine $b$ postavljen je uz vertikalni zid tako da flu
                     <span style="font-size: 0.85rem; color: #475569;">Kut α:</span>
                     <span id="v7-t1-angle-res" style="font-weight: 700; color: #1e293b;">- °</span>
                 </div>
+            </div>
+            <div style="padding: 0.95rem 1rem; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="v7-t1-explainer"></span>
             </div>
         </div>
     </div>
@@ -277,18 +301,23 @@ Cilindar polumjera $R$ i duljine $b$ postavljen je uz vertikalni zid tako da flu
         // Calculations
         // FH acts on vertical projection of left half (2R x b)
         const zc = h + R;
-        const FH = rho * g * zc * (2 * R) * b / 1000; // kN
+        const areaProj = (2 * R) * b;
+        const FH = rho * g * zc * areaProj / 1000; // kN
         
         // FV is buoyancy of the left half-cylinder
-        const FV = rho * g * (Math.PI * R * R / 2) * b / 1000; // kN
+        const volumeHalf = (Math.PI * R * R / 2) * b;
+        const FV = rho * g * volumeHalf / 1000; // kN
         
         const FR = Math.sqrt(FH*FH + FV*FV);
         const angle = Math.atan2(FV, FH) * 180 / Math.PI;
 
+        document.getElementById('v7-t1-area-res').innerText = areaProj.toFixed(2) + ' m²';
+        document.getElementById('v7-t1-vol-res').innerText = volumeHalf.toFixed(2) + ' m³';
         document.getElementById('v7-t1-fh-res').innerText = FH.toFixed(2) + ' kN';
         document.getElementById('v7-t1-fv-res').innerText = FV.toFixed(2) + ' kN';
         document.getElementById('v7-t1-fr-res').innerText = FR.toFixed(2) + ' kN';
         document.getElementById('v7-t1-angle-res').innerText = angle.toFixed(1) + '°';
+        document.getElementById('v7-t1-explainer').innerText = `Vertikalna projekcija smočene polovice ima površinu ${areaProj.toFixed(2)} m² i težište na dubini ${zc.toFixed(2)} m, pa daje F_H = ${FH.toFixed(2)} kN. Polucilindar istiskuje ${volumeHalf.toFixed(2)} m³ fluida pa daje F_V = ${FV.toFixed(2)} kN. Zato rezultanta iznosi ${FR.toFixed(2)} kN pod kutom ${angle.toFixed(1)}°.`;
 
         draw(h, R, FH, FV, FR, angle);
     }
@@ -455,6 +484,8 @@ Ovaj widget pokazuje kada se zakrivljena zaklopka počinje otvarati: tlak vode s
             </div>
 
             <div style="padding: 1rem; border-radius: 14px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">A_proj</span><strong id="v7-wf-aproj" style="color: #0f172a;">0.0 m²</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">V_iznad</span><strong id="v7-wf-vol" style="color: #0f172a;">0.0 m³</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Horizontalna sila F_H</span><strong id="v7-wf-fh" style="color: #2563eb;">0.0 kN</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Vertikalna sila F_V</span><strong id="v7-wf-fv" style="color: #16a34a;">0.0 kN</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Težina G</span><strong id="v7-wf-g" style="color: #ef4444;">0.0 kN</strong></div>
@@ -462,9 +493,16 @@ Ovaj widget pokazuje kada se zakrivljena zaklopka počinje otvarati: tlak vode s
             </div>
 
             <div style="padding: 1rem; border-radius: 14px; background: #fff7ed; border: 1px solid #fed7aa;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #9a3412;">z_FH</span><strong id="v7-wf-zcp" style="color: #c2410c;">0.0 m</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #9a3412;">x_FV</span><strong id="v7-wf-xfv" style="color: #c2410c;">0.0 m</strong></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #9a3412;">x_G</span><strong id="v7-wf-xg" style="color: #c2410c;">0.0 m</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #9a3412;">Moment vode</span><strong id="v7-wf-mw" style="color: #ea580c;">0.0 kNm</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #9a3412;">Moment težine</span><strong id="v7-wf-mg" style="color: #dc2626;">0.0 kNm</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; padding-top: 0.45rem; border-top: 1px solid #fdba74;"><span style="color: #7c2d12; font-weight: 700;">Kritična razina</span><strong id="v7-wf-hcrit" style="color: #c2410c;">0.0 m</strong></div>
+            </div>
+
+            <div style="padding: 0.95rem 1rem; border-radius: 14px; background: #fff7ed; border: 1px solid #fdba74; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="v7-wf-explainer"></span>
             </div>
 
             <div id="v7-wf-status" style="padding: 0.85rem 1rem; border-radius: 14px; font-weight: 800; text-align: center; background: #dcfce7; color: #166534;">
@@ -554,9 +592,11 @@ Ovaj widget pokazuje kada se zakrivljena zaklopka počinje otvarati: tlak vode s
             const R = parseFloat(rS.value);
             const b = parseFloat(bS.value);
             const m = parseFloat(mS.value);
+            const areaProj = b * R;
+            const volumeAbove = b * (Math.max(H, 0) * R + Math.PI * R * R / 4);
 
             const FH = rho * g * b * R * (H + R / 2);
-            const FV = rho * g * b * (Math.max(H, 0) * R + Math.PI * R * R / 4);
+            const FV = rho * g * volumeAbove;
             const FR = Math.sqrt(FH * FH + FV * FV);
             const G = m * g;
             const zcp = cpDepth(H, R);
@@ -571,15 +611,21 @@ Ovaj widget pokazuje kada se zakrivljena zaklopka počinje otvarati: tlak vode s
             document.getElementById('v7-wf-r-val').textContent = R.toFixed(1) + ' m';
             document.getElementById('v7-wf-b-val').textContent = b.toFixed(1) + ' m';
             document.getElementById('v7-wf-m-val').textContent = m.toFixed(0) + ' kg/m';
+            document.getElementById('v7-wf-aproj').textContent = areaProj.toFixed(2) + ' m²';
+            document.getElementById('v7-wf-vol').textContent = volumeAbove.toFixed(2) + ' m³';
             document.getElementById('v7-wf-fh').textContent = (FH / 1000).toFixed(1) + ' kN';
             document.getElementById('v7-wf-fv').textContent = (FV / 1000).toFixed(1) + ' kN';
             document.getElementById('v7-wf-g').textContent = (G / 1000).toFixed(2) + ' kN';
             document.getElementById('v7-wf-fr').textContent = (FR / 1000).toFixed(1) + ' kN';
+            document.getElementById('v7-wf-zcp').textContent = zcp.toFixed(2) + ' m';
+            document.getElementById('v7-wf-xfv').textContent = xfv.toFixed(2) + ' m';
+            document.getElementById('v7-wf-xg').textContent = xg.toFixed(2) + ' m';
             document.getElementById('v7-wf-mw').textContent = (Mwater / 1000).toFixed(1) + ' kNm';
             document.getElementById('v7-wf-mg').textContent = (Mgravity / 1000).toFixed(1) + ' kNm';
             document.getElementById('v7-wf-hcrit').textContent = Hcrit.toFixed(2) + ' m';
             document.getElementById('v7-wf-bar-water').style.width = Math.min(100, (Mwater / Math.max(Mgravity, Mwater, 1)) * 100).toFixed(1) + '%';
             document.getElementById('v7-wf-bar-gravity').style.width = Math.min(100, (Mgravity / Math.max(Mgravity, Mwater, 1)) * 100).toFixed(1) + '%';
+            document.getElementById('v7-wf-explainer').textContent = `Vertikalna projekcija ima površinu ${areaProj.toFixed(2)} m² pa daje F_H = ${(FH / 1000).toFixed(1)} kN. Volumen vode iznad zaklopke iznosi ${volumeAbove.toFixed(2)} m³ pa daje F_V = ${(FV / 1000).toFixed(1)} kN. Ta dva doprinosa djeluju s krakovima z_FH = ${zcp.toFixed(2)} m i x_FV = ${xfv.toFixed(2)} m, dok težina djeluje s x_G = ${xg.toFixed(2)} m.`;
 
             const status = document.getElementById('v7-wf-status');
             if (Mwater > Mgravity) {
@@ -691,17 +737,12 @@ Ovaj widget pokazuje kada se zakrivljena zaklopka počinje otvarati: tlak vode s
 ***
 
 
-### Zadatak Z2 â€” Polu-cilindrični zatvarač (60° luk) {.unnumbered}
+### Zadatak Z2 — Polu-cilindrični zatvarač (60° luk) {.unnumbered}
 
- 
-Zatvarač u obliku kružnog luka (sektora) polumjera $R$ i duljine $B$ nagnut je tako da obuhvaća kut od $2\alpha$ simetrično u odnosu na horizontalu. Fluid se nalazi iznad zatvarača do dubine $H$ (mjereno do središta zatvarača). Potrebno je odrediti komponente sile hidrostatskog tlaka i rezultantu.
+Zatvarač u obliku kružnog luka (sektora) polumjera $R$ i duljine $B$ nagnut je tako da obuhvaća kut od $2\alpha$ simetrično u odnosu na horizontalu. Fluid se nalazi iznad zatvarača do dubine $H$ (mjereno do središta zatvarača). 
 
-**Zadano:**
-* $H$ - ukupna dubina do središta zatvarača
-* $R$ - polumjer luka
-* $B$ - širina zatvarača
-* $\alpha$ - polukut luka
-* $\rho$ - gustoća fluida
+**Zadano:** $H$ - ukupna dubina do središta zatvarača, $R$ - polumjer luka, $B$ - širina zatvarača, $\alpha$ - polukut luka, $\rho$ - gustoća fluida  
+**Odrediti:** komponente sile hidrostatskog tlaka i rezultantu
 
 <hr class="widget-divider">
 <p class="widget-naslov">⚙️ Interaktivni simulator</p>
@@ -940,184 +981,13 @@ Zatvarač u obliku kružnog luka (sektora) polumjera $R$ i duljine $B$ nagnut je
 
 ***
 
-### Bonus: Interaktivni istraživač komponenti na kružnom luku
-
-Ovaj widget omogućuje slobodno definiranje potopljenog kružnog luka i analizu nastanka horizontalne i vertikalne komponente sile.
-
-<hr class="widget-divider">
-<p class="widget-naslov">⚙️ Interaktivni simulator</p>
-
-```{=html}
-<div id="v7-arc-explorer-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🎯 Explorer: Komponente na kružnom luku</h4>
-
-    <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 500px;">
-            <canvas id="v7-arc-canvas" width="550" height="500" style="width: 100%; height: 100%;"></canvas>
-
-            <div style="position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); padding: 12px; border-radius: 8px; font-size: 0.75rem; border: 1px solid #cbd5e0;">
-                <b>Upute:</b><br>
-                • Koristite slidere za promjenu kuta luka<br>
-                • Crvena linija = Vertikalna projekcija (Fₕ)<br>
-                • Plava linija = Horizontalna projekcija (Fᵥ)
-            </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 16px 18px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
-                <strong>Fizikalni smisao:</strong> Mijenjanjem početnog i završnog kuta mijenjaš i projekcije luka. Crvena projekcija vodi prema <code>F_H</code>, a plava zona iznad luka prema <code>F_V</code>.
-            </div>
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Početni kut: <span id="v7-v-a1" style="color:#2563eb;">0</span>°</label>
-                <input type="range" id="v7-a1-slider" min="0" max="360" value="90" style="width: 100%;">
-
-                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Završni kut: <span id="v7-v-a2" style="color:#2563eb;">180</span>°</label>
-                <input type="range" id="v7-a2-slider" min="0" max="360" value="180" style="width: 100%;">
-
-                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Dubina vrha h: <span id="v7-v-h" style="color:#2563eb;">1.0</span> m</label>
-                <input type="range" id="v7-h-slider" min="0" max="5" step="0.1" value="1" style="width: 100%;">
-            </div>
-
-            <div style="background: #2d3748; color: white; padding: 20px; border-radius: 15px;">
-                <div style="font-weight: 800; font-size: 0.75rem; color: #a0aec0; text-transform: uppercase; margin-bottom: 15px;">Izračunate komponente:</div>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Horizontalna Fₕ:</span>
-                        <b id="v7-res-fh" style="color:#fc8181; font-size: 1.1rem;">--- kN</b>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Vertikalna Fᵥ:</span>
-                        <b id="v7-res-fv" style="color:#63b3ed; font-size: 1.1rem;">--- kN</b>
-                    </div>
-                    <hr style="border: 0; border-top: 1px solid #4a5568; margin: 5px 0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Rezultanta Fᵣ:</span>
-                        <b id="v7-res-fr" style="color:#f6e05e; font-size: 1.2rem;">--- kN</b>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-(function() {
-    const canvas = document.getElementById('v7-arc-canvas');
-    const ctx = canvas.getContext('2d');
-    const a1S = document.getElementById('v7-a1-slider');
-    const a2S = document.getElementById('v7-a2-slider');
-    const hS = document.getElementById('v7-h-slider');
-
-    function update() {
-        const a1_deg = parseFloat(a1S.value);
-        const a2_deg = parseFloat(a2S.value);
-        const h = parseFloat(hS.value);
-        const R = 1.0; const rho = 1000; const g = 9.81;
-
-        document.getElementById('v7-v-a1').innerText = a1_deg;
-        document.getElementById('v7-v-a2').innerText = a2_deg;
-        document.getElementById('v7-v-h').innerText = h.toFixed(1);
-
-        const a1 = a1_deg * Math.PI / 180;
-        const a2 = a2_deg * Math.PI / 180;
-
-        // Simplified component calculation for explorer
-        // In real cases, this depends on integration or volume methods
-        // Here we use projection logic for visual feedback
-        const y1 = Math.sin(a1) * R;
-        const y2 = Math.sin(a2) * R;
-        const x1 = Math.cos(a1) * R;
-        const x2 = Math.cos(a2) * R;
-
-        const h_proj = Math.abs(y1 - y2);
-        const w_proj = Math.abs(x1 - x2);
-
-        const z_mid = h + (2*R - (y1 + y2 + 2*R)/2); // Approx depth
-        const FH = rho * g * z_mid * h_proj / 1000;
-        const FV = rho * g * (h * w_proj + 0.5 * w_proj * h_proj) / 1000; // Visual approximation
-        const FR = Math.sqrt(FH*FH + FV*FV);
-
-        document.getElementById('v7-res-fh').innerText = FH.toFixed(1) + " kN";
-        document.getElementById('v7-res-fv').innerText = FV.toFixed(1) + " kN";
-        document.getElementById('v7-res-fr').innerText = FR.toFixed(1) + " kN";
-
-        draw(a1, a2, h, R);
-    }
-
-    function draw(a1, a2, h, R) {
-        ctx.clearRect(0, 0, 550, 500);
-        const scale = 100;
-        const cx = 275, cy = 300;
-        const waterY = cy - (h + R) * scale;
-
-        // Water
-        ctx.fillStyle = "rgba(49, 130, 206, 0.15)";
-        ctx.fillRect(0, waterY, 550, 500 - waterY);
-        ctx.strokeStyle = "#3182ce"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(550, waterY); ctx.stroke();
-
-        // Circle Ghost
-        ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath(); ctx.arc(cx, cy, R * scale, 0, Math.PI*2); ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Projections
-        const x1 = Math.cos(a1) * R * scale;
-        const y1 = Math.sin(a1) * R * scale;
-        const x2 = Math.cos(a2) * R * scale;
-        const y2 = Math.sin(a2) * R * scale;
-
-        // Vertical Projection (Red)
-        ctx.strokeStyle = "#fc8181"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(cx - R * scale - 20, cy + y1); ctx.lineTo(cx - R * scale - 20, cy + y2); ctx.stroke();
-
-        // Horizontal Projection (Blue)
-        ctx.strokeStyle = "#63b3ed"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(cx + x1, cy + R * scale + 20); ctx.lineTo(cx + x2, cy + R * scale + 20); ctx.stroke();
-
-        // The Arc
-        ctx.strokeStyle = "#2d3748"; ctx.lineWidth = 6;
-        ctx.beginPath();
-        // Determine sweep direction
-        let start = a1, end = a2;
-        if (a1 > a2) [start, end] = [a2, a1];
-        ctx.arc(cx, cy, R * scale, start, end);
-        ctx.stroke();
-
-        // Force Vectors at Center
-        drawArrow(cx, cy, cx + 50, cy, "#fc8181", "Fh", 3);
-        drawArrow(cx, cy, cx, cy + 50, "#63b3ed", "Fv", 3);
-    }
-
-    function drawArrow(x1, y1, x2, y2, color, label, width) {
-        const headlen = 10;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-        ctx.closePath(); ctx.fill();
-        if(label) { ctx.font = "bold 12px Arial"; ctx.fillText(label, x2 + 5, y2 + 5); }
-    }
-
-    [a1S, a2S, hS].forEach(s => s.oninput = update);
-    update();
-})();
-</script>
-
-```
-
-***
-
 ## Dodatni istraživači
 
-U ovom su dijelu interaktivni istraživači koji pomažu u vizualizaciji i dubljem razumijevanju sila na zakrivljene plohe.
+U ovom dijelu ostaju samo dva dodatna istraživača koji stvarno šire razumijevanje glavnog teksta. Prvi generalizira geometriju proizvoljnog kružnog luka, a drugi povezuje lokalne sile tlaka s Arhimedovim uzgonom. Ostali pomoćni widgeti uklonjeni su jer su uglavnom ponavljali već prikazane odnose između $F_H$, $F_V$ i rezultante.
 
-### Widget A: Istraživač kružnog luka (Proizvoljni kutovi)
+### Widget A: Istraživač kružnog luka (proizvoljni kutovi)
 
-Ovaj istraživač omogućuje precizno definiranje luka pomoću kutova $\alpha_1$ i $\alpha_2$ te vizualizaciju pripadnih projekcija.
+Ovaj istraživač omogućuje precizno definiranje luka pomoću kutova $\alpha_1$ i $\alpha_2$ te vizualizaciju pripadnih projekcija. Koristan je kada treba prijeći s “standardnih” četvrtina i polukrugova na općenitiji segment.
 
 <hr class="widget-divider">
 <p class="widget-naslov">⚙️ Interaktivni simulator</p>
@@ -1229,475 +1099,85 @@ Ovaj istraživač omogućuje precizno definiranje luka pomoću kutova $\alpha_1$
 
     function draw(a1, a2, h, R, FH, FV, FR) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const scale = 120 / (R > 1 ? R : 1);
+
+        const scale = 120;
         const cx = canvas.width / 2;
-        const cy = canvas.height / 2 + 50;
-        const waterY = cy - (h + R) * scale;
+        const cy = canvas.height / 2 + 40;
+        const waterY = cy - (h + R) * 60;
 
-        const waterGrad = ctx.createLinearGradient(0, waterY, 0, canvas.height);
-        waterGrad.addColorStop(0, 'rgba(186, 230, 253, 0.3)');
-        waterGrad.addColorStop(1, 'rgba(186, 230, 253, 0.6)');
-        ctx.fillStyle = waterGrad;
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
         ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
-        
-        ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(canvas.width, waterY); ctx.stroke();
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, waterY);
+        ctx.lineTo(canvas.width, waterY);
+        ctx.stroke();
 
-        ctx.setLineDash([5, 5]);
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.beginPath(); ctx.arc(cx, cy, R * scale, 0, Math.PI*2); ctx.stroke();
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * scale, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#8b5cf6';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * scale, a1, a2);
+        ctx.stroke();
+
+        const x1 = cx + Math.cos(a1) * R * scale;
+        const y1 = cy + Math.sin(a1) * R * scale;
+        const x2 = cx + Math.cos(a2) * R * scale;
+        const y2 = cy + Math.sin(a2) * R * scale;
+        ctx.setLineDash([5, 4]);
+        ctx.strokeStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(Math.min(x1, x2), y1);
+        ctx.lineTo(Math.min(x1, x2), y2);
+        ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 6;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        let start = a1, end = a2;
-        if(a1 > a2) [start, end] = [a2, a1];
-        ctx.arc(cx, cy, R * scale, start, end);
-        ctx.stroke();
+        drawArrow(ctx, Math.min(x1, x2) - 70, (y1 + y2) / 2, Math.min(x1, x2) - 6, (y1 + y2) / 2, '#ef4444', 'F_H');
+        drawArrow(ctx, (x1 + x2) / 2, waterY + 15, (x1 + x2) / 2, cy - 10, '#3b82f6', 'F_V');
 
-        const x1 = Math.cos(a1) * R * scale;
-        const y1 = Math.sin(a1) * R * scale;
-        const x2 = Math.cos(a2) * R * scale;
-        const y2 = Math.sin(a2) * R * scale;
-
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)'; ctx.lineWidth = 4;
-        ctx.beginPath(); 
-        ctx.moveTo(cx - R*scale - 30, cy + y1); 
-        ctx.lineTo(cx - R*scale - 30, cy + y2); 
-        ctx.stroke();
-        
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(cx + x1, cy + R*scale + 30);
-        ctx.lineTo(cx + x2, cy + R*scale + 30);
-        ctx.stroke();
-
-        const fScale = 0.5;
-        drawArrow(ctx, cx, cy, cx + FH * fScale, cy, '#ef4444', 'F_H', 3);
-        drawArrow(ctx, cx, cy, cx, cy + FV * fScale, '#3b82f6', 'F_V', 3);
-        
-        const frAngle = Math.atan2(FV, FH);
-        drawArrow(ctx, cx, cy, cx + Math.cos(frAngle)*FR*fScale, cy + Math.sin(frAngle)*FR*fScale, '#8b5cf6', 'F_R', 4);
-    }
-
-    function drawArrow(ctx, x1, y1, x2, y2, color, label, width) {
-        const headlen = 10;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-        ctx.closePath(); ctx.fill();
-        if(label) { ctx.font = "bold 12px Inter"; ctx.fillText(label, x2 + 5, y2 + 5); }
-    }
-
-    [a1S, a2S, hS, rS].forEach(s => s.oninput = update);
-    update();
-})();
-</script>
-
-### Widget B: Tlačna kutija (Normalni vektori)
-
-Ovaj widget vizualizira kako tlak djeluje okomito na svaki dio zakrivljene plohe i kako ti vektori rastu s dubinom.
-
-<hr class="widget-divider">
-<p class="widget-naslov">⚙️ Interaktivni simulator</p>
-
-```{=html}
-<div id="v7-widget-b-container" class="mf1-widget" style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 950px; margin: 2rem auto; background: #ffffff; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0;">
-    <div style="background: linear-gradient(135deg, #0ea5e9, #0284c7); padding: 1.5rem; color: white;">
-        <h3 style="margin: 0; color: white; border: none; background: none; padding: 0; font-size: 1.5rem;">📦 Tlačna kutija: Normalni vektori</h3>
-        <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">Vizualizacija smjera i intenziteta tlaka po površini.</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
-        <div style="background: #f8fafc; padding: 1.5rem; position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center;">
-            <canvas id="v7-widget-b-canvas" width="550" height="500" style="max-width: 100%;"></canvas>
-            <div id="v7-wb-overlay" style="position: absolute; top: 1rem; left: 1rem; background: rgba(255,255,255,0.8); padding: 0.5rem; border-radius: 8px; font-size: 0.75rem; border: 1px solid #e2e8f0;">
-                Pomakni slider "Vodotaj" za animaciju rasta tlaka.
-            </div>
-        </div>
-
-        <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.25rem;">
-            <div>
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Vodotaj h [m]: <span id="v7-wb-h-val" style="color: #0284c7;">1.0</span></label>
-                <input type="range" id="v7-wb-h-slider" min="0" max="4" step="0.1" value="1.0" style="width: 100%;">
-            </div>
-            <div>
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Polumjer R [m]: <span id="v7-wb-r-val" style="color: #0284c7;">1.0</span></label>
-                <input type="range" id="v7-wb-r-slider" min="0.5" max="2" step="0.1" value="1.0" style="width: 100%;">
-            </div>
-            <div style="margin-top: 1rem;">
-                <button id="v7-wb-toggle-proj" style="width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid #0284c7; background: #f0f9ff; color: #0284c7; font-weight: 600; cursor: pointer; transition: 0.2s;">Prikaži komponente vektora</button>
-            </div>
-            
-            <div style="margin-top: auto; background: #f0f9ff; padding: 1.25rem; border-radius: 16px; border: 1px solid #bae6fd;">
-                <p style="font-size: 0.85rem; color: #0369a1; margin: 0; line-height: 1.4;">
-                    <strong>Fizikalni uvid:</strong> Svaki mali vektor tlaka djeluje okomito na plohu. Njihov zbroj po cijeloj površini daje rezultantnu silu F<sub>R</sub>.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-(function() {
-    const canvas = document.getElementById('v7-widget-b-canvas');
-    const ctx = canvas.getContext('2d');
-    const hS = document.getElementById('v7-wb-h-slider');
-    const rS = document.getElementById('v7-wb-r-slider');
-    const projBtn = document.getElementById('v7-wb-toggle-proj');
-
-    let showProj = false;
-    projBtn.onclick = () => {
-        showProj = !showProj;
-        projBtn.style.background = showProj ? '#0284c7' : '#f0f9ff';
-        projBtn.style.color = showProj ? '#ffffff' : '#0284c7';
-        update();
-    };
-
-    function update() {
-        const h = parseFloat(hS.value);
-        const R = parseFloat(rS.value);
-        document.getElementById('v7-wb-h-val').innerText = h.toFixed(1);
-        document.getElementById('v7-wb-r-val').innerText = R.toFixed(1);
-        draw(h, R);
-    }
-
-    function draw(h, R) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const scale = 120;
-        const cx = 150;
-        const cy = 250;
-        const waterY = cy - h * scale;
-
-        ctx.fillStyle = 'rgba(14, 165, 233, 0.1)';
-        ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
-        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(canvas.width, waterY); ctx.stroke();
-
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * scale, 0, Math.PI/2);
-        ctx.stroke();
-
-        for(let a = 0; a <= 90; a += 10) {
-            const rad = a * Math.PI / 180;
-            const x = cx + Math.cos(rad) * R * scale;
-            const y = cy + Math.sin(rad) * R * scale;
-            
-            const depth = (y - waterY) / scale;
-            if(depth < 0) continue;
-
-            const pLen = depth * 40;
-            const xEnd = x - Math.cos(rad) * pLen;
-            const yEnd = y - Math.sin(rad) * pLen;
-
-            const colorVal = Math.min(200, 50 + depth * 40);
-            ctx.strokeStyle = `rgb(2, 132, ${colorVal})`;
-            ctx.fillStyle = `rgb(2, 132, ${colorVal})`;
-            ctx.lineWidth = 2;
-
-            drawArrow(xEnd, yEnd, x, y, ctx.strokeStyle, null, 2);
-
-            if(showProj) {
-                ctx.setLineDash([2, 2]);
-                ctx.strokeStyle = 'rgba(100, 116, 139, 0.5)';
-                ctx.beginPath(); ctx.moveTo(xEnd, yEnd); ctx.lineTo(x, yEnd); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(xEnd, yEnd); ctx.lineTo(xEnd, y); ctx.stroke();
-                ctx.setLineDash([]);
-            }
-        }
-    }
-
-    function drawArrow(x1, y1, x2, y2, color, label, width) {
-        const headlen = 8;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-        ctx.closePath(); ctx.fill();
-    }
-
-    hS.oninput = update;
-    rS.oninput = update;
-    update();
-})();
-</script>
-```
-
-### Widget C: Usporedba (Ravna vs. Zakrivljena ploha)
-
-Ovaj widget pokazuje zašto je horizontalna sila ista za obje plohe, dok se vertikalna sila pojavljuje samo kod zakrivljene plohe.
-
-<hr class="widget-divider">
-<p class="widget-naslov">⚙️ Interaktivni simulator</p>
-
-```{=html}
-<div id="v7-widget-c-container" class="mf1-widget" style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 950px; margin: 2rem auto; background: #ffffff; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0;">
-    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 1.5rem; color: white;">
-        <h3 style="margin: 0; color: white; border: none; background: none; padding: 0; font-size: 1.5rem;">⚖️ Usporedba: Ravna vs. Zakrivljena</h3>
-        <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">Ista projekcija, različite ukupne sile.</p>
-    </div>
-
-    <div style="background: #f8fafc; padding: 2rem;">
-        <div style="margin-bottom: 1.5rem; padding: 0.95rem 1rem; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 14px; color: #9a3412; font-size: 0.82rem; line-height: 1.5;">
-            <strong>Fizikalni smisao:</strong> Ako su projekcije iste, horizontalna komponenta ostaje ista. Razlika nastaje zato što zakrivljena ploha nosi i dodatni vodeni volumen pa se pojavljuje vertikalna komponenta.
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-            <div style="background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 1rem; position: relative;">
-                <div style="position: absolute; top: 10px; left: 10px; font-weight: 700; color: #f59e0b; font-size: 0.8rem;">RAVNA PLOHA</div>
-                <canvas id="v7-wc-canvas-flat" width="400" height="350" style="width: 100%;"></canvas>
-            </div>
-            <div style="background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 1rem; position: relative;">
-                <div style="position: absolute; top: 10px; left: 10px; font-weight: 700; color: #3b82f6; font-size: 0.8rem;">ZAKRIVLJENA PLOHA</div>
-                <canvas id="v7-wc-canvas-curved" width="400" height="350" style="width: 100%;"></canvas>
-            </div>
-        </div>
-
-        <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; background: #ffffff; padding: 1.5rem; border-radius: 16px; border: 1px solid #e2e8f0;">
-            <div style="min-width: 150px;">
-                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #64748b;">Dubina h [m]</label>
-                <input type="range" id="v7-wc-h-slider" min="0.5" max="5" step="0.1" value="2.0" style="width: 100%;">
-            </div>
-            <div style="min-width: 150px;">
-                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #64748b;">Visina H [m]</label>
-                <input type="range" id="v7-wc-r-slider" min="0.5" max="2" step="0.1" value="1.5" style="width: 100%;">
-            </div>
-            
-            <table style="width: 100%; margin-top: 1rem; border-collapse: collapse; font-size: 0.9rem;">
-                <thead>
-                    <tr style="border-bottom: 2px solid #e2e8f0;">
-                        <th style="text-align: left; padding: 0.5rem; color: #64748b;">Komponenta</th>
-                        <th style="text-align: center; padding: 0.5rem; color: #f59e0b;">Ravna</th>
-                        <th style="text-align: center; padding: 0.5rem; color: #3b82f6;">Zakrivljena</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="padding: 0.5rem; border-bottom: 1px solid #f1f5f9;">Horizontalna F<sub>H</sub></td>
-                        <td id="v7-wc-fh-flat" style="text-align: center; padding: 0.5rem; font-weight: 700;">- kN</td>
-                        <td id="v7-wc-fh-curved" style="text-align: center; padding: 0.5rem; font-weight: 700;">- kN</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 0.5rem; border-bottom: 1px solid #f1f5f9;">Vertikalna F<sub>V</sub></td>
-                        <td style="text-align: center; padding: 0.5rem; color: #94a3b8;">0.00 kN</td>
-                        <td id="v7-wc-fv-curved" style="text-align: center; padding: 0.5rem; font-weight: 700;">- kN</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-(function() {
-    const cf = document.getElementById('v7-wc-canvas-flat');
-    const cc = document.getElementById('v7-wc-canvas-curved');
-    const ctxf = cf.getContext('2d');
-    const ctxc = cc.getContext('2d');
-    const hS = document.getElementById('v7-wc-h-slider');
-    const rS = document.getElementById('v7-wc-r-slider');
-
-    function update() {
-        const h = parseFloat(hS.value);
-        const H = parseFloat(rS.value);
-        const rho = 1000, g = 9.81;
-
-        const zc = h + H/2;
-        const FH = rho * g * zc * H / 1000;
-        const FV = rho * g * (h * H + Math.PI * H * H / 4) / 1000;
-
-        document.getElementById('v7-wc-fh-flat').innerText = FH.toFixed(2) + ' kN';
-        document.getElementById('v7-wc-fh-curved').innerText = FH.toFixed(2) + ' kN';
-        document.getElementById('v7-wc-fv-curved').innerText = FV.toFixed(2) + ' kN';
-
-        draw(h, H);
-    }
-
-    function draw(h, H) {
-        const scale = 50;
-        [ctxf, ctxc].forEach((ctx, i) => {
-            ctx.clearRect(0, 0, 400, 350);
-            const cx = 100, cy = 250;
-            const waterY = cy - h * scale;
-
-            ctx.fillStyle = 'rgba(186, 230, 253, 0.2)';
-            ctx.fillRect(0, waterY, 400, 350 - waterY);
-            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(400, waterY); ctx.stroke();
-
-            if(i === 0) {
-                ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 4;
-                ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - H * scale); ctx.stroke();
-                ctx.fillStyle = 'rgba(245, 158, 11, 0.2)';
-                ctx.beginPath();
-                ctx.moveTo(cx, cy - H * scale);
-                ctx.lineTo(cx + (h)*20, cy - H * scale);
-                ctx.lineTo(cx + (h+H)*20, cy);
-                ctx.lineTo(cx, cy);
-                ctx.fill();
-            } else {
-                ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(cx, cy - H*scale, H*scale, Math.PI/2, 0, true);
-                ctx.stroke();
-                for(let a = 0; a <= 90; a += 15) {
-                    const rad = a * Math.PI / 180;
-                    const x = cx + Math.cos(rad) * H * scale;
-                    const y = cy - H*scale + Math.sin(rad) * H * scale;
-                    const depth = (y - waterY) / scale;
-                    const pLen = depth * 15;
-                    drawArrow(ctx, x, y, x + Math.cos(rad)*pLen, y + Math.sin(rad)*pLen, '#3b82f6');
-                }
-            }
-        });
-    }
-
-    function drawArrow(ctx, x1, y1, x2, y2, color) {
-        const headlen = 6;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-        ctx.closePath(); ctx.fill();
-    }
-
-    hS.oninput = update;
-    rS.oninput = update;
-    update();
-})();
-</script>
-```
-
-### Widget D: 3D Intuicija (Rotacija cilindra)
-
-Istražite kako se rezultantna sila F<sub>R</sub> rotira i mijenja dok se cilindar postepeno potapa u fluid.
-
-<hr class="widget-divider">
-<p class="widget-naslov">⚙️ Interaktivni simulator</p>
-
-```{=html}
-<div id="v7-widget-d-container" class="mf1-widget" style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 950px; margin: 2rem auto; background: #ffffff; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0;">
-    <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 1.5rem; color: white;">
-        <h3 style="margin: 0; color: white; border: none; background: none; padding: 0; font-size: 1.5rem;">🌀 3D Intuicija: Subverzija</h3>
-        <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">Dinamička promjena kuta rezultante F<sub>R</sub>.</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
-        <div style="background: #f8fafc; padding: 1.5rem; position: relative; height: 450px;">
-            <canvas id="v7-wd-canvas-main" width="400" height="400" style="position: absolute; left: 20px; top: 25px;"></canvas>
-            <canvas id="v7-wd-canvas-polar" width="200" height="200" style="position: absolute; right: 20px; bottom: 20px; background: rgba(255,255,255,0.8); border-radius: 50%; border: 1px solid #e2e8f0;"></canvas>
-        </div>
-
-        <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 1.5rem;">
-            <div style="padding: 0.95rem 1rem; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; color: #5b21b6; font-size: 0.82rem; line-height: 1.5;">
-                <strong>Kako čitati widget:</strong> Kako raste uronjeni kut, mijenja se odnos između <code>F_H</code> i <code>F_V</code>, pa se zato zakreće i rezultanta <code>F_R</code>. Polarni prikaz desno sažima samo smjer rezultante.
-            </div>
-            <div>
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Kut potapanja [°]: <span id="v7-wd-angle-val" style="color: #8b5cf6;">180°</span></label>
-                <input type="range" id="v7-wd-angle-slider" min="1" max="360" value="180" style="width: 100%;">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <button class="v7-wd-preset" data-angle="90" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #ddd; background: #f9fafb; cursor: pointer; font-size: 0.8rem;">Četvrtina (90°)</button>
-                <button class="v7-wd-preset" data-angle="180" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #ddd; background: #f9fafb; cursor: pointer; font-size: 0.8rem;">Polovica (180°)</button>
-                <button class="v7-wd-preset" data-angle="270" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #ddd; background: #f9fafb; cursor: pointer; font-size: 0.8rem;">Tri četvrtine (270°)</button>
-                <button class="v7-wd-preset" data-angle="360" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #ddd; background: #f9fafb; cursor: pointer; font-size: 0.8rem;">Puni krug (360°)</button>
-            </div>
-
-            <div style="margin-top: auto; padding: 1rem; background: #f5f3ff; border-radius: 12px; border: 1px solid #ddd;">
-                <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 700; margin-bottom: 5px;">KUT REZULTANTE α:</div>
-                <div id="v7-wd-res-angle" style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">45.0°</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-(function() {
-    const canvas = document.getElementById('v7-wd-canvas-main');
-    const polar = document.getElementById('v7-wd-canvas-polar');
-    const ctx = canvas.getContext('2d');
-    const pctx = polar.getContext('2d');
-    const angleS = document.getElementById('v7-wd-angle-slider');
-    
-    document.querySelectorAll('.v7-wd-preset').forEach(btn => {
-        btn.onclick = () => { angleS.value = btn.dataset.angle; update(); };
-    });
-
-    function update() {
-        const phi = parseFloat(angleS.value);
-        document.getElementById('v7-wd-angle-val').innerText = phi + '°';
-        
-        const rad = phi * Math.PI / 180;
-        const FH = Math.sin(rad/2) * 50;
-        const FV = (rad/2 - Math.sin(rad)/2) * 40;
-        const alpha = Math.atan2(FV, FH) * 180 / Math.PI;
-        
-        document.getElementById('v7-wd-res-angle').innerText = alpha.toFixed(1) + '°';
-        
-        draw(rad, FH, FV);
-        drawPolar(alpha);
-    }
-
-    function draw(rad, FH, FV) {
-        ctx.clearRect(0,0,400,400);
-        const cx = 200, cy = 200, R = 100;
-        
-        ctx.fillStyle = 'rgba(139, 92, 246, 0.1)';
-        ctx.beginPath();
-        ctx.arc(cx, cy, R, Math.PI/2 - rad/2, Math.PI/2 + rad/2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2); ctx.stroke();
-        
-        ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.arc(cx, cy, R, Math.PI/2 - rad/2, Math.PI/2 + rad/2);
-        ctx.stroke();
-
-        const fAngle = Math.atan2(FV, FH);
-        drawArrow(ctx, cx, cy, cx + Math.cos(Math.PI/2)*120, cy + Math.sin(Math.PI/2)*120, '#8b5cf6', 'F_R');
-    }
-
-    function drawPolar(alpha) {
-        pctx.clearRect(0,0,200,200);
-        pctx.strokeStyle = '#e2e8f0';
-        pctx.beginPath(); pctx.arc(100, 100, 80, 0, Math.PI*2); pctx.stroke();
-        pctx.beginPath(); pctx.moveTo(20, 100); pctx.lineTo(180, 100); pctx.stroke();
-        pctx.beginPath(); pctx.moveTo(100, 20); pctx.lineTo(100, 180); pctx.stroke();
-        
-        pctx.strokeStyle = '#8b5cf6'; pctx.lineWidth = 3;
-        pctx.beginPath();
-        pctx.moveTo(100, 100);
-        const r = alpha * Math.PI / 180;
-        pctx.lineTo(100 + Math.cos(r)*80, 100 + Math.sin(r)*80);
-        pctx.stroke();
+        const alpha = Math.atan2(FV, FH);
+        drawArrow(ctx, cx, cy, cx - Math.cos(alpha) * 110, cy - Math.sin(alpha) * 110, '#8b5cf6', 'F_R');
     }
 
     function drawArrow(ctx, x1, y1, x2, y2, color, label) {
         const headlen = 10;
         const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
         ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
         ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-        ctx.closePath(); ctx.fill();
+        ctx.closePath();
+        ctx.fill();
+        if (label) {
+            ctx.font = 'bold 14px Inter';
+            ctx.fillText(label, x1, y1 - 10);
+        }
     }
 
-    angleS.oninput = update;
+    [a1S, a2S, hS, rS].forEach((slider) => slider.oninput = update);
     update();
 })();
 </script>
+```
+
+```{=html}
+<div class="mf1-warning">
+    <h4>Zašto su ostala samo dva widgeta</h4>
+    <p>U ovoj vježbi dodatni istraživači više ne ponavljaju iste ideje kroz više vizualnih stilova. Zadržani su samo modul za opći kružni luk i modul za uzgon, jer svaki od njih dodaje novu mentalnu sliku koju uvodni tekst i glavni zadaci ne pokrivaju dovoljno jasno.</p>
+</div>
 ```
 
 ### Widget E: Simulator uzgona (Integracija tlaka)

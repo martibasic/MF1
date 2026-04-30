@@ -24,7 +24,7 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
         .canvas-wrapper { position: relative; background: #2c3e50; border-radius: 8px; overflow: hidden; height: 250px; }
-        .controls { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .controls { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
     </style>
 
     <div class="widget-header"><h3 class="widget-title">Dinamika strujanja: Ubrzanje u suženju</h3></div>
@@ -40,14 +40,25 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
         </div>
     </div>
 
+      <div style="padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 15px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
+        <strong>Kako čitati widget:</strong> Presjek određuje lokalnu brzinu. Najprije iz promjera dobivaš površine <strong>A₁</strong> i <strong>A₂</strong>, zatim iz kontinuiteta vidiš da je isti volumenski protok <strong>V̇</strong> prisutan na oba presjeka, a iz toga slijedi zašto se čestice u suženju zbijaju i ubrzavaju.
+      </div>
+
     <div class="canvas-wrapper">
-        <canvas id="canvas-flow" width="800" height="250"></canvas>
+      <canvas id="canvas-flow" width="800" height="250" style="width: 100%; height: 100%; display: block;"></canvas>
     </div>
 
-    <div class="metrics" style="display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
-        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7;">BRZINA v1 [m/s]</span><span id="v1-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.2rem;">1.00</span></div>
-        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7;">BRZINA v2 [m/s]</span><span id="v2-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.2rem; color: #f1c40f;">0.00</span></div>
+      <div class="metrics" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7; display:block;">POVRŠINA A1 [m²]</span><span id="a1-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.05rem;">0.0177</span></div>
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7; display:block;">POVRŠINA A2 [m²]</span><span id="a2-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.05rem;">0.0050</span></div>
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7; display:block;">PROTOK V̇ [m³/s]</span><span id="q-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.05rem; color: #93c5fd;">0.0177</span></div>
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7; display:block;">BRZINA v1 [m/s]</span><span id="v1-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.05rem;">1.00</span></div>
+        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7; display:block;">BRZINA v2 [m/s]</span><span id="v2-out-cont" style="font-family:monospace; font-weight:bold; font-size: 1.05rem; color: #f1c40f;">0.00</span></div>
     </div>
+
+      <div style="margin-top: 14px; padding: 12px 14px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; color: #7c2d12; font-size: 0.82rem; line-height: 1.5;">
+        <strong>Tumačenje scene:</strong> <span id="cont-explainer"></span>
+      </div>
 
     <script>
     (function() {
@@ -66,11 +77,18 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
             const d2 = parseFloat(d2Sl.value);
             const v1 = 1.0; 
             const v2 = (d1*d1 / (d2*d2)) * v1;
+          const A1 = Math.PI * Math.pow(d1 / 1000, 2) / 4;
+          const A2 = Math.PI * Math.pow(d2 / 1000, 2) / 4;
+          const q = A1 * v1;
 
             document.getElementById('d1-val-cont').textContent = d1;
             document.getElementById('d2-val-cont').textContent = d2;
+          document.getElementById('a1-out-cont').textContent = A1.toFixed(4);
+          document.getElementById('a2-out-cont').textContent = A2.toFixed(4);
+          document.getElementById('q-out-cont').textContent = q.toFixed(4);
             document.getElementById('v1-out-cont').textContent = v1.toFixed(2);
             document.getElementById('v2-out-cont').textContent = v2.toFixed(2);
+          document.getElementById('cont-explainer').textContent = `Kad promjer padne s ${d1.toFixed(0)} mm na ${d2.toFixed(0)} mm, površina se smanji s ${A1.toFixed(4)} m² na ${A2.toFixed(4)} m². Budući da isti protok ostaje V̇ = ${q.toFixed(4)} m³/s, brzina mora porasti s ${v1.toFixed(2)} m/s na ${v2.toFixed(2)} m/s.`;
 
             ctx.clearRect(0,0,canvas.width, canvas.height);
             
@@ -113,39 +131,30 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
 
 ```
 
+```{=html}
+<div class="mf1-note-grid">
+  <div class="mf1-kriterij">
+    <h4>Kriterij primjene</h4>
+    <ul>
+      <li>Za stacionarno nestlačivo strujanje prvo očuvaj volumenski protok, pa tek onda računaj pojedine brzine i površine presjeka.</li>
+      <li>Kad se protok dijeli ili spaja, kontinuitet se primjenjuje na zbroj ulaznih i izlaznih masenih odnosno volumenskih protoka.</li>
+    </ul>
+  </div>
+  <div class="mf1-warning">
+    <h4>Česta pogreška</h4>
+    <p>Najčešća greška je koristiti promjer umjesto površine presjeka. Kontinuitet vrijedi za $A \cdot v$, pa promjer moraš prvo pretvoriti u površinu odgovarajuće geometrije.</p>
+  </div>
+</div>
+```
+
 ***
 
 ### ZADATAK 70.
 
-
 70. Voda struji kroz difuzor, čiji ulazni i izlazni presjeci iznose 120 mm, odnosno 180 mm. Ukoliko voda struji na izlaznom poprečnom presjeku srednjom brzinom 16 m/s , potrebno je odrediti srednju brzinu na ulaznom poprečnom presjeku, te volumenski i maseni protok na ulazu.
 
-
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| VeliÄina | Vrijednost |
-|---|---|
-| $$$D_1$ | $0$ |
-| | $12 [m]$ |
-| $\quad D_2$ | $0$ |
-| | $18 [m]$ |
-| $\quad v_{2sr}$ | $16 \left[\frac{m}{s}\right]$ |
-| $\quad \rho$ | $998 \left[\frac{kg}{m^3}\right]$$$ |
-
-
-</div>
-<div>
-
-#### Odrediti
-- $v_{1sr} = ?
-- \dot{V}_1 = ?
-- \dot{m}_1 = ?$
-
-
-</div>
-</div>
+**Zadano:** $D_1 = 120 \text{ mm}, D_2 = 180 \text{ mm}, v_{2sr} = 16 \text{ m/s}, \rho = 998 \text{ kg/m}^3$  
+**Odrediti:** srednju brzinu na ulazu $v_{1sr}$, volumenski protok $\dot{V}_1$ i maseni protok $\dot{m}_1$
 
 **Objašnjenje i rješenje korak po korak:**
 
@@ -194,6 +203,8 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
             </div>
 
             <div style="padding: 1rem; border-radius: 14px; background: #ffffff; border: 1px solid #e2e8f0;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Površina A1</span><strong id="a1r-70p" style="color: #0f172a;">0.0000 m²</strong></div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Površina A2</span><strong id="a2r-70p" style="color: #0f172a;">0.0000 m²</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Ulazna brzina v1</span><strong id="v1-res-70p" style="color: #0369a1;">0.00 m/s</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.45rem;"><span style="color: #475569;">Volumenski protok V̇</span><strong id="vdot-res-70p" style="color: #0f172a;">0.0000 m³/s</strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem;"><span style="color: #475569;">Maseni protok ṁ</span><strong id="mdot-res-70p" style="color: #0f766e;">0.0 kg/s</strong></div>
@@ -208,7 +219,7 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
         <div style="padding: 1.25rem; background: linear-gradient(180deg, #f8fbff 0%, #eef8ff 100%); display: flex; flex-direction: column; gap: 1rem; order: 1;">
             <canvas id="canvas-70p" width="680" height="320" style="width: 100%; height: auto; display: block; border-radius: 16px; background: linear-gradient(180deg, #ffffff 0%, #e0f2fe 100%); border: 1px solid #dbeafe;"></canvas>
 
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.85rem;">
                 <div style="padding: 0.85rem; border-radius: 12px; background: #ffffff; border: 1px solid #e2e8f0; text-align: center;">
                     <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">A1</div>
                     <div id="a1-70p" style="font-family: monospace; font-size: 1rem; font-weight: 800; color: #0f172a;">0.0000</div>
@@ -226,6 +237,10 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
                     <div style="font-size: 1rem; font-weight: 800; color: #0284c7;">Difuzor</div>
                 </div>
             </div>
+
+                <div style="padding: 0.95rem 1rem; border-radius: 14px; background: #fff7ed; border: 1px solid #fdba74; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                  <strong>Tumačenje scene:</strong> <span id="expl-70p"></span>
+                </div>
         </div>
     </div>
 </div>
@@ -297,6 +312,8 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
         document.getElementById('d2-70p-label').textContent = (d2 * 1000).toFixed(0) + ' mm';
         document.getElementById('v2-70p-label').textContent = v2.toFixed(1) + ' m/s';
         document.getElementById('rho-70p-label').textContent = rho.toFixed(0) + ' kg/m³';
+        document.getElementById('a1r-70p').textContent = fmtArea(A1);
+        document.getElementById('a2r-70p').textContent = fmtArea(A2);
         document.getElementById('v1-res-70p').textContent = v1.toFixed(2) + ' m/s';
         document.getElementById('vdot-res-70p').textContent = vdot.toFixed(4) + ' m³/s';
         document.getElementById('mdot-res-70p').textContent = mdot.toFixed(1) + ' kg/s';
@@ -304,6 +321,7 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
         document.getElementById('a2-70p').textContent = fmtArea(A2);
         document.getElementById('vratio-70p').textContent = (v1 / v2).toFixed(2);
         document.getElementById('eq-70p').textContent = `${A1.toFixed(4)} · ${v1.toFixed(2)} = ${A2.toFixed(4)} · ${v2.toFixed(2)} = ${vdot.toFixed(4)} m³/s`;
+        document.getElementById('expl-70p').textContent = `Izlazni presjek je veći od ulaznog, pa se isti protok ${vdot.toFixed(4)} m³/s mora rasporediti na veću površinu ${A2.toFixed(4)} m². Zato je izlazna brzina ${v2.toFixed(2)} m/s manja od ulazne ${v1.toFixed(2)} m/s, dok maseni protok ostaje ${mdot.toFixed(1)} kg/s.`;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -397,37 +415,10 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
 
 ### ZADATAK 71.
 
-
 71. Voda ustrujava u spremnik za miješanje prikazan na slici pri čemu volumenski protok iznosi $150 \text{ dm}^3/s$ kroz presjek A, istovremeno kroz presjek B ustrujava ulje relativne gustoće 0,8 volumenskim protokom $30 \text{ dm}^3/s$. Ukoliko su tekućine nestlačive, te ukoliko možemo smatrati mješavinu homogenom, potrebno je odrediti srednju brzinu i gustoću tekućine koja istrujava kroz presjek C čiji promjer iznosi 30 cm.
 
-
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| VeliÄina | Vrijednost |
-|---|---|
-| $$$\dot{V}_A$ | $0$ |
-| | $15 \left[\frac{m^3}{s}\right]$ |
-| $\quad \dot{V}_B$ | $0$ |
-| | $03 \left[\frac{m^3}{s}\right]$ |
-| $\quad D_C$ | $0$ |
-| | $3 [m]$ |
-| $\quad \rho_A$ | $1000 \left[\frac{kg}{m^3}\right]$ |
-| $\quad \bar{\rho}_B$ | $0$ |
-| | $8$$$ |
-
-
-</div>
-<div>
-
-#### Odrediti
-- $v_{Csr} = ?
-- \rho_C = ?$
-
-
-</div>
-</div>
+**Zadano:** $\dot{V}_A = 150 \text{ dm}^3/s, \dot{V}_B = 30 \text{ dm}^3/s, \bar{\rho}_B = 0,8, D_C = 30 \text{ cm}, \rho_A = 1000 \text{ kg/m}^3$  
+**Odrediti:** srednju brzinu $v_{Csr}$ i gustoću tekućine $\rho_C$ na izlazu
 
 **Objašnjenje i rješenje korak po korak:**
 
@@ -479,6 +470,7 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
             </div>
 
             <div style="padding:1rem; border-radius:14px; background:#ffffff; border:1px solid #e2e8f0;">
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:0.45rem;"><span style="color:#475569;">Presjek A_C</span><strong id="ac-71p" style="color:#0f172a;">0.0000 m²</strong></div>
                 <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:0.45rem;"><span style="color:#475569;">Izlazna brzina v_C</span><strong id="vc-71p" style="color:#0f766e;">0.00 m/s</strong></div>
                 <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:0.45rem;"><span style="color:#475569;">Gustoća mješavine ρ_C</span><strong id="rhoc-71p" style="color:#7c3aed;">0.0 kg/m³</strong></div>
                 <div style="display:flex; justify-content:space-between; font-size:0.82rem;"><span style="color:#475569;">Maseni tok na izlazu</span><strong id="mc-71p" style="color:#0f172a;">0.0 kg/s</strong></div>
@@ -493,7 +485,7 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
         <div style="padding:1.25rem; background:linear-gradient(180deg, #fbfdff 0%, #eff6ff 100%); display:flex; flex-direction:column; gap:1rem; order:1;">
             <canvas id="canvas-71p" width="700" height="360" style="width:100%; height:auto; display:block; border-radius:16px; background:#ffffff; border:1px solid #dbeafe;"></canvas>
 
-            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.85rem;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:0.85rem;">
                 <div style="padding:0.85rem; border-radius:12px; background:#ffffff; border:1px solid #e2e8f0; text-align:center;">
                     <div style="font-size:0.72rem; color:#64748b; font-weight:700;">ṁ_A</div>
                     <div id="ma-71p" style="font-family:monospace; font-size:1rem; font-weight:800; color:#0284c7;">0.0</div>
@@ -511,6 +503,10 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
                     <div id="rhob-71p" style="font-family:monospace; font-size:1rem; font-weight:800; color:#92400e;">0.0</div>
                 </div>
             </div>
+
+              <div style="padding:0.95rem 1rem; border-radius:14px; background:#fff7ed; border:1px solid #fdba74; color:#7c2d12; font-size:0.82rem; line-height:1.55;">
+                <strong>Tumačenje scene:</strong> <span id="expl-71p"></span>
+              </div>
         </div>
     </div>
 </div>
@@ -581,6 +577,7 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
         document.getElementById('dc-71p-label').textContent = (dc * 100).toFixed(0) + ' cm';
         document.getElementById('rhoa-71p-label').textContent = rhoa.toFixed(0) + ' kg/m³';
         document.getElementById('rhorel-71p-label').textContent = rhorel.toFixed(2);
+        document.getElementById('ac-71p').textContent = ac.toFixed(4) + ' m²';
         document.getElementById('vc-71p').textContent = vc.toFixed(2) + ' m/s';
         document.getElementById('rhoc-71p').textContent = rhoc.toFixed(1) + ' kg/m³';
         document.getElementById('mc-71p').textContent = mc.toFixed(1) + ' kg/s';
@@ -589,6 +586,7 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
         document.getElementById('qc-71p').textContent = qc.toFixed(3) + ' m³/s';
         document.getElementById('rhob-71p').textContent = rhob.toFixed(0) + ' kg/m³';
         document.getElementById('eq-71p').textContent = `${ma.toFixed(1)} + ${mb.toFixed(1)} = ${mc.toFixed(1)} kg/s`;
+        document.getElementById('expl-71p').textContent = `Na spoju se najprije zbrajaju maseni tokovi: ṁ_A = ${ma.toFixed(1)} kg/s i ṁ_B = ${mb.toFixed(1)} kg/s daju ṁ_C = ${mc.toFixed(1)} kg/s. Budući da je ukupni volumenski tok Q_C = ${qc.toFixed(3)} m³/s kroz presjek A_C = ${ac.toFixed(4)} m², izlazna brzina mora biti ${vc.toFixed(2)} m/s, a gustoća homogenizirane mješavine ${rhoc.toFixed(1)} kg/m³.`;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -701,48 +699,10 @@ Ova relacija pokazuje da su brzina strujanja i površina poprečnog presjeka **o
 
 ### ZADATAK 72.
 
-
 72. Voda ustrujava u cilindrični spremnik na slici kroz cijev 1 brzinom strujanja 8,3 m/s, pri čemu istrujava kroz cijevi 2 i 3 brzinama 0,9 m/s i 3,6 m/s. Cijev označena brojem 4 otvorena je prema atmosferi. Unutarnji promjeri cijevi iznose $D_1 = 75 \text{ mm}$, $D_2 = 50 \text{ mm}$, $D_3 = 60 \text{ mm}$, $D_4 = 50 \text{ mm}$. Potrebno je odrediti brzinu promjene razine spremnika ($dh/dt$), te srednju brzinu ustrujavanja zraka kroz cijev 4. Pretpostaviti strujanje nestlačivim.
 
-
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| VeliÄina | Vrijednost |
-|---|---|
-| $$$v_1$ | $8$ |
-| | $3 \left[\frac{m}{s}\right]$ |
-| $\quad v_2$ | $0$ |
-| | $9 \left[\frac{m}{s}\right]$ |
-| $\quad v_3$ | $3$ |
-| | $6 \left[\frac{m}{s}\right]$ |
-| $\quad d_s$ | $0$ |
-| | $61 [m]$ |
-| $\quad D_1$ | $0$ |
-| | $075 [m]$ |
-| $$$
-$$D_2$ | $0$ |
-| | $05 [m]$ |
-| $\quad D_3$ | $0$ |
-| | $06 [m]$ |
-| $\quad D_4$ | $0$ |
-| | $05 [m]$ |
-| $\quad \rho_v$ | $1000 \left[\frac{kg}{m^3}\right]$ |
-| $\quad \rho_z$ | $1$ |
-| | $2 \left[\frac{kg}{m^3}\right]$$$ |
-
-
-</div>
-<div>
-
-#### Odrediti
-- brzinu promjene razine u vode u spremniku $\frac{dh}{dt} = ?
-- $ te srednju brzinu ustrujavanja zraka $v_{4sr} = ?$
-
-
-</div>
-</div>
+**Zadano:** $v_1 = 8,3 \text{ m/s}, v_2 = 0,9 \text{ m/s}, v_3 = 3,6 \text{ m/s}, d_s = 0,61 \text{ m}, D_1 = 75 \text{ mm}, D_2 = 50 \text{ mm}, D_3 = 60 \text{ mm}, D_4 = 50 \text{ mm}, \rho_v = 1000 \text{ kg/m}^3, \rho_z = 1,2 \text{ kg/m}^3$  
+**Odrediti:** brzinu promjene razine spremnika ($dh/dt$) i srednju brzinu ustrujavanja zraka kroz cijev 4
 
 **Pretpostavke:** fluid je nestlačiv
 
@@ -896,41 +856,10 @@ $$v_{4sr} = \mathbf{12,59 \text{ m/s}}$$
 
 ### ZADATAK 73.
 
-
 73. U spremnik sa slike ustrujava 10,2 kg/s vode, pri čemu istrujava 5,3 kg/s benzina, relativne gustoće 0,69. Ukoliko pretpostavimo da su svi fluidi nestlačivi, potrebno je odrediti volumenski protok zraka i njegov smjer. Zrak je temperature $20^\circ \text{C}$ i tlak je atmosferski – 1bar.
 
-
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| VeliÄina | Vrijednost |
-|---|---|
-| $$$\dot{m}_1$ | $10$ |
-| | $2 \left[\frac{kg}{s}\right]$ |
-| $\quad \dot{m}_2$ | $5$ |
-| | $3 \left[\frac{kg}{s}\right]$ |
-| $\quad T$ | $20[^\circ C]$ |
-| $\quad p_{atm}$ | $100000[Pa]$ |
-| $\quad \rho_v$ | $998 \left[\frac{kg}{m^3}\right]$ |
-| $$$
-$$\bar{\rho}_b$ | $0$ |
-| | $69$ |
-| $\quad \rho_z$ | $1$ |
-| | $2 \left[\frac{kg}{m^3}\right]$ |
-| $\quad d_3$ | $0$ |
-| | $05 [m]$$$ |
-
-
-</div>
-<div>
-
-#### Odrediti
-- srednju brzinu ustrujavanja zraka $v_{3sr} = ?$
-
-
-</div>
-</div>
+**Zadano:** $\dot{m}_1 = 10,2 \text{ kg/s}, \dot{m}_2 = 5,3 \text{ kg/s}, \bar{\rho}_b = 0,69, d_3 = 0,05 \text{ m}, \rho_v = 998 \text{ kg/m}^3, \rho_z = 1,2 \text{ kg/m}^3, T = 20^\circ \text{C}, p_{atm} = 1 \text{ bar}$  
+**Odrediti:** volumenski protok zraka i njegov smjer, te srednju brzinu ustrujavanja zraka $v_{3sr}$
 
 **Pretpostavke:** fluid je nestlačiv
 
@@ -1059,44 +988,10 @@ $$\bar{\rho}_b$ | $0$ |
 
 ### ZADATAK 74.
 
-
 74. Ispitne stjenke zračnog tunela izrađene su od perforiranog materijala, pri čemu se fluid isisava u svrhu generiranja tankog viskoznog sloja. Stjenka ima 800 provrta promjera 7 mm po kvadratnom metru površine. Brzina istrujavanja na svakom provrtu iznosi $v_p = 10 \text{ m/s}$ , pri čemu brzina na ulazu iznosi $v_1 = 46 \text{ m/s}$. Ukoliko pretpostavimo da je fluid (zrak) nestlačiv temperature $20^\circ \text{C}$ i tlaka 1 atm, potrebno je odrediti ukupne odsisne brzine $v_2$, te $v_f$.
 
-
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| VeliÄina | Vrijednost |
-|---|---|
-| $$$v_p$ | $10 \left[\frac{m}{s}\right]$ |
-| $\quad v_1$ | $46 \left[\frac{m}{s}\right]$ |
-| $\quad n_p$ | $800 [m^{-2}]$ |
-| $\quad d_p$ | $0$ |
-| | $007[m]$ |
-| $\quad D_f$ | $2$ |
-| | $4[m]$ |
-| $$$
-$$D_1$ | $D_2 = 0$ |
-| | $9[m]$ |
-| $\quad D_0$ | $2$ |
-| | $6[m]$ |
-| $\quad L$ | $4[m]$ |
-| $\quad \rho_z$ | $1$ |
-| | $2 \left[\frac{kg}{m^3}\right]$ |
-| $\quad p_{atm}$ | $101325[Pa]$ |
-| $\quad T$ | $20[^\circ C]$$$ |
-
-
-</div>
-<div>
-
-#### Odrediti
-- odsisni volumenski protok $v_2$ i $v_f$
-
-
-</div>
-</div>
+**Zadano:** $v_p = 10 \text{ m/s}, v_1 = 46 \text{ m/s}, n_p = 800 \text{ m}^{-2}, d_p = 0,007 \text{ m}, D_f = 2,4 \text{ m}, D_1 = D_2 = 0,9 \text{ m}, D_0 = 2,6 \text{ m}, L = 4 \text{ m}, \rho_z = 1,2 \text{ kg/m}^3, T = 20^\circ \text{C}, p_{atm} = 1 \text{ atm}$  
+**Odrediti:** odsisni volumenski protok $v_2$ i $v_f$
 
 **Pretpostavke:** fluid je nestlačiv
 
@@ -1224,35 +1119,10 @@ $$D_1$ | $D_2 = 0$ |
 
 ### ZADATAK 75.
 
-
 75. Pumpa ubrizgava vodu, prikazano na slici, brzinom $v_1 = 26 \text{ m/s}$ kroz cijev promjera 100 mm, oko koje struji voda brzinom 2,6 m/s . Dva toka se nizstrujno miješaju, pri čemu u presjeku 3 brzina $v_3$ postaje konstantnom. Ukoliko je tok stacionaran i nestlačiv, potrebno je odrediti brzinu $v_3$.
 
-
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| VeliÄina | Vrijednost |
-|---|---|
-| $$$v_1$ | $26 \left[\frac{m}{s}\right]$ |
-| $\quad v_2$ | $2$ |
-| | $6 \left[\frac{m}{s}\right]$ |
-| $\quad D_1$ | $0$ |
-| | $1[m]$ |
-| $\quad D_2$ | $0$ |
-| | $3[m]$ |
-| $\quad \rho_v$ | $998 \left[\frac{kg}{m^3}\right]$$$ |
-
-
-</div>
-<div>
-
-#### Odrediti
-- brzinu u cijevi na presjeku 3 $v_3 = ?$
-
-
-</div>
-</div>
+**Zadano:** $v_1 = 26 \text{ m/s}, v_2 = 2,6 \text{ m/s}, D_1 = 100 \text{ mm}, D_2 = 300 \text{ mm}, \rho_v = 998 \text{ kg/m}^3$  
+**Odrediti:** brzinu u cijevi na presjeku 3 $v_3$
 
 **Pretpostavke:** fluid je nestlačiv, tok je stacionaran
 

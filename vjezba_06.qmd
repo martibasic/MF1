@@ -33,8 +33,8 @@ Ovaj fizikalni princip objašnjava zašto brane i potporni zidovi često imaju z
         <p style="margin: 6px 0 0 0; opacity: 0.7; font-size: 0.95rem;">Radijalni tlak vs. hidrostatske komponente</p>
     </div>
 
-    <div style="padding: 25px; background: white; display: flex; flex-direction: column; gap: 20px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div style="padding: 25px; background: white; display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px;">
                 <div style="position: relative; height: 320px; background: #fdfdfd; border-radius: 16px; border: 1px solid #f1f5f9; overflow: hidden;">
                     <div style="position: absolute; top: 10px; left: 10px; font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; z-index: 10;">Radijalni tlak</div>
                     <canvas id="canvas-radial" width="300" height="320" style="width: 100%; height: 100%;"></canvas>
@@ -45,7 +45,7 @@ Ovaj fizikalni princip objašnjava zašto brane i potporni zidovi često imaju z
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1.3fr 1.3fr 1fr; gap: 15px; align-items: stretch;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; align-items: stretch;">
                 <div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
                     <div class="control-group">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
@@ -69,6 +69,14 @@ Ovaj fizikalni princip objašnjava zašto brane i potporni zidovi često imaju z
                 <div style="padding: 15px 18px; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                     <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">Metrike rezultante</div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span style="color: #64748b;">A_proj:</span>
+                            <span id="aproj-out-curved" style="font-weight: 700; color: #1e293b;">0.0 m²</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span style="color: #64748b;">V_iznad:</span>
+                            <span id="v-out-curved" style="font-weight: 700; color: #1e293b;">0.0 m³</span>
+                        </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
                             <span style="color: #64748b;">Kut α:</span>
                             <span id="alpha-out-curved" style="font-weight: 700; color: #1e293b;">0.0°</span>
@@ -103,7 +111,7 @@ Ovaj fizikalni princip objašnjava zašto brane i potporni zidovi često imaju z
             </div>
 
             <!-- Bottom Metrics Dashboard -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                 <div style="background: #eff6ff; padding: 15px; border-radius: 12px; border-left: 4px solid #3b82f6; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.75rem; color: #1e40af; font-weight: 700; text-transform: uppercase;">FH [kN]</span>
                     <span id="fh-out-curved" style="font-size: 1.2rem; font-weight: 800; color: #1e3a8a; font-family: monospace;">0.0</span>
@@ -112,6 +120,11 @@ Ovaj fizikalni princip objašnjava zašto brane i potporni zidovi često imaju z
                     <span style="font-size: 0.75rem; color: #15803d; font-weight: 700; text-transform: uppercase;">FV [kN]</span>
                     <span id="fv-out-curved" style="font-size: 1.2rem; font-weight: 800; color: #064e3b; font-family: monospace;">0.0</span>
                 </div>
+            </div>
+
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 16px; color: #7c2d12;">
+                <div style="font-weight: 800; margin-bottom: 6px;">Tumačenje scene</div>
+                <p id="curved-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.55;"></p>
             </div>
     </div>
 
@@ -129,6 +142,8 @@ Ovaj fizikalni princip objašnjava zašto brane i potporni zidovi često imaju z
             const h1 = parseFloat(h1Sl.value);
             const R = parseFloat(rSl.value);
             const b = 1.0; const rho = 1000; const g = 9.81;
+            const areaProj = R * b;
+            const volumeAbove = (h1 * R + (Math.PI * R * R / 4)) * b;
 
             document.getElementById('h1-val-curved').textContent = h1.toFixed(1) + ' m';
             document.getElementById('r-val-curved').textContent = R.toFixed(1) + ' m';
@@ -139,10 +154,13 @@ Ovaj fizikalni princip objašnjava zašto brane i potporni zidovi često imaju z
             const FR = Math.sqrt(FH*FH + FV*FV);
             const alpha = Math.atan2(FV, FH) * 180 / Math.PI;
 
+            document.getElementById('aproj-out-curved').textContent = areaProj.toFixed(2) + ' m²';
+            document.getElementById('v-out-curved').textContent = volumeAbove.toFixed(2) + ' m³';
             document.getElementById('fh-out-curved').textContent = FH.toFixed(1);
             document.getElementById('fv-out-curved').textContent = FV.toFixed(1);
             document.getElementById('fr-out-curved').textContent = FR.toFixed(1) + ' kN';
             document.getElementById('alpha-out-curved').textContent = alpha.toFixed(1) + '°';
+            document.getElementById('curved-explainer').textContent = `Zakretanjem radijalnih tlakova dobivaš dvije računljive veličine. Vertikalna projekcija ima površinu ${areaProj.toFixed(2)} m² pa daje F_H = ${FH.toFixed(1)} kN, dok zamišljeni volumen vode iznad plohe iznosi ${volumeAbove.toFixed(2)} m³ pa daje F_V = ${FV.toFixed(1)} kN. Njihov zbroj je F_R = ${FR.toFixed(1)} kN pod kutom ${alpha.toFixed(1)}°.`;
 
             drawRadial(h1, R, rho, g);
             drawComp(h1, R, FH, FV);
@@ -234,30 +252,10 @@ Ovaj fizikalni princip objašnjava zašto brane i potporni zidovi često imaju z
 
 ### Zadatak Z49 — Cilindar kao automatska zaklopka (CENGEL 3.9) {.unnumbered}
 
-Čvrsti cilindar polumjera $0,8\text{ [m]}$ ovješen u točki A koristi se kao automatska zaklopka. Kada razina vode dosegne visinu $h_1$, zaklopka se otvara okretanjem oko hvatišta u točki A. Potrebno je odrediti ukupnu hidrostatsku silu koja djeluje na cilindar, liniju djelovanja (kut $\alpha$) te težinu cilindra po metru duljine ($G_c$). Zanemariti trenje.
+Čvrsti cilindar polumjera $0,8\text{ [m]}$ ovješen u točki A koristi se kao automatska zaklopka. Kada razina vode dosegne visinu $h_1$, zaklopka se otvara okretanjem oko hvatišta u točki A. 
 
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| Veličina | Vrijednost |
-|---|---|
-| $h_1$ | $5 \, \text{m}$ |
-| $h_2$ | $4,2 \, \text{m}$ |
-| $h_3$ | $0,8 \, \text{m}$ |
-| $R$ | $0,8 \, \text{m}$ |
-| $\rho$ | $1000 \, \text{kg/m}^3$ |
-
-</div>
-<div>
-
-#### Odrediti
-- ukupnu hidrostatsku silu $F_R$
-- liniju djelovanja (kut $\alpha$)
-- težinu cilindra po metru duljine $G_c$
-
-</div>
-</div>
+**Zadano:** $h_1 = 5 \, \text{m}, h_2 = 4,2 \, \text{m}, h_3 = 0,8 \, \text{m}, R = 0,8 \, \text{m}, \rho = 1000 \, \text{kg/m}^3$  
+**Odrediti:** ukupnu hidrostatsku silu $F_R$, liniju djelovanja (kut $\alpha$) te težinu cilindra po metru duljine $G_c$
 
 **Rješenje:**
 
@@ -308,7 +306,7 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
                 <canvas id="canvas-49" width="620" height="420" style="width: 100%; height: 100%;"></canvas>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                 <div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
                     <div class="control-group">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
@@ -368,9 +366,17 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                 <div style="background: #eff6ff; padding: 15px; border-radius: 12px; border-left: 4px solid #3b82f6;">
-                    <div style="font-size: 0.7rem; color: #1e40af; font-weight: 800; text-transform: uppercase;">Komponente sile</div>
+                    <div style="font-size: 0.7rem; color: #1e40af; font-weight: 800; text-transform: uppercase;">Geometrija i komponente</div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span style="font-size: 0.85rem; color: #475569;">A_proj:</span>
+                        <span id="aproj-49" style="font-weight: 700; color: #1e293b; font-family: monospace;">... m²</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                        <span style="font-size: 0.85rem; color: #475569;">V_iznad:</span>
+                        <span id="vol-49" style="font-weight: 700; color: #1e293b; font-family: monospace;">... m³</span>
+                    </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 8px;">
                         <span style="font-size: 0.85rem; color: #475569;">F<sub>H</sub>:</span>
                         <span id="fh-49" style="font-weight: 700; color: #1e293b; font-family: monospace;">... N</span>
@@ -381,16 +387,29 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
                     </div>
                 </div>
                 <div style="background: #fff7ed; padding: 15px; border-radius: 12px; border-left: 4px solid #f97316;">
-                    <div style="font-size: 0.7rem; color: #c2410c; font-weight: 800; text-transform: uppercase;">Rezultati</div>
+                    <div style="font-size: 0.7rem; color: #c2410c; font-weight: 800; text-transform: uppercase;">Rezultati i momenti</div>
                     <div style="display: flex; justify-content: space-between; margin-top: 8px;">
                         <span style="font-size: 0.85rem; color: #475569;">Kut α:</span>
                         <span id="alpha-49" style="font-weight: 700; color: #1e293b; font-family: monospace;">... °</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                        <span style="font-size: 0.85rem; color: #475569;">F<sub>R</sub>:</span>
+                        <span id="fr-49" style="font-weight: 700; color: #1e293b; font-family: monospace;">... kN</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                        <span style="font-size: 0.85rem; color: #475569;">M_voda:</span>
+                        <span id="mw-49" style="font-weight: 700; color: #1e293b; font-family: monospace;">... kNm/m</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 4px;">
                         <span style="font-size: 0.85rem; color: #475569;">Težina G<sub>c</sub>:</span>
                         <span id="gc-49" style="font-weight: 700; color: #c2410c; font-family: monospace;">... kN/m</span>
                     </div>
                 </div>
+            </div>
+
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 16px; color: #7c2d12;">
+                <div style="font-weight: 800; margin-bottom: 6px;">Tumačenje scene</div>
+                <p id="explainer-49" style="margin: 0; font-size: 0.84rem; line-height: 1.55;"></p>
             </div>
 
             <div style="background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%); border: 1px solid #fed7aa; border-radius: 16px; padding: 18px 20px;">
@@ -435,11 +454,13 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
         // Physics Calculations
         // Horizontal force on vertical projection (rectangle R x 1)
         const ztax = h2 + R/2;
+        const areaProj = R;
         const FH = rho * g * ztax * R;
 
         // Vertical force (upward buoyancy because water is below the quadrant)
         // Vol = rectangle above + quadrant part
-        const FV = rho * g * (R * h2 + (Math.PI * R * R / 4));
+        const volAbove = R * h2 + (Math.PI * R * R / 4);
+        const FV = rho * g * volAbove;
         const alpha = Math.atan2(FV, FH) * 180 / Math.PI;
         const FR = Math.sqrt(FH * FH + FV * FV);
 
@@ -455,10 +476,15 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
         const Gc_balance = MW / R; 
         const Gc_fixed = 37900; // 37.9 kN/m
 
+        document.getElementById('aproj-49').innerText = areaProj.toFixed(2) + ' m²';
+        document.getElementById('vol-49').innerText = volAbove.toFixed(2) + ' m³';
         document.getElementById('fh-49').innerText = FH.toFixed(0) + ' N';
         document.getElementById('fv-49').innerText = FV.toFixed(0) + ' N';
         document.getElementById('alpha-49').innerText = alpha.toFixed(1) + '°';
+        document.getElementById('fr-49').innerText = (FR / 1000).toFixed(1) + ' kN';
+        document.getElementById('mw-49').innerText = (MW / 1000).toFixed(1) + ' kNm/m';
         document.getElementById('gc-49').innerText = (Gc_balance / 1000).toFixed(1) + ' kN/m';
+        document.getElementById('explainer-49').innerText = `Vertikalna projekcija cilindra ima površinu ${areaProj.toFixed(2)} m² i težište na ${ztax.toFixed(2)} m, pa daje F_H = ${(FH/1000).toFixed(1)} kN. Zamišljeni volumen vode iznad zakrivljene plohe iznosi ${volAbove.toFixed(2)} m³, pa daje F_V = ${(FV/1000).toFixed(1)} kN. Rezultanta je ${(FR/1000).toFixed(1)} kN, a njen moment oko A je ${(MW/1000).toFixed(1)} kNm/m.`;
 
         const isOpen = MW > (37900 * R); // Comparing with a fixed weight for animation
         targetRotation = isOpen ? -Math.PI / 4 : 0;
@@ -625,9 +651,10 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
 
 ### Zadatak Z50 — Potopljena četvrtina kruga (2500 SPFM – 5.1) {.unnumbered}
 
-Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\text{ m}$. Duljina spremnika je $b=1,83\text{ m}$. Odrediti komponente sile i njihove položaje ($z_{FH}$ i $x_{FV}$).
+Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\text{ m}$. Duljina spremnika je $b=1,83\text{ m}$. 
 
-**Zadano:** $h_1 = 2,44\text{ m}, b = 1,83\text{ m}, R = 1,22\text{ m}, \rho = 998\text{ kg/m}^3$.
+**Zadano:** $h_1 = 2,44\text{ m}, b = 1,83\text{ m}, R = 1,22\text{ m}, \rho = 998\text{ kg/m}^3$  
+**Odrediti:** komponente sile i njihove položaje ($z_{FH}$ i $x_{FV}$)
 
 **Rješenje:**
 
@@ -2276,4 +2303,5 @@ Cilindrični spremnik težine $G=79\text{ [N]}$ djelomično je potopljen. Potreb
     update();
 })();
 </script>
+</div>
 ```

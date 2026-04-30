@@ -31,40 +31,56 @@ Moodyjev dijagram je ključni alat u mehanici fluida za određivanje koeficijent
 
 ```{=html}
 <!-- WIDGET: Moodyjev Dijagram -->
-<div id="v13-moody-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📊 Moodyjev Dijagram: Istraživanje otpora</h4>
-    
-    <div style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 30px;">
-        <!-- Dijagram -->
-        <div style="position: relative; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; height: 500px;">
-            <canvas id="v13-moody-canvas" width="600" height="500" style="width: 100%; height: 100%;"></canvas>
+<div id="v13-moody-widget" style="max-width: 1040px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 22px; padding: 30px; background: #ffffff; box-shadow: 0 18px 48px rgba(15,23,42,0.12); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #0f172a; margin-top: 0; margin-bottom: 24px; font-weight: 800;">📊 Moodyjev dijagram: gdje si na karti otpora?</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 22px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.6;">
+        <strong>Kako čitati Moodyja:</strong> Najprije lociraš <strong>Re</strong> po vodoravnoj osi. Zatim provjeriš jesi li u laminarnom, prijelaznom ili turbulentnom području. Tek kad si u turbulentnom području ima smisla pratiti krivulju za određeni <strong>k/D</strong> i očitati odgovarajući <strong>λ</strong>.
+    </div>
+
+    <div style="position: relative; background: radial-gradient(circle at top, #172554 0%, #0f172a 60%, #020617 100%); border-radius: 18px; border: 1px solid #1e293b; overflow: hidden; height: 560px; box-shadow: inset 0 0 0 1px rgba(148,163,184,0.08);">
+        <canvas id="v13-moody-canvas" width="960" height="560" style="width: 100%; height: 100%; display: block;"></canvas>
+        <div style="position: absolute; left: 18px; top: 18px; padding: 12px 14px; background: rgba(15,23,42,0.8); border: 1px solid rgba(148,163,184,0.3); border-radius: 12px; color: #e2e8f0; font-size: 0.74rem; line-height: 1.45; backdrop-filter: blur(8px); max-width: 220px;">
+            <div style="font-weight: 800; color: #f8fafc; margin-bottom: 6px;">Legenda</div>
+            <div><span style="color:#fbbf24; font-weight:700;">●</span> Trenutna radna točka</div>
+            <div><span style="color:#38bdf8; font-weight:700;">━</span> Glatka cijev / mali k/D</div>
+            <div><span style="color:#f97316; font-weight:700;">━</span> Veća hrapavost</div>
+            <div><span style="display:inline-block; width:12px; height:10px; background:rgba(34,197,94,0.18); border-radius:3px;"></span> Laminarno</div>
+            <div><span style="display:inline-block; width:12px; height:10px; background:rgba(245,158,11,0.18); border-radius:3px;"></span> Prijelaz</div>
+        </div>
+        <div style="position: absolute; right: 18px; top: 18px; padding: 12px 14px; background: rgba(15,23,42,0.8); border: 1px solid rgba(148,163,184,0.3); border-radius: 12px; color: #e2e8f0; font-size: 0.74rem; line-height: 1.45; backdrop-filter: blur(8px); min-width: 180px; text-align: right;">
+            <div style="font-weight: 700; color: #94a3b8; margin-bottom: 4px;">Trenutno očitanje</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #fbbf24;">λ = <span id="v13-res-lambda">---</span></div>
+            <div>Režim: <b id="v13-res-regime">---</b></div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 20px; align-items: start;">
+        <div style="padding: 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+            <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Reynolds (log Re): <span id="v13-v-re" style="color:#2563eb;">5.0</span></label>
+            <input type="range" id="v13-re-slider" min="3" max="8" step="0.01" value="5" style="width: 100%;">
+
+            <label style="display: block; font-weight: 700; margin-top: 22px; margin-bottom: 10px; color: #475569;">Relativna hrapavost k/D: <span id="v13-v-kd" style="color:#2563eb;">0.0010</span></label>
+            <input type="range" id="v13-kd-slider" min="-6" max="-1.3" step="0.1" value="-3" style="width: 100%;">
         </div>
 
-        <!-- Kontrole i Rezultati -->
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Reynolds (log Re): <span id="v13-v-re" style="color:#2563eb;">5.0</span> (Re ≈ 10⁵)</label>
-                <input type="range" id="v13-re-slider" min="3" max="8" step="0.01" value="5" style="width: 100%;">
-                
-                <label style="display: block; font-weight: 700; margin-top: 25px; margin-bottom: 10px; color: #475569;">Rel. hrapavost k/D: <span id="v13-v-kd" style="color:#2563eb;">0.001</span></label>
-                <input type="range" id="v13-kd-slider" min="-6" max="-1.3" step="0.1" value="-3" style="width: 100%;">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Re</div>
+                <div id="v13-re-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0</div>
             </div>
+            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Pravilo za λ</div>
+                <div id="v13-rule-card" style="font-family: monospace; font-size: 0.84rem; font-weight: 800; color: #0f172a;">---</div>
+            </div>
+            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">k/D</div>
+                <div id="v13-kd-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0</div>
+            </div>
+        </div>
 
-            <div style="background: #2d3748; color: white; padding: 25px; border-radius: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
-                <div style="font-weight: 800; font-size: 0.75rem; color: #a0aec0; text-transform: uppercase; margin-bottom: 15px;">Izračunati koeficijent:</div>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="font-size: 2.5rem; font-weight: 800; color: #f6e05e; text-align: center;">
-                        λ = <span id="v13-res-lambda">---</span>
-                    </div>
-                    <div style="text-align: center; color: #cbd5e0; font-size: 0.9rem;">
-                        Režim: <b id="v13-res-regime" style="color: #fff;">---</b>
-                    </div>
-                </div>
-            </div>
-
-            <div style="font-size: 0.8rem; color: #64748b; font-style: italic; line-height: 1.4;">
-                *Za turbulentno područje koristi se Colebrook-White jednadžba. Crvena točka na grafu prati vaše trenutne parametre.
-            </div>
+        <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.6;">
+            <strong>Tumačenje scene:</strong> <span id="v13-explainer"></span>
         </div>
     </div>
 </div>
@@ -75,276 +91,216 @@ Moodyjev dijagram je ključni alat u mehanici fluida za određivanje koeficijent
     const ctx = canvas.getContext('2d');
     const reS = document.getElementById('v13-re-slider');
     const kdS = document.getElementById('v13-kd-slider');
+    const roughnessCurves = [0, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2];
+    const curveColors = ['#38bdf8', '#60a5fa', '#818cf8', '#a78bfa', '#f472b6', '#fb7185', '#f97316', '#facc15'];
+    const plot = { left: 92, right: canvas.width - 74, top: 46, bottom: canvas.height - 82 };
 
-    function solveColebrook(Re, kd) {
-        if (Re < 2320) return 64 / Re;
-        // Newton-Raphson for Colebrook
-        let f = 0.02;
-        for (let i = 0; i < 10; i++) {
-            let next_f = 1 / Math.pow(-2 * Math.log10(kd / 3.7 + 2.51 / (Re * Math.sqrt(f))), 2);
-            if (Math.abs(next_f - f) < 0.00001) break;
-            f = next_f;
+    function solveLambda(re, kd) {
+        if (re <= 0) return 0.02;
+        if (re < 2320) return 64 / re;
+        const inv = -1.8 * Math.log10(Math.pow(Math.max(kd, 1e-10) / 3.7, 1.11) + 6.9 / re);
+        return 1 / (inv * inv);
+    }
+
+    function classifyRegime(re) {
+        if (re < 2320) return { label: 'laminarno', rule: '64/Re', color: '#4ade80' };
+        if (re < 4000) return { label: 'prijelazno', rule: 'nestabilno', color: '#f59e0b' };
+        return { label: 'turbulentno', rule: 'Haaland/Colebrook', color: '#f87171' };
+    }
+
+    function xFromRe(re) {
+        return plot.left + ((Math.log10(re) - 3) / 5) * (plot.right - plot.left);
+    }
+
+    function yFromLambda(lambda) {
+        const logMin = Math.log10(0.008);
+        const logMax = Math.log10(0.12);
+        return plot.top + ((logMax - Math.log10(lambda)) / (logMax - logMin)) * (plot.bottom - plot.top);
+    }
+
+    function formatKd(kd) {
+        if (kd < 1e-4) return kd.toExponential(1);
+        return kd.toFixed(4);
+    }
+
+    function drawAxes() {
+        ctx.strokeStyle = 'rgba(148,163,184,0.28)';
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '12px Inter';
+
+        for (let decade = 3; decade <= 8; decade += 1) {
+            const re = Math.pow(10, decade);
+            const x = xFromRe(re);
+            ctx.beginPath();
+            ctx.moveTo(x, plot.top);
+            ctx.lineTo(x, plot.bottom);
+            ctx.stroke();
+            ctx.fillText('10^' + decade, x - 14, plot.bottom + 28);
         }
-        return f;
+
+        const lambdaTicks = [0.008, 0.01, 0.015, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1];
+        lambdaTicks.forEach((tick) => {
+            const y = yFromLambda(tick);
+            ctx.beginPath();
+            ctx.moveTo(plot.left, y);
+            ctx.lineTo(plot.right, y);
+            ctx.stroke();
+            ctx.fillText(tick.toFixed(tick < 0.01 ? 3 : 2), 42, y + 4);
+        });
+
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(plot.left, plot.top);
+        ctx.lineTo(plot.left, plot.bottom);
+        ctx.lineTo(plot.right, plot.bottom);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '700 13px Inter';
+        ctx.fillText('Reynoldsov broj Re', plot.left + (plot.right - plot.left) / 2 - 62, canvas.height - 28);
+        ctx.save();
+        ctx.translate(26, plot.top + (plot.bottom - plot.top) / 2 + 42);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('Koeficijent trenja λ', 0, 0);
+        ctx.restore();
+    }
+
+    function plotCurve(kd, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = kd === 0 ? 2.8 : 1.8;
+        ctx.beginPath();
+        let started = false;
+        for (let logRe = 3; logRe <= 8; logRe += 0.025) {
+            const re = Math.pow(10, logRe);
+            if (kd !== 0 && re < 2800) continue;
+            const lambda = solveLambda(re, kd === 0 ? 1e-10 : kd);
+            if (lambda < 0.008 || lambda > 0.12) continue;
+            const x = xFromRe(re);
+            const y = yFromLambda(lambda);
+            if (!started) {
+                ctx.moveTo(x, y);
+                started = true;
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+    }
+
+    function drawCurrentPoint(re, lambda, regime) {
+        const x = xFromRe(re);
+        const y = yFromLambda(lambda);
+        ctx.strokeStyle = 'rgba(248,250,252,0.35)';
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(x, plot.bottom);
+        ctx.lineTo(x, y);
+        ctx.lineTo(plot.left, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = regime.color;
+        ctx.beginPath();
+        ctx.arc(x, y, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '700 12px Inter';
+        ctx.fillText('radna točka', x + 12, y - 10);
+    }
+
+    function draw(re, kd, lambda, regime) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = 'rgba(34,197,94,0.16)';
+        ctx.fillRect(plot.left, plot.top, xFromRe(2320) - plot.left, plot.bottom - plot.top);
+        ctx.fillStyle = 'rgba(245,158,11,0.16)';
+        ctx.fillRect(xFromRe(2320), plot.top, xFromRe(4000) - xFromRe(2320), plot.bottom - plot.top);
+
+        drawAxes();
+
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        let started = false;
+        for (let reLam = 700; reLam <= 2300; reLam += 25) {
+            const lam = 64 / reLam;
+            const x = xFromRe(reLam);
+            const y = yFromLambda(lam);
+            if (!started) {
+                ctx.moveTo(x, y);
+                started = true;
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+
+        roughnessCurves.forEach((curve, index) => plotCurve(curve, curveColors[index]));
+        drawCurrentPoint(re, lambda, regime);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '700 13px Inter';
+        ctx.fillText('laminarno', xFromRe(1250) - 32, plot.top + 24);
+        ctx.fillText('prijelaz', xFromRe(2850) - 24, plot.top + 24);
+        ctx.fillText('turbulentne krivulje hrapavosti', xFromRe(2e5), plot.top + 24);
+
+        ctx.font = '11px Inter';
+        roughnessCurves.slice(2).forEach((curve, index) => {
+            const sampleRe = 5e7;
+            const x = xFromRe(sampleRe) + 6;
+            const y = yFromLambda(solveLambda(sampleRe, curve));
+            if (y > plot.top + 12 && y < plot.bottom - 8) {
+                ctx.fillStyle = curveColors[index + 2];
+                ctx.fillText('k/D ' + formatKd(curve), x, y + 4);
+            }
+        });
     }
 
     function update() {
         const logRe = parseFloat(reS.value);
-        const Re = Math.pow(10, logRe);
-        const logKd = parseFloat(kdS.value);
-        const kd = Math.pow(10, logKd);
+        const re = Math.pow(10, logRe);
+        const kd = Math.pow(10, parseFloat(kdS.value));
+        const lambda = solveLambda(re, kd);
+        const regime = classifyRegime(re);
 
-        const lambda = solveColebrook(Re, kd);
+        document.getElementById('v13-v-re').textContent = logRe.toFixed(2);
+        document.getElementById('v13-v-kd').textContent = formatKd(kd);
+        document.getElementById('v13-res-lambda').textContent = lambda.toFixed(4);
+        document.getElementById('v13-res-regime').textContent = regime.label;
+        document.getElementById('v13-re-card').textContent = re.toExponential(2);
+        document.getElementById('v13-rule-card').textContent = regime.rule;
+        document.getElementById('v13-kd-card').textContent = formatKd(kd);
+        document.getElementById('v13-explainer').textContent = `Za Re ≈ ${re.toExponential(2)} i k/D = ${formatKd(kd)} nalaziš se u ${regime.label} području. Zato se λ očitava kao ${lambda.toFixed(4)}, pri čemu je pravilo ${regime.rule}. Pomak točke udesno znači jače inercijske učinke, a pomak prema gore veći otpor trenja.`;
 
-        document.getElementById('v13-v-re').innerText = logRe.toFixed(2);
-        document.getElementById('v13-v-kd').innerText = kd.toExponential(2);
-        document.getElementById('v13-res-lambda').innerText = lambda.toFixed(4);
-
-        let regime = "Turbulentno";
-        if(Re < 2320) regime = "Laminarno";
-        else if(Re < 4000) regime = "Prijelazno";
-        document.getElementById('v13-res-regime').innerText = regime;
-
-        draw(logRe, lambda);
+        draw(re, kd, lambda, regime);
     }
 
-    function draw(activeLogRe, activeLambda) {
-        ctx.clearRect(0, 0, 600, 500);
-        const pad = 50;
-        const w = 600 - 2*pad, h = 500 - 2*pad;
-
-        // Map Re (3 to 8) -> x
-        const getX = (lRe) => pad + (lRe - 3) / 5 * w;
-        // Map Lambda (0.008 to 0.1) -> y (Log scale)
-        const getY = (lam) => pad + h - (Math.log10(lam) - Math.log10(0.008)) / (Math.log10(0.1) - Math.log10(0.008)) * h;
-
-        // Background Regions
-        ctx.fillStyle = "rgba(72, 187, 120, 0.05)"; ctx.fillRect(getX(3), pad, getX(Math.log10(2320)) - getX(3), h);
-        ctx.fillStyle = "rgba(236, 201, 75, 0.05)"; ctx.fillRect(getX(Math.log10(2320)), pad, getX(Math.log10(4000)) - getX(Math.log10(2320)), h);
-
-        // Grid
-        ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
-        for(let i=3; i<=8; i++) {
-            let x = getX(i);
-            ctx.beginPath(); ctx.moveTo(x, pad); ctx.lineTo(x, pad+h); ctx.stroke();
-            ctx.fillStyle = "#94a3b8"; ctx.font = "10px Arial";
-            ctx.fillText(`10${String.fromCharCode(179+i-3)}`, x-10, pad+h+15);
-        }
-
-        // Curves
-        ctx.lineWidth = 1.5;
-        // Laminar
-        ctx.strokeStyle = "#48bb78";
-        ctx.beginPath();
-        for(let lr=3; lr<=Math.log10(2320); lr+=0.1) {
-            let x = getX(lr); let y = getY(64/Math.pow(10, lr));
-            if(lr===3) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-
-        // Roughness Curves
-        const kds = [0, 0.00001, 0.0001, 0.001, 0.01, 0.05];
-        kds.forEach(k => {
-            ctx.strokeStyle = k === 0 ? "#3182ce" : "#cbd5e0";
-            ctx.beginPath();
-            for(let lr=Math.log10(4000); lr<=8; lr+=0.1) {
-                let lam = solveColebrook(Math.pow(10, lr), k);
-                let x = getX(lr); let y = getY(lam);
-                if(lr===Math.log10(4000)) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        });
-
-        // Active Point
-        const curX = getX(activeLogRe);
-        const curY = getY(activeLambda);
-        ctx.fillStyle = "#ef4444";
-        ctx.beginPath(); ctx.arc(curX, curY, 6, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-    }
-
-    [reS, kdS].forEach(s => s.oninput = update);
+    reS.oninput = update;
+    kdS.oninput = update;
     update();
 })();
 </script>
-
-```
-
-***
-
 <hr class="widget-divider">
 <p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
-<!-- NOVI WIDGET: Režimi strujanja i profili brzine -->
-<div class="widget-container" id="widget-re-regimes">
-    <style>
-        .widget-container {
-            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        .canvas-wrapper { position: relative; background: #2c3e50; border-radius: 8px; overflow: hidden; height: 300px; }
-        .controls { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    </style>
-
-    <div class="widget-header"><h3 class="widget-title">Vizualizacija režima strujanja i profila brzine</h3></div>
-    
-    <div class="controls">
-        <div class="control-group">
-            <label>Brzina strujanja (v): <span id="v-val-re">0.2</span> m/s</label>
-            <input type="range" id="v-slider-re" min="0.01" max="2.0" value="0.2" step="0.01" style="width: 100%;">
-        </div>
-        <div class="control-group">
-            <label>Gustoća fluida (ρ): <span id="rho-val-re">1000</span> kg/m³</label>
-            <input type="range" id="rho-slider-re" min="500" max="1500" value="1000" step="50" style="width: 100%;">
-        </div>
-    </div>
-
-    <div class="canvas-wrapper">
-        <canvas id="canvas-re-flow" width="800" height="300"></canvas>
-    </div>
-
-    <div class="metrics" style="display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
-        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7;">REYNOLDSOV BROJ Re</span><span id="re-out-val" style="font-family:monospace; font-weight:bold; font-size: 1.2rem;">0</span></div>
-        <div class="metric-item" style="text-align:center;"><span style="font-size: 0.7rem; opacity: 0.7;">REŽIM STRUJANJA</span><span id="regime-out-val" style="font-family:monospace; font-weight:bold; font-size: 1.2rem; color: #3498db;">LAMINARNO</span></div>
-    </div>
-
-    <script>
-    (function() {
-        const canvas = document.getElementById('canvas-re-flow');
-        const ctx = canvas.getContext('2d');
-        const vSl = document.getElementById('v-slider-re');
-        const rSl = document.getElementById('rho-slider-re');
-
-        let particles = [];
-        for(let i=0; i<120; i++) {
-            particles.push({ x: Math.random() * canvas.width, y_rel: Math.random(), ox: Math.random()*2*Math.PI });
-        }
-
-        function draw() {
-            const v = parseFloat(vSl.value);
-            const rho = parseFloat(rSl.value);
-            const d = 0.05; const mu = 0.001;
-            const Re = (rho * v * d) / mu;
-
-            document.getElementById('rho-val-re').textContent = rho;
-            document.getElementById('v-val-re').textContent = v.toFixed(2);
-            document.getElementById('re-out-val').textContent = Math.round(Re);
-
-            let regime = "LAMINARNO";
-            let color = "#27ae60";
-            if(Re > 2320 && Re < 4000) { regime = "PRIJELAZNO"; color = "#f1c40f"; }
-            if(Re >= 4000) { regime = "TURBULENTNO"; color = "#e74c3c"; }
-            document.getElementById('regime-out-val').textContent = regime;
-            document.getElementById('regime-out-val').style.color = color;
-
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            const d_px = 180; const cy = 150;
-
-            // Particles
-            particles.forEach(p => {
-                const y_local = (p.y_rel - 0.5) * d_px;
-                const r_ratio = Math.abs(y_local) / (d_px/2);
-                
-                let v_local;
-                if(Re < 2320) {
-                    // Laminar Parabola: v = v_max * (1 - r^2/R^2)
-                    v_local = 2 * v * (1 - r_ratio * r_ratio);
-                } else {
-                    // Turbulent Flat Profile: v = v_max * (1 - r/R)^(1/7)
-                    v_local = 1.2 * v * Math.pow(1 - r_ratio, 1/7);
-                }
-
-                p.x += v_local * 20; // animation
-                if(p.x > canvas.width) p.x = 0;
-
-                let y_world = cy + y_local;
-                if(Re > 2320) {
-                    const jitter = (Re - 2320) / 1000 * Math.sin(p.x*0.1 + Date.now()*0.01 + p.ox);
-                    y_world += jitter;
-                }
-
-                ctx.fillStyle = `rgba(52, 152, 219, ${0.4 + (v_local/(2*v))*0.6})`;
-                ctx.beginPath(); ctx.arc(p.x, y_world, 2.5, 0, Math.PI*2); ctx.fill();
-            });
-
-            // Velocity Profile (Overlay)
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.setLineDash([2,2]);
-            ctx.beginPath();
-            for(let y = -d_px/2; y <= d_px/2; y+=5) {
-                const r_ratio = Math.abs(y) / (d_px/2);
-                const v_l = Re < 2320 ? 2 * v * (1 - r_ratio * r_ratio) : 1.2 * v * Math.pow(1 - r_ratio, 1/7);
-                ctx.lineTo(v_l * 100, cy + y);
-            }
-            ctx.stroke(); ctx.setLineDash([]);
-
-            // Pipe Walls
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 5;
-            ctx.beginPath(); ctx.moveTo(0, cy - d_px/2); ctx.lineTo(800, cy - d_px/2); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(0, cy + d_px/2); ctx.lineTo(800, cy + d_px/2); ctx.stroke();
-
-            requestAnimationFrame(draw);
-        }
-        vSl.oninput = rSl.oninput = draw;
-        draw();
-    })();
-    </script>
-</div>
-
-```
-
-***
-
-### Zadatak Z120 â€” Laminarno strujanje u tankoj cijevi {.unnumbered}
-
- 
-Voda temperature 10 °C struji stacionarno u cijevi dugoj 15 m, promjera 2 mm, pri čemu srednja brzina iznosi 1,2 m/s . Potrebno je odrediti ukupan pad tlaka i gubitke specifične mehaničke energije.
-
-
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| VeliÄina | Vrijednost |
-|---|---|
-| $* $t$ | $10 [°C]$ |
-| $L$ | $15[m]$ |
-| $d$ | $0$ |
-| | $002[m]$ |
-| $v_{sr}$ | $1$ |
-| $2 [m/s]$
-
-**Rješenje:**
-1. $Re$ | $\frac{\rho v d}{\mu} = \mathbf{1836}$ (Laminarno).
-2. $\lambda = 64/Re = \mathbf{0$ |
-| $0349}$.
-3. $\Delta p$ | $\lambda \frac{L}{d} \frac{\rho v^2}{2} = \mathbf{188$ |
-| | $2 \$ |
-| $\text{kPa}}$.
-4. $h_w$ | $\Delta p / (\rho g) = \mathbf{19$ |
-| | $19 \$ |
-| $\text{m}}$.
-
-<hr class$ | $"widget-divider">
-<p class="widget-naslov">⚙️ Interaktivni simulator</p>
-
-```{=html}
 <!-- WIDGET: Laminarni pad tlaka (Hagen-Poiseuille) -->
-<div id="z120-laminar-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter'$ |
-| | $system-ui$ |
-| | $sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0$ |
-| | $0$ |
-| | $0$ |
-| $0.1); border: 1px solid #e2e8f0;">
-    <h4 style$ | $"text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌡️ Laminarno strujanje: Utjecaj temperature i viskoznosti</h4>
+<div id="z120-laminar-widget" style="max-width: 1040px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌡️ Laminarno strujanje: Utjecaj temperature i viskoznosti</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati laminarni slučaj:</strong> Ovdje temperatura najprije mijenja dinamičku viskoznost <strong>μ</strong>, a tek to mijenja Reynoldsov broj i koeficijent trenja <strong>λ = 64/Re</strong>. Zato je lanac <strong>T -> μ -> Re -> λ -> Δp</strong> važniji od samog završnog pada tlaka.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
-        <!-- Pipe Visualization -->
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start;">
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 430px;">
             <canvas id="z120-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
-            
-            <!-- Pressure Gauges -->
             <div style="position: absolute; left: 50px; top: 20px; text-align: center;">
                 <div style="font-size: 0.6rem; font-weight: 800; color: #64748b;">ULAZ (p1)</div>
                 <div id="z120-p1-gauge" style="font-size: 1.1rem; font-weight: 800; color: #1e40af;">200 kPa</div>
@@ -355,7 +311,6 @@ Voda temperature 10 °C struji stacionarno u cijevi dugoj 15 m, promjera 2 mm, p
             </div>
         </div>
 
-        <!-- Controls -->
         <div style="display: flex; flex-direction: column; gap: 20px;">
             <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
                 <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Temperatura T: <span id="z120-v-T" style="color:#2563eb;">10</span> °C</label>
@@ -375,12 +330,24 @@ Voda temperature 10 °C struji stacionarno u cijevi dugoj 15 m, promjera 2 mm, p
                     </div>
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">μ</div>
+                    <div id="z120-res-mu" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000 Pa s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">λ = 64/Re</div>
+                    <div id="z120-res-lambda" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000</div>
+                </div>
+            </div>
+
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z120-explainer"></span>
+            </div>
             
             <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Kod laminarnog strujanja$ |
-| | $pad tlaka je direktno proporcionalan brzini ($v^1$) i viskoznosti. Kako temperatura raste$ |
-| | $viskoznost vode opada$ |
-| $što drastično smanjuje gubitke energije.
+                💡 <b>Fizikalni uvid:</b> Kod laminarnog strujanja pad tlaka je direktno proporcionalan brzini i viskoznosti. Kako temperatura raste, viskoznost vode opada, što drastično smanjuje gubitke energije.
             </p>
         </div>
     </div>
@@ -388,122 +355,104 @@ Voda temperature 10 °C struji stacionarno u cijevi dugoj 15 m, promjera 2 mm, p
 
 <script>
 (function() {
-    const canvas$ | $document.getElementById('z120-canvas')$ |
-| $ctx$ | $canvas.getContext('2d');
-    const tS = document.getElementById('z120-T-slider')$ |
-| $vS$ | $document.getElementById('z120-v-slider');
+    const canvas = document.getElementById('z120-canvas');
+    const ctx = canvas.getContext('2d');
+    const tS = document.getElementById('z120-T-slider');
+    const vS = document.getElementById('z120-v-slider');
 
     let particles = [];
-    for(let i=0; i<100; i++) particles.push({ t: Math.random()$ |
-| $y_rel: Math.random()*2 - 1 });
+    for (let index = 0; index < 100; index++) {
+        particles.push({ t: Math.random(), yRel: Math.random() * 2 - 1 });
+    }
+
+    const state = { v: 1.2 };
 
     function getViscosity(T) {
-        // Simplified dynamic viscosity of water in Pa*s (valid for 5-80C)
         return 0.00179 / (1 + 0.0337 * T + 0.00022 * T * T);
     }
 
     function update() {
-        const T$ | $parseFloat(tS.value)$ |
-| $v$ | $parseFloat(vS.value);
-        const L = 15$ |
-| $d$ | $0.002$ |
-| $rho$ | $1000$ |
-| $g$ | $9.81;
+        const T = parseFloat(tS.value);
+        const v = parseFloat(vS.value);
+        const L = 15;
+        const d = 0.002;
+        const rho = 1000;
+        const g = 9.81;
         const mu = getViscosity(T);
-        
+
         const Re = (rho * v * d) / mu;
         const lambda = 64 / Re;
-        const dp = lambda * (L / d) * (rho * v * v / 2) / 1000; // kPa
+        const dp = lambda * (L / d) * (rho * v * v / 2) / 1000;
         const hw = (dp * 1000) / (rho * g);
+
+        state.v = v;
 
         document.getElementById('z120-v-T').innerText = T;
         document.getElementById('z120-v-v').innerText = v.toFixed(1);
         document.getElementById('z120-res-re').innerText = Math.round(Re);
-        document.getElementById('z120-res-dp').innerText = dp.toFixed(1) + " kPa";
-        document.getElementById('z120-res-hw').innerText = hw.toFixed(1) + " m";
-        
-        document.getElementById('z120-p2-gauge').innerText = Math.max(0$ |
-| | $200 - dp).toFixed(1) + " kPa";
-
-        draw(v$ |
-| | $Re$ |
-| | $dp);
+        document.getElementById('z120-res-dp').innerText = dp.toFixed(1) + ' kPa';
+        document.getElementById('z120-res-hw').innerText = hw.toFixed(1) + ' m';
+        document.getElementById('z120-res-mu').innerText = mu.toFixed(5) + ' Pa s';
+        document.getElementById('z120-res-lambda').innerText = lambda.toFixed(4);
+        document.getElementById('z120-p2-gauge').innerText = Math.max(0, 200 - dp).toFixed(1) + ' kPa';
+        document.getElementById('z120-explainer').textContent = `Pri temperaturi ${T.toFixed(0)}°C dinamička viskoznost je ${mu.toFixed(5)} Pa s, pa za brzinu ${v.toFixed(1)} m/s dobivaš Re ≈ ${Math.round(Re)} i laminarni koeficijent λ = ${lambda.toFixed(4)}. To vodi do pada tlaka ${dp.toFixed(1)} kPa i gubitka energije ${hw.toFixed(1)} m.`;
     }
 
-    function draw(v$ |
-| | $Re$ |
-| | $dp) {
-        ctx.clearRect(0$ |
-| | $0$ |
-| | $550$ |
-| $450);
-        const cy$ | $200$ |
-| $d_px$ | $100;
-        
-        // Pressure gradient (Red to Blue)
-        const grad = ctx.createLinearGradient(50$ |
-| | $0$ |
-| | $500$ |
-| | $0);
-        grad.addColorStop(0$ |
-| | $"rgba(239$ |
-| | $68$ |
-| | $68$ |
-| | $0.2)");
-        grad.addColorStop(1$ |
-| | $"rgba(59$ |
-| | $130$ |
-| | $246$ |
-| $0.2)");
-        ctx.fillStyle$ | $grad;
-        ctx.fillRect(50$ |
-| | $cy - d_px/2$ |
-| | $450$ |
-| $d_px);
+    function draw() {
+        ctx.clearRect(0, 0, 550, 400);
+        const cy = 200;
+        const dPx = 100;
 
-        // Pipe Walls
-        ctx.strokeStyle$ | $"#475569"; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(50$ |
-| | $cy - d_px/2); ctx.lineTo(500$ |
-| | $cy - d_px/2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(50$ |
-| | $cy + d_px/2); ctx.lineTo(500$ |
-| $cy + d_px/2); ctx.stroke();
+        const grad = ctx.createLinearGradient(50, 0, 500, 0);
+        grad.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
+        grad.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(50, cy - dPx / 2, 450, dPx);
 
-        // Parabolic profile overlay
-        ctx.strokeStyle$ | $"rgba(30$ |
-| | $64$ |
-| | $175$ |
-| | $0.3)"; ctx.setLineDash([2$ |
-| $2]);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        for(let y$ | $-d_px/2; y <= d_px/2; y += 5) {
-            const r_rel = Math.abs(y) / (d_px/2);
-            const vx = (1 - r_rel * r_rel) * 80;
-            ctx.lineTo(50 + vx$ |
-| $cy + y);
-        }
-        ctx.stroke(); ctx.setLineDash([]);
+        ctx.moveTo(50, cy - dPx / 2);
+        ctx.lineTo(500, cy - dPx / 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(50, cy + dPx / 2);
+        ctx.lineTo(500, cy + dPx / 2);
+        ctx.stroke();
 
-        // Particles
-        particles.forEach(p$ | $> {
-            const r_rel = Math.abs(p.y_rel);
-            const v_local = 2 * v * (1 - r_rel * r_rel);
-            p.t += 0.005 * v_local; if(p.t > 1) p.t = 0;
-            
-            const px = 50 + p.t * 450;
-            const py = cy + p.y_rel * (d_px/2 - 5);
-            ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px$ |
-| | $py$ |
-| | $2$ |
-| | $0$ |
-| $Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(30, 64, 175, 0.3)';
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath();
+        for (let y = -dPx / 2; y <= dPx / 2; y += 5) {
+            const rRel = Math.abs(y) / (dPx / 2);
+            const vx = (1 - rRel * rRel) * 80;
+            if (y === -dPx / 2) ctx.moveTo(50 + vx, cy + y);
+            else ctx.lineTo(50 + vx, cy + y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        particles.forEach((particle) => {
+            const rRel = Math.abs(particle.yRel);
+            const vLocal = 2 * state.v * (1 - rRel * rRel);
+            particle.t += 0.005 * vLocal;
+            if (particle.t > 1) particle.t = 0;
+
+            const px = 50 + particle.t * 450;
+            const py = cy + particle.yRel * (dPx / 2 - 5);
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(px, py, 2, 0, Math.PI * 2);
+            ctx.fill();
         });
 
-        requestAnimationFrame(()$ | $> update());
+        requestAnimationFrame(draw);
     }
 
-    tS.oninput = update; vS.oninput = update; update();
+    tS.oninput = update;
+    vS.oninput = update;
+    update();
+    draw();
 })();
 </script>
 
@@ -512,40 +461,12 @@ Voda temperature 10 °C struji stacionarno u cijevi dugoj 15 m, promjera 2 mm, p
 
 ***
 
-### Zadatak Z121 â€” Turbulentno strujanje zraka {.unnumbered}
+### Zadatak Z121 — Turbulentno strujanje zraka {.unnumbered}
 
- 
-121. Zrak struji 7 m dugim pravokutnim ventilacijski kanalom unutarnjih dimenzija 150mm x 200mm$ |
-| | $ventilacijski kanal je izrađen od pocinčanog lima$ |
-| | $pri čemu tlak zraka unutar voda iznosi 101325 Pa$ |
-| | $temperatura 35°C$ |
-| | $a srednja brzina strujanja zraka iznosi 7 m/s . Potrebno je odrediti promjenu tlaka (ventilatora)$ |
-| $hrapavost iznosi $k$ | $4$ |
-| | $5 \cdot 10^{-5} \$ |
-| $m$.
+Zrak struji kroz 7 m dug pravokutni ventilacijski kanal dimenzija $150 \times 200\,\text{mm}$. Kanal je izrađen od pocinčanog lima ($k=4,5 \cdot 10^{-5}\,\text{m}$), tlak zraka je $101325\,\text{Pa}$, temperatura $35^\circ\text{C}$, a srednja brzina strujanja $7\,\text{m/s}$.
 
-**Zadano:**
-* $L$ | $7[m]$ |
-| $b$ | $0$ |
-| | $2[m]$ |
-| $h$ | $0$ |
-| | $15[m]$ |
-| $p_{atm}$ | $101325 [Pa]$ |
-| $t$ | $35[°C]$
-* $v_{sr} = 7 [m/s]$ |
-| $k$ | $4$ |
-| | $5 \cdot 10^{-5} [m]$$ |
-
-
-</div>
-<div>
-
-#### Odrediti
-- Promjenu tlaka $\Delta p = ?$
-
-
-</div>
-</div>
+**Zadano:** $L=7\,\text{m}$, $b=200\,\text{mm}$, $h=150\,\text{mm}$, $p=101325\,\text{Pa}$, $t=35^\circ\text{C}$, $v_{sr}=7\,\text{m/s}$, $k=0,045\,\text{mm}$
+**Odrediti:** $\Delta p$, $P$
 
 **Rješenje:**
 1. $d_{ekv} = \frac{4A}{O} = \mathbf{0,1714 \, \text{m}}$.
@@ -555,171 +476,265 @@ Voda temperature 10 °C struji stacionarno u cijevi dugoj 15 m, promjera 2 mm, p
 
 ***
 
-### Zadatak Z122 â€” Difuzor s lokalnim gubicima {.unnumbered}
+### Zadatak Z122 — Difuzor s lokalnim gubicima {.unnumbered}
 
- 
-Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke dijela koji se širi otklonjene su od horizontalne osi pod kutom od 30°. Srednja brzina i tlak vode prije difuzora iznose 7 m/s i 150 kPa. Potrebno je odrediti pad visine dobave u difuzoru i tlak u cijevi većeg promjera ukoliko.
+Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke dijela koji se širi otklonjene su od horizontalne osi pod kutom od 30°. Srednja brzina i tlak vode prije difuzora iznose 7 m/s i 150 kPa. Potrebno je odrediti pad visine dobave u difuzoru i tlak u cijevi većeg promjera.
 
-
-<div class="zadano-grid">
-<div>
-
-#### Zadano
-| VeliÄina | Vrijednost |
-|---|---|
-| $* $d_1$ | $0$ |
-| | $06[m]$ |
-| $d_2$ | $0$ |
-| | $09[m]$ |
-| $\alpha$ | $30°$ |
-| $v_1$ | $7 [m/s]$ |
-| $p_1$ | $150000[Pa]$$ |
-
-
-</div>
-<div>
-
-#### Odrediti
-- Pad visine dobave u difuzoru $h_{wm} = ?$
-
-
-</div>
-</div>
-Tlak $p_2 = ?$
+**Zadano:** $d_1=60\,\text{mm}$, $d_2=90\,\text{mm}$, $\alpha=30^\circ$, $v_1=7\,\text{m/s}$, $p_1=150\,\text{kPa}$
+**Odrediti:** $h_{wm}$, $p_2$
 
 **Rješenje:**
 1. $v_2 = 3,11 \, \text{m/s}$.
 2. $h_{wm} = \zeta \frac{v_1^2}{2g} = \mathbf{0,175 \, \text{m}}$.
-3. $p_2 = p_1 + \rho (\frac{\beta v_1^2 - \beta v_2^2}{2} - g h_{wm}) = \mathbf{169,1 \, \text{kPa}}$.
+3.
+
+    $$
+    p_2 = p_1 + \rho \left( \frac{\beta v_1^2 - \beta v_2^2}{2} - g h_{wm} \right)
+    = \mathbf{169,1 \, \text{kPa}}
+    $$
 
 <hr class="widget-divider">
 <p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
 <!-- WIDGET: Difuzor i lokalni gubici -->
-<div id="z122-diffuser-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📐 Geometrija difuzora: Kut proširenja i gubici</h4>
-    
-    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
-            <canvas id="z122-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
-            
-            <!-- Flow Separation Warn -->
-            <div id="z122-sep-warn" style="position: absolute; left: 350px; top: 100px; background: rgba(239, 68, 68, 0.9); color: white; padding: 5px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; display: none; animation: blink 1s infinite;">
-                ODVAJANJE STRUJE! ⚠️
+<div id="z122-diffuser-widget" style="max-width: 1040px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📐 Difuzor: usporavanje, povrat tlaka i odvajanje struje</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.6;">
+        <strong>Kako čitati difuzor:</strong> U urednom difuzoru strujnice se otvaraju glatko, brzina pada s <strong>v₁</strong> na <strong>v₂</strong>, a dio brzinske visine vraća se u tlak. Kad kut postane prevelik, granični sloj se odvaja od stijenke i uz zid nastaju vrtložne zone koje pretvaraju dobitak u dodatni lokalni gubitak.
+    </div>
+
+    <div style="position: relative; background: linear-gradient(180deg, #f8fafc 0%, #eef6ff 100%); border-radius: 16px; border: 1px solid #dbeafe; overflow: hidden; height: 440px;">
+        <canvas id="z122-canvas" width="920" height="440" style="width: 100%; height: 100%; display: block;"></canvas>
+        <div id="z122-sep-warn" style="position: absolute; right: 18px; top: 18px; background: rgba(239, 68, 68, 0.92); color: white; padding: 8px 12px; border-radius: 9px; font-size: 0.72rem; font-weight: 800; display: none; letter-spacing: 0.02em;">
+            ODVAJANJE STRUJE UZ STIJENKU
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; align-items: start;">
+        <div style="padding: 20px; background: #f8fafc; border-radius: 15px; border: 1px solid #e2e8f0;">
+            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Kut širenja α: <span id="z122-v-alpha" style="color:#2563eb;">30</span>°</label>
+            <input type="range" id="z122-alpha-slider" min="5" max="60" step="1" value="30" style="width: 100%;">
+
+            <label style="display: block; font-weight: 700; margin-top: 18px; margin-bottom: 8px; color: #475569;">Ulazna brzina v₁: <span id="z122-v-v1" style="color:#2563eb;">7.0</span> m/s</label>
+            <input type="range" id="z122-v1-slider" min="1" max="15" step="0.5" value="7" style="width: 100%;">
+        </div>
+
+        <div style="background: #fff7ed; padding: 18px 20px; border-radius: 15px; border-left: 6px solid #f97316;">
+            <div style="font-weight: 800; font-size: 0.75rem; color: #9a3412; text-transform: uppercase; margin-bottom: 12px;">Bilanca učinaka</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;">
+                <div style="display: flex; justify-content: space-between;"><span>Koeficijent ζ</span><b id="z122-res-zeta">0.07</b></div>
+                <div style="display: flex; justify-content: space-between;"><span>Lokalni gubitak hwm</span><b id="z122-res-hwm">0.18 m</b></div>
+                <div style="display: flex; justify-content: space-between;"><span>Izlazni tlak p₂</span><b id="z122-res-p2" style="color:#c2410c;">169.1 kPa</b></div>
             </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Kut širenja α: <span id="z122-v-alpha" style="color:#2563eb;">30</span>°</label>
-                <input type="range" id="z122-alpha-slider" min="5" max="60" step="1" value="30" style="width: 100%;">
-                
-                <label style="display: block; font-weight: 700; margin-top: 15px; margin-bottom: 8px; color: #475569;">Ulazna brzina v₁: <span id="z122-v-v1" style="color:#2563eb;">7.0</span> m/s</label>
-                <input type="range" id="z122-v1-slider" min="1" max="15" step="0.5" value="7" style="width: 100%;">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂</div>
+                <div id="z122-res-v2" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
             </div>
-
-            <div style="background: #fff7ed; padding: 20px; border-radius: 15px; border-left: 6px solid #f97316;">
-                <div style="font-weight: 800; font-size: 0.75rem; color: #9a3412; text-transform: uppercase; margin-bottom: 12px;">Analiza gubitaka:</div>
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;">
-                    <div style="display: flex; justify-content: space-between;"><span>Koeficijent ζ:</span> <b id="z122-res-zeta">0.07</b></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Lokalni gubitak hwm:</span> <b id="z122-res-hwm">0.18 m</b></div>
-                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #fed7aa; padding-top: 5px;">
-                        <span>Izlazni tlak p₂:</span> <b id="z122-res-p2" style="color: #c2410c;">169.1 kPa</b>
-                    </div>
-                </div>
+            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δ(v²/2g)</div>
+                <div id="z122-res-dhead" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
             </div>
-            
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Difuzor služi za pretvorbu kinetičke energije u tlačnu. Optimalni kut je oko 7-10°. Ako je kut prevelik, dolazi do odvajanja struje i vrtloženja, što drastično povećava gubitke i smanjuje tlak na izlazu.
-            </p>
+            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Režim kuta</div>
+                <div id="z122-res-regime" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">miran</div>
+            </div>
         </div>
+    </div>
+
+    <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.6; margin-top: 16px;">
+        <strong>Tumačenje scene:</strong> <span id="z122-explainer"></span>
     </div>
 </div>
 
 <script>
 (function() {
-    const canvas = document.getElementById('z122-canvas'), ctx = canvas.getContext('2d');
-    const aS = document.getElementById('z122-alpha-slider'), v1S = document.getElementById('z122-v1-slider');
+    const canvas = document.getElementById('z122-canvas');
+    const ctx = canvas.getContext('2d');
+    const aS = document.getElementById('z122-alpha-slider');
+    const v1S = document.getElementById('z122-v1-slider');
+    const lanes = [-0.82, -0.62, -0.42, -0.22, 0, 0.22, 0.42, 0.62, 0.82];
+    const particles = [];
+    const state = { alpha: 30, v1: 7, v2: 3.11, zeta: 0.07, hwm: 0.18, deltaHead: 0.18, p2: 169.1, separated: true, regime: 'odvajanje', time: 0 };
 
-    let particles = [];
-    for(let i=0; i<120; i++) particles.push({ x: Math.random()*550, y_rel: Math.random()*2 - 1 });
+    lanes.forEach((lane, laneIndex) => {
+        for (let index = 0; index < 8; index++) {
+            particles.push({ lane, phase: (index / 8 + laneIndex * 0.03) % 1, bias: 0.9 + Math.random() * 0.25 });
+        }
+    });
 
     function getZeta(alpha) {
-        // Approximate zeta vs angle for diffusers
-        if (alpha < 7) return 0.05 + (7-alpha)*0.01;
-        if (alpha < 20) return 0.05 + (alpha-7)*0.01;
-        return 0.2 + (alpha-20)*0.03;
+        if (alpha <= 8) return 0.05 + (8 - alpha) * 0.004;
+        if (alpha <= 14) return 0.05 + (alpha - 8) * 0.02;
+        if (alpha <= 25) return 0.17 + (alpha - 14) * 0.03;
+        return 0.5 + (alpha - 25) * 0.045;
+    }
+
+    function getGeometry(alpha) {
+        const cy = canvas.height / 2 + 18;
+        const halfIn = 34;
+        const halfOut = 68;
+        const inletStart = 44;
+        const inletEnd = 210;
+        const diffL = Math.max(150, Math.min(320, (halfOut - halfIn) / Math.tan(alpha * Math.PI / 180)));
+        const outletStart = inletEnd + diffL;
+        const outletEnd = canvas.width - 56;
+        return { cy, halfIn, halfOut, inletStart, inletEnd, diffL, outletStart, outletEnd };
+    }
+
+    function getHalfHeight(x, geometry) {
+        if (x <= geometry.inletEnd) return geometry.halfIn;
+        if (x <= geometry.outletStart) {
+            const t = (x - geometry.inletEnd) / geometry.diffL;
+            return geometry.halfIn + t * (geometry.halfOut - geometry.halfIn);
+        }
+        return geometry.halfOut;
+    }
+
+    function streamlineY(x, lane, geometry, separated) {
+        const half = getHalfHeight(x, geometry) - 8;
+        let localLane = lane;
+        if (separated && x > geometry.inletEnd + 0.35 * geometry.diffL && Math.abs(lane) > 0.58) {
+            const t = Math.min(1, (x - (geometry.inletEnd + 0.35 * geometry.diffL)) / (0.65 * geometry.diffL));
+            localLane = lane * (1 - 0.32 * t);
+        }
+        return geometry.cy + localLane * half;
     }
 
     function update() {
-        const alpha = parseFloat(aS.value), v1 = parseFloat(v1S.value);
-        const p1 = 150, rho = 1000, g = 9.81, d1 = 0.06, d2 = 0.09;
-        
-        const v2 = v1 * Math.pow(d1/d2, 2);
+        const alpha = parseFloat(aS.value);
+        const v1 = parseFloat(v1S.value);
+        const p1 = 150;
+        const rho = 1000;
+        const g = 9.81;
+        const d1 = 0.06;
+        const d2 = 0.09;
+        const v2 = v1 * Math.pow(d1 / d2, 2);
         const zeta = getZeta(alpha);
         const hwm = zeta * (v1 * v1 / (2 * g));
-        const p2 = p1 + (rho * ( (v1*v1 - v2*v2)/2 - g*hwm )) / 1000;
+        const deltaHead = (v1 * v1 - v2 * v2) / (2 * g);
+        const p2 = p1 + (rho * (((v1 * v1) - (v2 * v2)) / 2 - g * hwm)) / 1000;
+        const regime = alpha <= 10 ? 'povoljno' : (alpha <= 18 ? 'granično' : 'odvajanje');
 
-        document.getElementById('z122-v-alpha').innerText = alpha;
-        document.getElementById('z122-v-v1').innerText = v1.toFixed(1);
-        document.getElementById('z122-res-zeta').innerText = zeta.toFixed(2);
-        document.getElementById('z122-res-hwm').innerText = hwm.toFixed(2) + " m";
-        document.getElementById('z122-res-p2').innerText = p2.toFixed(1) + " kPa";
-        
-        document.getElementById('z122-sep-warn').style.display = alpha > 15 ? 'block' : 'none';
+        state.alpha = alpha;
+        state.v1 = v1;
+        state.v2 = v2;
+        state.zeta = zeta;
+        state.hwm = hwm;
+        state.deltaHead = deltaHead;
+        state.p2 = p2;
+        state.separated = alpha > 18;
+        state.regime = regime;
 
-        draw(alpha, v1, v2);
+        document.getElementById('z122-v-alpha').textContent = alpha.toFixed(0);
+        document.getElementById('z122-v-v1').textContent = v1.toFixed(1);
+        document.getElementById('z122-res-zeta').textContent = zeta.toFixed(2);
+        document.getElementById('z122-res-hwm').textContent = hwm.toFixed(2) + ' m';
+        document.getElementById('z122-res-p2').textContent = p2.toFixed(1) + ' kPa';
+        document.getElementById('z122-res-v2').textContent = v2.toFixed(2) + ' m/s';
+        document.getElementById('z122-res-dhead').textContent = deltaHead.toFixed(2) + ' m';
+        document.getElementById('z122-res-regime').textContent = regime;
+        document.getElementById('z122-explainer').textContent = `Za kut ${alpha.toFixed(0)}° i ulaznu brzinu ${v1.toFixed(1)} m/s idealno bi se moglo vratiti ${deltaHead.toFixed(2)} m brzinske visine. No stvarni difuzor pritom gubi ${hwm.toFixed(2)} m zbog lokalnog otpora, pa izlazni tlak završava na ${p2.toFixed(1)} kPa. Kad kut pređe približno 18°, uz stijenku se pojavljuju vrtložne zone odvajanja.`;
+        document.getElementById('z122-sep-warn').style.display = state.separated ? 'block' : 'none';
     }
 
-    function draw(alpha, v1, v2) {
-        ctx.clearRect(0, 0, 550, 450);
-        const cy = 200, scale = 1500;
-        const d1_px = 60, d2_px = 90;
-        const L_diff = (d2_px - d1_px) / (2 * Math.tan(alpha * Math.PI / 180));
-        
-        // Pipe Geometry
-        ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
+    function draw() {
+        state.time += 1;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const geometry = getGeometry(state.alpha);
+
+        const fluidGrad = ctx.createLinearGradient(0, geometry.cy - geometry.halfOut, 0, geometry.cy + geometry.halfOut);
+        fluidGrad.addColorStop(0, '#dbeafe');
+        fluidGrad.addColorStop(1, '#bfdbfe');
+        ctx.fillStyle = fluidGrad;
         ctx.beginPath();
-        ctx.moveTo(0, cy - d1_px/2);
-        ctx.lineTo(100, cy - d1_px/2);
-        ctx.lineTo(100 + L_diff, cy - d2_px/2);
-        ctx.lineTo(550, cy - d2_px/2);
+        ctx.moveTo(geometry.inletStart, geometry.cy - geometry.halfIn);
+        ctx.lineTo(geometry.inletEnd, geometry.cy - geometry.halfIn);
+        ctx.lineTo(geometry.outletStart, geometry.cy - geometry.halfOut);
+        ctx.lineTo(geometry.outletEnd, geometry.cy - geometry.halfOut);
+        ctx.lineTo(geometry.outletEnd, geometry.cy + geometry.halfOut);
+        ctx.lineTo(geometry.outletStart, geometry.cy + geometry.halfOut);
+        ctx.lineTo(geometry.inletEnd, geometry.cy + geometry.halfIn);
+        ctx.lineTo(geometry.inletStart, geometry.cy + geometry.halfIn);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, geometry.cy - geometry.halfIn);
+        ctx.lineTo(geometry.inletEnd, geometry.cy - geometry.halfIn);
+        ctx.lineTo(geometry.outletStart, geometry.cy - geometry.halfOut);
+        ctx.lineTo(canvas.width, geometry.cy - geometry.halfOut);
         ctx.stroke();
-        
         ctx.beginPath();
-        ctx.moveTo(0, cy + d1_px/2);
-        ctx.lineTo(100, cy + d1_px/2);
-        ctx.lineTo(100 + L_diff, cy + d2_px/2);
-        ctx.lineTo(550, cy + d2_px/2);
+        ctx.moveTo(0, geometry.cy + geometry.halfIn);
+        ctx.lineTo(geometry.inletEnd, geometry.cy + geometry.halfIn);
+        ctx.lineTo(geometry.outletStart, geometry.cy + geometry.halfOut);
+        ctx.lineTo(canvas.width, geometry.cy + geometry.halfOut);
         ctx.stroke();
 
-        // Particles
-        particles.forEach(p => {
-            let local_d = d1_px;
-            if(p.x > 100 && p.x < 100 + L_diff) {
-                const t = (p.x - 100) / L_diff;
-                local_d = d1_px + t * (d2_px - d1_px);
-            } else if(p.x >= 100 + L_diff) {
-                local_d = d2_px;
+        ctx.strokeStyle = 'rgba(59,130,246,0.22)';
+        ctx.lineWidth = 1.4;
+        lanes.forEach((lane) => {
+            ctx.beginPath();
+            for (let x = geometry.inletStart; x <= geometry.outletEnd; x += 10) {
+                const wiggle = (state.regime === 'povoljno' ? 0 : state.regime === 'granično' ? 2.5 : 4.5) * Math.sin((x * 0.025) + state.time * 0.015 + lane * 4) * (Math.abs(lane) * 0.65);
+                const y = streamlineY(x, lane, geometry, state.separated) + wiggle;
+                if (x === geometry.inletStart) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
             }
-            
-            const currentV = p.x < 100 ? v1 : (p.x < 100 + L_diff ? v1 - (v1-v2)*((p.x-100)/L_diff) : v2);
-            p.x += currentV * 2; if(p.x > 550) p.x = 0;
-            
-            let y_jitter = 0;
-            if(alpha > 15 && p.x > 100 + L_diff/2) {
-                y_jitter = Math.sin(p.x * 0.1 + Date.now()*0.01) * (alpha-15);
-            }
-            
-            ctx.fillStyle = "#3b82f6";
-            ctx.beginPath(); ctx.arc(p.x, cy + p.y_rel * (local_d/2 - 5) + y_jitter, 2, 0, Math.PI*2); ctx.fill();
+            ctx.stroke();
         });
 
-        requestAnimationFrame(() => update());
+        particles.forEach((particle) => {
+            const laneSpeed = 0.55 + (1 - Math.abs(particle.lane)) * 0.65;
+            particle.phase = (particle.phase + 0.0018 * state.v1 * laneSpeed * particle.bias) % 1;
+            const x = geometry.inletStart + particle.phase * (geometry.outletEnd - geometry.inletStart);
+            const wiggle = (state.regime === 'povoljno' ? 0 : state.regime === 'granično' ? 2.5 : 4.5) * Math.sin((x * 0.025) + state.time * 0.015 + particle.lane * 4) * (Math.abs(particle.lane) * 0.65);
+            const y = streamlineY(x, particle.lane, geometry, state.separated) + wiggle;
+            ctx.fillStyle = Math.abs(particle.lane) > 0.62 && state.separated ? '#f97316' : '#2563eb';
+            ctx.beginPath();
+            ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        if (state.separated) {
+            ctx.strokeStyle = 'rgba(249,115,22,0.9)';
+            ctx.lineWidth = 2;
+            [geometry.cy - geometry.halfOut + 22, geometry.cy + geometry.halfOut - 22].forEach((yCenter, index) => {
+                ctx.beginPath();
+                ctx.arc(geometry.outletStart + 70, yCenter, 18, index === 0 ? Math.PI * 0.1 : Math.PI * 1.1, index === 0 ? Math.PI * 1.85 : Math.PI * 0.85, index !== 0);
+                ctx.stroke();
+            });
+        }
+
+        ctx.strokeStyle = '#0f766e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(geometry.inletEnd + 10, geometry.cy - geometry.halfOut - 42);
+        ctx.lineTo(geometry.outletStart - 10, geometry.cy - geometry.halfOut - 42);
+        ctx.stroke();
+        ctx.fillStyle = '#0f766e';
+        ctx.font = '700 12px Inter';
+        ctx.fillText('pad v i mogući povrat tlaka', geometry.inletEnd + 18, geometry.cy - geometry.halfOut - 50);
+
+        ctx.fillStyle = '#334155';
+        ctx.font = '700 13px Inter';
+        ctx.fillText('v₁ = ' + state.v1.toFixed(1) + ' m/s', 34, geometry.cy - geometry.halfIn - 14);
+        ctx.fillText('v₂ = ' + state.v2.toFixed(2) + ' m/s', canvas.width - 160, geometry.cy - geometry.halfOut - 14);
+
+        requestAnimationFrame(draw);
     }
 
-    aS.oninput = update; v1S.oninput = update; update();
+    aS.oninput = update;
+    v1S.oninput = update;
+    update();
+    draw();
 })();
 </script>
 
@@ -728,19 +743,22 @@ Tlak $p_2 = ?$
 
 ***
 
-### Zadatak Z123 â€” Protok između dva spremnika {.unnumbered}
+### Zadatak Z123 — Protok između dva spremnika {.unnumbered}
 
- 
-Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50 mm izrađene od sivog lijeva, na način prikazan na slici. Potrebno je odrediti geodetsku visinu z1 za koju će volumenski protok iznositi 6 dm3/s . Hrapavost iznosi $2,6 \cdot 10^{-4} \, m$, dok su koeficijenti mjesnih gubitaka redom: $\zeta_u = 0,5$ - ravni rub, $\zeta_k = 0,3$ – koljeno, $\zeta_v = 0,2$ – ventil, $\zeta_i = 1,06$ – izlaz.
+Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50 mm izrađene od sivog lijeva. Hrapavost iznosi $2,6 \cdot 10^{-4} \, \text{m}$, dok su koeficijenti mjesnih gubitaka redom: $\zeta_u = 0,5$ (ulaz), $\zeta_k = 0,3$ (koljeno), $\zeta_v = 0,2$ (ventil), $\zeta_i = 1,06$ (izlaz).
 
-**Zadano:**
-* $t = 10[°C], d = 0,05[m], h = 9[m], L = 80[m], \zeta_u = 0,5, \zeta_k = 0,3$
-* $\zeta_v = 0,2 , \zeta_i = 1,06, \dot{V} = 0,006 [\frac{m^3}{s}], k = 0,00026[m], z_2 = 4[m]$
+**Zadano:** $t=10^\circ\text{C}$, $d=50\,\text{mm}$, $L=80\,\text{m}$, $h=9\,\text{m}$, $\dot{V}=6\,\text{L/s}$, $k=0,26\,\text{mm}$, $z_2=4\,\text{m}$, $\sum \zeta = 2,36$
+**Odrediti:** $z_1$
 
 **Rješenje:**
 1. $v = 3,06 \, \text{m/s}, Re = 116865, \lambda = 0,0315$.
 2. $\sum \zeta = 2,36$.
-3. $h_w = \frac{v^2}{2g} (2,36 + 0,0315 \frac{89}{0,05}) = \mathbf{27,8 \, \text{m}}$.
+3.
+
+    $$
+    h_w = \frac{v^2}{2g} \left( 2,36 + 0,0315 \frac{89}{0,05} \right)
+    = \mathbf{27,8 \, \text{m}}
+    $$
 4. $z_1 = z_2 + h_w = \mathbf{31,8 \, \text{m}}$.
 
 <hr class="widget-divider">
@@ -750,11 +768,15 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
 <!-- WIDGET: Budžet gubitaka cjevovoda -->
 <div id="z123-budget-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📊 Budžet gubitaka: Linijski vs. Lokalni</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati budžet:</strong> Prvo iz protoka i hrapavosti dobivaš <strong>Re</strong> i <strong>λ</strong>, zatim razdvajaš linijske i lokalne gubitke u istom cjevovodu. Tek njihov zbroj daje ukupni gubitak <strong>h_w</strong>, a on određuje potrebnu kotu slobodne površine <strong>z₁</strong>.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; align-items: start;">
         <!-- Energy Line Visualization -->
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
-            <canvas id="z123-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 520px;">
+            <canvas id="z123-canvas" width="520" height="520" style="width: 100%; height: 100%;"></canvas>
             
             <!-- Floating Metrics -->
             <div style="position: absolute; left: 20px; top: 20px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 0.7rem;">
@@ -784,10 +806,25 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
                     <span style="color:#2563eb;">LOKALNI (Zeta)</span>
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Re</div>
+                    <div id="z123-re-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">λ</div>
+                    <div id="z123-lambda-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">z₁</div>
+                    <div id="z123-z1-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0 m</div>
+                </div>
+            </div>
             
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Kod dugih cjevovoda ($L/D > 1000$), linijski gubici trenja su gotovo uvijek dominantni. Lokalni gubici postaju presudni u kratkim instalacijama s mnogo ventila i zavoja.
-            </p>
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z123-explainer"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -818,6 +855,7 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
         const sum_zeta = 2.36;
         const hw_loc = sum_zeta * (v * v / (2 * g));
         const hw_total = hw_lin + hw_loc;
+        const z1 = 4 + hw_total;
         
         const perc_lin = (hw_lin / hw_total) * 100;
 
@@ -826,43 +864,67 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
         document.getElementById('z123-hw-total').innerText = hw_total.toFixed(1) + " m";
         document.getElementById('z123-bar-friction').style.width = perc_lin + "%";
         document.getElementById('z123-bar-local').style.width = (100 - perc_lin) + "%";
+        document.getElementById('z123-re-card').textContent = Math.round(Re);
+        document.getElementById('z123-lambda-card').textContent = lambda.toFixed(4);
+        document.getElementById('z123-z1-card').textContent = z1.toFixed(1) + ' m';
+        document.getElementById('z123-explainer').textContent = `Za protok ${vdot_l.toFixed(1)} L/s i hrapavost ${k_mm.toFixed(2)} mm dobivaš Re ≈ ${Math.round(Re)} i λ = ${lambda.toFixed(4)}. Linijski gubitak tada iznosi ${hw_lin.toFixed(1)} m, lokalni ${hw_loc.toFixed(1)} m, pa ukupni gubitak ${hw_total.toFixed(1)} m traži uzvodnu kotu z₁ ≈ ${z1.toFixed(1)} m.`;
 
         draw(hw_total, hw_lin, hw_loc);
     }
 
     function draw(hwt, hlin, hloc) {
-        ctx.clearRect(0, 0, 500, 450);
-        const ox = 100, oy = 400, scale = 10;
-        
-        // Source Tank
-        ctx.fillStyle = "#ebf8ff"; ctx.fillRect(20, oy - (4 + hwt)*scale, 80, (4 + hwt)*scale);
-        ctx.strokeStyle = "#475569"; ctx.lineWidth = 3; ctx.strokeRect(20, oy - (4 + hwt)*scale, 80, (4 + hwt)*scale);
-        
-        // Target Tank
-        ctx.fillStyle = "#ebf8ff"; ctx.fillRect(400, oy - 4*scale, 80, 4*scale);
-        ctx.strokeRect(400, oy - 4*scale, 80, 4*scale);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const oy = canvas.height - 44;
+        const totalHead = 4 + hwt;
+        const topPadding = 84;
+        const scale = Math.min(10, (oy - topPadding) / Math.max(totalHead, 6));
+        const sourceX = 28;
+        const tankWidth = 92;
+        const targetX = canvas.width - 120;
+        const sourceTop = oy - totalHead * scale;
+        const targetTop = oy - 4 * scale;
+        const pipeY = oy - 24;
 
-        // Pipe
-        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 10;
-        ctx.beginPath(); ctx.moveTo(100, oy - 20); ctx.lineTo(400, oy - 20); ctx.stroke();
+        ctx.fillStyle = '#ebf8ff';
+        ctx.fillRect(sourceX, sourceTop, tankWidth, totalHead * scale);
+        ctx.fillRect(targetX, targetTop, tankWidth, 4 * scale);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(sourceX, sourceTop, tankWidth, totalHead * scale);
+        ctx.strokeRect(targetX, targetTop, tankWidth, 4 * scale);
 
-        // EGL Line (Energy)
-        ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2;
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 10;
         ctx.beginPath();
-        ctx.moveTo(100, oy - (4 + hwt)*scale);
-        ctx.lineTo(400, oy - 4*scale - 5); // Exit into tank (v approx 0)
+        ctx.moveTo(sourceX + tankWidth, pipeY);
+        ctx.lineTo(targetX, pipeY);
         ctx.stroke();
-        
-        // HGL Line (Piezometric)
-        ctx.strokeStyle = "#3b82f6"; ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(100, oy - (4 + hwt)*scale + 10);
-        ctx.lineTo(400, oy - 4*scale + 5);
-        ctx.stroke(); ctx.setLineDash([]);
 
-        ctx.fillStyle = "#1e293b"; ctx.font = "bold 10px Inter";
-        ctx.fillText("EGL", 110, oy - (4 + hwt)*scale - 10);
-        ctx.fillText("z1 = " + (4 + hwt).toFixed(1) + "m", 25, oy - (4 + hwt)*scale - 15);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(sourceX + tankWidth, sourceTop);
+        ctx.lineTo(targetX, targetTop - 6);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#3b82f6';
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(sourceX + tankWidth, sourceTop + 10);
+        ctx.lineTo(targetX, targetTop + 6);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 11px Inter';
+        ctx.fillText('EGL', sourceX + tankWidth + 8, Math.max(28, sourceTop - 10));
+        ctx.fillText('HGL', sourceX + tankWidth + 8, Math.max(44, sourceTop + 14));
+        ctx.fillText('z1 = ' + totalHead.toFixed(1) + ' m', sourceX + 4, Math.max(26, sourceTop - 14));
+        ctx.fillText('z2 = 4.0 m', targetX + 8, targetTop - 14);
+        ctx.fillStyle = '#475569';
+        ctx.font = '11px Inter';
+        ctx.fillText('hw,lin = ' + hlin.toFixed(1) + ' m', canvas.width / 2 - 96, sourceTop + (targetTop - sourceTop) * 0.35);
+        ctx.fillText('hw,loc = ' + hloc.toFixed(1) + ' m', canvas.width / 2 - 96, sourceTop + (targetTop - sourceTop) * 0.62);
     }
 
     vdotS.oninput = update; kS.oninput = update; update();
@@ -874,14 +936,24 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
 
 ***
 
-### Zadatak Z124 â€” Paralelni cjevovodi {.unnumbered}
+### Zadatak Z124 — Paralelni cjevovodi {.unnumbered}
 
- 
-Voda temperature 20°C crpi se iz spremnika A u spremnik B, na način prikazan na slici putem dviju paralelnih cijevi čije duljine su jednake i iznose 36 m. Volumenski protok na izlazu iz pumpe iznosi 30 dm$^3$/s. Zanemarujemo mjesne gubitke na račvi, sastavištu i koljenima, te linijske gubitke od spremnika A do pumpe, gubitke od izlaza iz pumpe do račve te gubitke od sastavišta do spremnika B. Potrebno je odrediti tlak u račvištu $p_R$ i volumenske protoke kroz pojedine ogranke račve. Gustoća vode pri 20°C iznosi 998 kg/m$^3$, dinamička viskoznost iznosi $1{,}002 \cdot 10^{-3}$ Pas, hrapavosti čelične cijevi je 0,000045 m.
+Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelnih cijevi duljine 36 m. Volumenski protok na izlazu iz pumpe iznosi 30 L/s. Zanemarujemo mjesne gubitke na račvi, sastavištu i koljenima.
+
+**Zadano:** $t=20^\circ\text{C}$, $L=36\,\text{m}$, $d_1=40\,\text{mm}$, $d_2=80\,\text{mm}$, $\dot{V}_{tot}=30\,\text{L/s}$, $k=0,045\,\text{mm}$
+**Odrediti:** $p_R$, $\dot{V}_1$, $\dot{V}_2$
 
 **Rješenje:**
 1. $v_2 = v_1 \sqrt{\frac{\lambda_1 d_2}{\lambda_2 d_1}} = 1,56 v_1$.
-2. $\dot{V}_{tot} = A_1 v_1 + A_2 (1,56 v_1) \implies v_1 = \mathbf{3,29 \, \text{m/s}}, v_2 = \mathbf{5,15 \, \text{m/s}}$.
+2.
+
+    $$
+    \dot{V}_{tot} = A_1 v_1 + A_2 (1,56 v_1)
+    $$
+
+    $$
+    v_1 = \mathbf{3,29 \, \text{m/s}}, \qquad v_2 = \mathbf{5,15 \, \text{m/s}}
+    $$
 3. $\dot{V}_1 = \mathbf{4,1 \, \text{L/s}}, \dot{V}_2 = \mathbf{25,9 \, \text{L/s}}$.
 4. $H_{pump} = (z_B - z_A) + h_{wl1} = \mathbf{18,93 \, \text{m}}$.
 
@@ -890,10 +962,14 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B, na način prikazan n
 
 ```{=html}
 <!-- WIDGET: Paralelne cijevi i raspodjela protoka -->
-<div id="z124-parallel-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<div id="z124-parallel-widget" style="max-width: 1040px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🔌 Hidraulička analogija: Raspodjela u paralelnim granama</h4>
+
+    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
+        <strong>Kako čitati paralelne grane:</strong> U obje grane pad energije mora biti isti, pa raspodjela ne ovisi proizvoljno o protoku nego o hidrauličkom otporu svake grane. Šira cijev zato preuzima veći dio ukupnog protoka jer za isti gubitak može nositi veću brzinu.
+    </div>
     
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start;">
         <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
             <canvas id="z124-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
             
@@ -935,10 +1011,25 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B, na način prikazan n
                     </div>
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₁</div>
+                    <div id="z124-v1-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂</div>
+                    <div id="z124-v2-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
+                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂/v₁</div>
+                    <div id="z124-ratio-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00</div>
+                </div>
+            </div>
             
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Paralelne cijevi se ponašaju kao paralelni otpornici. Budući da je pad tlaka (napon) isti za obje grane, šira cijev (manji otpor) automatski preuzima veći dio protoka (struje).
-            </p>
+            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
+                <strong>Tumačenje scene:</strong> <span id="z124-explainer"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -978,6 +1069,10 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B, na način prikazan n
         document.getElementById('z124-bar-v1').style.width = (vdot1/vtot_l * 100) + "%";
         document.getElementById('z124-bar-v2').style.width = (vdot2/vtot_l * 100) + "%";
         document.getElementById('z124-pr-val').innerText = pr.toFixed(1) + " kPa";
+        document.getElementById('z124-v1-card').textContent = v1.toFixed(2) + ' m/s';
+        document.getElementById('z124-v2-card').textContent = v2.toFixed(2) + ' m/s';
+        document.getElementById('z124-ratio-card').textContent = ratio_v.toFixed(2);
+        document.getElementById('z124-explainer').textContent = `Za ukupni protok ${vtot_l.toFixed(0)} L/s i promjer druge cijevi ${d2_mm.toFixed(0)} mm uvjet jednakog gubitka daje omjer brzina v₂/v₁ = ${ratio_v.toFixed(2)}. Zato prva grana nosi ${vdot1.toFixed(1)} L/s, druga ${vdot2.toFixed(1)} L/s, a tlak u račvi ispada ${pr.toFixed(1)} kPa.`;
 
         draw(v1, v2, d1, d2);
     }
@@ -1030,22 +1125,45 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B, na način prikazan n
 
 ```{=html}
 <!-- Flow Regime / Reynolds Widget -->
-<div id="reynolds-widget" style="max-width: 800px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: #f8f9fa;">
-    <h3 style="text-align: center;">Vizualizacija Reynoldsovog broja</h3>
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <div style="flex: 2; min-width: 300px;">
-            <canvas id="flow-canvas" width="450" height="150" style="background: white; border: 1px solid #eee; border-radius: 8px; width: 100%;"></canvas>
+<div id="reynolds-widget" style="max-width: 980px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; background: #ffffff; box-shadow: 0 15px 40px rgba(15,23,42,0.08);">
+    <h3 style="text-align: center; margin: 0 0 18px; color: #0f172a; font-weight: 800;">Vizualizacija Reynoldsovog broja</h3>
+    <div style="padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; margin-bottom: 16px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.6;">
+        <strong>Kako čitati režim:</strong> Ovdje je modelirana voda u maloj cijevi promjera <strong>2 mm</strong>, pa pomicanjem brzine možeš stvarno proći kroz sve tri zone. Lijevo vidiš kako se uređene strujnice pretvaraju u valovit i vrtložan tok, a desno kako se profil brzine iz paraboličnog spljoštava u turbulentni „čepasti" profil.
+    </div>
+
+    <div style="position: relative; background: radial-gradient(circle at top, #172554 0%, #0f172a 60%, #020617 100%); border-radius: 16px; overflow: hidden; height: 340px; border: 1px solid #1e293b;">
+        <canvas id="flow-canvas" width="920" height="340" style="width: 100%; height: 100%; display: block;"></canvas>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 18px; align-items: start;">
+        <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Brzina strujanja v: <span id="v-re-val" style="color:#2563eb;">0.50</span> m/s</label>
+            <input type="range" id="v-re-slider" min="0.05" max="5" step="0.05" value="0.5" style="width: 100%;">
+            <div style="margin-top: 10px; font-size: 0.76rem; color: #64748b; line-height: 1.5;">Model: voda, ν = 1.0×10⁻⁶ m²/s, d = 2 mm.</div>
         </div>
-        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 10px;">
-            <div>
-                <label>Brzina strujanja v (m/s): <span id="v-re-val">0.5</span></label>
-                <input type="range" id="v-re-slider" min="0.05" max="5" step="0.05" value="0.5" style="width: 100%;">
-            </div>
-            <div id="re-status" style="padding: 10px; border-radius: 8px; font-weight: bold; text-align: center;">
-                Re = 1000 (Laminarno)
-            </div>
-            <p style="font-size: 0.8em; color: #666;">Pri niskim Re (brzinama), viskoznost dominira i strujanje je uredno. Pri visokim Re, inercija prevladava i nastaju vrtlozi (turbulencija).</p>
+
+        <div id="re-status" style="padding: 16px; border-radius: 12px; font-weight: 800; text-align: center; border: 1px solid #bbf7d0; background: #dcfce7; color: #166534;">
+            Re = 1000 (Laminarno)
         </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+            <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Dominira</div>
+                <div id="re-dominant" style="font-family: monospace; font-weight: 800; color: #0f172a;">viskoznost</div>
+            </div>
+            <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Pragovi</div>
+                <div id="re-thresholds" style="font-family: monospace; font-weight: 800; color: #0f172a;">2300 / 4000</div>
+            </div>
+            <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #dbeafe; text-align: center;">
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Profil</div>
+                <div id="re-profile" style="font-family: monospace; font-weight: 800; color: #0f172a;">parabola</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="padding: 12px 14px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 10px; color: #7c2d12; font-size: 0.82rem; line-height: 1.6; margin-top: 16px;">
+        <strong>Tumačenje scene:</strong> <span id="re-explainer"></span>
     </div>
 </div>
 
@@ -1055,47 +1173,171 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B, na način prikazan n
     const canvas = document.getElementById('flow-canvas');
     const ctx = canvas.getContext('2d');
     const status = document.getElementById('re-status');
+    const lanes = [-0.86, -0.7, -0.54, -0.38, -0.22, -0.06, 0.06, 0.22, 0.38, 0.54, 0.7, 0.86];
+    const particles = [];
+    const state = { v: 0.5, re: 1000, regime: 'Laminarno', dominant: 'viskoznost', profile: 'parabola', color: '#22c55e', mix: 0, time: 0 };
+    const d = 0.002;
+    const nu = 1e-6;
 
-    let particles = [];
-    for(let i=0; i<50; i++) particles.push({x: Math.random()*450, y: 30 + Math.random()*90, ox: Math.random()*Math.PI*2});
+    lanes.forEach((lane, laneIndex) => {
+        for (let index = 0; index < 8; index++) {
+            particles.push({ lane, phase: (index / 8 + laneIndex * 0.025) % 1, bias: 0.85 + Math.random() * 0.3 });
+        }
+    });
+
+    function classify(re) {
+        if (re < 2300) return { regime: 'Laminarno', dominant: 'viskoznost', profile: 'parabola', color: '#22c55e', mix: 0 };
+        if (re < 4000) return { regime: 'Prijelazno', dominant: 'oba učinka', profile: 'spljošten', color: '#f59e0b', mix: (re - 2300) / 1700 };
+        return { regime: 'Turbulentno', dominant: 'inercija', profile: 'čepast', color: '#ef4444', mix: 1 };
+    }
+
+    function laneSpeed(lane) {
+        const r = Math.abs(lane);
+        const laminar = 1.8 * (1 - r * r);
+        const turbulent = 1.15 + 0.55 * (1 - Math.pow(r, 8));
+        return (1 - state.mix) * laminar + state.mix * turbulent;
+    }
 
     function update() {
         const v = parseFloat(vS.value);
-        document.getElementById('v-re-val').innerText = v.toFixed(2);
-        const Re = (1000 * v * 0.05) / 0.001; // Water d=50mm
-        
-        if(Re < 2300) {
-            status.innerText = `Re = ${Re.toFixed(0)} (Laminarno)`;
-            status.style.background = "#d4edda";
-        } else if(Re < 4000) {
-            status.innerText = `Re = ${Re.toFixed(0)} (Prijelazno)`;
-            status.style.background = "#fff3cd";
+        const re = v * d / nu;
+        const cls = classify(re);
+
+        state.v = v;
+        state.re = re;
+        Object.assign(state, cls);
+
+        document.getElementById('v-re-val').textContent = v.toFixed(2);
+        document.getElementById('re-dominant').textContent = cls.dominant;
+        document.getElementById('re-profile').textContent = cls.profile;
+        document.getElementById('re-explainer').textContent = `Za brzinu ${v.toFixed(2)} m/s dobivaš Re ≈ ${re.toFixed(0)}. Zato je režim ${cls.regime.toLowerCase()}, dominira ${cls.dominant}, a profil brzine prelazi prema obliku: ${cls.profile}. Pragovi 2300 i 4000 označavaju kada uredni slojevi više ne mogu ostati stabilni.`;
+
+        status.textContent = `Re = ${re.toFixed(0)} (${cls.regime})`;
+        if (cls.regime === 'Laminarno') {
+            status.style.background = '#dcfce7';
+            status.style.borderColor = '#bbf7d0';
+            status.style.color = '#166534';
+        } else if (cls.regime === 'Prijelazno') {
+            status.style.background = '#fef3c7';
+            status.style.borderColor = '#fde68a';
+            status.style.color = '#92400e';
         } else {
-            status.innerText = `Re = ${Re.toFixed(0)} (Turbulentno)`;
-            status.style.background = "#f8d7da";
+            status.style.background = '#fee2e2';
+            status.style.borderColor = '#fecaca';
+            status.style.color = '#991b1b';
         }
+    }
 
+    function streamlineY(x, lane, pipe) {
+        const amp = state.regime === 'Laminarno' ? 0 : (state.regime === 'Prijelazno' ? 5 : 12);
+        const ramp = Math.max(0, (x - pipe.x) / pipe.w);
+        const wiggle = amp * ramp * (0.25 + Math.abs(lane)) * Math.sin(x * 0.03 + state.time * 0.05 + lane * 5.5);
+        return pipe.cy + lane * (pipe.h / 2 - 12) + wiggle;
+    }
+
+    function draw() {
+        state.time += 1;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 2;
-        ctx.strokeRect(0, 20, 450, 110);
 
-        particles.forEach(p => {
-            p.x += v * 2;
-            if(p.x > 450) p.x = 0;
-            
-            let y_offset = 0;
-            if(Re > 2300) {
-                let intensity = Math.min(10, (Re-2300)/1000);
-                y_offset = Math.sin(p.x * 0.1 + Date.now()*0.01 + p.ox) * intensity;
+        const pipe = { x: 42, y: 72, w: 520, h: 196, cy: 170 };
+        const profile = { x: 620, y: 58, w: 230, h: 224 };
+
+        ctx.fillStyle = '#0b1220';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const fluidGrad = ctx.createLinearGradient(0, pipe.y, 0, pipe.y + pipe.h);
+        fluidGrad.addColorStop(0, 'rgba(37,99,235,0.18)');
+        fluidGrad.addColorStop(0.5, 'rgba(96,165,250,0.28)');
+        fluidGrad.addColorStop(1, 'rgba(37,99,235,0.18)');
+        ctx.fillStyle = fluidGrad;
+        ctx.fillRect(pipe.x, pipe.y, pipe.w, pipe.h);
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(pipe.x, pipe.y, pipe.w, pipe.h);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '700 13px Inter';
+        ctx.fillText('strujnice u cijevi', pipe.x, 34);
+        ctx.fillText('profil brzine', profile.x, 34);
+
+        ctx.strokeStyle = 'rgba(148,163,184,0.35)';
+        ctx.lineWidth = 1.3;
+        lanes.forEach((lane) => {
+            ctx.beginPath();
+            for (let x = pipe.x + 8; x <= pipe.x + pipe.w - 8; x += 12) {
+                const y = streamlineY(x, lane, pipe);
+                if (x === pipe.x + 8) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
             }
-            
-            ctx.fillStyle = "#3498db";
-            ctx.beginPath(); ctx.arc(p.x, p.y + y_offset, 2, 0, Math.PI*2); ctx.fill();
+            ctx.stroke();
         });
 
-        requestAnimationFrame(update);
+        particles.forEach((particle) => {
+            particle.phase = (particle.phase + 0.0015 * state.v * laneSpeed(particle.lane) * particle.bias) % 1;
+            const x = pipe.x + particle.phase * pipe.w;
+            const y = streamlineY(x, particle.lane, pipe);
+            ctx.fillStyle = state.color;
+            ctx.beginPath();
+            ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        if (state.regime === 'Turbulentno') {
+            ctx.strokeStyle = 'rgba(248,113,113,0.75)';
+            ctx.lineWidth = 1.7;
+            [pipe.x + 390, pipe.x + 450].forEach((cx, index) => {
+                ctx.beginPath();
+                ctx.arc(cx, pipe.cy + (index === 0 ? -42 : 44), 18, 0, Math.PI * 1.8);
+                ctx.stroke();
+            });
+        }
+
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(profile.x, profile.y, profile.w, profile.h);
+        ctx.strokeStyle = 'rgba(148,163,184,0.5)';
+        ctx.beginPath();
+        ctx.moveTo(profile.x + 44, profile.y + 12);
+        ctx.lineTo(profile.x + 44, profile.y + profile.h - 12);
+        ctx.stroke();
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '11px Inter';
+        ctx.fillText('brzina', profile.x + 86, profile.y + profile.h - 12);
+
+        ctx.strokeStyle = state.color;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        let first = true;
+        for (let yIndex = 0; yIndex <= 40; yIndex += 1) {
+            const lane = -1 + (yIndex / 40) * 2;
+            const y = profile.y + 16 + (yIndex / 40) * (profile.h - 32);
+            const x = profile.x + 44 + (laneSpeed(lane) / 1.8) * 140;
+            if (first) {
+                ctx.moveTo(x, y);
+                first = false;
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+
+        lanes.forEach((lane) => {
+            const y = profile.y + 16 + ((lane + 1) / 2) * (profile.h - 32);
+            const x = profile.x + 44 + (laneSpeed(lane) / 1.8) * 140;
+            ctx.strokeStyle = 'rgba(148,163,184,0.18)';
+            ctx.beginPath();
+            ctx.moveTo(profile.x + 44, y);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        });
+
+        requestAnimationFrame(draw);
     }
+
+    vS.oninput = update;
     update();
+    draw();
 })();
 </script>
 

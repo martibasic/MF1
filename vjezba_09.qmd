@@ -19,152 +19,646 @@ Ključni inženjerski uvid Bernoullijevog principa je taj da u sustavima s konst
 
 ```{=html}
 <!-- NOVI WIDGET: EGL/HGL Vizualizator -->
-<div class="widget-container" id="widget-bernoulli-energy">
+<div id="widget-bernoulli-energy">
     <style>
-        .widget-container {
-            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
+        #widget-bernoulli-energy * { box-sizing: border-box; }
+        #widget-bernoulli-energy .be-shell {
+            margin: 20px auto;
+            max-width: 1120px;
+            border: 1px solid #dce8f4;
+            border-radius: 28px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+            box-shadow: 0 24px 58px rgba(41, 76, 109, 0.10);
             font-family: 'Inter', system-ui, sans-serif;
+            color: #17324d;
         }
-        .canvas-wrapper { position: relative; background: #f8fafc; border-radius: 8px; border: 1px solid #eee; overflow: hidden; }
-        .legend { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 10px; font-size: 0.8rem; }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
+        #widget-bernoulli-energy .be-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: start;
+            padding: 1.45rem 1.55rem 1rem;
+            background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 34%), linear-gradient(135deg, #eef8ff 0%, #ffffff 56%, #f4fbff 100%);
+            border-bottom: 1px solid rgba(43, 92, 124, 0.10);
+        }
+        #widget-bernoulli-energy .be-kicker {
+            margin-bottom: 0.35rem;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #5d7b94;
+        }
+        #widget-bernoulli-energy .be-title {
+            margin: 0;
+            font-size: clamp(1.38rem, 2.4vw, 1.92rem);
+            line-height: 1.08;
+            color: #163c61;
+        }
+        #widget-bernoulli-energy .be-sub {
+            margin: 0.55rem 0 0;
+            max-width: 74ch;
+            color: #547088;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        #widget-bernoulli-energy .be-chip {
+            align-self: start;
+            padding: 0.76rem 0.96rem;
+            border-radius: 999px;
+            border: 1px solid #cfe3f7;
+            background: linear-gradient(135deg, #f0f8ff, #fbfdff);
+            color: #1d4f78;
+            font-weight: 800;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        #widget-bernoulli-energy .be-note {
+            margin: 1rem 1.55rem 0;
+            padding: 0.95rem 1rem;
+            border-radius: 16px;
+            border: 1px solid #d7e8f8;
+            background: linear-gradient(135deg, #eff7ff, #f8fbff);
+            color: #2d587f;
+            font-size: 0.86rem;
+            line-height: 1.6;
+        }
+        #widget-bernoulli-energy .be-stage {
+            margin: 1rem 1.55rem 0;
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid #dbe6f0;
+            background: radial-gradient(circle at top, #ffffff 0%, #eef6ff 68%, #e7f2fb 100%);
+        }
+        #widget-bernoulli-energy .be-stage canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #widget-bernoulli-energy .be-summary {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 0.75rem;
+            padding: 1rem 1.55rem 0;
+        }
+        #widget-bernoulli-energy .be-stat {
+            padding: 0.95rem;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #fbfdff 0%, #eef7ff 100%);
+            border: 1px solid rgba(31, 91, 150, 0.08);
+        }
+        #widget-bernoulli-energy .be-stat small {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #6a849a;
+        }
+        #widget-bernoulli-energy .be-stat strong {
+            display: block;
+            font-size: 1.02rem;
+            color: #123a63;
+            font-variant-numeric: tabular-nums;
+        }
+        #widget-bernoulli-energy .be-lower {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+            padding: 1rem 1.55rem 1.55rem;
+        }
+        #widget-bernoulli-energy .be-card {
+            border: 1px solid #e3ebf2;
+            border-radius: 18px;
+            background: #ffffff;
+        }
+        #widget-bernoulli-energy .be-controls,
+        #widget-bernoulli-energy .be-bars,
+        #widget-bernoulli-energy .be-formula,
+        #widget-bernoulli-energy .be-legend,
+        #widget-bernoulli-energy .be-explainer {
+            padding: 1rem;
+        }
+        #widget-bernoulli-energy .be-controls {
+            display: grid;
+            gap: 0.8rem;
+        }
+        #widget-bernoulli-energy .be-presets {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+        #widget-bernoulli-energy .be-preset {
+            appearance: none;
+            border: 1px solid #cfe3f7;
+            border-radius: 999px;
+            padding: 0.65rem 0.7rem;
+            background: #eff7ff;
+            color: #1d4f78;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease;
+        }
+        #widget-bernoulli-energy .be-preset:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(41, 76, 109, 0.08);
+        }
+        #widget-bernoulli-energy .be-row label {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.35rem;
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: #36506b;
+        }
+        #widget-bernoulli-energy .be-row input {
+            width: 100%;
+            accent-color: #2f80ed;
+        }
+        #widget-bernoulli-energy strong.section {
+            display: block;
+            margin-bottom: 0.55rem;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #66829a;
+        }
+        #widget-bernoulli-energy .be-bar-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.35rem;
+            font-size: 0.84rem;
+            color: #36506b;
+            font-weight: 700;
+        }
+        #widget-bernoulli-energy .be-track {
+            height: 12px;
+            border-radius: 999px;
+            background: #edf3f9;
+            overflow: hidden;
+            margin-bottom: 0.85rem;
+        }
+        #widget-bernoulli-energy .be-fill {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            transition: width 0.28s ease;
+        }
+        #widget-bernoulli-energy .be-vh1 {
+            background: linear-gradient(90deg, #60a5fa, #2563eb);
+        }
+        #widget-bernoulli-energy .be-vh2 {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+        }
+        #widget-bernoulli-energy .be-formula {
+            font-size: 0.84rem;
+            line-height: 1.58;
+            color: #355771;
+        }
+        #widget-bernoulli-energy .be-formula div + div {
+            margin-top: 0.45rem;
+        }
+        #widget-bernoulli-energy .be-legend-grid {
+            display: grid;
+            gap: 0.6rem;
+        }
+        #widget-bernoulli-energy .be-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 0.84rem;
+            color: #355771;
+        }
+        #widget-bernoulli-energy .be-swatch-line,
+        #widget-bernoulli-energy .be-swatch-hgl,
+        #widget-bernoulli-energy .be-swatch-fill,
+        #widget-bernoulli-energy .be-swatch-bar {
+            flex: 0 0 auto;
+        }
+        #widget-bernoulli-energy .be-swatch-line {
+            width: 22px;
+            height: 0;
+            border-top: 3px solid #ef4444;
+        }
+        #widget-bernoulli-energy .be-swatch-hgl {
+            width: 22px;
+            height: 0;
+            border-top: 3px dashed #2563eb;
+        }
+        #widget-bernoulli-energy .be-swatch-fill {
+            width: 22px;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(249, 115, 22, 0.22);
+            border: 1px solid rgba(249, 115, 22, 0.34);
+        }
+        #widget-bernoulli-energy .be-swatch-bar {
+            width: 22px;
+            height: 12px;
+            border-radius: 8px;
+            background: rgba(37, 99, 235, 0.18);
+            border: 1px solid rgba(37, 99, 235, 0.28);
+        }
+        #widget-bernoulli-energy .be-explainer {
+            grid-column: 1 / -1;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+            color: #1e3a8a;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        @media (max-width: 980px) {
+            #widget-bernoulli-energy .be-head,
+            #widget-bernoulli-energy .be-summary,
+            #widget-bernoulli-energy .be-lower {
+                grid-template-columns: 1fr;
+            }
+            #widget-bernoulli-energy .be-chip {
+                justify-self: start;
+            }
+        }
+        @media (max-width: 640px) {
+            #widget-bernoulli-energy .be-presets {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 
-    <div class="widget-header"><h3 class="widget-title">Energetske linije (EGL/HGL) u promjenjivom presjeku</h3></div>
-    
-    <div class="controls" style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-        <div class="control-group">
-            <label style="font-weight: 600; color: #475569;">Suženje cijevi (D₂): <span id="d2-val-egl" style="color: #3182ce;">80</span> mm</label>
-            <input type="range" id="d2-slider-egl" min="40" max="140" value="80" step="5" style="width: 100%; accent-color: #3182ce;">
+    <div class="be-shell">
+        <div class="be-head">
+            <div>
+                <div class="be-kicker">EGL i HGL u suženju cijevi</div>
+                <h3 class="be-title">U suženju se ukupna energija ne mijenja, ali se njezin udio premješta iz statičkog tlaka u brzinsku visinu</h3>
+                <p class="be-sub">Na presjeku 1 i presjeku 2 ukupna energija ostaje ista, pa je <strong>EGL</strong> vodoravna. Razlika je u tome što manji presjek tjera fluid na veću brzinu, pa se dio energije prebacuje u <strong>v²/2g</strong>, a <strong>HGL = z + p/ρg</strong> mora pasti.</p>
+            </div>
+            <div class="be-chip">EGL = HGL + v²/2g</div>
         </div>
-    </div>
 
-    <div style="padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 15px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
-        <strong>Kako čitati dijagram:</strong> Crvena linija prikazuje ukupnu energiju <strong>EGL</strong> koja ostaje stalna, dok plava isprekidana linija prikazuje <strong>HGL</strong>. Kad se presjek suzi, brzina raste pa se brzinska visina <strong>v²/2g</strong> povećava i zato piezometrijska visina mora pasti.
-    </div>
+        <div class="be-note"><strong>Kako čitati scenu:</strong> najprije pogledaj crvenu liniju <strong>EGL</strong> koja ostaje stalna. Zatim usporedi plavu liniju <strong>HGL</strong> prije i poslije suženja. Obojeno područje između njih predstavlja brzinsku visinu, a dva stupca uz presjeke 1 i 2 pokazuju kako se ista ukupna energija drugačije raspodjeljuje.</div>
 
-    <div class="canvas-wrapper">
-        <canvas id="canvas-egl" width="800" height="300" style="width: 100%; height: auto; display: block;"></canvas>
-    </div>
+        <div class="be-stage">
+            <canvas id="canvas-egl" width="920" height="420"></canvas>
+        </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 15px;">
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v1</div>
-            <div id="v1-egl" style="font-family: monospace; font-weight: 800; color: #0f172a;">1.50 m/s</div>
+        <div class="be-summary">
+            <div class="be-stat"><small>v1</small><strong id="v1-egl">1.50 m/s</strong></div>
+            <div class="be-stat"><small>v2</small><strong id="v2-egl">2.00 m/s</strong></div>
+            <div class="be-stat"><small>v1²/2g</small><strong id="vh1-egl">0.11 m</strong></div>
+            <div class="be-stat"><small>v2²/2g</small><strong id="vh2-egl">0.20 m</strong></div>
+            <div class="be-stat"><small>HGL1</small><strong id="hgl1-egl">7.39 m</strong></div>
+            <div class="be-stat"><small>HGL2</small><strong id="hgl2-egl">7.30 m</strong></div>
         </div>
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v2</div>
-            <div id="v2-egl" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
-        </div>
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v1²/2g</div>
-            <div id="vh1-egl" style="font-family: monospace; font-weight: 800; color: #0369a1;">0.11 m</div>
-        </div>
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v2²/2g</div>
-            <div id="vh2-egl" style="font-family: monospace; font-weight: 800; color: #0369a1;">0.00 m</div>
-        </div>
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">HGL₂</div>
-            <div id="hgl2-egl" style="font-family: monospace; font-weight: 800; color: #1d4ed8;">0.00 m</div>
-        </div>
-    </div>
 
-    <div style="margin-top: 14px; padding: 12px 14px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; color: #7c2d12; font-size: 0.82rem; line-height: 1.5;">
-        <strong>Tumačenje scene:</strong> <span id="egl-explainer"></span>
-    </div>
+        <div class="be-lower">
+            <div class="be-card be-controls">
+                <div class="be-presets">
+                    <button type="button" class="be-preset" id="egl-preset-wide">Blago suženje</button>
+                    <button type="button" class="be-preset" id="egl-preset-mid">Srednje suženje</button>
+                    <button type="button" class="be-preset" id="egl-preset-tight">Jako suženje</button>
+                </div>
 
-    <div class="legend">
-        <div class="legend-item"><span style="width:20px; height:3px; background:#e74c3c; display:inline-block;"></span> EGL (Ukupna energija)</div>
-        <div class="legend-item"><span style="width:20px; height:3px; background:#3498db; display:inline-block; border-top:1px dashed #3498db;"></span> HGL (Piezometrijska linija)</div>
-        <div class="legend-item"><span style="width:20px; height:10px; background:rgba(52,152,219,0.2); display:inline-block;"></span> Brzinska visina (v²/2g)</div>
+                <div class="be-row">
+                    <label for="d2-slider-egl"><span>Promjer suženja D2</span><span id="d2-val-egl">90 mm</span></label>
+                    <input type="range" id="d2-slider-egl" min="60" max="135" value="90" step="5">
+                </div>
+            </div>
+
+            <div class="be-card be-bars">
+                <strong class="section">Koliki dio EGL-a otpada na brzinu?</strong>
+                <div class="be-bar-row"><span>Presjek 1: v1²/2g</span><strong id="vh1-share-egl">1.5 %</strong></div>
+                <div class="be-track"><div id="vh1-bar-egl" class="be-fill be-vh1"></div></div>
+                <div class="be-bar-row"><span>Presjek 2: v2²/2g</span><strong id="vh2-share-egl">8.0 %</strong></div>
+                <div class="be-track"><div id="vh2-bar-egl" class="be-fill be-vh2"></div></div>
+            </div>
+
+            <div class="be-card be-formula">
+                <strong class="section">Računski lanac</strong>
+                <div id="egl-eq1">A1 v1 = A2 v2</div>
+                <div id="egl-eq2">v2 = v1 A1 / A2</div>
+                <div id="egl-eq3">HGL2 = EGL - v2²/2g</div>
+            </div>
+
+            <div class="be-card be-legend">
+                <strong class="section">Legenda i očitanje</strong>
+                <div class="be-legend-grid">
+                    <div class="be-legend-row"><span class="be-swatch-line"></span><span>EGL: ukupna energija ostaje konstantna</span></div>
+                    <div class="be-legend-row"><span class="be-swatch-hgl"></span><span>HGL: statička plus geodetska komponenta</span></div>
+                    <div class="be-legend-row"><span class="be-swatch-fill"></span><span>Brzinska visina v²/2g</span></div>
+                    <div class="be-legend-row"><span class="be-swatch-bar"></span><span>Energetski stupci u presjeku 1 i 2</span></div>
+                    <div class="be-legend-row"><span>D2/A1</span><strong id="area-ratio-egl">36 %</strong></div>
+                    <div class="be-legend-row"><span>Pad HGL-a</span><strong id="drop-egl">2.00 m</strong></div>
+                </div>
+            </div>
+
+            <div class="be-card be-explainer">
+                <strong class="section">Što se sada događa</strong>
+                <div id="egl-explainer">Kad se cijev suzi, brzina raste pa se brzinska visina povećava. Budući da je EGL stalna, HGL mora pasti upravo za isti iznos.</div>
+            </div>
+        </div>
     </div>
 
     <script>
     (function() {
-        const canvas = document.getElementById('canvas-egl');
-        const ctx = canvas.getContext('2d');
-        const d2Sl = document.getElementById('d2-slider-egl');
+        const root = document.getElementById('widget-bernoulli-energy');
+        if (!root) return;
 
-        function draw() {
-            const d1 = 150; 
-            const d2 = parseFloat(d2Sl.value);
-            const v1 = 1.5; 
-            const g = 9.81;
-            const hTotal = 5.0; // Total energy in meters
-            const v2 = (d1 * d1 / (d2 * d2)) * v1;
+        const canvas = root.querySelector('#canvas-egl');
+        const ctx = canvas.getContext('2d');
+        const input = root.querySelector('#d2-slider-egl');
+        const out = {
+            d2: root.querySelector('#d2-val-egl'),
+            v1: root.querySelector('#v1-egl'),
+            v2: root.querySelector('#v2-egl'),
+            vh1: root.querySelector('#vh1-egl'),
+            vh2: root.querySelector('#vh2-egl'),
+            hgl1: root.querySelector('#hgl1-egl'),
+            hgl2: root.querySelector('#hgl2-egl'),
+            areaRatio: root.querySelector('#area-ratio-egl'),
+            drop: root.querySelector('#drop-egl'),
+            vh1Bar: root.querySelector('#vh1-bar-egl'),
+            vh2Bar: root.querySelector('#vh2-bar-egl'),
+            vh1Share: root.querySelector('#vh1-share-egl'),
+            vh2Share: root.querySelector('#vh2-share-egl'),
+            eq1: root.querySelector('#egl-eq1'),
+            eq2: root.querySelector('#egl-eq2'),
+            eq3: root.querySelector('#egl-eq3'),
+            explainer: root.querySelector('#egl-explainer')
+        };
+
+        const d1 = 150;
+        const v1 = 1.5;
+        const g = 9.81;
+        const totalHead = 7.5;
+        const particles = Array.from({ length: 84 }, function() {
+            return { t: Math.random(), yRel: Math.random() };
+        });
+        let latest = null;
+
+        function fmt(value, digits) {
+            return Number(value).toFixed(digits);
+        }
+
+        function area(diameterMm) {
+            return Math.PI * diameterMm * diameterMm / 4 / 1000000;
+        }
+
+        function smoothStep(value) {
+            return value * value * (3 - 2 * value);
+        }
+
+        function localDiameterMm(x, d2) {
+            const start = 310;
+            const end = 540;
+            if (x <= start) return d1;
+            if (x >= end) return d2;
+            const t = (x - start) / (end - start);
+            return d1 + (d2 - d1) * smoothStep(t);
+        }
+
+        function velocityFromDiameter(diameterMm) {
+            return v1 * (d1 * d1) / (diameterMm * diameterMm);
+        }
+
+        function compute() {
+            const d2 = parseFloat(input.value);
+            const a1 = area(d1);
+            const a2 = area(d2);
+            const v2 = velocityFromDiameter(d2);
             const vHead1 = (v1 * v1) / (2 * g);
             const vHead2 = (v2 * v2) / (2 * g);
-            const hgl2 = hTotal - vHead2;
+            const hgl1 = totalHead - vHead1;
+            const hgl2 = totalHead - vHead2;
+            const areaRatio = a2 / a1;
+            const hglDrop = hgl1 - hgl2;
+            const velocityShare1 = vHead1 / totalHead;
+            const velocityShare2 = vHead2 / totalHead;
+            return { d2, a1, a2, v2, vHead1, vHead2, hgl1, hgl2, areaRatio, hglDrop, velocityShare1, velocityShare2 };
+        }
 
-            document.getElementById('d2-val-egl').textContent = d2;
-            document.getElementById('v1-egl').textContent = v1.toFixed(2) + ' m/s';
-            document.getElementById('v2-egl').textContent = v2.toFixed(2) + ' m/s';
-            document.getElementById('vh1-egl').textContent = vHead1.toFixed(2) + ' m';
-            document.getElementById('vh2-egl').textContent = vHead2.toFixed(2) + ' m';
-            document.getElementById('hgl2-egl').textContent = hgl2.toFixed(2) + ' m';
-            document.getElementById('egl-explainer').textContent = `Kad se promjer suzi na ${d2.toFixed(0)} mm, brzina poraste s ${v1.toFixed(2)} m/s na ${v2.toFixed(2)} m/s. Zato brzinska visina naraste s ${vHead1.toFixed(2)} m na ${vHead2.toFixed(2)} m, pa se HGL mora spustiti na ${hgl2.toFixed(2)} m da bi ukupna energija ostala stalna.`;
+        function syncText(data) {
+            out.d2.textContent = fmt(data.d2, 0) + ' mm';
+            out.v1.textContent = fmt(v1, 2) + ' m/s';
+            out.v2.textContent = fmt(data.v2, 2) + ' m/s';
+            out.vh1.textContent = fmt(data.vHead1, 2) + ' m';
+            out.vh2.textContent = fmt(data.vHead2, 2) + ' m';
+            out.hgl1.textContent = fmt(data.hgl1, 2) + ' m';
+            out.hgl2.textContent = fmt(data.hgl2, 2) + ' m';
+            out.areaRatio.textContent = (data.areaRatio * 100).toFixed(0) + ' %';
+            out.drop.textContent = fmt(data.hglDrop, 2) + ' m';
 
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            const scale = 40; 
-            
-            // Draw Pipe
-            ctx.fillStyle = '#f4f6f7';
+            out.vh1Bar.style.width = Math.min(data.velocityShare1 * 100, 100).toFixed(1) + '%';
+            out.vh2Bar.style.width = Math.min(data.velocityShare2 * 100, 100).toFixed(1) + '%';
+            out.vh1Share.textContent = (data.velocityShare1 * 100).toFixed(1) + ' %';
+            out.vh2Share.textContent = (data.velocityShare2 * 100).toFixed(1) + ' %';
+
+            out.eq1.textContent = 'A1 = ' + fmt(data.a1, 4) + ' m^2, A2 = ' + fmt(data.a2, 4) + ' m^2';
+            out.eq2.textContent = 'v2 = ' + fmt(v1, 2) + ' · ' + fmt(data.a1, 4) + ' / ' + fmt(data.a2, 4) + ' = ' + fmt(data.v2, 2) + ' m/s';
+            out.eq3.textContent = 'HGL2 = ' + fmt(totalHead, 2) + ' - ' + fmt(data.vHead2, 2) + ' = ' + fmt(data.hgl2, 2) + ' m';
+
+            if (data.areaRatio > 0.65) {
+                out.explainer.textContent = 'Suženje je još blago, pa se brzina u presjeku 2 povećava umjereno. Zato HGL pada samo malo: statički tlak je i dalje dominantan dio ukupne energije.';
+            } else if (data.areaRatio > 0.35) {
+                out.explainer.textContent = 'Srednje suženje jasno pokazuje Bernoullijevu zamjenu energije: dio HGL-a prelazi u brzinsku visinu, pa se plava linija u užem dijelu osjetno spušta iako crvena EGL ostaje ista.';
+            } else {
+                out.explainer.textContent = 'Jako suženje snažno ubrzava tok. Brzinska visina u presjeku 2 postaje velik dio ukupne energije, pa HGL mora znatno pasti da bi EGL ostala konstantna.';
+            }
+        }
+
+        function drawArrow(x1, y1, x2, y2, color, label) {
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const head = 10;
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(0, 250 - d1/2);
-            ctx.bezierCurveTo(300, 250-d1/2, 500, 250-d2/2, 800, 250-d2/2);
-            ctx.lineTo(800, 250 + d2/2);
-            ctx.bezierCurveTo(500, 250+d2/2, 300, 250+d1/2, 0, 250 + d1/2);
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
             ctx.fill();
-            ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.font = 'bold 12px Inter';
+            ctx.fillText(label, x1 + 6, y1 - 8);
+        }
 
-            // Calculate lines
-            const egl_y = 50; // Constant for ideal fluid
-            
-            ctx.beginPath(); ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 3;
-            ctx.moveTo(0, egl_y); ctx.lineTo(800, egl_y); ctx.stroke();
+        function drawEnergyColumn(x, yDatum, yHgl, yEgl, labelHgl, labelV) {
+            const width = 24;
 
-            // HGL Line
-            ctx.beginPath(); ctx.strokeStyle = '#3498db'; ctx.setLineDash([5,5]);
-            for(let x=0; x<=800; x+=10) {
-                const ratio = x / 800;
-                // Interpolate diameter for s-curve
-                const t = x < 300 ? 0 : (x > 500 ? 1 : (x-300)/200);
-                const smoothT = t * t * (3 - 2 * t);
-                const d_local = d1 + (d2 - d1) * smoothT;
-                const v_local = (d1*d1 / (d_local*d_local)) * v1;
-                const v_head = (v_local * v_local) / (2 * g) * scale;
-                
-                if(x===0) ctx.moveTo(x, egl_y + v_head);
-                else ctx.lineTo(x, egl_y + v_head);
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.18)';
+            ctx.fillRect(x - width / 2, yHgl, width, yDatum - yHgl);
+            ctx.strokeStyle = 'rgba(37, 99, 235, 0.28)';
+            ctx.strokeRect(x - width / 2, yHgl, width, yDatum - yHgl);
+
+            ctx.fillStyle = 'rgba(249, 115, 22, 0.20)';
+            ctx.fillRect(x - width / 2, yEgl, width, yHgl - yEgl);
+            ctx.strokeStyle = 'rgba(249, 115, 22, 0.34)';
+            ctx.strokeRect(x - width / 2, yEgl, width, yHgl - yEgl);
+
+            ctx.fillStyle = '#1e3a8a';
+            ctx.font = 'bold 11px Inter';
+            ctx.fillText(labelHgl, x - 32, yDatum + 18);
+            ctx.fillStyle = '#c2410c';
+            ctx.fillText(labelV, x - 24, yEgl - 10);
+        }
+
+        function drawScene(data) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bg.addColorStop(0, '#ffffff');
+            bg.addColorStop(1, '#eaf5ff');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const cy = 288;
+            const yDatum = 350;
+            const headScale = 28;
+            const eglY = yDatum - totalHead * headScale;
+            const hgl1Y = yDatum - data.hgl1 * headScale;
+            const hgl2Y = yDatum - data.hgl2 * headScale;
+
+            const x0 = 72;
+            const x1 = 310;
+            const x2 = 540;
+            const x3 = 850;
+            const sec1 = 200;
+            const sec2 = 690;
+            const d1Px = d1 * 0.72;
+            const d2Px = data.d2 * 0.72;
+
+            ctx.fillStyle = '#eef4fa';
+            ctx.beginPath();
+            ctx.moveTo(x0, cy - d1Px / 2);
+            ctx.lineTo(x1, cy - d1Px / 2);
+            ctx.bezierCurveTo(x1 + 70, cy - d1Px / 2, x2 - 50, cy - d2Px / 2, x2, cy - d2Px / 2);
+            ctx.lineTo(x3, cy - d2Px / 2);
+            ctx.lineTo(x3, cy + d2Px / 2);
+            ctx.lineTo(x2, cy + d2Px / 2);
+            ctx.bezierCurveTo(x2 - 50, cy + d2Px / 2, x1 + 70, cy + d1Px / 2, x1, cy + d1Px / 2);
+            ctx.lineTo(x0, cy + d1Px / 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(249, 115, 22, 0.12)';
+            ctx.beginPath();
+            ctx.moveTo(x0, eglY);
+            for (let x = x0; x <= x3; x += 6) {
+                const localD = localDiameterMm(x, data.d2);
+                const localV = velocityFromDiameter(localD);
+                const localHead = (localV * localV) / (2 * g);
+                const localHglY = yDatum - (totalHead - localHead) * headScale;
+                ctx.lineTo(x, localHglY);
+            }
+            ctx.lineTo(x3, eglY);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.moveTo(x0, eglY);
+            ctx.lineTo(x3, eglY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.setLineDash([7, 6]);
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 3;
+            for (let x = x0; x <= x3; x += 6) {
+                const localD = localDiameterMm(x, data.d2);
+                const localV = velocityFromDiameter(localD);
+                const localHead = (localV * localV) / (2 * g);
+                const localHglY = yDatum - (totalHead - localHead) * headScale;
+                if (x === x0) ctx.moveTo(x, localHglY);
+                else ctx.lineTo(x, localHglY);
             }
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Fill velocity head area
-            ctx.fillStyle = 'rgba(52, 152, 219, 0.1)';
-            ctx.beginPath();
-            ctx.moveTo(0, egl_y);
-            for(let x=0; x<=800; x+=10) {
-                const t = x < 300 ? 0 : (x > 500 ? 1 : (x-300)/200);
-                const smoothT = t * t * (3 - 2 * t);
-                const d_local = d1 + (d2 - d1) * smoothT;
-                const v_local = (d1*d1 / (d_local*d_local)) * v1;
-                const v_head = (v_local * v_local) / (2 * g) * scale;
-                ctx.lineTo(x, egl_y + v_head);
-            }
-            ctx.lineTo(800, egl_y);
-            ctx.fill();
+            particles.forEach(function(particle) {
+                const currentX = x0 + particle.t * (x3 - x0);
+                const localDiameterPx = localDiameterMm(currentX, data.d2) * 0.72;
+                const localVelocity = velocityFromDiameter(localDiameterMm(currentX, data.d2));
+                particle.t += 0.0017 + (localVelocity / 10) * 0.0025;
+                if (particle.t > 1) particle.t = 0;
 
-            // Labels
-            ctx.fillStyle = '#2c3e50'; ctx.font = '10px Arial';
-            ctx.fillText("Suženje (P ↑ v ↑ → p ↓)", 400, 280);
-            
-            requestAnimationFrame(draw);
+                const px = x0 + particle.t * (x3 - x0);
+                const currentDiameterPx = localDiameterMm(px, data.d2) * 0.72;
+                const py = cy + (particle.yRel - 0.5) * currentDiameterPx * 0.72;
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(px, py, 2.1, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.setLineDash([6, 4]);
+            ctx.strokeStyle = 'rgba(100, 116, 139, 0.75)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(sec1, 64);
+            ctx.lineTo(sec1, 374);
+            ctx.moveTo(sec2, 64);
+            ctx.lineTo(sec2, 374);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            drawEnergyColumn(sec1, yDatum, hgl1Y, eglY, 'HGL1', 'v1²/2g');
+            drawEnergyColumn(sec2, yDatum, hgl2Y, eglY, 'HGL2', 'v2²/2g');
+
+            drawArrow(120, cy, 185, cy, '#0ea5e9', 'v1');
+            drawArrow(608, cy, 720, cy, '#f97316', 'v2');
+
+            ctx.fillStyle = '#163c61';
+            ctx.font = 'bold 12px Inter';
+            ctx.fillText('presjek 1', sec1 - 28, 58);
+            ctx.fillText('presjek 2', sec2 - 28, 58);
+            ctx.fillText('EGL = const', 760, eglY - 10);
+            ctx.fillStyle = '#1d4ed8';
+            ctx.fillText('HGL pada kad se tok ubrza', 600, hgl2Y - 12);
+            ctx.fillStyle = '#355771';
+            ctx.fillText('D2 manji -> v2 veći -> HGL niži', 540, cy + d2Px / 2 + 34);
         }
-        d2Sl.oninput = draw;
-        draw();
+
+        function update() {
+            latest = compute();
+            syncText(latest);
+        }
+
+        function loop() {
+            if (latest) drawScene(latest);
+            requestAnimationFrame(loop);
+        }
+
+        input.addEventListener('input', update);
+        input.addEventListener('change', update);
+
+        root.querySelector('#egl-preset-wide').addEventListener('click', function() {
+            input.value = '125';
+            update();
+        });
+        root.querySelector('#egl-preset-mid').addEventListener('click', function() {
+            input.value = '90';
+            update();
+        });
+        root.querySelector('#egl-preset-tight').addEventListener('click', function() {
+            input.value = '60';
+            update();
+        });
+
+        update();
+        loop();
     })();
     </script>
 </div>
@@ -193,7 +687,7 @@ Ključni inženjerski uvid Bernoullijevog principa je taj da u sustavima s konst
 
 ```{=html}
 <!-- WIDGET: Torricellijev zakon i domet mlaza -->
-<div id="z76-jet-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<div id="z76-jet-legacy" style="display:none;max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🎯 Torricellijev zakon i domet mlaza</h4>
 
     <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
@@ -332,6 +826,359 @@ Ključni inženjerski uvid Bernoullijevog principa je taj da u sustavima s konst
 </script>
 ```
 
+```{=html}
+<div id='z76-jet-scene' style='max-width:1120px;margin:2rem auto;font-family:Inter,system-ui,sans-serif;color:#17324d;'>
+    <style>
+        #z76-jet-scene *{box-sizing:border-box}
+        #z76-jet-scene .z76b-shell{border:1px solid #dce8f4;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);box-shadow:0 24px 58px rgba(41,76,109,.1)}
+        #z76-jet-scene .z76b-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:start;padding:1.45rem 1.55rem 1rem;background:radial-gradient(circle at top right,rgba(250,204,21,.16),transparent 32%),linear-gradient(135deg,#eef8ff 0%,#ffffff 56%,#f4fbff 100%);border-bottom:1px solid rgba(43,92,124,.1)}
+        #z76-jet-scene .z76b-kicker{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#5d7b94;margin-bottom:.35rem}
+        #z76-jet-scene .z76b-title{margin:0;font-size:clamp(1.38rem,2.4vw,1.92rem);line-height:1.08;color:#163c61}
+        #z76-jet-scene .z76b-sub{margin:.55rem 0 0;max-width:72ch;color:#547088;font-size:.95rem;line-height:1.6}
+        #z76-jet-scene .z76b-chip{align-self:start;padding:.76rem .96rem;border-radius:999px;border:1px solid #cfe3f7;background:linear-gradient(135deg,#f0f8ff,#fbfdff);color:#1d4f78;font-weight:800;font-size:.82rem;white-space:nowrap}
+        #z76-jet-scene .z76b-note{margin:1rem 1.55rem 0;padding:.95rem 1rem;border-radius:16px;border:1px solid #d7e8f8;background:linear-gradient(135deg,#eff7ff,#f8fbff);color:#2d587f;font-size:.86rem;line-height:1.6}
+        #z76-jet-scene .z76b-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;padding:1rem 1.55rem 1.55rem}
+        #z76-jet-scene .z76b-stage{display:flex;flex-direction:column;gap:.9rem;padding:1rem;border-radius:22px;overflow:hidden;border:1px solid #dbe6f0;background:radial-gradient(circle at top,#ffffff 0%,#eef6ff 68%,#e7f2fb 100%)}
+        #z76-jet-scene .z76b-stage canvas{display:block;width:100%;height:auto}
+        #z76-jet-scene .z76b-overlay{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;padding:0;background:none;border:0;box-shadow:none}
+        #z76-jet-scene .z76b-overlay div{display:flex;flex-direction:column;gap:.35rem;padding:.85rem .92rem;border-radius:16px;background:rgba(255,255,255,.94);border:1px solid rgba(207,227,247,.98);box-shadow:0 12px 24px rgba(41,76,109,.06);font-size:.76rem;color:#3a5671}
+        #z76-jet-scene .z76b-overlay strong{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:#66829a}
+        #z76-jet-scene .z76b-overlay span{font-weight:800;color:#123a63;font-variant-numeric:tabular-nums}
+        #z76-jet-scene .z76b-state{position:static;align-self:flex-start;padding:.72rem .9rem;border-radius:16px;border:1px solid #dbe6f0;background:rgba(255,255,255,.94);box-shadow:0 12px 24px rgba(41,76,109,.08);font-size:.8rem;font-weight:800}
+        #z76-jet-scene .z76b-state.max{color:#166534;border-color:#86efac;background:rgba(240,253,244,.95)}
+        #z76-jet-scene .z76b-state.low{color:#92400e;border-color:#fdba74;background:rgba(255,247,237,.95)}
+        #z76-jet-scene .z76b-state.high{color:#1d4ed8;border-color:#93c5fd;background:rgba(239,246,255,.95)}
+        #z76-jet-scene .z76b-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}
+        #z76-jet-scene .z76b-card{border:1px solid #e3ebf2;border-radius:18px;background:#ffffff}
+        #z76-jet-scene .z76b-controls{padding:1rem;display:grid;gap:.8rem}
+        #z76-jet-scene .z76b-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+        #z76-jet-scene .z76b-preset{appearance:none;border:1px solid #cfe3f7;border-radius:999px;padding:.65rem .7rem;background:#eff7ff;color:#1d4f78;font-size:.78rem;font-weight:800;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
+        #z76-jet-scene .z76b-preset:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(41,76,109,.08)}
+        #z76-jet-scene .z76b-row label{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.83rem;font-weight:700;color:#36506b}
+        #z76-jet-scene .z76b-row input{width:100%;accent-color:#2f80ed}
+        #z76-jet-scene .z76b-check{display:flex;align-items:center;gap:.65rem;padding:.75rem .85rem;border-radius:14px;background:#f8fbff;border:1px solid #e0ebf5;color:#355771;font-size:.83rem;font-weight:700}
+        #z76-jet-scene .z76b-check input{accent-color:#2563eb;inline-size:16px;block-size:16px}
+        #z76-jet-scene .z76b-metrics{padding:1rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+        #z76-jet-scene .z76b-metric{padding:.9rem;border-radius:16px;background:linear-gradient(180deg,#fbfdff 0%,#eef7ff 100%);border:1px solid rgba(31,91,150,.08)}
+        #z76-jet-scene .z76b-metric small{display:block;margin-bottom:.35rem;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#6a849a}
+        #z76-jet-scene .z76b-metric strong{display:block;font-size:1.02rem;color:#123a63;font-variant-numeric:tabular-nums}
+        #z76-jet-scene .z76b-bars,#z76-jet-scene .z76b-formula,#z76-jet-scene .z76b-explainer{padding:1rem}
+        #z76-jet-scene .z76b-bars strong.section,#z76-jet-scene .z76b-formula strong.section,#z76-jet-scene .z76b-explainer strong.section{display:block;margin-bottom:.55rem;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#66829a}
+        #z76-jet-scene .z76b-bar-row{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.84rem;color:#36506b;font-weight:700}
+        #z76-jet-scene .z76b-track{height:12px;border-radius:999px;background:#edf3f9;overflow:hidden;margin-bottom:.85rem}
+        #z76-jet-scene .z76b-fill{height:100%;width:0;border-radius:inherit;transition:width .28s ease}
+        #z76-jet-scene .z76b-speed{background:linear-gradient(90deg,#38bdf8,#2563eb)}
+        #z76-jet-scene .z76b-fall{background:linear-gradient(90deg,#f59e0b,#f97316)}
+        #z76-jet-scene .z76b-formula{font-size:.84rem;line-height:1.58;color:#355771}
+        #z76-jet-scene .z76b-formula div+div{margin-top:.45rem}
+        #z76-jet-scene .z76b-explainer{grid-column:1/-1;border-color:#bfdbfe;background:#eff6ff;color:#1e3a8a;font-size:.84rem;line-height:1.58}
+        @media (max-width:980px){
+            #z76-jet-scene .z76b-head,#z76-jet-scene .z76b-grid{grid-template-columns:1fr}
+            #z76-jet-scene .z76b-chip{justify-self:start}
+        }
+        @media (max-width:640px){
+            #z76-jet-scene .z76b-presets,#z76-jet-scene .z76b-metrics,#z76-jet-scene .z76b-overlay,#z76-jet-scene .z76b-side{grid-template-columns:1fr}
+            #z76-jet-scene .z76b-stage{padding:.85rem}
+        }
+    </style>
+    <div class='z76b-shell'>
+        <div class='z76b-head'>
+            <div>
+                <div class='z76b-kicker'>Z76 domet slobodnog mlaza</div>
+                <h3 class='z76b-title'>Domet nije najveći ni kad je otvor prenisko ni kad je previsoko, nego kada se brzina istjecanja i vrijeme leta međusobno uravnoteže</h3>
+                <p class='z76b-sub'>Iz razlike razina <strong>H - h</strong> dobivaš izlaznu brzinu <strong>v<sub>0</sub></strong>, iz same visine otvora <strong>h</strong> dobivaš vrijeme leta <strong>t</strong>, a tek zatim njihov umnožak daje domet <strong>x</strong>. Zato je maksimum baš oko <strong>h/H = 0.5</strong>.</p>
+            </div>
+            <div class='z76b-chip'>x = 2sqrt(h(H - h))</div>
+        </div>
+
+        <div class='z76b-note'><strong>Kako čitati scenu:</strong> u spremniku pratiš ukupnu razinu <strong>H</strong> i visinu otvora <strong>h</strong>, a u mlazu desno vidiš kako se ta dva geometrijska podatka pretvaraju u brzinu, vrijeme leta i konačni domet. Referentne putanje za <strong>0.25H</strong>, <strong>0.50H</strong> i <strong>0.75H</strong> služe samo kao vizualna usporedba.</div>
+
+        <div class='z76b-grid'>
+            <div class='z76b-stage'>
+                <canvas id='z76b-canvas' width='720' height='520'></canvas>
+                <div class='z76b-overlay'>
+                    <div><strong>v<sub>0</sub></strong><span id='z76b-ov-v0'>4.95 m/s</span></div>
+                    <div><strong>t</strong><span id='z76b-ov-t'>0.71 s</span></div>
+                    <div><strong>x</strong><span id='z76b-ov-x'>3.54 m</span></div>
+                </div>
+                <div id='z76b-state' class='z76b-state max'>Blizu maksimuma</div>
+            </div>
+
+            <div class='z76b-side'>
+                <div class='z76b-card z76b-controls'>
+                    <div class='z76b-presets'>
+                        <button type='button' class='z76b-preset' id='z76b-preset-low'>0.25H</button>
+                        <button type='button' class='z76b-preset' id='z76b-preset-mid'>0.50H</button>
+                        <button type='button' class='z76b-preset' id='z76b-preset-high'>0.75H</button>
+                    </div>
+
+                    <div class='z76b-row'><label for='z76b-h'><span>Visina otvora h</span><span id='z76b-h-label'>2.5 m</span></label><input id='z76b-h' type='range' min='0.5' max='4.5' step='0.1' value='2.5'></div>
+                    <label class='z76b-check'><input id='z76b-showrefs' type='checkbox' checked><span>Prikaži referentne putanje za 0.25H, 0.50H i 0.75H</span></label>
+                </div>
+
+                <div class='z76b-card z76b-metrics'>
+                    <div class='z76b-metric'><small>h</small><strong id='z76b-h-out'>2.50 m</strong></div>
+                    <div class='z76b-metric'><small>H - h</small><strong id='z76b-dh-out'>2.50 m</strong></div>
+                    <div class='z76b-metric'><small>v0</small><strong id='z76b-v0-out'>4.95 m/s</strong></div>
+                    <div class='z76b-metric'><small>t</small><strong id='z76b-t-out'>0.71 s</strong></div>
+                    <div class='z76b-metric'><small>x</small><strong id='z76b-x-out'>5.00 m</strong></div>
+                    <div class='z76b-metric'><small>Omjer h/H</small><strong id='z76b-ratio-out'>0.50</strong></div>
+                </div>
+
+                <div class='z76b-card z76b-bars'>
+                    <strong class='section'>Što hrani domet?</strong>
+                    <div class='z76b-bar-row'><span>Visinska razlika H - h daje v0</span><strong id='z76b-speed-label'>50.0 %</strong></div>
+                    <div class='z76b-track'><div id='z76b-speed-bar' class='z76b-fill z76b-speed'></div></div>
+                    <div class='z76b-bar-row'><span>Visina pada h daje t</span><strong id='z76b-fall-label'>50.0 %</strong></div>
+                    <div class='z76b-track'><div id='z76b-fall-bar' class='z76b-fill z76b-fall'></div></div>
+                </div>
+
+                <div class='z76b-card z76b-formula'>
+                    <strong class='section'>Računski lanac</strong>
+                    <div id='z76b-eq1'>v0 = sqrt(2g(H - h))</div>
+                    <div id='z76b-eq2'>t = sqrt(2h/g)</div>
+                    <div id='z76b-eq3'>x = v0 t</div>
+                </div>
+
+                <div class='z76b-card z76b-explainer'>
+                    <strong class='section'>Što se sada događa</strong>
+                    <div id='z76b-expl'>Kad su h i H - h približno izbalansirani, dobiješ dobar kompromis između velike brzine i dugog vremena leta, pa domet raste prema maksimumu.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const root = document.getElementById('z76-jet-scene');
+    if (!root) return;
+
+    const canvas = root.querySelector('#z76b-canvas');
+    const ctx = canvas.getContext('2d');
+    const H = 5.0;
+    const g = 9.81;
+    const inputs = {
+        h: root.querySelector('#z76b-h'),
+        refs: root.querySelector('#z76b-showrefs')
+    };
+    const labels = {
+        h: root.querySelector('#z76b-h-label')
+    };
+    const out = {
+        ovV0: root.querySelector('#z76b-ov-v0'),
+        ovT: root.querySelector('#z76b-ov-t'),
+        ovX: root.querySelector('#z76b-ov-x'),
+        state: root.querySelector('#z76b-state'),
+        h: root.querySelector('#z76b-h-out'),
+        dh: root.querySelector('#z76b-dh-out'),
+        v0: root.querySelector('#z76b-v0-out'),
+        t: root.querySelector('#z76b-t-out'),
+        x: root.querySelector('#z76b-x-out'),
+        ratio: root.querySelector('#z76b-ratio-out'),
+        speedBar: root.querySelector('#z76b-speed-bar'),
+        fallBar: root.querySelector('#z76b-fall-bar'),
+        speedLabel: root.querySelector('#z76b-speed-label'),
+        fallLabel: root.querySelector('#z76b-fall-label'),
+        eq1: root.querySelector('#z76b-eq1'),
+        eq2: root.querySelector('#z76b-eq2'),
+        eq3: root.querySelector('#z76b-eq3'),
+        expl: root.querySelector('#z76b-expl')
+    };
+
+    let latest = null;
+    let phase = 0;
+
+    function fmt(value, digits) {
+        return Number(value).toFixed(digits);
+    }
+
+    function compute() {
+        const h = parseFloat(inputs.h.value);
+        const deltaH = H - h;
+        const v0 = Math.sqrt(2 * g * deltaH);
+        const tFlight = Math.sqrt((2 * h) / g);
+        const x = v0 * tFlight;
+        const ratio = h / H;
+        return { h, deltaH, v0, tFlight, x, ratio, showRefs: inputs.refs.checked };
+    }
+
+    function syncText(data) {
+        labels.h.textContent = fmt(data.h, 1) + ' m';
+
+        out.ovV0.textContent = fmt(data.v0, 2) + ' m/s';
+        out.ovT.textContent = fmt(data.tFlight, 2) + ' s';
+        out.ovX.textContent = fmt(data.x, 2) + ' m';
+        out.h.textContent = fmt(data.h, 2) + ' m';
+        out.dh.textContent = fmt(data.deltaH, 2) + ' m';
+        out.v0.textContent = fmt(data.v0, 2) + ' m/s';
+        out.t.textContent = fmt(data.tFlight, 2) + ' s';
+        out.x.textContent = fmt(data.x, 2) + ' m';
+        out.ratio.textContent = fmt(data.ratio, 2);
+
+        out.speedBar.style.width = (data.deltaH / H * 100).toFixed(1) + '%';
+        out.fallBar.style.width = (data.ratio * 100).toFixed(1) + '%';
+        out.speedLabel.textContent = (data.deltaH / H * 100).toFixed(1) + ' %';
+        out.fallLabel.textContent = (data.ratio * 100).toFixed(1) + ' %';
+
+        out.eq1.textContent = 'v0 = sqrt(2 · 9.81 · ' + fmt(data.deltaH, 2) + ') = ' + fmt(data.v0, 2) + ' m/s';
+        out.eq2.textContent = 't = sqrt(2 · ' + fmt(data.h, 2) + ' / 9.81) = ' + fmt(data.tFlight, 2) + ' s';
+        out.eq3.textContent = 'x = ' + fmt(data.v0, 2) + ' · ' + fmt(data.tFlight, 2) + ' = ' + fmt(data.x, 2) + ' m';
+
+        if (Math.abs(data.h - H / 2) < 0.18) {
+            out.state.className = 'z76b-state max';
+            out.state.textContent = 'Blizu maksimuma';
+            out.expl.textContent = 'Otvor je vrlo blizu položaja h = H/2, pa su brzina istjecanja i vrijeme leta najbolje izbalansirani. Zato je domet gotovo maksimalan i približava se vrijednosti H = 5 m.';
+        } else if (data.h < H / 2) {
+            out.state.className = 'z76b-state low';
+            out.state.textContent = 'Niži otvor';
+            out.expl.textContent = 'Otvor je niže u stijenci spremnika, pa mlaz ima duže vrijeme leta, ali manju raspoloživu visinsku razliku H - h za stvaranje brzine. Domet raste dok se ta dva učinka ne izbalansiraju.';
+        } else {
+            out.state.className = 'z76b-state high';
+            out.state.textContent = 'Viši otvor';
+            out.expl.textContent = 'Otvor je više postavljen, pa je izlazna brzina velika jer je H - h veći, ali mlaz ima manje vremena za let. Zato domet nakon prolaska optimuma ponovno pada iako je istjecanje brže.';
+        }
+    }
+
+    function drawArrow(x1, y1, x2, y2, color, label) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const head = 10;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+        if (label) {
+            ctx.font = 'bold 12px Inter';
+            ctx.fillText(label, x1 + 6, (y1 + y2) / 2 - 4);
+        }
+    }
+
+    function drawJet(h, color, alpha, scale, xStart, groundY) {
+        const v0 = Math.sqrt(2 * g * (H - h));
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.moveTo(xStart, groundY - h * scale);
+        for (let t = 0; t <= 2; t += 0.02) {
+            const px = v0 * t;
+            const py = 0.5 * g * t * t;
+            if (py > h) break;
+            ctx.lineTo(xStart + px * scale, groundY - h * scale + py * scale);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+    }
+
+    function drawScene(data) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bg.addColorStop(0, '#ffffff');
+        bg.addColorStop(1, '#eaf5ff');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const groundY = 438;
+        const scale = 62;
+        const tankX = 118;
+        const xStart = tankX + 8;
+        const tankW = 92;
+        const xToPx = 58;
+
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(24, groundY);
+        ctx.lineTo(690, groundY);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(59,130,246,.12)';
+        ctx.fillRect(tankX - tankW, groundY - H * scale, tankW, H * scale);
+        ctx.fillStyle = 'rgba(59,130,246,.28)';
+        ctx.fillRect(tankX - tankW + 6, groundY - H * scale + 6, tankW - 12, H * scale - 6);
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(tankX - tankW, groundY - H * scale, tankW, H * scale);
+
+        ctx.fillStyle = '#163c61';
+        ctx.font = 'bold 13px Inter';
+        ctx.fillText('spremnik', tankX - tankW + 12, groundY - H * scale - 14);
+        ctx.fillText('tlo', 650, groundY - 10);
+
+        if (data.showRefs) {
+            drawJet(H * 0.25, '#f59e0b', 0.32, xToPx, xStart, groundY);
+            drawJet(H * 0.50, '#ef4444', 0.32, xToPx, xStart, groundY);
+            drawJet(H * 0.75, '#8b5cf6', 0.32, xToPx, xStart, groundY);
+        }
+        drawJet(data.h, '#2563eb', 1, xToPx, xStart, groundY);
+
+        const dropletTime = (phase % 1) * data.tFlight;
+        const dropletX = xStart + data.v0 * dropletTime * xToPx;
+        const dropletY = groundY - data.h * scale + 0.5 * g * dropletTime * dropletTime * scale;
+        ctx.fillStyle = '#2563eb';
+        ctx.beginPath();
+        ctx.arc(dropletX, dropletY, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        drawArrow(tankX - tankW - 20, groundY - H * scale, tankX - tankW - 20, groundY, '#0f766e', 'H');
+        drawArrow(tankX + 34, groundY - data.h * scale, tankX + 34, groundY, '#f97316', 'h');
+        drawArrow(tankX - 8, groundY - H * scale, tankX - 8, groundY - data.h * scale, '#2563eb', 'H - h');
+
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = '#2563eb';
+        ctx.beginPath();
+        ctx.moveTo(xStart + data.x * xToPx, groundY - 10);
+        ctx.lineTo(xStart + data.x * xToPx, groundY + 10);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#163c61';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('x = ' + fmt(data.x, 2) + ' m', xStart + data.x * xToPx - 24, groundY + 28);
+    }
+
+    function update() {
+        latest = compute();
+        syncText(latest);
+    }
+
+    function loop() {
+        phase += 0.014;
+        if (latest) drawScene(latest);
+        requestAnimationFrame(loop);
+    }
+
+    inputs.h.addEventListener('input', update);
+    inputs.h.addEventListener('change', update);
+    inputs.refs.addEventListener('change', update);
+
+    root.querySelector('#z76b-preset-low').addEventListener('click', function() {
+        inputs.h.value = '1.25';
+        update();
+    });
+    root.querySelector('#z76b-preset-mid').addEventListener('click', function() {
+        inputs.h.value = '2.50';
+        update();
+    });
+    root.querySelector('#z76b-preset-high').addEventListener('click', function() {
+        inputs.h.value = '3.75';
+        update();
+    });
+
+    update();
+    loop();
+})();
+</script>
+```
+
 ***
 
 ### Zadatak Z77 â€” Srednja brzina laminarnog toka {.unnumbered}
@@ -346,7 +1193,7 @@ Ključni inženjerski uvid Bernoullijevog principa je taj da u sustavima s konst
 
 ```{=html}
 <!-- WIDGET: Laminaran profil brzine (Paraboloid) -->
-<div id="z77-laminar-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<div id="z77-laminar-legacy" style="display:none;max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">💧 Laminaran profil brzine u cijevi (Paraboloid)</h4>
     
     <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
@@ -501,6 +1348,424 @@ Ključni inženjerski uvid Bernoullijevog principa je taj da u sustavima s konst
 </script>
 ```
 
+```{=html}
+<div id='z77-laminar-scene' style='max-width:1120px;margin:2rem auto;font-family:Inter,system-ui,sans-serif;color:#17324d;'>
+    <style>
+        #z77-laminar-scene *{box-sizing:border-box}
+        #z77-laminar-scene .z77b-shell{border:1px solid #dce8f4;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);box-shadow:0 24px 58px rgba(41,76,109,.1)}
+        #z77-laminar-scene .z77b-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:start;padding:1.45rem 1.55rem 1rem;background:radial-gradient(circle at top right,rgba(56,189,248,.16),transparent 34%),linear-gradient(135deg,#eef8ff 0%,#ffffff 56%,#f4fbff 100%);border-bottom:1px solid rgba(43,92,124,.1)}
+        #z77-laminar-scene .z77b-kicker{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#5d7b94;margin-bottom:.35rem}
+        #z77-laminar-scene .z77b-title{margin:0;font-size:clamp(1.38rem,2.4vw,1.92rem);line-height:1.08;color:#163c61}
+        #z77-laminar-scene .z77b-sub{margin:.55rem 0 0;max-width:72ch;color:#547088;font-size:.95rem;line-height:1.6}
+        #z77-laminar-scene .z77b-chip{align-self:start;padding:.76rem .96rem;border-radius:999px;border:1px solid #cfe3f7;background:linear-gradient(135deg,#f0f8ff,#fbfdff);color:#1d4f78;font-weight:800;font-size:.82rem;white-space:nowrap}
+        #z77-laminar-scene .z77b-note{margin:1rem 1.55rem 0;padding:.95rem 1rem;border-radius:16px;border:1px solid #d7e8f8;background:linear-gradient(135deg,#eff7ff,#f8fbff);color:#2d587f;font-size:.86rem;line-height:1.6}
+        #z77-laminar-scene .z77b-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;padding:1rem 1.55rem 1.55rem}
+        #z77-laminar-scene .z77b-stage{display:flex;flex-direction:column;gap:.9rem;padding:1rem;border-radius:22px;overflow:hidden;border:1px solid #dbe6f0;background:radial-gradient(circle at top,#ffffff 0%,#eef6ff 68%,#e7f2fb 100%)}
+        #z77-laminar-scene .z77b-stage canvas{display:block;width:100%;height:auto}
+        #z77-laminar-scene .z77b-overlay{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;padding:0;background:none;border:0;box-shadow:none}
+        #z77-laminar-scene .z77b-overlay div{display:flex;flex-direction:column;gap:.35rem;padding:.85rem .92rem;border-radius:16px;background:rgba(255,255,255,.94);border:1px solid rgba(207,227,247,.98);box-shadow:0 12px 24px rgba(41,76,109,.06);font-size:.76rem;color:#3a5671}
+        #z77-laminar-scene .z77b-overlay strong{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:#66829a}
+        #z77-laminar-scene .z77b-overlay span{font-weight:800;color:#123a63;font-variant-numeric:tabular-nums}
+        #z77-laminar-scene .z77b-state{position:static;align-self:flex-start;padding:.72rem .9rem;border-radius:16px;border:1px solid #dbe6f0;background:rgba(255,255,255,.94);box-shadow:0 12px 24px rgba(41,76,109,.08);font-size:.8rem;font-weight:800;color:#1d4f78}
+        #z77-laminar-scene .z77b-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}
+        #z77-laminar-scene .z77b-card{border:1px solid #e3ebf2;border-radius:18px;background:#ffffff}
+        #z77-laminar-scene .z77b-controls{padding:1rem;display:grid;gap:.8rem}
+        #z77-laminar-scene .z77b-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+        #z77-laminar-scene .z77b-preset{appearance:none;border:1px solid #cfe3f7;border-radius:999px;padding:.65rem .7rem;background:#eff7ff;color:#1d4f78;font-size:.78rem;font-weight:800;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
+        #z77-laminar-scene .z77b-preset:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(41,76,109,.08)}
+        #z77-laminar-scene .z77b-row label{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.83rem;font-weight:700;color:#36506b}
+        #z77-laminar-scene .z77b-row input{width:100%;accent-color:#2f80ed}
+        #z77-laminar-scene .z77b-metrics{padding:1rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+        #z77-laminar-scene .z77b-metric{padding:.9rem;border-radius:16px;background:linear-gradient(180deg,#fbfdff 0%,#eef7ff 100%);border:1px solid rgba(31,91,150,.08)}
+        #z77-laminar-scene .z77b-metric small{display:block;margin-bottom:.35rem;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#6a849a}
+        #z77-laminar-scene .z77b-metric strong{display:block;font-size:1.02rem;color:#123a63;font-variant-numeric:tabular-nums}
+        #z77-laminar-scene .z77b-bars,#z77-laminar-scene .z77b-formula,#z77-laminar-scene .z77b-explainer{padding:1rem}
+        #z77-laminar-scene .z77b-bars strong.section,#z77-laminar-scene .z77b-formula strong.section,#z77-laminar-scene .z77b-explainer strong.section{display:block;margin-bottom:.55rem;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#66829a}
+        #z77-laminar-scene .z77b-bar-row{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.84rem;color:#36506b;font-weight:700}
+        #z77-laminar-scene .z77b-track{height:12px;border-radius:999px;background:#edf3f9;overflow:hidden;margin-bottom:.85rem}
+        #z77-laminar-scene .z77b-fill{height:100%;width:0;border-radius:inherit;transition:width .28s ease}
+        #z77-laminar-scene .z77b-mean{background:linear-gradient(90deg,#38bdf8,#2563eb)}
+        #z77-laminar-scene .z77b-probe{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+        #z77-laminar-scene .z77b-formula{font-size:.84rem;line-height:1.58;color:#355771}
+        #z77-laminar-scene .z77b-formula div+div{margin-top:.45rem}
+        #z77-laminar-scene .z77b-explainer{grid-column:1/-1;border-color:#bfdbfe;background:#eff6ff;color:#1e3a8a;font-size:.84rem;line-height:1.58}
+        @media (max-width:980px){
+            #z77-laminar-scene .z77b-head,#z77-laminar-scene .z77b-grid{grid-template-columns:1fr}
+            #z77-laminar-scene .z77b-chip{justify-self:start}
+        }
+        @media (max-width:640px){
+            #z77-laminar-scene .z77b-presets,#z77-laminar-scene .z77b-metrics,#z77-laminar-scene .z77b-overlay,#z77-laminar-scene .z77b-side{grid-template-columns:1fr}
+            #z77-laminar-scene .z77b-stage{padding:.85rem}
+        }
+    </style>
+    <div class='z77b-shell'>
+        <div class='z77b-head'>
+            <div>
+                <div class='z77b-kicker'>Z77 laminarni profil brzine</div>
+                <h3 class='z77b-title'>U laminarnom toku cijeli presjek nosi paraboličan profil, a sonda samo očitava koliko je od maksimalne brzine ostalo na odabranom radijusu</h3>
+                <p class='z77b-sub'>Najprije biraš <strong>v<sub>max</sub></strong> i radijus cijevi <strong>R</strong>. Zatim položaj sonde <strong>r/R</strong> izravno ulazi u profil <strong>v(r) = v<sub>max</sub>(1-r²/R²)</strong>, pa odmah vidiš kako lokalna brzina pada prema stijenci i zašto je srednja brzina uvijek <strong>v<sub>sr</sub> = v<sub>max</sub>/2</strong>.</p>
+            </div>
+            <div class='z77b-chip'>v(r) = v<sub>max</sub>(1-r²/R²)</div>
+        </div>
+
+        <div class='z77b-note'><strong>Kako čitati scenu:</strong> lijevo je bočni pogled na profil brzine u cijevi, desno isti presjek vidiš kao toplinsku kartu. Narančasta sonda označava isti položaj u oba prikaza, pa možeš povezati udaljenost od osi s lokalnom brzinom i ukupnim volumenskim protokom.</div>
+
+        <div class='z77b-grid'>
+            <div class='z77b-stage'>
+                <canvas id='z77b-canvas' width='720' height='520'></canvas>
+                <div class='z77b-overlay'>
+                    <div><strong>v<sub>max</sub></strong><span id='z77b-ov-vmax'>2.00 m/s</span></div>
+                    <div><strong>v<sub>sr</sub></strong><span id='z77b-ov-vmean'>1.00 m/s</span></div>
+                    <div><strong>v(r)</strong><span id='z77b-ov-vprobe'>1.50 m/s</span></div>
+                </div>
+                <div id='z77b-state' class='z77b-state'>Sonda u srednjem pojasu</div>
+            </div>
+
+            <div class='z77b-side'>
+                <div class='z77b-card z77b-controls'>
+                    <div class='z77b-presets'>
+                        <button type='button' class='z77b-preset' id='z77b-preset-axis'>Uz os</button>
+                        <button type='button' class='z77b-preset' id='z77b-preset-mid'>Srednji radijus</button>
+                        <button type='button' class='z77b-preset' id='z77b-preset-wall'>Prema stijenci</button>
+                    </div>
+
+                    <div class='z77b-row'><label for='z77b-vmax'><span>Maksimalna brzina v_max</span><span id='z77b-vmax-label'>2.0 m/s</span></label><input id='z77b-vmax' type='range' min='0.5' max='5.0' step='0.1' value='2.0'></div>
+                    <div class='z77b-row'><label for='z77b-radius'><span>Polumjer cijevi R</span><span id='z77b-radius-label'>100 mm</span></label><input id='z77b-radius' type='range' min='50' max='150' step='5' value='100'></div>
+                    <div class='z77b-row'><label for='z77b-probe'><span>Položaj sonde r/R</span><span id='z77b-probe-label'>0.50</span></label><input id='z77b-probe' type='range' min='0' max='1' step='0.05' value='0.50'></div>
+                </div>
+
+                <div class='z77b-card z77b-metrics'>
+                    <div class='z77b-metric'><small>v_max</small><strong id='z77b-vmax-out'>2.00 m/s</strong></div>
+                    <div class='z77b-metric'><small>v_sr</small><strong id='z77b-vmean-out'>1.00 m/s</strong></div>
+                    <div class='z77b-metric'><small>v(r)</small><strong id='z77b-vprobe-out'>1.50 m/s</strong></div>
+                    <div class='z77b-metric'><small>Položaj sonde r</small><strong id='z77b-rprobe-out'>50 mm</strong></div>
+                    <div class='z77b-metric'><small>Presjek A</small><strong id='z77b-area-out'>0.0314 m^2</strong></div>
+                    <div class='z77b-metric'><small>Volumenski protok Vdot</small><strong id='z77b-vdot-out'>31.42 L/s</strong></div>
+                </div>
+
+                <div class='z77b-card z77b-bars'>
+                    <strong class='section'>Koliki dio v_max vidiš?</strong>
+                    <div class='z77b-bar-row'><span>Srednja brzina v_sr</span><strong id='z77b-mean-label'>50.0 %</strong></div>
+                    <div class='z77b-track'><div id='z77b-mean-bar' class='z77b-fill z77b-mean'></div></div>
+                    <div class='z77b-bar-row'><span>Lokalna brzina sonde</span><strong id='z77b-probe-share-label'>75.0 %</strong></div>
+                    <div class='z77b-track'><div id='z77b-probe-bar' class='z77b-fill z77b-probe'></div></div>
+                </div>
+
+                <div class='z77b-card z77b-formula'>
+                    <strong class='section'>Računski lanac</strong>
+                    <div id='z77b-eq1'>v(r) = v_max (1 - (r/R)^2)</div>
+                    <div id='z77b-eq2'>v_sr = v_max / 2</div>
+                    <div id='z77b-eq3'>Vdot = v_sr A</div>
+                </div>
+
+                <div class='z77b-card z77b-explainer'>
+                    <strong class='section'>Što se sada događa</strong>
+                    <div id='z77b-expl'>Sonda je u srednjem pojasu presjeka, pa još mjeri velik dio maksimalne brzine. Prema stijenci profil mora pasti na nulu zbog trenja i rubnog uvjeta bez klizanja.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const root = document.getElementById('z77-laminar-scene');
+    if (!root) return;
+
+    const canvas = root.querySelector('#z77b-canvas');
+    const ctx = canvas.getContext('2d');
+    const inputs = {
+        vmax: root.querySelector('#z77b-vmax'),
+        radius: root.querySelector('#z77b-radius'),
+        probe: root.querySelector('#z77b-probe')
+    };
+    const labels = {
+        vmax: root.querySelector('#z77b-vmax-label'),
+        radius: root.querySelector('#z77b-radius-label'),
+        probe: root.querySelector('#z77b-probe-label')
+    };
+    const out = {
+        ovVmax: root.querySelector('#z77b-ov-vmax'),
+        ovVmean: root.querySelector('#z77b-ov-vmean'),
+        ovVprobe: root.querySelector('#z77b-ov-vprobe'),
+        state: root.querySelector('#z77b-state'),
+        vmax: root.querySelector('#z77b-vmax-out'),
+        vmean: root.querySelector('#z77b-vmean-out'),
+        vprobe: root.querySelector('#z77b-vprobe-out'),
+        rprobe: root.querySelector('#z77b-rprobe-out'),
+        area: root.querySelector('#z77b-area-out'),
+        vdot: root.querySelector('#z77b-vdot-out'),
+        meanBar: root.querySelector('#z77b-mean-bar'),
+        probeBar: root.querySelector('#z77b-probe-bar'),
+        meanLabel: root.querySelector('#z77b-mean-label'),
+        probeShareLabel: root.querySelector('#z77b-probe-share-label'),
+        eq1: root.querySelector('#z77b-eq1'),
+        eq2: root.querySelector('#z77b-eq2'),
+        eq3: root.querySelector('#z77b-eq3'),
+        expl: root.querySelector('#z77b-expl')
+    };
+
+    let latest = null;
+    const particles = Array.from({ length: 84 }, function() {
+        return { t: Math.random(), rRel: Math.random() * 2 - 1 };
+    });
+
+    function fmt(value, digits) {
+        return Number(value).toFixed(digits);
+    }
+
+    function roundedRect(x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + w - radius, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+        ctx.lineTo(x + w, y + h - radius);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+        ctx.lineTo(x + radius, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+    }
+
+    function compute() {
+        const vmax = parseFloat(inputs.vmax.value);
+        const rMm = parseFloat(inputs.radius.value);
+        const probeRel = parseFloat(inputs.probe.value);
+        const vMean = vmax / 2;
+        const vProbe = vmax * (1 - probeRel * probeRel);
+        const rProbe = probeRel * rMm;
+        const area = Math.PI * Math.pow(rMm / 1000, 2);
+        const vdot = vMean * area * 1000;
+        return { vmax, rMm, probeRel, vMean, vProbe, rProbe, area, vdot, probeShare: vmax > 0 ? vProbe / vmax : 0 };
+    }
+
+    function syncText(data) {
+        labels.vmax.textContent = fmt(data.vmax, 1) + ' m/s';
+        labels.radius.textContent = fmt(data.rMm, 0) + ' mm';
+        labels.probe.textContent = fmt(data.probeRel, 2);
+
+        out.ovVmax.textContent = fmt(data.vmax, 2) + ' m/s';
+        out.ovVmean.textContent = fmt(data.vMean, 2) + ' m/s';
+        out.ovVprobe.textContent = fmt(data.vProbe, 2) + ' m/s';
+        out.vmax.textContent = fmt(data.vmax, 2) + ' m/s';
+        out.vmean.textContent = fmt(data.vMean, 2) + ' m/s';
+        out.vprobe.textContent = fmt(data.vProbe, 2) + ' m/s';
+        out.rprobe.textContent = fmt(data.rProbe, 0) + ' mm';
+        out.area.textContent = fmt(data.area, 4) + ' m^2';
+        out.vdot.textContent = fmt(data.vdot, 2) + ' L/s';
+
+        out.meanBar.style.width = '50%';
+        out.probeBar.style.width = (data.probeShare * 100).toFixed(1) + '%';
+        out.meanLabel.textContent = '50.0 %';
+        out.probeShareLabel.textContent = (data.probeShare * 100).toFixed(1) + ' %';
+
+        out.eq1.textContent = 'v(r) = ' + fmt(data.vmax, 2) + ' · (1 - ' + fmt(data.probeRel, 2) + '^2) = ' + fmt(data.vProbe, 2) + ' m/s';
+        out.eq2.textContent = 'v_sr = ' + fmt(data.vmax, 2) + ' / 2 = ' + fmt(data.vMean, 2) + ' m/s';
+        out.eq3.textContent = 'Vdot = ' + fmt(data.vMean, 2) + ' · ' + fmt(data.area, 4) + ' = ' + fmt(data.vdot, 2) + ' L/s';
+
+        if (data.probeRel < 0.2) {
+            out.state.textContent = 'Sonda blizu osi';
+            out.expl.textContent = 'Sonda je vrlo blizu osi cijevi, pa mjeri gotovo maksimalnu brzinu. U laminarnom toku upravo je središte presjeka energetski najbogatiji dio profila.';
+        } else if (data.probeRel > 0.75) {
+            out.state.textContent = 'Sonda blizu stijenke';
+            out.expl.textContent = 'Sonda je pomaknuta prema stijenci, pa lokalna brzina snažno pada. To je izravna posljedica rubnog uvjeta bez klizanja: na stijenci brzina mora pasti na nulu.';
+        } else {
+            out.state.textContent = 'Sonda u srednjem pojasu';
+            out.expl.textContent = 'Sonda je u prijelaznom dijelu presjeka: još vidi velik dio maksimalne brzine, ali već se jasno osjeća paraboličan pad prema stijenci. Zato je v(r) = ' + fmt(data.vProbe, 2) + ' m/s između osi i ruba, dok srednja brzina ostaje ' + fmt(data.vMean, 2) + ' m/s.';
+        }
+    }
+
+    function drawScene(data) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bg.addColorStop(0, '#ffffff');
+        bg.addColorStop(1, '#eaf5ff');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const left = { x: 34, y: 58, w: 314, h: 404 };
+        const right = { x: 372, y: 58, w: 314, h: 404 };
+        const cy = 270;
+        const radiusPx = Math.max(56, Math.min(124, data.rMm * 0.82));
+        const pipeTop = cy - radiusPx;
+        const pipeBottom = cy + radiusPx;
+        const baseX = left.x + 30;
+        const profileScale = data.vmax * 30;
+        const meanX = baseX + data.vMean * 30;
+        const probeY = cy + data.probeRel * radiusPx;
+        const probeX = baseX + data.vProbe * 30;
+        const crossCx = right.x + right.w / 2;
+        const crossCy = right.y + right.h / 2 + 10;
+        const crossR = Math.max(58, Math.min(112, radiusPx * 0.88));
+
+        ctx.fillStyle = 'rgba(255,255,255,.78)';
+        roundedRect(left.x, left.y, left.w, left.h, 22);
+        ctx.fill();
+        roundedRect(right.x, right.y, right.w, right.h, 22);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(148, 179, 211, .55)';
+        ctx.lineWidth = 1.2;
+        roundedRect(left.x, left.y, left.w, left.h, 22);
+        ctx.stroke();
+        roundedRect(right.x, right.y, right.w, right.h, 22);
+        ctx.stroke();
+
+        ctx.fillStyle = '#163c61';
+        ctx.font = 'bold 14px Inter';
+        ctx.fillText('Bočni presjek profila', left.x + 18, left.y + 26);
+        ctx.fillText('Poprečni presjek', right.x + 18, right.y + 26);
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(left.x + 14, pipeTop);
+        ctx.lineTo(left.x + left.w - 16, pipeTop);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(left.x + 14, pipeBottom);
+        ctx.lineTo(left.x + left.w - 16, pipeBottom);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(37,99,235,.16)';
+        ctx.beginPath();
+        ctx.moveTo(baseX, pipeTop);
+        for (let y = -radiusPx; y <= radiusPx; y += 2) {
+            const rel = y / radiusPx;
+            const vRel = 1 - rel * rel;
+            ctx.lineTo(baseX + vRel * profileScale, cy + y);
+        }
+        ctx.lineTo(baseX, pipeBottom);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(37,99,235,.45)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(baseX, pipeTop);
+        for (let y = -radiusPx; y <= radiusPx; y += 2) {
+            const rel = y / radiusPx;
+            const vRel = 1 - rel * rel;
+            ctx.lineTo(baseX + vRel * profileScale, cy + y);
+        }
+        ctx.stroke();
+
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = '#0ea5e9';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(meanX, pipeTop - 6);
+        ctx.lineTo(meanX, pipeBottom + 6);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#0369a1';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('v_sr', meanX - 12, pipeTop - 16);
+
+        particles.forEach(function(p) {
+            p.t += (0.0025 + data.vmax * 0.0008) * (1 - p.rRel * p.rRel);
+            if (p.t > 1) p.t = 0;
+            const px = left.x + 22 + p.t * (left.w - 44);
+            const py = cy + p.rRel * radiusPx;
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(px, py, 2, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([7, 6]);
+        ctx.beginPath();
+        ctx.moveTo(baseX - 10, probeY);
+        ctx.lineTo(probeX, probeY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(probeX, probeY, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#991b1b';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('v(r)', probeX + 10, probeY - 10);
+
+        for (let r = crossR; r > 0; r -= 2) {
+            const rel = r / crossR;
+            const vRel = 1 - rel * rel;
+            const rr = Math.floor(233 - vRel * 160);
+            const gg = Math.floor(243 - vRel * 100);
+            ctx.fillStyle = 'rgb(' + rr + ',' + gg + ',255)';
+            ctx.beginPath();
+            ctx.arc(crossCx, crossCy, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(crossCx, crossCy, crossR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.setLineDash([7, 6]);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(crossCx, crossCy);
+        ctx.lineTo(crossCx + data.probeRel * crossR, crossCy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(crossCx + data.probeRel * crossR, crossCy, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#36506b';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('os cijevi', left.x + 16, cy - 10);
+        ctx.fillText('r/R = ' + fmt(data.probeRel, 2), right.x + 18, right.y + right.h - 18);
+        ctx.fillText('stijenka: v = 0', left.x + left.w - 120, pipeBottom + 28);
+    }
+
+    function update() {
+        latest = compute();
+        syncText(latest);
+    }
+
+    function loop() {
+        if (latest) drawScene(latest);
+        requestAnimationFrame(loop);
+    }
+
+    Object.values(inputs).forEach(function(input) {
+        input.addEventListener('input', update);
+        input.addEventListener('change', update);
+    });
+
+    root.querySelector('#z77b-preset-axis').addEventListener('click', function() {
+        inputs.vmax.value = '2.5';
+        inputs.radius.value = '100';
+        inputs.probe.value = '0.10';
+        update();
+    });
+    root.querySelector('#z77b-preset-mid').addEventListener('click', function() {
+        inputs.vmax.value = '2.0';
+        inputs.radius.value = '100';
+        inputs.probe.value = '0.50';
+        update();
+    });
+    root.querySelector('#z77b-preset-wall').addEventListener('click', function() {
+        inputs.vmax.value = '3.2';
+        inputs.radius.value = '120';
+        inputs.probe.value = '0.85';
+        update();
+    });
+
+    update();
+    loop();
+})();
+</script>
+```
+
 ***
 
 ### Zadatak Z78 â€” Difuzor bez gubitaka {.unnumbered}
@@ -541,7 +1806,7 @@ $\Delta p = \frac{\rho}{2}(v_2^2 - v_1^2) = \frac{1,2}{2}(30,63^2 - 8,1^2) = \ma
 
 ```{=html}
 <!-- WIDGET: Venturijeva cijev -->
-<div id="v9-venturi-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<div id="v9-venturi-legacy" style="display:none;max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🧪 Venturijeva cijev: Mjerenje protoka</h4>
     <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
         <strong>Kako čitati Venturi:</strong> U suženju je površina manja pa iz kontinuiteta mora porasti lokalna brzina <strong>v₂</strong>. Bernoulli zatim taj porast brzine prevodi u pad statičkog tlaka, pa manometarska razlika <strong>Δh</strong> postaje vizualni trag iste energetske zamjene.
@@ -639,6 +1904,377 @@ $\Delta p = \frac{\rho}{2}(v_2^2 - v_1^2) = \frac{1,2}{2}(30,63^2 - 8,1^2) = \ma
 </script>
 ```
 
+```{=html}
+<div id='v9-venturi-scene' style='max-width:1120px;margin:2rem auto;font-family:Inter,system-ui,sans-serif;color:#17324d;'>
+    <style>
+        #v9-venturi-scene *{box-sizing:border-box}
+        #v9-venturi-scene .v9vb-shell{border:1px solid #dce8f4;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);box-shadow:0 24px 58px rgba(41,76,109,.1)}
+        #v9-venturi-scene .v9vb-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:start;padding:1.45rem 1.55rem 1rem;background:radial-gradient(circle at top right,rgba(14,165,233,.16),transparent 34%),linear-gradient(135deg,#eef8ff 0%,#ffffff 56%,#f4fbff 100%);border-bottom:1px solid rgba(43,92,124,.1)}
+        #v9-venturi-scene .v9vb-kicker{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#5d7b94;margin-bottom:.35rem}
+        #v9-venturi-scene .v9vb-title{margin:0;font-size:clamp(1.38rem,2.4vw,1.92rem);line-height:1.08;color:#163c61}
+        #v9-venturi-scene .v9vb-sub{margin:.55rem 0 0;max-width:72ch;color:#547088;font-size:.95rem;line-height:1.6}
+        #v9-venturi-scene .v9vb-chip{align-self:start;padding:.76rem .96rem;border-radius:999px;border:1px solid #cfe3f7;background:linear-gradient(135deg,#f0f8ff,#fbfdff);color:#1d4f78;font-weight:800;font-size:.82rem;white-space:nowrap}
+        #v9-venturi-scene .v9vb-note{margin:1rem 1.55rem 0;padding:.95rem 1rem;border-radius:16px;border:1px solid #d7e8f8;background:linear-gradient(135deg,#eff7ff,#f8fbff);color:#2d587f;font-size:.86rem;line-height:1.6}
+        #v9-venturi-scene .v9vb-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;padding:1rem 1.55rem 1.55rem}
+        #v9-venturi-scene .v9vb-stage{display:flex;flex-direction:column;gap:.9rem;padding:1rem;border-radius:22px;overflow:hidden;border:1px solid #dbe6f0;background:radial-gradient(circle at top,#ffffff 0%,#eef6ff 68%,#e7f2fb 100%)}
+        #v9-venturi-scene .v9vb-stage canvas{display:block;width:100%;height:auto}
+        #v9-venturi-scene .v9vb-overlay{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;padding:0;background:none;border:0;box-shadow:none}
+        #v9-venturi-scene .v9vb-overlay div{display:flex;flex-direction:column;gap:.35rem;padding:.85rem .92rem;border-radius:16px;background:rgba(255,255,255,.94);border:1px solid rgba(207,227,247,.98);box-shadow:0 12px 24px rgba(41,76,109,.06);font-size:.76rem;color:#3a5671}
+        #v9-venturi-scene .v9vb-overlay strong{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:#66829a}
+        #v9-venturi-scene .v9vb-overlay span{font-weight:800;color:#123a63;font-variant-numeric:tabular-nums}
+        #v9-venturi-scene .v9vb-state{position:static;align-self:flex-start;padding:.72rem .9rem;border-radius:16px;border:1px solid #dbe6f0;background:rgba(255,255,255,.94);box-shadow:0 12px 24px rgba(41,76,109,.08);font-size:.8rem;font-weight:800}
+        #v9-venturi-scene .v9vb-state.mild{color:#0f766e;border-color:#99f6e4;background:rgba(240,253,250,.95)}
+        #v9-venturi-scene .v9vb-state.medium{color:#b45309;border-color:#fdba74;background:rgba(255,247,237,.95)}
+        #v9-venturi-scene .v9vb-state.strong{color:#b91c1c;border-color:#fca5a5;background:rgba(254,242,242,.95)}
+        #v9-venturi-scene .v9vb-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}
+        #v9-venturi-scene .v9vb-card{border:1px solid #e3ebf2;border-radius:18px;background:#ffffff}
+        #v9-venturi-scene .v9vb-controls{padding:1rem;display:grid;gap:.8rem}
+        #v9-venturi-scene .v9vb-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+        #v9-venturi-scene .v9vb-preset{appearance:none;border:1px solid #cfe3f7;border-radius:999px;padding:.65rem .7rem;background:#eff7ff;color:#1d4f78;font-size:.78rem;font-weight:800;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
+        #v9-venturi-scene .v9vb-preset:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(41,76,109,.08)}
+        #v9-venturi-scene .v9vb-row label{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.83rem;font-weight:700;color:#36506b}
+        #v9-venturi-scene .v9vb-row input{width:100%;accent-color:#2f80ed}
+        #v9-venturi-scene .v9vb-metrics{padding:1rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+        #v9-venturi-scene .v9vb-metric{padding:.9rem;border-radius:16px;background:linear-gradient(180deg,#fbfdff 0%,#eef7ff 100%);border:1px solid rgba(31,91,150,.08)}
+        #v9-venturi-scene .v9vb-metric small{display:block;margin-bottom:.35rem;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#6a849a}
+        #v9-venturi-scene .v9vb-metric strong{display:block;font-size:1.02rem;color:#123a63;font-variant-numeric:tabular-nums}
+        #v9-venturi-scene .v9vb-bars,#v9-venturi-scene .v9vb-formula,#v9-venturi-scene .v9vb-explainer{padding:1rem}
+        #v9-venturi-scene .v9vb-bars strong.section,#v9-venturi-scene .v9vb-formula strong.section,#v9-venturi-scene .v9vb-explainer strong.section{display:block;margin-bottom:.55rem;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#66829a}
+        #v9-venturi-scene .v9vb-bar-row{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.84rem;color:#36506b;font-weight:700}
+        #v9-venturi-scene .v9vb-track{height:12px;border-radius:999px;background:#edf3f9;overflow:hidden;margin-bottom:.85rem}
+        #v9-venturi-scene .v9vb-fill{height:100%;width:0;border-radius:inherit;transition:width .28s ease}
+        #v9-venturi-scene .v9vb-area{background:linear-gradient(90deg,#38bdf8,#2563eb)}
+        #v9-venturi-scene .v9vb-speed{background:linear-gradient(90deg,#f97316,#ef4444)}
+        #v9-venturi-scene .v9vb-formula{font-size:.84rem;line-height:1.58;color:#355771}
+        #v9-venturi-scene .v9vb-formula div+div{margin-top:.45rem}
+        #v9-venturi-scene .v9vb-explainer{grid-column:1/-1;border-color:#bfdbfe;background:#eff6ff;color:#1e3a8a;font-size:.84rem;line-height:1.58}
+        @media (max-width:980px){
+            #v9-venturi-scene .v9vb-head,#v9-venturi-scene .v9vb-grid{grid-template-columns:1fr}
+            #v9-venturi-scene .v9vb-chip{justify-self:start}
+        }
+        @media (max-width:640px){
+            #v9-venturi-scene .v9vb-presets,#v9-venturi-scene .v9vb-metrics,#v9-venturi-scene .v9vb-overlay,#v9-venturi-scene .v9vb-side{grid-template-columns:1fr}
+            #v9-venturi-scene .v9vb-stage{padding:.85rem}
+        }
+    </style>
+    <div class='v9vb-shell'>
+        <div class='v9vb-head'>
+            <div>
+                <div class='v9vb-kicker'>Venturi i mjerenje protoka</div>
+                <h3 class='v9vb-title'>Venturi ne mjeri protok izravno, nego najprije prisili tok da ubrza u suženju, a zatim očita tlačnu cijenu tog ubrzanja</h3>
+                <p class='v9vb-sub'>Kontinuitet prvo veže presjeke i brzine kroz <strong>A<sub>1</sub>v<sub>1</sub> = A<sub>2</sub>v<sub>2</sub></strong>. Bernoulli zatim taj skok brzine pretvara u pad statičkog tlaka, pa piezometarska razlika <strong>Δh</strong> postaje vizualni trag iste zamjene energije.</p>
+            </div>
+            <div class='v9vb-chip'>A<sub>1</sub>v<sub>1</sub> = A<sub>2</sub>v<sub>2</sub></div>
+        </div>
+
+        <div class='v9vb-note'><strong>Kako čitati scenu:</strong> lijevo i desno vidiš široki presjek cijevi, a u grlu Venturija uži presjek i veće brzine čestica. Iznad njih su piezometarske cijevi koje ne mjere brzinu, nego upravo statički tlak, pa njihova razlika pokazuje koliko je tlaka potrošeno na ubrzanje toka.</div>
+
+        <div class='v9vb-grid'>
+            <div class='v9vb-stage'>
+                <canvas id='v9vb-canvas' width='720' height='520'></canvas>
+                <div class='v9vb-overlay'>
+                    <div><strong>v<sub>1</sub></strong><span id='v9vb-ov-v1'>2.00 m/s</span></div>
+                    <div><strong>v<sub>2</sub></strong><span id='v9vb-ov-v2'>5.56 m/s</span></div>
+                    <div><strong>Δh</strong><span id='v9vb-ov-dh'>1370.0 mm</span></div>
+                </div>
+                <div id='v9vb-state' class='v9vb-state medium'>Srednje suženje</div>
+            </div>
+
+            <div class='v9vb-side'>
+                <div class='v9vb-card v9vb-controls'>
+                    <div class='v9vb-presets'>
+                        <button type='button' class='v9vb-preset' id='v9vb-preset-mild'>Blago</button>
+                        <button type='button' class='v9vb-preset' id='v9vb-preset-mid'>Srednje</button>
+                        <button type='button' class='v9vb-preset' id='v9vb-preset-strong'>Jako</button>
+                    </div>
+
+                    <div class='v9vb-row'><label for='v9vb-v1'><span>Ulazna brzina v1</span><span id='v9vb-v1-label'>2.0 m/s</span></label><input id='v9vb-v1' type='range' min='0.5' max='8.0' step='0.1' value='2.0'></div>
+                    <div class='v9vb-row'><label for='v9vb-d2'><span>Promjer grla D2</span><span id='v9vb-d2-label'>60 mm</span></label><input id='v9vb-d2' type='range' min='30' max='90' step='2' value='60'></div>
+                </div>
+
+                <div class='v9vb-card v9vb-metrics'>
+                    <div class='v9vb-metric'><small>A1</small><strong id='v9vb-a1'>0.0079 m^2</strong></div>
+                    <div class='v9vb-metric'><small>A2</small><strong id='v9vb-a2'>0.0028 m^2</strong></div>
+                    <div class='v9vb-metric'><small>v2</small><strong id='v9vb-v2'>5.56 m/s</strong></div>
+                    <div class='v9vb-metric'><small>Δp</small><strong id='v9vb-dp'>13424 Pa</strong></div>
+                    <div class='v9vb-metric'><small>Δh</small><strong id='v9vb-dh'>1368.4 mm</strong></div>
+                    <div class='v9vb-metric'><small>Vdot</small><strong id='v9vb-vdot'>15.71 L/s</strong></div>
+                </div>
+
+                <div class='v9vb-card v9vb-bars'>
+                    <strong class='section'>Kontinuitet i posljedica</strong>
+                    <div class='v9vb-bar-row'><span>Preostali presjek A2/A1</span><strong id='v9vb-area-label'>36.0 %</strong></div>
+                    <div class='v9vb-track'><div id='v9vb-area-bar' class='v9vb-fill v9vb-area'></div></div>
+                    <div class='v9vb-bar-row'><span>Pojačanje brzine v2/v1</span><strong id='v9vb-speed-label'>2.78x</strong></div>
+                    <div class='v9vb-track'><div id='v9vb-speed-bar' class='v9vb-fill v9vb-speed'></div></div>
+                </div>
+
+                <div class='v9vb-card v9vb-formula'>
+                    <strong class='section'>Računski lanac</strong>
+                    <div id='v9vb-eq1'>v2 = v1 A1 / A2</div>
+                    <div id='v9vb-eq2'>Δp = ρ (v2^2 - v1^2) / 2</div>
+                    <div id='v9vb-eq3'>Δh = Δp / (ρg)</div>
+                </div>
+
+                <div class='v9vb-card v9vb-explainer'>
+                    <strong class='section'>Što se sada događa</strong>
+                    <div id='v9vb-expl'>Kad se presjek smanji, kontinuitet prisili tok na veću lokalnu brzinu u grlu. Bernoulli tada dio statičkog tlaka pretvara u brzinsku energiju, pa piezometar u grlu pada niže od ulaznog.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const root = document.getElementById('v9-venturi-scene');
+    if (!root) return;
+
+    const canvas = root.querySelector('#v9vb-canvas');
+    const ctx = canvas.getContext('2d');
+    const inputs = {
+        v1: root.querySelector('#v9vb-v1'),
+        d2: root.querySelector('#v9vb-d2')
+    };
+    const labels = {
+        v1: root.querySelector('#v9vb-v1-label'),
+        d2: root.querySelector('#v9vb-d2-label')
+    };
+    const out = {
+        ovV1: root.querySelector('#v9vb-ov-v1'),
+        ovV2: root.querySelector('#v9vb-ov-v2'),
+        ovDh: root.querySelector('#v9vb-ov-dh'),
+        state: root.querySelector('#v9vb-state'),
+        a1: root.querySelector('#v9vb-a1'),
+        a2: root.querySelector('#v9vb-a2'),
+        v2: root.querySelector('#v9vb-v2'),
+        dp: root.querySelector('#v9vb-dp'),
+        dh: root.querySelector('#v9vb-dh'),
+        vdot: root.querySelector('#v9vb-vdot'),
+        areaBar: root.querySelector('#v9vb-area-bar'),
+        speedBar: root.querySelector('#v9vb-speed-bar'),
+        areaLabel: root.querySelector('#v9vb-area-label'),
+        speedLabel: root.querySelector('#v9vb-speed-label'),
+        eq1: root.querySelector('#v9vb-eq1'),
+        eq2: root.querySelector('#v9vb-eq2'),
+        eq3: root.querySelector('#v9vb-eq3'),
+        expl: root.querySelector('#v9vb-expl')
+    };
+
+    const d1 = 0.1;
+    const rho = 1000;
+    const g = 9.81;
+    const particles = Array.from({ length: 110 }, function() {
+        return { t: Math.random(), yRel: Math.random() };
+    });
+    let latest = null;
+
+    function fmt(value, digits) {
+        return Number(value).toFixed(digits);
+    }
+
+    function compute() {
+        const v1 = parseFloat(inputs.v1.value);
+        const d2 = parseFloat(inputs.d2.value) / 1000;
+        const a1 = Math.PI * d1 * d1 / 4;
+        const a2 = Math.PI * d2 * d2 / 4;
+        const vdot = v1 * a1;
+        const v2 = vdot / a2;
+        const dp = 0.5 * rho * (v2 * v2 - v1 * v1);
+        const dh = dp / (rho * g);
+        const areaRatio = a2 / a1;
+        const speedRatio = v2 / v1;
+        return { v1, d2, a1, a2, vdot, v2, dp, dh, areaRatio, speedRatio };
+    }
+
+    function syncText(data) {
+        labels.v1.textContent = fmt(data.v1, 1) + ' m/s';
+        labels.d2.textContent = fmt(data.d2 * 1000, 0) + ' mm';
+
+        out.ovV1.textContent = fmt(data.v1, 2) + ' m/s';
+        out.ovV2.textContent = fmt(data.v2, 2) + ' m/s';
+        out.ovDh.textContent = fmt(data.dh * 1000, 1) + ' mm';
+
+        out.a1.textContent = fmt(data.a1, 4) + ' m^2';
+        out.a2.textContent = fmt(data.a2, 4) + ' m^2';
+        out.v2.textContent = fmt(data.v2, 2) + ' m/s';
+        out.dp.textContent = Math.round(data.dp) + ' Pa';
+        out.dh.textContent = fmt(data.dh * 1000, 1) + ' mm';
+        out.vdot.textContent = fmt(data.vdot * 1000, 2) + ' L/s';
+
+        out.areaBar.style.width = (data.areaRatio * 100).toFixed(1) + '%';
+        out.speedBar.style.width = Math.min(data.speedRatio / 6 * 100, 100).toFixed(1) + '%';
+        out.areaLabel.textContent = (data.areaRatio * 100).toFixed(1) + ' %';
+        out.speedLabel.textContent = data.speedRatio.toFixed(2) + 'x';
+
+        out.eq1.textContent = 'v2 = ' + fmt(data.v1, 2) + ' · ' + fmt(data.a1, 4) + ' / ' + fmt(data.a2, 4) + ' = ' + fmt(data.v2, 2) + ' m/s';
+        out.eq2.textContent = 'Δp = 1000 · (' + fmt(data.v2, 2) + '^2 - ' + fmt(data.v1, 2) + '^2) / 2 = ' + Math.round(data.dp) + ' Pa';
+        out.eq3.textContent = 'Δh = ' + Math.round(data.dp) + ' / (1000 · 9.81) = ' + fmt(data.dh * 1000, 1) + ' mm';
+
+        if (data.areaRatio > 0.60) {
+            out.state.className = 'v9vb-state mild';
+            out.state.textContent = 'Blago suženje';
+            out.expl.textContent = 'Grlo je još relativno široko, pa su porast brzine i pad statičkog tlaka umjereni. Piezometarska razlika postoji, ali nije dramatična jer kontinuitet ne mora snažno ubrzati tok.';
+        } else if (data.areaRatio > 0.35) {
+            out.state.className = 'v9vb-state medium';
+            out.state.textContent = 'Srednje suženje';
+            out.expl.textContent = 'Smanjenje presjeka je dovoljno jako da v2 značajno naraste u odnosu na v1. Bernoulli zato prevodi dio statičkog tlaka u brzinsku energiju i piezometar u grlu jasno pada ispod ulaznog.';
+        } else {
+            out.state.className = 'v9vb-state strong';
+            out.state.textContent = 'Jako suženje';
+            out.expl.textContent = 'Grlo je vrlo usko, pa kontinuitet traži veliko ubrzanje toka. Zato je tlak u grlu snažno snižen, a piezometarska razlika postaje velik vizualni trag cijene koju protok plaća za nagli porast brzine.';
+        }
+    }
+
+    function getLocalDiameter(x, d1Px, d2Px) {
+        if (x <= 180) return d1Px;
+        if (x < 300) {
+            const t = (x - 180) / 120;
+            return d1Px + (d2Px - d1Px) * t;
+        }
+        if (x <= 420) return d2Px;
+        if (x < 540) {
+            const t = (x - 420) / 120;
+            return d2Px + (d1Px - d2Px) * t;
+        }
+        return d1Px;
+    }
+
+    function drawScene(data) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bg.addColorStop(0, '#ffffff');
+        bg.addColorStop(1, '#eaf5ff');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cy = 310;
+        const d1Px = d1 * 1500;
+        const d2Px = data.d2 * 1500;
+        const pipeTop1 = cy - d1Px / 2;
+        const headBaseY = 112;
+        const dhPx = Math.min(170, Math.sqrt(Math.max(data.dh * 1000, 0)) * 4.8);
+        const level1 = headBaseY;
+        const level2 = headBaseY + dhPx;
+        const m1x = 136;
+        const m2x = 360;
+
+        ctx.fillStyle = '#eef4fa';
+        ctx.beginPath();
+        ctx.moveTo(0, cy - d1Px / 2);
+        ctx.lineTo(180, cy - d1Px / 2);
+        ctx.bezierCurveTo(230, cy - d1Px / 2, 260, cy - d2Px / 2, 300, cy - d2Px / 2);
+        ctx.lineTo(420, cy - d2Px / 2);
+        ctx.bezierCurveTo(460, cy - d2Px / 2, 490, cy - d1Px / 2, 540, cy - d1Px / 2);
+        ctx.lineTo(720, cy - d1Px / 2);
+        ctx.lineTo(720, cy + d1Px / 2);
+        ctx.lineTo(540, cy + d1Px / 2);
+        ctx.bezierCurveTo(490, cy + d1Px / 2, 460, cy + d2Px / 2, 420, cy + d2Px / 2);
+        ctx.lineTo(300, cy + d2Px / 2);
+        ctx.bezierCurveTo(260, cy + d2Px / 2, 230, cy + d1Px / 2, 180, cy + d1Px / 2);
+        ctx.lineTo(0, cy + d1Px / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(m1x, cy - d1Px / 2);
+        ctx.lineTo(m1x, headBaseY - 8);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(m2x, cy - d2Px / 2);
+        ctx.lineTo(m2x, headBaseY - 8 + dhPx);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(m1x, cy - d1Px / 2);
+        ctx.lineTo(m1x, level1 + 20);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(m2x, cy - d2Px / 2);
+        ctx.lineTo(m2x, level2 + 20);
+        ctx.stroke();
+
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(m2x + 34, level1 + 10);
+        ctx.lineTo(m2x + 34, level2 + 10);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#c2410c';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('Δh', m2x + 42, level1 + dhPx / 2 + 14);
+        ctx.fillText('komprimirana skala piezometra', 448, 88);
+
+        particles.forEach(function(p) {
+            const x = p.t * 720;
+            const localD = getLocalDiameter(x, d1Px, d2Px);
+            const velocityFactor = Math.pow(d1Px / localD, 2) * (data.v1 / 3.2);
+            p.t += 0.0018 + velocityFactor * 0.0016;
+            if (p.t > 1) p.t = 0;
+            const currentX = p.t * 720;
+            const currentD = getLocalDiameter(currentX, d1Px, d2Px);
+            const y = cy + (p.yRel - 0.5) * currentD * 0.72;
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(currentX, y, 2.1, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.fillStyle = '#163c61';
+        ctx.font = 'bold 13px Inter';
+        ctx.fillText('A1, v1', 78, cy + d1Px / 2 + 26);
+        ctx.fillText('A2, v2', 330, cy + d2Px / 2 + 26);
+        ctx.fillText('široki presjek', 78, 470);
+        ctx.fillText('grlo Venturija', 312, 470);
+    }
+
+    function update() {
+        latest = compute();
+        syncText(latest);
+    }
+
+    function loop() {
+        if (latest) drawScene(latest);
+        requestAnimationFrame(loop);
+    }
+
+    Object.values(inputs).forEach(function(input) {
+        input.addEventListener('input', update);
+        input.addEventListener('change', update);
+    });
+
+    root.querySelector('#v9vb-preset-mild').addEventListener('click', function() {
+        inputs.v1.value = '1.6';
+        inputs.d2.value = '84';
+        update();
+    });
+    root.querySelector('#v9vb-preset-mid').addEventListener('click', function() {
+        inputs.v1.value = '2.0';
+        inputs.d2.value = '60';
+        update();
+    });
+    root.querySelector('#v9vb-preset-strong').addEventListener('click', function() {
+        inputs.v1.value = '4.5';
+        inputs.d2.value = '40';
+        update();
+    });
+
+    update();
+    loop();
+})();
+</script>
+```
+
 ***
 
 ### Zadatak Z80 â€” Usisna visina pumpe {.unnumbered}
@@ -676,7 +2312,7 @@ $\Delta p = \frac{\rho}{2}(v_2^2 - v_1^2) = \frac{1,2}{2}(30,63^2 - 8,1^2) = \ma
 
 ```{=html}
 <!-- WIDGET: Pumpni sustav i visine dobave -->
-<div id="z80-pump-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<div id="z80-pump-legacy" style="display:none;max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">⚙️ Pumpni sustav: Analiza visina dobave (A i B)</h4>
     <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
         <strong>Kako čitati pumpu:</strong> Ukupna visina dobave u svakoj točki sastoji se od tlačne, brzinske i geodetske komponente. Pumpa ne "stvara tlak" izdvojeno, nego dodaje razliku energije <strong>H<sub>p</sub> = H<sub>B</sub> - H<sub>A</sub></strong> potrebnu da tok iz usisa dođe do više i energijski bogatije izlazne točke.
@@ -773,6 +2409,451 @@ $\Delta p = \frac{\rho}{2}(v_2^2 - v_1^2) = \frac{1,2}{2}(30,63^2 - 8,1^2) = \ma
 </script>
 ```
 
+```{=html}
+<div id='z80-pump-scene' style='max-width:1120px;margin:2rem auto;font-family:Inter,system-ui,sans-serif;color:#17324d;'>
+    <style>
+        #z80-pump-scene *{box-sizing:border-box}
+        #z80-pump-scene .z80b-shell{border:1px solid #dce8f4;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);box-shadow:0 24px 58px rgba(41,76,109,.1)}
+        #z80-pump-scene .z80b-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:start;padding:1.45rem 1.55rem 1rem;background:radial-gradient(circle at top right,rgba(14,165,233,.14),transparent 34%),linear-gradient(135deg,#eef8ff 0%,#ffffff 56%,#f4fbff 100%);border-bottom:1px solid rgba(43,92,124,.1)}
+        #z80-pump-scene .z80b-kicker{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#5d7b94;margin-bottom:.35rem}
+        #z80-pump-scene .z80b-title{margin:0;font-size:clamp(1.38rem,2.4vw,1.92rem);line-height:1.08;color:#163c61}
+        #z80-pump-scene .z80b-sub{margin:.55rem 0 0;max-width:72ch;color:#547088;font-size:.95rem;line-height:1.6}
+        #z80-pump-scene .z80b-chip{align-self:start;padding:.76rem .96rem;border-radius:999px;border:1px solid #cfe3f7;background:linear-gradient(135deg,#f0f8ff,#fbfdff);color:#1d4f78;font-weight:800;font-size:.82rem;white-space:nowrap}
+        #z80-pump-scene .z80b-note{margin:1rem 1.55rem 0;padding:.95rem 1rem;border-radius:16px;border:1px solid #d7e8f8;background:linear-gradient(135deg,#eff7ff,#f8fbff);color:#2d587f;font-size:.86rem;line-height:1.6}
+        #z80-pump-scene .z80b-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;padding:1rem 1.55rem 1.55rem}
+        #z80-pump-scene .z80b-stage{display:flex;flex-direction:column;gap:.9rem;padding:1rem;border-radius:22px;overflow:hidden;border:1px solid #dbe6f0;background:radial-gradient(circle at top,#ffffff 0%,#eef6ff 68%,#e7f2fb 100%)}
+        #z80-pump-scene .z80b-stage canvas{display:block;width:100%;height:auto}
+        #z80-pump-scene .z80b-overlay{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;padding:0;background:none;border:0;box-shadow:none}
+        #z80-pump-scene .z80b-overlay div{display:flex;flex-direction:column;gap:.35rem;padding:.85rem .92rem;border-radius:16px;background:rgba(255,255,255,.94);border:1px solid rgba(207,227,247,.98);box-shadow:0 12px 24px rgba(41,76,109,.06);font-size:.76rem;color:#3a5671}
+        #z80-pump-scene .z80b-overlay strong{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:#66829a}
+        #z80-pump-scene .z80b-overlay span{font-weight:800;color:#123a63;font-variant-numeric:tabular-nums}
+        #z80-pump-scene .z80b-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}
+        #z80-pump-scene .z80b-card{border:1px solid #e3ebf2;border-radius:18px;background:#ffffff}
+        #z80-pump-scene .z80b-controls{padding:1rem;display:grid;gap:.8rem}
+        #z80-pump-scene .z80b-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+        #z80-pump-scene .z80b-preset{appearance:none;border:1px solid #cfe3f7;border-radius:999px;padding:.65rem .7rem;background:#eff7ff;color:#1d4f78;font-size:.78rem;font-weight:800;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
+        #z80-pump-scene .z80b-preset:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(41,76,109,.08)}
+        #z80-pump-scene .z80b-row label{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.83rem;font-weight:700;color:#36506b}
+        #z80-pump-scene .z80b-row input{width:100%;accent-color:#2f80ed}
+        #z80-pump-scene .z80b-metrics{padding:1rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+        #z80-pump-scene .z80b-metric{padding:.9rem;border-radius:16px;background:linear-gradient(180deg,#fbfdff 0%,#eef7ff 100%);border:1px solid rgba(31,91,150,.08)}
+        #z80-pump-scene .z80b-metric small{display:block;margin-bottom:.35rem;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#6a849a}
+        #z80-pump-scene .z80b-metric strong{display:block;font-size:1.02rem;color:#123a63;font-variant-numeric:tabular-nums}
+        #z80-pump-scene .z80b-bars,#z80-pump-scene .z80b-formula,#z80-pump-scene .z80b-explainer{padding:1rem}
+        #z80-pump-scene .z80b-bars strong.section,#z80-pump-scene .z80b-formula strong.section,#z80-pump-scene .z80b-explainer strong.section{display:block;margin-bottom:.55rem;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#66829a}
+        #z80-pump-scene .z80b-bar-row{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.84rem;color:#36506b;font-weight:700}
+        #z80-pump-scene .z80b-track{height:12px;border-radius:999px;background:#edf3f9;overflow:hidden;margin-bottom:.85rem}
+        #z80-pump-scene .z80b-fill{height:100%;width:0;border-radius:inherit;transition:width .28s ease}
+        #z80-pump-scene .z80b-base{background:linear-gradient(90deg,#3b82f6,#1d4ed8)}
+        #z80-pump-scene .z80b-pump{background:linear-gradient(90deg,#f97316,#ef4444)}
+        #z80-pump-scene .z80b-formula{font-size:.84rem;line-height:1.58;color:#355771}
+        #z80-pump-scene .z80b-formula div+div{margin-top:.45rem}
+        #z80-pump-scene .z80b-explainer{grid-column:1/-1;border-color:#bfdbfe;background:#eff6ff;color:#1e3a8a;font-size:.84rem;line-height:1.58}
+        @media (max-width:980px){
+            #z80-pump-scene .z80b-head,#z80-pump-scene .z80b-grid{grid-template-columns:1fr}
+            #z80-pump-scene .z80b-chip{justify-self:start}
+        }
+        @media (max-width:640px){
+            #z80-pump-scene .z80b-presets,#z80-pump-scene .z80b-metrics,#z80-pump-scene .z80b-overlay,#z80-pump-scene .z80b-side{grid-template-columns:1fr}
+            #z80-pump-scene .z80b-stage{padding:.85rem}
+        }
+    </style>
+    <div class='z80b-shell'>
+        <div class='z80b-head'>
+            <div>
+                <div class='z80b-kicker'>Z80-Z81 visina dobave pumpe</div>
+                <h3 class='z80b-title'>Pumpa ne dodaje samo tlak, nego ukupnu energiju potrebnu da tok iz točke A dođe do bogatijeg stanja u točki B</h3>
+                <p class='z80b-sub'>Najprije u svakoj točki rastavljaš ukupnu visinu na tlačnu, brzinsku i geodetsku komponentu. Tek nakon toga uspoređuješ <strong>H<sub>A</sub></strong> i <strong>H<sub>B</sub></strong>, pa dobivaš koliko pumpa stvarno mora dodati: <strong>H<sub>p</sub> = H<sub>B</sub> - H<sub>A</sub></strong>.</p>
+            </div>
+            <div class='z80b-chip'>H<sub>B</sub> = H<sub>A</sub> + H<sub>p</sub></div>
+        </div>
+
+        <div class='z80b-note'><strong>Kako čitati scenu:</strong> lijevo je točka A na usisu, desno točka B na višem izlazu. Stupci energije pokazuju kako se <strong>z</strong>, <strong>v²/2g</strong> i <strong>p/ρg</strong> slažu u ukupne visine <strong>H<sub>A</sub></strong> i <strong>H<sub>B</sub></strong>, dok je narančasti skok između njih upravo posao pumpe.</div>
+
+        <div class='z80b-grid'>
+            <div class='z80b-stage'>
+                <canvas id='z80b-canvas' width='720' height='520'></canvas>
+                <div class='z80b-overlay'>
+                    <div><strong>H<sub>A</sub></strong><span id='z80b-ov-ha'>7.31 m</span></div>
+                    <div><strong>H<sub>B</sub></strong><span id='z80b-ov-hb'>24.37 m</span></div>
+                    <div><strong>H<sub>p</sub></strong><span id='z80b-ov-hp'>17.06 m</span></div>
+                </div>
+            </div>
+
+            <div class='z80b-side'>
+                <div class='z80b-card z80b-controls'>
+                    <div class='z80b-presets'>
+                        <button type='button' class='z80b-preset' id='z80b-preset-base'>Početni</button>
+                        <button type='button' class='z80b-preset' id='z80b-preset-flow'>Veći protok</button>
+                        <button type='button' class='z80b-preset' id='z80b-preset-lift'>Viši izlaz</button>
+                    </div>
+
+                    <div class='z80b-row'><label for='z80b-vdot'><span>Volumenski protok V̇</span><span id='z80b-vdot-label'>0.15 m^3/s</span></label><input id='z80b-vdot' type='range' min='0.05' max='0.30' step='0.01' value='0.15'></div>
+                    <div class='z80b-row'><label for='z80b-zb'><span>Geodetska visina izlaza z_B</span><span id='z80b-zb-label'>20 m</span></label><input id='z80b-zb' type='range' min='15' max='30' step='1' value='20'></div>
+                </div>
+
+                <div class='z80b-card z80b-metrics'>
+                    <div class='z80b-metric'><small>v_A</small><strong id='z80b-va'>3.06 m/s</strong></div>
+                    <div class='z80b-metric'><small>v_B</small><strong id='z80b-vb'>4.77 m/s</strong></div>
+                    <div class='z80b-metric'><small>p_A/ρg</small><strong id='z80b-pah'>5.10 m</strong></div>
+                    <div class='z80b-metric'><small>p_B/ρg</small><strong id='z80b-pbh'>10.19 m</strong></div>
+                    <div class='z80b-metric'><small>H_A</small><strong id='z80b-ha'>7.31 m</strong></div>
+                    <div class='z80b-metric'><small>H_B</small><strong id='z80b-hb'>24.37 m</strong></div>
+                </div>
+
+                <div class='z80b-card z80b-bars'>
+                    <strong class='section'>Kako nastaje H_B?</strong>
+                    <div class='z80b-bar-row'><span>Energija već prisutna u A</span><strong id='z80b-base-label'>30.0 %</strong></div>
+                    <div class='z80b-track'><div id='z80b-base-bar' class='z80b-fill z80b-base'></div></div>
+                    <div class='z80b-bar-row'><span>Dodatak pumpe H_p</span><strong id='z80b-pump-label'>70.0 %</strong></div>
+                    <div class='z80b-track'><div id='z80b-pump-bar' class='z80b-fill z80b-pump'></div></div>
+                </div>
+
+                <div class='z80b-card z80b-formula'>
+                    <strong class='section'>Lanac Bernoullija</strong>
+                    <div id='z80b-eq1'>H_A = p_A/ρg + v_A^2/2g + z_A</div>
+                    <div id='z80b-eq2'>H_B = p_B/ρg + v_B^2/2g + z_B</div>
+                    <div id='z80b-eq3'>H_p = H_B - H_A</div>
+                </div>
+
+                <div class='z80b-card z80b-explainer'>
+                    <strong class='section'>Što se sada događa</strong>
+                    <div id='z80b-expl'>Pumpa mora nadoknaditi razliku između raspoložive energije na usisu i traženog energetskog stanja na višem izlazu.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const root = document.getElementById('z80-pump-scene');
+    if (!root) return;
+
+    const canvas = root.querySelector('#z80b-canvas');
+    const ctx = canvas.getContext('2d');
+    const inputs = {
+        vdot: root.querySelector('#z80b-vdot'),
+        zb: root.querySelector('#z80b-zb')
+    };
+    const labels = {
+        vdot: root.querySelector('#z80b-vdot-label'),
+        zb: root.querySelector('#z80b-zb-label')
+    };
+    const out = {
+        va: root.querySelector('#z80b-va'),
+        vb: root.querySelector('#z80b-vb'),
+        pah: root.querySelector('#z80b-pah'),
+        pbh: root.querySelector('#z80b-pbh'),
+        ha: root.querySelector('#z80b-ha'),
+        hb: root.querySelector('#z80b-hb'),
+        ovHa: root.querySelector('#z80b-ov-ha'),
+        ovHb: root.querySelector('#z80b-ov-hb'),
+        ovHp: root.querySelector('#z80b-ov-hp'),
+        baseBar: root.querySelector('#z80b-base-bar'),
+        pumpBar: root.querySelector('#z80b-pump-bar'),
+        baseLabel: root.querySelector('#z80b-base-label'),
+        pumpLabel: root.querySelector('#z80b-pump-label'),
+        eq1: root.querySelector('#z80b-eq1'),
+        eq2: root.querySelector('#z80b-eq2'),
+        eq3: root.querySelector('#z80b-eq3'),
+        expl: root.querySelector('#z80b-expl')
+    };
+
+    let phase = 0;
+    let latest = null;
+
+    function fmt(value, digits) {
+        return Number(value).toFixed(digits);
+    }
+
+    function area(diameter) {
+        return Math.PI * diameter * diameter / 4;
+    }
+
+    function roundedRect(x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + w - radius, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+        ctx.lineTo(x + w, y + h - radius);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+        ctx.lineTo(x + radius, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+    }
+
+    function compute() {
+        const vdot = parseFloat(inputs.vdot.value);
+        const zb = parseFloat(inputs.zb.value);
+        const g = 9.81;
+        const rho = 1000;
+        const d1 = 0.25;
+        const d2 = 0.20;
+        const za = 10;
+        const pa = 50000;
+        const pb = 100000;
+        const vA = vdot / area(d1);
+        const vB = vdot / area(d2);
+        const pHeadA = pa / (rho * g);
+        const pHeadB = pb / (rho * g);
+        const vHeadA = (vA * vA) / (2 * g);
+        const vHeadB = (vB * vB) / (2 * g);
+        const HA = pHeadA + vHeadA + za;
+        const HB = pHeadB + vHeadB + zb;
+        const HP = HB - HA;
+        const baseShare = HB > 0 ? HA / HB : 0;
+        const pumpShare = HB > 0 ? HP / HB : 0;
+        return { vdot, zb, za, pHeadA, pHeadB, vA, vB, vHeadA, vHeadB, HA, HB, HP, baseShare, pumpShare };
+    }
+
+    function syncText(data) {
+        labels.vdot.textContent = fmt(data.vdot, 2) + ' m^3/s';
+        labels.zb.textContent = fmt(data.zb, 0) + ' m';
+
+        out.va.textContent = fmt(data.vA, 2) + ' m/s';
+        out.vb.textContent = fmt(data.vB, 2) + ' m/s';
+        out.pah.textContent = fmt(data.pHeadA, 2) + ' m';
+        out.pbh.textContent = fmt(data.pHeadB, 2) + ' m';
+        out.ha.textContent = fmt(data.HA, 2) + ' m';
+        out.hb.textContent = fmt(data.HB, 2) + ' m';
+        out.ovHa.textContent = fmt(data.HA, 2) + ' m';
+        out.ovHb.textContent = fmt(data.HB, 2) + ' m';
+        out.ovHp.textContent = fmt(data.HP, 2) + ' m';
+
+        out.baseBar.style.width = (data.baseShare * 100).toFixed(1) + '%';
+        out.pumpBar.style.width = (data.pumpShare * 100).toFixed(1) + '%';
+        out.baseLabel.textContent = (data.baseShare * 100).toFixed(1) + ' %';
+        out.pumpLabel.textContent = (data.pumpShare * 100).toFixed(1) + ' %';
+
+        out.eq1.textContent = 'H_A = ' + fmt(data.pHeadA, 2) + ' + ' + fmt(data.vHeadA, 2) + ' + ' + fmt(data.za, 2) + ' = ' + fmt(data.HA, 2) + ' m';
+        out.eq2.textContent = 'H_B = ' + fmt(data.pHeadB, 2) + ' + ' + fmt(data.vHeadB, 2) + ' + ' + fmt(data.zb, 2) + ' = ' + fmt(data.HB, 2) + ' m';
+        out.eq3.textContent = 'H_p = ' + fmt(data.HB, 2) + ' - ' + fmt(data.HA, 2) + ' = ' + fmt(data.HP, 2) + ' m';
+
+        if (data.pumpShare > 0.7) {
+            out.expl.textContent = 'Većina potrebne izlazne energije ovdje dolazi od same pumpe. To znači da postojeća energija u točki A nije dovoljna za traženu visinu i tlak u B, pa pumpa mora nadoknaditi glavninu razlike od ' + fmt(data.HP, 2) + ' m.';
+        } else {
+            out.expl.textContent = 'U točki A već postoji značajan dio ukupne energije, ali pumpa ipak mora dodati ' + fmt(data.HP, 2) + ' m kako bi tok stigao do izlazne točke B na višoj koti i s većim ukupnim energetskim stanjem.';
+        }
+    }
+
+    function drawArrow(x1, y1, x2, y2, color, width, label) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const head = 10;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+        if (label) {
+            ctx.font = 'bold 13px Inter';
+            ctx.fillText(label, x1, y1 - 10);
+        }
+    }
+
+    function drawStack(x, baseY, parts, title, totalText) {
+        const width = 46;
+        const scale = 7.5;
+        let currentY = baseY;
+        parts.forEach(function(part) {
+            const height = Math.max(4, part.value * scale);
+            currentY -= height;
+            ctx.fillStyle = part.color;
+            ctx.fillRect(x, currentY, width, height);
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, currentY, width, height);
+        });
+        ctx.strokeStyle = '#385873';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, currentY, width, baseY - currentY);
+        ctx.fillStyle = '#163c61';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText(title, x - 2, baseY + 18);
+        ctx.fillText(totalText, x - 6, currentY - 12);
+    }
+
+    function drawScene(data) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bg.addColorStop(0, '#ffffff');
+        bg.addColorStop(1, '#e9f4ff');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const groundY = 446;
+        const sceneScale = 8;
+        const leftTank = { x: 38, y: groundY - 108, w: 110, h: 108 };
+        const pipeY = groundY - data.za * sceneScale;
+        const rightTank = { x: 360, y: groundY - data.zb * sceneScale - 78, w: 110, h: 110 };
+        const pumpX = 255;
+        const pumpY = pipeY;
+        const energyBaseY = 422;
+
+        ctx.fillStyle = '#dbeafe';
+        ctx.fillRect(24, groundY + 6, canvas.width - 48, 10);
+
+        ctx.fillStyle = '#e8f3fb';
+        ctx.fillRect(leftTank.x, leftTank.y, leftTank.w, leftTank.h);
+        ctx.fillRect(rightTank.x, rightTank.y, rightTank.w, rightTank.h);
+        ctx.strokeStyle = '#4a6f90';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(leftTank.x, leftTank.y, leftTank.w, leftTank.h);
+        ctx.strokeRect(rightTank.x, rightTank.y, rightTank.w, rightTank.h);
+
+        ctx.fillStyle = 'rgba(59,130,246,0.16)';
+        ctx.fillRect(leftTank.x + 6, leftTank.y + 8, leftTank.w - 12, leftTank.h - 8);
+        ctx.fillRect(rightTank.x + 6, rightTank.y + 16, rightTank.w - 12, rightTank.h - 16);
+
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 18;
+        ctx.beginPath();
+        ctx.moveTo(leftTank.x + 52, leftTank.y + 40);
+        ctx.lineTo(leftTank.x + 52, pipeY);
+        ctx.lineTo(pumpX - 34, pipeY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pumpX + 34, pipeY);
+        ctx.lineTo(rightTank.x + 55, pipeY);
+        ctx.lineTo(rightTank.x + 55, rightTank.y + 38);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(pumpX, pumpY, 30, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#7dd3fc';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(pumpX, pumpY);
+        ctx.rotate(phase * 0.08 + data.vdot * 8);
+        for (let i = 0; i < 4; i++) {
+            ctx.rotate(Math.PI / 2);
+            ctx.fillStyle = '#7dd3fc';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(14, 4, 22, 0);
+            ctx.quadraticCurveTo(14, -4, 0, 0);
+            ctx.fill();
+        }
+        ctx.restore();
+
+        const particleColor = '#3b82f6';
+        for (let i = 0; i < 30; i++) {
+            const pos = ((i / 30) + phase * (0.004 + data.vA * 0.0012)) % 1;
+            let px, py;
+            if (pos < 0.38) {
+                px = leftTank.x + 52;
+                py = leftTank.y + 40 - (pos / 0.38) * (leftTank.y + 40 - pipeY);
+            } else {
+                px = leftTank.x + 52 + ((pos - 0.38) / 0.62) * (pumpX - 86 - (leftTank.x + 52));
+                py = pipeY;
+            }
+            ctx.fillStyle = particleColor;
+            ctx.beginPath();
+            ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        for (let i = 0; i < 34; i++) {
+            const pos = ((i / 34) + phase * (0.005 + data.vB * 0.0012)) % 1;
+            let px, py;
+            if (pos < 0.6) {
+                px = pumpX + 34 + (pos / 0.6) * (rightTank.x + 55 - (pumpX + 34));
+                py = pipeY;
+            } else {
+                px = rightTank.x + 55;
+                py = pipeY + ((pos - 0.6) / 0.4) * (rightTank.y + 38 - pipeY);
+            }
+            ctx.fillStyle = particleColor;
+            ctx.beginPath();
+            ctx.arc(px, py, 2.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        drawArrow(pumpX - 86, pipeY, pumpX - 24, pipeY, '#1d4ed8', 4, 'v_A');
+        drawArrow(pumpX + 42, pipeY, pumpX + 108, pipeY, '#ef4444', 4, 'v_B');
+        drawArrow(pumpX + 6, pipeY - 70, pumpX + 6, pipeY - 18, '#f97316', 3.5, 'H_p');
+
+        drawStack(548, energyBaseY, [
+            { value: data.za, color: '#94a3b8' },
+            { value: data.vHeadA, color: '#7dd3fc' },
+            { value: data.pHeadA, color: '#3b82f6' }
+        ], 'H_A', fmt(data.HA, 1) + ' m');
+
+        drawStack(626, energyBaseY, [
+            { value: data.zb, color: '#94a3b8' },
+            { value: data.vHeadB, color: '#7dd3fc' },
+            { value: data.pHeadB, color: '#3b82f6' }
+        ], 'H_B', fmt(data.HB, 1) + ' m');
+
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(602, energyBaseY - data.HA * 7.5);
+        ctx.lineTo(602, energyBaseY - data.HB * 7.5);
+        ctx.stroke();
+        drawArrow(602, energyBaseY - data.HA * 7.5, 602, energyBaseY - data.HB * 7.5, '#f97316', 3);
+
+        ctx.fillStyle = '#36506b';
+        ctx.font = 'bold 13px Inter';
+        ctx.fillText('Točka A', leftTank.x + 18, leftTank.y - 12);
+        ctx.fillText('Točka B', rightTank.x + 18, rightTank.y - 12);
+        ctx.fillText('pumpa', pumpX - 16, pipeY + 52);
+        ctx.fillText('z_A = ' + fmt(data.za, 0) + ' m', 144, pipeY - 18);
+        ctx.fillText('z_B = ' + fmt(data.zb, 0) + ' m', rightTank.x - 8, rightTank.y - 30);
+    }
+
+    function update() {
+        latest = compute();
+        syncText(latest);
+    }
+
+    function loop() {
+        phase += 1;
+        if (latest) drawScene(latest);
+        requestAnimationFrame(loop);
+    }
+
+    Object.values(inputs).forEach(function(input) {
+        input.addEventListener('input', update);
+    });
+
+    root.querySelector('#z80b-preset-base').addEventListener('click', function() {
+        inputs.vdot.value = 0.15;
+        inputs.zb.value = 20;
+        update();
+    });
+    root.querySelector('#z80b-preset-flow').addEventListener('click', function() {
+        inputs.vdot.value = 0.24;
+        inputs.zb.value = 20;
+        update();
+    });
+    root.querySelector('#z80b-preset-lift').addEventListener('click', function() {
+        inputs.vdot.value = 0.12;
+        inputs.zb.value = 28;
+        update();
+    });
+
+    update();
+    loop();
+})();
+</script>
+```
+
 ### Zadatak Z82 â€” Pad tlaka u cijevi {.unnumbered}
 
  
@@ -835,7 +2916,7 @@ $\Delta p = \frac{\rho}{2}(v_2^2 - v_1^2) = \frac{1,2}{2}(30,63^2 - 8,1^2) = \ma
 
 ```{=html}
 <!-- WIDGET: Sifon i Kavitacija -->
-<div id="z83-siphon-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+<div id="z83-siphon-legacy" style="display:none;max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌀 Fizika sifona: Brzina, Podtlak i Kavitacija</h4>
     <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
         <strong>Kako čitati sifon:</strong> Pad prema izlazu <strong>h₃</strong> određuje brzinu toka, a ta brzina zatim zajedno s visinom vrha <strong>h₂</strong> spušta tlak u najvišoj točki. Kavitacija nastupa kada apsolutni tlak u vrhu padne ispod tlaka isparavanja odabrane tekućine.
@@ -934,6 +3015,432 @@ $\Delta p = \frac{\rho}{2}(v_2^2 - v_1^2) = \frac{1,2}{2}(30,63^2 - 8,1^2) = \ma
     }
     h2S.oninput = update; h3S.oninput = update; fluidS.onchange = update; update();
     function anim() { update(); requestAnimationFrame(anim); } anim();
+})();
+</script>
+```
+
+```{=html}
+<div id='z83-siphon-scene' style='max-width:1120px;margin:2rem auto;font-family:Inter,system-ui,sans-serif;color:#17324d;'>
+    <style>
+        #z83-siphon-scene *{box-sizing:border-box}
+        #z83-siphon-scene .z83b-shell{border:1px solid #dce8f4;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);box-shadow:0 24px 58px rgba(41,76,109,.1)}
+        #z83-siphon-scene .z83b-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:start;padding:1.45rem 1.55rem 1rem;background:radial-gradient(circle at top right,rgba(59,130,246,.12),transparent 34%),linear-gradient(135deg,#eef8ff 0%,#ffffff 56%,#f4fbff 100%);border-bottom:1px solid rgba(43,92,124,.1)}
+        #z83-siphon-scene .z83b-kicker{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#5d7b94;margin-bottom:.35rem}
+        #z83-siphon-scene .z83b-title{margin:0;font-size:clamp(1.38rem,2.4vw,1.92rem);line-height:1.08;color:#163c61}
+        #z83-siphon-scene .z83b-sub{margin:.55rem 0 0;max-width:72ch;color:#547088;font-size:.95rem;line-height:1.6}
+        #z83-siphon-scene .z83b-chip{align-self:start;padding:.76rem .96rem;border-radius:999px;border:1px solid #cfe3f7;background:linear-gradient(135deg,#f0f8ff,#fbfdff);color:#1d4f78;font-weight:800;font-size:.82rem;white-space:nowrap}
+        #z83-siphon-scene .z83b-note{margin:1rem 1.55rem 0;padding:.95rem 1rem;border-radius:16px;border:1px solid #d7e8f8;background:linear-gradient(135deg,#eff7ff,#f8fbff);color:#2d587f;font-size:.86rem;line-height:1.6}
+        #z83-siphon-scene .z83b-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;padding:1rem 1.55rem 1.55rem}
+        #z83-siphon-scene .z83b-stage{display:flex;flex-direction:column;gap:.9rem;padding:1rem;border-radius:22px;overflow:hidden;border:1px solid #dbe6f0;background:radial-gradient(circle at top,#ffffff 0%,#eef6ff 68%,#e7f2fb 100%)}
+        #z83-siphon-scene .z83b-stage canvas{display:block;width:100%;height:auto}
+        #z83-siphon-scene .z83b-overlay{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;padding:0;background:none;border:0;box-shadow:none}
+        #z83-siphon-scene .z83b-overlay div{display:flex;flex-direction:column;gap:.35rem;padding:.85rem .92rem;border-radius:16px;background:rgba(255,255,255,.94);border:1px solid rgba(207,227,247,.98);box-shadow:0 12px 24px rgba(41,76,109,.06);font-size:.76rem;color:#3a5671}
+        #z83-siphon-scene .z83b-overlay strong{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:#66829a}
+        #z83-siphon-scene .z83b-overlay span{font-weight:800;color:#123a63;font-variant-numeric:tabular-nums}
+        #z83-siphon-scene .z83b-state{position:static;align-self:flex-start;padding:.72rem .9rem;border-radius:16px;border:1px solid #dbe6f0;background:rgba(255,255,255,.94);box-shadow:0 12px 24px rgba(41,76,109,.08);font-size:.8rem;font-weight:800}
+        #z83-siphon-scene .z83b-state.safe{color:#0f766e;border-color:#99f6e4;background:rgba(240,253,250,.95)}
+        #z83-siphon-scene .z83b-state.risk{color:#b45309;border-color:#fdba74;background:rgba(255,247,237,.96)}
+        #z83-siphon-scene .z83b-state.cav{color:#b91c1c;border-color:#fca5a5;background:rgba(254,242,242,.96)}
+        #z83-siphon-scene .z83b-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}
+        #z83-siphon-scene .z83b-card{border:1px solid #e3ebf2;border-radius:18px;background:#ffffff}
+        #z83-siphon-scene .z83b-controls{padding:1rem;display:grid;gap:.8rem}
+        #z83-siphon-scene .z83b-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+        #z83-siphon-scene .z83b-preset{appearance:none;border:1px solid #cfe3f7;border-radius:999px;padding:.65rem .7rem;background:#eff7ff;color:#1d4f78;font-size:.78rem;font-weight:800;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
+        #z83-siphon-scene .z83b-preset:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(41,76,109,.08)}
+        #z83-siphon-scene .z83b-row label{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.83rem;font-weight:700;color:#36506b}
+        #z83-siphon-scene .z83b-row input,#z83-siphon-scene .z83b-row select{width:100%;accent-color:#2f80ed}
+        #z83-siphon-scene .z83b-row select{padding:.55rem .7rem;border-radius:12px;border:1px solid #dbe6f0;background:#f8fbff;color:#163c61;font:inherit}
+        #z83-siphon-scene .z83b-metrics{padding:1rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+        #z83-siphon-scene .z83b-metric{padding:.9rem;border-radius:16px;background:linear-gradient(180deg,#fbfdff 0%,#eef7ff 100%);border:1px solid rgba(31,91,150,.08)}
+        #z83-siphon-scene .z83b-metric small{display:block;margin-bottom:.35rem;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#6a849a}
+        #z83-siphon-scene .z83b-metric strong{display:block;font-size:1.02rem;color:#123a63;font-variant-numeric:tabular-nums}
+        #z83-siphon-scene .z83b-bars,#z83-siphon-scene .z83b-formula,#z83-siphon-scene .z83b-explainer{padding:1rem}
+        #z83-siphon-scene .z83b-bars strong.section,#z83-siphon-scene .z83b-formula strong.section,#z83-siphon-scene .z83b-explainer strong.section{display:block;margin-bottom:.55rem;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#66829a}
+        #z83-siphon-scene .z83b-bar-row{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.84rem;color:#36506b;font-weight:700}
+        #z83-siphon-scene .z83b-track{height:12px;border-radius:999px;background:#edf3f9;overflow:hidden;margin-bottom:.85rem}
+        #z83-siphon-scene .z83b-fill{height:100%;width:0;border-radius:inherit;transition:width .28s ease}
+        #z83-siphon-scene .z83b-static{background:linear-gradient(90deg,#60a5fa,#2563eb)}
+        #z83-siphon-scene .z83b-dynamic{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+        #z83-siphon-scene .z83b-formula{font-size:.84rem;line-height:1.58;color:#355771}
+        #z83-siphon-scene .z83b-formula div+div{margin-top:.45rem}
+        #z83-siphon-scene .z83b-explainer{grid-column:1/-1;border-color:#bfdbfe;background:#eff6ff;color:#1e3a8a;font-size:.84rem;line-height:1.58}
+        @media (max-width:980px){
+            #z83-siphon-scene .z83b-head,#z83-siphon-scene .z83b-grid{grid-template-columns:1fr}
+            #z83-siphon-scene .z83b-chip{justify-self:start}
+        }
+        @media (max-width:640px){
+            #z83-siphon-scene .z83b-presets,#z83-siphon-scene .z83b-metrics,#z83-siphon-scene .z83b-overlay,#z83-siphon-scene .z83b-side{grid-template-columns:1fr}
+            #z83-siphon-scene .z83b-stage{padding:.85rem}
+        }
+    </style>
+    <div class='z83b-shell'>
+        <div class='z83b-head'>
+            <div>
+                <div class='z83b-kicker'>Z83-Z85 sifon i kavitacija</div>
+                <h3 class='z83b-title'>Pad prema izlazu najprije stvara brzinu, a tek ta brzina zajedno s usponom vrha određuje koliko tlaka ostaje u najvišoj točki</h3>
+                <p class='z83b-sub'>Lanac je ovdje strog: <strong>h<sub>3</sub></strong> daje brzinu <strong>v</strong>, iz nje slijedi brzinska visina <strong>v²/2g</strong>, a zatim Bernoulli oduzima i geodetski uspon <strong>h<sub>2</sub></strong> i dinamički doprinos od atmosferskog tlaka. Tek tada vidiš ostaje li vrh iznad tlaka isparavanja <strong>p<sub>v</sub></strong>.</p>
+            </div>
+            <div class='z83b-chip'>p<sub>apex</sub> = p<sub>atm</sub> - ρgh<sub>2</sub> - ρv²/2</div>
+        </div>
+
+        <div class='z83b-note'><strong>Kako čitati scenu:</strong> plava cijev prikazuje glavni tok, a desno pratiš kako se atmosferski tlak u vrhu “troši” na geodetski uspon i na brzinsku visinu. Kad preostali tlak padne ispod <strong>p<sub>v</sub></strong>, u vrhu se pojavljuje kavitacija.</div>
+
+        <div class='z83b-grid'>
+            <div class='z83b-stage'>
+                <canvas id='z83b-canvas' width='720' height='520'></canvas>
+                <div class='z83b-overlay'>
+                    <div><strong>p<sub>apex</sub></strong><span id='z83b-ov-papex'>52.3 kPa</span></div>
+                    <div><strong>p<sub>v</sub></strong><span id='z83b-ov-pv'>2.33 kPa</span></div>
+                    <div><strong>Rezerva</strong><span id='z83b-ov-margin'>49.95 kPa</span></div>
+                </div>
+                <div id='z83b-state' class='z83b-state safe'>Siguran rad</div>
+            </div>
+
+            <div class='z83b-side'>
+                <div class='z83b-card z83b-controls'>
+                    <div class='z83b-presets'>
+                        <button type='button' class='z83b-preset' id='z83b-preset-safe'>Sigurno</button>
+                        <button type='button' class='z83b-preset' id='z83b-preset-edge'>Rubno</button>
+                        <button type='button' class='z83b-preset' id='z83b-preset-cav'>Kavitacija</button>
+                    </div>
+
+                    <div class='z83b-row'><label for='z83b-h2'><span>Visina vrha h2</span><span id='z83b-h2-label'>3.0 m</span></label><input id='z83b-h2' type='range' min='1' max='12' step='0.1' value='3'></div>
+                    <div class='z83b-row'><label for='z83b-h3'><span>Pad sifona h3</span><span id='z83b-h3-label'>2.0 m</span></label><input id='z83b-h3' type='range' min='0.5' max='6' step='0.1' value='2'></div>
+                    <div class='z83b-row'><label for='z83b-fluid'><span>Tekućina</span><span id='z83b-fluid-label'>Voda (20°C)</span></label><select id='z83b-fluid'><option value='water'>Voda (20°C)</option><option value='hot_water'>Vruća voda (80°C)</option><option value='oil'>Ulje</option></select></div>
+                </div>
+
+                <div class='z83b-card z83b-metrics'>
+                    <div class='z83b-metric'><small>v</small><strong id='z83b-v'>6.26 m/s</strong></div>
+                    <div class='z83b-metric'><small>v^2/2g</small><strong id='z83b-vhead'>2.00 m</strong></div>
+                    <div class='z83b-metric'><small>p_apex</small><strong id='z83b-papex'>52.30 kPa</strong></div>
+                    <div class='z83b-metric'><small>p_v</small><strong id='z83b-pv'>2.33 kPa</strong></div>
+                    <div class='z83b-metric'><small>Pad zbog h2</small><strong id='z83b-static-drop'>29.43 kPa</strong></div>
+                    <div class='z83b-metric'><small>Rezerva</small><strong id='z83b-margin'>49.95 kPa</strong></div>
+                </div>
+
+                <div class='z83b-card z83b-bars'>
+                    <strong class='section'>Što troši tlak u vrhu?</strong>
+                    <div class='z83b-bar-row'><span>Geodetski uspon h2</span><strong id='z83b-static-label'>29.1 %</strong></div>
+                    <div class='z83b-track'><div id='z83b-static-bar' class='z83b-fill z83b-static'></div></div>
+                    <div class='z83b-bar-row'><span>Brzinska komponenta</span><strong id='z83b-dynamic-label'>18.6 %</strong></div>
+                    <div class='z83b-track'><div id='z83b-dynamic-bar' class='z83b-fill z83b-dynamic'></div></div>
+                </div>
+
+                <div class='z83b-card z83b-formula'>
+                    <strong class='section'>Lanac Bernoullija</strong>
+                    <div id='z83b-eq1'>v = sqrt(2gh3)</div>
+                    <div id='z83b-eq2'>p_apex = p_atm - rho g h2 - rho v^2 / 2</div>
+                    <div id='z83b-eq3'>Rezerva = p_apex - p_v</div>
+                </div>
+
+                <div class='z83b-card z83b-explainer'>
+                    <strong class='section'>Što se sada događa</strong>
+                    <div id='z83b-expl'>Pad prema izlazu daje brzinu, a kombinacija uspona i brzine zatim spušta tlak u vrhu. Dok je p_apex iznad p_v, sifon radi bez kavitacije.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    const root = document.getElementById('z83-siphon-scene');
+    if (!root) return;
+
+    const canvas = root.querySelector('#z83b-canvas');
+    const ctx = canvas.getContext('2d');
+    const inputs = {
+        h2: root.querySelector('#z83b-h2'),
+        h3: root.querySelector('#z83b-h3'),
+        fluid: root.querySelector('#z83b-fluid')
+    };
+    const labels = {
+        h2: root.querySelector('#z83b-h2-label'),
+        h3: root.querySelector('#z83b-h3-label'),
+        fluid: root.querySelector('#z83b-fluid-label')
+    };
+    const out = {
+        v: root.querySelector('#z83b-v'),
+        vhead: root.querySelector('#z83b-vhead'),
+        papex: root.querySelector('#z83b-papex'),
+        pv: root.querySelector('#z83b-pv'),
+        staticDrop: root.querySelector('#z83b-static-drop'),
+        margin: root.querySelector('#z83b-margin'),
+        ovPapex: root.querySelector('#z83b-ov-papex'),
+        ovPv: root.querySelector('#z83b-ov-pv'),
+        ovMargin: root.querySelector('#z83b-ov-margin'),
+        state: root.querySelector('#z83b-state'),
+        staticBar: root.querySelector('#z83b-static-bar'),
+        dynamicBar: root.querySelector('#z83b-dynamic-bar'),
+        staticLabel: root.querySelector('#z83b-static-label'),
+        dynamicLabel: root.querySelector('#z83b-dynamic-label'),
+        eq1: root.querySelector('#z83b-eq1'),
+        eq2: root.querySelector('#z83b-eq2'),
+        eq3: root.querySelector('#z83b-eq3'),
+        expl: root.querySelector('#z83b-expl')
+    };
+
+    let phase = 0;
+    let latest = null;
+
+    function fmt(value, digits) {
+        return Number(value).toFixed(digits);
+    }
+
+    function fluidProps(key) {
+        if (key === 'hot_water') {
+            return { label: 'Vruća voda (80°C)', rho: 972, pv: 47400, color: '#f97316' };
+        }
+        if (key === 'oil') {
+            return { label: 'Ulje', rho: 850, pv: 10, color: '#0f766e' };
+        }
+        return { label: 'Voda (20°C)', rho: 1000, pv: 2330, color: '#2563eb' };
+    }
+
+    function compute() {
+        const h2 = parseFloat(inputs.h2.value);
+        const h3 = parseFloat(inputs.h3.value);
+        const props = fluidProps(inputs.fluid.value);
+        const g = 9.81;
+        const patm = 101325;
+        const v = Math.sqrt(2 * g * h3);
+        const vHead = (v * v) / (2 * g);
+        const staticDrop = props.rho * g * h2;
+        const dynamicDrop = 0.5 * props.rho * v * v;
+        const pApexAbs = patm - staticDrop - dynamicDrop;
+        const margin = pApexAbs - props.pv;
+        const staticShare = staticDrop / patm;
+        const dynamicShare = dynamicDrop / patm;
+        return {
+            h2, h3, props, g, patm, v, vHead, staticDrop, dynamicDrop, pApexAbs, margin, staticShare, dynamicShare,
+            isCav: pApexAbs <= props.pv,
+            isRisk: pApexAbs > props.pv && margin < 10000
+        };
+    }
+
+    function syncText(data) {
+        labels.h2.textContent = fmt(data.h2, 1) + ' m';
+        labels.h3.textContent = fmt(data.h3, 1) + ' m';
+        labels.fluid.textContent = data.props.label;
+
+        out.v.textContent = fmt(data.v, 2) + ' m/s';
+        out.vhead.textContent = fmt(data.vHead, 2) + ' m';
+        out.papex.textContent = fmt(Math.max(data.pApexAbs, 0) / 1000, 2) + ' kPa';
+        out.pv.textContent = fmt(data.props.pv / 1000, 2) + ' kPa';
+        out.staticDrop.textContent = fmt(data.staticDrop / 1000, 2) + ' kPa';
+        out.margin.textContent = fmt(data.margin / 1000, 2) + ' kPa';
+        out.ovPapex.textContent = fmt(Math.max(data.pApexAbs, 0) / 1000, 2) + ' kPa';
+        out.ovPv.textContent = fmt(data.props.pv / 1000, 2) + ' kPa';
+        out.ovMargin.textContent = fmt(data.margin / 1000, 2) + ' kPa';
+
+        out.staticBar.style.width = Math.min(data.staticShare * 100, 100).toFixed(1) + '%';
+        out.dynamicBar.style.width = Math.min(data.dynamicShare * 100, 100).toFixed(1) + '%';
+        out.staticLabel.textContent = (data.staticShare * 100).toFixed(1) + ' %';
+        out.dynamicLabel.textContent = (data.dynamicShare * 100).toFixed(1) + ' %';
+
+        out.eq1.textContent = 'v = sqrt(2 · 9.81 · ' + fmt(data.h3, 1) + ') = ' + fmt(data.v, 2) + ' m/s';
+        out.eq2.textContent = 'p_apex = 101.33 - ' + fmt(data.staticDrop / 1000, 2) + ' - ' + fmt(data.dynamicDrop / 1000, 2) + ' = ' + fmt(Math.max(data.pApexAbs, 0) / 1000, 2) + ' kPa';
+        out.eq3.textContent = 'Rezerva = ' + fmt(Math.max(data.pApexAbs, 0) / 1000, 2) + ' - ' + fmt(data.props.pv / 1000, 2) + ' = ' + fmt(data.margin / 1000, 2) + ' kPa';
+
+        out.state.className = 'z83b-state ' + (data.isCav ? 'cav' : (data.isRisk ? 'risk' : 'safe'));
+        out.state.textContent = data.isCav ? 'Kavitacija' : (data.isRisk ? 'Mala rezerva' : 'Siguran rad');
+
+        if (data.isCav) {
+            out.expl.textContent = 'Geodetski uspon i brzinska komponenta zajedno su potrošili više tlaka nego što je dopušteno za odabranu tekućinu. Zato p_apex pada ispod p_v i u vrhu sifona počinje kavitacija.';
+        } else if (data.isRisk) {
+            out.expl.textContent = 'Sifon još radi bez kavitacije, ali rezerva je mala. Svako dodatno povećanje h2 ili h3 može spustiti vršni tlak ispod p_v i prebaciti sustav u kavitaciju.';
+        } else {
+            out.expl.textContent = 'Pad h3 najprije daje brzinu ' + fmt(data.v, 2) + ' m/s, a zatim se u vrhu od atmosferskog tlaka oduzimaju i geodetski uspon i dinamički doprinos. Budući da je p_apex još iznad p_v, sifon radi bez kavitacije.';
+        }
+    }
+
+    function drawArrow(x1, y1, x2, y2, color, width, label) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const head = 10;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+        if (label) {
+            ctx.font = 'bold 13px Inter';
+            ctx.fillText(label, x1, y1 - 10);
+        }
+    }
+
+    function drawScene(data) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bg.addColorStop(0, '#ffffff');
+        bg.addColorStop(1, '#eaf5ff');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const groundY = 430;
+        const scale = 28;
+        const tank = { x: 46, y: groundY - 150, w: 160, h: 150 };
+        const tubeX1 = 138;
+        const tubeX2 = 364;
+        const radius = 42;
+        const crestY = groundY - data.h2 * scale - 64;
+        const outletY = groundY + data.h3 * scale - 90;
+        const fluidColor = data.isCav ? '#93c5fd' : data.props.color;
+
+        ctx.fillStyle = '#e8f3fb';
+        ctx.fillRect(tank.x, tank.y, tank.w, tank.h);
+        ctx.strokeStyle = '#4a6f90';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(tank.x, tank.y, tank.w, tank.h);
+        ctx.fillStyle = 'rgba(59,130,246,0.14)';
+        ctx.fillRect(tank.x + 6, tank.y + 10, tank.w - 12, tank.h - 10);
+
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 18;
+        ctx.beginPath();
+        ctx.moveTo(tubeX1, tank.y + 52);
+        ctx.lineTo(tubeX1, crestY + radius);
+        ctx.arc(tubeX1 + radius, crestY + radius, radius, Math.PI, 1.5 * Math.PI);
+        ctx.lineTo(tubeX2 - radius, crestY);
+        ctx.arc(tubeX2 - radius, crestY + radius, radius, 1.5 * Math.PI, 2 * Math.PI);
+        ctx.lineTo(tubeX2, outletY);
+        ctx.stroke();
+
+        ctx.strokeStyle = fluidColor;
+        ctx.lineWidth = 11;
+        ctx.beginPath();
+        ctx.moveTo(tubeX1, tank.y + 52);
+        ctx.lineTo(tubeX1, crestY + radius);
+        ctx.arc(tubeX1 + radius, crestY + radius, radius, Math.PI, 1.5 * Math.PI);
+        ctx.lineTo(tubeX2 - radius, crestY);
+        ctx.arc(tubeX2 - radius, crestY + radius, radius, 1.5 * Math.PI, 2 * Math.PI);
+        ctx.lineTo(tubeX2, outletY);
+        ctx.stroke();
+
+        if (!data.isCav) {
+            for (let i = 0; i < 42; i++) {
+                const pos = ((i / 42) + phase * (0.005 + data.v * 0.0014)) % 1;
+                let px, py;
+                if (pos < 0.26) {
+                    px = tubeX1;
+                    py = tank.y + 52 - (pos / 0.26) * (tank.y + 52 - (crestY + radius));
+                } else if (pos < 0.38) {
+                    const angle = Math.PI + ((pos - 0.26) / 0.12) * (Math.PI / 2);
+                    px = tubeX1 + radius + radius * Math.cos(angle);
+                    py = crestY + radius + radius * Math.sin(angle);
+                } else if (pos < 0.62) {
+                    px = tubeX1 + radius + ((pos - 0.38) / 0.24) * (tubeX2 - radius - (tubeX1 + radius));
+                    py = crestY;
+                } else if (pos < 0.74) {
+                    const angle = 1.5 * Math.PI + ((pos - 0.62) / 0.12) * (Math.PI / 2);
+                    px = tubeX2 - radius + radius * Math.cos(angle);
+                    py = crestY + radius + radius * Math.sin(angle);
+                } else {
+                    px = tubeX2;
+                    py = crestY + radius + ((pos - 0.74) / 0.26) * (outletY - (crestY + radius));
+                }
+                ctx.fillStyle = 'rgba(255,255,255,.9)';
+                ctx.beginPath();
+                ctx.arc(px, py, 2.1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else {
+            for (let i = 0; i < 26; i++) {
+                const x = 186 + Math.random() * 150;
+                const y = crestY - 8 + (Math.random() - 0.5) * 18;
+                ctx.fillStyle = 'rgba(255,255,255,.92)';
+                ctx.beginPath();
+                ctx.arc(x, y, 2 + Math.random() * 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const gaugeX = 560;
+        const gaugeY = 112;
+        const gaugeH = 270;
+        const pApexClamped = Math.max(data.pApexAbs, 0);
+        const remainingRatio = pApexClamped / data.patm;
+        const vaporRatio = data.props.pv / data.patm;
+
+        ctx.fillStyle = '#edf3f9';
+        ctx.fillRect(gaugeX, gaugeY, 34, gaugeH);
+        const gaugeGrad = ctx.createLinearGradient(gaugeX, gaugeY + gaugeH, gaugeX, gaugeY);
+        gaugeGrad.addColorStop(0, '#f97316');
+        gaugeGrad.addColorStop(1, '#2563eb');
+        ctx.fillStyle = gaugeGrad;
+        ctx.fillRect(gaugeX, gaugeY + gaugeH - gaugeH * remainingRatio, 34, gaugeH * remainingRatio);
+        ctx.strokeStyle = '#4a6f90';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(gaugeX, gaugeY, 34, gaugeH);
+        ctx.strokeStyle = '#ef4444';
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(gaugeX - 8, gaugeY + gaugeH - gaugeH * vaporRatio);
+        ctx.lineTo(gaugeX + 42, gaugeY + gaugeH - gaugeH * vaporRatio);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#36506b';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('p_atm', gaugeX + 46, gaugeY + 8);
+        ctx.fillText('p_v', gaugeX + 46, gaugeY + gaugeH - gaugeH * vaporRatio + 4);
+        ctx.fillText('p_apex', gaugeX + 46, gaugeY + gaugeH - gaugeH * remainingRatio - 6);
+
+        drawArrow(tubeX2 + 18, crestY + 22, tubeX2 + 18, outletY - 14, '#1d4ed8', 3.5, 'h3');
+        drawArrow(tubeX1 + 24, tank.y + 20, tubeX1 + 24, crestY - 12, '#f97316', 3.2, 'h2');
+
+        ctx.fillStyle = '#163c61';
+        ctx.font = 'bold 13px Inter';
+        ctx.fillText('vrh sifona', 228, crestY - 18);
+        ctx.fillText('izlaz', tubeX2 - 16, outletY + 26);
+        ctx.fillText('spremnik', tank.x + 32, tank.y - 12);
+    }
+
+    function update() {
+        latest = compute();
+        syncText(latest);
+    }
+
+    function loop() {
+        phase += 1;
+        if (latest) drawScene(latest);
+        requestAnimationFrame(loop);
+    }
+
+    Object.values(inputs).forEach(function(input) {
+        input.addEventListener('input', update);
+        input.addEventListener('change', update);
+    });
+
+    root.querySelector('#z83b-preset-safe').addEventListener('click', function() {
+        inputs.h2.value = 3.0;
+        inputs.h3.value = 2.0;
+        inputs.fluid.value = 'water';
+        update();
+    });
+    root.querySelector('#z83b-preset-edge').addEventListener('click', function() {
+        inputs.h2.value = 5.0;
+        inputs.h3.value = 3.6;
+        inputs.fluid.value = 'water';
+        update();
+    });
+    root.querySelector('#z83b-preset-cav').addEventListener('click', function() {
+        inputs.h2.value = 4.8;
+        inputs.h3.value = 5.2;
+        inputs.fluid.value = 'hot_water';
+        update();
+    });
+
+    update();
+    loop();
 })();
 </script>
 ```

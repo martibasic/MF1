@@ -31,56 +31,257 @@ Moodyjev dijagram je ključni alat u mehanici fluida za određivanje koeficijent
 
 ```{=html}
 <!-- WIDGET: Moodyjev Dijagram -->
-<div id="v13-moody-widget" style="max-width: 1040px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 22px; padding: 30px; background: #ffffff; box-shadow: 0 18px 48px rgba(15,23,42,0.12); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #0f172a; margin-top: 0; margin-bottom: 24px; font-weight: 800;">📊 Moodyjev dijagram: gdje si na karti otpora?</h4>
+<div id="v13-moody-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+    <style>
+        #v13-moody-widget .m13-shell {
+            border-radius: 30px;
+            border: 1px solid #d9e7f7;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            box-shadow: 0 28px 64px rgba(15, 23, 42, 0.09);
+            padding: 28px;
+        }
+        #v13-moody-widget .m13-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        #v13-moody-widget .m13-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        #v13-moody-widget .m13-title {
+            margin: 0;
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            line-height: 1.06;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        #v13-moody-widget .m13-sub {
+            margin: 8px 0 0;
+            max-width: 74ch;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.62;
+        }
+        #v13-moody-widget .m13-chip {
+            align-self: start;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #e0f2fe, #ede9fe);
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-size: 0.78rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #v13-moody-widget .m13-note {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid #bfdbfe;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.62;
+        }
+        #v13-moody-widget .m13-stage {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        #v13-moody-widget .m13-scene {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #1e293b;
+            background: radial-gradient(circle at top, #172554 0%, #0f172a 60%, #020617 100%);
+            box-shadow: inset 0 0 0 1px rgba(148,163,184,0.08);
+        }
+        #v13-moody-widget canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #v13-moody-widget .m13-summary {
+            display: grid;
+            grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #v13-moody-widget .m13-legend,
+        #v13-moody-widget .m13-reading,
+        #v13-moody-widget .m13-controls,
+        #v13-moody-widget .m13-metric,
+        #v13-moody-widget .m13-explainer {
+            border-radius: 18px;
+            border: 1px solid #dbeafe;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
+        }
+        #v13-moody-widget .m13-legend {
+            padding: 18px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            color: #334155;
+            font-size: 0.84rem;
+            line-height: 1.55;
+        }
+        #v13-moody-widget .m13-legend-title,
+        #v13-moody-widget .m13-reading-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        #v13-moody-widget .m13-legend-title {
+            color: #475569;
+        }
+        #v13-moody-widget .m13-legend-row + .m13-legend-row {
+            margin-top: 8px;
+        }
+        #v13-moody-widget .m13-reading {
+            padding: 18px 20px;
+            background: linear-gradient(135deg, #0f172a, #172554);
+            border-color: rgba(148,163,184,0.26);
+            color: #e2e8f0;
+        }
+        #v13-moody-widget .m13-reading-kicker {
+            color: #94a3b8;
+        }
+        #v13-moody-widget .m13-lambda {
+            font-size: clamp(1.45rem, 2.6vw, 1.9rem);
+            font-weight: 800;
+            color: #fbbf24;
+            margin-bottom: 6px;
+        }
+        #v13-moody-widget .m13-lower {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #v13-moody-widget .m13-controls,
+        #v13-moody-widget .m13-explainer {
+            padding: 18px;
+            background: #ffffff;
+        }
+        #v13-moody-widget .m13-control + .m13-control {
+            margin-top: 20px;
+        }
+        #v13-moody-widget .m13-control label {
+            display: block;
+            margin-bottom: 10px;
+            color: #475569;
+            font-weight: 700;
+        }
+        #v13-moody-widget .m13-control input {
+            width: 100%;
+            accent-color: #2563eb;
+        }
+        #v13-moody-widget .m13-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #v13-moody-widget .m13-metric {
+            padding: 14px;
+            text-align: center;
+            background: #ffffff;
+        }
+        #v13-moody-widget .m13-metric small {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        #v13-moody-widget .m13-metric strong,
+        #v13-re-card,
+        #v13-rule-card,
+        #v13-kd-card {
+            display: block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        #v13-moody-widget .m13-explainer {
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #7c2d12;
+            font-size: 0.84rem;
+            line-height: 1.6;
+        }
+        @media (max-width: 960px) {
+            #v13-moody-widget .m13-head,
+            #v13-moody-widget .m13-summary,
+            #v13-moody-widget .m13-lower,
+            #v13-moody-widget .m13-metrics {
+                grid-template-columns: 1fr;
+            }
+            #v13-moody-widget .m13-chip {
+                justify-self: start;
+            }
+        }
+    </style>
 
-    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 22px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.6;">
-        <strong>Kako čitati Moodyja:</strong> Najprije lociraš <strong>Re</strong> po vodoravnoj osi. Zatim provjeriš jesi li u laminarnom, prijelaznom ili turbulentnom području. Tek kad si u turbulentnom području ima smisla pratiti krivulju za određeni <strong>k/D</strong> i očitati odgovarajući <strong>λ</strong>.
-    </div>
-
-    <div style="position: relative; background: radial-gradient(circle at top, #172554 0%, #0f172a 60%, #020617 100%); border-radius: 18px; border: 1px solid #1e293b; overflow: hidden; height: 560px; box-shadow: inset 0 0 0 1px rgba(148,163,184,0.08);">
-        <canvas id="v13-moody-canvas" width="960" height="560" style="width: 100%; height: 100%; display: block;"></canvas>
-        <div style="position: absolute; left: 18px; top: 18px; padding: 12px 14px; background: rgba(15,23,42,0.8); border: 1px solid rgba(148,163,184,0.3); border-radius: 12px; color: #e2e8f0; font-size: 0.74rem; line-height: 1.45; backdrop-filter: blur(8px); max-width: 220px;">
-            <div style="font-weight: 800; color: #f8fafc; margin-bottom: 6px;">Legenda</div>
-            <div><span style="color:#fbbf24; font-weight:700;">●</span> Trenutna radna točka</div>
-            <div><span style="color:#38bdf8; font-weight:700;">━</span> Glatka cijev / mali k/D</div>
-            <div><span style="color:#f97316; font-weight:700;">━</span> Veća hrapavost</div>
-            <div><span style="display:inline-block; width:12px; height:10px; background:rgba(34,197,94,0.18); border-radius:3px;"></span> Laminarno</div>
-            <div><span style="display:inline-block; width:12px; height:10px; background:rgba(245,158,11,0.18); border-radius:3px;"></span> Prijelaz</div>
-        </div>
-        <div style="position: absolute; right: 18px; top: 18px; padding: 12px 14px; background: rgba(15,23,42,0.8); border: 1px solid rgba(148,163,184,0.3); border-radius: 12px; color: #e2e8f0; font-size: 0.74rem; line-height: 1.45; backdrop-filter: blur(8px); min-width: 180px; text-align: right;">
-            <div style="font-weight: 700; color: #94a3b8; margin-bottom: 4px;">Trenutno očitanje</div>
-            <div style="font-size: 1.6rem; font-weight: 800; color: #fbbf24;">λ = <span id="v13-res-lambda">---</span></div>
-            <div>Režim: <b id="v13-res-regime">---</b></div>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 20px; align-items: start;">
-        <div style="padding: 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
-            <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Reynolds (log Re): <span id="v13-v-re" style="color:#2563eb;">5.0</span></label>
-            <input type="range" id="v13-re-slider" min="3" max="8" step="0.01" value="5" style="width: 100%;">
-
-            <label style="display: block; font-weight: 700; margin-top: 22px; margin-bottom: 10px; color: #475569;">Relativna hrapavost k/D: <span id="v13-v-kd" style="color:#2563eb;">0.0010</span></label>
-            <input type="range" id="v13-kd-slider" min="-6" max="-1.3" step="0.1" value="-3" style="width: 100%;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
-            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Re</div>
-                <div id="v13-re-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0</div>
+    <div class="m13-shell">
+        <div class="m13-head">
+            <div>
+                <div class="m13-kicker">Moodyjev dijagram</div>
+                <h4 class="m13-title">Prvo odredi gdje si po Reynoldsovom broju, a tek onda čitaj kako hrapavost pomiče otpor trenja</h4>
+                <p class="m13-sub">Završni polish ovdje nije dirao fiziku nego ritam čitanja: graf je sada čist bez prekrivanja, a legenda i trenutno očitanje preseljeni su u sažetak ispod scene.</p>
             </div>
-            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Pravilo za λ</div>
-                <div id="v13-rule-card" style="font-family: monospace; font-size: 0.84rem; font-weight: 800; color: #0f172a;">---</div>
+            <div class="m13-chip">Re + k/D -> λ</div>
+        </div>
+
+        <div class="m13-note"><strong>Kako čitati Moodyja:</strong> Najprije lociraš <strong>Re</strong> po vodoravnoj osi. Zatim provjeriš jesi li u laminarnom, prijelaznom ili turbulentnom području. Tek kad si u turbulentnom području ima smisla pratiti krivulju za određeni <strong>k/D</strong> i očitati odgovarajući <strong>λ</strong>.</div>
+
+        <div class="m13-stage">
+            <div class="m13-scene">
+                <canvas id="v13-moody-canvas" width="960" height="560"></canvas>
             </div>
-            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">k/D</div>
-                <div id="v13-kd-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0</div>
+            <div class="m13-summary">
+                <div class="m13-legend">
+                    <div class="m13-legend-title">Legenda</div>
+                    <div class="m13-legend-row"><span style="color:#fbbf24; font-weight:700;">●</span> Trenutna radna točka</div>
+                    <div class="m13-legend-row"><span style="color:#38bdf8; font-weight:700;">━</span> Glatka cijev / mali k/D</div>
+                    <div class="m13-legend-row"><span style="color:#f97316; font-weight:700;">━</span> Veća hrapavost</div>
+                    <div class="m13-legend-row"><span style="display:inline-block; width:12px; height:10px; background:rgba(34,197,94,0.18); border-radius:3px;"></span> Laminarno</div>
+                    <div class="m13-legend-row"><span style="display:inline-block; width:12px; height:10px; background:rgba(245,158,11,0.18); border-radius:3px;"></span> Prijelaz</div>
+                </div>
+                <div class="m13-reading">
+                    <div class="m13-reading-kicker">Trenutno očitanje</div>
+                    <div class="m13-lambda">λ = <span id="v13-res-lambda">---</span></div>
+                    <div>Režim: <b id="v13-res-regime">---</b></div>
+                </div>
             </div>
         </div>
 
-        <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.6;">
-            <strong>Tumačenje scene:</strong> <span id="v13-explainer"></span>
+        <div class="m13-lower">
+            <div class="m13-controls">
+                <div class="m13-control">
+                    <label>Reynolds (log Re): <span id="v13-v-re" style="color:#2563eb;">5.0</span></label>
+                    <input type="range" id="v13-re-slider" min="3" max="8" step="0.01" value="5">
+                </div>
+                <div class="m13-control">
+                    <label>Relativna hrapavost k/D: <span id="v13-v-kd" style="color:#2563eb;">0.0010</span></label>
+                    <input type="range" id="v13-kd-slider" min="-6" max="-1.3" step="0.1" value="-3">
+                </div>
+            </div>
+
+            <div>
+                <div class="m13-metrics">
+                    <div class="m13-metric"><small>Re</small><strong id="v13-re-card">0</strong></div>
+                    <div class="m13-metric"><small>Pravilo za λ</small><strong id="v13-rule-card">---</strong></div>
+                    <div class="m13-metric"><small>k/D</small><strong id="v13-kd-card">0</strong></div>
+                </div>
+                <div class="m13-explainer" style="margin-top:14px;"><strong>Tumačenje scene:</strong> <span id="v13-explainer"></span></div>
+            </div>
         </div>
     </div>
 </div>
@@ -291,64 +492,310 @@ Moodyjev dijagram je ključni alat u mehanici fluida za određivanje koeficijent
 
 ```{=html}
 <!-- WIDGET: Laminarni pad tlaka (Hagen-Poiseuille) -->
-<div id="z120-laminar-widget" style="max-width: 1040px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌡️ Laminarno strujanje: Utjecaj temperature i viskoznosti</h4>
+<div id="z120-laminar-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+    <style>
+        #z120-laminar-widget .z120-shell {
+            border-radius: 30px;
+            border: 1px solid #d8e7f7;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+        }
+        #z120-laminar-widget .z120-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        #z120-laminar-widget .z120-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        #z120-laminar-widget .z120-title {
+            margin: 0;
+            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
+            line-height: 1.08;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        #z120-laminar-widget .z120-sub {
+            margin: 8px 0 0;
+            max-width: 72ch;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.62;
+        }
+        #z120-laminar-widget .z120-chip {
+            align-self: start;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #e0f2fe, #eff6ff);
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-size: 0.78rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #z120-laminar-widget .z120-note {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid #bfdbfe;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.62;
+        }
+        #z120-laminar-widget .z120-stage {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        #z120-laminar-widget .z120-scene {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #dbeafe;
+            background: linear-gradient(180deg, #fbfdff 0%, #eff6ff 100%);
+        }
+        #z120-laminar-widget canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #z120-laminar-widget .z120-summary {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z120-laminar-widget .z120-pressures {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #z120-laminar-widget .z120-pressure,
+        #z120-laminar-widget .z120-state,
+        #z120-laminar-widget .z120-controls,
+        #z120-laminar-widget .z120-metric,
+        #z120-laminar-widget .z120-physics,
+        #z120-laminar-widget .z120-explainer {
+            border-radius: 18px;
+            border: 1px solid #dbeafe;
+            background: #ffffff;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
+        }
+        #z120-laminar-widget .z120-pressure {
+            padding: 16px;
+            text-align: center;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        }
+        #z120-laminar-widget .z120-pressure small {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+        }
+        #z120-p1-gauge,
+        #z120-p2-gauge {
+            display: block;
+            font-size: 1.35rem;
+            font-weight: 800;
+        }
+        #z120-p1-gauge {
+            color: #1d4ed8;
+        }
+        #z120-p2-gauge {
+            color: #dc2626;
+        }
+        #z120-laminar-widget .z120-state {
+            padding: 18px 20px;
+            background: linear-gradient(180deg, #ebf8ff 0%, #f7fbff 100%);
+            border-left: 6px solid #3182ce;
+        }
+        #z120-laminar-widget .z120-state-title,
+        #z120-laminar-widget .z120-physics-title {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        #z120-laminar-widget .z120-state-title {
+            color: #2c5282;
+        }
+        #z120-laminar-widget .z120-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+        #z120-laminar-widget .z120-row + .z120-row {
+            margin-top: 8px;
+        }
+        #z120-laminar-widget .z120-row + .z120-row.is-divider {
+            border-top: 1px solid #bee3f8;
+            padding-top: 8px;
+        }
+        #z120-laminar-widget .z120-lower {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z120-laminar-widget .z120-controls,
+        #z120-laminar-widget .z120-physics,
+        #z120-laminar-widget .z120-explainer {
+            padding: 18px;
+        }
+        #z120-laminar-widget .z120-control + .z120-control {
+            margin-top: 18px;
+        }
+        #z120-laminar-widget .z120-control label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #475569;
+        }
+        #z120-laminar-widget .z120-control input {
+            width: 100%;
+            accent-color: #2563eb;
+        }
+        #z120-laminar-widget .z120-side {
+            display: grid;
+            gap: 14px;
+        }
+        #z120-laminar-widget .z120-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #z120-laminar-widget .z120-metric {
+            padding: 14px;
+            text-align: center;
+        }
+        #z120-laminar-widget .z120-metric small {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        #z120-laminar-widget .z120-metric strong {
+            display: block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            font-size: 0.98rem;
+            color: #0f172a;
+        }
+        #z120-laminar-widget .z120-physics {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            color: #475569;
+            font-size: 0.8rem;
+            line-height: 1.58;
+        }
+        #z120-laminar-widget .z120-physics-title {
+            color: #334155;
+        }
+        #z120-laminar-widget .z120-explainer {
+            grid-column: 1 / -1;
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #7c2d12;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        @media (max-width: 960px) {
+            #z120-laminar-widget .z120-head,
+            #z120-laminar-widget .z120-summary,
+            #z120-laminar-widget .z120-lower,
+            #z120-laminar-widget .z120-pressures,
+            #z120-laminar-widget .z120-metrics {
+                grid-template-columns: 1fr;
+            }
+            #z120-laminar-widget .z120-chip {
+                justify-self: start;
+            }
+            #z120-laminar-widget .z120-explainer {
+                grid-column: auto;
+            }
+        }
+    </style>
 
-    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
-        <strong>Kako čitati laminarni slučaj:</strong> Ovdje temperatura najprije mijenja dinamičku viskoznost <strong>μ</strong>, a tek to mijenja Reynoldsov broj i koeficijent trenja <strong>λ = 64/Re</strong>. Zato je lanac <strong>T -> μ -> Re -> λ -> Δp</strong> važniji od samog završnog pada tlaka.
-    </div>
-    
-    <div style="display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start;">
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 430px;">
-            <canvas id="z120-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
-            <div style="position: absolute; left: 50px; top: 20px; text-align: center;">
-                <div style="font-size: 0.6rem; font-weight: 800; color: #64748b;">ULAZ (p1)</div>
-                <div id="z120-p1-gauge" style="font-size: 1.1rem; font-weight: 800; color: #1e40af;">200 kPa</div>
+    <div class="z120-shell">
+        <div class="z120-head">
+            <div>
+                <div class="z120-kicker">Z120 laminarni gubici</div>
+                <h4 class="z120-title">Temperatura ovdje ne djeluje izravno na pad tlaka nego prvo mijenja viskoznost, a tek onda cijeli lanac otpora</h4>
+                <p class="z120-sub">Widget sada prvo pokazuje cijev i usporedbu ulaznog i izlaznog tlaka, zatim sažetak stanja `Re`, `Δp` i `h_w`, a tek ispod kontrole i mikrometrike `μ` i `λ`. Time je važniji uzročno-posljedični redoslijed `T -> μ -> Re -> λ -> Δp` vidljiv bez prekrivanja scene.</p>
             </div>
-            <div style="position: absolute; right: 50px; top: 20px; text-align: center;">
-                <div style="font-size: 0.6rem; font-weight: 800; color: #64748b;">IZLAZ (p2)</div>
-                <div id="z120-p2-gauge" style="font-size: 1.1rem; font-weight: 800; color: #ef4444;">11.8 kPa</div>
+            <div class="z120-chip">T -> μ -> Re -> λ -> Δp</div>
+        </div>
+
+        <div class="z120-note"><strong>Kako čitati laminarni slučaj:</strong> Ovdje temperatura najprije mijenja dinamičku viskoznost <strong>μ</strong>, a tek to mijenja Reynoldsov broj i koeficijent trenja <strong>λ = 64/Re</strong>. Zato je lanac <strong>T -> μ -> Re -> λ -> Δp</strong> važniji od samog završnog pada tlaka.</div>
+
+        <div class="z120-stage">
+            <div class="z120-scene">
+                <canvas id="z120-canvas" width="550" height="400"></canvas>
+            </div>
+            <div class="z120-summary">
+                <div class="z120-pressures">
+                    <div class="z120-pressure">
+                        <small>Ulaz p1</small>
+                        <strong id="z120-p1-gauge">200 kPa</strong>
+                    </div>
+                    <div class="z120-pressure">
+                        <small>Izlaz p2</small>
+                        <strong id="z120-p2-gauge">11.8 kPa</strong>
+                    </div>
+                </div>
+                <div class="z120-state">
+                    <div class="z120-state-title">Fizikalna stanja</div>
+                    <div class="z120-row"><span>Reynolds Re</span><b id="z120-res-re">1836</b></div>
+                    <div class="z120-row"><span>Pad tlaka Δp</span><b id="z120-res-dp">188.2 kPa</b></div>
+                    <div class="z120-row is-divider"><span>Gubitak h<wbr>w</span><b id="z120-res-hw">19.2 m</b></div>
+                </div>
             </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Temperatura T: <span id="z120-v-T" style="color:#2563eb;">10</span> °C</label>
-                <input type="range" id="z120-T-slider" min="5" max="80" step="1" value="10" style="width: 100%;">
-                
-                <label style="display: block; font-weight: 700; margin-top: 15px; margin-bottom: 8px; color: #475569;">Brzina v: <span id="z120-v-v" style="color:#2563eb;">1.2</span> m/s</label>
-                <input type="range" id="z120-v-slider" min="0.1" max="3" step="0.1" value="1.2" style="width: 100%;">
+        <div class="z120-lower">
+            <div class="z120-controls">
+                <div class="z120-control">
+                    <label>Temperatura T: <span id="z120-v-T" style="color:#2563eb;">10</span> °C</label>
+                    <input type="range" id="z120-T-slider" min="5" max="80" step="1" value="10">
+                </div>
+                <div class="z120-control">
+                    <label>Brzina v: <span id="z120-v-v" style="color:#2563eb;">1.2</span> m/s</label>
+                    <input type="range" id="z120-v-slider" min="0.1" max="3" step="0.1" value="1.2">
+                </div>
             </div>
 
-            <div style="background: #ebf8ff; padding: 20px; border-radius: 15px; border-left: 6px solid #3182ce;">
-                <div style="font-weight: 800; font-size: 0.75rem; color: #2c5282; text-transform: uppercase; margin-bottom: 12px;">Fizikalna stanja:</div>
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;">
-                    <div style="display: flex; justify-content: space-between;"><span>Reynolds Re:</span> <b id="z120-res-re">1836</b></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Pad tlaka Δp:</span> <b id="z120-res-dp">188.2 kPa</b></div>
-                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #bee3f8; padding-top: 5px;">
-                        <span>Gubitak hw:</span> <b id="z120-res-hw">19.2 m</b>
+            <div class="z120-side">
+                <div class="z120-metrics">
+                    <div class="z120-metric">
+                        <small>μ</small>
+                        <strong id="z120-res-mu">0.0000 Pa s</strong>
+                    </div>
+                    <div class="z120-metric">
+                        <small>λ = 64/Re</small>
+                        <strong id="z120-res-lambda">0.0000</strong>
                     </div>
                 </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">μ</div>
-                    <div id="z120-res-mu" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000 Pa s</div>
-                </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">λ = 64/Re</div>
-                    <div id="z120-res-lambda" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000</div>
+                <div class="z120-physics">
+                    <div class="z120-physics-title">Fizikalni uvid</div>
+                    Kod laminarnog strujanja pad tlaka je direktno proporcionalan brzini i viskoznosti. Kako temperatura raste, viskoznost vode opada, pa isti tok traži sve manji utrošak energije.
                 </div>
             </div>
 
-            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
-                <strong>Tumačenje scene:</strong> <span id="z120-explainer"></span>
-            </div>
-            
-            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; font-style: italic;">
-                💡 <b>Fizikalni uvid:</b> Kod laminarnog strujanja pad tlaka je direktno proporcionalan brzini i viskoznosti. Kako temperatura raste, viskoznost vode opada, što drastično smanjuje gubitke energije.
-            </p>
+            <div class="z120-explainer"><strong>Tumačenje scene:</strong> <span id="z120-explainer"></span></div>
         </div>
     </div>
 </div>
@@ -498,56 +945,292 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
 
 ```{=html}
 <!-- WIDGET: Difuzor i lokalni gubici -->
-<div id="z122-diffuser-widget" style="max-width: 1040px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📐 Difuzor: usporavanje, povrat tlaka i odvajanje struje</h4>
+<div id="z122-diffuser-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+    <style>
+        #z122-diffuser-widget .z122-shell {
+            border-radius: 30px;
+            border: 1px solid #d8e7f7;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+        }
+        #z122-diffuser-widget .z122-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        #z122-diffuser-widget .z122-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        #z122-diffuser-widget .z122-title {
+            margin: 0;
+            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
+            line-height: 1.08;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        #z122-diffuser-widget .z122-sub {
+            margin: 8px 0 0;
+            max-width: 74ch;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.62;
+        }
+        #z122-diffuser-widget .z122-chip {
+            align-self: start;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #dbeafe, #ecfeff);
+            border: 1px solid #bfdbfe;
+            color: #0369a1;
+            font-size: 0.78rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #z122-diffuser-widget .z122-note {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid #bfdbfe;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.6;
+        }
+        #z122-diffuser-widget .z122-stage {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        #z122-diffuser-widget .z122-scene {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #dbeafe;
+            background: linear-gradient(180deg, #f8fafc 0%, #eef6ff 100%);
+        }
+        #z122-diffuser-widget canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #z122-diffuser-widget .z122-summary {
+            display: grid;
+            grid-template-columns: minmax(240px, 0.88fr) minmax(0, 1.12fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z122-diffuser-widget .z122-status,
+        #z122-diffuser-widget .z122-balance,
+        #z122-diffuser-widget .z122-metric,
+        #z122-diffuser-widget .z122-controls,
+        #z122-diffuser-widget .z122-physics,
+        #z122-diffuser-widget .z122-explainer {
+            border-radius: 18px;
+            border: 1px solid #dbeafe;
+            background: #ffffff;
+            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.06);
+        }
+        #z122-diffuser-widget .z122-status {
+            padding: 18px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        }
+        #z122-diffuser-widget .z122-status-title,
+        #z122-diffuser-widget .z122-balance-title,
+        #z122-diffuser-widget .z122-physics-title {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        #z122-diffuser-widget .z122-status-title {
+            color: #475569;
+        }
+        #z122-diffuser-widget .z122-status-copy {
+            margin: 0;
+            color: #475569;
+            font-size: 0.86rem;
+            line-height: 1.58;
+        }
+        #z122-sep-warn {
+            display: none;
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ef4444, #fb7185);
+            color: #ffffff;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            text-align: center;
+            box-shadow: 0 12px 22px rgba(239, 68, 68, 0.22);
+        }
+        #z122-diffuser-widget .z122-summary-side {
+            display: grid;
+            gap: 12px;
+        }
+        #z122-diffuser-widget .z122-balance {
+            padding: 18px 20px;
+            background: #fff7ed;
+            border-left: 6px solid #f97316;
+        }
+        #z122-diffuser-widget .z122-balance-title {
+            color: #9a3412;
+        }
+        #z122-diffuser-widget .z122-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+        #z122-diffuser-widget .z122-row + .z122-row {
+            margin-top: 8px;
+        }
+        #z122-diffuser-widget .z122-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #z122-diffuser-widget .z122-metric {
+            padding: 14px;
+            text-align: center;
+        }
+        #z122-diffuser-widget .z122-metric small {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        #z122-diffuser-widget .z122-metric strong {
+            display: block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            font-size: 0.98rem;
+            color: #0f172a;
+        }
+        #z122-diffuser-widget .z122-lower {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z122-diffuser-widget .z122-controls,
+        #z122-diffuser-widget .z122-physics,
+        #z122-diffuser-widget .z122-explainer {
+            padding: 18px;
+        }
+        #z122-diffuser-widget .z122-control + .z122-control {
+            margin-top: 18px;
+        }
+        #z122-diffuser-widget .z122-control label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #475569;
+        }
+        #z122-diffuser-widget .z122-control input {
+            width: 100%;
+            accent-color: #2563eb;
+        }
+        #z122-diffuser-widget .z122-physics {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            color: #475569;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        #z122-diffuser-widget .z122-physics-title {
+            color: #334155;
+        }
+        #z122-diffuser-widget .z122-explainer {
+            grid-column: 1 / -1;
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #7c2d12;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        @media (max-width: 960px) {
+            #z122-diffuser-widget .z122-head,
+            #z122-diffuser-widget .z122-summary,
+            #z122-diffuser-widget .z122-lower,
+            #z122-diffuser-widget .z122-metrics {
+                grid-template-columns: 1fr;
+            }
+            #z122-diffuser-widget .z122-chip {
+                justify-self: start;
+            }
+            #z122-diffuser-widget .z122-explainer {
+                grid-column: auto;
+            }
+        }
+    </style>
 
-    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.6;">
-        <strong>Kako čitati difuzor:</strong> U urednom difuzoru strujnice se otvaraju glatko, brzina pada s <strong>v₁</strong> na <strong>v₂</strong>, a dio brzinske visine vraća se u tlak. Kad kut postane prevelik, granični sloj se odvaja od stijenke i uz zid nastaju vrtložne zone koje pretvaraju dobitak u dodatni lokalni gubitak.
-    </div>
-
-    <div style="position: relative; background: linear-gradient(180deg, #f8fafc 0%, #eef6ff 100%); border-radius: 16px; border: 1px solid #dbeafe; overflow: hidden; height: 440px;">
-        <canvas id="z122-canvas" width="920" height="440" style="width: 100%; height: 100%; display: block;"></canvas>
-        <div id="z122-sep-warn" style="position: absolute; right: 18px; top: 18px; background: rgba(239, 68, 68, 0.92); color: white; padding: 8px 12px; border-radius: 9px; font-size: 0.72rem; font-weight: 800; display: none; letter-spacing: 0.02em;">
-            ODVAJANJE STRUJE UZ STIJENKU
+    <div class="z122-shell">
+        <div class="z122-head">
+            <div>
+                <div class="z122-kicker">Z122 difuzor</div>
+                <h4 class="z122-title">Dobitak tlaka vrijedi samo dok difuzor širi tok dovoljno nježno da granični sloj ostane priljubljen uz stijenku</h4>
+                <p class="z122-sub">Ovaj polish čita difuzor istim redoslijedom kao novije widgete: najprije vidiš širenje scene, zatim stanje odvajanja i bilancu učinaka, a tek onda podešavaš kut i ulaznu brzinu.</p>
+            </div>
+            <div class="z122-chip">v₁ -> v₂ -> p₂</div>
         </div>
-    </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; align-items: start;">
-        <div style="padding: 20px; background: #f8fafc; border-radius: 15px; border: 1px solid #e2e8f0;">
-            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Kut širenja α: <span id="z122-v-alpha" style="color:#2563eb;">30</span>°</label>
-            <input type="range" id="z122-alpha-slider" min="5" max="60" step="1" value="30" style="width: 100%;">
+        <div class="z122-note"><strong>Kako čitati difuzor:</strong> U urednom difuzoru strujnice se otvaraju glatko, brzina pada s <strong>v₁</strong> na <strong>v₂</strong>, a dio brzinske visine vraća se u tlak. Kad kut postane prevelik, granični sloj se odvaja od stijenke i uz zid nastaju vrtložne zone koje pretvaraju dobitak u dodatni lokalni gubitak.</div>
 
-            <label style="display: block; font-weight: 700; margin-top: 18px; margin-bottom: 8px; color: #475569;">Ulazna brzina v₁: <span id="z122-v-v1" style="color:#2563eb;">7.0</span> m/s</label>
-            <input type="range" id="z122-v1-slider" min="1" max="15" step="0.5" value="7" style="width: 100%;">
-        </div>
-
-        <div style="background: #fff7ed; padding: 18px 20px; border-radius: 15px; border-left: 6px solid #f97316;">
-            <div style="font-weight: 800; font-size: 0.75rem; color: #9a3412; text-transform: uppercase; margin-bottom: 12px;">Bilanca učinaka</div>
-            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;">
-                <div style="display: flex; justify-content: space-between;"><span>Koeficijent ζ</span><b id="z122-res-zeta">0.07</b></div>
-                <div style="display: flex; justify-content: space-between;"><span>Lokalni gubitak hwm</span><b id="z122-res-hwm">0.18 m</b></div>
-                <div style="display: flex; justify-content: space-between;"><span>Izlazni tlak p₂</span><b id="z122-res-p2" style="color:#c2410c;">169.1 kPa</b></div>
+        <div class="z122-stage">
+            <div class="z122-scene">
+                <canvas id="z122-canvas" width="920" height="440"></canvas>
+            </div>
+            <div class="z122-summary">
+                <div class="z122-status">
+                    <div class="z122-status-title">Stanje graničnog sloja</div>
+                    <p class="z122-status-copy">Mali kutovi dopuštaju uredan povrat tlaka. Veći kut tjera tok da se odlijepi od stijenke, pa dio dobitka odlazi u vrtložne zone i dodatne gubitke.</p>
+                    <div id="z122-sep-warn">ODVAJANJE STRUJE UZ STIJENKU</div>
+                </div>
+                <div class="z122-summary-side">
+                    <div class="z122-balance">
+                        <div class="z122-balance-title">Bilanca učinaka</div>
+                        <div class="z122-row"><span>Koeficijent ζ</span><b id="z122-res-zeta">0.07</b></div>
+                        <div class="z122-row"><span>Lokalni gubitak hwm</span><b id="z122-res-hwm">0.18 m</b></div>
+                        <div class="z122-row"><span>Izlazni tlak p₂</span><b id="z122-res-p2" style="color:#c2410c;">169.1 kPa</b></div>
+                    </div>
+                    <div class="z122-metrics">
+                        <div class="z122-metric"><small>v₂</small><strong id="z122-res-v2">0.00 m/s</strong></div>
+                        <div class="z122-metric"><small>Δ(v²/2g)</small><strong id="z122-res-dhead">0.00 m</strong></div>
+                        <div class="z122-metric"><small>Režim kuta</small><strong id="z122-res-regime">miran</strong></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
-            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂</div>
-                <div id="z122-res-v2" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+        <div class="z122-lower">
+            <div class="z122-controls">
+                <div class="z122-control">
+                    <label>Kut širenja α: <span id="z122-v-alpha" style="color:#2563eb;">30</span>°</label>
+                    <input type="range" id="z122-alpha-slider" min="5" max="60" step="1" value="30">
+                </div>
+                <div class="z122-control">
+                    <label>Ulazna brzina v₁: <span id="z122-v-v1" style="color:#2563eb;">7.0</span> m/s</label>
+                    <input type="range" id="z122-v1-slider" min="1" max="15" step="0.5" value="7">
+                </div>
             </div>
-            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δ(v²/2g)</div>
-                <div id="z122-res-dhead" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
-            </div>
-            <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Režim kuta</div>
-                <div id="z122-res-regime" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">miran</div>
-            </div>
-        </div>
-    </div>
 
-    <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.6; margin-top: 16px;">
-        <strong>Tumačenje scene:</strong> <span id="z122-explainer"></span>
+            <div class="z122-physics">
+                <div class="z122-physics-title">Fizikalni uvid</div>
+                Difuzor idealno pretvara dio brzinske visine natrag u tlak. No čim se širenje previše agresivno otvori, tok više ne prati stijenu i lokalni gubitak brzo raste unatoč nižoj izlaznoj brzini.
+            </div>
+
+            <div class="z122-explainer"><strong>Tumačenje scene:</strong> <span id="z122-explainer"></span></div>
+        </div>
     </div>
 </div>
 
@@ -766,65 +1449,292 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
 
 ```{=html}
 <!-- WIDGET: Budžet gubitaka cjevovoda -->
-<div id="z123-budget-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📊 Budžet gubitaka: Linijski vs. Lokalni</h4>
+<div id="z123-budget-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+    <style>
+        #z123-budget-widget .z123-shell {
+            border-radius: 30px;
+            border: 1px solid #dde6f4;
+            background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+        }
+        #z123-budget-widget .z123-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        #z123-budget-widget .z123-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        #z123-budget-widget .z123-title {
+            margin: 0;
+            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
+            line-height: 1.08;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        #z123-budget-widget .z123-sub {
+            margin: 8px 0 0;
+            max-width: 74ch;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.62;
+        }
+        #z123-budget-widget .z123-chip {
+            align-self: start;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #fef3c7, #ffedd5);
+            border: 1px solid #fdba74;
+            color: #c2410c;
+            font-size: 0.78rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #z123-budget-widget .z123-note {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid #bfdbfe;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.58;
+        }
+        #z123-budget-widget .z123-stage {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        #z123-budget-widget .z123-scene {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        #z123-budget-widget canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #z123-budget-widget .z123-summary {
+            display: grid;
+            grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z123-budget-widget .z123-total,
+        #z123-budget-widget .z123-metric,
+        #z123-budget-widget .z123-controls,
+        #z123-budget-widget .z123-breakdown,
+        #z123-budget-widget .z123-explainer {
+            border-radius: 18px;
+            border: 1px solid #dbeafe;
+            background: #ffffff;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
+        }
+        #z123-budget-widget .z123-total {
+            padding: 18px;
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+        }
+        #z123-budget-widget .z123-total small {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+        }
+        #z123-hw-total {
+            display: block;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #1d4ed8;
+            margin-bottom: 8px;
+        }
+        #z123-budget-widget .z123-total span {
+            display: block;
+            color: #475569;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        #z123-budget-widget .z123-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #z123-budget-widget .z123-metric {
+            padding: 14px;
+            text-align: center;
+        }
+        #z123-budget-widget .z123-metric small {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        #z123-budget-widget .z123-metric strong {
+            display: block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            font-size: 0.98rem;
+            color: #0f172a;
+        }
+        #z123-budget-widget .z123-lower {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z123-budget-widget .z123-controls,
+        #z123-budget-widget .z123-breakdown,
+        #z123-budget-widget .z123-explainer {
+            padding: 18px;
+        }
+        #z123-budget-widget .z123-control + .z123-control {
+            margin-top: 18px;
+        }
+        #z123-budget-widget .z123-control label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #475569;
+        }
+        #z123-budget-widget .z123-control input {
+            width: 100%;
+            accent-color: #2563eb;
+        }
+        #z123-budget-widget .z123-breakdown {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        }
+        #z123-budget-widget .z123-breakdown-title {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            color: #64748b;
+            text-align: center;
+        }
+        #z123-budget-widget .z123-track {
+            display: flex;
+            height: 30px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+        #z123-bar-friction,
+        #z123-bar-local {
+            height: 100%;
+        }
+        #z123-bar-friction {
+            background: linear-gradient(90deg, #f97316, #fb923c);
+        }
+        #z123-bar-local {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        }
+        #z123-budget-widget .z123-breakdown-legend {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        #z123-budget-widget .z123-breakdown-legend span:first-child {
+            color: #ea580c;
+        }
+        #z123-budget-widget .z123-breakdown-legend span:last-child {
+            color: #2563eb;
+        }
+        #z123-budget-widget .z123-explainer {
+            grid-column: 1 / -1;
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #7c2d12;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        @media (max-width: 960px) {
+            #z123-budget-widget .z123-head,
+            #z123-budget-widget .z123-summary,
+            #z123-budget-widget .z123-lower,
+            #z123-budget-widget .z123-metrics {
+                grid-template-columns: 1fr;
+            }
+            #z123-budget-widget .z123-chip {
+                justify-self: start;
+            }
+            #z123-budget-widget .z123-explainer {
+                grid-column: auto;
+            }
+        }
+    </style>
 
-    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
-        <strong>Kako čitati budžet:</strong> Prvo iz protoka i hrapavosti dobivaš <strong>Re</strong> i <strong>λ</strong>, zatim razdvajaš linijske i lokalne gubitke u istom cjevovodu. Tek njihov zbroj daje ukupni gubitak <strong>h_w</strong>, a on određuje potrebnu kotu slobodne površine <strong>z₁</strong>.
-    </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; align-items: start;">
-        <!-- Energy Line Visualization -->
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 520px;">
-            <canvas id="z123-canvas" width="520" height="520" style="width: 100%; height: 100%;"></canvas>
-            
-            <!-- Floating Metrics -->
-            <div style="position: absolute; left: 20px; top: 20px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 0.7rem;">
-                <div style="font-weight: 800; color: #64748b;">UKUPNI GUBITAK hw</div>
-                <div id="z123-hw-total" style="font-size: 1.2rem; font-weight: 800; color: #1e40af;">27.8 m</div>
+    <div class="z123-shell">
+        <div class="z123-head">
+            <div>
+                <div class="z123-kicker">Z123 budžet gubitaka</div>
+                <h4 class="z123-title">Tek kad razdvojiš linijske i lokalne gubitke postaje jasno koliko visoku uzvodnu kotu sustav doista traži</h4>
+                <p class="z123-sub">Widget sada prvo prikazuje energijsku sliku između spremnika, odmah ispod daje ukupni gubitak i ključne brojeve `Re`, `λ` i `z₁`, a tek niže razlaže koliko otpada na trenje duž cijevi, a koliko na lokalne elemente.</p>
+            </div>
+            <div class="z123-chip">h_w = h_w,lin + h_w,loc</div>
+        </div>
+
+        <div class="z123-note"><strong>Kako čitati budžet:</strong> Prvo iz protoka i hrapavosti dobivaš <strong>Re</strong> i <strong>λ</strong>, zatim razdvajaš linijske i lokalne gubitke u istom cjevovodu. Tek njihov zbroj daje ukupni gubitak <strong>h_w</strong>, a on određuje potrebnu kotu slobodne površine <strong>z₁</strong>.</div>
+
+        <div class="z123-stage">
+            <div class="z123-scene">
+                <canvas id="z123-canvas" width="520" height="520"></canvas>
+            </div>
+            <div class="z123-summary">
+                <div class="z123-total">
+                    <small>Ukupni gubitak h_w</small>
+                    <strong id="z123-hw-total">27.8 m</strong>
+                    <span>To je ukupna visina energije koju cjevovod mora potrošiti između uzvodnog i nizvodnog spremnika.</span>
+                </div>
+                <div class="z123-metrics">
+                    <div class="z123-metric"><small>Re</small><strong id="z123-re-card">0</strong></div>
+                    <div class="z123-metric"><small>λ</small><strong id="z123-lambda-card">0.0000</strong></div>
+                    <div class="z123-metric"><small>z₁</small><strong id="z123-z1-card">0.0 m</strong></div>
+                </div>
             </div>
         </div>
 
-        <!-- Controls and Pie Chart -->
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Protok Q: <span id="z123-v-vdot" style="color:#2563eb;">6.0</span> L/s</label>
-                <input type="range" id="z123-vdot-slider" min="1" max="15" step="0.5" value="6" style="width: 100%;">
-                
-                <label style="display: block; font-weight: 700; margin-top: 15px; margin-bottom: 8px; color: #475569;">Hrapavost k: <span id="z123-v-k" style="color:#2563eb;">0.26</span> mm</label>
-                <input type="range" id="z123-k-slider" min="0.01" max="1.0" step="0.01" value="0.26" style="width: 100%;">
-            </div>
-
-            <div style="background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; text-align: center;">
-                <div style="font-weight: 800; font-size: 0.7rem; color: #64748b; text-transform: uppercase; margin-bottom: 10px;">Raspodjela otpora [%]</div>
-                <div style="display: flex; height: 30px; border-radius: 6px; overflow: hidden;">
-                    <div id="z123-bar-friction" style="width: 90%; background: #f97316;" title="Trenje u cijevi"></div>
-                    <div id="z123-bar-local" style="width: 10%; background: #3b82f6;" title="Lokalni gubici"></div>
+        <div class="z123-lower">
+            <div class="z123-controls">
+                <div class="z123-control">
+                    <label>Protok Q: <span id="z123-v-vdot" style="color:#2563eb;">6.0</span> L/s</label>
+                    <input type="range" id="z123-vdot-slider" min="1" max="15" step="0.5" value="6">
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; margin-top: 5px; font-weight: 600;">
-                    <span style="color:#ea580c;">LINIJSKI (Trenje)</span>
-                    <span style="color:#2563eb;">LOKALNI (Zeta)</span>
+                <div class="z123-control">
+                    <label>Hrapavost k: <span id="z123-v-k" style="color:#2563eb;">0.26</span> mm</label>
+                    <input type="range" id="z123-k-slider" min="0.01" max="1.0" step="0.01" value="0.26">
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Re</div>
-                    <div id="z123-re-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0</div>
+            <div class="z123-breakdown">
+                <div class="z123-breakdown-title">Raspodjela otpora [%]</div>
+                <div class="z123-track">
+                    <div id="z123-bar-friction" style="width: 90%;" title="Trenje u cijevi"></div>
+                    <div id="z123-bar-local" style="width: 10%;" title="Lokalni gubici"></div>
                 </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">λ</div>
-                    <div id="z123-lambda-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0000</div>
-                </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">z₁</div>
-                    <div id="z123-z1-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0 m</div>
+                <div class="z123-breakdown-legend">
+                    <span>LINIJSKI (Trenje)</span>
+                    <span>LOKALNI (Zeta)</span>
                 </div>
             </div>
-            
-            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
-                <strong>Tumačenje scene:</strong> <span id="z123-explainer"></span>
-            </div>
+
+            <div class="z123-explainer"><strong>Tumačenje scene:</strong> <span id="z123-explainer"></span></div>
         </div>
     </div>
 </div>
@@ -962,74 +1872,298 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 
 ```{=html}
 <!-- WIDGET: Paralelne cijevi i raspodjela protoka -->
-<div id="z124-parallel-widget" style="max-width: 1040px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🔌 Hidraulička analogija: Raspodjela u paralelnim granama</h4>
+<div id="z124-parallel-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+    <style>
+        #z124-parallel-widget .z124-shell {
+            border-radius: 30px;
+            border: 1px solid #d7f0eb;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fffd 100%);
+            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+        }
+        #z124-parallel-widget .z124-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        #z124-parallel-widget .z124-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        #z124-parallel-widget .z124-title {
+            margin: 0;
+            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
+            line-height: 1.08;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        #z124-parallel-widget .z124-sub {
+            margin: 8px 0 0;
+            max-width: 74ch;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.62;
+        }
+        #z124-parallel-widget .z124-chip {
+            align-self: start;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #dcfce7, #ecfeff);
+            border: 1px solid #a7f3d0;
+            color: #047857;
+            font-size: 0.78rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #z124-parallel-widget .z124-note {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid #bfdbfe;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.6;
+        }
+        #z124-parallel-widget .z124-stage {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        #z124-parallel-widget .z124-scene {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #dbeafe;
+            background: linear-gradient(180deg, #f9fcff 0%, #eef6ff 100%);
+        }
+        #z124-parallel-widget canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #z124-parallel-widget .z124-summary {
+            display: grid;
+            grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z124-parallel-widget .z124-pressure,
+        #z124-parallel-widget .z124-metric,
+        #z124-parallel-widget .z124-controls,
+        #z124-parallel-widget .z124-split,
+        #z124-parallel-widget .z124-explainer {
+            border-radius: 18px;
+            border: 1px solid #dbeafe;
+            background: #ffffff;
+            box-shadow: 0 10px 24px rgba(16, 185, 129, 0.06);
+        }
+        #z124-parallel-widget .z124-pressure {
+            padding: 18px;
+            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+        }
+        #z124-parallel-widget .z124-pressure small {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+        }
+        #z124-pr-val {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1d4ed8;
+            margin-bottom: 8px;
+        }
+        #z124-parallel-widget .z124-pressure span {
+            display: block;
+            color: #475569;
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+        #z124-parallel-widget .z124-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #z124-parallel-widget .z124-metric {
+            padding: 14px;
+            text-align: center;
+        }
+        #z124-parallel-widget .z124-metric small {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        #z124-parallel-widget .z124-metric strong {
+            display: block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            font-size: 0.98rem;
+            color: #0f172a;
+        }
+        #z124-parallel-widget .z124-lower {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z124-parallel-widget .z124-controls,
+        #z124-parallel-widget .z124-split,
+        #z124-parallel-widget .z124-explainer {
+            padding: 18px;
+        }
+        #z124-parallel-widget .z124-control + .z124-control {
+            margin-top: 18px;
+        }
+        #z124-parallel-widget .z124-control label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #475569;
+        }
+        #z124-parallel-widget .z124-control input {
+            width: 100%;
+            accent-color: #2563eb;
+        }
+        #z124-parallel-widget .z124-split {
+            background: linear-gradient(180deg, #ecfeff 0%, #f8fbff 100%);
+            border-left: 6px solid #0ea5e9;
+        }
+        #z124-parallel-widget .z124-split-title {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            color: #0f4c81;
+        }
+        #z124-parallel-widget .z124-bar-label {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 6px;
+            font-size: 0.84rem;
+            color: #1e293b;
+        }
+        #z124-parallel-widget .z124-track {
+            height: 10px;
+            background: #dbeafe;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        #z124-bar-v1,
+        #z124-bar-v2 {
+            height: 100%;
+            border-radius: 999px;
+        }
+        #z124-bar-v1 {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        }
+        #z124-bar-v2 {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+        #z124-parallel-widget .z124-split-item + .z124-split-item {
+            margin-top: 14px;
+        }
+        #z124-parallel-widget .z124-explainer {
+            grid-column: 1 / -1;
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #7c2d12;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        @media (max-width: 960px) {
+            #z124-parallel-widget .z124-head,
+            #z124-parallel-widget .z124-summary,
+            #z124-parallel-widget .z124-lower,
+            #z124-parallel-widget .z124-metrics {
+                grid-template-columns: 1fr;
+            }
+            #z124-parallel-widget .z124-chip {
+                justify-self: start;
+            }
+            #z124-parallel-widget .z124-explainer {
+                grid-column: auto;
+            }
+        }
+    </style>
 
-    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
-        <strong>Kako čitati paralelne grane:</strong> U obje grane pad energije mora biti isti, pa raspodjela ne ovisi proizvoljno o protoku nego o hidrauličkom otporu svake grane. Šira cijev zato preuzima veći dio ukupnog protoka jer za isti gubitak može nositi veću brzinu.
-    </div>
-    
-    <div style="display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start;">
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
-            <canvas id="z124-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
-            
-            <!-- Pressure Gauge at Junction -->
-            <div style="position: absolute; left: 150px; top: 180px; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; border: 1px solid #3b82f6; text-align: center;">
-                <div style="font-size: 0.6rem; font-weight: 800; color: #64748b;">TLAK U RAČVI p_R</div>
-                <div id="z124-pr-val" style="font-size: 1rem; font-weight: 800; color: #1e40af;">--- kPa</div>
+    <div class="z124-shell">
+        <div class="z124-head">
+            <div>
+                <div class="z124-kicker">Z124 paralelne grane</div>
+                <h4 class="z124-title">Raspodjela protoka ne bira se “po osjećaju”, nego iz uvjeta da obje grane troše istu visinu energije</h4>
+                <p class="z124-sub">Novi raspored prvo izdvaja samu mrežu cijevi, odmah ispod daje tlak u račvi i ključne brzine, a zatim odvojeno pokazuje koje dvije kontrole mijenjaju odnos otpora i kako se protok dijeli između grana.</p>
+            </div>
+            <div class="z124-chip">h<wbr>w,1 = h<wbr>w,2</div>
+        </div>
+
+        <div class="z124-note"><strong>Kako čitati paralelne grane:</strong> U obje grane pad energije mora biti isti, pa raspodjela ne ovisi proizvoljno o protoku nego o hidrauličkom otporu svake grane. Šira cijev zato preuzima veći dio ukupnog protoka jer za isti gubitak može nositi veću brzinu.</div>
+
+        <div class="z124-stage">
+            <div class="z124-scene">
+                <canvas id="z124-canvas" width="550" height="400"></canvas>
+            </div>
+            <div class="z124-summary">
+                <div class="z124-pressure">
+                    <small>Tlak u račvi p_R</small>
+                    <strong id="z124-pr-val">--- kPa</strong>
+                    <span>To je raspoloživi tlak u točki gdje se ukupni protok dijeli na dvije grane koje moraju završiti s istim gubitkom energije.</span>
+                </div>
+                <div class="z124-metrics">
+                    <div class="z124-metric">
+                        <small>v₁</small>
+                        <strong id="z124-v1-card">0.00 m/s</strong>
+                    </div>
+                    <div class="z124-metric">
+                        <small>v₂</small>
+                        <strong id="z124-v2-card">0.00 m/s</strong>
+                    </div>
+                    <div class="z124-metric">
+                        <small>v₂/v₁</small>
+                        <strong id="z124-ratio-card">0.00</strong>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Ukupni protok Q_tot: <span id="z124-v-vtot" style="color:#2563eb;">30</span> L/s</label>
-                <input type="range" id="z124-vtot-slider" min="10" max="60" step="1" value="30" style="width: 100%;">
-                
-                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Promjer cijevi 2 (D2): <span id="z124-v-d2" style="color:#2563eb;">80</span> mm</label>
-                <input type="range" id="z124-d2-slider" min="40" max="120" step="5" value="80" style="width: 100%;">
-            </div>
-
-            <!-- Flow Split Bars -->
-            <div style="background: #ebf8ff; padding: 20px; border-radius: 15px; border-left: 6px solid #3182ce;">
-                <div style="font-weight: 800; font-size: 0.75rem; color: #2c5282; text-transform: uppercase; margin-bottom: 15px;">Raspodjela protoka:</div>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
-                            <span>Cijev 1 (40mm):</span> <b id="z124-v1-out">4.1 L/s</b>
-                        </div>
-                        <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                            <div id="z124-bar-v1" style="width: 14%; height: 100%; background: #3b82f6;"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
-                            <span>Cijev 2 (<span id="z124-d2-label">80</span>mm):</span> <b id="z124-v2-out">25.9 L/s</b>
-                        </div>
-                        <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                            <div id="z124-bar-v2" style="width: 86%; height: 100%; background: #10b981;"></div>
-                        </div>
-                    </div>
+        <div class="z124-lower">
+            <div class="z124-controls">
+                <div class="z124-control">
+                    <label>Ukupni protok Q_tot: <span id="z124-v-vtot" style="color:#2563eb;">30</span> L/s</label>
+                    <input type="range" id="z124-vtot-slider" min="10" max="60" step="1" value="30">
+                </div>
+                <div class="z124-control">
+                    <label>Promjer cijevi 2 (D2): <span id="z124-v-d2" style="color:#2563eb;">80</span> mm</label>
+                    <input type="range" id="z124-d2-slider" min="40" max="120" step="5" value="80">
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₁</div>
-                    <div id="z124-v1-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+            <div class="z124-split">
+                <div class="z124-split-title">Raspodjela protoka</div>
+                <div class="z124-split-item">
+                    <div class="z124-bar-label"><span>Cijev 1 (40 mm)</span><b id="z124-v1-out">4.1 L/s</b></div>
+                    <div class="z124-track"><div id="z124-bar-v1" style="width: 14%;"></div></div>
                 </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂</div>
-                    <div id="z124-v2-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m/s</div>
-                </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂/v₁</div>
-                    <div id="z124-ratio-card" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00</div>
+                <div class="z124-split-item">
+                    <div class="z124-bar-label"><span>Cijev 2 (<span id="z124-d2-label">80</span> mm)</span><b id="z124-v2-out">25.9 L/s</b></div>
+                    <div class="z124-track"><div id="z124-bar-v2" style="width: 86%;"></div></div>
                 </div>
             </div>
-            
-            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
-                <strong>Tumačenje scene:</strong> <span id="z124-explainer"></span>
-            </div>
+
+            <div class="z124-explainer"><strong>Tumačenje scene:</strong> <span id="z124-explainer"></span></div>
         </div>
     </div>
 </div>
@@ -1038,82 +2172,134 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 (function() {
     const canvas = document.getElementById('z124-canvas'), ctx = canvas.getContext('2d');
     const vtotS = document.getElementById('z124-vtot-slider'), d2S = document.getElementById('z124-d2-slider');
+    const state = { v1: 0, v2: 0, d1: 0.04, d2: 0.08, pr: 0, ratio: 0, vdot1: 0, vdot2: 0 };
 
     let particles = [];
-    for(let i=0; i<150; i++) particles.push({ t: Math.random(), branch: Math.random() > 0.5 ? 1 : 2 });
+    for (let i = 0; i < 150; i++) particles.push({ t: Math.random(), branch: Math.random() > 0.5 ? 1 : 2 });
 
     function update() {
         const vtot_l = parseFloat(vtotS.value), d2_mm = parseFloat(d2S.value);
         const d1 = 0.04, d2 = d2_mm / 1000, L = 36, rho = 998, g = 9.81;
         const lam1 = 0.022, lam2 = 0.018;
-        
-        // v2 = v1 * sqrt( (lam1 * d2) / (lam2 * d1) )
-        const ratio_v = Math.sqrt( (lam1 * d2) / (lam2 * d1) );
+
+        const ratio_v = Math.sqrt((lam1 * d2) / (lam2 * d1));
         const A1 = Math.PI * d1 * d1 / 4;
         const A2 = Math.PI * d2 * d2 / 4;
-        
-        // Vtot = A1v1 + A2v2 = A1v1 + A2 * ratio_v * v1 = v1 (A1 + A2*ratio_v)
+
         const v1 = (vtot_l / 1000) / (A1 + A2 * ratio_v);
         const v2 = v1 * ratio_v;
         const vdot1 = A1 * v1 * 1000;
         const vdot2 = A2 * v2 * 1000;
-        
+
         const hw = lam1 * (L / d1) * (v1 * v1 / (2 * g));
-        const pr = (rho * g * (13 - 5 + hw)) / 1000; // Simplified gauge at pump junction
+        const pr = (rho * g * (13 - 5 + hw)) / 1000;
+
+        state.v1 = v1;
+        state.v2 = v2;
+        state.d1 = d1;
+        state.d2 = d2;
+        state.pr = pr;
+        state.ratio = ratio_v;
+        state.vdot1 = vdot1;
+        state.vdot2 = vdot2;
 
         document.getElementById('z124-v-vtot').innerText = vtot_l;
         document.getElementById('z124-v-d2').innerText = d2_mm;
         document.getElementById('z124-d2-label').innerText = d2_mm;
-        document.getElementById('z124-v1-out').innerText = vdot1.toFixed(1) + " L/s";
-        document.getElementById('z124-v2-out').innerText = vdot2.toFixed(1) + " L/s";
-        document.getElementById('z124-bar-v1').style.width = (vdot1/vtot_l * 100) + "%";
-        document.getElementById('z124-bar-v2').style.width = (vdot2/vtot_l * 100) + "%";
-        document.getElementById('z124-pr-val').innerText = pr.toFixed(1) + " kPa";
+        document.getElementById('z124-v1-out').innerText = vdot1.toFixed(1) + ' L/s';
+        document.getElementById('z124-v2-out').innerText = vdot2.toFixed(1) + ' L/s';
+        document.getElementById('z124-bar-v1').style.width = (vdot1 / vtot_l * 100) + '%';
+        document.getElementById('z124-bar-v2').style.width = (vdot2 / vtot_l * 100) + '%';
+        document.getElementById('z124-pr-val').innerText = pr.toFixed(1) + ' kPa';
         document.getElementById('z124-v1-card').textContent = v1.toFixed(2) + ' m/s';
         document.getElementById('z124-v2-card').textContent = v2.toFixed(2) + ' m/s';
         document.getElementById('z124-ratio-card').textContent = ratio_v.toFixed(2);
         document.getElementById('z124-explainer').textContent = `Za ukupni protok ${vtot_l.toFixed(0)} L/s i promjer druge cijevi ${d2_mm.toFixed(0)} mm uvjet jednakog gubitka daje omjer brzina v₂/v₁ = ${ratio_v.toFixed(2)}. Zato prva grana nosi ${vdot1.toFixed(1)} L/s, druga ${vdot2.toFixed(1)} L/s, a tlak u račvi ispada ${pr.toFixed(1)} kPa.`;
-
-        draw(v1, v2, d1, d2);
     }
 
-    function draw(v1, v2, d1, d2) {
-        ctx.clearRect(0, 0, 550, 450);
-        const cy = 200, ox = 150, scale = 1500;
-        
-        // Junctions
-        ctx.fillStyle = "#475569";
-        ctx.beginPath(); ctx.arc(ox, cy, 15, 0, Math.PI*2); ctx.fill(); // R
-        ctx.beginPath(); ctx.arc(ox + 250, cy, 15, 0, Math.PI*2); ctx.fill(); // Confluence
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cy = 200;
+        const ox = 150;
 
-        // Pipes
-        ctx.strokeStyle = "#cbd5e0";
-        // Branch 1 (Top)
-        ctx.lineWidth = d1 * 500;
-        ctx.beginPath(); ctx.moveTo(ox, cy); ctx.lineTo(ox, cy - 80); ctx.lineTo(ox+250, cy - 80); ctx.lineTo(ox+250, cy); ctx.stroke();
-        // Branch 2 (Bottom)
-        ctx.lineWidth = d2 * 500;
-        ctx.beginPath(); ctx.moveTo(ox, cy); ctx.lineTo(ox, cy + 80); ctx.lineTo(ox+250, cy + 80); ctx.lineTo(ox+250, cy); ctx.stroke();
+        ctx.fillStyle = '#f8fbff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Particles
-        particles.forEach(p => {
-            const currentV = p.branch === 1 ? v1 : v2;
-            p.t += 0.005 * currentV; if(p.t > 1) p.t = 0;
-            
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(68, cy);
+        ctx.lineTo(canvas.width - 48, cy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#475569';
+        ctx.beginPath(); ctx.arc(ox, cy, 15, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ox + 250, cy, 15, 0, Math.PI * 2); ctx.fill();
+
+        ctx.strokeStyle = '#cbd5e0';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = state.d1 * 500;
+        ctx.beginPath();
+        ctx.moveTo(ox, cy);
+        ctx.lineTo(ox, cy - 80);
+        ctx.lineTo(ox + 250, cy - 80);
+        ctx.lineTo(ox + 250, cy);
+        ctx.stroke();
+
+        ctx.lineWidth = state.d2 * 500;
+        ctx.beginPath();
+        ctx.moveTo(ox, cy);
+        ctx.lineTo(ox, cy + 80);
+        ctx.lineTo(ox + 250, cy + 80);
+        ctx.lineTo(ox + 250, cy);
+        ctx.stroke();
+
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('grana 1', ox + 92, cy - 106);
+        ctx.fillText('grana 2', ox + 92, cy + 118);
+
+        particles.forEach((particle) => {
+            const currentV = particle.branch === 1 ? state.v1 : state.v2;
+            particle.t += 0.005 * currentV;
+            if (particle.t > 1) particle.t = 0;
+
             let px, py;
-            const h = p.branch === 1 ? -80 : 80;
-            if(p.t < 0.2) { px = ox; py = cy + (p.t/0.2)*h; }
-            else if(p.t < 0.8) { px = ox + ((p.t-0.2)/0.6)*250; py = cy + h; }
-            else { px = ox + 250; py = cy + h - ((p.t-0.8)/0.2)*h; }
-            
-            ctx.fillStyle = p.branch === 1 ? "#3b82f6" : "#10b981";
-            ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
+            const h = particle.branch === 1 ? -80 : 80;
+            if (particle.t < 0.2) {
+                px = ox;
+                py = cy + (particle.t / 0.2) * h;
+            } else if (particle.t < 0.8) {
+                px = ox + ((particle.t - 0.2) / 0.6) * 250;
+                py = cy + h;
+            } else {
+                px = ox + 250;
+                py = cy + h - ((particle.t - 0.8) / 0.2) * h;
+            }
+
+            ctx.fillStyle = particle.branch === 1 ? '#3b82f6' : '#10b981';
+            ctx.beginPath();
+            ctx.arc(px, py, 2, 0, Math.PI * 2);
+            ctx.fill();
         });
 
-        requestAnimationFrame(() => update());
+        ctx.fillStyle = '#334155';
+        ctx.font = '12px Inter';
+        ctx.fillText('Qtot', ox - 48, cy - 22);
+        ctx.fillText('isti gubitak energije u obje grane', ox + 112, cy + 22);
     }
 
-    vtotS.oninput = update; d2S.oninput = update; update();
+    function frame() {
+        draw();
+        requestAnimationFrame(frame);
+    }
+
+    vtotS.oninput = update;
+    d2S.oninput = update;
+    update();
+    frame();
 })();
 </script>
 
@@ -1125,45 +2311,209 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 
 ```{=html}
 <!-- Flow Regime / Reynolds Widget -->
-<div id="reynolds-widget" style="max-width: 980px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; background: #ffffff; box-shadow: 0 15px 40px rgba(15,23,42,0.08);">
-    <h3 style="text-align: center; margin: 0 0 18px; color: #0f172a; font-weight: 800;">Vizualizacija Reynoldsovog broja</h3>
-    <div style="padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; margin-bottom: 16px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.6;">
-        <strong>Kako čitati režim:</strong> Ovdje je modelirana voda u maloj cijevi promjera <strong>2 mm</strong>, pa pomicanjem brzine možeš stvarno proći kroz sve tri zone. Lijevo vidiš kako se uređene strujnice pretvaraju u valovit i vrtložan tok, a desno kako se profil brzine iz paraboličnog spljoštava u turbulentni „čepasti" profil.
-    </div>
+<div id="reynolds-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+    <style>
+        #reynolds-widget .rw-shell {
+            border-radius: 30px;
+            border: 1px solid #dce9f7;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            box-shadow: 0 28px 64px rgba(15, 23, 42, 0.09);
+            padding: 28px;
+        }
+        #reynolds-widget .rw-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        #reynolds-widget .rw-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        #reynolds-widget .rw-title {
+            margin: 0;
+            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
+            line-height: 1.08;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        #reynolds-widget .rw-sub {
+            margin: 8px 0 0;
+            max-width: 74ch;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.62;
+        }
+        #reynolds-widget .rw-chip {
+            align-self: start;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #dcfce7, #dbeafe);
+            border: 1px solid #bbf7d0;
+            color: #047857;
+            font-size: 0.78rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #reynolds-widget .rw-note {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid #bfdbfe;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.62;
+        }
+        #reynolds-widget .rw-stage {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        #reynolds-widget .rw-scene {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #1e293b;
+            background: radial-gradient(circle at top, #172554 0%, #0f172a 60%, #020617 100%);
+        }
+        #reynolds-widget canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #reynolds-widget .rw-summary {
+            display: grid;
+            grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #re-status,
+        #reynolds-widget .rw-metric,
+        #reynolds-widget .rw-controls,
+        #reynolds-widget .rw-explainer {
+            border-radius: 18px;
+            border: 1px solid #dbeafe;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
+        }
+        #re-status {
+            padding: 18px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+        #reynolds-widget .rw-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #reynolds-widget .rw-metric {
+            padding: 14px;
+            text-align: center;
+            background: #ffffff;
+        }
+        #reynolds-widget .rw-metric small {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        #reynolds-widget .rw-metric strong,
+        #re-dominant,
+        #re-thresholds,
+        #re-profile {
+            display: block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        #reynolds-widget .rw-lower {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.08fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #reynolds-widget .rw-controls,
+        #reynolds-widget .rw-explainer {
+            padding: 18px;
+            background: #ffffff;
+        }
+        #reynolds-widget .rw-controls label {
+            display: block;
+            margin-bottom: 10px;
+            color: #475569;
+            font-weight: 700;
+        }
+        #reynolds-widget .rw-controls input {
+            width: 100%;
+            accent-color: #2563eb;
+        }
+        #reynolds-widget .rw-model {
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: #64748b;
+            line-height: 1.55;
+        }
+        #reynolds-widget .rw-explainer {
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #7c2d12;
+            font-size: 0.84rem;
+            line-height: 1.6;
+        }
+        @media (max-width: 960px) {
+            #reynolds-widget .rw-head,
+            #reynolds-widget .rw-summary,
+            #reynolds-widget .rw-lower,
+            #reynolds-widget .rw-metrics {
+                grid-template-columns: 1fr;
+            }
+            #reynolds-widget .rw-chip {
+                justify-self: start;
+            }
+        }
+    </style>
 
-    <div style="position: relative; background: radial-gradient(circle at top, #172554 0%, #0f172a 60%, #020617 100%); border-radius: 16px; overflow: hidden; height: 340px; border: 1px solid #1e293b;">
-        <canvas id="flow-canvas" width="920" height="340" style="width: 100%; height: 100%; display: block;"></canvas>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 18px; align-items: start;">
-        <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Brzina strujanja v: <span id="v-re-val" style="color:#2563eb;">0.50</span> m/s</label>
-            <input type="range" id="v-re-slider" min="0.05" max="5" step="0.05" value="0.5" style="width: 100%;">
-            <div style="margin-top: 10px; font-size: 0.76rem; color: #64748b; line-height: 1.5;">Model: voda, ν = 1.0×10⁻⁶ m²/s, d = 2 mm.</div>
+    <div class="rw-shell">
+        <div class="rw-head">
+            <div>
+                <div class="rw-kicker">Reynoldsov broj</div>
+                <h3 class="rw-title">Brzina ne mijenja samo broj na ekranu nego i samu prirodu toka: od urednih slojeva do vrtložnog miješanja</h3>
+                <p class="rw-sub">Ovdje je završni polish fokusiran na preglednost: scena ostaje čista, a status režima, dominantni učinak i profil brzine čitaju se odmah ispod canvasa istim ritmom kao i ostatak vježbe.</p>
+            </div>
+            <div class="rw-chip">v -> Re -> režim</div>
         </div>
 
-        <div id="re-status" style="padding: 16px; border-radius: 12px; font-weight: 800; text-align: center; border: 1px solid #bbf7d0; background: #dcfce7; color: #166534;">
-            Re = 1000 (Laminarno)
+        <div class="rw-note"><strong>Kako čitati režim:</strong> Ovdje je modelirana voda u maloj cijevi promjera <strong>2 mm</strong>, pa pomicanjem brzine možeš stvarno proći kroz sve tri zone. Lijevo vidiš kako se uređene strujnice pretvaraju u valovit i vrtložan tok, a desno kako se profil brzine iz paraboličnog spljoštava u turbulentni „čepasti" profil.</div>
+
+        <div class="rw-stage">
+            <div class="rw-scene">
+                <canvas id="flow-canvas" width="920" height="340"></canvas>
+            </div>
+            <div class="rw-summary">
+                <div id="re-status">Re = 1000 (Laminarno)</div>
+                <div class="rw-metrics">
+                    <div class="rw-metric"><small>Dominira</small><strong id="re-dominant">viskoznost</strong></div>
+                    <div class="rw-metric"><small>Pragovi</small><strong id="re-thresholds">2300 / 4000</strong></div>
+                    <div class="rw-metric"><small>Profil</small><strong id="re-profile">parabola</strong></div>
+                </div>
+            </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
-            <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Dominira</div>
-                <div id="re-dominant" style="font-family: monospace; font-weight: 800; color: #0f172a;">viskoznost</div>
+        <div class="rw-lower">
+            <div class="rw-controls">
+                <label>Brzina strujanja v: <span id="v-re-val" style="color:#2563eb;">0.50</span> m/s</label>
+                <input type="range" id="v-re-slider" min="0.05" max="5" step="0.05" value="0.5">
+                <div class="rw-model">Model: voda, ν = 1.0×10⁻⁶ m²/s, d = 2 mm.</div>
             </div>
-            <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Pragovi</div>
-                <div id="re-thresholds" style="font-family: monospace; font-weight: 800; color: #0f172a;">2300 / 4000</div>
-            </div>
-            <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #dbeafe; text-align: center;">
-                <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Profil</div>
-                <div id="re-profile" style="font-family: monospace; font-weight: 800; color: #0f172a;">parabola</div>
-            </div>
-        </div>
-    </div>
 
-    <div style="padding: 12px 14px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 10px; color: #7c2d12; font-size: 0.82rem; line-height: 1.6; margin-top: 16px;">
-        <strong>Tumačenje scene:</strong> <span id="re-explainer"></span>
+            <div class="rw-explainer"><strong>Tumačenje scene:</strong> <span id="re-explainer"></span></div>
+        </div>
     </div>
 </div>
 

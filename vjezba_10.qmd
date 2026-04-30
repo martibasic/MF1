@@ -33,209 +33,723 @@ Kod realnih fluida dio energije se nepovratno gubi na svladavanje otpora trenja.
 
 ```{=html}
 <!-- WIDGET: Ideal vs Real Fluid -->
-<div id="v10-ideal-real-widget" style="max-width: 950px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 25px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📉 Vizualizacija gubitaka: Idealni vs. Realni fluid</h4>
+<div id="v10-ideal-real-widget">
+    <style>
+        #v10-ideal-real-widget * {
+            box-sizing: border-box;
+        }
+        #v10-ideal-real-widget .v10r-shell {
+            max-width: 980px;
+            margin: 2rem auto;
+            overflow: hidden;
+            border: 1px solid rgba(86, 115, 138, 0.14);
+            border-radius: 28px;
+            background: linear-gradient(180deg, #fbfdff 0%, #f5f9fc 100%);
+            box-shadow: 0 22px 50px rgba(33, 55, 77, 0.12);
+            font-family: "Aptos", "Segoe UI", sans-serif;
+        }
+        #v10-ideal-real-widget .v10r-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: start;
+            padding: 1.55rem 1.6rem 1rem;
+            background: radial-gradient(circle at top right, rgba(249, 115, 22, 0.18), transparent 36%), linear-gradient(135deg, #f4fbff 0%, #ffffff 54%, #fff6eb 100%);
+            border-bottom: 1px solid rgba(86, 115, 138, 0.12);
+        }
+        #v10-ideal-real-widget .v10r-kicker {
+            margin-bottom: 0.35rem;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #6f869a;
+        }
+        #v10-ideal-real-widget .v10r-title {
+            margin: 0;
+            font-size: clamp(1.4rem, 2.55vw, 1.96rem);
+            line-height: 1.08;
+            color: #193f63;
+        }
+        #v10-ideal-real-widget .v10r-sub {
+            margin: 0.55rem 0 0;
+            max-width: 74ch;
+            font-size: 0.95rem;
+            line-height: 1.62;
+            color: #547088;
+        }
+        #v10-ideal-real-widget .v10r-chip {
+            align-self: start;
+            padding: 0.76rem 0.94rem;
+            border: 1px solid #d8e6f1;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ffffff, #f6fbff);
+            color: #1f4f79;
+            font-size: 0.82rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #v10-ideal-real-widget .v10r-note {
+            margin: 1rem 1.6rem 0;
+            padding: 1rem 1.05rem;
+            border: 1px solid #dae7f2;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #eef8ff, #fff8f1);
+            color: #325775;
+            font-size: 0.86rem;
+            line-height: 1.62;
+        }
+        #v10-ideal-real-widget .v10r-stage {
+            margin: 1rem 1.6rem 0;
+            border: 1px solid #dbe6ef;
+            border-radius: 24px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #f6fbff 0%, #edf5fb 100%);
+        }
+        #v10-ideal-real-widget .v10r-stage canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #v10-ideal-real-widget .v10r-summary {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.75rem;
+            padding: 1rem 1.6rem 0;
+        }
+        #v10-ideal-real-widget .v10r-stat {
+            padding: 0.95rem;
+            border: 1px solid rgba(29, 79, 120, 0.09);
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f7fb 100%);
+        }
+        #v10-ideal-real-widget .v10r-stat small {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #6b8497;
+        }
+        #v10-ideal-real-widget .v10r-stat strong {
+            display: block;
+            font-size: 1.02rem;
+            color: #11375a;
+            font-variant-numeric: tabular-nums;
+        }
+        #v10-ideal-real-widget .v10r-lower {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.95rem;
+            padding: 1rem 1.6rem 1.6rem;
+        }
+        #v10-ideal-real-widget .v10r-card {
+            border: 1px solid #e3ebf2;
+            border-radius: 20px;
+            background: #ffffff;
+        }
+        #v10-ideal-real-widget .v10r-controls,
+        #v10-ideal-real-widget .v10r-legend,
+        #v10-ideal-real-widget .v10r-formula,
+        #v10-ideal-real-widget .v10r-explainer {
+            padding: 1rem;
+        }
+        #v10-ideal-real-widget .v10r-controls {
+            display: grid;
+            gap: 0.85rem;
+        }
+        #v10-ideal-real-widget strong.section {
+            display: block;
+            margin-bottom: 0.55rem;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #678195;
+        }
+        #v10-ideal-real-widget .v10r-presets {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+        #v10-ideal-real-widget .v10r-preset {
+            appearance: none;
+            border: 1px solid #d7e4ee;
+            border-radius: 999px;
+            padding: 0.68rem 0.72rem;
+            background: #f5fafc;
+            color: #244d72;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+        }
+        #v10-ideal-real-widget .v10r-preset:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(41, 76, 109, 0.08);
+        }
+        #v10-ideal-real-widget .v10r-preset.is-active {
+            background: linear-gradient(135deg, #ecf7ff, #fff4e9);
+            border-color: #bcd6ea;
+            color: #173f62;
+        }
+        #v10-ideal-real-widget .v10r-row label {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.35rem;
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: #36506b;
+        }
+        #v10-ideal-real-widget .v10r-row input {
+            width: 100%;
+            accent-color: #2b7ab8;
+        }
+        #v10-ideal-real-widget .v10r-legend-grid {
+            display: grid;
+            gap: 0.6rem;
+        }
+        #v10-ideal-real-widget .v10r-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 0.72rem;
+            font-size: 0.84rem;
+            line-height: 1.5;
+            color: #36506b;
+        }
+        #v10-ideal-real-widget .v10r-swatch {
+            flex: 0 0 auto;
+            display: inline-block;
+        }
+        #v10-ideal-real-widget .v10r-swatch-line-ideal {
+            width: 24px;
+            height: 0;
+            border-top: 3px solid #dc2626;
+        }
+        #v10-ideal-real-widget .v10r-swatch-line-real {
+            width: 24px;
+            height: 0;
+            border-top: 3px solid #ea580c;
+        }
+        #v10-ideal-real-widget .v10r-swatch-hgl {
+            width: 24px;
+            height: 0;
+            border-top: 3px dashed #1d4ed8;
+        }
+        #v10-ideal-real-widget .v10r-swatch-fill {
+            width: 24px;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.14);
+            border: 1px solid rgba(59, 130, 246, 0.24);
+        }
+        #v10-ideal-real-widget .v10r-swatch-arrow {
+            position: relative;
+            width: 18px;
+            height: 18px;
+        }
+        #v10-ideal-real-widget .v10r-swatch-arrow::before,
+        #v10-ideal-real-widget .v10r-swatch-arrow::after {
+            content: "";
+            position: absolute;
+            left: 8px;
+            background: #ea580c;
+        }
+        #v10-ideal-real-widget .v10r-swatch-arrow::before {
+            top: 3px;
+            width: 2px;
+            height: 12px;
+        }
+        #v10-ideal-real-widget .v10r-swatch-arrow::after {
+            top: 0;
+            width: 2px;
+            height: 2px;
+            box-shadow: -3px 3px 0 0 #ea580c, 3px 3px 0 0 #ea580c, -3px 11px 0 0 #ea580c, 3px 11px 0 0 #ea580c;
+        }
+        #v10-ideal-real-widget .v10r-formula {
+            font-size: 0.84rem;
+            line-height: 1.62;
+            color: #355771;
+        }
+        #v10-ideal-real-widget .v10r-formula div + div {
+            margin-top: 0.45rem;
+        }
+        #v10-ideal-real-widget .v10r-explainer {
+            grid-column: 1 / -1;
+            border-color: #c9dcf0;
+            background: linear-gradient(135deg, #eff7ff, #fff5e8);
+            color: #1d4970;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+        @media (max-width: 980px) {
+            #v10-ideal-real-widget .v10r-head,
+            #v10-ideal-real-widget .v10r-summary,
+            #v10-ideal-real-widget .v10r-lower {
+                grid-template-columns: 1fr;
+            }
+            #v10-ideal-real-widget .v10r-chip {
+                justify-self: start;
+            }
+        }
+        @media (max-width: 640px) {
+            #v10-ideal-real-widget .v10r-presets {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 
-    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
-        <strong>Kako čitati usporedbu:</strong> U oba slučaja ista brzina daje istu brzinsku visinu <strong>v²/2g</strong>, ali samo realni fluid gubi dodatni dio energije kroz <strong>h<sub>w</sub></strong>. Zato u desnom panelu EGL pada niz cijev, a njegov nagib <strong>I = h<sub>w</sub>/L</strong> izravno mjeri koliko se energije gubi po metru cijevi.
-    </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-        <!-- Lijevo: Idealno -->
-        <div style="background: #f8fafc; border-radius: 15px; padding: 15px; border: 1px solid #e2e8f0;">
-            <h5 style="text-align: center; margin: 0 0 15px 0; color: #3b82f6;">IDEALNI FLUID (hw = 0)</h5>
-            <canvas id="ideal-canvas" width="400" height="300" style="width: 100%; border-radius: 8px; background: white;"></canvas>
+    <div class="v10r-shell">
+        <div class="v10r-head">
+            <div>
+                <div class="v10r-kicker">Idealni i realni Bernoulli u istoj sceni</div>
+                <h3 class="v10r-title">Ista brzinska visina ostaje u oba toka, ali samo realni fluid spušta EGL jer dio energije odlazi na trenje</h3>
+                <p class="v10r-sub">Grafika gore prikazuje usporedbu u jednom širokom kadru: gornja traka je referentni idealni tok bez disipacije, a donja traka je realni tok s Darcy-Weisbachovim gubitkom. Tako se odmah vidi što ostaje isto, a što se mijenja kada uvedemo viskoznost i trenje o stijenku.</p>
+            </div>
+            <div class="v10r-chip">h<sub>w</sub> = λ (L/D) (v²/2g)</div>
         </div>
-        <!-- Desno: Realno -->
-        <div style="background: #fef2f2; border-radius: 15px; padding: 15px; border: 1px solid #fee2e2;">
-            <h5 style="text-align: center; margin: 0 0 15px 0; color: #ef4444;">REALNI FLUID (Darcy-Weisbach)</h5>
-            <canvas id="real-canvas" width="400" height="300" style="width: 100%; border-radius: 8px; background: white;"></canvas>
-        </div>
-    </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; margin-top: 25px; padding: 20px; background: #f1f5f9; border-radius: 15px;">
-        <div class="control-group">
-            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Faktor trenja λ: <span id="v10-v-f" style="color:#ef4444;">0.030</span></label>
-            <input type="range" id="v10-f-slider" min="0.01" max="0.08" step="0.005" value="0.03" style="width: 100%;">
-        </div>
-        <div class="control-group">
-            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Duljina cijevi L: <span id="v10-v-L" style="color:#2563eb;">20</span> m</label>
-            <input type="range" id="v10-L-slider" min="5" max="50" step="1" value="20" style="width: 100%;">
-        </div>
-        <div class="control-group">
-            <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #475569;">Brzina v₀: <span id="v10-v-v" style="color:#2563eb;">2.0</span> m/s</label>
-            <input type="range" id="v10-v-slider" min="0.5" max="5" step="0.1" value="2" style="width: 100%;">
-        </div>
-    </div>
+        <div class="v10r-note"><strong>Kako čitati scenu:</strong> prvo usporedi crvenu idealnu EGL liniju i narančastu realnu EGL liniju. Plava isprekidana HGL ostaje u oba slučaja niže za istu brzinsku visinu <strong>v²/2g</strong>, jer je promjer cijevi isti. Dodatni pad u donjoj traci označen je strelicom <strong>h<sub>w</sub></strong>, pa izravno pokazuje koliko energije nestaje na trenju duž duljine <strong>L</strong>.</div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 20px;">
-        <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v²/2g</div>
-            <div id="v10-vhead-out" style="font-family: monospace; font-size: 0.98rem; font-weight: 800; color: #0f172a;">0.00 m</div>
+        <div class="v10r-stage">
+            <canvas id="v10r-canvas" width="920" height="420"></canvas>
         </div>
-        <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">h_w</div>
-            <div id="v10-hw-card" style="font-family: monospace; font-size: 0.98rem; font-weight: 800; color: #0f172a;">0.00 m</div>
-        </div>
-        <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Hidraulički nagib I</div>
-            <div id="v10-slope-out" style="font-family: monospace; font-size: 0.98rem; font-weight: 800; color: #0f172a;">0.000</div>
-        </div>
-        <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">D/L utjecaj</div>
-            <div id="v10-ld-out" style="font-family: monospace; font-size: 0.98rem; font-weight: 800; color: #0f172a;">0.0</div>
-        </div>
-    </div>
 
-    <div id="v10-loss-summary" style="margin-top: 20px; padding: 15px; background: #2d3748; color: white; border-radius: 12px; text-align: center;">
-        Ukupni gubitak visine dobave <b>h<sub>w</sub></b> = <span id="v10-hw-out" style="color:#fc8181; font-size: 1.2rem;">---</span> m
-    </div>
+        <div class="v10r-summary">
+            <div class="v10r-stat"><small>v²/2g</small><strong id="v10r-vhead">0.00 m</strong></div>
+            <div class="v10r-stat"><small>h_w</small><strong id="v10r-hw">0.00 m</strong></div>
+            <div class="v10r-stat"><small>Hidraulički nagib I</small><strong id="v10r-slope">0.000 m/m</strong></div>
+            <div class="v10r-stat"><small>L/D</small><strong id="v10r-ld">0.0</strong></div>
+            <div class="v10r-stat"><small>Režim gubitaka</small><strong id="v10r-regime">gotovo idealno</strong></div>
+        </div>
 
-    <div style="margin-top: 16px; padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
-        <strong>Tumačenje scene:</strong> <span id="v10-explainer"></span>
+        <div class="v10r-lower">
+            <div class="v10r-card v10r-controls">
+                <strong class="section">Ulazni uvjeti</strong>
+                <div class="v10r-presets">
+                    <button type="button" class="v10r-preset" data-lam="0.015" data-length="10" data-velocity="1.4">Glatka i kratka</button>
+                    <button type="button" class="v10r-preset is-active" data-lam="0.030" data-length="20" data-velocity="2.0">Referentni slučaj</button>
+                    <button type="button" class="v10r-preset" data-lam="0.060" data-length="40" data-velocity="3.5">Duga i hrapava</button>
+                </div>
+                <div class="v10r-row">
+                    <label for="v10r-lam-slider"><span>Faktor trenja λ</span><strong id="v10r-lam-value">0.030</strong></label>
+                    <input type="range" id="v10r-lam-slider" min="0.01" max="0.08" step="0.005" value="0.03">
+                </div>
+                <div class="v10r-row">
+                    <label for="v10r-length-slider"><span>Duljina cijevi L</span><strong><span id="v10r-length-value">20</span> m</strong></label>
+                    <input type="range" id="v10r-length-slider" min="5" max="50" step="1" value="20">
+                </div>
+                <div class="v10r-row">
+                    <label for="v10r-velocity-slider"><span>Brzina v</span><strong><span id="v10r-velocity-value">2.0</span> m/s</strong></label>
+                    <input type="range" id="v10r-velocity-slider" min="0.5" max="5" step="0.1" value="2.0">
+                </div>
+            </div>
+
+            <div class="v10r-card v10r-legend">
+                <strong class="section">Legenda scene</strong>
+                <div class="v10r-legend-grid">
+                    <div class="v10r-legend-row"><span class="v10r-swatch v10r-swatch-line-ideal"></span><span>Idealni EGL ostaje vodoravan jer nema disipacije energije.</span></div>
+                    <div class="v10r-legend-row"><span class="v10r-swatch v10r-swatch-line-real"></span><span>Realni EGL pada niz cijev jer se mehanička energija troši na trenje.</span></div>
+                    <div class="v10r-legend-row"><span class="v10r-swatch v10r-swatch-hgl"></span><span>HGL je u oba slučaja niži od EGL za istu brzinsku visinu.</span></div>
+                    <div class="v10r-legend-row"><span class="v10r-swatch v10r-swatch-fill"></span><span>Obojeni pojas predstavlja brzinsku visinu <strong>v²/2g</strong>.</span></div>
+                    <div class="v10r-legend-row"><span class="v10r-swatch v10r-swatch-arrow"></span><span>Vertikalna strelica uz izlaz označava ukupni gubitak <strong>h<sub>w</sub></strong>.</span></div>
+                </div>
+            </div>
+
+            <div class="v10r-card v10r-formula">
+                <strong class="section">Darcy-Weisbach u ovoj usporedbi</strong>
+                <div><strong>h<sub>w</sub> = λ (L/D) (v²/2g)</strong> spaja viskoznost, geometriju i brzinu u jedan izraz za ukupni gubitak energije.</div>
+                <div><strong>I = h<sub>w</sub> / L</strong> govori koliko metri energije nestaje po metru cijevi.</div>
+                <div>Grafika koristi istu didaktičku vizualnu skalu kroz cijeli widget, pa se veličine lako uspoređuju pri svim položajima klizača bez preklapanja legendi i kartica preko scene.</div>
+            </div>
+
+            <div class="v10r-card v10r-explainer">
+                <strong class="section">Tumačenje scene</strong>
+                <div id="v10r-explainer"></div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
 (function() {
-    const idealCanvas = document.getElementById('ideal-canvas');
-    const realCanvas = document.getElementById('real-canvas');
-    const idealCtx = idealCanvas.getContext('2d');
-    const realCtx = realCanvas.getContext('2d');
-    const fSlider = document.getElementById('v10-f-slider');
-    const lSlider = document.getElementById('v10-L-slider');
-    const vSlider = document.getElementById('v10-v-slider');
+    const root = document.getElementById('v10-ideal-real-widget');
+    if (!root) return;
 
+    const canvas = document.getElementById('v10r-canvas');
+    const ctx = canvas.getContext('2d');
+    const lamSlider = document.getElementById('v10r-lam-slider');
+    const lengthSlider = document.getElementById('v10r-length-slider');
+    const velocitySlider = document.getElementById('v10r-velocity-slider');
+    const presetButtons = Array.from(root.querySelectorAll('.v10r-preset'));
+
+    const g = 9.81;
+    const diameter = 0.15;
+    const maxVelocityHead = Math.pow(parseFloat(velocitySlider.max), 2) / (2 * g);
+    const maxHeadLoss = parseFloat(lamSlider.max) * (parseFloat(lengthSlider.max) / diameter) * maxVelocityHead;
+    const particlesIdeal = createParticles(34);
+    const particlesReal = createParticles(34);
     const state = {
-        lam: parseFloat(fSlider.value),
-        length: parseFloat(lSlider.value),
-        velocity: parseFloat(vSlider.value),
-        headLoss: 0
+        lam: parseFloat(lamSlider.value),
+        length: parseFloat(lengthSlider.value),
+        velocity: parseFloat(velocitySlider.value),
+        vHead: 0,
+        headLoss: 0,
+        slope: 0,
+        ld: 0,
+        regime: 'gotovo idealno'
     };
-    const particles = Array.from({ length: 28 }, (_, index) => ({
-        t: index / 28,
-        offset: (index % 3) - 1
-    }));
 
-    function updateState() {
-        state.lam = parseFloat(fSlider.value);
-        state.length = parseFloat(lSlider.value);
-        state.velocity = parseFloat(vSlider.value);
-
-        const g = 9.81;
-        const diameter = 0.15;
-        const vHead = state.velocity * state.velocity / (2 * g);
-        state.headLoss = state.lam * (state.length / diameter) * vHead;
-        const slope = state.headLoss / state.length;
-
-        document.getElementById('v10-v-f').innerText = state.lam.toFixed(3);
-        document.getElementById('v10-v-L').innerText = state.length.toFixed(0);
-        document.getElementById('v10-v-v').innerText = state.velocity.toFixed(1);
-        document.getElementById('v10-hw-out').innerText = state.headLoss.toFixed(2);
-        document.getElementById('v10-vhead-out').innerText = vHead.toFixed(2) + ' m';
-        document.getElementById('v10-hw-card').innerText = state.headLoss.toFixed(2) + ' m';
-        document.getElementById('v10-slope-out').innerText = slope.toFixed(3);
-        document.getElementById('v10-ld-out').innerText = (state.length / diameter).toFixed(1);
-        document.getElementById('v10-explainer').textContent = `Za brzinu ${state.velocity.toFixed(1)} m/s brzinska visina iznosi ${vHead.toFixed(2)} m. U realnom slučaju faktor trenja λ = ${state.lam.toFixed(3)} i omjer L/D = ${(state.length / diameter).toFixed(1)} pretvaraju tu energiju u ukupni gubitak ${state.headLoss.toFixed(2)} m, pa EGL pada nagibom I = ${slope.toFixed(3)} m/m duž cijevi.`;
+    function createParticles(count) {
+        return Array.from({ length: count }, (_, index) => ({
+            t: index / count,
+            offset: ((index % 5) - 2) * 2.25,
+            speed: 0.82 + Math.random() * 0.38,
+            phase: Math.random() * Math.PI * 2
+        }));
     }
 
-    function drawScene(ctx, isReal) {
-        const width = ctx.canvas.width;
-        const height = ctx.canvas.height;
-        const marginX = 34;
-        const surfaceY = 92;
-        const baseY = 236;
-        const pipeY = 206;
-        const pipeStart = 82;
-        const pipeEnd = 330;
-        const outletX = 352;
-        const outletY = 224;
-        const g = 9.81;
-        const velocityHead = state.velocity * state.velocity / (2 * g);
-        const energyScale = 16;
-        const headLossPx = isReal ? state.headLoss * energyScale : 0;
+    function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
 
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, width, height);
+    function syncPresetButtons() {
+        presetButtons.forEach((button) => {
+            const isActive =
+                Math.abs(parseFloat(button.dataset.lam) - state.lam) < 1e-6 &&
+                Math.abs(parseFloat(button.dataset.length) - state.length) < 1e-6 &&
+                Math.abs(parseFloat(button.dataset.velocity) - state.velocity) < 1e-6;
+            button.classList.toggle('is-active', isActive);
+        });
+    }
 
-        ctx.fillStyle = isReal ? "#fff1f2" : "#eff6ff";
-        ctx.fillRect(0, 0, width, height);
+    function updateState() {
+        state.lam = parseFloat(lamSlider.value);
+        state.length = parseFloat(lengthSlider.value);
+        state.velocity = parseFloat(velocitySlider.value);
+        state.vHead = state.velocity * state.velocity / (2 * g);
+        state.ld = state.length / diameter;
+        state.headLoss = state.lam * state.ld * state.vHead;
+        state.slope = state.headLoss / state.length;
 
-        ctx.strokeStyle = "#cbd5e1";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(marginX, baseY + 34);
-        ctx.lineTo(width - marginX, baseY + 34);
-        ctx.stroke();
+        if (state.headLoss < 0.4) {
+            state.regime = 'gotovo idealno';
+        } else if (state.headLoss < 1.5) {
+            state.regime = 'blagi gubici';
+        } else if (state.headLoss < 4.5) {
+            state.regime = 'izražen pad EGL';
+        } else {
+            state.regime = 'dominantni gubici';
+        }
 
-        ctx.fillStyle = "#dbeafe";
-        ctx.fillRect(marginX, surfaceY, 66, baseY - surfaceY);
-        ctx.strokeStyle = "#475569";
-        ctx.lineWidth = 3;
-        ctx.strokeRect(marginX, surfaceY, 66, baseY - surfaceY);
+        setText('v10r-lam-value', state.lam.toFixed(3));
+        setText('v10r-length-value', state.length.toFixed(0));
+        setText('v10r-velocity-value', state.velocity.toFixed(1));
+        setText('v10r-vhead', state.vHead.toFixed(2) + ' m');
+        setText('v10r-hw', state.headLoss.toFixed(2) + ' m');
+        setText('v10r-slope', state.slope.toFixed(3) + ' m/m');
+        setText('v10r-ld', state.ld.toFixed(1));
+        setText('v10r-regime', state.regime);
+        setText(
+            'v10r-explainer',
+            `Za brzinu ${state.velocity.toFixed(1)} m/s brzinska visina ostaje ${state.vHead.toFixed(2)} m u oba traka jer je promjer cijevi isti. Kad uvedeš λ = ${state.lam.toFixed(3)} i omjer L/D = ${state.ld.toFixed(1)}, realni tok gubi ${state.headLoss.toFixed(2)} m energije, pa donja EGL linija pada nagibom I = ${state.slope.toFixed(3)} m/m, dok gornja idealna linija ostaje ravna.`
+        );
+        syncPresetButtons();
+    }
 
-        ctx.strokeStyle = "#94a3b8";
-        ctx.lineWidth = 16;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(pipeStart, pipeY);
-        ctx.lineTo(pipeEnd, pipeY);
-        ctx.lineTo(outletX, outletY);
-        ctx.stroke();
-
-        ctx.strokeStyle = "#ef4444";
-        ctx.lineWidth = 3;
-        const eglInletY = surfaceY;
-        const eglOutletY = eglInletY + headLossPx;
-        ctx.beginPath();
-        ctx.moveTo(pipeStart, eglInletY);
-        ctx.lineTo(pipeEnd, eglOutletY);
-        ctx.lineTo(outletX + 14, eglOutletY);
-        ctx.stroke();
-
-        ctx.strokeStyle = "#2563eb";
+    function drawVerticalBracket(x, y1, y2, color, label) {
+        if (Math.abs(y2 - y1) < 3) return;
+        const top = Math.min(y1, y2);
+        const bottom = Math.max(y1, y2);
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
         ctx.lineWidth = 2;
-        ctx.setLineDash([7, 6]);
         ctx.beginPath();
-        ctx.moveTo(pipeStart, eglInletY - velocityHead * energyScale);
-        ctx.lineTo(pipeEnd, eglOutletY - velocityHead * energyScale);
-        ctx.lineTo(outletX + 14, eglOutletY - velocityHead * energyScale);
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, bottom);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, top);
+        ctx.lineTo(x - 5, top + 7);
+        ctx.lineTo(x + 5, top + 7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x, bottom);
+        ctx.lineTo(x - 5, bottom - 7);
+        ctx.lineTo(x + 5, bottom - 7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.font = 'bold 12px Aptos, Segoe UI, sans-serif';
+        ctx.fillText(label, x + 10, (top + bottom) / 2 + 4);
+        ctx.restore();
+    }
+
+    function drawHorizontalBracket(x1, x2, y, color, label) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x1, y);
+        ctx.lineTo(x2, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x1, y);
+        ctx.lineTo(x1 + 8, y - 4);
+        ctx.lineTo(x1 + 8, y + 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x2, y);
+        ctx.lineTo(x2 - 8, y - 4);
+        ctx.lineTo(x2 - 8, y + 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.font = 'bold 12px Aptos, Segoe UI, sans-serif';
+        ctx.fillText(label, (x1 + x2) / 2 - 4, y - 8);
+        ctx.restore();
+    }
+
+    function drawParticles(particles, pipeY, isReal) {
+        const pipeStart = 124;
+        const outletX = 836;
+        particles.forEach((particle) => {
+            particle.t += 0.0019 * state.velocity * particle.speed;
+            if (particle.t > 1) particle.t -= 1;
+            const x = pipeStart + particle.t * (outletX - pipeStart);
+            const outletZone = Math.max((x - 706) / 130, 0);
+            const swirl = isReal ? Math.sin(particle.phase + particle.t * 24) * 3.5 * outletZone : 0;
+            const wave = Math.sin(particle.phase + particle.t * 12) * (isReal ? 1.2 : 0.5);
+            const y = pipeY + particle.offset + wave + swirl;
+            ctx.fillStyle = isReal ? '#f97316' : '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(x, y, 2.15, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    function drawLane(config) {
+        const bandY = config.bandY;
+        const laneTop = bandY - 88;
+        const laneHeight = 126;
+        const pipeStart = 124;
+        const pipeEnd = 770;
+        const outletX = 836;
+        const reservoirX = 46;
+        const reservoirTop = bandY - 52;
+        const reservoirBottom = bandY + 26;
+        const sectionStart = 198;
+        const sectionEnd = 748;
+        const velocityBand = 14 + 28 * (state.vHead / maxVelocityHead);
+        const lossDrop = config.isReal ? 76 * (state.headLoss / maxHeadLoss) : 0;
+        const eglStartY = bandY - 58;
+        const eglEndY = eglStartY + lossDrop;
+        const hglStartY = eglStartY + velocityBand;
+        const hglEndY = eglEndY + velocityBand;
+
+        ctx.fillStyle = config.panel;
+        ctx.fillRect(22, laneTop, 876, laneHeight);
+        ctx.strokeStyle = config.border;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(22, laneTop, 876, laneHeight);
+
+        ctx.fillStyle = config.tagBg;
+        ctx.fillRect(40, laneTop + 12, config.tagWidth, 24);
+        ctx.fillStyle = config.tagText;
+        ctx.font = '800 11px Aptos, Segoe UI, sans-serif';
+        ctx.fillText(config.label, 54, laneTop + 28);
+
+        ctx.fillStyle = '#d8efff';
+        ctx.fillRect(reservoirX, reservoirTop, 54, reservoirBottom - reservoirTop);
+        ctx.strokeStyle = '#567086';
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(reservoirX, reservoirTop, 54, reservoirBottom - reservoirTop);
+        ctx.strokeStyle = '#7fc5ff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(reservoirX + 5, reservoirTop + 14);
+        ctx.lineTo(reservoirX + 49, reservoirTop + 14);
+        ctx.stroke();
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#8da6ba';
+        ctx.lineWidth = 19;
+        ctx.beginPath();
+        ctx.moveTo(98, bandY);
+        ctx.lineTo(pipeEnd, bandY);
+        ctx.lineTo(outletX, bandY - 4);
+        ctx.stroke();
+
+        ctx.strokeStyle = config.flow;
+        ctx.lineWidth = 11;
+        ctx.beginPath();
+        ctx.moveTo(98, bandY);
+        ctx.lineTo(pipeEnd, bandY);
+        ctx.lineTo(outletX, bandY - 4);
+        ctx.stroke();
+
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = 'rgba(90, 112, 133, 0.45)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(sectionStart, laneTop + 20);
+        ctx.lineTo(sectionStart, laneTop + laneHeight - 16);
+        ctx.moveTo(sectionEnd, laneTop + 20);
+        ctx.lineTo(sectionEnd, laneTop + laneHeight - 16);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle = "#ef4444";
-        ctx.font = "bold 11px Inter";
-        ctx.fillText("EGL", pipeStart - 34, eglInletY + 4);
-        ctx.fillStyle = "#2563eb";
-        ctx.fillText("HGL", pipeStart - 34, eglInletY - velocityHead * energyScale + 4);
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.14)';
+        ctx.beginPath();
+        ctx.moveTo(pipeStart, eglStartY);
+        ctx.lineTo(outletX, eglEndY);
+        ctx.lineTo(outletX, hglEndY);
+        ctx.lineTo(pipeStart, hglStartY);
+        ctx.closePath();
+        ctx.fill();
 
-        particles.forEach((particle) => {
-            particle.t += 0.0025 * state.velocity;
-            if (particle.t > 1) particle.t -= 1;
-            const x = pipeStart + particle.t * (outletX - pipeStart);
-            const localSlope = (outletY - pipeY) / (outletX - pipeStart);
-            const yCenter = pipeY + (x - pipeStart) * localSlope;
-            const y = yCenter + particle.offset * 3;
-            ctx.fillStyle = isReal ? "#ef4444" : "#3b82f6";
+        ctx.strokeStyle = config.egl;
+        ctx.lineWidth = 3.2;
+        ctx.beginPath();
+        ctx.moveTo(pipeStart, eglStartY);
+        ctx.lineTo(outletX, eglEndY);
+        ctx.stroke();
+
+        ctx.setLineDash([10, 8]);
+        ctx.strokeStyle = '#1d4ed8';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(pipeStart, hglStartY);
+        ctx.lineTo(outletX, hglEndY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = config.egl;
+        ctx.font = 'bold 12px Aptos, Segoe UI, sans-serif';
+        ctx.fillText('EGL', pipeStart - 36, eglStartY + 4);
+        ctx.fillStyle = '#1d4ed8';
+        ctx.fillText('HGL', pipeStart - 36, hglStartY + 4);
+
+        drawVerticalBracket(pipeStart + 20, eglStartY, hglStartY, '#1d4ed8', config.isReal ? 'isti v²/2g' : 'v²/2g');
+        if (config.isReal) {
+            drawVerticalBracket(outletX + 18, eglStartY, eglEndY, '#ea580c', 'h_w');
+        }
+
+        ctx.fillStyle = '#506a80';
+        ctx.font = '700 11px Aptos, Segoe UI, sans-serif';
+        ctx.fillText('1', sectionStart - 4, bandY + 36);
+        ctx.fillText('2', sectionEnd - 4, bandY + 36);
+
+        for (let marker = 0; marker < 3; marker++) {
+            const x = 270 + marker * 160;
+            ctx.strokeStyle = config.arrow;
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(x, y, 2.3, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(x, bandY - 18);
+            ctx.lineTo(x + 34, bandY - 18);
+            ctx.lineTo(x + 28, bandY - 23);
+            ctx.moveTo(x + 34, bandY - 18);
+            ctx.lineTo(x + 28, bandY - 13);
+            ctx.stroke();
+        }
+
+        if (config.isReal) {
+            ctx.strokeStyle = 'rgba(234, 88, 12, 0.9)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                const x = 260 + i * 72;
+                ctx.beginPath();
+                ctx.moveTo(x, bandY + 18);
+                ctx.lineTo(x + 12, bandY + 28);
+                ctx.stroke();
+            }
+            drawHorizontalBracket(sectionStart, sectionEnd, bandY + 50, '#607689', 'L');
+        }
+
+        drawParticles(config.particles, bandY, config.isReal);
+    }
+
+    function drawBackground() {
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#f8fbff');
+        gradient.addColorStop(1, '#edf4fa');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = 'rgba(112, 145, 171, 0.12)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= canvas.width; x += 92) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackground();
+
+        ctx.fillStyle = '#4f6f87';
+        ctx.font = '700 12px Aptos, Segoe UI, sans-serif';
+        ctx.fillText('Gore: referentni idealni tok', 34, 24);
+        ctx.fillText('Dolje: realni tok s gubitkom na trenju', 34, 216);
+
+        drawLane({
+            bandY: 112,
+            label: 'IDEALNI TOK: bez disipacije',
+            tagWidth: 190,
+            panel: 'rgba(255, 255, 255, 0.84)',
+            border: 'rgba(148, 191, 224, 0.42)',
+            tagBg: '#e9f4ff',
+            tagText: '#235887',
+            flow: '#60a5fa',
+            egl: '#dc2626',
+            arrow: '#5f85a8',
+            isReal: false,
+            particles: particlesIdeal
         });
 
-        ctx.fillStyle = "#0f172a";
-        ctx.font = "600 11px Inter";
-        ctx.fillText(isReal ? "Pad energije zbog trenja" : "Bez gubitka energije", 124, 30);
-        ctx.fillText("hw = " + (isReal ? state.headLoss.toFixed(2) : "0.00") + " m", 250, 282);
+        drawLane({
+            bandY: 300,
+            label: 'REALNI TOK: Darcy-Weisbach gubitak',
+            tagWidth: 228,
+            panel: 'rgba(255, 248, 240, 0.9)',
+            border: 'rgba(235, 158, 94, 0.38)',
+            tagBg: '#fff1df',
+            tagText: '#a24b0f',
+            flow: '#f59e0b',
+            egl: '#ea580c',
+            arrow: '#cc6f2f',
+            isReal: true,
+            particles: particlesReal
+        });
     }
 
     function animate() {
-        drawScene(idealCtx, false);
-        drawScene(realCtx, true);
+        draw();
         requestAnimationFrame(animate);
     }
 
-    [fSlider, lSlider, vSlider].forEach((slider) => slider.addEventListener('input', updateState));
+    presetButtons.forEach((button) => {
+        button.addEventListener('click', function() {
+            lamSlider.value = button.dataset.lam;
+            lengthSlider.value = button.dataset.length;
+            velocitySlider.value = button.dataset.velocity;
+            updateState();
+        });
+    });
+
+    [lamSlider, lengthSlider, velocitySlider].forEach((slider) => {
+        slider.addEventListener('input', updateState);
+    });
+
     updateState();
     animate();
 })();
@@ -290,6 +804,135 @@ Sifon sa slike napunjen je vodom pri čemu volumenski protok iznosi 150 [dm3/s].
 
 ```{=html}
 <!-- WIDGET: Sifon s gubicima (EGL/HGL) -->
+<style>
+    #z86-siphon-losses-widget,
+    #z87-nozzle-jet-widget,
+    #z90-pitot-premium-widget,
+    #z91-multiphase-widget,
+    #z92-nozzle-contracta-widget,
+    #z94-ejector-widget {
+        max-width: 980px !important;
+    }
+    #z86-siphon-losses-widget > div:nth-of-type(2),
+    #z87-nozzle-jet-widget > div:nth-of-type(2),
+    #z90-pitot-premium-widget > div:nth-of-type(2),
+    #z91-multiphase-widget > div:nth-of-type(2),
+    #z92-nozzle-contracta-widget > div:nth-of-type(2),
+    #z94-ejector-widget > div:nth-of-type(2) {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        align-items: start !important;
+    }
+    #z86-siphon-losses-widget > div:nth-of-type(2) > div:first-child,
+    #z87-nozzle-jet-widget > div:nth-of-type(2) > div:first-child,
+    #z90-pitot-premium-widget > div:nth-of-type(2) > div:first-child,
+    #z91-multiphase-widget > div:nth-of-type(2) > div:first-child,
+    #z92-nozzle-contracta-widget > div:nth-of-type(2) > div:first-child,
+    #z94-ejector-widget > div:nth-of-type(2) > div:first-child {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.95rem;
+        height: auto !important;
+        min-height: 0;
+        overflow: visible !important;
+        padding-bottom: 1rem;
+    }
+    #z86-siphon-losses-widget canvas,
+    #z87-nozzle-jet-widget canvas,
+    #z90-pitot-premium-widget canvas,
+    #z91-multiphase-widget canvas,
+    #z92-nozzle-contracta-widget canvas,
+    #z94-ejector-widget canvas {
+        display: block;
+        width: 100% !important;
+        height: auto !important;
+    }
+    #z86-siphon-losses-widget > div:nth-of-type(2) > div:last-child,
+    #z87-nozzle-jet-widget > div:nth-of-type(2) > div:last-child,
+    #z90-pitot-premium-widget > div:nth-of-type(2) > div:last-child,
+    #z91-multiphase-widget > div:nth-of-type(2) > div:last-child,
+    #z92-nozzle-contracta-widget > div:nth-of-type(2) > div:last-child,
+    #z94-ejector-widget > div:nth-of-type(2) > div:last-child {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.95rem !important;
+        align-items: start;
+    }
+    #z86-siphon-losses-widget > div:nth-of-type(2) > div:last-child > div,
+    #z87-nozzle-jet-widget > div:nth-of-type(2) > div:last-child > div,
+    #z90-pitot-premium-widget > div:nth-of-type(2) > div:last-child > div,
+    #z91-multiphase-widget > div:nth-of-type(2) > div:last-child > div,
+    #z92-nozzle-contracta-widget > div:nth-of-type(2) > div:last-child > div,
+    #z94-ejector-widget > div:nth-of-type(2) > div:last-child > div {
+        margin: 0 !important;
+    }
+    #z86-siphon-losses-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+    #z86-siphon-losses-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+    #z87-nozzle-jet-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+    #z87-nozzle-jet-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+    #z90-pitot-premium-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+    #z90-pitot-premium-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+    #z91-multiphase-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+    #z91-multiphase-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+    #z92-nozzle-contracta-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+    #z92-nozzle-contracta-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+    #z94-ejector-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+    #z94-ejector-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4) {
+        grid-column: 1 / -1;
+    }
+    #z86-siphon-losses-widget > div:nth-of-type(2) > div:first-child > div:last-child,
+    #z87-nozzle-jet-widget > div:nth-of-type(2) > div:first-child > div:last-child,
+    #z90-stagnation-label,
+    #z92-vena-label {
+        position: static !important;
+        inset: auto !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        margin: 0 1rem 0 auto;
+        align-self: flex-end;
+    }
+    #z91-multiphase-widget > div:nth-of-type(2) > div:first-child > div:last-child {
+        position: static !important;
+        inset: auto !important;
+        margin: 0 1rem;
+        align-self: flex-start;
+    }
+    #z94-suction-info {
+        position: static !important;
+        inset: auto !important;
+        transform: none !important;
+        margin: 0 auto;
+        align-self: center;
+    }
+    @media (max-width: 900px) {
+        #z86-siphon-losses-widget > div:nth-of-type(2) > div:last-child,
+        #z87-nozzle-jet-widget > div:nth-of-type(2) > div:last-child,
+        #z90-pitot-premium-widget > div:nth-of-type(2) > div:last-child,
+        #z91-multiphase-widget > div:nth-of-type(2) > div:last-child,
+        #z92-nozzle-contracta-widget > div:nth-of-type(2) > div:last-child,
+        #z94-ejector-widget > div:nth-of-type(2) > div:last-child {
+            grid-template-columns: 1fr !important;
+        }
+        #z86-siphon-losses-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+        #z86-siphon-losses-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+        #z87-nozzle-jet-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+        #z87-nozzle-jet-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+        #z90-pitot-premium-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+        #z90-pitot-premium-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+        #z91-multiphase-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+        #z91-multiphase-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+        #z92-nozzle-contracta-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+        #z92-nozzle-contracta-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4),
+        #z94-ejector-widget > div:nth-of-type(2) > div:last-child > div:nth-child(3),
+        #z94-ejector-widget > div:nth-of-type(2) > div:last-child > div:nth-child(4) {
+            grid-column: auto;
+        }
+    }
+</style>
 <div id="z86-siphon-losses-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🌀 Sifon s gubicima: EGL, HGL i raspodjela tlaka</h4>
 

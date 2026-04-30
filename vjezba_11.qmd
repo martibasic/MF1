@@ -18,69 +18,429 @@ Ovaj fenomen je temelj rada hidrauličkih strojeva – upravo zato lopatice Pelt
 
 ```{=html}
 <!-- NOVI WIDGET: Sila mlaza (Ravna vs Zakrivljena ploha) -->
-<div class="widget-container" id="widget-jet-impact">
+<div id="widget-jet-impact">
     <style>
-        .widget-container {
-            border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 20px auto; max-width: 850px;
-            font-family: 'Inter', system-ui, sans-serif;
+        #widget-jet-impact * {
+            box-sizing: border-box;
         }
-        .canvas-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
-        .canvas-box { border: 1px solid #eee; border-radius: 8px; background: #fdfdfd; position: relative; height: 300px; }
-        .label-overlay { position: absolute; top: 10px; width: 100%; text-align: center; font-weight: bold; color: #2c3e50; }
+        #widget-jet-impact .ji-shell {
+            max-width: 1020px;
+            margin: 24px auto;
+            overflow: hidden;
+            border: 1px solid rgba(86, 115, 138, 0.16);
+            border-radius: 30px;
+            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 28%), linear-gradient(180deg, #fcfeff 0%, #f3f8fd 100%);
+            box-shadow: 0 28px 68px rgba(33, 55, 77, 0.14);
+            font-family: "Aptos", "Segoe UI", sans-serif;
+        }
+        #widget-jet-impact .ji-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 0.85rem;
+            align-items: start;
+            padding: 1.35rem 1.45rem 1rem;
+            background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 34%), linear-gradient(135deg, #eef8ff 0%, #ffffff 52%, #fff6eb 100%);
+            border-bottom: 1px solid rgba(86, 115, 138, 0.12);
+        }
+        #widget-jet-impact .ji-kicker {
+            margin-bottom: 0.35rem;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #6f869a;
+        }
+        #widget-jet-impact .ji-title {
+            margin: 0;
+            font-size: clamp(1.18rem, 2vw, 1.55rem);
+            line-height: 1.12;
+            color: #193f63;
+        }
+        #widget-jet-impact .ji-sub {
+            margin: 0.48rem 0 0;
+            max-width: 68ch;
+            font-size: 0.88rem;
+            line-height: 1.56;
+            color: #547088;
+        }
+        #widget-jet-impact .ji-chip {
+            align-self: start;
+            padding: 0.66rem 0.88rem;
+            border: 1px solid #d7e7f5;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ffffff, #f7fbff);
+            color: #1f4f79;
+            font-size: 0.74rem;
+            font-weight: 800;
+            line-height: 1.35;
+            max-width: min(100%, 320px);
+            white-space: normal;
+            text-align: right;
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.08);
+        }
+        #widget-jet-impact .ji-note {
+            margin: 0.85rem 1.45rem 0;
+            padding: 0.9rem 1rem;
+            border: 1px solid #d8e8f6;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #edf8ff, #fff7ee);
+            color: #325775;
+            font-size: 0.8rem;
+            line-height: 1.56;
+        }
+        #widget-jet-impact .ji-stage {
+            margin: 0.85rem 1.45rem 0;
+            padding: 0.85rem;
+            border: 1px solid #dbe7f2;
+            border-radius: 26px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #f7fbff 0%, #edf5fb 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        }
+        #widget-jet-impact .ji-stage-head {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.55rem;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+        #widget-jet-impact .ji-stage-text strong {
+            display: block;
+            margin-bottom: 0.2rem;
+            font-size: 0.86rem;
+            color: #143f66;
+        }
+        #widget-jet-impact .ji-stage-text span {
+            display: block;
+            font-size: 0.79rem;
+            line-height: 1.48;
+            color: #547088;
+        }
+        #widget-jet-impact .ji-stage-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            justify-content: flex-start;
+        }
+        #widget-jet-impact .ji-pill {
+            padding: 0.4rem 0.62rem;
+            border-radius: 999px;
+            border: 1px solid #cfe0ef;
+            background: rgba(255, 255, 255, 0.9);
+            color: #335876;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+        #widget-jet-impact .ji-pill-warm {
+            border-color: #fed7aa;
+            background: rgba(255, 247, 237, 0.92);
+            color: #9a3412;
+        }
+        #widget-jet-impact .ji-canvases {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.85rem;
+        }
+        #widget-jet-impact .ji-pane {
+            border: 1px solid #d8e7f3;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            padding: 0.9rem 1rem 1rem;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.05);
+        }
+        #widget-jet-impact .ji-pane-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 0.35rem;
+        }
+        #widget-jet-impact .ji-pane h4 {
+            margin: 0;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #36506b;
+        }
+        #widget-jet-impact .ji-pane-badge {
+            padding: 0.32rem 0.55rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            border: 1px solid #d7e6f6;
+            color: #1d4f7a;
+            font-size: 0.68rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #widget-jet-impact .ji-pane-copy {
+            margin: 0 0 0.55rem;
+            font-size: 0.78rem;
+            line-height: 1.5;
+            color: #547088;
+        }
+        #widget-jet-impact .ji-pane canvas {
+            display: block;
+            width: min(100%, 620px);
+            height: auto;
+            margin: 0 auto;
+            border-radius: 16px;
+            border: 1px solid #e1eaf3;
+            background: linear-gradient(180deg, #fcfeff 0%, #eef4fb 100%);
+        }
+        #widget-jet-impact .ji-forceband {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.65rem;
+            padding: 0.85rem 1.45rem 0;
+        }
+        #widget-jet-impact .ji-forcecard {
+            min-width: 0;
+            padding: 0.82rem 0.9rem;
+            border-radius: 18px;
+            border: 1px solid rgba(29, 79, 120, 0.12);
+            background: linear-gradient(160deg, #ffffff 0%, #f3f8fd 100%);
+            box-shadow: 0 14px 30px rgba(37, 99, 235, 0.08);
+        }
+        #widget-jet-impact .ji-forcecard-warm {
+            border-color: rgba(251, 146, 60, 0.24);
+            background: linear-gradient(160deg, #fff7ed 0%, #fff1f2 100%);
+            box-shadow: 0 16px 30px rgba(249, 115, 22, 0.12);
+        }
+        #widget-jet-impact .ji-forcecard-dark {
+            border-color: rgba(15, 23, 42, 0.12);
+            background: linear-gradient(160deg, #143a63 0%, #1d4f7a 100%);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+        #widget-jet-impact .ji-force-eyebrow {
+            display: block;
+            margin-bottom: 0.28rem;
+            font-size: 0.66rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #688298;
+        }
+        #widget-jet-impact .ji-forcecard strong {
+            display: block;
+            font-size: clamp(1.18rem, 1.7vw, 1.45rem);
+            line-height: 1;
+            color: #0f3558;
+        }
+        #widget-jet-impact .ji-forcecard-dark .ji-force-eyebrow,
+        #widget-jet-impact .ji-forcecard-dark strong,
+        #widget-jet-impact .ji-forcecard-dark .ji-force-hint {
+            color: #ffffff;
+        }
+        #widget-jet-impact .ji-force-hint {
+            display: block;
+            margin-top: 0.32rem;
+            font-size: 0.74rem;
+            line-height: 1.4;
+            color: #547088;
+        }
+        #widget-jet-impact .ji-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.65rem;
+            padding: 0.7rem 1.45rem 0;
+        }
+        #widget-jet-impact .ji-stat {
+            min-width: 0;
+            padding: 0.78rem 0.85rem;
+            border: 1px solid rgba(29, 79, 120, 0.09);
+            border-radius: 16px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f7fb 100%);
+        }
+        #widget-jet-impact .ji-stat small {
+            display: block;
+            margin-bottom: 0.28rem;
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #6b8497;
+        }
+        #widget-jet-impact .ji-stat strong {
+            display: block;
+            font-size: 0.9rem;
+            color: #11375a;
+            font-variant-numeric: tabular-nums;
+            overflow-wrap: anywhere;
+        }
+        #widget-jet-impact .ji-lower {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.8rem;
+            padding: 0.85rem 1.45rem 1.45rem;
+        }
+        #widget-jet-impact .ji-card {
+            border: 1px solid #e3ebf2;
+            border-radius: 18px;
+            background: #ffffff;
+            padding: 0.9rem 0.95rem;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+        }
+        #widget-jet-impact .ji-section {
+            display: block;
+            margin-bottom: 0.45rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #678195;
+        }
+        #widget-jet-impact .ji-controls {
+            display: grid;
+            gap: 0.85rem;
+        }
+        #widget-jet-impact .ji-row label {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.35rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #36506b;
+        }
+        #widget-jet-impact .ji-row input {
+            width: 100%;
+            accent-color: #2b7ab8;
+        }
+        #widget-jet-impact .ji-compare {
+            font-size: 0.8rem;
+            line-height: 1.54;
+            color: #355771;
+        }
+        #widget-jet-impact .ji-compare div + div {
+            margin-top: 0.5rem;
+        }
+        #widget-jet-impact .ji-explainer {
+            grid-column: 1 / -1;
+            border-color: #c9dcf0;
+            background: linear-gradient(135deg, #eff7ff, #fff5e8);
+            color: #1d4970;
+            font-size: 0.81rem;
+            line-height: 1.54;
+        }
+        @media (max-width: 980px) {
+            #widget-jet-impact .ji-head,
+            #widget-jet-impact .ji-lower {
+                grid-template-columns: 1fr;
+            }
+            #widget-jet-impact .ji-forceband {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            #widget-jet-impact .ji-chip {
+                justify-self: start;
+                text-align: left;
+            }
+        }
+        @media (max-width: 620px) {
+            #widget-jet-impact .ji-forceband,
+            #widget-jet-impact .ji-summary {
+                grid-template-columns: 1fr;
+            }
+            #widget-jet-impact .ji-pane-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
     </style>
 
-    <div class="widget-header"><h3 class="widget-title">Eksperiment: Impuls mlaza na lopatice</h3></div>
+    <div class="ji-shell">
+        <div class="ji-head">
+            <div>
+                <div class="ji-kicker">Impuls mlaza na lopatice</div>
+                <h3 class="ji-title">Isti mlaz daje veću silu tek onda kada mu promijeniš i smjer, ne samo kada ga zaustaviš</h3>
+                <p class="ji-sub">Gornja scena namjerno uspoređuje dva kontrolna volumena u istom kadru. Ravna ploča poništava izlaznu x-komponentu, dok zakrivljena lopatica vraća mlaz natrag pa promjena količine gibanja postaje dvostruko veća i sila odmah raste.</p>
+            </div>
+            <div class="ji-chip">F = ṁ(v<sub>iz,x</sub> - v<sub>ul,x</sub>)</div>
+        </div>
 
-    <div style="padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 15px; color: #1e3a8a; font-size: 0.82rem; line-height: 1.5;">
-        <strong>Kako čitati usporedbu:</strong> Sila ne ovisi samo o iznosu brzine, nego o promjeni njezine x-komponente. Ravna ploča svodi izlaznu x-brzinu na nulu, dok zakrivljena lopatica vraća mlaz natrag pa izlazna komponenta postaje negativna i promjena količine gibanja postaje dvostruko veća.
-    </div>
-    
-    <div class="controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-        <div class="control-group">
-            <label>Brzina mlaza (v): <span id="v-val-jet">15</span> m/s</label>
-            <input type="range" id="v-slider-jet" min="5" max="30" value="15" step="1" style="width: 100%;">
-        </div>
-        <div class="control-group">
-            <label>Maseni protok (ṁ): <span id="m-val-jet">5.0</span> kg/s</label>
-            <input type="range" id="m-slider-jet" min="1" max="10" value="5" step="0.5" style="width: 100%;">
-        </div>
-    </div>
+        <div class="ji-note"><strong>Kako čitati usporedbu:</strong> prvo pogledaj ulaznu x-brzinu koja je ista u oba slučaja. Zatim usporedi što ostaje na izlazu: kod ravne ploče izlazna x-komponenta pada na nulu, a kod zakrivljene lopatice postaje negativna. Upravo ta promjena predznaka objašnjava zašto se sila na zakrivljenoj lopatici udvostručuje.</div>
 
-    <div class="canvas-row">
-        <div class="canvas-box">
-            <div class="label-overlay">RAVNA PLOČA (90°)</div>
-            <canvas id="canvas-flat" width="400" height="280" style="width: 100%; height: 100%; display: block;"></canvas>
-            <div style="position:absolute; bottom:10px; width:100%; text-align:center; font-weight:bold; color:#e67e22;">F = <span id="f-flat-out">0</span> N</div>
+        <div class="ji-stage">
+            <div class="ji-stage-head">
+                <div class="ji-stage-text">
+                    <strong>Isti ulazni mlaz, dva različita izlaza</strong>
+                    <span>Usporedbu čitaj s lijeva na desno: ulazni impuls <strong>ṁv<sub>x</sub></strong> je isti u oba slučaja, a razlika u sili pojavljuje se tek kada se promijeni izlazna x-komponenta brzine.</span>
+                </div>
+                <div class="ji-stage-pills">
+                    <span class="ji-pill">isti ulaz: ṁv</span>
+                    <span class="ji-pill ji-pill-warm">veći Δv<sub>x</sub> -&gt; veća reakcija</span>
+                </div>
+            </div>
+            <div class="ji-canvases">
+                <div class="ji-pane">
+                    <div class="ji-pane-head">
+                        <h4>Ravna ploča</h4>
+                        <span class="ji-pane-badge">v<sub>iz,x</sub> = 0</span>
+                    </div>
+                    <p class="ji-pane-copy">Mlaz izgubi x-komponentu pa ploča prima jedan ulazni impuls po sekundi.</p>
+                    <canvas id="canvas-flat" width="400" height="280"></canvas>
+                </div>
+                <div class="ji-pane">
+                    <div class="ji-pane-head">
+                        <h4>Zakrivljena lopatica</h4>
+                        <span class="ji-pane-badge">v<sub>iz,x</sub> &lt; 0</span>
+                    </div>
+                    <p class="ji-pane-copy">Lopatica vraća mlaz natrag pa promjena x-impulsa postaje približno dvostruka.</p>
+                    <canvas id="canvas-cup" width="400" height="280"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="canvas-box">
-            <div class="label-overlay">ZAKRIVLJENA LOPATICA (180°)</div>
-            <canvas id="canvas-cup" width="400" height="280" style="width: 100%; height: 100%; display: block;"></canvas>
-            <div style="position:absolute; bottom:10px; width:100%; text-align:center; font-weight:bold; color:#c0392b;">F = <span id="f-cup-out">0</span> N</div>
-        </div>
-    </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 15px;">
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Ravna: v_ul,x</div>
-            <div id="jet-flat-vin" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
+        <div class="ji-forceband">
+            <div class="ji-forcecard">
+                <small class="ji-force-eyebrow">Ravna ploča</small>
+                <strong><span id="f-flat-out">0</span> N</strong>
+                <span class="ji-force-hint">Reakcija ostaje na razini jednog ulaznog impulsa: <strong>F = ṁv</strong>.</span>
+            </div>
+            <div class="ji-forcecard ji-forcecard-warm">
+                <small class="ji-force-eyebrow">Zakrivljena lopatica</small>
+                <strong><span id="f-cup-out">0</span> N</strong>
+                <span class="ji-force-hint">Povrat mlaza pojača promjenu količine gibanja: <strong>F = 2ṁv</strong>.</span>
+            </div>
+            <div class="ji-forcecard ji-forcecard-dark">
+                <small class="ji-force-eyebrow">Pojačanje zbog skretanja</small>
+                <strong id="ji-force-ratio">2.0×</strong>
+                <span class="ji-force-hint">Omjer zakrivljene i ravne reakcije za isti ulazni mlaz.</span>
+            </div>
         </div>
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Ravna: v_iz,x</div>
-            <div id="jet-flat-vout" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
-        </div>
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Zakrivljena: v_iz,x</div>
-            <div id="jet-cup-vout" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 m/s</div>
-        </div>
-        <div style="padding: 12px; border: 1px solid #dbeafe; border-radius: 10px; background: #ffffff; text-align: center;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δ(ṁv_x)</div>
-            <div id="jet-dmom-out" style="font-family: monospace; font-weight: 800; color: #0f172a;">0.00 N</div>
-        </div>
-    </div>
 
-    <div style="margin-top: 14px; padding: 12px 14px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; color: #7c2d12; font-size: 0.82rem; line-height: 1.5;">
-        <strong>Tumačenje scene:</strong> <span id="jet-impact-explainer"></span>
+        <div class="ji-summary">
+            <div class="ji-stat"><small>Ravna: v_ul,x</small><strong id="jet-flat-vin">0.00 m/s</strong></div>
+            <div class="ji-stat"><small>Ravna: v_iz,x</small><strong id="jet-flat-vout">0.00 m/s</strong></div>
+            <div class="ji-stat"><small>Zakrivljena: v_iz,x</small><strong id="jet-cup-vout">0.00 m/s</strong></div>
+            <div class="ji-stat"><small>Δ(ṁv_x)</small><strong id="jet-dmom-out">0.00 N</strong></div>
+        </div>
+
+        <div class="ji-lower">
+            <div class="ji-card ji-controls">
+                <strong class="ji-section">Ulazni uvjeti</strong>
+                <div class="ji-row">
+                    <label for="v-slider-jet"><span>Brzina mlaza v</span><strong><span id="v-val-jet">15</span> m/s</strong></label>
+                    <input type="range" id="v-slider-jet" min="5" max="30" value="15" step="1">
+                </div>
+                <div class="ji-row">
+                    <label for="m-slider-jet"><span>Maseni protok ṁ</span><strong><span id="m-val-jet">5.0</span> kg/s</strong></label>
+                    <input type="range" id="m-slider-jet" min="1" max="10" value="5" step="0.5">
+                </div>
+            </div>
+
+            <div class="ji-card ji-compare">
+                <strong class="ji-section">Što se mijenja između plohe i lopatice</strong>
+                <div>Za <strong>ravnu ploču</strong> vrijedi približno <strong>v<sub>iz,x</sub> = 0</strong>, pa je reakcija jednaka ulaznom impulsu po sekundi: <strong>F = ṁv</strong>.</div>
+                <div>Za <strong>zakrivljenu lopaticu</strong> mlaz izlazi natrag, pa je <strong>v<sub>iz,x</sub> ≈ -v</strong>. Tada je promjena x-impulsa približno dvostruka i dobivaš <strong>F = 2ṁv</strong>.</div>
+            </div>
+
+            <div class="ji-card ji-explainer">
+                <strong class="ji-section">Tumačenje scene</strong>
+                <div id="jet-impact-explainer"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -108,53 +468,168 @@ Ovaj fenomen je temelj rada hidrauličkih strojeva – upravo zato lopatice Pelt
             document.getElementById('jet-flat-vout').textContent = '0.00 m/s';
             document.getElementById('jet-cup-vout').textContent = (-v).toFixed(2) + ' m/s';
             document.getElementById('jet-dmom-out').textContent = (m * (0 - v)).toFixed(1) + ' N';
+            document.getElementById('ji-force-ratio').textContent = (fFlat > 0 ? (fCup / fFlat).toFixed(1) : '0.0') + '×';
             document.getElementById('jet-impact-explainer').textContent = `Za brzinu ${v.toFixed(1)} m/s i maseni protok ${m.toFixed(1)} kg/s ravna ploča mijenja x-komponentu brzine s ${v.toFixed(1)} na 0 m/s, pa je sila ${fFlat.toFixed(1)} N. Zakrivljena lopatica vraća mlaz na ${(-v).toFixed(1)} m/s u x-smjeru, pa je promjena impulsa dvostruko veća i sila raste na ${fCup.toFixed(1)} N.`;
 
             drawFlat(v, m);
             drawCup(v, m);
         }
 
+        function drawBackdrop(ctx) {
+            const bg = ctx.createLinearGradient(0, 0, 0, 280);
+            bg.addColorStop(0, '#fbfdff');
+            bg.addColorStop(1, '#edf4fb');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, 400, 280);
+
+            const panel = ctx.createLinearGradient(0, 28, 0, 244);
+            panel.addColorStop(0, 'rgba(255,255,255,0.94)');
+            panel.addColorStop(1, 'rgba(239,246,255,0.86)');
+            ctx.fillStyle = panel;
+            ctx.fillRect(18, 28, 364, 214);
+
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.38)';
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([6, 7]);
+            ctx.beginPath();
+            ctx.moveTo(24, 150);
+            ctx.lineTo(376, 150);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - 11 * Math.cos(angle - Math.PI / 6), y2 - 11 * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - 11 * Math.cos(angle + Math.PI / 6), y2 - 11 * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            ctx.font = 'bold 11px Aptos';
+            ctx.fillStyle = color;
+            ctx.fillText(label, x1 + 4, y1 - 10);
+        }
+
+        function drawJetBeam(ctx, startX, centerY, length, spread, colorStart, colorEnd, phase) {
+            const beam = ctx.createLinearGradient(startX, centerY, startX + length, centerY);
+            beam.addColorStop(0, colorStart);
+            beam.addColorStop(1, colorEnd);
+            ctx.fillStyle = beam;
+            ctx.beginPath();
+            ctx.moveTo(startX, centerY - spread * 0.55);
+            ctx.lineTo(startX + length, centerY - spread);
+            ctx.lineTo(startX + length, centerY + spread);
+            ctx.lineTo(startX, centerY + spread * 0.55);
+            ctx.closePath();
+            ctx.fill();
+
+            for (let i = 0; i < 18; i++) {
+                const t = i / 17;
+                const px = startX + 12 + t * (length - 26);
+                const py = centerY + Math.sin(t * 12 + phase) * spread * 0.42;
+                ctx.fillStyle = `rgba(37, 99, 235, ${0.22 + 0.55 * (1 - t)})`;
+                ctx.beginPath();
+                ctx.arc(px, py, 1.8 + (1 - t) * 0.9, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
         function drawFlat(v, m) {
             ctxF.clearRect(0,0,400,280);
-            // Mlaz
-            ctxF.fillStyle = '#3498db';
-            ctxF.fillRect(0, 130, 200, 20); // dolazni mlaz
-            // Ploča
-            ctxF.fillStyle = '#2c3e50';
-            ctxF.fillRect(200, 80, 10, 120);
-            // Raspršivanje
-            ctxF.fillStyle = 'rgba(52, 152, 219, 0.6)';
-            ctxF.fillRect(200, 130, 10, 50); ctxF.fillRect(200, 100, 10, 30);
-            
-            // Sila strelica
-            ctxF.strokeStyle = '#e67e22'; ctxF.lineWidth = 4;
-            ctxF.beginPath(); ctxF.moveTo(215, 140); ctxF.lineTo(215 + v*3, 140); ctxF.stroke();
-            ctxF.fillStyle = '#475569'; ctxF.font = 'bold 11px Inter';
-            ctxF.fillText('ulazni impuls', 42, 120);
-            ctxF.fillText('F = mdot * v', 234, 124);
+            drawBackdrop(ctxF);
+            drawJetBeam(ctxF, 34, 150, 188, 18, 'rgba(59, 130, 246, 0.98)', 'rgba(59, 130, 246, 0.16)', v * 0.35 + m * 0.12);
+
+            ctxF.fillStyle = 'rgba(15, 23, 42, 0.12)';
+            ctxF.fillRect(227, 78, 18, 154);
+            ctxF.fillStyle = '#334155';
+            ctxF.fillRect(224, 74, 18, 160);
+
+            for (let i = 0; i < 12; i++) {
+                const spread = i * 4;
+                ctxF.fillStyle = `rgba(56, 189, 248, ${0.26 + i * 0.035})`;
+                ctxF.beginPath();
+                ctxF.arc(238 + (i % 3) * 5, 126 - spread, 2.3, 0, Math.PI * 2);
+                ctxF.arc(238 + ((i + 1) % 3) * 5, 154 + spread, 2.3, 0, Math.PI * 2);
+                ctxF.fill();
+            }
+
+            drawArrow(ctxF, 42, 112, 176, 112, '#2563eb', 'ulaz v₁');
+            drawArrow(ctxF, 254, 150, 340, 150, '#ef4444', 'F_R = ṁv₁');
+
+            ctxF.fillStyle = '#475569';
+            ctxF.font = 'bold 11px Aptos';
+            ctxF.fillText('ravna ploča', 214, 68);
+            ctxF.fillText('x-komponenta nestaje', 250, 104);
+            ctxF.fillText('izlaz se raspodijeli gore i dolje', 246, 122);
+            ctxF.fillText('ulazni impuls = ṁv₁', 36, 176);
         }
 
         function drawCup(v, m) {
             ctxC.clearRect(0,0,400,280);
-            // Mlaz
-            ctxC.fillStyle = '#3498db';
-            ctxC.fillRect(0, 130, 200, 20);
-            // Lopatica (U-oblik)
-            ctxC.strokeStyle = '#2c3e50'; ctxC.lineWidth = 8;
-            ctxC.beginPath();
-            ctxC.arc(220, 140, 40, -Math.PI/2, Math.PI/2);
-            ctxC.stroke();
-            // Povratni mlaz
-            ctxC.fillStyle = 'rgba(52, 152, 219, 0.6)';
-            ctxC.fillRect(100, 95, 100, 15);
-            ctxC.fillRect(100, 170, 100, 15);
+            drawBackdrop(ctxC);
+            drawJetBeam(ctxC, 34, 150, 184, 18, 'rgba(59, 130, 246, 0.98)', 'rgba(59, 130, 246, 0.18)', v * 0.3 + m * 0.1);
 
-            // Sila strelica
-            ctxC.strokeStyle = '#c0392b'; ctxC.lineWidth = 4;
-            ctxC.beginPath(); ctxC.moveTo(265, 140); ctxC.lineTo(265 + v*6, 140); ctxC.stroke();
-            ctxC.fillStyle = '#475569'; ctxC.font = 'bold 11px Inter';
-            ctxC.fillText('povratni mlaz', 96, 88);
-            ctxC.fillText('F = 2 mdot * v', 280, 124);
+            ctxC.strokeStyle = '#334155';
+            ctxC.lineWidth = 10;
+            ctxC.lineCap = 'round';
+            ctxC.beginPath();
+            ctxC.moveTo(238, 92);
+            ctxC.quadraticCurveTo(286, 140, 238, 188);
+            ctxC.stroke();
+            ctxC.lineCap = 'butt';
+
+            const returnTop = ctxC.createLinearGradient(224, 104, 112, 94);
+            returnTop.addColorStop(0, 'rgba(56, 189, 248, 0.72)');
+            returnTop.addColorStop(1, 'rgba(56, 189, 248, 0.14)');
+            ctxC.fillStyle = returnTop;
+            ctxC.beginPath();
+            ctxC.moveTo(224, 108);
+            ctxC.lineTo(110, 92);
+            ctxC.lineTo(110, 108);
+            ctxC.lineTo(224, 120);
+            ctxC.closePath();
+            ctxC.fill();
+
+            const returnBottom = ctxC.createLinearGradient(224, 176, 112, 188);
+            returnBottom.addColorStop(0, 'rgba(56, 189, 248, 0.72)');
+            returnBottom.addColorStop(1, 'rgba(56, 189, 248, 0.14)');
+            ctxC.fillStyle = returnBottom;
+            ctxC.beginPath();
+            ctxC.moveTo(224, 160);
+            ctxC.lineTo(110, 172);
+            ctxC.lineTo(110, 188);
+            ctxC.lineTo(224, 176);
+            ctxC.closePath();
+            ctxC.fill();
+
+            for (let i = 0; i < 11; i++) {
+                const t = i / 10;
+                ctxC.fillStyle = `rgba(56, 189, 248, ${0.22 + 0.45 * (1 - t)})`;
+                ctxC.beginPath();
+                ctxC.arc(206 - t * 92, 104 - t * 13, 2.1, 0, Math.PI * 2);
+                ctxC.arc(206 - t * 92, 176 + t * 11, 2.1, 0, Math.PI * 2);
+                ctxC.fill();
+            }
+
+            drawArrow(ctxC, 42, 112, 176, 112, '#2563eb', 'ulaz v₁');
+            drawArrow(ctxC, 254, 150, 352, 150, '#dc2626', 'F_R = 2ṁv₁');
+
+            ctxC.fillStyle = '#475569';
+            ctxC.font = 'bold 11px Aptos';
+            ctxC.fillText('zakrivljena lopatica', 210, 78);
+            ctxC.fillText('povratni mlaz -> v_iz,x < 0', 108, 88);
+            ctxC.fillText('promjena impulsa se udvostručuje', 226, 104);
+            ctxC.fillText('izlaz ide natrag u oba kraka', 112, 206);
         }
 
         vSl.oninput = mSl.oninput = update;
@@ -197,15 +672,99 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
 <p class="widget-naslov">⚙️ Interaktivni simulator</p>
 
 ```{=html}
+<style>
+    #z99-rotating-widget .z99-grid,
+    #bend-widget .bend-grid,
+    #z103-turbine-widget .z103-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        align-items: start !important;
+    }
+    #z99-rotating-widget .z99-scene,
+    #bend-widget .bend-scene,
+    #z103-turbine-widget .z103-scene {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.95rem;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-bottom: 1rem;
+    }
+    #z99-rotating-widget canvas,
+    #bend-widget canvas,
+    #z103-turbine-widget canvas {
+        display: block;
+        width: 100% !important;
+        height: auto !important;
+    }
+    #z99-rotating-widget .z99-overlay,
+    #bend-widget .bend-overlay,
+    #z103-turbine-widget .z103-overlay {
+        position: static !important;
+        inset: auto !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        margin: 0 1rem;
+        align-self: flex-start;
+    }
+    #z103-turbine-widget .z103-case {
+        position: static !important;
+        inset: auto !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        margin: 0 !important;
+        align-self: auto;
+    }
+    #z99-rotating-widget .z99-side,
+    #bend-widget .bend-side,
+    #z103-turbine-widget .z103-side {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.95rem !important;
+        align-items: start;
+    }
+    #z99-rotating-widget .z99-side > div,
+    #bend-widget .bend-side > div,
+    #z103-turbine-widget .z103-side > div {
+        margin: 0 !important;
+    }
+    #z99-rotating-widget .z99-explainer,
+    #bend-widget .bend-explainer,
+    #z103-turbine-widget .z103-cases,
+    #z103-turbine-widget .z103-explainer {
+        grid-column: 1 / -1;
+    }
+    @media (max-width: 900px) {
+        #z99-rotating-widget .z99-side,
+        #bend-widget .bend-side,
+        #z103-turbine-widget .z103-side {
+            grid-template-columns: 1fr !important;
+        }
+        #z99-rotating-widget .z99-explainer,
+        #bend-widget .bend-explainer,
+        #z103-turbine-widget .z103-cases,
+        #z103-turbine-widget .z103-explainer {
+            grid-column: auto;
+        }
+    }
+</style>
 <!-- WIDGET: Pražnjenje spremnika -->
 <div id="z97-drain-widget" style="max-width: 1080px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
     <style>
         #z97-drain-widget .z97-shell {
             border-radius: 28px;
-            border: 1px solid #c7d9ee;
-            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+            border: 1px solid #caddee;
+            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 26%), linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
             padding: 28px;
-            box-shadow: 0 24px 56px rgba(15, 23, 42, 0.09);
+            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.1);
         }
         #z97-drain-widget .z97-head {
             display: grid;
@@ -224,115 +783,172 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
         }
         #z97-drain-widget .z97-title {
             margin: 0;
-            font-size: clamp(1.5rem, 2.4vw, 1.95rem);
-            line-height: 1.06;
+            font-size: clamp(1.3rem, 2.1vw, 1.7rem);
+            line-height: 1.1;
             color: #0f172a;
             font-weight: 800;
         }
         #z97-drain-widget .z97-sub {
             margin: 8px 0 0;
             color: #475569;
-            font-size: 0.95rem;
-            line-height: 1.62;
+            font-size: 0.88rem;
+            line-height: 1.54;
             max-width: 72ch;
         }
         #z97-drain-widget .z97-chip {
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 999px;
             background: linear-gradient(135deg, #dbeafe, #eff6ff);
             border: 1px solid #bfdbfe;
             color: #1d4ed8;
-            font-size: 0.8rem;
+            font-size: 0.76rem;
             font-weight: 800;
-            white-space: nowrap;
+            line-height: 1.35;
+            max-width: min(100%, 340px);
+            white-space: normal;
+            text-align: right;
         }
         #z97-drain-widget .z97-note {
             margin-bottom: 18px;
             padding: 14px 16px;
-            background: linear-gradient(135deg, #eff6ff, #f8fbff);
-            border: 1px solid #c7ddff;
-            border-radius: 16px;
-            color: #1e3a8a;
-            font-size: 0.86rem;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #eef7ff, #fff8ef);
+            border: 1px solid #d7e6fb;
+            border-radius: 18px;
+            color: #1d4a77;
+            font-size: 0.82rem;
+            line-height: 1.55;
         }
         #z97-drain-widget .z97-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
             gap: 18px;
             align-items: start;
         }
+        #z97-drain-widget .z97-stage {
+            display: grid;
+            grid-template-columns: minmax(0, 1.28fr) minmax(250px, 0.72fr);
+            gap: 16px;
+        }
+        #z97-drain-widget .z97-lower {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
+            gap: 16px;
+            align-items: start;
+        }
         @media (max-width: 960px) {
-            #z97-drain-widget .z97-head,
-            #z97-drain-widget .z97-grid {
+            #z97-drain-widget .z97-head {
                 grid-template-columns: 1fr;
             }
             #z97-drain-widget .z97-chip {
                 justify-self: start;
+                text-align: left;
             }
         }
         #z97-drain-widget .z97-scene {
             position: relative;
-            min-height: 500px;
-            border-radius: 22px;
+            min-height: 0;
+            border-radius: 24px;
             overflow: hidden;
             border: 1px solid #d7e6f7;
-            background: radial-gradient(circle at top, #ffffff 0%, #eef6ff 68%, #e6f1ff 100%);
+            background: radial-gradient(circle at top, #ffffff 0%, #eef6ff 64%, #e6f1ff 100%);
+            padding: 16px 16px 12px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
         }
         #z97-drain-widget canvas {
             display: block;
             width: 100%;
             height: auto;
+            border-radius: 18px;
+        }
+        #z97-drain-widget .z97-summary {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
         #z97-drain-widget .z97-overlay,
         #z97-drain-widget .z97-tip {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(191, 219, 254, 0.95);
-            border-radius: 14px;
+            position: static;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(191, 219, 254, 0.92);
+            border-radius: 18px;
             color: #334155;
             box-shadow: 0 12px 24px rgba(30, 64, 175, 0.08);
+            max-width: none;
         }
         #z97-drain-widget .z97-overlay {
-            top: 16px;
-            left: 16px;
-            padding: 10px 12px;
-            font-size: 0.76rem;
-            line-height: 1.5;
-        }
-        #z97-drain-widget .z97-tip {
-            right: 16px;
-            top: 16px;
-            padding: 10px 12px;
+            padding: 14px 16px;
             font-size: 0.74rem;
             line-height: 1.45;
-            max-width: 220px;
+            background: linear-gradient(135deg, #ffffff, #f7fbff);
+        }
+        #z97-drain-widget .z97-tip {
+            padding: 14px 16px;
+            font-size: 0.73rem;
+            line-height: 1.42;
+            background: linear-gradient(135deg, #eef6ff, #ffffff);
+        }
+        #z97-drain-widget .z97-tip-title {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 800;
+            color: #2563eb;
+        }
+        #z97-drain-widget .z97-progress-card {
+            padding: 14px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(125, 211, 252, 0.52);
+            background: linear-gradient(135deg, #0f3b7a, #0ea5e9);
+            color: #ffffff;
+            box-shadow: 0 18px 36px rgba(14, 116, 214, 0.18);
+        }
+        #z97-drain-widget .z97-progress-card small {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.82);
+        }
+        #z97-drain-widget .z97-progress-card strong {
+            display: block;
+            font-size: clamp(1.35rem, 2vw, 1.7rem);
+            line-height: 1;
+        }
+        #z97-drain-widget .z97-progress-card span {
+            display: block;
+            margin-top: 0.45rem;
+            font-size: 0.76rem;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.88);
         }
         #z97-drain-widget .z97-side {
             display: grid;
-            gap: 14px;
+            gap: 12px;
         }
         #z97-drain-widget .z97-controls,
         #z97-drain-widget .z97-chart,
         #z97-drain-widget .z97-metric,
-        #z97-drain-widget .z97-explainer {
+        #z97-drain-widget .z97-explainer,
+        #z97-drain-widget .z97-chain {
             border-radius: 18px;
             border: 1px solid #e2e8f0;
             background: #ffffff;
         }
         #z97-drain-widget .z97-controls,
         #z97-drain-widget .z97-chart,
-        #z97-drain-widget .z97-explainer {
+        #z97-drain-widget .z97-explainer,
+        #z97-drain-widget .z97-chain {
             padding: 16px;
         }
         #z97-drain-widget .z97-controls {
             display: grid;
             gap: 14px;
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.04);
         }
         #z97-drain-widget .z97-control label {
             display: block;
             margin-bottom: 7px;
-            font-size: 0.82rem;
+            font-size: 0.79rem;
             font-weight: 700;
             color: #334155;
         }
@@ -368,10 +984,12 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
         #z97-drain-widget .z97-metrics {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
+            gap: 10px;
         }
         #z97-drain-widget .z97-metric {
-            padding: 14px;
+            min-width: 0;
+            padding: 14px 15px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
         }
         #z97-drain-widget .z97-metric small {
             display: block;
@@ -384,26 +1002,75 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
         }
         #z97-drain-widget .z97-metric strong {
             display: block;
-            font-size: 1.1rem;
+            font-size: clamp(0.94rem, 1.4vw, 1.04rem);
             color: #0f172a;
+            overflow-wrap: anywhere;
         }
         #z97-drain-widget .z97-chart {
             background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
         }
         #z97-drain-widget .z97-chart-title {
             margin: 0 0 10px;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 800;
             letter-spacing: 0.04em;
             text-transform: uppercase;
             color: #64748b;
         }
         #z97-drain-widget .z97-explainer {
-            background: #fff7ed;
+            background: linear-gradient(135deg, #fff7ed, #fffaf5);
             border-color: #fdba74;
             color: #7c2d12;
             font-size: 0.84rem;
             line-height: 1.58;
+        }
+        #z97-drain-widget .z97-chain {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            border-color: #dbeafe;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+        }
+        #z97-drain-widget .z97-step {
+            min-width: 0;
+            padding: 12px 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(191, 219, 254, 0.88);
+            background: rgba(255, 255, 255, 0.94);
+        }
+        #z97-drain-widget .z97-step small {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+        #z97-drain-widget .z97-step strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            color: #0f172a;
+        }
+        #z97-drain-widget .z97-step span {
+            display: block;
+            font-size: 0.74rem;
+            line-height: 1.4;
+            color: #475569;
+        }
+        @media (max-width: 980px) {
+            #z97-drain-widget .z97-stage,
+            #z97-drain-widget .z97-lower {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 640px) {
+            #z97-drain-widget .z97-buttons,
+            #z97-drain-widget .z97-metrics,
+            #z97-drain-widget .z97-chain {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 
@@ -420,20 +1087,30 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
         <div class="z97-note"><strong>Kako čitati scenu:</strong> trenutna razina određuje trenutnu izlaznu brzinu, brzina određuje protok kroz sapnicu, a protok određuje koliko brzo se razina dalje spušta. Zato je najvažnije pratiti lanac <strong>h -> v -> Q -> dh/dt</strong>, a ne samo početno i završno stanje.</div>
 
         <div class="z97-grid">
-            <div class="z97-scene">
-                <canvas id="z97-canvas" width="660" height="500"></canvas>
-                <div class="z97-overlay">
-                    <div><strong>Početna visina:</strong> <span id="z97-h0-live">0.50</span> m</div>
-                    <div><strong>Trenutna visina:</strong> <span id="z97-h-live">0.50</span> m</div>
-                    <div><strong>Vrijeme:</strong> <span id="z97-t-live">0.0</span> s</div>
+            <div class="z97-stage">
+                <div class="z97-scene">
+                    <canvas id="z97-canvas" width="660" height="500"></canvas>
                 </div>
-                <div class="z97-tip">
-                    <div style="font-weight: 800; color: #2563eb; margin-bottom: 4px;">Ključna ideja</div>
-                    <div>Dok je spremnik puniji, sapnica izbacuje vodu brže. Kako <strong>h</strong> pada, mlaz slabi i zadnji dio pražnjenja postaje sporiji nego što intuitivno izgleda iz samog početnog toka.</div>
+
+                <div class="z97-summary">
+                    <div class="z97-overlay">
+                        <div><strong>Početna visina:</strong> <span id="z97-h0-live">0.50</span> m</div>
+                        <div><strong>Trenutna visina:</strong> <span id="z97-h-live">0.50</span> m</div>
+                        <div><strong>Vrijeme:</strong> <span id="z97-t-live">0.0</span> s</div>
+                    </div>
+                    <div class="z97-tip">
+                        <span class="z97-tip-title">Ključna ideja</span>
+                        <div>Dok je spremnik puniji, sapnica izbacuje vodu brže. Kako <strong>h</strong> pada, mlaz slabi i zadnji dio pražnjenja postaje sporiji nego što izgleda iz samog početnog toka.</div>
+                    </div>
+                    <div class="z97-progress-card">
+                        <small>Stupanj pražnjenja</small>
+                        <strong id="z97-res-progress">0.0 %</strong>
+                        <span>Najvažniji lanac za čitanje scene je <strong>h -&gt; v -&gt; Q -&gt; dh/dt</strong>.</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="z97-side">
+            <div class="z97-lower">
                 <div class="z97-controls">
                     <div class="z97-control">
                         <label>Promjer spremnika D: <span id="z97-v-D" style="color:#2563eb;">0.50</span> m</label>
@@ -458,21 +1135,29 @@ $T = \left( \frac{D}{d} \right)^2 \frac{2 \sqrt{h_0}}{\sqrt{2g}} = \left( \frac{
                     </div>
                 </div>
 
-                <div class="z97-metrics">
-                    <div class="z97-metric"><small>Brzina istjecanja v</small><strong id="z97-res-v">0.00 m/s</strong></div>
-                    <div class="z97-metric"><small>Volumenski protok Q</small><strong id="z97-res-q">0.0000 m³/s</strong></div>
-                    <div class="z97-metric"><small>Brzina pada dh/dt</small><strong id="z97-res-dhdt">0.0000 m/s</strong></div>
-                    <div class="z97-metric"><small>Preostalo vrijeme</small><strong id="z97-res-tleft">0.0 s</strong></div>
-                    <div class="z97-metric"><small>Ukupno vrijeme T</small><strong id="z97-res-ttotal">0.0 s</strong></div>
-                    <div class="z97-metric"><small>Pražnjenje</small><strong id="z97-res-progress">0.0 %</strong></div>
-                </div>
+                <div class="z97-side">
+                    <div class="z97-metrics">
+                        <div class="z97-metric"><small>Brzina istjecanja v</small><strong id="z97-res-v">0.00 m/s</strong></div>
+                        <div class="z97-metric"><small>Volumenski protok Q</small><strong id="z97-res-q">0.0000 m³/s</strong></div>
+                        <div class="z97-metric"><small>Brzina pada dh/dt</small><strong id="z97-res-dhdt">0.0000 m/s</strong></div>
+                        <div class="z97-metric"><small>Preostalo vrijeme</small><strong id="z97-res-tleft">0.0 s</strong></div>
+                        <div class="z97-metric"><small>Ukupno vrijeme T</small><strong id="z97-res-ttotal">0.0 s</strong></div>
+                    </div>
 
-                <div class="z97-chart">
-                    <div class="z97-chart-title">Visina h(t)</div>
-                    <canvas id="z97-graph" width="360" height="220"></canvas>
-                </div>
+                    <div class="z97-chart">
+                        <div class="z97-chart-title">Visina h(t)</div>
+                        <canvas id="z97-graph" width="360" height="220"></canvas>
+                    </div>
 
-                <div class="z97-explainer"><strong>Tumačenje scene:</strong> <span id="z97-explainer">Na početku je pogonska visina najveća pa je i istjecanje najjače. Kako se razina spušta, istjecanje postaje sve sporije, zbog čega krivulja h(t) nije pravac nego sve blaže pada.</span></div>
+                    <div class="z97-chain">
+                        <div class="z97-step"><small>Korak 1</small><strong>h</strong><span>Visina stupca stvara pogonski tlak na sapnici.</span></div>
+                        <div class="z97-step"><small>Korak 2</small><strong>v</strong><span>Veća visina daje veću Torricellijevu brzinu istjecanja.</span></div>
+                        <div class="z97-step"><small>Korak 3</small><strong>Q</strong><span>Brzina i presjek sapnice određuju trenutni protok.</span></div>
+                        <div class="z97-step"><small>Korak 4</small><strong>dh/dt</strong><span>Protok zatim određuje koliko se brzo razina dalje spušta.</span></div>
+                    </div>
+
+                    <div class="z97-explainer"><strong>Tumačenje scene:</strong> <span id="z97-explainer">Na početku je pogonska visina najveća pa je i istjecanje najjače. Kako se razina spušta, istjecanje postaje sve sporije, zbog čega krivulja h(t) nije pravac nego sve blaže pada.</span></div>
+                </div>
             </div>
         </div>
     </div>
@@ -826,62 +1511,297 @@ Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identič
 
 ```{=html}
 <!-- WIDGET: Dva mlaza (Parabolični letovi) -->
-<div id="z98-jets-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🎯 Kinematika mlazova: Sjecište u istoj točki</h4>
+<div id="z98-jets-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+    <style>
+        #z98-jets-widget .z98-shell {
+            border-radius: 28px;
+            border: 1px solid #d5e4f4;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+        }
+        #z98-jets-widget .z98-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        #z98-jets-widget .z98-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        #z98-jets-widget .z98-title {
+            margin: 0;
+            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
+            line-height: 1.08;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        #z98-jets-widget .z98-sub {
+            margin: 8px 0 0;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-width: 72ch;
+        }
+        #z98-jets-widget .z98-chip {
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-size: 0.8rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #z98-jets-widget .z98-note {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid #c9ddff;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.6;
+        }
+        #z98-jets-widget .z98-stage {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        #z98-jets-widget .z98-scene {
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid #d7e6f7;
+            background: radial-gradient(circle at top, #ffffff 0%, #eef6ff 68%, #e6f0fb 100%);
+        }
+        #z98-jets-widget canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #z98-jets-widget .z98-summary {
+            display: grid;
+            grid-template-columns: minmax(220px, auto) minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z98-jets-widget .z98-target-note {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.8rem 1rem;
+            border-radius: 999px;
+            border: 1px solid #fecaca;
+            background: rgba(255, 255, 255, 0.93);
+            color: #b91c1c;
+            font-size: 0.76rem;
+            font-weight: 800;
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.08);
+            min-height: 54px;
+        }
+        #z98-jets-widget .z98-target-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.55);
+            flex: 0 0 auto;
+        }
+        #z98-jets-widget .z98-badges {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #z98-jets-widget .z98-badge,
+        #z98-jets-widget .z98-controls,
+        #z98-jets-widget #z98-match-card,
+        #z98-jets-widget .z98-explainer {
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+        #z98-jets-widget .z98-badge {
+            padding: 14px;
+        }
+        #z98-jets-widget .z98-badge small,
+        #z98-jets-widget .z98-quick small,
+        #z98-jets-widget .z98-prod-label,
+        #z98-jets-widget .z98-status-kicker {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+        #z98-jets-widget .z98-badge strong,
+        #z98-jets-widget .z98-quick strong,
+        #z98-jets-widget .z98-prod-value {
+            display: block;
+            font-size: 1.08rem;
+            color: #0f172a;
+        }
+        #z98-jets-widget .z98-lower {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            align-items: start;
+        }
+        #z98-jets-widget .z98-controls,
+        #z98-jets-widget #z98-match-card,
+        #z98-jets-widget .z98-explainer {
+            padding: 18px;
+        }
+        #z98-jets-widget .z98-control + .z98-control {
+            margin-top: 18px;
+        }
+        #z98-jets-widget .z98-control label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #334155;
+        }
+        #z98-jets-widget .z98-control input {
+            width: 100%;
+        }
+        #z98-jets-widget .z98-quick {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+        #z98-jets-widget .z98-quick > div {
+            border-radius: 16px;
+            border: 1px solid #dbeafe;
+            background: #eff6ff;
+            padding: 12px;
+        }
+        #z98-jets-widget #z98-match-card {
+            background: #f0fdf4;
+            border-left: 6px solid #22c55e;
+        }
+        #z98-jets-widget #z98-match-text {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #166534;
+            margin-bottom: 10px;
+        }
+        #z98-jets-widget .z98-match-copy {
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: #15803d;
+            margin-bottom: 14px;
+        }
+        #z98-jets-widget .z98-prod-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        #z98-jets-widget .z98-prod-grid > div {
+            border-radius: 16px;
+            border: 1px solid rgba(34, 197, 94, 0.18);
+            background: rgba(255, 255, 255, 0.85);
+            padding: 12px;
+        }
+        #z98-jets-widget .z98-explainer {
+            grid-column: 1 / -1;
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #7c2d12;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        @media (max-width: 960px) {
+            #z98-jets-widget .z98-head,
+            #z98-jets-widget .z98-summary,
+            #z98-jets-widget .z98-lower,
+            #z98-jets-widget .z98-badges,
+            #z98-jets-widget .z98-quick,
+            #z98-jets-widget .z98-prod-grid {
+                grid-template-columns: 1fr;
+            }
+            #z98-jets-widget .z98-chip {
+                justify-self: start;
+            }
+            #z98-jets-widget .z98-explainer {
+                grid-column: auto;
+            }
+        }
+    </style>
 
-    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
-        <strong>Kako čitati simetriju:</strong> Domet ovisi o produktu <strong>h(H-h)</strong>, a ne o samoj dubini zasebno. Zato dva otvora simetrična oko sredine spremnika imaju isti produkt i zato njihovi mlazovi imaju isti domet, iako izlaze iz različitih visina.
-    </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
-        <!-- Visualization -->
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
-            <canvas id="z98-canvas" width="550" height="450" style="width: 100%; height: 100%;"></canvas>
-            
-            <!-- Target Point Indicator -->
-            <div style="position: absolute; left: 430px; top: 405px; width: 12px; height: 12px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444; transform: translate(-50%, -50%);"></div>
-            <div style="position: absolute; left: 430px; top: 380px; transform: translateX(-50%); font-size: 0.65rem; font-weight: 800; color: #ef4444;">L = 10m</div>
+    <div class="z98-shell">
+        <div class="z98-head">
+            <div>
+                <div class="z98-kicker">Z98 kinematika dva mlaza</div>
+                <h3 class="z98-title">Jednak domet ne traži jednake dubine, nego isti produkt <span style="white-space:nowrap;">h(H-h)</span></h3>
+                <p class="z98-sub">Ovaj widget sada direktno odvaja geometriju scene od rezultata: prvo vidiš spremnik i ciljnu točku, zatim uspoređuješ domete, a ispod toga čitaš koliko je par otvora blizu idealnoj simetriji oko sredine spremnika.</p>
+            </div>
+            <div class="z98-chip">x = 2√(h(H-h))</div>
         </div>
 
-        <!-- Controls -->
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Ukupna visina H: <span id="z98-v-H" style="color:#2563eb;">10.25</span> m</label>
-                <input type="range" id="z98-H-slider" min="8" max="15" step="0.05" value="10.25" style="width: 100%;">
-                
-                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Dubina gornjeg otvora h₁: <span id="z98-v-h1" style="color:#2563eb;">2.25</span> m</label>
-                <input type="range" id="z98-h1-slider" min="1" max="5" step="0.05" value="2.25" style="width: 100%;">
+        <div class="z98-note"><strong>Kako čitati simetriju:</strong> Domet ovisi o produktu <strong>h(H-h)</strong>, a ne o samoj dubini zasebno. Kad su otvori gotovo simetrični oko <strong>H/2</strong>, oba produkta ispadaju gotovo jednaka pa mlazovi završavaju na istoj točki iako izlaze iz različitih visina.</div>
 
-                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Dubina donjeg otvora h₂: <span id="z98-v-h2" style="color:#2563eb;">6.25</span> m</label>
-                <input type="range" id="z98-h2-slider" min="5.5" max="10" step="0.05" value="6.25" style="width: 100%;">
+        <div class="z98-stage">
+            <div class="z98-scene">
+                <canvas id="z98-canvas" width="550" height="450"></canvas>
+            </div>
+            <div class="z98-summary">
+                <div class="z98-target-note"><span class="z98-target-dot"></span><span>Referentna točka na L = 10 m ostaje fiksna meta za oba mlaza</span></div>
+                <div class="z98-badges">
+                    <div class="z98-badge"><small>Domet gornjeg mlaza</small><strong id="z98-res-x1">10.0 m</strong></div>
+                    <div class="z98-badge"><small>Domet donjeg mlaza</small><strong id="z98-res-x2">10.0 m</strong></div>
+                    <div class="z98-badge"><small>Razlika dometa</small><strong id="z98-dx">0.00 m</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="z98-lower">
+            <div class="z98-controls">
+                <div class="z98-control">
+                    <label>Ukupna visina H: <span id="z98-v-H" style="color:#2563eb;">10.25</span> m</label>
+                    <input type="range" id="z98-H-slider" min="8" max="15" step="0.05" value="10.25">
+                </div>
+                <div class="z98-control">
+                    <label>Dubina gornjeg otvora h₁: <span id="z98-v-h1" style="color:#2563eb;">2.25</span> m</label>
+                    <input type="range" id="z98-h1-slider" min="1" max="5" step="0.05" value="2.25">
+                </div>
+                <div class="z98-control">
+                    <label>Dubina donjeg otvora h₂: <span id="z98-v-h2" style="color:#2563eb;">6.25</span> m</label>
+                    <input type="range" id="z98-h2-slider" min="5.5" max="10" step="0.05" value="6.25">
+                </div>
+
+                <div class="z98-quick">
+                    <div><small>Sredina spremnika H/2</small><strong id="z98-midplane">5.13 m</strong></div>
+                    <div><small>Zbroj dubina h₁+h₂</small><strong id="z98-depth-sum">8.50 m</strong></div>
+                    <div><small>Odstupanje od simetrije</small><strong id="z98-sym-gap">1.75 m</strong></div>
+                </div>
             </div>
 
-            <div id="z98-match-card" style="background: #f0fdf4; padding: 20px; border-radius: 15px; border-left: 6px solid #22c55e;">
-                <div id="z98-match-text" style="font-weight: 800; font-size: 0.9rem; color: #166534; text-align: center;">MLAZOVI SE POKLAPAJU! ✅</div>
-                <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px; font-size: 0.85rem; color: #15803d;">
-                    <div style="display: flex; justify-content: space-between;"><span>Domet 1:</span> <b id="z98-res-x1">10.0 m</b></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Domet 2:</span> <b id="z98-res-x2">10.0 m</b></div>
+            <div id="z98-match-card">
+                <div class="z98-status-kicker">Status presjeka</div>
+                <div id="z98-match-text">MLAZOVI SE POKLAPAJU! ✅</div>
+                <div id="z98-match-copy" class="z98-match-copy">Otvori su gotovo simetrični oko sredine spremnika pa zato daju gotovo isti produkt i domet.</div>
+                <div class="z98-prod-grid">
+                    <div>
+                        <span class="z98-prod-label">h₁(H-h₁)</span>
+                        <strong id="z98-prod1" class="z98-prod-value">0.00</strong>
+                    </div>
+                    <div>
+                        <span class="z98-prod-label">h₂(H-h₂)</span>
+                        <strong id="z98-prod2" class="z98-prod-value">0.00</strong>
+                    </div>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">h₁(H-h₁)</div>
-                    <div id="z98-prod1" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00</div>
-                </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">h₂(H-h₂)</div>
-                    <div id="z98-prod2" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00</div>
-                </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Razlika dometa</div>
-                    <div id="z98-dx" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.00 m</div>
-                </div>
-            </div>
-            
-            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
-                <strong>Tumačenje scene:</strong> <span id="z98-explainer">Torricellijeva formula za domet je x = 2√(h(H-h)). Zbog simetrije izraza, dubine simetrične oko H/2 daju isti domet.</span>
-            </div>
+            <div class="z98-explainer"><strong>Tumačenje scene:</strong> <span id="z98-explainer">Torricellijeva formula za domet je x = 2√(h(H-h)). Zbog simetrije izraza, dubine simetrične oko H/2 daju isti domet.</span></div>
         </div>
     </div>
 </div>
@@ -896,11 +1816,21 @@ Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identič
     const state = { H: 10.25, h1: 2.25, h2: 6.25 };
 
     function recalculate() {
-        const H = parseFloat(hSl.value), h1 = parseFloat(h1Sl.value), h2 = parseFloat(h2Sl.value);
-        const x1 = 2 * Math.sqrt(h1 * (H - h1));
-        const x2 = 2 * Math.sqrt(h2 * (H - h2));
-        const prod1 = h1 * (H - h1);
-        const prod2 = h2 * (H - h2);
+        const H = parseFloat(hSl.value);
+        h1Sl.max = Math.max(parseFloat(h1Sl.min), H - 0.25).toFixed(2);
+        h2Sl.max = Math.max(parseFloat(h2Sl.min), H - 0.25).toFixed(2);
+
+        let h1 = Math.min(parseFloat(h1Sl.value), parseFloat(h1Sl.max));
+        let h2 = Math.min(parseFloat(h2Sl.value), parseFloat(h2Sl.max));
+
+        if (Math.abs(parseFloat(h1Sl.value) - h1) > 0.001) h1Sl.value = h1.toFixed(2);
+        if (Math.abs(parseFloat(h2Sl.value) - h2) > 0.001) h2Sl.value = h2.toFixed(2);
+
+        const prod1 = Math.max(0, h1 * (H - h1));
+        const prod2 = Math.max(0, h2 * (H - h2));
+        const x1 = 2 * Math.sqrt(prod1);
+        const x2 = 2 * Math.sqrt(prod2);
+        const symmetryGap = Math.abs((h1 + h2) - H);
         state.H = H;
         state.h1 = h1;
         state.h2 = h2;
@@ -913,62 +1843,176 @@ Iz velikog spremnika istrujavaju dva mlaza pri čemu je promjer sapnica identič
         document.getElementById('z98-prod1').innerText = prod1.toFixed(2);
         document.getElementById('z98-prod2').innerText = prod2.toFixed(2);
         document.getElementById('z98-dx').innerText = Math.abs(x1 - x2).toFixed(2) + " m";
+        document.getElementById('z98-midplane').textContent = (H / 2).toFixed(2) + ' m';
+        document.getElementById('z98-depth-sum').textContent = (h1 + h2).toFixed(2) + ' m';
+        document.getElementById('z98-sym-gap').textContent = symmetryGap.toFixed(2) + ' m';
         document.getElementById('z98-explainer').textContent = `Za H = ${H.toFixed(2)} m prvi otvor daje produkt ${prod1.toFixed(2)}, a drugi ${prod2.toFixed(2)}. Kad su ti produkti jednaki, dometi su isti; zato ovdje mlazovi daju ${x1.toFixed(2)} m i ${x2.toFixed(2)} m.`;
 
         const isMatch = Math.abs(x1 - x2) < 0.2;
         const matchCard = document.getElementById('z98-match-card');
         const matchText = document.getElementById('z98-match-text');
+        const matchCopy = document.getElementById('z98-match-copy');
         if(isMatch) {
             matchCard.style.background = "#f0fdf4"; matchCard.style.borderLeftColor = "#22c55e";
             matchText.innerText = "MLAZOVI SE POKLAPAJU! ✅"; matchText.style.color = "#166534";
+            matchCopy.textContent = symmetryGap < 0.15
+                ? 'Otvori su gotovo simetrični oko sredine spremnika pa zato daju gotovo isti produkt i domet.'
+                : 'I bez savršene simetrije još uvijek možeš postići gotovo jednak domet jer su oba produkta vrlo blizu.';
+            matchCopy.style.color = '#15803d';
         } else {
             matchCard.style.background = "#fffbeb"; matchCard.style.borderLeftColor = "#f59e0b";
             matchText.innerText = "MLAZOVI SE RAZILAZE ⚠️"; matchText.style.color = "#92400e";
+            matchCopy.textContent = 'Kad zbroj dubina više nije blizu H i produkti se razdvoje, oba mlaza padaju na različita mjesta.';
+            matchCopy.style.color = '#92400e';
         }
 
     }
 
     function draw() {
-        ctx.clearRect(0, 0, 550, 450);
-        const scale = 35, ox = 80, oy = 420;
+        const W = canvas.width;
+        const Hc = canvas.height;
+        ctx.clearRect(0, 0, W, Hc);
 
-        // Ground
-        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(20, oy); ctx.lineTo(530, oy); ctx.stroke();
+        const scale = Math.min(34, 300 / Math.max(state.H, 1));
+        const ox = 120;
+        const oy = 398;
+        const tankWidth = 72;
+        const tankHeight = state.H * scale;
+        const tankTop = oy - tankHeight;
+        const targetX = ox + 10 * scale;
+        const midY = oy - (state.H / 2) * scale;
 
-        // Tank
-        ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
-        ctx.fillRect(ox - 60, oy - state.H*scale, 60, state.H*scale);
-        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 3;
-        ctx.strokeRect(ox - 60, oy - state.H*scale, 60, state.H*scale);
-        ctx.fillStyle = "rgba(59, 130, 246, 0.4)";
-        ctx.fillRect(ox - 60, oy - state.H*scale, 60, state.H*scale);
+        const sky = ctx.createLinearGradient(0, 0, 0, Hc);
+        sky.addColorStop(0, '#ffffff');
+        sky.addColorStop(1, '#e8f3ff');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, W, Hc);
 
-        const drawJet = (h, color, alpha) => {
-            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.globalAlpha = alpha;
-            ctx.beginPath(); ctx.moveTo(ox, oy - (state.H-h)*scale);
+        ctx.fillStyle = '#dbeafe';
+        ctx.fillRect(28, oy + 8, W - 56, 11);
+
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(24, oy);
+        ctx.lineTo(W - 18, oy);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.38)';
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(targetX, oy);
+        ctx.lineTo(targetX, 48);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(targetX, oy, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('L = 10 m', targetX - 26, oy - 12);
+
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.14)';
+        ctx.fillRect(ox - tankWidth, tankTop, tankWidth, tankHeight);
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.42)';
+        ctx.fillRect(ox - tankWidth, tankTop, tankWidth, tankHeight);
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(ox - tankWidth, tankTop, tankWidth, tankHeight);
+
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.28)';
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.moveTo(ox - tankWidth - 24, midY);
+        ctx.lineTo(ox + 24, midY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#2563eb';
+        ctx.fillText('H/2', ox - tankWidth - 42, midY + 4);
+
+        const drawJet = (h, color) => {
+            const head = state.H - h;
+            const originY = oy - head * scale;
+            const range = 2 * Math.sqrt(Math.max(0, h * head));
+            const landingX = ox + range * scale;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(ox, originY);
             const v0 = Math.sqrt(2 * 9.81 * h);
-            for(let t = 0; t < 2.5; t += 0.02) {
-                let px = v0 * t;
-                let py = 0.5 * 9.81 * t*t;
-                if(py > (state.H-h)) break;
-                ctx.lineTo(ox + px*scale, (oy - (state.H-h)*scale) + py*scale);
+            const fallTime = Math.sqrt((2 * head) / 9.81);
+            for (let t = 0; t <= fallTime + 0.01; t += fallTime / 36) {
+                const px = ox + v0 * t * scale;
+                const py = originY + 0.5 * 9.81 * t * t * scale;
+                ctx.lineTo(px, py);
             }
             ctx.stroke();
-            ctx.globalAlpha = 1.0;
+
+            return { originY, landingX, head };
         };
 
-        drawJet(state.h1, "#3b82f6", 1.0);
-        drawJet(state.h2, "#f59e0b", 1.0);
+        const jet1 = drawJet(state.h1, '#3b82f6');
+        const jet2 = drawJet(state.h2, '#f59e0b');
 
-        // Labels
-        ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(ox, oy - (state.H-state.h1)*scale, 4, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.arc(ox, oy - (state.H-state.h2)*scale, 4, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#1e293b"; ctx.font = "bold 11px Inter";
-        ctx.fillText("H", ox - 78, oy - state.H*scale - 8);
-        ctx.fillStyle = "#3b82f6"; ctx.fillText("h1", ox + 10, oy - (state.H-state.h1)*scale - 6);
-        ctx.fillStyle = "#f59e0b"; ctx.fillText("h2", ox + 10, oy - (state.H-state.h2)*scale - 6);
-        ctx.fillStyle = "#475569"; ctx.fillText("spremnik", ox - 84, 34);
+        particles.forEach((particle) => {
+            particle.t = (particle.t + 0.008 + particle.jet * 0.0015) % 1;
+            const h = particle.jet === 1 ? state.h1 : state.h2;
+            const head = state.H - h;
+            const v0 = Math.sqrt(2 * 9.81 * h);
+            const fallTime = Math.sqrt((2 * head) / 9.81);
+            const t = particle.t * fallTime;
+            const px = ox + v0 * t * scale;
+            const py = oy - head * scale + 0.5 * 9.81 * t * t * scale;
+            if (py <= oy + 1) {
+                ctx.fillStyle = particle.jet === 1 ? 'rgba(59, 130, 246, 0.75)' : 'rgba(245, 158, 11, 0.75)';
+                ctx.beginPath();
+                ctx.arc(px, py, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(ox, jet1.originY, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(ox, jet2.originY, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(jet1.landingX, oy, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(jet2.landingX, oy, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#1d4ed8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(ox - tankWidth - 28, oy);
+        ctx.lineTo(ox - tankWidth - 28, tankTop);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(ox - tankWidth - 34, oy);
+        ctx.lineTo(ox - tankWidth - 22, oy);
+        ctx.moveTo(ox - tankWidth - 34, tankTop);
+        ctx.lineTo(ox - tankWidth - 22, tankTop);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 12px Inter';
+        ctx.fillText('H', ox - tankWidth - 44, tankTop - 10);
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillText('h₁', ox + 12, jet1.originY - 6);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillText('h₂', ox + 12, jet2.originY - 6);
+        ctx.fillStyle = '#475569';
+        ctx.fillText('spremnik', ox - tankWidth - 20, tankTop - 22);
+        ctx.fillText('ciljna točka', targetX - 30, oy + 28);
     }
 
     [hSl, h1Sl, h2Sl].forEach(s => s.oninput = recalculate);
@@ -1289,61 +2333,6 @@ Spremnik velikih dimenzija na kojeg je priključena cijev, prikazano na slici, r
 
         ctx.fillStyle = '#dbeafe';
         ctx.fillRect(46, tankTop + tankHeight + 54, canvas.width - 92, 10);
-
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.22)';
-        ctx.fillRect(tankLeft, tankTop, tankWidth, tankHeight);
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(tankLeft, tankTop, tankWidth, tankHeight);
-        ctx.clip();
-
-        for (let i = 0; i < 10; i++) {
-            const stripeX = tankLeft + i * (tankWidth / 10);
-            const rel = Math.abs((stripeX + tankWidth / 20 - centerX) / (tankWidth / 2));
-            ctx.fillStyle = `rgba(29, 78, 216, ${0.10 + rel * 0.25})`;
-            ctx.fillRect(stripeX, tankTop, tankWidth / 10 + 1, tankHeight);
-        }
-
-        const waterGrad = ctx.createLinearGradient(0, tankTop, 0, tankTop + tankHeight);
-        waterGrad.addColorStop(0, 'rgba(96, 165, 250, 0.88)');
-        waterGrad.addColorStop(1, 'rgba(29, 78, 216, 0.98)');
-        ctx.fillStyle = waterGrad;
-        ctx.beginPath();
-        ctx.moveTo(tankLeft, tankTop + tankHeight);
-        ctx.lineTo(tankLeft, baseSurface + curveAmp);
-        for (let x = 0; x <= tankWidth; x += 6) {
-            const norm = (x - tankWidth / 2) / (tankWidth / 2);
-            const y = baseSurface + curveAmp * norm * norm;
-            ctx.lineTo(tankLeft + x, y);
-        }
-        ctx.lineTo(tankLeft + tankWidth, tankTop + tankHeight);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.restore();
-
-        ctx.strokeStyle = '#94a3b8';
-        ctx.setLineDash([8, 6]);
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.moveTo(tankLeft - 12, baseSurface + curveAmp * 0.25);
-        ctx.lineTo(tankLeft + tankWidth + 12, baseSurface + curveAmp * 0.25);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        for (let x = 0; x <= tankWidth; x += 5) {
-            const norm = (x - tankWidth / 2) / (tankWidth / 2);
-            const y = baseSurface + curveAmp * norm * norm;
-            if (x === 0) ctx.moveTo(tankLeft + x, y);
-            else ctx.lineTo(tankLeft + x, y);
-        }
-        ctx.stroke();
-
-        ctx.strokeStyle = '#334155';
         ctx.lineWidth = 4;
         ctx.strokeRect(tankLeft, tankTop, tankWidth, tankHeight);
 
@@ -1352,8 +2341,41 @@ Spremnik velikih dimenzija na kojeg je priključena cijev, prikazano na slici, r
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(pipeX, pipeY);
+            for(let i=0; i<150; i++) {
+                particles.push({
+                    t: Math.random(),
+                    lane: (Math.random() - 0.5) * 16,
+                    dir: Math.random() > 0.5 ? 1 : -1,
+                    travel: 18 + Math.random() * 26,
+                    height: 55 + Math.random() * 60,
+                    size: 1.2 + Math.random() * 1.5,
+                    offset: Math.random() * 5
+                });
+            }
         ctx.lineTo(pipeX + 72, pipeY);
+
+            function drawArrow(x1, y1, x2, y2, color, label) {
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const head = 10;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+                if (label) {
+                    ctx.fillStyle = color;
+                    ctx.font = 'bold 12px Inter';
+                    ctx.fillText(label, x2 + 8, y2 - 8);
+                }
+            }
         ctx.lineTo(pipeX + 72, pipeY + 116);
         ctx.lineTo(pipeX + 162, pipeY + 116);
         ctx.stroke();
@@ -1884,59 +2906,253 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
 
 ```{=html}
 <!-- WIDGET: Mlaz na ploču (Impuls) -->
-<div id="z102-jetplate-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">💥 Udarna sila mlaza: Zakon količine gibanja</h4>
+<div id="z102-jetplate-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+    <style>
+        #z102-jetplate-widget .z102-shell {
+            border-radius: 28px;
+            border: 1px solid #d5e4f4;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+        }
+        #z102-jetplate-widget .z102-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        #z102-jetplate-widget .z102-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        #z102-jetplate-widget .z102-title {
+            margin: 0;
+            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
+            line-height: 1.08;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        #z102-jetplate-widget .z102-sub {
+            margin: 8px 0 0;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-width: 72ch;
+        }
+        #z102-jetplate-widget .z102-chip {
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #fee2e2, #fff1f2);
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 0.8rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #z102-jetplate-widget .z102-note {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid #c9ddff;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.6;
+        }
+        #z102-jetplate-widget .z102-stage {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        #z102-jetplate-widget .z102-scene {
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid #d7e6f7;
+            background: radial-gradient(circle at top, #ffffff 0%, #eef6ff 68%, #e6f0fb 100%);
+        }
+        #z102-jetplate-widget canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #z102-jetplate-widget .z102-summary {
+            display: grid;
+            grid-template-columns: minmax(220px, auto) minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
+        }
+        #z102-jetplate-widget #z102-force-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 54px;
+            padding: 0.8rem 1rem;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 0.86rem;
+            font-weight: 800;
+            box-shadow: 0 12px 24px rgba(239, 68, 68, 0.2);
+        }
+        #z102-jetplate-widget .z102-badges {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        #z102-jetplate-widget .z102-badge,
+        #z102-jetplate-widget .z102-controls,
+        #z102-jetplate-widget .z102-impulse,
+        #z102-jetplate-widget .z102-explainer {
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+        #z102-jetplate-widget .z102-badge {
+            padding: 14px;
+        }
+        #z102-jetplate-widget .z102-badge small,
+        #z102-jetplate-widget .z102-impulse small {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+        #z102-jetplate-widget .z102-badge strong {
+            display: block;
+            font-size: 1.08rem;
+            color: #0f172a;
+        }
+        #z102-jetplate-widget .z102-lower {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            align-items: start;
+        }
+        #z102-jetplate-widget .z102-controls,
+        #z102-jetplate-widget .z102-impulse,
+        #z102-jetplate-widget .z102-explainer {
+            padding: 18px;
+        }
+        #z102-jetplate-widget .z102-control + .z102-control {
+            margin-top: 18px;
+        }
+        #z102-jetplate-widget .z102-control label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #334155;
+        }
+        #z102-jetplate-widget .z102-control input {
+            width: 100%;
+        }
+        #z102-jetplate-widget .z102-quick {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+        #z102-jetplate-widget .z102-quick > div {
+            border-radius: 16px;
+            border: 1px solid #dbeafe;
+            background: #eff6ff;
+            padding: 12px;
+            font-size: 0.82rem;
+            color: #1e3a8a;
+            line-height: 1.45;
+        }
+        #z102-jetplate-widget .z102-impulse {
+            background: #fef2f2;
+            border-left: 6px solid #ef4444;
+            color: #991b1b;
+        }
+        #z102-jetplate-widget .z102-impulse div {
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: #b91c1c;
+        }
+        #z102-jetplate-widget .z102-explainer {
+            grid-column: 1 / -1;
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #7c2d12;
+            font-size: 0.84rem;
+            line-height: 1.58;
+        }
+        @media (max-width: 960px) {
+            #z102-jetplate-widget .z102-head,
+            #z102-jetplate-widget .z102-summary,
+            #z102-jetplate-widget .z102-badges,
+            #z102-jetplate-widget .z102-lower,
+            #z102-jetplate-widget .z102-quick {
+                grid-template-columns: 1fr;
+            }
+            #z102-jetplate-widget .z102-chip {
+                justify-self: start;
+            }
+            #z102-jetplate-widget .z102-explainer {
+                grid-column: auto;
+            }
+        }
+    </style>
 
-    <div style="padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 20px; color: #1e3a8a; font-size: 0.84rem; line-height: 1.55;">
-        <strong>Kako čitati udar:</strong> U ovom slučaju mlaz nakon udara više nema x-komponentu brzine. Zato je sila na ploču izravno povezana s time koliko ulaznog impulsa po sekundi dovodiš prema ploči, odnosno s veličinom <strong>ṁv₁</strong>.
-    </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: start;">
-        <div style="position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
-            <canvas id="z102-canvas" width="550" height="400" style="width: 100%; height: 100%;"></canvas>
-            
-            <!-- Force Arrow Vector -->
-            <div id="z102-force-tag" style="position: absolute; right: 80px; top: 180px; background: #ef4444; color: white; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 800; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
-                F_R = <span id="z102-res-fr">200</span> N
+    <div class="z102-shell">
+        <div class="z102-head">
+            <div>
+                <div class="z102-kicker">Z102 mlaz na ploču</div>
+                <h3 class="z102-title">Reakcija ploče nastaje jer nakon udara nestaje cijela x-komponenta brzine</h3>
+                <p class="z102-sub">Ovdje je bitno da se scena i impulsna jednadžba čitaju zajedno: ulazni mlaz nosi sav x-impuls, a iza ploče ga razdvajaš gore i dolje, pa izlaz više ne doprinosi u x-smjeru. Zato sila raste linearno s <strong>ṁv₁</strong>.</p>
+            </div>
+            <div class="z102-chip">F<sub>R</sub> = ṁv₁</div>
+        </div>
+
+        <div class="z102-note"><strong>Kako čitati udar:</strong> U ovom slučaju mlaz nakon udara više nema x-komponentu brzine. Zato je sila na ploču izravno povezana s time koliko ulaznog impulsa po sekundi dovodiš prema ploči, odnosno s veličinom <strong>ṁv₁</strong>.</div>
+
+        <div class="z102-stage">
+            <div class="z102-scene">
+                <canvas id="z102-canvas" width="550" height="400"></canvas>
+            </div>
+            <div class="z102-summary">
+                <div id="z102-force-tag">F_R = <span id="z102-res-fr">200</span> N</div>
+                <div class="z102-badges">
+                    <div class="z102-badge"><small>Ulazni impuls ṁv₁</small><strong id="z102-mdotv">200 N</strong></div>
+                    <div class="z102-badge"><small>Izlazna x-komponenta</small><strong id="z102-voutx">0.0 m/s</strong></div>
+                    <div class="z102-badge"><small>Promjena impulsa</small><strong id="z102-dmom">-200 N</strong></div>
+                </div>
             </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div style="padding: 20px; background: #f1f5f9; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #475569;">Brzina mlaza v₁: <span id="z102-v-v1" style="color:#2563eb;">20</span> m/s</label>
-                <input type="range" id="z102-v1-slider" min="5" max="40" step="1" value="20" style="width: 100%;">
-                
-                <label style="display: block; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: #475569;">Maseni protok ṁ: <span id="z102-v-mdot" style="color:#2563eb;">10</span> kg/s</label>
-                <input type="range" id="z102-mdot-slider" min="2" max="25" step="0.5" value="10" style="width: 100%;">
+        <div class="z102-lower">
+            <div class="z102-controls">
+                <div class="z102-control">
+                    <label>Brzina mlaza v₁: <span id="z102-v-v1" style="color:#2563eb;">20</span> m/s</label>
+                    <input type="range" id="z102-v1-slider" min="5" max="40" step="1" value="20">
+                </div>
+                <div class="z102-control">
+                    <label>Maseni protok ṁ: <span id="z102-v-mdot" style="color:#2563eb;">10</span> kg/s</label>
+                    <input type="range" id="z102-mdot-slider" min="2" max="25" step="0.5" value="10">
+                </div>
+
+                <div class="z102-quick">
+                    <div><strong>Prije udara:</strong> cijeli impuls je usmjeren prema ploči duž x-osi.</div>
+                    <div><strong>Nakon udara:</strong> mlaz odlazi gore i dolje pa za x-smjer vrijedi <strong>v₂,x = 0</strong>.</div>
+                </div>
             </div>
 
-            <div style="background: #fef2f2; padding: 20px; border-radius: 15px; border-left: 6px solid #ef4444;">
-                <div style="font-weight: 800; font-size: 0.75rem; color: #991b1b; text-transform: uppercase; margin-bottom: 10px;">Analiza impulsa:</div>
-                <div style="font-size: 0.9rem; color: #b91c1c; line-height: 1.5;">
-                    Ulazni impuls: ṁv₁<br>
-                    Izlazni impuls (x): 0<br>
-                    <b>ΣF_x = ṁ(0 - v₁) = -F_R</b>
-                </div>
+            <div class="z102-impulse">
+                <small>Analiza impulsa</small>
+                <div>Ulazni impuls: ṁv₁<br>Izlazni impuls (x): 0<br><strong>ΣF_x = ṁ(0 - v₁) = -F_R</strong></div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">ṁv₁</div>
-                    <div id="z102-mdotv" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">200 N</div>
-                </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">v₂,x</div>
-                    <div id="z102-voutx" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">0.0 m/s</div>
-                </div>
-                <div style="background: #ffffff; padding: 14px; border-radius: 12px; border: 1px solid #dbeafe; text-align: center;">
-                    <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">Δ(ṁv_x)</div>
-                    <div id="z102-dmom" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a;">-200 N</div>
-                </div>
-            </div>
-            
-            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; color: #7c2d12; font-size: 0.82rem; line-height: 1.55;">
-                <strong>Tumačenje scene:</strong> <span id="z102-explainer"></span>
-            </div>
+            <div class="z102-explainer"><strong>Tumačenje scene:</strong> <span id="z102-explainer"></span></div>
         </div>
     </div>
 </div>
@@ -1947,8 +3163,41 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
     const v1S = document.getElementById('z102-v1-slider'), mS = document.getElementById('z102-mdot-slider');
 
     let particles = [];
-    for(let i=0; i<150; i++) particles.push({ x: 0, y: 0, state: 'jet', t: Math.random() });
+    for (let i = 0; i < 150; i++) {
+        particles.push({
+            t: Math.random(),
+            lane: (Math.random() - 0.5) * 16,
+            dir: Math.random() > 0.5 ? 1 : -1,
+            travel: 18 + Math.random() * 26,
+            height: 55 + Math.random() * 60,
+            size: 1.2 + Math.random() * 1.5,
+            offset: Math.random() * 5
+        });
+    }
     const state = { v1: 20, fr: 200 };
+
+    function drawArrow(x1, y1, x2, y2, color, label) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const head = 10;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        if (label) {
+            ctx.fillStyle = color;
+            ctx.font = 'bold 12px Inter';
+            ctx.fillText(label, x2 + 8, y2 - 8);
+        }
+    }
 
     function recalculate() {
         const v1 = parseFloat(v1S.value), mdot = parseFloat(mS.value);
@@ -1966,54 +3215,77 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
     }
 
     function draw() {
-        ctx.clearRect(0, 0, 550, 450);
-        const cy = 200, ox = 50, plateX = 400;
-        
-        // Nozzle
-        ctx.fillStyle = "#475569";
-        ctx.fillRect(ox, cy-20, 40, 40);
-        
-        // Plate
-        ctx.fillStyle = "#1e293b";
-        ctx.fillRect(plateX, cy-100, 15, 200);
-        ctx.fillStyle = "#475569";
-        ctx.font = "bold 11px Inter";
-        ctx.fillText("mlaz", ox + 8, cy - 28);
-        ctx.fillText("ploča", plateX - 8, cy - 112);
+        ctx.clearRect(0, 0, 550, 400);
+        const cy = 200, ox = 56, plateX = 404;
 
-        // Particles
-        particles.forEach(p => {
-            p.t += 0.01 * (state.v1/20);
-            if(p.t > 1) p.t = 0;
+        const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        sky.addColorStop(0, '#ffffff');
+        sky.addColorStop(1, '#e8f3ff');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            if(p.t < 0.7) {
-                // Jet phase
-                const pt = p.t / 0.7;
-                const px = ox + 40 + pt * (plateX - (ox + 40));
-                const py = cy + (Math.random()-0.5)*15;
-                ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(30, cy);
+        ctx.lineTo(canvas.width - 24, cy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(ox, cy - 24, 42, 48);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(ox + 42, cy - 12, 18, 24);
+
+        const beam = ctx.createLinearGradient(ox + 60, cy, plateX, cy);
+        beam.addColorStop(0, 'rgba(59, 130, 246, 0.75)');
+        beam.addColorStop(1, 'rgba(59, 130, 246, 0.18)');
+        ctx.fillStyle = beam;
+        ctx.fillRect(ox + 60, cy - 14, plateX - (ox + 60), 28);
+
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(plateX, cy - 105, 16, 210);
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(plateX + 16, cy - 120, 18, 240);
+
+        particles.forEach((particle) => {
+            particle.t += 0.004 + (state.v1 / 40) * 0.01;
+            if (particle.t > 1) particle.t -= 1;
+
+            if (particle.t < 0.72) {
+                const pt = particle.t / 0.72;
+                const px = ox + 60 + pt * (plateX - (ox + 60));
+                const py = cy + particle.lane;
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.82)';
+                ctx.beginPath();
+                ctx.arc(px, py, particle.size, 0, Math.PI * 2);
+                ctx.fill();
             } else {
-                // Splash phase
-                const pt = (p.t - 0.7) / 0.3;
-                const dir = Math.random() > 0.5 ? 1 : -1;
-                const px = plateX + (Math.random()*5);
-                const py = cy + dir * pt * 100;
-                ctx.fillStyle = "rgba(59, 130, 246, 0.6)"; ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI*2); ctx.fill();
+                const pt = (particle.t - 0.72) / 0.28;
+                const px = plateX + 3 + particle.offset + pt * particle.travel;
+                const py = cy + particle.dir * pt * particle.height;
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.55)';
+                ctx.beginPath();
+                ctx.arc(px, py, particle.size * 0.9, 0, Math.PI * 2);
+                ctx.fill();
             }
         });
 
-        // Force Arrow
-        const arrowLen = Math.min(state.fr / 2, 120);
-        ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(plateX + 20, cy);
-        ctx.lineTo(plateX + 20 + arrowLen, cy);
-        ctx.stroke();
-        // Arrow head
-        ctx.beginPath(); ctx.moveTo(plateX + 20 + arrowLen, cy);
-        ctx.lineTo(plateX + 10 + arrowLen, cy - 8);
-        ctx.lineTo(plateX + 10 + arrowLen, cy + 8);
-        ctx.closePath(); ctx.fillStyle = "#ef4444"; ctx.fill();
+        drawArrow(120, cy - 30, 202, cy - 30, '#2563eb', 'v1');
+        drawArrow(plateX + 28, cy - 6, plateX + 28, cy - 70, '#0f766e', 'v2');
+        drawArrow(plateX + 28, cy + 6, plateX + 28, cy + 70, '#0f766e', '');
+
+        const arrowLen = Math.min(state.fr / 2.2, 125);
+        drawArrow(plateX + 28, cy + 36, plateX + 28 + arrowLen, cy + 36, '#ef4444', 'FR');
+
+        ctx.fillStyle = '#475569';
+        ctx.font = 'bold 11px Inter';
+        ctx.fillText('mlaz', ox + 6, cy - 34);
+        ctx.fillText('ploča', plateX - 4, cy - 118);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText('v₂,x = 0', plateX + 42, cy - 82);
+        ctx.fillText('ulazni impuls = ṁv₁', 84, cy + 44);
     }
 
     function animate() {
@@ -2021,7 +3293,10 @@ $F_R = \dot{m} v_1 = 10 \cdot 20 = \mathbf{200 \, \text{N}}$.
         requestAnimationFrame(animate);
     }
 
-    v1S.oninput = recalculate; mS.oninput = recalculate; recalculate(); animate();
+    v1S.oninput = recalculate;
+    mS.oninput = recalculate;
+    recalculate();
+    animate();
 })();
 </script>
 

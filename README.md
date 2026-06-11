@@ -48,6 +48,59 @@ Ovaj README vise nije plan za odvojenu skriptu i zaseban teorijski prirucnik. Sl
 3. Selektivno podizati vizualni standard skica i print/PDF stabilnost.
 4. Nakon nastavnog ciklusa odluciti treba li dodatno konsolidirati ili ugasiti prijelazne teorijske slojeve izvan `MF1_udzbenik`.
 
+## Stil zadataka i rjesenja (vjezba_XX.qmd)
+
+Svaki zadatak u vjezba_XX.qmd prati ovaj format (referentni primjer: vjezba_02.qmd):
+
+### Naslov zadatka
+```
+### Zadatak ZXX — Kratak opisni naslov {.unnumbered}
+
+Jedna ili dvije recenice opisa problema. Izvor u zagradi ako postoji, npr. (2500 SPFM – x.xx).
+```
+
+### Zadano / Odrediti blok (HTML, ne bold inline)
+```html
+<div class="zadano-grid">
+<div class="zadano-row">
+<span class="label">Zadano</span>
+<span class="zadano-text">simboli i vrijednosti bez tocke na kraju</span>
+</div>
+<div class="zadano-row">
+<span class="label">Odrediti</span>
+<span class="zadano-text">trazena velicina i oznaka</span>
+</div>
+</div>
+```
+**Ne koristiti:** `**Zadano:** ...` / `**Odrediti:** ...` bold inline.
+
+### Rjesenje blok
+```html
+<div class="rjesenje-label">Rjesenje</div>
+```
+**Ne koristiti:** `**Rjesenje:**` bold inline.
+
+### Format rjesenja
+- Numerirani koraci s **bold** konceptom: `1. **Ime koraka:** tekst`
+- Svaka kljucna jednadžba u display bloku: `$$...$$`
+- Bez `\boxed{}` — finalni rezultat je zadnja `$$...$$` jednadžba
+- Kratki medukoraci smiju biti inline: `$A = \pi r^2/4 = 0{,}785\ \text{m}^2$`
+
+### Fizikalni uvid (unutar raw HTML bloka, nakon widgeta div, prije script)
+```html
+<div class="fizikalni-uvid">
+Jedna recenica koja objasnjava fizikalnu pouku zadatka.
+</div>
+```
+
+### Sto NE raditi
+- Ne pisati `\boxed{}` za konacni rezultat
+- Ne pisati Zadano/Odrediti kao bold Markdown
+- Ne pisati rjesenje kao jednu dugu recenicu s inline formulama
+- Ne koristiti inline styl na widget kontejneru — koristiti `<style>` blok s CSS klasama skopiranim na `#widget-id`
+
+---
+
 ## Datum zadnje sinkronizacije
 
 Ovaj README je uskladen sa stvarnim stanjem repozitorija u svibnju 2026., nakon sto je `MF1_udzbenik` potvrden kao glavni proizvod i nakon zavrsnih urednickih prolaza kroz sadrzaj `U01-U13`.

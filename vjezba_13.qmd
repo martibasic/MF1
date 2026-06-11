@@ -22,468 +22,997 @@ Ispravno poznavanje ovih zakona nužno je za projektiranje efikasnih vodoopskrbn
 
 <hr class="zadatak-sep">
 
-### Interaktivni Moodyjev dijagram
+### Moodyjev dijagram
 
-Moodyjev dijagram je ključni alat u mehanici fluida za određivanje koeficijenta trenja $\lambda$. Ovisi o Reynoldsovom broju ($Re$) i relativnoj hrapavosti cijevi ($k/D$).
+**Moodyjev dijagram** je nomogram koji za zadani Reynoldsov broj $Re$ i relativnu hrapavost $k/D$ direktno očitava koeficijent trenja $\lambda$ potreban u Darcy–Weisbachovoj jednadžbi gubitaka:
+$$h_f = \lambda \frac{L}{D} \frac{v^2}{2g}$$
+
+**Odakle dolazi?**
+
+Dijagram je objavio američki inženjer **Lewis Ferry Moody** 1944. godine u časopisu *Transactions of the ASME*. Grafički je prikazao **Colebrook–Whiteovu jednadžbu** (1939.) koja nema eksplicitno rješenje za $\lambda$:
+$$\frac{1}{\sqrt{\lambda}} = -2\log\!\left(\frac{k/D}{3{,}71} + \frac{2{,}51}{Re\sqrt{\lambda}}\right)$$
+Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvijek jest — standardni alat za brzo ručno određivanje $\lambda$.
+
+**Kako se čita dijagram — osi i krivulje**
+
+- **Vodoravna os ($Re$):** logaritmička skala od $\approx 600$ do $10^8$; smjer čitanja ide slijeva nadesno (s rastom $Re$).
+- **Vertikalna os ($\lambda$):** logaritmička skala od $\approx 0{,}008$ do $0{,}1$; tražena vrijednost očitava se na ovoj osi.
+- **Krivulje:** svaka krivulja odgovara jednoj vrijednosti relativne hrapavosti $k/D$ (od $0$ za idealno glatku cijev do $0{,}05$ za vrlo hrapavu). Vrijednosti $k/D$ označene su s desne strane dijagrama.
+- **Laminarna linija** ($Re < 2320$): ravna crta s nagibom $-1$ — to je izravni zakon $\lambda = 64/Re$.
+
+**Kako odabrati postupak — if–else logika**
+
+```
+IF Re < 2320  →  LAMINARNO strujanje
+    λ = 64 / Re          ← formula, dijagram nije potreban
+    Profil brzine: paraboličan (Hagen-Poiseuille)
+
+ELSE IF 2320 ≤ Re ≤ 4000  →  PRIJELAZNO područje
+    λ nije pouzdano definirano — strujanje nestabilno
+    Inženjerska praxis: uzeti konzervativniju (veću) vrijednost
+    ili redizajnirati sustav da izbjegne ovo područje
+
+ELSE  (Re > 4000)  →  TURBULENTNO strujanje
+
+    IF k/D ≈ 0  (hidraulički glatka cijev)
+        λ ovisi samo o Re  → pratiti krivulju k/D → 0
+        Za Re < 10^5: Blasiusova formula  λ = 0.316 · Re^(-0.25)
+
+    ELSE IF k/D > 0  I  Re nije prevelik  (prijelazno turbulentno)
+        λ ovisi i o Re i o k/D  → Moodyjev dijagram ili Colebrook
+
+    ELSE  (Re > ~10^5 i k/D nije zanemariva)  →  kvadratni zakon
+        λ ovisi SAMO o k/D  (vodoravna asimptota na dijagramu)
+        λ ≈ [1 / (-2·log(k / (3.71·D)))]²  ← Nikuradseova formula
+        Praktično: povećanje brzine više ne mijenja λ
+```
+
+**Praktični savjeti za primjenu**
+
+- **Iteracija s Colebrookom:** pretpostaviti $\lambda_0$ (npr. s dijagrama), uvrštavati u Colebrook, ponavljati do konvergencije (2–3 koraka).
+- **Eksplicitna aproksimacija bez iteracije:** Swamee–Jainova formula (pogreška $< 3\%$):
+  $$\lambda = \frac{0{,}25}{\left[\log\!\left(\dfrac{k/D}{3{,}7} + \dfrac{5{,}74}{Re^{0{,}9}}\right)\right]^2}$$
+- **Tipične hrapavosti:** čelik $k \approx 0{,}046\ \text{mm}$; beton $k \approx 0{,}3\!-\!3\ \text{mm}$; glatke plastične cijevi $k \approx 0{,}0015\ \text{mm}$.
 
 <hr class="widget-sep">
 <div class="widget-label">⚙ Interaktivni simulator</div>
 
 ```{=html}
 <!-- WIDGET: Moodyjev Dijagram -->
-<div id="v13-moody-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
-    <style>
-        #v13-moody-widget .m13-shell {
-            border-radius: 30px;
-            border: 1px solid #d9e7f7;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-            box-shadow: 0 28px 64px rgba(15, 23, 42, 0.09);
-            padding: 28px;
-        }
-        #v13-moody-widget .m13-head {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 18px;
-            align-items: start;
-            margin-bottom: 18px;
-        }
-        #v13-moody-widget .m13-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        #v13-moody-widget .m13-title {
-            margin: 0;
-            font-size: clamp(1.5rem, 2.5vw, 2rem);
-            line-height: 1.06;
-            color: #0f172a;
-            font-weight: 800;
-        }
-        #v13-moody-widget .m13-sub {
-            margin: 8px 0 0;
-            max-width: 74ch;
-            color: #475569;
-            font-size: 0.95rem;
-            line-height: 1.62;
-        }
-        #v13-moody-widget .m13-chip {
-            align-self: start;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #e0f2fe, #ede9fe);
-            border: 1px solid #bfdbfe;
-            color: #1d4ed8;
-            font-size: 0.78rem;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-        #v13-moody-widget .m13-note {
-            margin-bottom: 18px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            border: 1px solid #bfdbfe;
-            background: linear-gradient(135deg, #eff6ff, #f8fbff);
-            color: #1e3a8a;
-            font-size: 0.86rem;
-            line-height: 1.62;
-        }
-        #v13-moody-widget .m13-stage {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-        #v13-moody-widget .m13-scene {
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid #1e293b;
-            background: radial-gradient(circle at top, #172554 0%, #0f172a 60%, #020617 100%);
-            box-shadow: inset 0 0 0 1px rgba(148,163,184,0.08);
-        }
-        #v13-moody-widget canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        #v13-moody-widget .m13-summary {
-            display: grid;
-            grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #v13-moody-widget .m13-legend,
-        #v13-moody-widget .m13-reading,
-        #v13-moody-widget .m13-controls,
-        #v13-moody-widget .m13-metric,
-        #v13-moody-widget .m13-explainer {
-            border-radius: 18px;
-            border: 1px solid #dbeafe;
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
-        }
-        #v13-moody-widget .m13-legend {
-            padding: 18px;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-            color: #334155;
-            font-size: 0.84rem;
-            line-height: 1.55;
-        }
-        #v13-moody-widget .m13-legend-title,
-        #v13-moody-widget .m13-reading-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-        #v13-moody-widget .m13-legend-title {
-            color: #475569;
-        }
-        #v13-moody-widget .m13-legend-row + .m13-legend-row {
-            margin-top: 8px;
-        }
-        #v13-moody-widget .m13-reading {
-            padding: 18px 20px;
-            background: linear-gradient(135deg, #0f172a, #172554);
-            border-color: rgba(148,163,184,0.26);
-            color: #e2e8f0;
-        }
-        #v13-moody-widget .m13-reading-kicker {
-            color: #94a3b8;
-        }
-        #v13-moody-widget .m13-lambda {
-            font-size: clamp(1.45rem, 2.6vw, 1.9rem);
-            font-weight: 800;
-            color: #fbbf24;
-            margin-bottom: 6px;
-        }
-        #v13-moody-widget .m13-lower {
-            display: grid;
-            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #v13-moody-widget .m13-controls,
-        #v13-moody-widget .m13-explainer {
-            padding: 18px;
-            background: #ffffff;
-        }
-        #v13-moody-widget .m13-control + .m13-control {
-            margin-top: 20px;
-        }
-        #v13-moody-widget .m13-control label {
-            display: block;
-            margin-bottom: 10px;
-            color: #475569;
-            font-weight: 700;
-        }
-        #v13-moody-widget .m13-control input {
-            width: 100%;
-            accent-color: #2563eb;
-        }
-        #v13-moody-widget .m13-metrics {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-        }
-        #v13-moody-widget .m13-metric {
-            padding: 14px;
-            text-align: center;
-            background: #ffffff;
-        }
-        #v13-moody-widget .m13-metric small {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #64748b;
-        }
-        #v13-moody-widget .m13-metric strong,
-        #v13-re-card,
-        #v13-rule-card,
-        #v13-kd-card {
-            display: block;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-            font-size: 0.98rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-        #v13-moody-widget .m13-explainer {
-            background: #fff7ed;
-            border-color: #fdba74;
-            color: #7c2d12;
-            font-size: 0.84rem;
-            line-height: 1.6;
-        }
-        @media (max-width: 960px) {
-            #v13-moody-widget .m13-head,
-            #v13-moody-widget .m13-summary,
-            #v13-moody-widget .m13-lower,
-            #v13-moody-widget .m13-metrics {
-                grid-template-columns: 1fr;
-            }
-            #v13-moody-widget .m13-chip {
-                justify-self: start;
-            }
-        }
-    </style>
+<div id="v13-moody-widget" style="max-width: 1100px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+<style>
+#v13-moody-widget .m13-shell {
+    border-radius: 22px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    box-shadow: 0 20px 56px rgba(15,23,42,0.09);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+#v13-moody-widget .m13-head { }
+#v13-moody-widget .m13-kicker {
+    font-size: 0.70rem;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 3px;
+}
+#v13-moody-widget .m13-title {
+    margin: 0 0 4px;
+    font-size: clamp(1.2rem, 2.0vw, 1.5rem);
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+}
+#v13-moody-widget .m13-subtitle {
+    color: #475569;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    margin: 0;
+}
+/* ── Canvas: full width ── */
+#v13-moody-widget .m13-scene {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    background: #fafcff;
+    box-shadow: 0 4px 18px rgba(15,23,42,0.07);
+    width: 100%;
+}
+#v13-moody-widget canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+/* ── Controls bar (sliders + λ) ── */
+#v13-moody-widget .m13-cbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+}
+#v13-moody-widget .m13-slider-box {
+    background: #ffffff;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 6px rgba(37,99,235,0.05);
+}
+#v13-moody-widget .m13-slider-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+}
+#v13-moody-widget .m13-slider-val {
+    font-family: ui-monospace, monospace;
+    font-size: 0.88rem;
+    color: #2563eb;
+    font-weight: 800;
+    white-space: nowrap;
+}
+#v13-moody-widget input[type=range] {
+    width: 100%;
+    accent-color: #2563eb;
+    cursor: pointer;
+}
+/* ── λ result card ── */
+#v13-moody-widget .m13-lcard {
+    background: linear-gradient(135deg, #0c1f3f, #0f2d52);
+    border: 1.5px solid #2563eb;
+    border-radius: 12px;
+    padding: 12px 18px;
+    text-align: center;
+    min-width: 110px;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.25), 0 4px 16px rgba(37,99,235,0.20);
+}
+#v13-moody-widget .m13-lcard small {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #93c5fd;
+    margin-bottom: 4px;
+}
+#v13-moody-widget .m13-lcard strong {
+    font-family: ui-monospace, monospace;
+    font-size: 1.30rem;
+    font-weight: 800;
+    color: #fbbf24;
+}
+/* ── Bottom row ── */
+#v13-moody-widget .m13-bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+}
+/* ── Re / k/D mini values ── */
+#v13-moody-widget .m13-minis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+#v13-moody-widget .m13-mini {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    padding: 9px 10px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+#v13-moody-widget .m13-mini small {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+#v13-moody-widget .m13-mini strong {
+    font-family: ui-monospace, monospace;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+/* ── Decision tree ── */
+#v13-moody-widget .m13-tree {
+    background: #ffffff;
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.05);
+}
+#v13-moody-widget .m13-tree-hd {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+#v13-moody-widget .m13-branch {
+    border-radius: 9px;
+    border: 1.5px solid #e2e8f0;
+    margin-bottom: 7px;
+    overflow: hidden;
+    opacity: 0.35;
+    transition: opacity 0.20s, border-color 0.20s, box-shadow 0.20s, background 0.20s;
+}
+#v13-moody-widget .m13-branch:last-child { margin-bottom: 0; }
+#v13-moody-widget .m13-branch.m13-on { opacity: 1; }
+#v13-moody-widget .m13-branch.m13-on.lam { border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,0.15); background: #f0fdf4; }
+#v13-moody-widget .m13-branch.m13-on.trans { border-color: #d97706; box-shadow: 0 0 0 2px rgba(217,119,6,0.15); background: #fffbeb; }
+#v13-moody-widget .m13-branch.m13-on.turb { border-color: #dc2626; box-shadow: 0 0 0 2px rgba(220,38,38,0.15); background: #fff1f2; }
+#v13-moody-widget .m13-bh {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 5px;
+    padding: 8px 11px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+#v13-moody-widget .m13-bkw {
+    font-family: ui-monospace, monospace;
+    font-size: 0.67rem;
+    font-weight: 800;
+    background: #e2e8f0;
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: #475569;
+}
+#v13-moody-widget .m13-on.lam .m13-bkw { background: #bbf7d0; color: #15803d; }
+#v13-moody-widget .m13-on.trans .m13-bkw { background: #fde68a; color: #92400e; }
+#v13-moody-widget .m13-on.turb .m13-bkw { background: #fecaca; color: #991b1b; }
+#v13-moody-widget .m13-bcond { color: #334155; font-size: 0.78rem; }
+#v13-moody-widget .m13-barr { color: #94a3b8; }
+#v13-moody-widget .m13-blbl { font-weight: 800; font-size: 0.80rem; }
+#v13-moody-widget .m13-on.lam .m13-blbl { color: #15803d; }
+#v13-moody-widget .m13-on.trans .m13-blbl { color: #b45309; }
+#v13-moody-widget .m13-on.turb .m13-blbl { color: #b91c1c; }
+#v13-moody-widget .m13-bb {
+    padding: 0 11px 9px;
+    font-size: 0.76rem;
+    line-height: 1.52;
+    color: #475569;
+}
+#v13-moody-widget .m13-bf {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    font-size: 0.80rem;
+    color: #1e3a8a;
+    background: #eff6ff;
+    border-radius: 5px;
+    padding: 3px 8px;
+    margin-bottom: 4px;
+    display: inline-block;
+}
+#v13-moody-widget .m13-on.lam .m13-bf { background: #dcfce7; color: #15803d; }
+#v13-moody-widget .m13-on.trans .m13-bf { background: #fef9c3; color: #92400e; }
+#v13-moody-widget .m13-on.turb .m13-bf { background: #fee2e2; color: #991b1b; }
+#v13-moody-widget .m13-subs {
+    border-top: 1px dashed #fca5a5;
+    margin: 3px 0 0;
+    padding-top: 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+#v13-moody-widget .m13-sub {
+    border-radius: 7px;
+    border: 1px solid #fecaca;
+    padding: 5px 9px;
+    opacity: 0.35;
+    transition: opacity 0.20s, border-color 0.20s, background 0.20s;
+    font-size: 0.73rem;
+    line-height: 1.45;
+}
+#v13-moody-widget .m13-sub.m13-on { opacity: 1; border-color: #dc2626; background: #fff5f5; }
+#v13-moody-widget .m13-sbh { display: flex; align-items: baseline; gap: 5px; margin-bottom: 2px; }
+#v13-moody-widget .m13-skw {
+    font-family: ui-monospace, monospace;
+    font-size: 0.65rem;
+    font-weight: 800;
+    background: #fee2e2;
+    border-radius: 3px;
+    padding: 1px 4px;
+    color: #b91c1c;
+}
+#v13-moody-widget .m13-scond { font-size: 0.73rem; color: #374151; font-weight: 600; }
+#v13-moody-widget .m13-sf {
+    font-family: ui-monospace, monospace;
+    font-size: 0.70rem;
+    color: #6b21a8;
+    background: #f5f3ff;
+    border-radius: 4px;
+    padding: 2px 6px;
+    display: inline-block;
+    margin-top: 1px;
+}
+/* ── Explainer ── */
+#v13-moody-widget .m13-exp {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 13px 15px;
+    color: #334155;
+    font-size: 0.80rem;
+    line-height: 1.65;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+#v13-moody-widget .m13-exp strong { color: #1d4ed8; }
+/* ── Right column (mini metrics + explainer) ── */
+#v13-moody-widget .m13-right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+/* ── Responsive ── */
+@media (max-width: 760px) {
+    #v13-moody-widget .m13-cbar { grid-template-columns: 1fr 1fr; }
+    #v13-moody-widget .m13-lcard { grid-column: 1 / -1; }
+    #v13-moody-widget .m13-bottom { grid-template-columns: 1fr; }
+}
+</style>
 
-    <div class="m13-shell">
-        <div class="m13-head">
-            <div>
-                <div class="m13-kicker">Moodyjev dijagram</div>
-                <h4 class="m13-title">Prvo odredi gdje si po Reynoldsovom broju, a tek onda čitaj kako hrapavost pomiče otpor trenja</h4>
-                <p class="m13-sub">Završni polish ovdje nije dirao fiziku nego ritam čitanja: graf je sada čist bez prekrivanja, a legenda i trenutno očitanje preseljeni su u sažetak ispod scene.</p>
+<div class="m13-shell">
+
+    <div class="m13-head">
+        <div class="m13-kicker">Interaktivni simulator — Mehanika fluida 1</div>
+        <h4 class="m13-title">Moodyjev dijagram</h4>
+        <p class="m13-subtitle">Pomicaj klizače — radna točka se ažurira na dijagramu, a stablo odluke pokazuje koji postupak koristiti za zadane Re i k/D.</p>
+    </div>
+
+    <!-- Canvas: puna širina -->
+    <div class="m13-scene">
+        <canvas id="v13-moody-canvas" width="1000" height="560"></canvas>
+    </div>
+
+    <!-- Klizači + λ -->
+    <div class="m13-cbar">
+        <div class="m13-slider-box">
+            <div class="m13-slider-label">
+                <span>Reynoldsov broj (log<sub>10</sub> Re)</span>
+                <span class="m13-slider-val" id="v13-v-re">5.00</span>
             </div>
-            <div class="m13-chip">Re + k/D -> λ</div>
+            <input type="range" id="v13-re-slider" min="3" max="8" step="0.01" value="5">
         </div>
-
-        <div class="m13-note"><strong>Kako čitati Moodyja:</strong> Najprije lociraš <strong>Re</strong> po vodoravnoj osi. Zatim provjeriš jesi li u laminarnom, prijelaznom ili turbulentnom području. Tek kad si u turbulentnom području ima smisla pratiti krivulju za određeni <strong>k/D</strong> i očitati odgovarajući <strong>λ</strong>.</div>
-
-        <div class="m13-stage">
-            <div class="m13-scene">
-                <canvas id="v13-moody-canvas" width="960" height="560"></canvas>
+        <div class="m13-slider-box">
+            <div class="m13-slider-label">
+                <span>Relativna hrapavost k/D</span>
+                <span class="m13-slider-val" id="v13-v-kd">0.0010</span>
             </div>
-            <div class="m13-summary">
-                <div class="m13-legend">
-                    <div class="m13-legend-title">Legenda</div>
-                    <div class="m13-legend-row"><span style="color:#fbbf24; font-weight:700;">●</span> Trenutna radna točka</div>
-                    <div class="m13-legend-row"><span style="color:#38bdf8; font-weight:700;">━</span> Glatka cijev / mali k/D</div>
-                    <div class="m13-legend-row"><span style="color:#f97316; font-weight:700;">━</span> Veća hrapavost</div>
-                    <div class="m13-legend-row"><span style="display:inline-block; width:12px; height:10px; background:rgba(34,197,94,0.18); border-radius:3px;"></span> Laminarno</div>
-                    <div class="m13-legend-row"><span style="display:inline-block; width:12px; height:10px; background:rgba(245,158,11,0.18); border-radius:3px;"></span> Prijelaz</div>
-                </div>
-                <div class="m13-reading">
-                    <div class="m13-reading-kicker">Trenutno očitanje</div>
-                    <div class="m13-lambda">λ = <span id="v13-res-lambda">---</span></div>
-                    <div>Režim: <b id="v13-res-regime">---</b></div>
-                </div>
-            </div>
+            <input type="range" id="v13-kd-slider" min="-6" max="-1.3" step="0.1" value="-3">
         </div>
-
-        <div class="m13-lower">
-            <div class="m13-controls">
-                <div class="m13-control">
-                    <label>Reynolds (log Re): <span id="v13-v-re" style="color:#2563eb;">5.0</span></label>
-                    <input type="range" id="v13-re-slider" min="3" max="8" step="0.01" value="5">
-                </div>
-                <div class="m13-control">
-                    <label>Relativna hrapavost k/D: <span id="v13-v-kd" style="color:#2563eb;">0.0010</span></label>
-                    <input type="range" id="v13-kd-slider" min="-6" max="-1.3" step="0.1" value="-3">
-                </div>
-            </div>
-
-            <div>
-                <div class="m13-metrics">
-                    <div class="m13-metric"><small>Re</small><strong id="v13-re-card">0</strong></div>
-                    <div class="m13-metric"><small>Pravilo za λ</small><strong id="v13-rule-card">---</strong></div>
-                    <div class="m13-metric"><small>k/D</small><strong id="v13-kd-card">0</strong></div>
-                </div>
-                <div class="m13-explainer" style="margin-top:14px;"><strong>Tumačenje scene:</strong> <span id="v13-explainer"></span></div>
-            </div>
+        <div class="m13-lcard">
+            <small>Koef. trenja</small>
+            <strong>λ = <span id="v13-res-lambda">—</span></strong>
         </div>
     </div>
+
+    <!-- Stablo odluke + tumačenje -->
+    <div class="m13-bottom">
+
+        <div class="m13-tree">
+            <div class="m13-tree-hd">Stablo odluke — koji postupak koristim?</div>
+
+            <div class="m13-branch lam" id="m13-b-lam">
+                <div class="m13-bh">
+                    <span class="m13-bkw">IF</span>
+                    <span class="m13-bcond">Re &lt; 2 320</span>
+                    <span class="m13-barr">→</span>
+                    <span class="m13-blbl">LAMINARNO</span>
+                </div>
+                <div class="m13-bb">
+                    <div class="m13-bf">λ = 64 / Re</div>
+                    <div>Hagen–Poiseuille. Dijagram nije potreban. Profil brzine: parabola.</div>
+                </div>
+            </div>
+
+            <div class="m13-branch trans" id="m13-b-trans">
+                <div class="m13-bh">
+                    <span class="m13-bkw">ELSE IF</span>
+                    <span class="m13-bcond">Re ≤ 4 000</span>
+                    <span class="m13-barr">→</span>
+                    <span class="m13-blbl">PRIJELAZNO</span>
+                </div>
+                <div class="m13-bb">
+                    <div class="m13-bf">λ — nestabilno!</div>
+                    <div>Strujanje nepredvidivo. Uzeti konzervativniju vrijednost ili redizajnirati sustav.</div>
+                </div>
+            </div>
+
+            <div class="m13-branch turb" id="m13-b-turb">
+                <div class="m13-bh">
+                    <span class="m13-bkw">ELSE</span>
+                    <span class="m13-bcond">Re &gt; 4 000</span>
+                    <span class="m13-barr">→</span>
+                    <span class="m13-blbl">TURBULENTNO</span>
+                </div>
+                <div class="m13-bb">
+                    <div class="m13-subs">
+                        <div class="m13-sub" id="m13-b-smooth">
+                            <div class="m13-sbh">
+                                <span class="m13-skw">IF</span>
+                                <span class="m13-scond">k/D ≈ 0 &ensp;(glatka cijev)</span>
+                            </div>
+                            <span class="m13-sf">Blasius: λ = 0.316 · Re⁻⁰·²⁵</span>
+                        </div>
+                        <div class="m13-sub" id="m13-b-cb">
+                            <div class="m13-sbh">
+                                <span class="m13-skw">ELSE IF</span>
+                                <span class="m13-scond">prijelazno hrapava</span>
+                            </div>
+                            <span class="m13-sf">Colebrook–White (iteracija)</span>
+                        </div>
+                        <div class="m13-sub" id="m13-b-rough">
+                            <div class="m13-sbh">
+                                <span class="m13-skw">ELSE</span>
+                                <span class="m13-scond">potpuno hrapava</span>
+                            </div>
+                            <span class="m13-sf">1/√λ = −2·log(k/D / 3.71)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="m13-right-col">
+            <div class="m13-minis">
+                <div class="m13-mini"><small>Re</small><strong id="v13-re-card">—</strong></div>
+                <div class="m13-mini"><small>k / D</small><strong id="v13-kd-card">—</strong></div>
+            </div>
+            <div class="m13-exp" id="v13-explainer-box">Pomakni klizač da vidiš tumačenje.</div>
+        </div>
+
+    </div>
+
+</div>
 </div>
 
 <script>
 (function() {
-    const canvas = document.getElementById('v13-moody-canvas');
-    const ctx = canvas.getContext('2d');
-    const reS = document.getElementById('v13-re-slider');
-    const kdS = document.getElementById('v13-kd-slider');
-    const roughnessCurves = [0, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2];
-    const curveColors = ['#38bdf8', '#60a5fa', '#818cf8', '#a78bfa', '#f472b6', '#fb7185', '#f97316', '#facc15'];
-    const plot = { left: 92, right: canvas.width - 74, top: 46, bottom: canvas.height - 82 };
+    var canvas   = document.getElementById('v13-moody-canvas');
+    var ctx      = canvas.getContext('2d');
+    var reSlider = document.getElementById('v13-re-slider');
+    var kdSlider = document.getElementById('v13-kd-slider');
 
-    function solveLambda(re, kd) {
-        if (re <= 0) return 0.02;
-        if (re < 2320) return 64 / re;
-        const inv = -1.8 * Math.log10(Math.pow(Math.max(kd, 1e-10) / 3.7, 1.11) + 6.9 / re);
+    var W = canvas.width, H = canvas.height;
+    var P = { l: 72, r: W - 76, t: 40, b: H - 66 };
+
+    var KD_CURVES = [0, 5e-5, 1e-4, 5e-4, 1e-3, 3e-3, 5e-3, 1e-2, 2e-2, 5e-2];
+    /* Darker colours for light background */
+    var KD_COLORS = ['#0369a1','#1d4ed8','#4338ca','#6d28d9','#a21caf','#be185d','#b91c1c','#c2410c','#b45309','#4d7c0f'];
+
+    /* ── Physics ── */
+    function haaland(re, kd) {
+        var k = Math.max(kd, 1e-12);
+        var inv = -1.8 * Math.log10(Math.pow(k / 3.7, 1.11) + 6.9 / re);
         return 1 / (inv * inv);
     }
-
-    function classifyRegime(re) {
-        if (re < 2320) return { label: 'laminarno', rule: '64/Re', color: '#4ade80' };
-        if (re < 4000) return { label: 'prijelazno', rule: 'nestabilno', color: '#f59e0b' };
-        return { label: 'turbulentno', rule: 'Haaland/Colebrook', color: '#f87171' };
-    }
-
-    function xFromRe(re) {
-        return plot.left + ((Math.log10(re) - 3) / 5) * (plot.right - plot.left);
-    }
-
-    function yFromLambda(lambda) {
-        const logMin = Math.log10(0.008);
-        const logMax = Math.log10(0.12);
-        return plot.top + ((logMax - Math.log10(lambda)) / (logMax - logMin)) * (plot.bottom - plot.top);
-    }
-
-    function formatKd(kd) {
-        if (kd < 1e-4) return kd.toExponential(1);
-        return kd.toFixed(4);
-    }
-
-    function drawAxes() {
-        ctx.strokeStyle = 'rgba(148,163,184,0.28)';
-        ctx.lineWidth = 1;
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '12px Inter';
-
-        for (let decade = 3; decade <= 8; decade += 1) {
-            const re = Math.pow(10, decade);
-            const x = xFromRe(re);
-            ctx.beginPath();
-            ctx.moveTo(x, plot.top);
-            ctx.lineTo(x, plot.bottom);
-            ctx.stroke();
-            ctx.fillText('10^' + decade, x - 14, plot.bottom + 28);
+    function solveLambda(re, kd) {
+        if (re < 2320) return 64 / re;
+        if (re < 4000) {
+            var t = (re - 2320) / 1680;
+            return (64/2320) * (1-t) + haaland(4000, kd) * t;
         }
-
-        const lambdaTicks = [0.008, 0.01, 0.015, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1];
-        lambdaTicks.forEach((tick) => {
-            const y = yFromLambda(tick);
-            ctx.beginPath();
-            ctx.moveTo(plot.left, y);
-            ctx.lineTo(plot.right, y);
-            ctx.stroke();
-            ctx.fillText(tick.toFixed(tick < 0.01 ? 3 : 2), 42, y + 4);
-        });
-
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(plot.left, plot.top);
-        ctx.lineTo(plot.left, plot.bottom);
-        ctx.lineTo(plot.right, plot.bottom);
-        ctx.stroke();
-
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = '700 13px Inter';
-        ctx.fillText('Reynoldsov broj Re', plot.left + (plot.right - plot.left) / 2 - 62, canvas.height - 28);
-        ctx.save();
-        ctx.translate(26, plot.top + (plot.bottom - plot.top) / 2 + 42);
-        ctx.rotate(-Math.PI / 2);
-        ctx.fillText('Koeficijent trenja λ', 0, 0);
-        ctx.restore();
+        return haaland(re, kd);
+    }
+    function turbSub(re, kd, lam) {
+        var ksp = kd * re * Math.sqrt(lam) / (2 * Math.sqrt(8));
+        if (ksp < 5 || kd < 2e-5) return 'smooth';
+        if (ksp > 70)              return 'rough';
+        return 'cb';
     }
 
-    function plotCurve(kd, color) {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = kd === 0 ? 2.8 : 1.8;
-        ctx.beginPath();
-        let started = false;
-        for (let logRe = 3; logRe <= 8; logRe += 0.025) {
-            const re = Math.pow(10, logRe);
-            if (kd !== 0 && re < 2800) continue;
-            const lambda = solveLambda(re, kd === 0 ? 1e-10 : kd);
-            if (lambda < 0.008 || lambda > 0.12) continue;
-            const x = xFromRe(re);
-            const y = yFromLambda(lambda);
-            if (!started) {
-                ctx.moveTo(x, y);
-                started = true;
-            } else {
-                ctx.lineTo(x, y);
-            }
-        }
-        ctx.stroke();
+    /* ── Coords ── */
+    function xRe(re)  { return P.l + (Math.log10(re) - 3) / 5 * (P.r - P.l); }
+    function yLam(lam) {
+        var lo = Math.log10(0.0079), hi = Math.log10(0.121);
+        return P.t + (hi - Math.log10(lam)) / (hi - lo) * (P.b - P.t);
+    }
+    function fmtKd(kd) {
+        if (kd >= 0.01)   return kd.toFixed(3);
+        if (kd >= 0.001)  return kd.toFixed(4);
+        if (kd >= 0.0001) return kd.toFixed(5);
+        return kd.toExponential(1);
+    }
+    function fmtRe(re) {
+        if (re >= 1e7) return (re/1e7).toFixed(1)+'\xd710\u2077';
+        if (re >= 1e6) return (re/1e6).toFixed(2)+'\xd710\u2076';
+        if (re >= 1e5) return (re/1e5).toFixed(2)+'\xd710\u2075';
+        if (re >= 1e4) return (re/1e4).toFixed(1)+'\xd710\u2074';
+        return re.toFixed(0);
     }
 
-    function drawCurrentPoint(re, lambda, regime) {
-        const x = xFromRe(re);
-        const y = yFromLambda(lambda);
-        ctx.strokeStyle = 'rgba(248,250,252,0.35)';
-        ctx.setLineDash([6, 6]);
-        ctx.beginPath();
-        ctx.moveTo(x, plot.bottom);
-        ctx.lineTo(x, y);
-        ctx.lineTo(plot.left, y);
-        ctx.stroke();
+    /* ── Drawing: light theme ── */
+    function drawGrid() {
+        /* white/light background */
+        ctx.fillStyle = '#fafcff';
+        ctx.fillRect(0, 0, W, H);
+
+        /* zone tints */
+        ctx.fillStyle = 'rgba(22,163,74,0.07)';
+        ctx.fillRect(P.l, P.t, xRe(2320)-P.l, P.b-P.t);
+        ctx.fillStyle = 'rgba(217,119,6,0.08)';
+        ctx.fillRect(xRe(2320), P.t, xRe(4000)-xRe(2320), P.b-P.t);
+
+        /* zone boundary dashes */
+        ctx.setLineDash([5,5]); ctx.lineWidth = 1.2;
+        ctx.strokeStyle = 'rgba(22,163,74,0.55)';
+        ctx.beginPath(); ctx.moveTo(xRe(2320), P.t); ctx.lineTo(xRe(2320), P.b); ctx.stroke();
+        ctx.strokeStyle = 'rgba(217,119,6,0.65)';
+        ctx.beginPath(); ctx.moveTo(xRe(4000), P.t); ctx.lineTo(xRe(4000), P.b); ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle = regime.color;
-        ctx.beginPath();
-        ctx.arc(x, y, 7, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#f8fafc';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = '700 12px Inter';
-        ctx.fillText('radna točka', x + 12, y - 10);
-    }
-
-    function draw(re, kd, lambda, regime) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = 'rgba(34,197,94,0.16)';
-        ctx.fillRect(plot.left, plot.top, xFromRe(2320) - plot.left, plot.bottom - plot.top);
-        ctx.fillStyle = 'rgba(245,158,11,0.16)';
-        ctx.fillRect(xFromRe(2320), plot.top, xFromRe(4000) - xFromRe(2320), plot.bottom - plot.top);
-
-        drawAxes();
-
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 2.8;
-        ctx.beginPath();
-        let started = false;
-        for (let reLam = 700; reLam <= 2300; reLam += 25) {
-            const lam = 64 / reLam;
-            const x = xFromRe(reLam);
-            const y = yFromLambda(lam);
-            if (!started) {
-                ctx.moveTo(x, y);
-                started = true;
-            } else {
-                ctx.lineTo(x, y);
+        /* Re grid (minor + major) */
+        for (var dec = 3; dec <= 8; dec++) {
+            for (var m = 1; m <= 9; m++) {
+                var re = m * Math.pow(10, dec);
+                if (re > 1e8) break;
+                var x = xRe(re);
+                ctx.strokeStyle = m === 1 ? 'rgba(100,116,139,0.30)' : 'rgba(100,116,139,0.10)';
+                ctx.lineWidth   = m === 1 ? 0.9 : 0.5;
+                ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.b); ctx.stroke();
             }
         }
-        ctx.stroke();
 
-        roughnessCurves.forEach((curve, index) => plotCurve(curve, curveColors[index]));
-        drawCurrentPoint(re, lambda, regime);
+        /* λ grid */
+        var ticks  = [0.008,0.009,0.01,0.012,0.015,0.02,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.12];
+        var majors = [0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1];
+        ticks.forEach(function(t) {
+            if (t < 0.0079 || t > 0.121) return;
+            var y = yLam(t), isMaj = majors.indexOf(t) >= 0;
+            ctx.strokeStyle = isMaj ? 'rgba(100,116,139,0.28)' : 'rgba(100,116,139,0.10)';
+            ctx.lineWidth   = isMaj ? 0.9 : 0.5;
+            ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(P.r, y); ctx.stroke();
+        });
 
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = '700 13px Inter';
-        ctx.fillText('laminarno', xFromRe(1250) - 32, plot.top + 24);
-        ctx.fillText('prijelaz', xFromRe(2850) - 24, plot.top + 24);
-        ctx.fillText('turbulentne krivulje hrapavosti', xFromRe(2e5), plot.top + 24);
+        /* border */
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(P.l, P.t, P.r-P.l, P.b-P.t);
+    }
 
-        ctx.font = '11px Inter';
-        roughnessCurves.slice(2).forEach((curve, index) => {
-            const sampleRe = 5e7;
-            const x = xFromRe(sampleRe) + 6;
-            const y = yFromLambda(solveLambda(sampleRe, curve));
-            if (y > plot.top + 12 && y < plot.bottom - 8) {
-                ctx.fillStyle = curveColors[index + 2];
-                ctx.fillText('k/D ' + formatKd(curve), x, y + 4);
+    function drawLabels() {
+        /* Re axis ticks */
+        ctx.textAlign = 'center';
+        for (var dec = 3; dec <= 8; dec++) {
+            var x = xRe(Math.pow(10, dec));
+            ctx.fillStyle = '#64748b'; ctx.font = '600 12px Inter,sans-serif';
+            ctx.fillText('10', x - 7, P.b + 19);
+            ctx.font = '600 9px Inter,sans-serif';
+            ctx.fillText(String(dec), x + 6, P.b + 15);
+        }
+
+        /* λ axis labels */
+        var lbls = [0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1];
+        ctx.textAlign = 'right'; ctx.font = '600 11px Inter,sans-serif';
+        lbls.forEach(function(t) {
+            var y = yLam(t);
+            ctx.fillStyle = '#64748b';
+            var s = t < 0.01 ? t.toFixed(3) : t < 0.1 ? t.toFixed(2) : t.toFixed(1);
+            ctx.fillText(s, P.l - 6, y + 4);
+        });
+
+        /* axis titles */
+        ctx.fillStyle = '#334155'; ctx.font = '700 13px Inter,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('Reynoldsov broj  Re', P.l + (P.r-P.l)/2, H - 18);
+        ctx.save();
+        ctx.translate(14, P.t + (P.b-P.t)/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText('Koeficijent trenja  \u03bb', 0, 0);
+        ctx.restore();
+
+        /* zone labels */
+        ctx.font = '700 11px Inter,sans-serif'; ctx.textAlign = 'center';
+        var lw = xRe(2320) - P.l;
+        if (lw > 18) { ctx.fillStyle = '#15803d'; ctx.fillText('LAM.', P.l + lw/2, P.t + 16); }
+        var tw = xRe(4000) - xRe(2320);
+        if (tw > 14) { ctx.fillStyle = '#b45309'; ctx.fillText('PRIJ.', xRe(2320) + tw/2, P.t + 16); }
+        ctx.fillStyle = '#b91c1c'; ctx.textAlign = 'left';
+        ctx.fillText('TURBULENTNO', xRe(5500), P.t + 16);
+    }
+
+    function plotCurves() {
+        /* laminar line: dashed dark amber */
+        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2.4; ctx.setLineDash([8,5]);
+        ctx.beginPath(); var ls = false;
+        for (var rL = 700; rL <= 2330; rL += 12) {
+            var lL = 64/rL;
+            if (lL < 0.0079 || lL > 0.121) continue;
+            var xL = xRe(rL), yL = yLam(lL);
+            if (!ls) { ctx.moveTo(xL,yL); ls=true; } else ctx.lineTo(xL,yL);
+        }
+        ctx.stroke(); ctx.setLineDash([]);
+
+        /* turbulent curves */
+        KD_CURVES.forEach(function(kd, idx) {
+            ctx.strokeStyle = KD_COLORS[idx];
+            ctx.lineWidth   = kd === 0 ? 2.4 : 1.7;
+            ctx.beginPath(); var ok = false;
+            var rStart = kd === 0 ? 2320 : 2800;
+            for (var logR = Math.log10(rStart); logR <= 8.002; logR += 0.016) {
+                var r = Math.pow(10, logR);
+                var l = solveLambda(r, kd === 0 ? 1e-12 : kd);
+                if (l < 0.0079 || l > 0.121) { ok = false; continue; }
+                var xc = xRe(r), yc = yLam(l);
+                if (!ok) { ctx.moveTo(xc,yc); ok=true; } else ctx.lineTo(xc,yc);
+            }
+            ctx.stroke();
+
+            /* k/D label */
+            if (kd > 0) {
+                var sR = 5.5e7, sL = solveLambda(sR, kd);
+                if (sL >= 0.0079 && sL <= 0.121) {
+                    var ly = yLam(sL);
+                    if (ly > P.t+8 && ly < P.b-3) {
+                        ctx.save();
+                        ctx.fillStyle = KD_COLORS[idx];
+                        ctx.font = '600 10px Inter,sans-serif'; ctx.textAlign = 'left';
+                        ctx.fillText(fmtKd(kd), P.r + 4, ly + 3);
+                        ctx.restore();
+                    }
+                }
             }
         });
     }
 
-    function update() {
-        const logRe = parseFloat(reS.value);
-        const re = Math.pow(10, logRe);
-        const kd = Math.pow(10, parseFloat(kdS.value));
-        const lambda = solveLambda(re, kd);
-        const regime = classifyRegime(re);
+    function drawPoint(re, lam, regime) {
+        var x = xRe(re), y = yLam(lam);
+        var rc = regime === 'lam' ? '#16a34a' : regime === 'trans' ? '#d97706' : '#dc2626';
 
-        document.getElementById('v13-v-re').textContent = logRe.toFixed(2);
-        document.getElementById('v13-v-kd').textContent = formatKd(kd);
-        document.getElementById('v13-res-lambda').textContent = lambda.toFixed(4);
-        document.getElementById('v13-res-regime').textContent = regime.label;
-        document.getElementById('v13-re-card').textContent = re.toExponential(2);
-        document.getElementById('v13-rule-card').textContent = regime.rule;
-        document.getElementById('v13-kd-card').textContent = formatKd(kd);
-        document.getElementById('v13-explainer').textContent = `Za Re ≈ ${re.toExponential(2)} i k/D = ${formatKd(kd)} nalaziš se u ${regime.label} području. Zato se λ očitava kao ${lambda.toFixed(4)}, pri čemu je pravilo ${regime.rule}. Pomak točke udesno znači jače inercijske učinke, a pomak prema gore veći otpor trenja.`;
+        /* crosshair: subtle dark on light */
+        ctx.strokeStyle = 'rgba(15,23,42,0.18)';
+        ctx.lineWidth = 1; ctx.setLineDash([5,5]);
+        ctx.beginPath(); ctx.moveTo(x, P.b); ctx.lineTo(x, y); ctx.lineTo(P.l, y); ctx.stroke();
+        ctx.setLineDash([]);
 
-        draw(re, kd, lambda, regime);
+        /* glow ring */
+        var g = ctx.createRadialGradient(x, y, 0, x, y, 22);
+        g.addColorStop(0, rc + '45'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, 22, 0, 2*Math.PI); ctx.fill();
+
+        /* dot */
+        ctx.fillStyle = rc;
+        ctx.beginPath(); ctx.arc(x, y, 7, 0, 2*Math.PI); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; ctx.stroke();
+        ctx.strokeStyle = rc; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(x, y, 7, 0, 2*Math.PI); ctx.stroke();
+
+        /* annotation bubble: light card */
+        var bx = x + (x > P.r - 145 ? -150 : 14);
+        var by = y + (y < P.t + 55 ? 12 : -46);
+        ctx.fillStyle = 'rgba(248,250,252,0.97)';
+        ctx.beginPath(); ctx.roundRect(bx, by, 138, 40, 8); ctx.fill();
+        ctx.strokeStyle = rc; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#334155'; ctx.font = '600 11px Inter,sans-serif';
+        ctx.fillText('Re = ' + fmtRe(re), bx + 8, by + 14);
+        ctx.fillStyle = rc; ctx.font = '700 12px Inter,sans-serif';
+        ctx.fillText('\u03bb = ' + lam.toFixed(4), bx + 8, by + 30);
     }
 
-    reS.oninput = update;
-    kdS.oninput = update;
+    /* ── Decision tree ── */
+    function setOn(id, on) {
+        var el = document.getElementById(id);
+        if (el) el.classList.toggle('m13-on', on);
+    }
+    function updateTree(regime, sub) {
+        setOn('m13-b-lam',    regime === 'lam');
+        setOn('m13-b-trans',  regime === 'trans');
+        setOn('m13-b-turb',   regime === 'turb');
+        setOn('m13-b-smooth', regime === 'turb' && sub === 'smooth');
+        setOn('m13-b-cb',     regime === 'turb' && sub === 'cb');
+        setOn('m13-b-rough',  regime === 'turb' && sub === 'rough');
+    }
+    function explainerText(re, kd, lam, regime, sub) {
+        if (regime === 'lam')
+            return 'Re\u00a0=\u00a0' + re.toExponential(2) + '\u00a0<\u00a02\u202f320 \u2192 laminarno. \u03bb\u00a0=\u00a064/Re\u00a0=\u00a0' + lam.toFixed(4) + '. Profil brzine: parabola (Hagen\u2013Poiseuille). Dijagram nije potreban.';
+        if (regime === 'trans')
+            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ' u prijelaznom podr\u016fcju (2\u202f320\u2013\u20224\u202f000). Strujanje nestabilno, \u03bb nije pouzdano definiran. Uzeti konzervativnu vrijednost ili redizajnirati sustav.';
+        if (sub === 'smooth')
+            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + '\u00a0\u2192 turbulentno, hidrauli\u010dki glatka cijev. Blasius: \u03bb\u00a0=\u00a00.316\u00b7Re\u207b\u2070\u02d9\u00b2\u2075\u00a0=\u00a0' + lam.toFixed(4) + '. Hrapavost skrivena u viskoznom podsloju.';
+        if (sub === 'rough')
+            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + '\u00a0\u2192 potpuno hrapavo turbulentno. Kvadratni zakon: \u03bb ovisi SAMO o k/D. 1/\u221a\u03bb\u00a0=\u00a0\u22122\u00b7log(k/D\u00a0/\u00a03.71), \u03bb\u00a0\u2248\u00a0' + lam.toFixed(4) + '.';
+        return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + '\u00a0\u2192 prijelazno turbulentno. \u03bb\u00a0=\u00a0' + lam.toFixed(4) + '. Koristiti Colebrook\u2013White ili Moodyjev dijagram. Swamee\u2013Jain: eksplicitna aproksimacija (<\u00a03\u00a0% gre\u0161ke).';
+    }
+
+    /* ── Update ── */
+    function update() {
+        var logRe = parseFloat(reSlider.value);
+        var re    = Math.pow(10, logRe);
+        var kd    = Math.pow(10, parseFloat(kdSlider.value));
+        var lam   = solveLambda(re, kd);
+        var regime = re < 2320 ? 'lam' : re < 4000 ? 'trans' : 'turb';
+        var sub    = regime === 'turb' ? turbSub(re, kd, lam) : null;
+
+        document.getElementById('v13-v-re').textContent       = logRe.toFixed(2);
+        document.getElementById('v13-v-kd').textContent       = fmtKd(kd);
+        document.getElementById('v13-res-lambda').textContent = lam.toFixed(4);
+        document.getElementById('v13-re-card').textContent    = re.toExponential(2);
+        document.getElementById('v13-kd-card').textContent    = fmtKd(kd);
+        document.getElementById('v13-explainer-box').textContent = explainerText(re, kd, lam, regime, sub);
+
+        updateTree(regime, sub);
+
+        ctx.clearRect(0, 0, W, H);
+        drawGrid();
+        drawLabels();
+        plotCurves();
+        drawPoint(re, lam, regime);
+    }
+
+    reSlider.oninput = update;
+    kdSlider.oninput = update;
+    update();
+})();
+</script>
+<script type="text/plain">
+        if (ksp > 70)              return 'rough';
+        return 'cb';
+    }
+
+    /* ── Coordinate helpers ── */
+    function xRe(re)     { return P.l + (Math.log10(re) - 3) / 5 * (P.r - P.l); }
+    function yLam(lam)   {
+        var logMin = Math.log10(0.0079), logMax = Math.log10(0.121);
+        return P.t + (logMax - Math.log10(lam)) / (logMax - logMin) * (P.b - P.t);
+    }
+
+    function fmtKd(kd) {
+        if (kd >= 0.01)    return kd.toFixed(3);
+        if (kd >= 0.001)   return kd.toFixed(4);
+        if (kd >= 0.0001)  return kd.toFixed(5);
+        return kd.toExponential(1);
+    }
+    function fmtRe(re) {
+        if (re >= 1e7) return (re/1e7).toFixed(1)+'\xd710\u2077';
+        if (re >= 1e6) return (re/1e6).toFixed(2)+'\xd710\u2076';
+        if (re >= 1e5) return (re/1e5).toFixed(2)+'\xd710\u2075';
+        if (re >= 1e4) return (re/1e4).toFixed(1)+'\xd710\u2074';
+        return re.toFixed(0);
+    }
+
+    /* ── Draw helpers ── */
+    function drawGrid() {
+        /* background */
+        ctx.fillStyle = '#070d1a';
+        ctx.fillRect(0, 0, W, H);
+
+        /* zone fills */
+        ctx.fillStyle = 'rgba(34,197,94,0.09)';
+        ctx.fillRect(P.l, P.t, xRe(2320) - P.l, P.b - P.t);
+        ctx.fillStyle = 'rgba(245,158,11,0.11)';
+        ctx.fillRect(xRe(2320), P.t, xRe(4000) - xRe(2320), P.b - P.t);
+
+        /* zone boundary dashes */
+        ctx.setLineDash([5,5]);
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = 'rgba(74,222,128,0.45)';
+        ctx.beginPath(); ctx.moveTo(xRe(2320), P.t); ctx.lineTo(xRe(2320), P.b); ctx.stroke();
+        ctx.strokeStyle = 'rgba(251,191,36,0.55)';
+        ctx.beginPath(); ctx.moveTo(xRe(4000), P.t); ctx.lineTo(xRe(4000), P.b); ctx.stroke();
+        ctx.setLineDash([]);
+
+        /* Re grid */
+        for (var dec = 3; dec <= 8; dec++) {
+            for (var m = 1; m <= 9; m++) {
+                var re = m * Math.pow(10, dec);
+                if (re > 1e8) break;
+                var x = xRe(re);
+                ctx.strokeStyle = m === 1 ? 'rgba(148,163,184,0.28)' : 'rgba(148,163,184,0.09)';
+                ctx.lineWidth   = m === 1 ? 0.9 : 0.5;
+                ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.b); ctx.stroke();
+            }
+        }
+
+        /* λ grid */
+        var lambdaTicks  = [0.008,0.009,0.01,0.012,0.015,0.02,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.12];
+        var lambdaLabels = [0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1];
+        lambdaTicks.forEach(function(t) {
+            if (t < 0.0079 || t > 0.121) return;
+            var y = yLam(t);
+            var major = lambdaLabels.indexOf(t) >= 0;
+            ctx.strokeStyle = major ? 'rgba(148,163,184,0.26)' : 'rgba(148,163,184,0.09)';
+            ctx.lineWidth   = major ? 0.9 : 0.5;
+            ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(P.r, y); ctx.stroke();
+        });
+
+        /* border */
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(P.l, P.t, P.r - P.l, P.b - P.t);
+    }
+
+    function drawLabels() {
+        /* Re axis */
+        ctx.textAlign = 'center';
+        for (var dec = 3; dec <= 8; dec++) {
+            var x = xRe(Math.pow(10, dec));
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '600 12px Inter,sans-serif';
+            ctx.fillText('10', x - 7, P.b + 20);
+            ctx.font = '600 9px Inter,sans-serif';
+            ctx.fillText(String(dec), x + 6, P.b + 16);
+        }
+
+        /* λ axis */
+        var lbls = [0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1];
+        ctx.textAlign = 'right';
+        ctx.font = '600 11px Inter,sans-serif';
+        lbls.forEach(function(t) {
+            var y = yLam(t);
+            ctx.fillStyle = '#94a3b8';
+            var s = t < 0.01 ? t.toFixed(3) : t < 0.1 ? t.toFixed(2) : t.toFixed(1);
+            ctx.fillText(s, P.l - 7, y + 4);
+        });
+
+        /* axis titles */
+        ctx.fillStyle = '#cbd5e1'; ctx.font = '700 13px Inter,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('Reynoldsov broj  Re', P.l + (P.r - P.l) / 2, H - 20);
+        ctx.save();
+        ctx.translate(16, P.t + (P.b - P.t) / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('Koeficijent trenja  \u03bb', 0, 0);
+        ctx.restore();
+
+        /* zone labels */
+        ctx.font = '700 11px Inter,sans-serif'; ctx.textAlign = 'center';
+        var lw = xRe(2320) - P.l;
+        if (lw > 20) { ctx.fillStyle = 'rgba(74,222,128,0.90)'; ctx.fillText('LAM.', P.l + lw/2, P.t + 17); }
+        var tw = xRe(4000) - xRe(2320);
+        if (tw > 15) { ctx.fillStyle = 'rgba(251,191,36,0.90)'; ctx.fillText('PRIJ.', xRe(2320) + tw/2, P.t + 17); }
+        ctx.fillStyle = 'rgba(248,113,113,0.82)'; ctx.textAlign = 'left';
+        ctx.fillText('TURBULENTNO', xRe(5500), P.t + 17);
+    }
+
+    function plotCurves() {
+        /* laminar line */
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.6; ctx.setLineDash([7,5]);
+        ctx.beginPath();
+        var lamStarted = false;
+        for (var reLam = 700; reLam <= 2330; reLam += 14) {
+            var lam = 64 / reLam;
+            if (lam < 0.0079 || lam > 0.121) continue;
+            var x = xRe(reLam), y = yLam(lam);
+            if (!lamStarted) { ctx.moveTo(x, y); lamStarted = true; } else ctx.lineTo(x, y);
+        }
+        ctx.stroke(); ctx.setLineDash([]);
+
+        /* turbulent curves */
+        KD_CURVES.forEach(function(kd, idx) {
+            ctx.strokeStyle = KD_COLORS[idx];
+            ctx.lineWidth   = kd === 0 ? 2.4 : 1.6;
+            ctx.beginPath();
+            var started = false;
+            var reStart = kd === 0 ? 2320 : 2800;
+            for (var logRe = Math.log10(reStart); logRe <= 8.002; logRe += 0.016) {
+                var re  = Math.pow(10, logRe);
+                var lambda = solveLambda(re, kd === 0 ? 1e-12 : kd);
+                if (lambda < 0.0079 || lambda > 0.121) { started = false; continue; }
+                var xc = xRe(re), yc = yLam(lambda);
+                if (!started) { ctx.moveTo(xc, yc); started = true; } else ctx.lineTo(xc, yc);
+            }
+            ctx.stroke();
+
+            /* k/D label on right margin */
+            if (kd > 0) {
+                var sRe = 5.5e7;
+                var sL  = solveLambda(sRe, kd);
+                if (sL >= 0.0079 && sL <= 0.121) {
+                    var ly = yLam(sL);
+                    if (ly > P.t + 10 && ly < P.b - 4) {
+                        ctx.save();
+                        ctx.fillStyle = KD_COLORS[idx];
+                        ctx.font = '600 10px Inter,sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(fmtKd(kd), P.r + 5, ly + 3);
+                        ctx.restore();
+                    }
+                }
+            }
+        });
+    }
+
+    function drawPoint(re, lam, regime, sub) {
+        var x = xRe(re), y = yLam(lam);
+        var regColor = regime === 'lam' ? '#4ade80' : regime === 'trans' ? '#fbbf24' : '#f87171';
+
+        /* crosshair */
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1; ctx.setLineDash([5,5]);
+        ctx.beginPath(); ctx.moveTo(x, P.b); ctx.lineTo(x, y); ctx.lineTo(P.l, y); ctx.stroke();
+        ctx.setLineDash([]);
+
+        /* glow */
+        var g = ctx.createRadialGradient(x, y, 0, x, y, 20);
+        g.addColorStop(0, regColor + '55'); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, 20, 0, 2*Math.PI); ctx.fill();
+
+        /* dot */
+        ctx.fillStyle = regColor;
+        ctx.beginPath(); ctx.arc(x, y, 7, 0, 2*Math.PI); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+
+        /* annotation bubble */
+        var bx = x + (x > P.r - 140 ? -148 : 14);
+        var by = y + (y < P.t + 54 ? 14 : -46);
+        ctx.fillStyle = 'rgba(7,13,26,0.90)';
+        ctx.beginPath(); ctx.roundRect(bx, by, 136, 40, 7); ctx.fill();
+        ctx.strokeStyle = regColor; ctx.lineWidth = 1.2; ctx.stroke();
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#e2e8f0'; ctx.font = '600 11px Inter,sans-serif';
+        ctx.fillText('Re = ' + fmtRe(re), bx + 8, by + 14);
+        ctx.fillStyle = '#fbbf24'; ctx.font = '700 11px Inter,sans-serif';
+        ctx.fillText('\u03bb = ' + lam.toFixed(4), bx + 8, by + 29);
+    }
+
+    /* ── Decision tree state ── */
+    function setOn(id, on) {
+        var el = document.getElementById(id);
+        if (el) el.classList.toggle('m13-on', on);
+    }
+
+    function updateTree(regime, sub) {
+        setOn('m13-b-lam',    regime === 'lam');
+        setOn('m13-b-trans',  regime === 'trans');
+        setOn('m13-b-turb',   regime === 'turb');
+        setOn('m13-b-smooth', regime === 'turb' && sub === 'smooth');
+        setOn('m13-b-cb',     regime === 'turb' && sub === 'cb');
+        setOn('m13-b-rough',  regime === 'turb' && sub === 'rough');
+    }
+
+    function explainerText(re, kd, lam, regime, sub) {
+        if (regime === 'lam')
+            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ' < 2\u202f320 \u2192 laminarno strujanje. Formula: \u03bb = 64/Re = ' + lam.toFixed(4) + '. Profil brzine: parabola (Hagen\u2013Poiseuille). Dijagram nije potreban.';
+        if (regime === 'trans')
+            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ' je u prijelaznom podr\u00fcuju (2\u202f320\u2013\u00202\u202f000). Strujanje nestabilno, \u03bb nije pouzdano definiran. Inženjerska praksa: uzeti konzervativnu vrijednost ili redizajnirati sustav.';
+        if (sub === 'smooth')
+            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D = ' + fmtKd(kd) + ' \u2192 turbulentno, hidrauli\u010dki glatka cijev. Blasius: \u03bb\u00a0=\u00a00.316\u00b7Re\u207b\u2070\u02d9\u00b2\u2075 = ' + lam.toFixed(4) + '. Hrapavost je skrivena u viskoznom podsloju \u2014 k/D gotovo ne utje\u010de na \u03bb.';
+        if (sub === 'rough')
+            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + ' \u2192 potpuno hrapavo turbulentno. Kvadratni zakon otpora: \u03bb ovisi SAMO o k/D. Pove\u0107anje brzine vi\u0161e ne mijenja \u03bb. 1/\u221a\u03bb = \u22122\u00b7log(k/D / 3.71), \u03bb\u00a0\u2248\u00a0' + lam.toFixed(4) + '.';
+        return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + ' \u2192 prijelazno turbulentno. \u03bb ovisi i o Re i o k/D \u2014 Colebrook\u2013White ili Moodyjev dijagram. \u03bb\u00a0=\u00a0' + lam.toFixed(4) + '. Swamee\u2013Jain daje eksplicitnu aproksimaciju s gre\u0161kom < 3\u00a0%.';
+    }
+
+    /* ── Main update ── */
+    function update() {
+        var logRe = parseFloat(reSlider.value);
+        var re    = Math.pow(10, logRe);
+        var kd    = Math.pow(10, parseFloat(kdSlider.value));
+        var lam   = solveLambda(re, kd);
+        var regime = re < 2320 ? 'lam' : re < 4000 ? 'trans' : 'turb';
+        var sub    = regime === 'turb' ? turbSubregime(re, kd, lam) : null;
+
+        document.getElementById('v13-v-re').textContent      = logRe.toFixed(2);
+        document.getElementById('v13-v-kd').textContent      = fmtKd(kd);
+        document.getElementById('v13-re-card').textContent   = re.toExponential(2);
+        document.getElementById('v13-kd-card').textContent   = fmtKd(kd);
+        document.getElementById('v13-res-lambda').textContent = lam.toFixed(4);
+        document.getElementById('v13-explainer-box').textContent = explainerText(re, kd, lam, regime, sub);
+
+        updateTree(regime, sub);
+
+        ctx.clearRect(0, 0, W, H);
+        drawGrid();
+        drawLabels();
+        plotCurves();
+        drawPoint(re, lam, regime, sub);
+    }
+
+    reSlider.oninput = update;
+    kdSlider.oninput = update;
     update();
 })();
 </script>
@@ -733,9 +1262,9 @@ Moodyjev dijagram je ključni alat u mehanici fluida za određivanje koeficijent
     <div class="z120-shell">
         <div class="z120-head">
             <div>
-                <div class="z120-kicker">Z120 laminarni gubici</div>
-                <h4 class="z120-title">Temperatura ovdje ne djeluje izravno na pad tlaka nego prvo mijenja viskoznost, a tek onda cijeli lanac otpora</h4>
-                <p class="z120-sub">Widget sada prvo pokazuje cijev i usporedbu ulaznog i izlaznog tlaka, zatim sažetak stanja `Re`, `Δp` i `h_w`, a tek ispod kontrole i mikrometrike `μ` i `λ`. Time je važniji uzročno-posljedični redoslijed `T -> μ -> Re -> λ -> Δp` vidljiv bez prekrivanja scene.</p>
+                <div class="z120-kicker">Laminarni gubici tlaka — Hagen–Poiseuille</div>
+                <h4 class="z120-title">Laminarno strujanje u cijevi: kako temperatura utječe na pad tlaka</h4>
+                <p class="z120-sub">Podesi temperaturu i brzinu — simulator prikazuje laminarno strujanje i izračunava pad tlaka putem lanca T &rarr; &mu; &rarr; Re &rarr; &lambda; &rarr; &Delta;p.</p>
             </div>
             <div class="z120-chip">T -> μ -> Re -> λ -> Δp</div>
         </div>

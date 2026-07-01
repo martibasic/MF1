@@ -656,6 +656,8 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
 
 <hr class="zadatak-sep">
 
+<hr class='zadatak-sep'>
+
 ### Zadatak Z50 — Potopljena četvrtina kruga (2500 SPFM – 5.1) {.unnumbered}
 
 Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\text{ m}$. Duljina spremnika je $b=1,83\text{ m}$.
@@ -1028,11 +1030,352 @@ Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\
 
 <hr class="zadatak-sep">
 
+<hr class='zadatak-sep'>
+
+### Zadatak Z55 — Potopljeni naopaki cilindar (CENGEL 3.151) {.unnumbered}
+
+Cilindrični spremnik težine $G=79\text{ [N]}$ djelomično je potopljen. Potrebno je odrediti visinu stupca u manometru ($h_1$) i silu $F$ potrebnu da spremnik ostane u tom položaju.
+
+<div class="zadano-grid">
+<div class="zadano-row">
+<span class="label">Zadano</span>
+<span class="zadano-text">$G = 79\text{ N}$, $h_2 = 0,2\text{ m}$, $D = 0,3\text{ m}$, $\rho_v = 1000\text{ kg/m}^3$, $\bar{\rho}_{mf} = 2,1$</span>
+</div>
+<div class="zadano-row">
+<span class="label">Odrediti</span>
+<span class="zadano-text">visinu stupca u manometru ($h_1$) i silu $F$ potrebnu da spremnik ostane u tom položaju</span>
+</div>
+</div>
+<div class="rjesenje-label">Rješenje</div>
+
+1.  **Tlak u cilindru ($p_m$):**
+    Budući da je razina vode u cilindru niža za $h_2$ od razine vani, unutar cilindra vlada pretlak koji drži tu razinu.
+    *   $p_m = \rho_v \cdot g \cdot h_2 = 1000 \cdot 9,81 \cdot 0,2 = \mathbf{1962\text{ Pa}}$.
+
+2.  **Visina manometra ($h_1$):**
+    Taj isti pretlak $p_m$ djeluje na manometar s fluidom gustoće $\rho_{mf} = 2,1 \cdot 1000 = 2100\text{ kg/m}^3$.
+    *   $p_m = \rho_{mf} \cdot g \cdot h_1 \implies h_1 = \frac{1962}{2100 \cdot 9,81} = \mathbf{0,095\text{ m}}$.
+
+3.  **Sila zadržavanja ($F$):**
+    Postavljamo ravnotežu sila u vertikalnom smjeru. Na spremnik djeluje vanjska sila $F$ prema dolje, težina $G$ prema dolje, a tlak zraka $p_m$ gura odozdo prema gore na gornju bazu cilindra (površina $A_c$).
+    *   $F + G = p_m \cdot A_c$
+    *   $F = p_m \cdot \frac{D^2 \pi}{4} - G = 1962 \cdot \frac{0,3^2 \pi}{4} - 79 = \mathbf{59,7\text{ N}}$.
+
+**Zaključak:** Sila $F$ je pozitivna, što znači da moramo pritiskati spremnik prema dolje kako bi on ostao potopljen na toj dubini, jer ga tlak zarobljenog zraka "gura" van poput plovka.
+
+<hr class="widget-sep">
+<div class="widget-label">⚙ Interaktivni simulator</div>
+
+```{=html}
+<!-- ZADATAK 55: OBRNUTI CILINDAR S MANOMETROM (UNAPRIJEĐENI) -->
+<div class="widget-container" id="widget-55" style="
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    max-width: 950px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 25px 35px; color: white;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; color: white; border: none; background: none; padding: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.025em;">
+                    55. Obrnuti cilindrični spremnik
+                </h3>
+                <p style="margin: 6px 0 0 0; opacity: 0.7; font-size: 0.95rem;">Analiza tlaka zarobljenog zraka i manometrije</p>
+            </div>
+            <button id="push-btn-55" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.2s;">
+                ↓ Potisni dublje
+            </button>
+        </div>
+    </div>
+
+    <div style="padding: 30px; background: white; display: flex; flex-direction: column; gap: 20px;">
+        <!-- Controls -->
+        <div style="background: #f8fafc; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; order: 2;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; align-items: start;">
+                
+                <div class="control-group">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem; text-transform: uppercase;">Težina (G)</label>
+                        <span id="g-val-55" style="color: #2563eb; font-weight: 700; font-family: monospace;">79 N</span>
+                    </div>
+                    <input type="range" id="g-slider-55" min="20" max="150" step="1" value="79" style="width: 100%; accent-color: #2563eb;">
+                </div>
+
+                <div class="control-group">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem; text-transform: uppercase;">Promjer (D)</label>
+                        <span id="d-val-55" style="color: #2563eb; font-weight: 700; font-family: monospace;">0.3 m</span>
+                    </div>
+                    <input type="range" id="d-slider-55" min="0.1" max="0.5" step="0.01" value="0.3" style="width: 100%; accent-color: #2563eb;">
+                </div>
+
+                <div class="control-group">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem; text-transform: uppercase;">Dubina (h₂)</label>
+                        <span id="h2-val-55" style="color: #2563eb; font-weight: 700; font-family: monospace;">0.2 m</span>
+                    </div>
+                    <input type="range" id="h2-slider-55" min="0.05" max="0.4" step="0.01" value="0.2" style="width: 100%; accent-color: #2563eb;">
+                </div>
+
+                <div class="control-group">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem; text-transform: uppercase;">Rel. gustoća (ρ_mf)</label>
+                        <span id="rhomf-val-55" style="color: #2563eb; font-weight: 700; font-family: monospace;">2.1</span>
+                    </div>
+                    <input type="range" id="rhomf-slider-55" min="1.5" max="3.0" step="0.1" value="2.1" style="width: 100%; accent-color: #2563eb;">
+                </div>
+
+                <!-- Metrics -->
+                <div style="padding: 20px; background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); grid-column: 1 / -1;">
+                    <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">Proračun manometra</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 0.85rem; color: #64748b;">Pretlak p<sub>air</sub>:</span>
+                        <span id="pm-res-55" style="font-weight: 700; color: #1e293b;">... Pa</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 0.85rem; color: #64748b;">Visina h<sub>1</sub>:</span>
+                        <span id="h1-res-55" style="font-weight: 700; color: #f97316;">... m</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">Potrebna sila F:</span>
+                        <span id="f-res-55" style="font-weight: 800; color: #ef4444;">... N</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization -->
+        <div style="display: flex; flex-direction: column; gap: 20px; order: 1;">
+            <div style="position: relative; width: 100%; height: 420px; background: #fdfdfd; border-radius: 20px; border: 1px solid #f1f5f9; overflow: hidden;">
+                <canvas id="canvas-55" width="600" height="420" style="width: 100%; height: 100%;"></canvas>
+                
+                <!-- Equations Overlay -->
+                <div style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); font-size: 0.75rem; color: #334155;">
+                    <div style="font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Ravnoteža sila</div>
+                    <div style="font-family: serif; font-style: italic; font-size: 0.95rem;">F + G = p<sub>air</sub> · A<sub>c</sub></div>
+                    <div style="margin-top: 10px; font-family: serif; font-style: italic; font-size: 0.95rem;">h<sub>1</sub> = (ρ<sub>v</sub> / ρ<sub>mf</sub>) · h<sub>2</sub></div>
+                </div>
+            </div>
+
+            <div style="padding: 18px 20px; background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%); border: 1px solid #fed7aa; border-radius: 16px;">
+                <p style="margin: 0; font-size: 0.85rem; color: #9a3412; line-height: 1.4;">
+                    <b>Napomena:</b> Sila F je potrebna jer tlak zraka u unutrašnjosti "gura" gornju stijenku cilindra prema gore jače nego što je težina cilindra prema dolje.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const gS = document.getElementById('g-slider-55');
+    const dS = document.getElementById('d-slider-55');
+    const h2S = document.getElementById('h2-slider-55');
+    const rmS = document.getElementById('rhomf-slider-55');
+    const pushBtn = document.getElementById('push-btn-55');
+
+    const canvas = document.getElementById('canvas-55');
+    const ctx = canvas.getContext('2d');
+
+    let isAnimating = false;
+
+    function update() {
+        const G = parseFloat(gS.value);
+        const D = parseFloat(dS.value);
+        const h2 = parseFloat(h2S.value);
+        const rho_mf_rel = parseFloat(rmS.value);
+        const rho_v = 1000;
+        const g = 9.81;
+
+        document.getElementById('g-val-55').innerText = G + ' N';
+        document.getElementById('d-val-55').innerText = D.toFixed(2) + ' m';
+        document.getElementById('h2-val-55').innerText = h2.toFixed(2) + ' m';
+        document.getElementById('rhomf-val-55').innerText = rho_mf_rel.toFixed(1);
+
+        // Physics
+        const pm = rho_v * g * h2;
+        const h1 = pm / (rho_mf_rel * rho_v * g);
+        const Ac = (Math.PI * D * D) / 4;
+        const F = pm * Ac - G;
+
+        document.getElementById('pm-res-55').innerText = pm.toFixed(0) + ' Pa';
+        document.getElementById('h1-res-55').innerText = h1.toFixed(3) + ' m';
+        document.getElementById('f-res-55').innerText = F.toFixed(1) + ' N';
+        document.getElementById('f-res-55').style.color = F >= 0 ? '#ef4444' : '#0f766e';
+
+        render(G, D, h2, h1, F, pm);
+    }
+
+    function render(G, D, h2, h1, F, pm) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const scale = 500; 
+        const centerX = 220;
+        const waterY = 100;
+        
+        // Water tank
+        ctx.fillStyle = "#ebf5fb";
+        ctx.fillRect(50, waterY, 350, 300);
+        ctx.strokeStyle = "#3498db";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(50, waterY); ctx.lineTo(400, waterY); ctx.stroke();
+        ctx.fillStyle = "#2563eb";
+        ctx.font = "12px Inter";
+        ctx.fillText("vanjska razina vode", 58, waterY - 8);
+
+        // Cylinder
+        const cylW = D * scale;
+        const cylH = 150;
+        const cylTopY = waterY + 50 - (h2*scale)/4; // Simplified movement
+        const airLevelY = waterY + h2 * scale;
+        const innerWaterY = airLevelY;
+
+        // Container Walls
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(centerX - cylW/2, cylTopY, cylW, cylH);
+        ctx.fillStyle = "rgba(148, 163, 184, 0.2)";
+        ctx.fillRect(centerX - cylW/2, cylTopY, cylW, innerWaterY - cylTopY);
+        ctx.fillStyle = "rgba(14, 165, 233, 0.25)";
+        ctx.fillRect(centerX - cylW/2, innerWaterY, cylW, cylTopY + cylH - innerWaterY);
+        ctx.strokeStyle = "#0ea5e9";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX - cylW/2, innerWaterY);
+        ctx.lineTo(centerX + cylW/2, innerWaterY);
+        ctx.stroke();
+
+        // Manometer Connection
+        ctx.beginPath();
+        ctx.moveTo(centerX + cylW/2, cylTopY + 20);
+        ctx.lineTo(450, cylTopY + 20);
+        ctx.lineTo(450, 250);
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 8;
+        ctx.stroke();
+
+        // U-Tube Manometer
+        ctx.beginPath();
+        ctx.moveTo(450, 250);
+        ctx.lineTo(450, 350);
+        ctx.arc(480, 350, 30, Math.PI, 0, true);
+        ctx.lineTo(510, 200);
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 12;
+        ctx.stroke();
+
+        // Manometer Fluid (Orange)
+        const mBaseY = 350;
+        const mLeftLevel = mBaseY - 30; // arbitrary base
+        const mRightLevel = mLeftLevel - h1 * scale;
+
+        ctx.strokeStyle = "#f97316";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(450, 250 + (250-mLeftLevel)); // Fill from top connection down
+        ctx.lineTo(450, 350);
+        ctx.arc(480, 350, 30, Math.PI, 0, true);
+        ctx.lineTo(510, mRightLevel);
+        ctx.stroke();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = "#f97316";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(430, mLeftLevel);
+        ctx.lineTo(535, mLeftLevel);
+        ctx.moveTo(430, mRightLevel);
+        ctx.lineTo(535, mRightLevel);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Force Arrows
+        // Weight G
+        drawArrow(ctx, centerX - 20, cylTopY + 30, centerX - 20, cylTopY + 80, "#2563eb", 3);
+        ctx.fillStyle = "#2563eb"; ctx.font = "bold 12px Inter"; ctx.fillText("G", centerX - 35, cylTopY + 60);
+
+        // Force F
+        if (F > 0) {
+            drawArrow(ctx, centerX + 20, cylTopY - 60, centerX + 20, cylTopY - 5, "#ef4444", 3);
+            ctx.fillStyle = "#ef4444"; ctx.fillText("F", centerX + 30, cylTopY - 30);
+        } else {
+            drawArrow(ctx, centerX + 20, cylTopY - 5, centerX + 20, cylTopY - 60, "#0f766e", 3);
+            ctx.fillStyle = "#0f766e"; ctx.fillText("F nije potreban", centerX + 30, cylTopY - 30);
+        }
+
+        // Pressure pm (upward)
+        drawArrow(ctx, centerX, airLevelY - 10, centerX, airLevelY - 60, "#10b981", 2);
+        ctx.fillStyle = "#10b981"; ctx.fillText("p_air", centerX + 10, airLevelY - 40);
+        
+        // Labels
+        ctx.fillStyle = "#1e293b";
+        ctx.fillText("h2 = " + h2.toFixed(2) + " m", centerX - cylW/2 - 70, (waterY + airLevelY)/2);
+        ctx.fillText("h1 = " + h1.toFixed(3) + " m", 525, (mLeftLevel + mRightLevel)/2);
+        ctx.fillText("unutarnja razina", centerX - cylW/2 - 10, innerWaterY - 8);
+        ctx.fillText("Δp = ρvg h2 = " + pm.toFixed(0) + " Pa", 54, 386);
+
+        ctx.strokeStyle = "#64748b";
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(centerX - cylW/2 - 20, waterY);
+        ctx.lineTo(centerX - cylW/2 - 20, innerWaterY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawArrow(ctx, centerX - cylW/2 - 20, waterY + 6, centerX - cylW/2 - 20, innerWaterY - 6, "#64748b", 2);
+    }
+
+    function drawArrow(ctx, fromx, fromy, tox, toy, color, width) {
+        const headlen = 10;
+        const angle = Math.atan2(toy - fromy, tox - fromx);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath(); ctx.moveTo(fromx, fromy); ctx.lineTo(tox, toy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tox, toy);
+        ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI/6), toy - headlen * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI/6), toy - headlen * Math.sin(angle + Math.PI/6));
+        ctx.fillStyle = color; ctx.fill();
+    }
+
+    pushBtn.onclick = () => {
+        if (isAnimating) return;
+        isAnimating = true;
+        let targetH2 = 0.4;
+        let startH2 = parseFloat(h2S.value);
+        let step = 0.005;
+        
+        const anim = setInterval(() => {
+            let curr = parseFloat(h2S.value);
+            if (curr < targetH2) {
+                h2S.value = (curr + step).toFixed(3);
+                update();
+            } else {
+                clearInterval(anim);
+                isAnimating = false;
+            }
+        }, 20);
+    };
+
+    [gS, dS, h2S, rmS].forEach(el => el.oninput = update);
+    update();
+})();
+</script>
+</div>
+```
+
+
+## Dodatni primjeri {.unnumbered}
+
 ### Dodatni primjer Z51 — Potopljena četvrtina kruga (voda s desne strane) {.unnumbered}
 
 (Rješenje i analiza su integrirani u gornji interaktivni widget radi lakše usporedbe.)
 
 <hr class="zadatak-sep">
+
+<hr class='zadatak-sep'>
 
 ### Dodatni primjer Z52 — Potopljena zaklopka (šestina isječka kruga) {.unnumbered}
 
@@ -1345,6 +1688,8 @@ Potrebno je odrediti intenzitet i lokaciju horizontalne i vertikalne komponente 
 ```
 
 <hr class="zadatak-sep">
+
+<hr class='zadatak-sep'>
 
 ### Dodatni primjer Z53 — Elastični balon i promjena sile u užetu {.unnumbered}
 
@@ -1695,6 +2040,8 @@ Elastični balon promjera $30 \text{ cm}$ napunjen je zrakom i privezan za dno. 
 
 <hr class="zadatak-sep">
 
+<hr class='zadatak-sep'>
+
 ### Dodatni primjer Z54 — Ledenjak (volumni udio i stabilnost) {.unnumbered}
 
 Potrebno je odrediti volumni udio ledenjaka koji je potopljen u morskoj vodi te objasniti zašto dolazi do prevrtanja ledenjaka.
@@ -2016,336 +2363,3 @@ Potrebno je odrediti volumni udio ledenjaka koji je potopljen u morskoj vodi te 
 
 <hr class="zadatak-sep">
 
-### Zadatak Z55 — Potopljeni naopaki cilindar (CENGEL 3.151) {.unnumbered}
-
-Cilindrični spremnik težine $G=79\text{ [N]}$ djelomično je potopljen. Potrebno je odrediti visinu stupca u manometru ($h_1$) i silu $F$ potrebnu da spremnik ostane u tom položaju.
-
-<div class="zadano-grid">
-<div class="zadano-row">
-<span class="label">Zadano</span>
-<span class="zadano-text">$G = 79\text{ N}$, $h_2 = 0,2\text{ m}$, $D = 0,3\text{ m}$, $\rho_v = 1000\text{ kg/m}^3$, $\bar{\rho}_{mf} = 2,1$</span>
-</div>
-<div class="zadano-row">
-<span class="label">Odrediti</span>
-<span class="zadano-text">visinu stupca u manometru ($h_1$) i silu $F$ potrebnu da spremnik ostane u tom položaju</span>
-</div>
-</div>
-<div class="rjesenje-label">Rješenje</div>
-
-1.  **Tlak u cilindru ($p_m$):**
-    Budući da je razina vode u cilindru niža za $h_2$ od razine vani, unutar cilindra vlada pretlak koji drži tu razinu.
-    *   $p_m = \rho_v \cdot g \cdot h_2 = 1000 \cdot 9,81 \cdot 0,2 = \mathbf{1962\text{ Pa}}$.
-
-2.  **Visina manometra ($h_1$):**
-    Taj isti pretlak $p_m$ djeluje na manometar s fluidom gustoće $\rho_{mf} = 2,1 \cdot 1000 = 2100\text{ kg/m}^3$.
-    *   $p_m = \rho_{mf} \cdot g \cdot h_1 \implies h_1 = \frac{1962}{2100 \cdot 9,81} = \mathbf{0,095\text{ m}}$.
-
-3.  **Sila zadržavanja ($F$):**
-    Postavljamo ravnotežu sila u vertikalnom smjeru. Na spremnik djeluje vanjska sila $F$ prema dolje, težina $G$ prema dolje, a tlak zraka $p_m$ gura odozdo prema gore na gornju bazu cilindra (površina $A_c$).
-    *   $F + G = p_m \cdot A_c$
-    *   $F = p_m \cdot \frac{D^2 \pi}{4} - G = 1962 \cdot \frac{0,3^2 \pi}{4} - 79 = \mathbf{59,7\text{ N}}$.
-
-**Zaključak:** Sila $F$ je pozitivna, što znači da moramo pritiskati spremnik prema dolje kako bi on ostao potopljen na toj dubini, jer ga tlak zarobljenog zraka "gura" van poput plovka.
-
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
-
-```{=html}
-<!-- ZADATAK 55: OBRNUTI CILINDAR S MANOMETROM (UNAPRIJEĐENI) -->
-<div class="widget-container" id="widget-55" style="
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    max-width: 950px;
-    margin: 40px auto;
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    border: 1px solid #f1f5f9;
-">
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 25px 35px; color: white;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3 style="margin: 0; color: white; border: none; background: none; padding: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.025em;">
-                    55. Obrnuti cilindrični spremnik
-                </h3>
-                <p style="margin: 6px 0 0 0; opacity: 0.7; font-size: 0.95rem;">Analiza tlaka zarobljenog zraka i manometrije</p>
-            </div>
-            <button id="push-btn-55" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.2s;">
-                ↓ Potisni dublje
-            </button>
-        </div>
-    </div>
-
-    <div style="padding: 30px; background: white; display: flex; flex-direction: column; gap: 20px;">
-        <!-- Controls -->
-        <div style="background: #f8fafc; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; order: 2;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; align-items: start;">
-                
-                <div class="control-group">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem; text-transform: uppercase;">Težina (G)</label>
-                        <span id="g-val-55" style="color: #2563eb; font-weight: 700; font-family: monospace;">79 N</span>
-                    </div>
-                    <input type="range" id="g-slider-55" min="20" max="150" step="1" value="79" style="width: 100%; accent-color: #2563eb;">
-                </div>
-
-                <div class="control-group">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem; text-transform: uppercase;">Promjer (D)</label>
-                        <span id="d-val-55" style="color: #2563eb; font-weight: 700; font-family: monospace;">0.3 m</span>
-                    </div>
-                    <input type="range" id="d-slider-55" min="0.1" max="0.5" step="0.01" value="0.3" style="width: 100%; accent-color: #2563eb;">
-                </div>
-
-                <div class="control-group">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem; text-transform: uppercase;">Dubina (h₂)</label>
-                        <span id="h2-val-55" style="color: #2563eb; font-weight: 700; font-family: monospace;">0.2 m</span>
-                    </div>
-                    <input type="range" id="h2-slider-55" min="0.05" max="0.4" step="0.01" value="0.2" style="width: 100%; accent-color: #2563eb;">
-                </div>
-
-                <div class="control-group">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <label style="font-weight: 700; color: #475569; font-size: 0.75rem; text-transform: uppercase;">Rel. gustoća (ρ_mf)</label>
-                        <span id="rhomf-val-55" style="color: #2563eb; font-weight: 700; font-family: monospace;">2.1</span>
-                    </div>
-                    <input type="range" id="rhomf-slider-55" min="1.5" max="3.0" step="0.1" value="2.1" style="width: 100%; accent-color: #2563eb;">
-                </div>
-
-                <!-- Metrics -->
-                <div style="padding: 20px; background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); grid-column: 1 / -1;">
-                    <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">Proračun manometra</div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; color: #64748b;">Pretlak p<sub>air</sub>:</span>
-                        <span id="pm-res-55" style="font-weight: 700; color: #1e293b;">... Pa</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; color: #64748b;">Visina h<sub>1</sub>:</span>
-                        <span id="h1-res-55" style="font-weight: 700; color: #f97316;">... m</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
-                        <span style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">Potrebna sila F:</span>
-                        <span id="f-res-55" style="font-weight: 800; color: #ef4444;">... N</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Visualization -->
-        <div style="display: flex; flex-direction: column; gap: 20px; order: 1;">
-            <div style="position: relative; width: 100%; height: 420px; background: #fdfdfd; border-radius: 20px; border: 1px solid #f1f5f9; overflow: hidden;">
-                <canvas id="canvas-55" width="600" height="420" style="width: 100%; height: 100%;"></canvas>
-                
-                <!-- Equations Overlay -->
-                <div style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); font-size: 0.75rem; color: #334155;">
-                    <div style="font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Ravnoteža sila</div>
-                    <div style="font-family: serif; font-style: italic; font-size: 0.95rem;">F + G = p<sub>air</sub> · A<sub>c</sub></div>
-                    <div style="margin-top: 10px; font-family: serif; font-style: italic; font-size: 0.95rem;">h<sub>1</sub> = (ρ<sub>v</sub> / ρ<sub>mf</sub>) · h<sub>2</sub></div>
-                </div>
-            </div>
-
-            <div style="padding: 18px 20px; background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%); border: 1px solid #fed7aa; border-radius: 16px;">
-                <p style="margin: 0; font-size: 0.85rem; color: #9a3412; line-height: 1.4;">
-                    <b>Napomena:</b> Sila F je potrebna jer tlak zraka u unutrašnjosti "gura" gornju stijenku cilindra prema gore jače nego što je težina cilindra prema dolje.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-(function() {
-    const gS = document.getElementById('g-slider-55');
-    const dS = document.getElementById('d-slider-55');
-    const h2S = document.getElementById('h2-slider-55');
-    const rmS = document.getElementById('rhomf-slider-55');
-    const pushBtn = document.getElementById('push-btn-55');
-
-    const canvas = document.getElementById('canvas-55');
-    const ctx = canvas.getContext('2d');
-
-    let isAnimating = false;
-
-    function update() {
-        const G = parseFloat(gS.value);
-        const D = parseFloat(dS.value);
-        const h2 = parseFloat(h2S.value);
-        const rho_mf_rel = parseFloat(rmS.value);
-        const rho_v = 1000;
-        const g = 9.81;
-
-        document.getElementById('g-val-55').innerText = G + ' N';
-        document.getElementById('d-val-55').innerText = D.toFixed(2) + ' m';
-        document.getElementById('h2-val-55').innerText = h2.toFixed(2) + ' m';
-        document.getElementById('rhomf-val-55').innerText = rho_mf_rel.toFixed(1);
-
-        // Physics
-        const pm = rho_v * g * h2;
-        const h1 = pm / (rho_mf_rel * rho_v * g);
-        const Ac = (Math.PI * D * D) / 4;
-        const F = pm * Ac - G;
-
-        document.getElementById('pm-res-55').innerText = pm.toFixed(0) + ' Pa';
-        document.getElementById('h1-res-55').innerText = h1.toFixed(3) + ' m';
-        document.getElementById('f-res-55').innerText = F.toFixed(1) + ' N';
-        document.getElementById('f-res-55').style.color = F >= 0 ? '#ef4444' : '#0f766e';
-
-        render(G, D, h2, h1, F, pm);
-    }
-
-    function render(G, D, h2, h1, F, pm) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const scale = 500; 
-        const centerX = 220;
-        const waterY = 100;
-        
-        // Water tank
-        ctx.fillStyle = "#ebf5fb";
-        ctx.fillRect(50, waterY, 350, 300);
-        ctx.strokeStyle = "#3498db";
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(50, waterY); ctx.lineTo(400, waterY); ctx.stroke();
-        ctx.fillStyle = "#2563eb";
-        ctx.font = "12px Inter";
-        ctx.fillText("vanjska razina vode", 58, waterY - 8);
-
-        // Cylinder
-        const cylW = D * scale;
-        const cylH = 150;
-        const cylTopY = waterY + 50 - (h2*scale)/4; // Simplified movement
-        const airLevelY = waterY + h2 * scale;
-        const innerWaterY = airLevelY;
-
-        // Container Walls
-        ctx.strokeStyle = "#475569";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(centerX - cylW/2, cylTopY, cylW, cylH);
-        ctx.fillStyle = "rgba(148, 163, 184, 0.2)";
-        ctx.fillRect(centerX - cylW/2, cylTopY, cylW, innerWaterY - cylTopY);
-        ctx.fillStyle = "rgba(14, 165, 233, 0.25)";
-        ctx.fillRect(centerX - cylW/2, innerWaterY, cylW, cylTopY + cylH - innerWaterY);
-        ctx.strokeStyle = "#0ea5e9";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(centerX - cylW/2, innerWaterY);
-        ctx.lineTo(centerX + cylW/2, innerWaterY);
-        ctx.stroke();
-
-        // Manometer Connection
-        ctx.beginPath();
-        ctx.moveTo(centerX + cylW/2, cylTopY + 20);
-        ctx.lineTo(450, cylTopY + 20);
-        ctx.lineTo(450, 250);
-        ctx.strokeStyle = "#475569";
-        ctx.lineWidth = 8;
-        ctx.stroke();
-
-        // U-Tube Manometer
-        ctx.beginPath();
-        ctx.moveTo(450, 250);
-        ctx.lineTo(450, 350);
-        ctx.arc(480, 350, 30, Math.PI, 0, true);
-        ctx.lineTo(510, 200);
-        ctx.strokeStyle = "#94a3b8";
-        ctx.lineWidth = 12;
-        ctx.stroke();
-
-        // Manometer Fluid (Orange)
-        const mBaseY = 350;
-        const mLeftLevel = mBaseY - 30; // arbitrary base
-        const mRightLevel = mLeftLevel - h1 * scale;
-
-        ctx.strokeStyle = "#f97316";
-        ctx.lineWidth = 8;
-        ctx.beginPath();
-        ctx.moveTo(450, 250 + (250-mLeftLevel)); // Fill from top connection down
-        ctx.lineTo(450, 350);
-        ctx.arc(480, 350, 30, Math.PI, 0, true);
-        ctx.lineTo(510, mRightLevel);
-        ctx.stroke();
-        ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = "#f97316";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(430, mLeftLevel);
-        ctx.lineTo(535, mLeftLevel);
-        ctx.moveTo(430, mRightLevel);
-        ctx.lineTo(535, mRightLevel);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Force Arrows
-        // Weight G
-        drawArrow(ctx, centerX - 20, cylTopY + 30, centerX - 20, cylTopY + 80, "#2563eb", 3);
-        ctx.fillStyle = "#2563eb"; ctx.font = "bold 12px Inter"; ctx.fillText("G", centerX - 35, cylTopY + 60);
-
-        // Force F
-        if (F > 0) {
-            drawArrow(ctx, centerX + 20, cylTopY - 60, centerX + 20, cylTopY - 5, "#ef4444", 3);
-            ctx.fillStyle = "#ef4444"; ctx.fillText("F", centerX + 30, cylTopY - 30);
-        } else {
-            drawArrow(ctx, centerX + 20, cylTopY - 5, centerX + 20, cylTopY - 60, "#0f766e", 3);
-            ctx.fillStyle = "#0f766e"; ctx.fillText("F nije potreban", centerX + 30, cylTopY - 30);
-        }
-
-        // Pressure pm (upward)
-        drawArrow(ctx, centerX, airLevelY - 10, centerX, airLevelY - 60, "#10b981", 2);
-        ctx.fillStyle = "#10b981"; ctx.fillText("p_air", centerX + 10, airLevelY - 40);
-        
-        // Labels
-        ctx.fillStyle = "#1e293b";
-        ctx.fillText("h2 = " + h2.toFixed(2) + " m", centerX - cylW/2 - 70, (waterY + airLevelY)/2);
-        ctx.fillText("h1 = " + h1.toFixed(3) + " m", 525, (mLeftLevel + mRightLevel)/2);
-        ctx.fillText("unutarnja razina", centerX - cylW/2 - 10, innerWaterY - 8);
-        ctx.fillText("Δp = ρvg h2 = " + pm.toFixed(0) + " Pa", 54, 386);
-
-        ctx.strokeStyle = "#64748b";
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(centerX - cylW/2 - 20, waterY);
-        ctx.lineTo(centerX - cylW/2 - 20, innerWaterY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        drawArrow(ctx, centerX - cylW/2 - 20, waterY + 6, centerX - cylW/2 - 20, innerWaterY - 6, "#64748b", 2);
-    }
-
-    function drawArrow(ctx, fromx, fromy, tox, toy, color, width) {
-        const headlen = 10;
-        const angle = Math.atan2(toy - fromy, tox - fromx);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(fromx, fromy); ctx.lineTo(tox, toy); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(tox, toy);
-        ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI/6), toy - headlen * Math.sin(angle - Math.PI/6));
-        ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI/6), toy - headlen * Math.sin(angle + Math.PI/6));
-        ctx.fillStyle = color; ctx.fill();
-    }
-
-    pushBtn.onclick = () => {
-        if (isAnimating) return;
-        isAnimating = true;
-        let targetH2 = 0.4;
-        let startH2 = parseFloat(h2S.value);
-        let step = 0.005;
-        
-        const anim = setInterval(() => {
-            let curr = parseFloat(h2S.value);
-            if (curr < targetH2) {
-                h2S.value = (curr + step).toFixed(3);
-                update();
-            } else {
-                clearInterval(anim);
-                isAnimating = false;
-            }
-        }, 20);
-    };
-
-    [gS, dS, h2S, rmS].forEach(el => el.oninput = update);
-    update();
-})();
-</script>
-</div>
-```

@@ -199,6 +199,220 @@ Ključne zakonitosti:
 
 <hr class="zadatak-sep">
 
+### Zadatak Z35 — Rotirajući cilindar (Kritični broj okretaja) {.unnumbered}
+
+Vertikalni cilindar rotira oko svoje osi. Potrebno je odrediti granični broj okretaja $n$ pri kojem neće doći do prelijevanja.
+
+<div class="zadano-grid">
+<div class="zadano-row">
+<span class="label">Zadano</span>
+<span class="zadano-text">$D$, $H$, $h_0$, $\rho$</span>
+</div>
+<div class="zadano-row">
+<span class="label">Odrediti</span>
+<span class="zadano-text">$n_{crit} = ?$</span>
+</div>
+</div>
+<div class="rjesenje-label">Rješenje</div>
+1. $h_c = h_0 - \frac{\omega^2 R^2}{4g}$
+2. $z(R) = H \implies h_0 + \frac{\omega^2 R^2}{4g} = H$
+3. $\omega = \sqrt{\frac{4g(H-h_0)}{R^2}} \implies n = \frac{60\omega}{2\pi}$
+
+<hr class="widget-sep">
+<div class="widget-label">⚙ Interaktivni simulator</div>
+
+```{=html}
+<!-- Z35 widget content -->
+<div id="z34-advanced-widget" style="max-width: 980px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 22px; padding: 24px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+    <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px;">
+        <div>
+            <div style="font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Z35 laboratorij rotacije</div>
+            <h4 style="text-align:left; color:#0f172a; margin:0; font-size:1.42rem; font-weight:800;">Kritični broj okretaja dolazi iz ruba paraboloida, ne iz središta</h4>
+            <p style="margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px;">Rotacija spušta središte i podiže rub. Zato je prelijevanje najbolje pratiti preko dvije visine: središnje dubine $h_c$ i rubne visine $z(R)$. Granični broj okretaja je trenutak kada rub prvi put dosegne vrh spremnika.</p>
+        </div>
+        <div style="background:rgba(15,23,42,0.94); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px;">
+            <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Lanac</div>
+            <div><strong>n -> ω</strong></div>
+            <div><strong>ω -> h_c, z(R)</strong></div>
+            <div><strong>z(R)=H -> n_crit</strong></div>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:20px;">
+        <div style="background:#fff; border-radius:16px; display:flex; align-items:center; justify-content:center; border:1px solid #e2e8f0; overflow:hidden;">
+            <canvas id="z34-3d-canvas" width="900" height="360" style="display:block; width:100%; height:auto;"></canvas>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:#fff; padding:15px; border-radius:14px; border:1px solid #e2e8f0;">
+                <label style="display:block; margin-bottom:8px; font-weight:700; font-size:0.82rem; color:#334155;">Brzina vrtnje n: <span id="z34-v-n" style="color:#ef4444;">95</span> o/min</label>
+                <input type="range" id="z34-n-slider" min="0" max="250" value="95" style="width:100%; accent-color:#ef4444;">
+                <label style="display:block; margin-top:15px; margin-bottom:8px; font-weight:700; font-size:0.82rem; color:#334155;">Početna visina h₀: <span id="z34-v-h0" style="color:#2563eb;">0.50</span> m</label>
+                <input type="range" id="z34-h0-slider" min="0.1" max="0.58" step="0.01" value="0.50" style="width:100%; accent-color:#2563eb;">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Središnja visina h_c</small><strong style="font-size:1.08rem; color:#2563eb;"><span id="z34-res-hc">0.47</span> m</strong></div>
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Rubna visina z(R)</small><strong style="font-size:1.08rem; color:#0f766e;"><span id="z34-res-zmax">0.53</span> m</strong></div>
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Kritični broj okretaja</small><strong style="font-size:1.08rem; color:#b45309;"><span id="z34-res-ncrit">115</span> o/min</strong></div>
+                <div id="z34-status-box" style="padding:14px; border-radius:14px; background:#f0fff4; border:1px solid #bbf7d0;"><div style="font-weight:800; color:#166534;" id="z34-status-text">✅ STABILNO</div><div style="font-size:0.8rem; color:#166534;" id="z34-status-sub">rub je još ispod vrha spremnika</div></div>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:14px; padding:14px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; font-size:0.84rem; color:#334155; line-height:1.55;" id="z34-explainer"></div>
+    
+    <script>
+    (function() {
+        const canvas = document.getElementById('z34-3d-canvas'); const ctx = canvas.getContext('2d');
+        const nS = document.getElementById('z34-n-slider'); const h0S = document.getElementById('z34-h0-slider');
+        function update() {
+            const n = parseFloat(nS.value); const h0 = parseFloat(h0S.value);
+            const w = n * Math.PI / 30; const R = 0.1; const H = 0.6; const g = 9.81;
+            const hc = h0 - (w*w * R*R)/(4*g); const zmax = h0 + (w*w * R*R)/(4*g);
+            const wCrit = Math.sqrt((4 * g * (H - h0)) / (R * R));
+            const nCrit = (60 * wCrit) / (2 * Math.PI);
+            document.getElementById('z34-v-n').innerText = n; document.getElementById('z34-v-h0').innerText = h0.toFixed(2);
+            document.getElementById('z34-res-hc').innerText = Math.max(hc, 0).toFixed(3); document.getElementById('z34-res-zmax').innerText = zmax.toFixed(3);
+            document.getElementById('z34-res-ncrit').innerText = Math.round(nCrit);
+            const statusBox = document.getElementById('z34-status-box'); const statusText = document.getElementById('z34-status-text');
+            const statusSub = document.getElementById('z34-status-sub');
+            if(zmax > H) { statusBox.style.background = "#fff5f5"; statusBox.style.borderColor = "#fecaca"; statusText.style.color = "#b91c1c"; statusSub.style.color = "#b91c1c"; statusText.innerText = "⚠️ PRELIJEVANJE!"; statusSub.innerText = "rub paraboloida je iznad vrha spremnika"; }
+            else { statusBox.style.background = "#f0fff4"; statusBox.style.borderColor = "#bbf7d0"; statusText.style.color = "#166534"; statusSub.style.color = "#166534"; statusText.innerText = "✅ STABILNO"; statusSub.innerText = "rub je još ispod vrha spremnika"; }
+            document.getElementById('z34-explainer').innerText = `Za n = ${n.toFixed(0)} o/min dobivaš ω = ${w.toFixed(2)} rad/s. Time se središte spušta na ${Math.max(hc, 0).toFixed(3)} m, a rub diže na ${zmax.toFixed(3)} m. Kritični broj okretaja za zadani početni nivo je približno ${Math.round(nCrit)} o/min.`;
+            draw(w, hc, zmax, H, R);
+        }
+        function draw(w, hc, zmax, H, R) {
+            ctx.clearRect(0,0,900,360); const cx = 260, base = 305, scale = 620;
+            ctx.fillStyle = "rgba(59, 130, 246, 0.5)"; ctx.beginPath();
+            ctx.moveTo(cx - R*scale, base - Math.min(zmax, H)*scale);
+            for(let x = -R*scale; x <= R*scale; x++) {
+                let r = Math.abs(x/scale); let z = hc + (w*w * r*r)/(2*9.81);
+                ctx.lineTo(cx + x, base - Math.max(Math.min(z, H), 0)*scale);
+            }
+            ctx.lineTo(cx + R*scale, base); ctx.lineTo(cx - R*scale, base); ctx.fill();
+            ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 2; ctx.strokeRect(cx - R*scale, base - H*scale, 2*R*scale, H*scale);
+            ctx.strokeStyle = "#ef4444"; ctx.setLineDash([6,5]); ctx.beginPath(); ctx.moveTo(cx - R*scale - 40, base - H*scale); ctx.lineTo(cx + R*scale + 40, base - H*scale); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = "#0f172a"; ctx.font = "bold 12px Inter";
+            ctx.fillText('vrh spremnika H', cx + R*scale + 20, base - H*scale + 4);
+            ctx.fillText('paraboloid slobodne površine', 520, 62);
+        }
+        [nS, h0S].forEach(s => s.oninput = update); update();
+    })();
+    </script>
+</div>
+```
+
+<hr class="zadatak-sep">
+
+<hr class='zadatak-sep'>
+
+### Zadatak Z36 — Cilindrični spremnik - Benzin (Kombinirano ubrzanje) {.unnumbered}
+
+Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike tlaka.
+
+<div class="zadano-grid">
+<div class="zadano-row">
+<span class="label">Zadano</span>
+<span class="zadano-text">$D$, $H$, $\rho$, $n$, $a$</span>
+</div>
+<div class="zadano-row">
+<span class="label">Odrediti</span>
+<span class="zadano-text">$\Delta p_v = ?$; $\Delta p_r = ?$</span>
+</div>
+</div>
+<div class="rjesenje-label">Rješenje</div>
+1. $\Delta p_v = \rho(g+a)H$
+2. $\Delta p_r = \frac{\rho \omega^2 R^2}{2}$
+
+<hr class="widget-sep">
+<div class="widget-label">⚙ Interaktivni simulator</div>
+
+```{=html}
+<!-- Z36 widget content -->
+<div id="z35-advanced-widget" style="max-width: 980px; margin: 2rem auto; padding: 24px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+    <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px;">
+        <div>
+            <div style="font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Z36 kombinirano polje tlaka</div>
+            <h4 style="color:#0f172a; margin:0; font-size:1.42rem; font-weight:800;">Vertikalno ubrzanje i rotacija grade tlak u dva neovisna smjera</h4>
+            <p style="margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px;">U istom spremniku možeš odvojeno pratiti porast tlaka po visini i porast tlaka prema stijenci. Tek njihov zbroj daje ukupnu raspodjelu. Ovdje su ta dva doprinosa namjerno odvojena prije nego ih spojiš u kartu tlaka.</p>
+        </div>
+        <div style="background:rgba(15,23,42,0.94); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px;">
+            <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Lanac</div>
+            <div><strong>a_z -> Δp_v</strong></div>
+            <div><strong>n -> ω -> Δp_r</strong></div>
+            <div><strong>Δp_v + Δp_r -> p(r,z)</strong></div>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:24px;">
+        <div style="position:relative; background:#fff; border-radius:16px; border:1px solid #e2e8f0; overflow:hidden;">
+            <canvas id="z35-heatmap-canvas" width="900" height="420" style="display:block; width:100%; height:auto;"></canvas>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="padding:16px; background:#fff; border-radius:14px; border:1px solid #e2e8f0;">
+                <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.82rem; color:#334155;">Ubrzanje a<sub>z</sub>: <span id="z35-v-a" style="color:#2563eb;">5.0</span> m/s²</label>
+                <input type="range" id="z35-a-slider" min="-9" max="20" value="5" style="width:100%; accent-color:#2563eb;">
+                <label style="display:block; font-weight:700; margin-top:18px; margin-bottom:8px; font-size:0.82rem; color:#334155;">Brzina n: <span id="z35-v-n" style="color:#ef4444;">90</span> o/min</label>
+                <input type="range" id="z35-n-slider" min="0" max="300" value="90" style="width:100%; accent-color:#ef4444;">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Efektivno vertikalno polje</small><strong style="font-size:1.08rem; color:#2563eb;"><span id="z35-res-geff">14.8</span> m/s²</strong></div>
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Kutna brzina ω</small><strong style="font-size:1.08rem; color:#ef4444;"><span id="z35-res-w">9.4</span> rad/s</strong></div>
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Δp<sub>v</sub> po visini</small><strong style="font-size:1.08rem; color:#0f766e;" id="z35-res-dpv">21.9 kPa</strong></div>
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Δp<sub>r</sub> prema stijenci</small><strong style="font-size:1.08rem; color:#b45309;" id="z35-res-dpr">8.2 kPa</strong></div>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:14px; padding:14px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; font-size:0.84rem; color:#334155; line-height:1.55;" id="z35-explainer"></div>
+    
+    <script>
+    (function() {
+        const canvas = document.getElementById('z35-heatmap-canvas'); const ctx = canvas.getContext('2d');
+        const aS = document.getElementById('z35-a-slider'); const nS = document.getElementById('z35-n-slider');
+        function update() {
+            const a = parseFloat(aS.value); const n = parseFloat(nS.value);
+            const w = n * Math.PI / 30; const rho = 740; const R = 0.5; const H = 2.0; const g = 9.81;
+            const dpv = rho * (g + a) * H; const dpr = (rho * w*w * R*R) / 2;
+            document.getElementById('z35-v-a').innerText = a.toFixed(1);
+            document.getElementById('z35-v-n').innerText = n;
+            document.getElementById('z35-res-geff').innerText = (g + a).toFixed(1);
+            document.getElementById('z35-res-w').innerText = w.toFixed(1);
+            document.getElementById('z35-res-dpv').innerText = (dpv / 1000).toFixed(1) + " kPa";
+            document.getElementById('z35-res-dpr').innerText = (dpr / 1000).toFixed(1) + " kPa";
+            document.getElementById('z35-explainer').innerText = `Pri a_z = ${a.toFixed(1)} m/s² efektivna težina postaje ${(g + a).toFixed(1)} m/s², pa preko visine H nastaje vertikalna razlika tlaka ${(dpv / 1000).toFixed(1)} kPa. Istodobno rotacija s ω = ${w.toFixed(1)} rad/s daje radijalni porast ${(dpr / 1000).toFixed(1)} kPa od osi do stijenke.`;
+            draw(w, a, g, H, R, rho);
+        }
+        function draw(w, a, g, H, R, rho) {
+            ctx.clearRect(0, 0, 900, 420);
+            const ox = 120, oy = 40; const dw = 320, dh = 320; const step = 10;
+            for(let r_px = 0; r_px <= dw; r_px += step) {
+                for(let z_px = 0; z_px <= dh; z_px += step) {
+                    const r_real = (r_px / dw) * R; const z_real = (z_px / dh) * H;
+                    const p_rel = rho * (g + a) * z_real + (rho * w*w * r_real*r_real) / 2;
+                    const hue = Math.max(0, 240 - (p_rel / 50000) * 240);
+                    ctx.fillStyle = `hsla(${hue}, 100%, 50%, 0.8)`; ctx.fillRect(ox + r_px, oy + z_px, step, step);
+                }
+            }
+            ctx.strokeStyle = "#2d3748"; ctx.lineWidth = 3; ctx.strokeRect(ox, oy, dw, dh);
+            ctx.fillStyle = "#0f172a"; ctx.font = "bold 12px Inter";
+            ctx.fillText('os rotacije', ox + 8, oy - 12);
+            ctx.fillText('stijenka spremnika', ox + dw - 98, oy - 12);
+            ctx.fillText('dublje + dalje od osi = veći tlak', 520, 60);
+            ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(540, 110); ctx.lineTo(540, 250); ctx.stroke();
+            ctx.fillStyle = "#2563eb"; ctx.fillText('vertikalni doprinos', 560, 184);
+            ctx.strokeStyle = "#ef4444"; ctx.beginPath(); ctx.moveTo(540, 290); ctx.lineTo(700, 290); ctx.stroke();
+            ctx.fillStyle = "#ef4444"; ctx.fillText('radijalni doprinos', 560, 282);
+        }
+        [aS, nS].forEach(s => s.oninput = update); update();
+    })();
+    </script>
+</div>
+```
+
+<hr class="zadatak-sep">
+
+
+## Dodatni primjeri {.unnumbered}
+
 ### Dodatni primjer Z34 — Kolica na kosini {.unnumbered}
 
 Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba $\alpha$. Potrebno je odrediti geometriju slobodne površine te izračunati tlak u karakterističnim točkama.
@@ -329,214 +543,7 @@ Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba 
 
 <hr class="zadatak-sep">
 
-### Zadatak Z35 — Rotirajući cilindar (Kritični broj okretaja) {.unnumbered}
-
-Vertikalni cilindar rotira oko svoje osi. Potrebno je odrediti granični broj okretaja $n$ pri kojem neće doći do prelijevanja.
-
-<div class="zadano-grid">
-<div class="zadano-row">
-<span class="label">Zadano</span>
-<span class="zadano-text">$D$, $H$, $h_0$, $\rho$</span>
-</div>
-<div class="zadano-row">
-<span class="label">Odrediti</span>
-<span class="zadano-text">$n_{crit} = ?$</span>
-</div>
-</div>
-<div class="rjesenje-label">Rješenje</div>
-1. $h_c = h_0 - \frac{\omega^2 R^2}{4g}$
-2. $z(R) = H \implies h_0 + \frac{\omega^2 R^2}{4g} = H$
-3. $\omega = \sqrt{\frac{4g(H-h_0)}{R^2}} \implies n = \frac{60\omega}{2\pi}$
-
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
-
-```{=html}
-<!-- Z35 widget content -->
-<div id="z34-advanced-widget" style="max-width: 980px; margin: 20px auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 22px; padding: 24px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
-    <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px;">
-        <div>
-            <div style="font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Z35 laboratorij rotacije</div>
-            <h4 style="text-align:left; color:#0f172a; margin:0; font-size:1.42rem; font-weight:800;">Kritični broj okretaja dolazi iz ruba paraboloida, ne iz središta</h4>
-            <p style="margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px;">Rotacija spušta središte i podiže rub. Zato je prelijevanje najbolje pratiti preko dvije visine: središnje dubine $h_c$ i rubne visine $z(R)$. Granični broj okretaja je trenutak kada rub prvi put dosegne vrh spremnika.</p>
-        </div>
-        <div style="background:rgba(15,23,42,0.94); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px;">
-            <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Lanac</div>
-            <div><strong>n -> ω</strong></div>
-            <div><strong>ω -> h_c, z(R)</strong></div>
-            <div><strong>z(R)=H -> n_crit</strong></div>
-        </div>
-    </div>
-
-    <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:20px;">
-        <div style="background:#fff; border-radius:16px; display:flex; align-items:center; justify-content:center; border:1px solid #e2e8f0; overflow:hidden;">
-            <canvas id="z34-3d-canvas" width="900" height="360" style="display:block; width:100%; height:auto;"></canvas>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:15px;">
-            <div style="background:#fff; padding:15px; border-radius:14px; border:1px solid #e2e8f0;">
-                <label style="display:block; margin-bottom:8px; font-weight:700; font-size:0.82rem; color:#334155;">Brzina vrtnje n: <span id="z34-v-n" style="color:#ef4444;">95</span> o/min</label>
-                <input type="range" id="z34-n-slider" min="0" max="250" value="95" style="width:100%; accent-color:#ef4444;">
-                <label style="display:block; margin-top:15px; margin-bottom:8px; font-weight:700; font-size:0.82rem; color:#334155;">Početna visina h₀: <span id="z34-v-h0" style="color:#2563eb;">0.50</span> m</label>
-                <input type="range" id="z34-h0-slider" min="0.1" max="0.58" step="0.01" value="0.50" style="width:100%; accent-color:#2563eb;">
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Središnja visina h_c</small><strong style="font-size:1.08rem; color:#2563eb;"><span id="z34-res-hc">0.47</span> m</strong></div>
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Rubna visina z(R)</small><strong style="font-size:1.08rem; color:#0f766e;"><span id="z34-res-zmax">0.53</span> m</strong></div>
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Kritični broj okretaja</small><strong style="font-size:1.08rem; color:#b45309;"><span id="z34-res-ncrit">115</span> o/min</strong></div>
-                <div id="z34-status-box" style="padding:14px; border-radius:14px; background:#f0fff4; border:1px solid #bbf7d0;"><div style="font-weight:800; color:#166534;" id="z34-status-text">✅ STABILNO</div><div style="font-size:0.8rem; color:#166534;" id="z34-status-sub">rub je još ispod vrha spremnika</div></div>
-            </div>
-        </div>
-    </div>
-    <div style="margin-top:14px; padding:14px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; font-size:0.84rem; color:#334155; line-height:1.55;" id="z34-explainer"></div>
-    
-    <script>
-    (function() {
-        const canvas = document.getElementById('z34-3d-canvas'); const ctx = canvas.getContext('2d');
-        const nS = document.getElementById('z34-n-slider'); const h0S = document.getElementById('z34-h0-slider');
-        function update() {
-            const n = parseFloat(nS.value); const h0 = parseFloat(h0S.value);
-            const w = n * Math.PI / 30; const R = 0.1; const H = 0.6; const g = 9.81;
-            const hc = h0 - (w*w * R*R)/(4*g); const zmax = h0 + (w*w * R*R)/(4*g);
-            const wCrit = Math.sqrt((4 * g * (H - h0)) / (R * R));
-            const nCrit = (60 * wCrit) / (2 * Math.PI);
-            document.getElementById('z34-v-n').innerText = n; document.getElementById('z34-v-h0').innerText = h0.toFixed(2);
-            document.getElementById('z34-res-hc').innerText = Math.max(hc, 0).toFixed(3); document.getElementById('z34-res-zmax').innerText = zmax.toFixed(3);
-            document.getElementById('z34-res-ncrit').innerText = Math.round(nCrit);
-            const statusBox = document.getElementById('z34-status-box'); const statusText = document.getElementById('z34-status-text');
-            const statusSub = document.getElementById('z34-status-sub');
-            if(zmax > H) { statusBox.style.background = "#fff5f5"; statusBox.style.borderColor = "#fecaca"; statusText.style.color = "#b91c1c"; statusSub.style.color = "#b91c1c"; statusText.innerText = "⚠️ PRELIJEVANJE!"; statusSub.innerText = "rub paraboloida je iznad vrha spremnika"; }
-            else { statusBox.style.background = "#f0fff4"; statusBox.style.borderColor = "#bbf7d0"; statusText.style.color = "#166534"; statusSub.style.color = "#166534"; statusText.innerText = "✅ STABILNO"; statusSub.innerText = "rub je još ispod vrha spremnika"; }
-            document.getElementById('z34-explainer').innerText = `Za n = ${n.toFixed(0)} o/min dobivaš ω = ${w.toFixed(2)} rad/s. Time se središte spušta na ${Math.max(hc, 0).toFixed(3)} m, a rub diže na ${zmax.toFixed(3)} m. Kritični broj okretaja za zadani početni nivo je približno ${Math.round(nCrit)} o/min.`;
-            draw(w, hc, zmax, H, R);
-        }
-        function draw(w, hc, zmax, H, R) {
-            ctx.clearRect(0,0,900,360); const cx = 260, base = 305, scale = 620;
-            ctx.fillStyle = "rgba(59, 130, 246, 0.5)"; ctx.beginPath();
-            ctx.moveTo(cx - R*scale, base - Math.min(zmax, H)*scale);
-            for(let x = -R*scale; x <= R*scale; x++) {
-                let r = Math.abs(x/scale); let z = hc + (w*w * r*r)/(2*9.81);
-                ctx.lineTo(cx + x, base - Math.max(Math.min(z, H), 0)*scale);
-            }
-            ctx.lineTo(cx + R*scale, base); ctx.lineTo(cx - R*scale, base); ctx.fill();
-            ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 2; ctx.strokeRect(cx - R*scale, base - H*scale, 2*R*scale, H*scale);
-            ctx.strokeStyle = "#ef4444"; ctx.setLineDash([6,5]); ctx.beginPath(); ctx.moveTo(cx - R*scale - 40, base - H*scale); ctx.lineTo(cx + R*scale + 40, base - H*scale); ctx.stroke(); ctx.setLineDash([]);
-            ctx.fillStyle = "#0f172a"; ctx.font = "bold 12px Inter";
-            ctx.fillText('vrh spremnika H', cx + R*scale + 20, base - H*scale + 4);
-            ctx.fillText('paraboloid slobodne površine', 520, 62);
-        }
-        [nS, h0S].forEach(s => s.oninput = update); update();
-    })();
-    </script>
-</div>
-```
-
-<hr class="zadatak-sep">
-
-### Zadatak Z36 — Cilindrični spremnik - Benzin (Kombinirano ubrzanje) {.unnumbered}
-
-Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike tlaka.
-
-<div class="zadano-grid">
-<div class="zadano-row">
-<span class="label">Zadano</span>
-<span class="zadano-text">$D$, $H$, $\rho$, $n$, $a$</span>
-</div>
-<div class="zadano-row">
-<span class="label">Odrediti</span>
-<span class="zadano-text">$\Delta p_v = ?$; $\Delta p_r = ?$</span>
-</div>
-</div>
-<div class="rjesenje-label">Rješenje</div>
-1. $\Delta p_v = \rho(g+a)H$
-2. $\Delta p_r = \frac{\rho \omega^2 R^2}{2}$
-
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
-
-```{=html}
-<!-- Z36 widget content -->
-<div id="z35-advanced-widget" style="max-width: 980px; margin: 2rem auto; padding: 24px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
-    <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px;">
-        <div>
-            <div style="font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Z36 kombinirano polje tlaka</div>
-            <h4 style="color:#0f172a; margin:0; font-size:1.42rem; font-weight:800;">Vertikalno ubrzanje i rotacija grade tlak u dva neovisna smjera</h4>
-            <p style="margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px;">U istom spremniku možeš odvojeno pratiti porast tlaka po visini i porast tlaka prema stijenci. Tek njihov zbroj daje ukupnu raspodjelu. Ovdje su ta dva doprinosa namjerno odvojena prije nego ih spojiš u kartu tlaka.</p>
-        </div>
-        <div style="background:rgba(15,23,42,0.94); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px;">
-            <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Lanac</div>
-            <div><strong>a_z -> Δp_v</strong></div>
-            <div><strong>n -> ω -> Δp_r</strong></div>
-            <div><strong>Δp_v + Δp_r -> p(r,z)</strong></div>
-        </div>
-    </div>
-
-    <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:24px;">
-        <div style="position:relative; background:#fff; border-radius:16px; border:1px solid #e2e8f0; overflow:hidden;">
-            <canvas id="z35-heatmap-canvas" width="900" height="420" style="display:block; width:100%; height:auto;"></canvas>
-        </div>
-
-        <div style="display:flex; flex-direction:column; gap:16px;">
-            <div style="padding:16px; background:#fff; border-radius:14px; border:1px solid #e2e8f0;">
-                <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.82rem; color:#334155;">Ubrzanje a<sub>z</sub>: <span id="z35-v-a" style="color:#2563eb;">5.0</span> m/s²</label>
-                <input type="range" id="z35-a-slider" min="-9" max="20" value="5" style="width:100%; accent-color:#2563eb;">
-                <label style="display:block; font-weight:700; margin-top:18px; margin-bottom:8px; font-size:0.82rem; color:#334155;">Brzina n: <span id="z35-v-n" style="color:#ef4444;">90</span> o/min</label>
-                <input type="range" id="z35-n-slider" min="0" max="300" value="90" style="width:100%; accent-color:#ef4444;">
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Efektivno vertikalno polje</small><strong style="font-size:1.08rem; color:#2563eb;"><span id="z35-res-geff">14.8</span> m/s²</strong></div>
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Kutna brzina ω</small><strong style="font-size:1.08rem; color:#ef4444;"><span id="z35-res-w">9.4</span> rad/s</strong></div>
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Δp<sub>v</sub> po visini</small><strong style="font-size:1.08rem; color:#0f766e;" id="z35-res-dpv">21.9 kPa</strong></div>
-                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px;"><small style="display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px;">Δp<sub>r</sub> prema stijenci</small><strong style="font-size:1.08rem; color:#b45309;" id="z35-res-dpr">8.2 kPa</strong></div>
-            </div>
-        </div>
-    </div>
-    <div style="margin-top:14px; padding:14px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; font-size:0.84rem; color:#334155; line-height:1.55;" id="z35-explainer"></div>
-    
-    <script>
-    (function() {
-        const canvas = document.getElementById('z35-heatmap-canvas'); const ctx = canvas.getContext('2d');
-        const aS = document.getElementById('z35-a-slider'); const nS = document.getElementById('z35-n-slider');
-        function update() {
-            const a = parseFloat(aS.value); const n = parseFloat(nS.value);
-            const w = n * Math.PI / 30; const rho = 740; const R = 0.5; const H = 2.0; const g = 9.81;
-            const dpv = rho * (g + a) * H; const dpr = (rho * w*w * R*R) / 2;
-            document.getElementById('z35-v-a').innerText = a.toFixed(1);
-            document.getElementById('z35-v-n').innerText = n;
-            document.getElementById('z35-res-geff').innerText = (g + a).toFixed(1);
-            document.getElementById('z35-res-w').innerText = w.toFixed(1);
-            document.getElementById('z35-res-dpv').innerText = (dpv / 1000).toFixed(1) + " kPa";
-            document.getElementById('z35-res-dpr').innerText = (dpr / 1000).toFixed(1) + " kPa";
-            document.getElementById('z35-explainer').innerText = `Pri a_z = ${a.toFixed(1)} m/s² efektivna težina postaje ${(g + a).toFixed(1)} m/s², pa preko visine H nastaje vertikalna razlika tlaka ${(dpv / 1000).toFixed(1)} kPa. Istodobno rotacija s ω = ${w.toFixed(1)} rad/s daje radijalni porast ${(dpr / 1000).toFixed(1)} kPa od osi do stijenke.`;
-            draw(w, a, g, H, R, rho);
-        }
-        function draw(w, a, g, H, R, rho) {
-            ctx.clearRect(0, 0, 900, 420);
-            const ox = 120, oy = 40; const dw = 320, dh = 320; const step = 10;
-            for(let r_px = 0; r_px <= dw; r_px += step) {
-                for(let z_px = 0; z_px <= dh; z_px += step) {
-                    const r_real = (r_px / dw) * R; const z_real = (z_px / dh) * H;
-                    const p_rel = rho * (g + a) * z_real + (rho * w*w * r_real*r_real) / 2;
-                    const hue = Math.max(0, 240 - (p_rel / 50000) * 240);
-                    ctx.fillStyle = `hsla(${hue}, 100%, 50%, 0.8)`; ctx.fillRect(ox + r_px, oy + z_px, step, step);
-                }
-            }
-            ctx.strokeStyle = "#2d3748"; ctx.lineWidth = 3; ctx.strokeRect(ox, oy, dw, dh);
-            ctx.fillStyle = "#0f172a"; ctx.font = "bold 12px Inter";
-            ctx.fillText('os rotacije', ox + 8, oy - 12);
-            ctx.fillText('stijenka spremnika', ox + dw - 98, oy - 12);
-            ctx.fillText('dublje + dalje od osi = veći tlak', 520, 60);
-            ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(540, 110); ctx.lineTo(540, 250); ctx.stroke();
-            ctx.fillStyle = "#2563eb"; ctx.fillText('vertikalni doprinos', 560, 184);
-            ctx.strokeStyle = "#ef4444"; ctx.beginPath(); ctx.moveTo(540, 290); ctx.lineTo(700, 290); ctx.stroke();
-            ctx.fillStyle = "#ef4444"; ctx.fillText('radijalni doprinos', 560, 282);
-        }
-        [aS, nS].forEach(s => s.oninput = update); update();
-    })();
-    </script>
-</div>
-```
-
-<hr class="zadatak-sep">
+<hr class='zadatak-sep'>
 
 ### Dodatni primjer Z37 — Rotirajuća U-cijev s dva fluida {.unnumbered}
 
@@ -630,6 +637,8 @@ $$\rho_f (gh - \frac{\omega^2 R_1^2}{2}) = \rho_v (gh - \frac{\omega^2 R_2^2}{2}
 ```
 
 <hr class="zadatak-sep">
+
+<hr class='zadatak-sep'>
 
 ### Dodatni primjer Z38 — Rotirajući spremnik (Mokro vs. Suho dno) {.unnumbered}
 
@@ -744,6 +753,8 @@ Prstenasti cilindar rotira kutnom brzinom $\omega$. Odrediti uvjet za suho dno.
 ```
 
 <hr class="zadatak-sep">
+
+<hr class='zadatak-sep'>
 
 ### Dodatni primjer Z39 — Nakošeni spremnik koji rotira i ubrzava {.unnumbered}
 
@@ -960,3 +971,4 @@ Kada je cilindrična posuda nagnuta u odnosu na vertikalu, relativno mirovanje j
 })();
 </script>
 ```
+

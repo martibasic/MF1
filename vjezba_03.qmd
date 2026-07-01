@@ -523,6 +523,14 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         <label>Visina ulja h₃: <span id="z24-v3-val-h3" style="color:#b7791f;">0.75</span> m</label>
         <input type="range" id="z24-v3-slider-h3" min="0.2" max="1.8" step="0.01" value="0.75" style="accent-color:#b7791f;">
     </div>
+    <div class="z24-control">
+        <label>Gustoća vode ρ_v: <span id="z24-v3-val-rhov" style="color:#2563eb;">1000</span> kg/m³</label>
+        <input type="range" id="z24-v3-slider-rhov" min="980" max="1040" step="1" value="1000" style="accent-color:#2563eb;">
+    </div>
+    <div class="z24-control">
+        <label>Gustoća ulja ρ_u: <span id="z24-v3-val-rhou" style="color:#b7791f;">720</span> kg/m³</label>
+        <input type="range" id="z24-v3-slider-rhou" min="650" max="900" step="5" value="720" style="accent-color:#b7791f;">
+    </div>
 </div>
 
 <div class="z24-actions">
@@ -538,6 +546,7 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
     <div class="z24-metric"><small>Doprinos plina + vode</small><strong style="color:#2563eb;"><span id="z24-v3-res-rise">67.94</span> kPa</strong></div>
     <div class="z24-metric"><small>Oduzimanje ulja</small><strong style="color:#b7791f;"><span id="z24-v3-res-oil">5.30</span> kPa</strong></div>
     <div class="z24-metric"><small>Ekvivalent tlaka žive</small><strong style="color:#0f766e;"><span id="z24-v3-res-hgdp">62.64</span> kPa</strong></div>
+    <div class="z24-metric"><small>Neto rezerva</small><strong style="color:#7c3aed;"><span id="z24-v3-res-margin">92.2</span> %</strong></div>
 </div>
 
 <div class="z24-explainer" id="z24-v3-explainer"></div>
@@ -549,14 +558,16 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
     const slP = document.getElementById('z24-v3-slider-p');
     const slH1 = document.getElementById('z24-v3-slider-h1');
     const slH3 = document.getElementById('z24-v3-slider-h3');
+    const slRhoV = document.getElementById('z24-v3-slider-rhov');
+    const slRhoU = document.getElementById('z24-v3-slider-rhou');
     const scenarioButtons = Array.from(document.querySelectorAll('[data-z24-scenario]'));
     const statusEl = document.getElementById('z24-v3-status');
     let phase = 0;
 
     const scenarios = {
-        'default': { p: 65, h1: 0.30, h3: 0.75 },
-        'high-gas': { p: 120, h1: 0.45, h3: 0.60 },
-        'oil-dominant': { p: 20, h1: 0.20, h3: 1.60 }
+        'default': { p: 65, h1: 0.30, h3: 0.75, rhoV: 1000, rhoU: 720 },
+        'high-gas': { p: 120, h1: 0.45, h3: 0.60, rhoV: 1000, rhoU: 720 },
+        'oil-dominant': { p: 20, h1: 0.20, h3: 1.60, rhoV: 1000, rhoU: 860 }
     };
 
     function setActiveScenario(name) {
@@ -571,6 +582,8 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         slP.value = cfg.p;
         slH1.value = cfg.h1;
         slH3.value = cfg.h3;
+        slRhoV.value = cfg.rhoV;
+        slRhoU.value = cfg.rhoU;
         setActiveScenario(name);
         update();
     }
@@ -579,22 +592,26 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         const p = parseFloat(slP.value);
         const h1 = parseFloat(slH1.value);
         const h3 = parseFloat(slH3.value);
+        const rhoV = parseFloat(slRhoV.value);
+        const rhoU = parseFloat(slRhoU.value);
         const g = 9.81;
-        const rhoV = 1000;
-        const rhoU = 720;
         const rhoHg = 13600;
         const rise = p + rhoV * g * h1 / 1000;
         const oilOpposition = rhoU * g * h3 / 1000;
         const hgEquivalent = rise - oilOpposition;
         const h2 = (hgEquivalent * 1000) / (rhoHg * g);
+        const marginPct = rise > 0 ? (100 * hgEquivalent / rise) : 0;
 
         document.getElementById('z24-v3-val-p').textContent = p.toFixed(0);
         document.getElementById('z24-v3-val-h1').textContent = h1.toFixed(2);
         document.getElementById('z24-v3-val-h3').textContent = h3.toFixed(2);
+        document.getElementById('z24-v3-val-rhov').textContent = rhoV.toFixed(0);
+        document.getElementById('z24-v3-val-rhou').textContent = rhoU.toFixed(0);
         document.getElementById('z24-v3-res-h2').textContent = h2.toFixed(3);
         document.getElementById('z24-v3-res-rise').textContent = rise.toFixed(2);
         document.getElementById('z24-v3-res-oil').textContent = oilOpposition.toFixed(2);
         document.getElementById('z24-v3-res-hgdp').textContent = hgEquivalent.toFixed(2);
+        document.getElementById('z24-v3-res-margin').textContent = marginPct.toFixed(1);
 
         if (hgEquivalent < 0) {
             statusEl.textContent = 'Rezim: uljni stupac nadvladava pogonski tlak i trazeni smjer stupca zive se obrce.';
@@ -606,6 +623,11 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
             statusEl.style.background = '#fff7ed';
             statusEl.style.borderColor = '#fdba74';
             statusEl.style.color = '#9a3412';
+        } else if (marginPct < 15) {
+            statusEl.textContent = 'Rezim: gotovo uravnotezeno, mali pomak parametara lako mijenja potrebnu visinu zive.';
+            statusEl.style.background = '#f5f3ff';
+            statusEl.style.borderColor = '#ddd6fe';
+            statusEl.style.color = '#5b21b6';
         } else {
             statusEl.textContent = 'Rezim: uravnotezen standardni slucaj.';
             statusEl.style.background = '#eff6ff';
@@ -613,7 +635,7 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
             statusEl.style.color = '#1e3a8a';
         }
 
-        document.getElementById('z24-v3-explainer').textContent = `Pretlak plina od ${p.toFixed(0)} kPa i vodeni stupac ${h1.toFixed(2)} m zajedno daju ${rise.toFixed(2)} kPa. Ulje oduzima ${oilOpposition.toFixed(2)} kPa, pa živa mora preuzeti preostalih ${hgEquivalent.toFixed(2)} kPa. Zato je potrebna visina žive h₂ = ${h2.toFixed(3)} m.`;
+        document.getElementById('z24-v3-explainer').textContent = `Pretlak plina od ${p.toFixed(0)} kPa i vodeni stupac ${h1.toFixed(2)} m (ρ_v=${rhoV.toFixed(0)} kg/m³) zajedno daju ${rise.toFixed(2)} kPa. Ulje (ρ_u=${rhoU.toFixed(0)} kg/m³) oduzima ${oilOpposition.toFixed(2)} kPa, pa živa preuzima ${hgEquivalent.toFixed(2)} kPa. Zato je potrebna visina žive h₂ = ${h2.toFixed(3)} m.`;
 
         draw(p, h1, h2, h3, rise, oilOpposition);
     }
@@ -723,7 +745,7 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         drawArrow(820, 130, 820, 220, '#6b7280', `h₂ = ${h2.toFixed(3)} m`);
     }
 
-    [slP, slH1, slH3].forEach((slider) => slider.addEventListener('input', () => {
+    [slP, slH1, slH3, slRhoV, slRhoU].forEach((slider) => slider.addEventListener('input', () => {
         setActiveScenario('');
         update();
     }));
@@ -986,6 +1008,10 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
             <label>Referentno uranjanje u vodi h₁: <span id="z30-v-h1" style="color:#2563eb;">100</span> mm</label>
             <input type="range" id="z30-h1" min="60" max="160" step="2" value="100" style="accent-color:#2563eb;">
         </div>
+        <div class="z30-control">
+            <label>Nesigurnost očitanja ±: <span id="z30-v-sigma" style="color:#7c3aed;">1.0</span> mm</label>
+            <input type="range" id="z30-sigma" min="0" max="4" step="0.1" value="1.0" style="accent-color:#7c3aed;">
+        </div>
     </div>
     <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
         <button type="button" id="z30-preset-light" style="border:1px solid #cbd5e1; background:#f8fafc; color:#0f172a; border-radius:999px; padding:7px 12px; font-size:0.75rem; font-weight:700; cursor:pointer;">Laksa od vode</button>
@@ -995,6 +1021,7 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
     <div id="z30-status-band" style="margin-bottom:12px; padding:10px 12px; border-radius:12px; font-size:0.8rem; font-weight:700; border:1px solid #bfdbfe; background:#eff6ff; color:#1e3a8a;">Rezim: gustoća je blizu gustoće vode.</div>
     <div class="z30-metrics">
         <div class="z30-metric"><small>Gustoća nepoznate tekućine</small><strong style="color:#1d4ed8;"><span id="z30-v-rho">1052.6</span> kg/m³</strong></div>
+        <div class="z30-metric"><small>Interval gustoće</small><strong style="color:#6d28d9;"><span id="z30-rho-range">1040 - 1066</span> kg/m³</strong></div>
         <div class="z30-metric"><small>Uronjeno u vodi</small><strong style="color:#2563eb;"><span id="z30-res-hwater">100</span> mm</strong></div>
         <div class="z30-metric"><small>Uronjeno u nepoznatoj tekućini</small><strong style="color:#0f766e;"><span id="z30-res-hfluid">95</span> mm</strong></div>
         <div class="z30-metric"><small>Omjer prema vodi</small><strong style="color:#7c3aed;"><span id="z30-ratio">1.05</span>x</strong></div>
@@ -1007,6 +1034,7 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
         const ctx = canvas.getContext('2d');
         const h2S = document.getElementById('z30-h2');
         const h1S = document.getElementById('z30-h1');
+        const sigmaS = document.getElementById('z30-sigma');
         const bandEl = document.getElementById('z30-status-band');
 
         function setPreset(h2Value, h1Value) {
@@ -1018,19 +1046,32 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
         function update() {
             const h2 = parseFloat(h2S.value);
             const h1 = parseFloat(h1S.value);
+            const sigma = parseFloat(sigmaS.value);
             const submerged = h1 - h2;
-            const rho = 1000 * h1 / submerged;
+            const safeSubmerged = Math.max(submerged, 0.5);
+            const rho = 1000 * h1 / safeSubmerged;
             const ratio = rho / 1000;
+            const subLow = Math.max(h1 - (h2 + sigma), 0.5);
+            const subHigh = Math.max(h1 - (h2 - sigma), 0.5);
+            const rhoHigh = 1000 * h1 / subLow;
+            const rhoLow = 1000 * h1 / subHigh;
 
             document.getElementById('z30-v-h2').textContent = h2.toFixed(1);
             document.getElementById('z30-v-h1').textContent = h1.toFixed(0);
+            document.getElementById('z30-v-sigma').textContent = sigma.toFixed(1);
             document.getElementById('z30-v-rho').textContent = rho.toFixed(1);
+            document.getElementById('z30-rho-range').textContent = `${rhoLow.toFixed(0)} - ${rhoHigh.toFixed(0)}`;
             document.getElementById('z30-res-hwater').textContent = h1.toFixed(0);
-            document.getElementById('z30-res-hfluid').textContent = submerged.toFixed(1);
+            document.getElementById('z30-res-hfluid').textContent = safeSubmerged.toFixed(1);
             document.getElementById('z30-ratio').textContent = ratio.toFixed(3);
             const status = h2 > 0 ? 'gušća od vode' : (h2 < 0 ? 'rjeđa od vode' : 'jednaka vodi');
             document.getElementById('z30-status').textContent = status;
-            if (Math.abs(ratio - 1) < 0.03) {
+            if (submerged <= 0.5) {
+                bandEl.textContent = 'Rezim: geometrijska granica areometra (h₁ - h₂ ≈ 0). U tom području model postaje nestabilan.';
+                bandEl.style.background = '#fef2f2';
+                bandEl.style.borderColor = '#fecaca';
+                bandEl.style.color = '#991b1b';
+            } else if (Math.abs(ratio - 1) < 0.03) {
                 bandEl.textContent = 'Rezim: gustoća je gotovo jednaka vodi, zato su i uranjanja vrlo slicna.';
                 bandEl.style.background = '#eff6ff';
                 bandEl.style.borderColor = '#bfdbfe';
@@ -1046,8 +1087,8 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
                 bandEl.style.borderColor = '#fdba74';
                 bandEl.style.color = '#9a3412';
             }
-            document.getElementById('z30-explainer').textContent = `Ako je očitanje u drugoj tekućini ${h2.toFixed(1)} mm više nego u vodi, areometar u toj tekućini uranja samo ${submerged.toFixed(1)} mm. Iz jednakosti uzgona slijedi gustoća ${rho.toFixed(1)} kg/m³, pa je tekućina ${status}.`;
-            draw(h1, submerged, h2, rho);
+            document.getElementById('z30-explainer').textContent = `Ako je očitanje u drugoj tekućini ${h2.toFixed(1)} mm više nego u vodi, areometar uranja ${safeSubmerged.toFixed(1)} mm. Iz jednakosti uzgona slijedi gustoća ${rho.toFixed(1)} kg/m³, pa je tekućina ${status}. Uz nesigurnost ±${sigma.toFixed(1)} mm, gustoća je u intervalu ${rhoLow.toFixed(0)} do ${rhoHigh.toFixed(0)} kg/m³.`;
+            draw(h1, safeSubmerged, h2, rho);
         }
 
         function draw(hWater, hFluid, h2, rho) {
@@ -1111,7 +1152,7 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
             ctx.fillText(label, x - 22, surfaceY + 198);
         }
 
-        [h2S, h1S].forEach((slider) => slider.addEventListener('input', update));
+        [h2S, h1S, sigmaS].forEach((slider) => slider.addEventListener('input', update));
         document.getElementById('z30-preset-light').addEventListener('click', () => setPreset(-12, 100));
         document.getElementById('z30-preset-neutral').addEventListener('click', () => setPreset(0, 100));
         document.getElementById('z30-preset-heavy').addEventListener('click', () => setPreset(12, 100));

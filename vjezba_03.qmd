@@ -341,6 +341,19 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
 
 <script>
 (function() {
+    window.mf1HiDpiCanvas = function(canvas) {
+        if (!canvas) return null;
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        const logicalWidth = parseInt(canvas.getAttribute('width'), 10) || 900;
+        const logicalHeight = parseInt(canvas.getAttribute('height'), 10) || 360;
+        canvas.width = Math.round(logicalWidth * ratio);
+        canvas.height = Math.round(logicalHeight * ratio);
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        return { ctx, logicalWidth, logicalHeight };
+    };
+
     function triggerInputs(root) {
         root.querySelectorAll('input, select').forEach((el) => {
             el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -531,6 +544,10 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         <label>Gustoća ulja ρ_u: <span id="z24-v3-val-rhou" style="color:#b7791f;">720</span> kg/m³</label>
         <input type="range" id="z24-v3-slider-rhou" min="650" max="900" step="5" value="720" style="accent-color:#b7791f;">
     </div>
+    <div class="z24-control">
+        <label>Gustoća manometarske tekućine ρ_m: <span id="z24-v3-val-rhom" style="color:#6b7280;">13600</span> kg/m³</label>
+        <input type="range" id="z24-v3-slider-rhom" min="12000" max="14000" step="100" value="13600" style="accent-color:#6b7280;">
+    </div>
 </div>
 
 <div class="z24-actions">
@@ -554,20 +571,24 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
 <script>
 (function() {
     const canvas = document.getElementById('canvas-z24-v3');
-    const ctx = canvas.getContext('2d');
+    const hd = window.mf1HiDpiCanvas ? window.mf1HiDpiCanvas(canvas) : null;
+    const ctx = hd ? hd.ctx : canvas.getContext('2d');
+    const canvasW = hd ? hd.logicalWidth : (parseInt(canvas.getAttribute('width'), 10) || canvas.width);
+    const canvasH = hd ? hd.logicalHeight : (parseInt(canvas.getAttribute('height'), 10) || canvas.height);
     const slP = document.getElementById('z24-v3-slider-p');
     const slH1 = document.getElementById('z24-v3-slider-h1');
     const slH3 = document.getElementById('z24-v3-slider-h3');
     const slRhoV = document.getElementById('z24-v3-slider-rhov');
     const slRhoU = document.getElementById('z24-v3-slider-rhou');
+    const slRhoM = document.getElementById('z24-v3-slider-rhom');
     const scenarioButtons = Array.from(document.querySelectorAll('[data-z24-scenario]'));
     const statusEl = document.getElementById('z24-v3-status');
     let phase = 0;
 
     const scenarios = {
-        'default': { p: 65, h1: 0.30, h3: 0.75, rhoV: 1000, rhoU: 720 },
-        'high-gas': { p: 120, h1: 0.45, h3: 0.60, rhoV: 1000, rhoU: 720 },
-        'oil-dominant': { p: 20, h1: 0.20, h3: 1.60, rhoV: 1000, rhoU: 860 }
+        'default': { p: 65, h1: 0.30, h3: 0.75, rhoV: 1000, rhoU: 720, rhoM: 13600 },
+        'high-gas': { p: 120, h1: 0.45, h3: 0.60, rhoV: 1000, rhoU: 720, rhoM: 13600 },
+        'oil-dominant': { p: 20, h1: 0.20, h3: 1.60, rhoV: 1000, rhoU: 860, rhoM: 13600 }
     };
 
     function setActiveScenario(name) {
@@ -584,6 +605,7 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         slH3.value = cfg.h3;
         slRhoV.value = cfg.rhoV;
         slRhoU.value = cfg.rhoU;
+        slRhoM.value = cfg.rhoM;
         setActiveScenario(name);
         update();
     }
@@ -594,12 +616,12 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         const h3 = parseFloat(slH3.value);
         const rhoV = parseFloat(slRhoV.value);
         const rhoU = parseFloat(slRhoU.value);
+        const rhoM = parseFloat(slRhoM.value);
         const g = 9.81;
-        const rhoHg = 13600;
         const rise = p + rhoV * g * h1 / 1000;
         const oilOpposition = rhoU * g * h3 / 1000;
         const hgEquivalent = rise - oilOpposition;
-        const h2 = (hgEquivalent * 1000) / (rhoHg * g);
+        const h2 = (hgEquivalent * 1000) / (rhoM * g);
         const marginPct = rise > 0 ? (100 * hgEquivalent / rise) : 0;
 
         document.getElementById('z24-v3-val-p').textContent = p.toFixed(0);
@@ -607,6 +629,7 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         document.getElementById('z24-v3-val-h3').textContent = h3.toFixed(2);
         document.getElementById('z24-v3-val-rhov').textContent = rhoV.toFixed(0);
         document.getElementById('z24-v3-val-rhou').textContent = rhoU.toFixed(0);
+        document.getElementById('z24-v3-val-rhom').textContent = rhoM.toFixed(0);
         document.getElementById('z24-v3-res-h2').textContent = h2.toFixed(3);
         document.getElementById('z24-v3-res-rise').textContent = rise.toFixed(2);
         document.getElementById('z24-v3-res-oil').textContent = oilOpposition.toFixed(2);
@@ -635,7 +658,7 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
             statusEl.style.color = '#1e3a8a';
         }
 
-        document.getElementById('z24-v3-explainer').textContent = `Pretlak plina od ${p.toFixed(0)} kPa i vodeni stupac ${h1.toFixed(2)} m (ρ_v=${rhoV.toFixed(0)} kg/m³) zajedno daju ${rise.toFixed(2)} kPa. Ulje (ρ_u=${rhoU.toFixed(0)} kg/m³) oduzima ${oilOpposition.toFixed(2)} kPa, pa živa preuzima ${hgEquivalent.toFixed(2)} kPa. Zato je potrebna visina žive h₂ = ${h2.toFixed(3)} m.`;
+        document.getElementById('z24-v3-explainer').textContent = `Pretlak plina od ${p.toFixed(0)} kPa i vodeni stupac ${h1.toFixed(2)} m (ρ_v=${rhoV.toFixed(0)} kg/m³) zajedno daju ${rise.toFixed(2)} kPa. Ulje (ρ_u=${rhoU.toFixed(0)} kg/m³) oduzima ${oilOpposition.toFixed(2)} kPa, a manometarska tekućina (ρ_m=${rhoM.toFixed(0)} kg/m³) taj ostatak prevodi u visinu. Zato je potrebna visina h₂ = ${h2.toFixed(3)} m.`;
 
         draw(p, h1, h2, h3, rise, oilOpposition);
     }
@@ -664,9 +687,9 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
 
     function draw(p, h1, h2, h3, rise, oilOpposition) {
         phase += 0.04;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvasW, canvasH);
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvasW, canvasH);
 
         const tankX = 60;
         const tankY = 65;
@@ -745,7 +768,7 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
         drawArrow(820, 130, 820, 220, '#6b7280', `h₂ = ${h2.toFixed(3)} m`);
     }
 
-    [slP, slH1, slH3, slRhoV, slRhoU].forEach((slider) => slider.addEventListener('input', () => {
+    [slP, slH1, slH3, slRhoV, slRhoU, slRhoM].forEach((slider) => slider.addEventListener('input', () => {
         setActiveScenario('');
         update();
     }));
@@ -838,48 +861,104 @@ $$p_B^* = p_c^* - \rho_v g (h_2 - h_1) = 353,6 - 1000 \cdot 9,81 \cdot (0,5 - 0,
             <label>Promjer klipa d: <span id="z25-v3-val-d" style="color:#2563eb;">300</span> mm</label>
             <input type="range" id="z25-v3-slider-d" min="150" max="600" step="10" value="300" style="accent-color:#2563eb;">
         </div>
+        <div class="z25-control">
+            <label>Gustoća fluida ρ: <span id="z25-v3-val-rho" style="color:#0f766e;">1000</span> kg/m³</label>
+            <input type="range" id="z25-v3-slider-rho" min="900" max="1200" step="5" value="1000" style="accent-color:#0f766e;">
+        </div>
+        <div class="z25-control">
+            <label>Visina h₁: <span id="z25-v3-val-h1" style="color:#1d4ed8;">0.25</span> m</label>
+            <input type="range" id="z25-v3-slider-h1" min="0.05" max="0.60" step="0.01" value="0.25" style="accent-color:#1d4ed8;">
+        </div>
+        <div class="z25-control">
+            <label>Visina h₂: <span id="z25-v3-val-h2" style="color:#7c3aed;">0.50</span> m</label>
+            <input type="range" id="z25-v3-slider-h2" min="0.10" max="1.20" step="0.01" value="0.50" style="accent-color:#7c3aed;">
+        </div>
+        <div class="z25-control">
+            <label>Atmosferski tlak p_atm: <span id="z25-v3-val-patm" style="color:#b45309;">101.3</span> kPa</label>
+            <input type="range" id="z25-v3-slider-patm" min="95" max="105" step="0.1" value="101.3" style="accent-color:#b45309;">
+        </div>
     </div>
+    <div class="z25-explainer" id="z25-v3-band" style="margin-bottom:12px; font-weight:700;">Rezim: blagi vakuum u komori B.</div>
     <div class="z25-metrics">
         <div class="z25-metric"><small>Bazni tlak p_c</small><strong style="color:#0f766e;"><span id="z25-v3-res-pc">0.354</span> kPa</strong></div>
         <div class="z25-metric"><small>Pretlak u A</small><strong style="color:#1d4ed8;"><span id="z25-v3-res-pA">2.81</span> kPa</strong></div>
         <div class="z25-metric"><small>Pretlak u B</small><strong style="color:#7c3aed;"><span id="z25-v3-res-pB">-2.10</span> kPa</strong></div>
+        <div class="z25-metric"><small>Apsolutni tlak u B</small><strong style="color:#be123c;"><span id="z25-v3-res-pBabs">99.2</span> kPa</strong></div>
         <div class="z25-metric"><small>Stanje komore B</small><strong style="color:#b45309;" id="z25-v3-res-state">vakuumski režim</strong></div>
     </div>
     <div class="z25-explainer" id="z25-v3-explainer"></div>
     <script>
     (function() {
         const canvas = document.getElementById('canvas-z25-v3');
-        const ctx = canvas.getContext('2d');
+        const hd = window.mf1HiDpiCanvas ? window.mf1HiDpiCanvas(canvas) : null;
+        const ctx = hd ? hd.ctx : canvas.getContext('2d');
+        const canvasW = hd ? hd.logicalWidth : (parseInt(canvas.getAttribute('width'), 10) || canvas.width);
+        const canvasH = hd ? hd.logicalHeight : (parseInt(canvas.getAttribute('height'), 10) || canvas.height);
         const slG = document.getElementById('z25-v3-slider-g');
         const slD = document.getElementById('z25-v3-slider-d');
+        const slRho = document.getElementById('z25-v3-slider-rho');
+        const slH1 = document.getElementById('z25-v3-slider-h1');
+        const slH2 = document.getElementById('z25-v3-slider-h2');
+        const slPatm = document.getElementById('z25-v3-slider-patm');
+        const bandEl = document.getElementById('z25-v3-band');
 
         function update() {
             const G = parseFloat(slG.value);
             const dMm = parseFloat(slD.value);
             const d = dMm / 1000;
             const area = Math.PI * d * d / 4;
-            const rho = 1000;
+            const rho = parseFloat(slRho.value);
             const g = 9.81;
-            const h1 = 0.25;
-            const h2 = 0.5;
+            const h1 = parseFloat(slH1.value);
+            const h2 = parseFloat(slH2.value);
+            const pAtm = parseFloat(slPatm.value) * 1000;
             const pc = G / area;
             const pA = pc + rho * g * h1;
             const pB = pc - rho * g * (h2 - h1);
+            const pBabs = pAtm + pB;
 
             document.getElementById('z25-v3-val-g').textContent = G.toFixed(0);
             document.getElementById('z25-v3-val-d').textContent = dMm.toFixed(0);
+            document.getElementById('z25-v3-val-rho').textContent = rho.toFixed(0);
+            document.getElementById('z25-v3-val-h1').textContent = h1.toFixed(2);
+            document.getElementById('z25-v3-val-h2').textContent = h2.toFixed(2);
+            document.getElementById('z25-v3-val-patm').textContent = (pAtm / 1000).toFixed(1);
             document.getElementById('z25-v3-res-pc').textContent = (pc / 1000).toFixed(3);
             document.getElementById('z25-v3-res-pA').textContent = (pA / 1000).toFixed(2);
             document.getElementById('z25-v3-res-pB').textContent = (pB / 1000).toFixed(2);
-            document.getElementById('z25-v3-res-state').textContent = pB < 0 ? 'vakuumski režim' : 'pozitivan pretlak';
-            document.getElementById('z25-v3-explainer').textContent = `Klip težine ${G.toFixed(0)} N i promjera ${dMm.toFixed(0)} mm stvara bazni tlak ${(pc / 1000).toFixed(3)} kPa. Dodavanjem hidrostatskog stupca do komore A dobivaš ${(pA / 1000).toFixed(2)} kPa, dok komora B ostaje na ${(pB / 1000).toFixed(2)} kPa jer je geodetski viša od razine ispod klipa.`;
+            document.getElementById('z25-v3-res-pBabs').textContent = (pBabs / 1000).toFixed(1);
+
+            let stateText = 'pozitivan pretlak';
+            if (pB < 0) stateText = 'vakuumski režim';
+            if (pBabs < 30000) stateText = 'duboki vakuum';
+            if (pBabs < 2300) stateText = 'rizik isparavanja';
+            document.getElementById('z25-v3-res-state').textContent = stateText;
+
+            if (pBabs < 2300) {
+                bandEl.textContent = 'Upozorenje: apsolutni tlak u B je ispod tlaka isparavanja vode (~2.3 kPa) - model ulazi u dvofazno podrucje.';
+                bandEl.style.background = '#fef2f2';
+                bandEl.style.borderColor = '#fecaca';
+                bandEl.style.color = '#991b1b';
+            } else if (pB < 0) {
+                bandEl.textContent = 'Rezim: vakuum u komori B, ali i dalje jednostruki fluidni model je primjenjiv.';
+                bandEl.style.background = '#fff7ed';
+                bandEl.style.borderColor = '#fdba74';
+                bandEl.style.color = '#9a3412';
+            } else {
+                bandEl.textContent = 'Rezim: obje komore su u pozitivnom pretlaku.';
+                bandEl.style.background = '#eff6ff';
+                bandEl.style.borderColor = '#bfdbfe';
+                bandEl.style.color = '#1e3a8a';
+            }
+
+            document.getElementById('z25-v3-explainer').textContent = `Za G=${G.toFixed(0)} N, d=${dMm.toFixed(0)} mm i ρ=${rho.toFixed(0)} kg/m³ bazni tlak je ${(pc / 1000).toFixed(3)} kPa. Dobiva se p_A=${(pA / 1000).toFixed(2)} kPa, p_B=${(pB / 1000).toFixed(2)} kPa i apsolutni tlak u B ${(pBabs / 1000).toFixed(1)} kPa.`;
             draw(G, dMm, pA, pB, pc);
         }
 
         function draw(G, dMm, pA, pB, pc) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvasW, canvasH);
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvasW, canvasH);
             const cx = 430;
             const cy = 180;
             const tubeW = dMm * 0.36;
@@ -945,7 +1024,7 @@ $$p_B^* = p_c^* - \rho_v g (h_2 - h_1) = 353,6 - 1000 \cdot 9,81 \cdot (0,5 - 0,
             ctx.fill();
         }
 
-        [slG, slD].forEach((slider) => slider.addEventListener('input', update));
+        [slG, slD, slRho, slH1, slH2, slPatm].forEach((slider) => slider.addEventListener('input', update));
         update();
     })();
     </script>
@@ -1012,6 +1091,10 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
             <label>Nesigurnost očitanja ±: <span id="z30-v-sigma" style="color:#7c3aed;">1.0</span> mm</label>
             <input type="range" id="z30-sigma" min="0" max="4" step="0.1" value="1.0" style="accent-color:#7c3aed;">
         </div>
+        <div class="z30-control">
+            <label>Referentna gustoća ρ_ref: <span id="z30-v-rhref" style="color:#2563eb;">1000</span> kg/m³</label>
+            <input type="range" id="z30-rhref" min="980" max="1035" step="1" value="1000" style="accent-color:#2563eb;">
+        </div>
     </div>
     <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
         <button type="button" id="z30-preset-light" style="border:1px solid #cbd5e1; background:#f8fafc; color:#0f172a; border-radius:999px; padding:7px 12px; font-size:0.75rem; font-weight:700; cursor:pointer;">Laksa od vode</button>
@@ -1024,17 +1107,21 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
         <div class="z30-metric"><small>Interval gustoće</small><strong style="color:#6d28d9;"><span id="z30-rho-range">1040 - 1066</span> kg/m³</strong></div>
         <div class="z30-metric"><small>Uronjeno u vodi</small><strong style="color:#2563eb;"><span id="z30-res-hwater">100</span> mm</strong></div>
         <div class="z30-metric"><small>Uronjeno u nepoznatoj tekućini</small><strong style="color:#0f766e;"><span id="z30-res-hfluid">95</span> mm</strong></div>
-        <div class="z30-metric"><small>Omjer prema vodi</small><strong style="color:#7c3aed;"><span id="z30-ratio">1.05</span>x</strong></div>
+        <div class="z30-metric"><small>Omjer prema referenci</small><strong style="color:#7c3aed;"><span id="z30-ratio">1.05</span>x</strong></div>
         <div class="z30-metric"><small>Interpretacija</small><strong style="color:#b45309;" id="z30-status">gušća od vode</strong></div>
     </div>
     <div class="z30-explainer" id="z30-explainer"></div>
     <script>
     (function() {
         const canvas = document.getElementById('z30-canvas');
-        const ctx = canvas.getContext('2d');
+        const hd = window.mf1HiDpiCanvas ? window.mf1HiDpiCanvas(canvas) : null;
+        const ctx = hd ? hd.ctx : canvas.getContext('2d');
+        const canvasW = hd ? hd.logicalWidth : (parseInt(canvas.getAttribute('width'), 10) || canvas.width);
+        const canvasH = hd ? hd.logicalHeight : (parseInt(canvas.getAttribute('height'), 10) || canvas.height);
         const h2S = document.getElementById('z30-h2');
         const h1S = document.getElementById('z30-h1');
         const sigmaS = document.getElementById('z30-sigma');
+        const rhoRefS = document.getElementById('z30-rhref');
         const bandEl = document.getElementById('z30-status-band');
 
         function setPreset(h2Value, h1Value) {
@@ -1047,24 +1134,26 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
             const h2 = parseFloat(h2S.value);
             const h1 = parseFloat(h1S.value);
             const sigma = parseFloat(sigmaS.value);
+            const rhoRef = parseFloat(rhoRefS.value);
             const submerged = h1 - h2;
             const safeSubmerged = Math.max(submerged, 0.5);
-            const rho = 1000 * h1 / safeSubmerged;
-            const ratio = rho / 1000;
+            const rho = rhoRef * h1 / safeSubmerged;
+            const ratio = rho / rhoRef;
             const subLow = Math.max(h1 - (h2 + sigma), 0.5);
             const subHigh = Math.max(h1 - (h2 - sigma), 0.5);
-            const rhoHigh = 1000 * h1 / subLow;
-            const rhoLow = 1000 * h1 / subHigh;
+            const rhoHigh = rhoRef * h1 / subLow;
+            const rhoLow = rhoRef * h1 / subHigh;
 
             document.getElementById('z30-v-h2').textContent = h2.toFixed(1);
             document.getElementById('z30-v-h1').textContent = h1.toFixed(0);
             document.getElementById('z30-v-sigma').textContent = sigma.toFixed(1);
+            document.getElementById('z30-v-rhref').textContent = rhoRef.toFixed(0);
             document.getElementById('z30-v-rho').textContent = rho.toFixed(1);
             document.getElementById('z30-rho-range').textContent = `${rhoLow.toFixed(0)} - ${rhoHigh.toFixed(0)}`;
             document.getElementById('z30-res-hwater').textContent = h1.toFixed(0);
             document.getElementById('z30-res-hfluid').textContent = safeSubmerged.toFixed(1);
             document.getElementById('z30-ratio').textContent = ratio.toFixed(3);
-            const status = h2 > 0 ? 'gušća od vode' : (h2 < 0 ? 'rjeđa od vode' : 'jednaka vodi');
+            const status = h2 > 0 ? 'gušća od reference' : (h2 < 0 ? 'rjeđa od reference' : 'jednaka referenci');
             document.getElementById('z30-status').textContent = status;
             if (submerged <= 0.5) {
                 bandEl.textContent = 'Rezim: geometrijska granica areometra (h₁ - h₂ ≈ 0). U tom području model postaje nestabilan.';
@@ -1087,14 +1176,14 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
                 bandEl.style.borderColor = '#fdba74';
                 bandEl.style.color = '#9a3412';
             }
-            document.getElementById('z30-explainer').textContent = `Ako je očitanje u drugoj tekućini ${h2.toFixed(1)} mm više nego u vodi, areometar uranja ${safeSubmerged.toFixed(1)} mm. Iz jednakosti uzgona slijedi gustoća ${rho.toFixed(1)} kg/m³, pa je tekućina ${status}. Uz nesigurnost ±${sigma.toFixed(1)} mm, gustoća je u intervalu ${rhoLow.toFixed(0)} do ${rhoHigh.toFixed(0)} kg/m³.`;
+            document.getElementById('z30-explainer').textContent = `Ako je očitanje u drugoj tekućini ${h2.toFixed(1)} mm više nego u referenci, areometar uranja ${safeSubmerged.toFixed(1)} mm. Za ρ_ref=${rhoRef.toFixed(0)} kg/m³ dobiva se gustoća ${rho.toFixed(1)} kg/m³ (${status}). Uz nesigurnost ±${sigma.toFixed(1)} mm, gustoća je u intervalu ${rhoLow.toFixed(0)} do ${rhoHigh.toFixed(0)} kg/m³.`;
             draw(h1, safeSubmerged, h2, rho);
         }
 
         function draw(hWater, hFluid, h2, rho) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvasW, canvasH);
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvasW, canvasH);
             const surfaceY = 130;
             const scale = 1.45;
             ctx.fillStyle = 'rgba(96,165,250,0.18)';
@@ -1152,7 +1241,7 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
             ctx.fillText(label, x - 22, surfaceY + 198);
         }
 
-        [h2S, h1S, sigmaS].forEach((slider) => slider.addEventListener('input', update));
+        [h2S, h1S, sigmaS, rhoRefS].forEach((slider) => slider.addEventListener('input', update));
         document.getElementById('z30-preset-light').addEventListener('click', () => setPreset(-12, 100));
         document.getElementById('z30-preset-neutral').addEventListener('click', () => setPreset(0, 100));
         document.getElementById('z30-preset-heavy').addEventListener('click', () => setPreset(12, 100));
@@ -1252,11 +1341,25 @@ $$h_{vmax} = 0,8 - \frac{0,6}{2} \cdot 0,2548 = \mathbf{0,724 \, \text{m}}$$
             <label>Planirani početni nivo punjenja: <span id="z31-v3-val-hi" style="color:#dc2626;">0.55</span> m</label>
             <input type="range" id="z31-v3-slider-hi" min="0.2" max="0.8" step="0.01" value="0.55" style="accent-color:#dc2626;">
         </div>
+        <div class="z31-control">
+            <label>Visina spremnika h_s: <span id="z31-v3-val-hs" style="color:#0f766e;">0.80</span> m</label>
+            <input type="range" id="z31-v3-slider-hs" min="0.50" max="1.20" step="0.01" value="0.80" style="accent-color:#0f766e;">
+        </div>
+        <div class="z31-control">
+            <label>Duža baza L_d: <span id="z31-v3-val-ll" style="color:#1d4ed8;">2.00</span> m</label>
+            <input type="range" id="z31-v3-slider-ll" min="1.00" max="3.00" step="0.05" value="2.00" style="accent-color:#1d4ed8;">
+        </div>
+        <div class="z31-control">
+            <label>Kraća baza L_k: <span id="z31-v3-val-ls" style="color:#0f766e;">0.60</span> m</label>
+            <input type="range" id="z31-v3-slider-ls" min="0.30" max="1.20" step="0.02" value="0.60" style="accent-color:#0f766e;">
+        </div>
     </div>
+    <div class="z31-explainer" id="z31-v3-band" style="margin-bottom:12px; font-weight:700;">Rezim: sigurno za kraću orijentaciju, rubno za dužu.</div>
     <div class="z31-metrics">
         <div class="z31-metric"><small>Kut površine α</small><strong style="color:#0f172a;"><span id="z31-v3-res-alpha">14.3</span>°</strong></div>
-        <div class="z31-metric"><small>Dopušteni nivo za L=2.0 m</small><strong style="color:#1d4ed8;"><span id="z31-v3-hlong">0.545</span> m</strong></div>
-        <div class="z31-metric"><small>Dopušteni nivo za L=0.6 m</small><strong style="color:#0f766e;"><span id="z31-v3-hshort">0.724</span> m</strong></div>
+        <div class="z31-metric"><small>Dopušteni nivo za L_d</small><strong style="color:#1d4ed8;"><span id="z31-v3-hlong">0.545</span> m</strong></div>
+        <div class="z31-metric"><small>Dopušteni nivo za L_k</small><strong style="color:#0f766e;"><span id="z31-v3-hshort">0.724</span> m</strong></div>
+        <div class="z31-metric"><small>Sigurnosna margina (L_d)</small><strong style="color:#be123c;"><span id="z31-v3-margin">-0.005</span> m</strong></div>
         <div class="z31-metric"><small>Povoljnija orijentacija</small><strong style="color:#b45309;" id="z31-v3-better">kraća strana naprijed</strong></div>
     </div>
     <div class="z31-compare">
@@ -1274,30 +1377,59 @@ $$h_{vmax} = 0,8 - \frac{0,6}{2} \cdot 0,2548 = \mathbf{0,724 \, \text{m}}$$
     (function() {
         const slAx = document.getElementById('z31-v3-slider-ax');
         const slHi = document.getElementById('z31-v3-slider-hi');
+        const slHs = document.getElementById('z31-v3-slider-hs');
+        const slLl = document.getElementById('z31-v3-slider-ll');
+        const slLs = document.getElementById('z31-v3-slider-ls');
         const cLong = document.getElementById('canvas-z31-v3-long');
         const cShort = document.getElementById('canvas-z31-v3-short');
-        const ctxL = cLong.getContext('2d');
-        const ctxS = cShort.getContext('2d');
+        const hdL = window.mf1HiDpiCanvas ? window.mf1HiDpiCanvas(cLong) : null;
+        const hdS = window.mf1HiDpiCanvas ? window.mf1HiDpiCanvas(cShort) : null;
+        const ctxL = hdL ? hdL.ctx : cLong.getContext('2d');
+        const ctxS = hdS ? hdS.ctx : cShort.getContext('2d');
+        const bandEl = document.getElementById('z31-v3-band');
 
         function update() {
             const ax = parseFloat(slAx.value);
             const hInit = parseFloat(slHi.value);
+            const hTank = parseFloat(slHs.value);
+            const longL = parseFloat(slLl.value);
+            const shortL = parseFloat(slLs.value);
             const g = 9.81;
             const alpha = Math.atan(ax / g);
             const alphaDeg = alpha * 180 / Math.PI;
-            const hTank = 0.8;
-            const longMax = hTank - (2.0 / 2) * Math.tan(alpha);
-            const shortMax = hTank - (0.6 / 2) * Math.tan(alpha);
+            const longMax = hTank - (longL / 2) * Math.tan(alpha);
+            const shortMax = hTank - (shortL / 2) * Math.tan(alpha);
+            const marginLong = longMax - hInit;
 
             document.getElementById('z31-v3-val-ax').textContent = ax.toFixed(1);
             document.getElementById('z31-v3-val-hi').textContent = hInit.toFixed(2);
+            document.getElementById('z31-v3-val-hs').textContent = hTank.toFixed(2);
+            document.getElementById('z31-v3-val-ll').textContent = longL.toFixed(2);
+            document.getElementById('z31-v3-val-ls').textContent = shortL.toFixed(2);
             document.getElementById('z31-v3-res-alpha').textContent = alphaDeg.toFixed(1);
             document.getElementById('z31-v3-hlong').textContent = longMax.toFixed(3);
             document.getElementById('z31-v3-hshort').textContent = shortMax.toFixed(3);
+            document.getElementById('z31-v3-margin').textContent = marginLong.toFixed(3);
             document.getElementById('z31-v3-better').textContent = shortMax > longMax ? 'kraća strana naprijed' : 'duža strana naprijed';
-            document.getElementById('z31-v3-explainer').textContent = `Za ubrzanje ${ax.toFixed(1)} m/s² slobodna površina zatvara kut ${alphaDeg.toFixed(1)}°. Ako spremnik puniš do ${hInit.toFixed(2)} m, orijentacija s duljinom 2.0 m dopušta najviše ${longMax.toFixed(3)} m, dok orijentacija s duljinom 0.6 m dopušta ${shortMax.toFixed(3)} m. Zato je kraća stranica u smjeru gibanja sigurnija.`;
-            draw(ctxL, 2.0, hTank, hInit, alpha, longMax);
-            draw(ctxS, 0.6, hTank, hInit, alpha, shortMax);
+            if (marginLong < 0) {
+                bandEl.textContent = 'Rezim: prelijevanje u dugoj orijentaciji - smanji pocetno punjenje ili ubrzanje.';
+                bandEl.style.background = '#fef2f2';
+                bandEl.style.borderColor = '#fecaca';
+                bandEl.style.color = '#991b1b';
+            } else if (marginLong < 0.03) {
+                bandEl.textContent = 'Rezim: rubna sigurnost u dugoj orijentaciji, mala rezerva protiv prelijevanja.';
+                bandEl.style.background = '#fff7ed';
+                bandEl.style.borderColor = '#fdba74';
+                bandEl.style.color = '#9a3412';
+            } else {
+                bandEl.textContent = 'Rezim: sigurno punjenje u obje orijentacije.';
+                bandEl.style.background = '#eff6ff';
+                bandEl.style.borderColor = '#bfdbfe';
+                bandEl.style.color = '#1e3a8a';
+            }
+            document.getElementById('z31-v3-explainer').textContent = `Za ubrzanje ${ax.toFixed(1)} m/s² površina je pod kutom ${alphaDeg.toFixed(1)}°. Za h_s=${hTank.toFixed(2)} m i h_i=${hInit.toFixed(2)} m, duga orijentacija (L_d=${longL.toFixed(2)} m) dopušta ${longMax.toFixed(3)} m, kratka (L_k=${shortL.toFixed(2)} m) ${shortMax.toFixed(3)} m.`;
+            draw(ctxL, longL, hTank, hInit, alpha, longMax);
+            draw(ctxS, shortL, hTank, hInit, alpha, shortMax);
         }
 
         function draw(ctx, L, hTank, hInit, alpha, hSafe) {
@@ -1329,7 +1461,7 @@ $$h_{vmax} = 0,8 - \frac{0,6}{2} \cdot 0,2548 = \mathbf{0,724 \, \text{m}}$$
             ctx.fillText(hInit > hSafe ? 'prelijevanje' : 'sigurno', 18, 38);
         }
 
-        [slAx, slHi].forEach((slider) => slider.addEventListener('input', update));
+        [slAx, slHi, slHs, slLl, slLs].forEach((slider) => slider.addEventListener('input', update));
         update();
     })();
     </script>
@@ -1391,47 +1523,91 @@ $$p_{dmin} = \rho \cdot g \cdot h_{min} = 1000 \cdot 9,81 \cdot 0,266 = \mathbf{
             <label>Horizontalno ubrzanje aₓ: <span id="z32-v-a" style="color:#2563eb;">2.4</span> m/s²</label>
             <input type="range" id="z32-a" min="0" max="8" step="0.1" value="2.4" style="accent-color:#2563eb;">
         </div>
+        <div class="z32-control">
+            <label>Duljina spremnika L: <span id="z32-v-l" style="color:#1d4ed8;">6.0</span> m</label>
+            <input type="range" id="z32-l" min="2" max="8" step="0.1" value="6.0" style="accent-color:#1d4ed8;">
+        </div>
+        <div class="z32-control">
+            <label>Početna razina h₀: <span id="z32-v-h0" style="color:#0f766e;">1.00</span> m</label>
+            <input type="range" id="z32-h0" min="0.2" max="1.8" step="0.01" value="1.0" style="accent-color:#0f766e;">
+        </div>
+        <div class="z32-control">
+            <label>Gustoća fluida ρ: <span id="z32-v-rho" style="color:#7c3aed;">1000</span> kg/m³</label>
+            <input type="range" id="z32-rho" min="900" max="1200" step="5" value="1000" style="accent-color:#7c3aed;">
+        </div>
     </div>
+    <div class="z32-explainer" id="z32-band" style="margin-bottom:12px; font-weight:700;">Rezim: obje visine su fizikalno valjane.</div>
     <div class="z32-metrics">
         <div class="z32-metric"><small>Kut α</small><strong style="color:#0f172a;"><span id="z32-res-alpha">13.8</span>°</strong></div>
         <div class="z32-metric"><small>h_max na dnu</small><strong style="color:#1d4ed8;"><span id="z32-res-hmax">1.734</span> m</strong></div>
         <div class="z32-metric"><small>h_min na dnu</small><strong style="color:#0f766e;"><span id="z32-res-hmin">0.266</span> m</strong></div>
         <div class="z32-metric"><small>p_dmax / p_dmin</small><strong style="color:#b45309;"><span id="z32-res-pmax">17.0</span> / <span id="z32-res-pmin">2.6</span> kPa</strong></div>
+        <div class="z32-metric"><small>Omjer aₓ/g</small><strong style="color:#7c3aed;"><span id="z32-res-fr">0.245</span></strong></div>
     </div>
     <div class="z32-scene"><canvas id="z32-canvas" width="900" height="340"></canvas></div>
     <div class="z32-explainer" id="z32-explainer"></div>
     <script>
     (function() {
         const canvas = document.getElementById('z32-canvas');
-        const ctx = canvas.getContext('2d');
+        const hd = window.mf1HiDpiCanvas ? window.mf1HiDpiCanvas(canvas) : null;
+        const ctx = hd ? hd.ctx : canvas.getContext('2d');
+        const canvasW = hd ? hd.logicalWidth : (parseInt(canvas.getAttribute('width'), 10) || canvas.width);
+        const canvasH = hd ? hd.logicalHeight : (parseInt(canvas.getAttribute('height'), 10) || canvas.height);
         const aS = document.getElementById('z32-a');
+        const lS = document.getElementById('z32-l');
+        const h0S = document.getElementById('z32-h0');
+        const rhoS = document.getElementById('z32-rho');
+        const bandEl = document.getElementById('z32-band');
 
         function update() {
             const a = parseFloat(aS.value);
+            const L = parseFloat(lS.value);
+            const h0 = parseFloat(h0S.value);
+            const rho = parseFloat(rhoS.value);
             const g = 9.81;
-            const L = 6.0;
-            const h0 = 1.0;
-            const rho = 1000;
             const alpha = Math.atan(a / g);
             const hMax = h0 + (L / 2) * Math.tan(alpha);
             const hMin = Math.max(0, h0 - (L / 2) * Math.tan(alpha));
             const pMax = rho * g * hMax;
             const pMin = rho * g * hMin;
+            const fr = a / g;
 
             document.getElementById('z32-v-a').textContent = a.toFixed(1);
+            document.getElementById('z32-v-l').textContent = L.toFixed(1);
+            document.getElementById('z32-v-h0').textContent = h0.toFixed(2);
+            document.getElementById('z32-v-rho').textContent = rho.toFixed(0);
             document.getElementById('z32-res-alpha').textContent = (alpha * 180 / Math.PI).toFixed(1);
             document.getElementById('z32-res-hmax').textContent = hMax.toFixed(3);
             document.getElementById('z32-res-hmin').textContent = hMin.toFixed(3);
             document.getElementById('z32-res-pmax').textContent = (pMax / 1000).toFixed(1);
             document.getElementById('z32-res-pmin').textContent = (pMin / 1000).toFixed(1);
-            document.getElementById('z32-explainer').textContent = `Pri ubrzanju ${a.toFixed(1)} m/s² površina se naginje za ${(alpha * 180 / Math.PI).toFixed(1)}°. Na stražnjem dnu ostaje stupac vode ${hMax.toFixed(3)} m i zato tlak raste na ${(pMax / 1000).toFixed(1)} kPa, dok je na prednjem dnu stupac samo ${hMin.toFixed(3)} m pa tlak pada na ${(pMin / 1000).toFixed(1)} kPa.`;
+            document.getElementById('z32-res-fr').textContent = fr.toFixed(3);
+
+            if (hMin <= 0.001) {
+                bandEl.textContent = 'Rezim: suho dno na prednjem kraju (h_min≈0), daljnje povećanje ubrzanja izlazi iz jednodimenzijskog modela.';
+                bandEl.style.background = '#fef2f2';
+                bandEl.style.borderColor = '#fecaca';
+                bandEl.style.color = '#991b1b';
+            } else if (hMax >= 2.0) {
+                bandEl.textContent = 'Rezim: visoki stupac na stražnjem kraju, blizu geometrijske granice spremnika.';
+                bandEl.style.background = '#fff7ed';
+                bandEl.style.borderColor = '#fdba74';
+                bandEl.style.color = '#9a3412';
+            } else {
+                bandEl.textContent = 'Rezim: obje visine su fizikalno valjane.';
+                bandEl.style.background = '#eff6ff';
+                bandEl.style.borderColor = '#bfdbfe';
+                bandEl.style.color = '#1e3a8a';
+            }
+
+            document.getElementById('z32-explainer').textContent = `Za a=${a.toFixed(1)} m/s² i L=${L.toFixed(1)} m površina se naginje za ${(alpha * 180 / Math.PI).toFixed(1)}°. Pri h₀=${h0.toFixed(2)} m dobiva se h_max=${hMax.toFixed(3)} m i h_min=${hMin.toFixed(3)} m, pa su tlakovi ${(pMax / 1000).toFixed(1)} i ${(pMin / 1000).toFixed(1)} kPa.`;
             draw(alpha, hMax, hMin, pMax, pMin);
         }
 
         function draw(alpha, hMax, hMin, pMax, pMin) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvasW, canvasH);
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvasW, canvasH);
             const ox = 110;
             const oy = 285;
             const w = 560;
@@ -1481,7 +1657,7 @@ $$p_{dmin} = \rho \cdot g \cdot h_{min} = 1000 \cdot 9,81 \cdot 0,266 = \mathbf{
             ctx.fillText(`α = ${(alpha * 180 / Math.PI).toFixed(1)}°`, 730, 48);
         }
 
-        aS.addEventListener('input', update);
+        [aS, lS, h0S, rhoS].forEach((slider) => slider.addEventListener('input', update));
         update();
     })();
     </script>
@@ -1542,14 +1718,32 @@ $$p_{pmax} = p_{max} - p_{atm} = 147,7 - 101,3 = \mathbf{46,4 \, \text{kPa}}$$
             <input type="range" id="z33-a" min="-8" max="8" step="0.1" value="2.5" style="accent-color:#2563eb;">
         </div>
         <div class="z33-control">
+            <label>Gustoća ρ: <span id="z33-v-rho" style="color:#0f766e;">1020</span> kg/m³</label>
+            <input type="range" id="z33-rho" min="950" max="1200" step="5" value="1020" style="accent-color:#0f766e;">
+        </div>
+        <div class="z33-control">
+            <label>Duljina l: <span id="z33-v-l" style="color:#1d4ed8;">7.0</span> m</label>
+            <input type="range" id="z33-l" min="4" max="9" step="0.1" value="7.0" style="accent-color:#1d4ed8;">
+        </div>
+        <div class="z33-control">
+            <label>Promjer d: <span id="z33-v-d" style="color:#7c3aed;">3.0</span> m</label>
+            <input type="range" id="z33-d" min="1.5" max="4.0" step="0.1" value="3.0" style="accent-color:#7c3aed;">
+        </div>
+        <div class="z33-control">
+            <label>Minimalni aps. tlak p_min: <span id="z33-v-pmin" style="color:#b45309;">100</span> kPa</label>
+            <input type="range" id="z33-pmin" min="80" max="120" step="0.5" value="100" style="accent-color:#b45309;">
+        </div>
+        <div class="z33-control">
             <label>Interaktivna sonda</label>
             <div style="font-size:0.82rem; color:#475569; line-height:1.55;">Pomakni miš preko cisterne. Widget računa lokalni tlak iz zadane minimalne točke od 100 kPa i lokalne udaljenosti kroz polje ubrzanja i gravitacije.</div>
             <button id="z33-brake" class="z33-action" style="margin-top:10px;">Prebaci na naglo kočenje</button>
         </div>
     </div>
+    <div class="z33-explainer" id="z33-band" style="margin-bottom:12px; font-weight:700;">Rezim: jednofazni tlakovi, bez rizika isparavanja.</div>
     <div class="z33-metrics">
         <div class="z33-metric"><small>Maksimalan apsolutni tlak</small><strong style="color:#1d4ed8;"><span id="z33-res-pabs">147.7</span> kPa</strong></div>
         <div class="z33-metric"><small>Maksimalan pretlak</small><strong style="color:#be123c;"><span id="z33-res-pmax">46.4</span> kPa</strong></div>
+        <div class="z33-metric"><small>Minimalan pretlak</small><strong style="color:#0f766e;"><span id="z33-res-pming">-1.3</span> kPa</strong></div>
         <div class="z33-metric"><small>Mjesto maksimuma</small><strong style="color:#0f766e;" id="z33-res-place">donji stražnji rub</strong></div>
         <div class="z33-metric"><small>Sonda</small><strong style="color:#b45309;"><span id="z33-probe-p">--</span> kPa</strong></div>
     </div>
@@ -1558,39 +1752,69 @@ $$p_{pmax} = p_{max} - p_{atm} = 147,7 - 101,3 = \mathbf{46,4 \, \text{kPa}}$$
     <script>
     (function() {
         const canvas = document.getElementById('z33-canvas');
-        const ctx = canvas.getContext('2d');
+        const hd = window.mf1HiDpiCanvas ? window.mf1HiDpiCanvas(canvas) : null;
+        const ctx = hd ? hd.ctx : canvas.getContext('2d');
+        const canvasW = hd ? hd.logicalWidth : (parseInt(canvas.getAttribute('width'), 10) || canvas.width);
+        const canvasH = hd ? hd.logicalHeight : (parseInt(canvas.getAttribute('height'), 10) || canvas.height);
         const aS = document.getElementById('z33-a');
+        const rhoS = document.getElementById('z33-rho');
+        const lS = document.getElementById('z33-l');
+        const dS = document.getElementById('z33-d');
+        const pminS = document.getElementById('z33-pmin');
         const brakeBtn = document.getElementById('z33-brake');
-        const rho = 1020;
-        const pMinAbs = 100000;
+        let rho = 1020;
+        let pMinAbs = 100000;
         const pAtm = 101300;
         const pVapor = 2330;
-        const L = 7.0;
-        const D = 3.0;
+        let L = 7.0;
+        let D = 3.0;
         const ox = 140;
         const oy = 60;
         const w = 560;
         const h = 180;
+        const bandEl = document.getElementById('z33-band');
         let mouseX = -1;
         let mouseY = -1;
 
         function update() {
             const a = parseFloat(aS.value);
+            rho = parseFloat(rhoS.value);
+            L = parseFloat(lS.value);
+            D = parseFloat(dS.value);
+            pMinAbs = parseFloat(pminS.value) * 1000;
             const pMax = pMinAbs + rho * Math.abs(a) * L + rho * 9.81 * D;
             const pGauge = pMax - pAtm;
             document.getElementById('z33-v-a').textContent = a.toFixed(1);
+            document.getElementById('z33-v-rho').textContent = rho.toFixed(0);
+            document.getElementById('z33-v-l').textContent = L.toFixed(1);
+            document.getElementById('z33-v-d').textContent = D.toFixed(1);
+            document.getElementById('z33-v-pmin').textContent = (pMinAbs / 1000).toFixed(1);
             document.getElementById('z33-res-pabs').textContent = (pMax / 1000).toFixed(1);
             document.getElementById('z33-res-pmax').textContent = (pGauge / 1000).toFixed(1);
+            document.getElementById('z33-res-pming').textContent = ((pMinAbs - pAtm) / 1000).toFixed(1);
             document.getElementById('z33-res-place').textContent = a >= 0 ? 'donji stražnji rub' : 'donji prednji rub';
-            document.getElementById('z33-explainer').textContent = `Za ubrzanje ${a.toFixed(1)} m/s² tlak raste od zadane minimalne točke 100 kPa kroz uzdužni doprinos ρa_xl i vertikalni doprinos ρgd. Zato najveći apsolutni tlak iznosi ${(pMax / 1000).toFixed(1)} kPa, odnosno najveći pretlak ${(pGauge / 1000).toFixed(1)} kPa.`;
+
+            if (pMinAbs < pVapor) {
+                bandEl.textContent = 'Upozorenje: zadani minimalni tlak je ispod tlaka isparavanja - model jednofaznog fluida nije valjan.';
+                bandEl.style.background = '#fef2f2';
+                bandEl.style.borderColor = '#fecaca';
+                bandEl.style.color = '#991b1b';
+            } else {
+                bandEl.textContent = 'Rezim: jednofazni tlakovi, bez rizika isparavanja.';
+                bandEl.style.background = '#eff6ff';
+                bandEl.style.borderColor = '#bfdbfe';
+                bandEl.style.color = '#1e3a8a';
+            }
+
+            document.getElementById('z33-explainer').textContent = `Za a=${a.toFixed(1)} m/s², ρ=${rho.toFixed(0)} kg/m³, l=${L.toFixed(1)} m i d=${D.toFixed(1)} m tlak raste od p_min=${(pMinAbs / 1000).toFixed(1)} kPa kroz doprinose ρaₓl i ρgd. Maksimalni apsolutni tlak je ${(pMax / 1000).toFixed(1)} kPa.`;
             draw(a, pMax);
             updateProbe(a);
         }
 
         function draw(a, pMax) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvasW, canvasH);
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvasW, canvasH);
             const grad = ctx.createLinearGradient(a >= 0 ? ox + w : ox, oy, a >= 0 ? ox : ox + w, oy + h);
             grad.addColorStop(0, '#dbeafe');
             grad.addColorStop(1, '#1d4ed8');
@@ -1622,8 +1846,8 @@ $$p_{pmax} = p_{max} - p_{atm} = 147,7 - 101,3 = \mathbf{46,4 \, \text{kPa}}$$
 
             ctx.fillStyle = '#0f172a';
             ctx.font = 'bold 12px Inter';
-            ctx.fillText(a >= 0 ? 'p_min = 100 kPa' : 'p_max zona', ox + w - 120, oy - 12);
-            ctx.fillText(a >= 0 ? 'p_max zona' : 'p_min = 100 kPa', ox + 12, oy + h + 26);
+            ctx.fillText(a >= 0 ? `p_min = ${(pMinAbs/1000).toFixed(1)} kPa` : 'p_max zona', ox + w - 150, oy - 12);
+            ctx.fillText(a >= 0 ? 'p_max zona' : `p_min = ${(pMinAbs/1000).toFixed(1)} kPa`, ox + 12, oy + h + 26);
             ctx.fillText(`p_max = ${(pMax / 1000).toFixed(1)} kPa`, ox + 210, 34);
         }
 
@@ -1654,7 +1878,7 @@ $$p_{pmax} = p_{max} - p_{atm} = 147,7 - 101,3 = \mathbf{46,4 \, \text{kPa}}$$
             aS.value = '-2.5';
             update();
         });
-        aS.addEventListener('input', update);
+        [aS, rhoS, lS, dS, pminS].forEach((slider) => slider.addEventListener('input', update));
         update();
     })();
     </script>

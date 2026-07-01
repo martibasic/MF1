@@ -404,6 +404,104 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         return { ctx, logicalWidth, logicalHeight };
     };
 
+    // Improve readability of canvas annotations across widgets without rewriting each draw routine.
+    window.mf1EnhanceCanvasReadability = function(canvas, options) {
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx || ctx.__mf1ReadablePatched) return;
+        const minFontPx = options && options.minFontPx ? options.minFontPx : 16;
+        const minLineWidth = options && options.minLineWidth ? options.minLineWidth : 1.6;
+        const drawLabelBg = options && Object.prototype.hasOwnProperty.call(options, 'drawLabelBg') ? options.drawLabelBg : true;
+        const fontPxRe = /(\d+(?:\.\d+)?)px/;
+
+        const originalFillText = ctx.fillText.bind(ctx);
+        const originalStrokeText = ctx.strokeText.bind(ctx);
+        const originalStroke = ctx.stroke.bind(ctx);
+
+        function drawRoundedRect(x, y, w, h, r) {
+            const rr = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + rr, y);
+            ctx.arcTo(x + w, y, x + w, y + h, rr);
+            ctx.arcTo(x + w, y + h, x, y + h, rr);
+            ctx.arcTo(x, y + h, x, y, rr);
+            ctx.arcTo(x, y, x + w, y, rr);
+            ctx.closePath();
+        }
+
+        function maybeDrawLabelBackdrop(text, x, y) {
+            if (!drawLabelBg) return;
+            if (typeof text !== 'string') return;
+            if (text.length < 2 || text.length > 42) return;
+            const wordCount = text.trim().split(/\s+/).length;
+            if (wordCount > 8) return;
+
+            const tm = ctx.measureText(text);
+            const ascent = tm.actualBoundingBoxAscent || 11;
+            const descent = tm.actualBoundingBoxDescent || 5;
+            const padX = 6;
+            const padY = 3;
+            const bx = x - padX;
+            const by = y - ascent - padY;
+            const bw = tm.width + padX * 2;
+            const bh = ascent + descent + padY * 2;
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(255,255,255,0.82)';
+            drawRoundedRect(bx, by, bw, bh, 6);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(148,163,184,0.45)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function withReadableFont(drawFn, text, x, y, maxWidth) {
+            const prevFont = ctx.font;
+            const match = prevFont && prevFont.match(fontPxRe);
+            if (match) {
+                const px = parseFloat(match[1]);
+                if (Number.isFinite(px) && px < minFontPx) {
+                    ctx.font = prevFont.replace(fontPxRe, `${minFontPx}px`);
+                }
+            }
+            // Keep labels visually consistent and more legible in busy sketches.
+            if (!/Inter|Segoe UI|Arial|sans-serif/i.test(ctx.font)) {
+                ctx.font = `${ctx.font}, "Segoe UI", Arial, sans-serif`;
+            }
+            maybeDrawLabelBackdrop(text, x, y);
+            if (typeof maxWidth === 'number') {
+                drawFn(text, x, y, maxWidth);
+            } else {
+                drawFn(text, x, y);
+            }
+            ctx.font = prevFont;
+        }
+
+        ctx.fillText = function(text, x, y, maxWidth) {
+            withReadableFont(originalFillText, text, x, y, maxWidth);
+        };
+
+        ctx.strokeText = function(text, x, y, maxWidth) {
+            withReadableFont(originalStrokeText, text, x, y, maxWidth);
+        };
+
+        ctx.stroke = function() {
+            const prevWidth = ctx.lineWidth;
+            if (prevWidth < minLineWidth) ctx.lineWidth = minLineWidth;
+            const prevJoin = ctx.lineJoin;
+            const prevCap = ctx.lineCap;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            originalStroke();
+            ctx.lineWidth = prevWidth;
+            ctx.lineJoin = prevJoin;
+            ctx.lineCap = prevCap;
+        };
+
+        ctx.__mf1ReadablePatched = true;
+    };
+
     function triggerInputs(root) {
         root.querySelectorAll('input, select').forEach((el) => {
             el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -474,6 +572,8 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
     function init() {
         const widgets = Array.from(document.querySelectorAll('#v3-intro-widget, div[id$="-widget"]'));
         widgets.forEach(setupWidget);
+        const canvases = Array.from(document.querySelectorAll('#v3-intro-widget canvas, div[id$="-widget"] canvas'));
+        canvases.forEach((canvas) => window.mf1EnhanceCanvasReadability(canvas, { minFontPx: 16, minLineWidth: 1.6, drawLabelBg: true }));
     }
 
     if (document.readyState === 'loading') {
@@ -1370,6 +1470,44 @@ $$h_{vmax} = 0,8 - \frac{0,6}{2} \cdot 0,2548 = \mathbf{0,724 \, \text{m}}$$
         #widget-z31-advanced canvas, #widget-z32-advanced canvas, #widget-z33-advanced canvas { display:block; width:100%; height:auto; }
         #widget-z31-advanced .z31-compare { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; margin-bottom:14px; }
         #widget-z31-advanced .z31-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; }
+        #widget-z31-advanced .z31-layout { display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(320px, 0.95fr); gap:12px; align-items:start; }
+        #widget-z31-advanced .z31-layout-main,
+        #widget-z31-advanced .z31-layout-side { min-width:0; }
+        #widget-z31-advanced .z31-layout-side .z31-controls { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-bottom:10px; }
+        #widget-z31-advanced .z31-layout-side .z31-impact { margin-bottom:10px; }
+        #widget-z31-advanced .z31-layout-side .z31-metrics { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-bottom:10px; }
+        #widget-z31-advanced .z31-layout-side .z31-control { padding:10px 12px; }
+        #widget-z31-advanced .z31-layout-side .z31-control label { font-size:0.84rem; margin-bottom:6px; }
+        #widget-z31-advanced .z31-layout-side .z31-metric { padding:10px 12px; }
+        #widget-z31-advanced .z31-layout-side .z31-metric small { font-size:0.7rem; }
+        #widget-z31-advanced .z31-layout-side .z31-metric strong { font-size:1.02rem; }
+        #widget-z31-advanced .z31-layout-side #z31-v3-band { margin-bottom:10px !important; }
+        #widget-z31-advanced .z31-layout-main .z31-card { padding:10px 12px; }
+        #widget-z31-advanced .z31-layout-main .z31-card div { font-size:0.9rem; }
+        #widget-z32-advanced .z32-layout { display:block; }
+        #widget-z32-advanced .z32-layout-main,
+        #widget-z32-advanced .z32-layout-side { min-width:0; }
+        #widget-z32-advanced .z32-layout-side { margin-top:10px; }
+        #widget-z32-advanced .z32-layout-side .z32-controls { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-bottom:10px; }
+        #widget-z32-advanced .z32-layout-side .z32-impact { margin-bottom:10px; }
+        #widget-z32-advanced .z32-layout-side .z32-metrics { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-bottom:10px; }
+        #widget-z32-advanced .z32-layout-side .z32-control { padding:10px 12px; }
+        #widget-z32-advanced .z32-layout-side .z32-control label { font-size:0.84rem; margin-bottom:6px; }
+        #widget-z32-advanced .z32-layout-side .z32-metric { padding:10px 12px; }
+        #widget-z32-advanced .z32-layout-side .z32-metric small { font-size:0.7rem; }
+        #widget-z32-advanced .z32-layout-side .z32-metric strong { font-size:1.02rem; }
+        #widget-z32-advanced .z32-layout-side #z32-band { margin-bottom:10px !important; }
+        #widget-z32-advanced .z32-layout-main .z32-scene { margin-bottom:10px; }
+        @media (max-width: 980px) {
+            #widget-z31-advanced .z31-layout { grid-template-columns:1fr; }
+            #widget-z31-advanced .z31-layout-side .z31-controls,
+            #widget-z31-advanced .z31-layout-side .z31-metrics { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
+            #widget-z32-advanced .z32-layout-side .z32-controls,
+            #widget-z32-advanced .z32-layout-side .z32-metrics { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
+        }
+        @media (max-width: 760px) {
+            #widget-z32-advanced .z32-layout-side .z32-controls { grid-template-columns:1fr; }
+        }
         #widget-z31-advanced .z31-explainer, #widget-z32-advanced .z32-explainer, #widget-z33-advanced .z33-explainer { padding:14px 16px; background:#f8fafc; font-size:0.84rem; color:#334155; line-height:1.55; }
         #widget-z33-advanced .z33-action { display:inline-flex; align-items:center; justify-content:center; width:100%; padding:11px 14px; border-radius:12px; border:1px solid #fecaca; background:#fff1f2; color:#be123c; font-weight:800; cursor:pointer; }
     </style>
@@ -1386,52 +1524,58 @@ $$h_{vmax} = 0,8 - \frac{0,6}{2} \cdot 0,2548 = \mathbf{0,724 \, \text{m}}$$
             <div>kraći L daje veći dopušteni početni nivo</div>
         </div>
     </div>
-    <div class="z31-controls">
-        <div class="z31-control">
-            <label>Ubrzanje vozila aₓ: <span id="z31-v3-val-ax" style="color:#2563eb;">2.5</span> m/s²</label>
-            <input type="range" id="z31-v3-slider-ax" min="0" max="6" step="0.1" value="2.5" style="accent-color:#2563eb;">
+    <div class="z31-layout">
+        <div class="z31-layout-main">
+            <div class="z31-compare">
+                <div class="z31-card">
+                    <div style="font-weight:800; color:#0f172a; margin-bottom:6px;">Duga strana u smjeru gibanja</div>
+                    <canvas id="canvas-z31-v3-long" width="420" height="220"></canvas>
+                </div>
+                <div class="z31-card">
+                    <div style="font-weight:800; color:#0f172a; margin-bottom:6px;">Kratka strana u smjeru gibanja</div>
+                    <canvas id="canvas-z31-v3-short" width="420" height="220"></canvas>
+                </div>
+            </div>
+            <div class="z31-explainer" id="z31-v3-explainer"></div>
         </div>
-        <div class="z31-control">
-            <label>Planirani početni nivo punjenja: <span id="z31-v3-val-hi" style="color:#dc2626;">0.55</span> m</label>
-            <input type="range" id="z31-v3-slider-hi" min="0.2" max="0.8" step="0.01" value="0.55" style="accent-color:#dc2626;">
-        </div>
-        <div class="z31-control">
-            <label>Visina spremnika h_s: <span id="z31-v3-val-hs" style="color:#0f766e;">0.80</span> m</label>
-            <input type="range" id="z31-v3-slider-hs" min="0.50" max="1.20" step="0.01" value="0.80" style="accent-color:#0f766e;">
-        </div>
-        <div class="z31-control">
-            <label>Duža baza L_d: <span id="z31-v3-val-ll" style="color:#1d4ed8;">2.00</span> m</label>
-            <input type="range" id="z31-v3-slider-ll" min="1.00" max="3.00" step="0.05" value="2.00" style="accent-color:#1d4ed8;">
-        </div>
-        <div class="z31-control">
-            <label>Kraća baza L_k: <span id="z31-v3-val-ls" style="color:#0f766e;">0.60</span> m</label>
-            <input type="range" id="z31-v3-slider-ls" min="0.30" max="1.20" step="0.02" value="0.60" style="accent-color:#0f766e;">
+        <div class="z31-layout-side">
+            <div class="z31-controls">
+                <div class="z31-control">
+                    <label>Ubrzanje vozila aₓ: <span id="z31-v3-val-ax" style="color:#2563eb;">2.5</span> m/s²</label>
+                    <input type="range" id="z31-v3-slider-ax" min="0" max="6" step="0.1" value="2.5" style="accent-color:#2563eb;">
+                </div>
+                <div class="z31-control">
+                    <label>Planirani početni nivo punjenja: <span id="z31-v3-val-hi" style="color:#dc2626;">0.55</span> m</label>
+                    <input type="range" id="z31-v3-slider-hi" min="0.2" max="0.8" step="0.01" value="0.55" style="accent-color:#dc2626;">
+                </div>
+                <div class="z31-control">
+                    <label>Visina spremnika h_s: <span id="z31-v3-val-hs" style="color:#0f766e;">0.80</span> m</label>
+                    <input type="range" id="z31-v3-slider-hs" min="0.50" max="1.20" step="0.01" value="0.80" style="accent-color:#0f766e;">
+                </div>
+                <div class="z31-control">
+                    <label>Duža baza L_d: <span id="z31-v3-val-ll" style="color:#1d4ed8;">2.00</span> m</label>
+                    <input type="range" id="z31-v3-slider-ll" min="1.00" max="3.00" step="0.05" value="2.00" style="accent-color:#1d4ed8;">
+                </div>
+                <div class="z31-control">
+                    <label>Kraća baza L_k: <span id="z31-v3-val-ls" style="color:#0f766e;">0.60</span> m</label>
+                    <input type="range" id="z31-v3-slider-ls" min="0.30" max="1.20" step="0.02" value="0.60" style="accent-color:#0f766e;">
+                </div>
+            </div>
+            <div class="z31-impact">
+                <div class="z31-impact-card"><small>Promjena</small><strong id="z31-impact-1">aₓ srednje</strong></div>
+                <div class="z31-impact-card"><small>Direktan efekt</small><strong id="z31-impact-2">kut i Δh srednji</strong></div>
+                <div class="z31-impact-card"><small>Poruka</small><strong id="z31-impact-3">kraća orijentacija je sigurnija</strong></div>
+            </div>
+            <div class="z31-explainer" id="z31-v3-band" style="margin-bottom:12px; font-weight:700;">Rezim: sigurno za kraću orijentaciju, rubno za dužu.</div>
+            <div class="z31-metrics">
+                <div class="z31-metric"><small>Kut površine α</small><strong style="color:#0f172a;"><span id="z31-v3-res-alpha">14.3</span>°</strong></div>
+                <div class="z31-metric"><small>Dopušteni nivo za L_d</small><strong style="color:#1d4ed8;"><span id="z31-v3-hlong">0.545</span> m</strong></div>
+                <div class="z31-metric"><small>Dopušteni nivo za L_k</small><strong style="color:#0f766e;"><span id="z31-v3-hshort">0.724</span> m</strong></div>
+                <div class="z31-metric"><small>Sigurnosna margina (L_d)</small><strong style="color:#be123c;"><span id="z31-v3-margin">-0.005</span> m</strong></div>
+                <div class="z31-metric"><small>Povoljnija orijentacija</small><strong style="color:#b45309;" id="z31-v3-better">kraća strana naprijed</strong></div>
+            </div>
         </div>
     </div>
-    <div class="z31-impact">
-        <div class="z31-impact-card"><small>Promjena</small><strong id="z31-impact-1">aₓ srednje</strong></div>
-        <div class="z31-impact-card"><small>Direktan efekt</small><strong id="z31-impact-2">kut i Δh srednji</strong></div>
-        <div class="z31-impact-card"><small>Poruka</small><strong id="z31-impact-3">kraća orijentacija je sigurnija</strong></div>
-    </div>
-    <div class="z31-explainer" id="z31-v3-band" style="margin-bottom:12px; font-weight:700;">Rezim: sigurno za kraću orijentaciju, rubno za dužu.</div>
-    <div class="z31-metrics">
-        <div class="z31-metric"><small>Kut površine α</small><strong style="color:#0f172a;"><span id="z31-v3-res-alpha">14.3</span>°</strong></div>
-        <div class="z31-metric"><small>Dopušteni nivo za L_d</small><strong style="color:#1d4ed8;"><span id="z31-v3-hlong">0.545</span> m</strong></div>
-        <div class="z31-metric"><small>Dopušteni nivo za L_k</small><strong style="color:#0f766e;"><span id="z31-v3-hshort">0.724</span> m</strong></div>
-        <div class="z31-metric"><small>Sigurnosna margina (L_d)</small><strong style="color:#be123c;"><span id="z31-v3-margin">-0.005</span> m</strong></div>
-        <div class="z31-metric"><small>Povoljnija orijentacija</small><strong style="color:#b45309;" id="z31-v3-better">kraća strana naprijed</strong></div>
-    </div>
-    <div class="z31-compare">
-        <div class="z31-card">
-            <div style="font-weight:800; color:#0f172a; margin-bottom:6px;">Duga strana u smjeru gibanja</div>
-            <canvas id="canvas-z31-v3-long" width="420" height="220"></canvas>
-        </div>
-        <div class="z31-card">
-            <div style="font-weight:800; color:#0f172a; margin-bottom:6px;">Kratka strana u smjeru gibanja</div>
-            <canvas id="canvas-z31-v3-short" width="420" height="220"></canvas>
-        </div>
-    </div>
-    <div class="z31-explainer" id="z31-v3-explainer"></div>
     <script>
     (function() {
         const slAx = document.getElementById('z31-v3-slider-ax');
@@ -1582,39 +1726,45 @@ $$p_{dmin} = \rho \cdot g \cdot h_{min} = 1000 \cdot 9,81 \cdot 0,266 = \mathbf{
             <div><strong>p_d = ρgh</strong> lokalno na dnu</div>
         </div>
     </div>
-    <div class="z32-controls">
-        <div class="z32-control">
-            <label>Horizontalno ubrzanje aₓ: <span id="z32-v-a" style="color:#2563eb;">2.4</span> m/s²</label>
-            <input type="range" id="z32-a" min="0" max="8" step="0.1" value="2.4" style="accent-color:#2563eb;">
+    <div class="z32-layout">
+        <div class="z32-layout-main">
+            <div class="z32-scene"><canvas id="z32-canvas" width="900" height="340"></canvas></div>
+            <div class="z32-explainer" id="z32-explainer"></div>
         </div>
-        <div class="z32-control">
-            <label>Duljina spremnika L: <span id="z32-v-l" style="color:#1d4ed8;">6.0</span> m</label>
-            <input type="range" id="z32-l" min="2" max="8" step="0.1" value="6.0" style="accent-color:#1d4ed8;">
-        </div>
-        <div class="z32-control">
-            <label>Početna razina h₀: <span id="z32-v-h0" style="color:#0f766e;">1.00</span> m</label>
-            <input type="range" id="z32-h0" min="0.2" max="1.8" step="0.01" value="1.0" style="accent-color:#0f766e;">
-        </div>
-        <div class="z32-control">
-            <label>Gustoća fluida ρ: <span id="z32-v-rho" style="color:#7c3aed;">1000</span> kg/m³</label>
-            <input type="range" id="z32-rho" min="900" max="1200" step="5" value="1000" style="accent-color:#7c3aed;">
+        <div class="z32-layout-side">
+            <div class="z32-controls">
+                <div class="z32-control">
+                    <label>Horizontalno ubrzanje aₓ: <span id="z32-v-a" style="color:#2563eb;">2.4</span> m/s²</label>
+                    <input type="range" id="z32-a" min="0" max="8" step="0.1" value="2.4" style="accent-color:#2563eb;">
+                </div>
+                <div class="z32-control">
+                    <label>Duljina spremnika L: <span id="z32-v-l" style="color:#1d4ed8;">6.0</span> m</label>
+                    <input type="range" id="z32-l" min="2" max="8" step="0.1" value="6.0" style="accent-color:#1d4ed8;">
+                </div>
+                <div class="z32-control">
+                    <label>Početna razina h₀: <span id="z32-v-h0" style="color:#0f766e;">1.00</span> m</label>
+                    <input type="range" id="z32-h0" min="0.2" max="1.8" step="0.01" value="1.0" style="accent-color:#0f766e;">
+                </div>
+                <div class="z32-control">
+                    <label>Gustoća fluida ρ: <span id="z32-v-rho" style="color:#7c3aed;">1000</span> kg/m³</label>
+                    <input type="range" id="z32-rho" min="900" max="1200" step="5" value="1000" style="accent-color:#7c3aed;">
+                </div>
+            </div>
+            <div class="z32-impact">
+                <div class="z32-impact-card"><small>Promjena</small><strong id="z32-impact-1">aₓ i L određuju α</strong></div>
+                <div class="z32-impact-card"><small>Direktan efekt</small><strong id="z32-impact-2">raste razlika h_max-h_min</strong></div>
+                <div class="z32-impact-card"><small>Poruka</small><strong id="z32-impact-3">tlak je lokalan: p=ρgh</strong></div>
+            </div>
+            <div class="z32-explainer" id="z32-band" style="margin-bottom:12px; font-weight:700;">Rezim: obje visine su fizikalno valjane.</div>
+            <div class="z32-metrics">
+                <div class="z32-metric"><small>Kut α</small><strong style="color:#0f172a;"><span id="z32-res-alpha">13.8</span>°</strong></div>
+                <div class="z32-metric"><small>h_max na dnu</small><strong style="color:#1d4ed8;"><span id="z32-res-hmax">1.734</span> m</strong></div>
+                <div class="z32-metric"><small>h_min na dnu</small><strong style="color:#0f766e;"><span id="z32-res-hmin">0.266</span> m</strong></div>
+                <div class="z32-metric"><small>p_dmax / p_dmin</small><strong style="color:#b45309;"><span id="z32-res-pmax">17.0</span> / <span id="z32-res-pmin">2.6</span> kPa</strong></div>
+                <div class="z32-metric"><small>Omjer aₓ/g</small><strong style="color:#7c3aed;"><span id="z32-res-fr">0.245</span></strong></div>
+            </div>
         </div>
     </div>
-    <div class="z32-impact">
-        <div class="z32-impact-card"><small>Promjena</small><strong id="z32-impact-1">aₓ i L određuju α</strong></div>
-        <div class="z32-impact-card"><small>Direktan efekt</small><strong id="z32-impact-2">raste razlika h_max-h_min</strong></div>
-        <div class="z32-impact-card"><small>Poruka</small><strong id="z32-impact-3">tlak je lokalan: p=ρgh</strong></div>
-    </div>
-    <div class="z32-explainer" id="z32-band" style="margin-bottom:12px; font-weight:700;">Rezim: obje visine su fizikalno valjane.</div>
-    <div class="z32-metrics">
-        <div class="z32-metric"><small>Kut α</small><strong style="color:#0f172a;"><span id="z32-res-alpha">13.8</span>°</strong></div>
-        <div class="z32-metric"><small>h_max na dnu</small><strong style="color:#1d4ed8;"><span id="z32-res-hmax">1.734</span> m</strong></div>
-        <div class="z32-metric"><small>h_min na dnu</small><strong style="color:#0f766e;"><span id="z32-res-hmin">0.266</span> m</strong></div>
-        <div class="z32-metric"><small>p_dmax / p_dmin</small><strong style="color:#b45309;"><span id="z32-res-pmax">17.0</span> / <span id="z32-res-pmin">2.6</span> kPa</strong></div>
-        <div class="z32-metric"><small>Omjer aₓ/g</small><strong style="color:#7c3aed;"><span id="z32-res-fr">0.245</span></strong></div>
-    </div>
-    <div class="z32-scene"><canvas id="z32-canvas" width="900" height="340"></canvas></div>
-    <div class="z32-explainer" id="z32-explainer"></div>
     <script>
     (function() {
         const canvas = document.getElementById('z32-canvas');

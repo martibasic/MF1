@@ -24,6 +24,21 @@ Ispod možete interaktivno istražiti oba principa.
         </div>
     </div>
 
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px;">
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 8px 10px;">
+            <div style="font-size: 0.68rem; color: #1d4ed8; font-weight: 800; text-transform: uppercase;">Ulazna sila</div>
+            <div style="font-size: 1.02rem; color: #1e3a8a; font-weight: 800;"><span id="v1-badge-f1">120</span> N</div>
+        </div>
+        <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 8px 10px;">
+            <div style="font-size: 0.68rem; color: #4338ca; font-weight: 800; text-transform: uppercase;">Tlak p</div>
+            <div style="font-size: 1.02rem; color: #312e81; font-weight: 800;"><span id="v1-badge-p">1.00</span> MPa</div>
+        </div>
+        <div style="background: #ecfeff; border: 1px solid #a5f3fc; border-radius: 12px; padding: 8px 10px;">
+            <div style="font-size: 0.68rem; color: #0f766e; font-weight: 800; text-transform: uppercase;">Izlazna sila</div>
+            <div style="font-size: 1.02rem; color: #115e59; font-weight: 800;"><span id="v1-badge-f2">480</span> N</div>
+        </div>
+    </div>
+
     <div style="display: flex; flex-direction: column; gap: 18px;">
         <div style="position: relative; width: 100%; max-width: 520px; margin: 0 auto; background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 72%); border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
             <canvas id="v1-intro-canvas" width="520" height="360" style="display: block; width: 100%; height: auto;"></canvas>
@@ -36,9 +51,11 @@ Ispod možete interaktivno istražiti oba principa.
                     <div style="font-size: 0.75rem; color: #1d4ed8; text-transform: uppercase; font-weight: 800; margin-bottom: 10px;">Ulazi sustava</div>
                     <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Ulazna sila F₁: <span id="v1-pascal-force-val" style="color: #2563eb;">120</span> N</label>
                     <input id="v1-pascal-force" type="range" min="40" max="240" step="10" value="120" style="width: 100%; margin-bottom: 12px; accent-color: #2563eb;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: -6px; margin-bottom: 10px;"><span>min 40 N</span><span>max 240 N</span></div>
 
                     <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Omjer površina A₂ / A₁: <span id="v1-pascal-ratio-val" style="color: #2563eb;">4.0</span></label>
                     <input id="v1-pascal-ratio" type="range" min="1.5" max="8" step="0.1" value="4" style="width: 100%; accent-color: #2563eb;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 4px;"><span>min 1.5</span><span>max 8.0</span></div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -63,9 +80,11 @@ Ispod možete interaktivno istražiti oba principa.
                     <div style="font-size: 0.75rem; color: #c2410c; text-transform: uppercase; font-weight: 800; margin-bottom: 10px;">Ulazi sustava</div>
                     <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Brzina gornje ploče: <span id="v1-newton-speed-val" style="color: #ea580c;">1.20</span> m/s</label>
                     <input id="v1-newton-speed" type="range" min="0.2" max="2.4" step="0.1" value="1.2" style="width: 100%; margin-bottom: 12px; accent-color: #ea580c;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: -6px; margin-bottom: 10px;"><span>min 0.2 m/s</span><span>max 2.4 m/s</span></div>
 
                     <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Dinamička viskoznost μ: <span id="v1-newton-mu-val" style="color: #ea580c;">0.35</span> Pa·s</label>
                     <input id="v1-newton-mu" type="range" min="0.05" max="1.2" step="0.05" value="0.35" style="width: 100%; accent-color: #ea580c;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 4px;"><span>min 0.05 Pa·s</span><span>max 1.20 Pa·s</span></div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -149,6 +168,9 @@ Ispod možete interaktivno istražiti oba principa.
         document.getElementById('v1-pascal-ratio-val').textContent = state.pascalRatio.toFixed(1);
         document.getElementById('v1-pascal-pressure').textContent = (pressure / 1e6).toFixed(2);
         document.getElementById('v1-pascal-output').textContent = force2.toFixed(0);
+        document.getElementById('v1-badge-f1').textContent = state.pascalForce.toFixed(0);
+        document.getElementById('v1-badge-p').textContent = (pressure / 1e6).toFixed(2);
+        document.getElementById('v1-badge-f2').textContent = force2.toFixed(0);
         document.getElementById('v1-pascal-explainer').textContent = `Isti tlak prolazi kroz cijelu zatvorenu tekućinu, pa povećanje omjera površina s ${state.pascalRatio.toFixed(1)} odmah diže izlaznu silu na ${force2.toFixed(0)} N. Ne množi se tlak, nego površina na koju taj tlak djeluje.`;
 
         const gradient = state.newtonSpeed / gapMeters;
@@ -436,57 +458,73 @@ $$G = p_k \cdot A_k = 78\,437 \cdot 0{,}785 = 61\,603\ \text{N}$$
         </div>
     </div>
     
-    <div style="display: flex; flex-direction: column; gap: 18px;">
-        <div style="position: relative; width: 100%; max-width: 520px; margin: 0 auto; background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 72%); border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
-            <canvas id="z2-canvas" width="520" height="410" style="display: block; width: 100%; height: auto;"></canvas>
-            <div style="position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.92); border: 1px solid #dbeafe; border-radius: 12px; padding: 8px 12px; font-size: 0.78rem; color: #334155;">
-                Očitanje manometra: <span id="z2-res-pm-top" style="font-weight: 800; color: #dc2626;">70.0</span> kPa
-            </div>
-            <div style="position: absolute; top: 12px; right: 12px; background: rgba(15,23,42,0.9); color: #e2e8f0; border-radius: 12px; padding: 10px 12px; font-size: 0.73rem; line-height: 1.45; max-width: 180px;">
-                <div style="font-weight: 800; color: #93c5fd; margin-bottom: 4px;">Bilanca tlaka</div>
-                <div>1. Klip stvara <strong>G/A</strong></div>
-                <div>2. Stupac ulja oduzima <strong>ρgh</strong></div>
-                <div>3. Manometar očitava <strong>pₘ</strong></div>
+    <div style="display: grid; grid-template-columns: minmax(320px, 1.1fr) 1fr; gap: 14px; align-items: start;">
+        <div style="position: relative; background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 72%); border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden; min-height: 430px;">
+            <svg id="z2-svg" viewBox="0 0 540 430" style="width: 100%; height: auto; display:block;">
+                <defs>
+                    <linearGradient id="z2-oil-grad" x1="0" x2="0" y1="0" y2="1">
+                        <stop id="z2-oil-stop1" offset="0%" stop-color="#f59e0b" stop-opacity="0.28"></stop>
+                        <stop id="z2-oil-stop2" offset="100%" stop-color="#ea580c" stop-opacity="0.52"></stop>
+                    </linearGradient>
+                </defs>
+                <rect x="120" y="72" width="120" height="260" fill="url(#z2-oil-grad)" stroke="#64748b" stroke-width="3"></rect>
+                <rect id="z2-piston" x="112" y="56" width="136" height="18" fill="#334155"></rect>
+                <rect id="z2-weight" x="146" y="18" width="68" height="38" fill="#0f172a" rx="4"></rect>
+                <text id="z2-weight-text" x="180" y="43" font-size="13" text-anchor="middle" fill="#fff" font-weight="700">61.6 kN</text>
+                <path d="M240 290 L360 290 L360 180" fill="none" stroke="#f59e0b" stroke-width="8" stroke-linecap="round"></path>
+                <path id="z2-h-guide" d="M366 290 L366 180" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5"></path>
+                <text id="z2-h-label" x="374" y="236" font-size="12" fill="#475569">h = 1.0 m</text>
+                <circle cx="430" cy="182" r="58" fill="#fff" stroke="#cbd5e1" stroke-width="3"></circle>
+                <line x1="430" y1="182" x2="430" y2="132" stroke="#94a3b8" stroke-width="2"></line>
+                <line x1="430" y1="182" x2="468" y2="214" stroke="#94a3b8" stroke-width="2"></line>
+                <line x1="430" y1="182" x2="392" y2="214" stroke="#94a3b8" stroke-width="2"></line>
+                <line id="z2-needle" x1="430" y1="182" x2="470" y2="170" stroke="#dc2626" stroke-width="4" stroke-linecap="round"></line>
+                <circle cx="430" cy="182" r="5" fill="#dc2626"></circle>
+                <text x="430" y="252" text-anchor="middle" font-size="12" fill="#334155">manometar pₘ</text>
+                <text x="18" y="30" font-size="12" fill="#64748b">Klip stvara G/A, stupac ulja oduzima ρgh.</text>
+            </svg>
+            <div style="position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.92); border:1px solid #dbeafe; border-radius:10px; padding:7px 10px; font-size:0.77rem; color:#334155;">
+                Očitanje manometra: <span id="z2-res-pm-top" style="font-weight:800; color:#dc2626;">70.0</span> kPa
             </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-            <div style="background: #f8fafc; padding: 16px; border: 1px solid #e2e8f0; border-radius: 16px;">
-                <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Gustoća ulja ρ: <span id="z2-v-rho" style="color: #2563eb;">860</span> kg/m³</label>
-                <input type="range" id="z2-rho" min="700" max="1000" step="10" value="860" style="width: 100%; accent-color: #2563eb; margin-bottom: 12px;">
-                
-                <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Visinska razlika h: <span id="z2-v-h" style="color: #0f766e;">1.0</span> m</label>
-                <input type="range" id="z2-h" min="0" max="3" step="0.1" value="1.0" style="width: 100%; accent-color: #0f766e; margin-bottom: 12px;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="background: #f8fafc; padding: 14px; border: 1px solid #e2e8f0; border-radius: 14px;">
+                <label style="display:block; font-weight:700; color:#475569; margin-bottom:6px;">Gustoća ulja ρ: <span id="z2-v-rho" style="color:#2563eb;">860</span> kg/m³</label>
+                <input type="range" id="z2-rho" min="700" max="1000" step="10" value="860" style="width:100%; accent-color:#2563eb;">
+                <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#64748b; margin:2px 0 8px;"><span>700</span><span>1000</span></div>
 
-                <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Dodatni teret: <span id="z2-v-extra" style="color: #ea580c;">0</span> kN</label>
-                <input type="range" id="z2-extra" min="0" max="80" step="10" value="0" style="width: 100%; accent-color: #ea580c;">
+                <label style="display:block; font-weight:700; color:#475569; margin-bottom:6px;">Visinska razlika h: <span id="z2-v-h" style="color:#0f766e;">1.0</span> m</label>
+                <input type="range" id="z2-h" min="0" max="3" step="0.1" value="1.0" style="width:100%; accent-color:#0f766e;">
+                <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#64748b; margin:2px 0 8px;"><span>0.0</span><span>3.0</span></div>
+
+                <label style="display:block; font-weight:700; color:#475569; margin-bottom:6px;">Dodatni teret: <span id="z2-v-extra" style="color:#ea580c;">0</span> kN</label>
+                <input type="range" id="z2-extra" min="0" max="80" step="10" value="0" style="width:100%; accent-color:#ea580c;">
+                <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#64748b; margin-top:2px;"><span>0</span><span>80</span></div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div style="background: #eff6ff; padding: 14px; border: 1px solid #bfdbfe; border-radius: 14px;">
-                    <div style="font-size: 0.7rem; color: #1d4ed8; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Tlak pod klipom G/A</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #1d4ed8;"><span id="z2-res-piston">78.4</span> kPa</div>
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:12px;">
+                <div style="font-size:0.72rem; color:#64748b; font-weight:800; text-transform:uppercase; margin-bottom:8px;">Bilanca tlaka (horizontalni stupci)</div>
+                <div style="font-size:0.78rem; color:#1d4ed8; margin-bottom:4px;">$G/A$ = <span id="z2-res-piston">78.4</span> kPa</div>
+                <div style="height:12px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-bottom:8px;"><div id="z2-bar-p" style="height:100%; width:0%; background:#2563eb;"></div></div>
+                <div style="font-size:0.78rem; color:#c2410c; margin-bottom:4px;">$-\rho g h$ = -<span id="z2-res-hydro">8.4</span> kPa</div>
+                <div style="height:12px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-bottom:8px;"><div id="z2-bar-h" style="height:100%; width:0%; background:#f59e0b;"></div></div>
+                <div style="font-size:0.78rem; color:#166534; margin-bottom:4px;">$p_m$ = <span id="z2-res-pm">70.0</span> kPa</div>
+                <div style="height:12px; background:#e2e8f0; border-radius:999px; overflow:hidden;"><div id="z2-bar-m" style="height:100%; width:0%; background:#22c55e;"></div></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:12px; padding:10px;">
+                    <div style="font-size:0.68rem; color:#4338ca; font-weight:800; text-transform:uppercase;">Težina klipa</div>
+                    <div style="font-size:1.1rem; color:#3730a3; font-weight:800;"><span id="z2-res-g">61.6</span> kN</div>
                 </div>
-                <div style="background: #f0fdf4; padding: 14px; border: 1px solid #bbf7d0; border-radius: 14px;">
-                    <div style="font-size: 0.7rem; color: #166534; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Hidrostatski pad ρgh</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #166534;"><span id="z2-res-hydro">8.4</span> kPa</div>
-                </div>
-                <div style="background: #fff5f5; padding: 14px; border: 1px solid #fecaca; border-radius: 14px;">
-                    <div style="font-size: 0.7rem; color: #991b1b; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Manometar pₘ</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #991b1b;"><span id="z2-res-pm">70.0</span> kPa</div>
-                </div>
-                <div style="background: #eef2ff; padding: 14px; border: 1px solid #c7d2fe; border-radius: 14px;">
-                    <div style="font-size: 0.7rem; color: #3730a3; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Težina klipa G</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #3730a3;"><span id="z2-res-g">61.6</span> kN</div>
+                <div style="background:#fff7ed; border:1px solid #fdba74; border-radius:12px; padding:10px; color:#7c2d12;">
+                    <div style="font-size:0.68rem; font-weight:800; text-transform:uppercase;">Numerička bilanca</div>
+                    <div style="font-size:0.78rem;" id="z2-eq-vals">...</div>
                 </div>
             </div>
 
-            <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 16px; color: #7c2d12;">
-                <div style="font-weight: 800; margin-bottom: 6px;">Numerička bilanca</div>
-                <div style="font-size: 0.84rem; line-height: 1.5;" id="z2-eq-vals">...</div>
-            </div>
-
-            <div style="padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; color: #334155;">
+            <div style="padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; color: #334155;">
                 <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Pouka</div>
                 <p id="z2-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.55;"></p>
             </div>
@@ -500,13 +538,17 @@ Manometar ne očitava direktno tlak pod klipom. On očitava tlak na svojoj visin
 
 <script>
 (function() {
-    const canvas = document.getElementById('z2-canvas');
-    const ctx = canvas.getContext('2d');
     const rhoS = document.getElementById('z2-rho');
     const hS = document.getElementById('z2-h');
     const extraS = document.getElementById('z2-extra');
-
-    const state = { frame: 0 };
+    const pistonEl = document.getElementById('z2-piston');
+    const weightEl = document.getElementById('z2-weight');
+    const weightTextEl = document.getElementById('z2-weight-text');
+    const needleEl = document.getElementById('z2-needle');
+    const hGuideEl = document.getElementById('z2-h-guide');
+    const hLabelEl = document.getElementById('z2-h-label');
+    const oilStop1 = document.getElementById('z2-oil-stop1');
+    const oilStop2 = document.getElementById('z2-oil-stop2');
 
     function getValues() {
         const rho = parseFloat(rhoS.value);
@@ -537,121 +579,31 @@ Manometar ne očitava direktno tlak pod klipom. On očitava tlak na svojoj visin
         document.getElementById('z2-eq-vals').textContent = `${values.pm.toFixed(1)} kPa = ${values.pistonPressure.toFixed(1)} kPa - ${values.hydroDrop.toFixed(1)} kPa`;
         document.getElementById('z2-explainer').textContent = `Klip trenutačno stvara ${values.pistonPressure.toFixed(1)} kPa na dnu cilindra, ali se do manometra izgubi ${values.hydroDrop.toFixed(1)} kPa zbog penjanja kroz stupac ulja visine ${values.h.toFixed(1)} m. Zato instrument pokazuje ${values.pm.toFixed(1)} kPa, a ne puni tlak pod klipom.`;
 
-        draw(values);
-    }
+        const pRatio = Math.min(values.pistonPressure / 120, 1);
+        const hRatio = Math.min(values.hydroDrop / 35, 1);
+        const mRatio = Math.min(values.pm / 120, 1);
+        document.getElementById('z2-bar-p').style.width = `${(pRatio * 100).toFixed(1)}%`;
+        document.getElementById('z2-bar-h').style.width = `${(hRatio * 100).toFixed(1)}%`;
+        document.getElementById('z2-bar-m').style.width = `${(mRatio * 100).toFixed(1)}%`;
 
-    function draw(values) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        state.frame += 1;
+        const pistonDrop = Math.min((values.currentG / 1000) * 0.12, 16);
+        pistonEl.setAttribute('y', (56 + pistonDrop).toFixed(1));
+        weightEl.setAttribute('y', (18 + pistonDrop).toFixed(1));
+        weightTextEl.setAttribute('y', (43 + pistonDrop).toFixed(1));
+        weightTextEl.textContent = `${(values.currentG / 1000).toFixed(1)} kN`;
 
-        const bx = 116;
-        const by = 340;
-        const width = 130;
-        const height = 240;
-        const pistonY = by - height - 18;
-        const branchX = bx + width;
-        const gaugeX = branchX + 130;
-        const gaugeY = by - 36;
-        const manometerY = by - height - values.h * 48;
-        const liquidLevel = Math.min(height, 80 + values.h * 30);
-        const fluidGrad = ctx.createLinearGradient(bx, by - height, bx, by);
-        fluidGrad.addColorStop(0, 'rgba(245, 158, 11, 0.16)');
-        fluidGrad.addColorStop(1, 'rgba(234, 88, 12, 0.42)');
+        const gaugeY = 290 - values.h * 36;
+        hGuideEl.setAttribute('d', `M366 290 L366 ${gaugeY.toFixed(1)}`);
+        hLabelEl.setAttribute('y', ((290 + gaugeY) / 2).toFixed(1));
+        hLabelEl.textContent = `h = ${values.h.toFixed(1)} m`;
 
-        ctx.fillStyle = fluidGrad;
-        ctx.fillRect(bx, by - height, width, height);
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(bx, by - height, width, height);
+        const angle = -60 + Math.min(Math.max(values.pm, 0), 120) / 120 * 120;
+        needleEl.setAttribute('transform', `rotate(${angle.toFixed(2)} 430 182)`);
 
-        ctx.fillStyle = '#334155';
-        ctx.fillRect(bx - 8, pistonY, width + 16, 26);
-        const blockH = 42 + Math.min(values.currentG / 1000, 140) * 0.28;
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(bx + 26, pistonY - blockH, width - 52, blockH);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 13px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${(values.currentG / 1000).toFixed(1)} kN`, bx + width / 2, pistonY - blockH / 2 + 4);
-
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 12;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(branchX, gaugeY);
-        ctx.lineTo(gaugeX, gaugeY);
-        ctx.lineTo(gaugeX, manometerY);
-        ctx.stroke();
-
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.moveTo(branchX, gaugeY);
-        ctx.lineTo(gaugeX, gaugeY);
-        ctx.lineTo(gaugeX, manometerY);
-        ctx.stroke();
-
-        const ratioP = Math.min(values.pistonPressure / 140, 1);
-        const ratioH = Math.min(values.hydroDrop / 30, 1);
-        const ratioM = Math.min(values.pm / 120, 1);
-
-        drawBar(30, 88, 42, 210, ratioP, '#2563eb', 'G/A');
-        drawBar(92, 128, 42, 170, ratioH, '#16a34a', 'ρgh');
-        drawBar(420, 108, 44, 190, ratioM, '#dc2626', 'pm');
-
-        ctx.textAlign = 'left';
-        ctx.font = '12px Inter';
-        ctx.fillStyle = '#475569';
-        ctx.fillText(`h = ${values.h.toFixed(1)} m`, gaugeX + 16, (gaugeY + manometerY) / 2);
-        ctx.fillText('tlak pod klipom', 22, 320);
-        ctx.fillText('hidrostatski pad', 76, 320);
-        ctx.fillText('očitanje manometra', 360, 320);
-
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.setLineDash([6, 5]);
-        ctx.beginPath();
-        ctx.moveTo(branchX + 6, manometerY);
-        ctx.lineTo(gaugeX + 42, manometerY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        drawArrow(bx + width / 2, pistonY - 70, bx + width / 2, pistonY - 4, '#dc2626', 'G');
-        drawArrow(bx + width / 2, pistonY + 92, bx + width / 2, pistonY + 28, '#2563eb', 'pklip');
-        drawArrow(gaugeX + 22, manometerY + 52, gaugeX + 22, manometerY + 4, '#16a34a', 'ρgh');
-    }
-
-    function drawBar(x, y, w, h, ratio, color, label) {
-        ctx.fillStyle = '#e2e8f0';
-        ctx.fillRect(x, y, w, h);
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y + (1 - ratio) * h, w, ratio * h);
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.strokeRect(x, y, w, h);
-        ctx.fillStyle = '#334155';
-        ctx.font = 'bold 11px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText(label, x + w / 2, y - 8);
-    }
-
-    function drawArrow(x1, y1, x2, y2, color, label) {
-        const headlen = 10;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color;
-        ctx.fillStyle = color;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-        ctx.closePath();
-        ctx.fill();
-        ctx.font = 'bold 11px Inter';
-        ctx.textAlign = 'left';
-        ctx.fillText(label, x2 + 10, y2 + 2);
+        const cTop = 0.16 + (values.rho - 700) / 300 * 0.24;
+        const cBot = 0.32 + (values.rho - 700) / 300 * 0.28;
+        oilStop1.setAttribute('stop-opacity', cTop.toFixed(3));
+        oilStop2.setAttribute('stop-opacity', cBot.toFixed(3));
     }
 
     [rhoS, hS, extraS].forEach((slider) => slider.addEventListener('input', update));
@@ -712,8 +664,10 @@ $$E = -\frac{\Delta p}{\Delta V/V_1} = -\frac{(2-1)\cdot 10^6}{(995-1000)/1000} 
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem;">
             <div style="background: #ffffff; padding: 14px; border: 1px solid #e2e8f0; border-radius: 16px;">
-                <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Tlak p: <span id="z4-v-p-side" style="color: #2563eb;">1</span> MPa</label>
-                <input type="range" id="z4-p" min="1" max="100" step="1" value="1" style="width: 100%; accent-color: #2563eb;">
+                <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Tlak p: <span id="z4-v-p-side" style="color: #2563eb;">1.0</span> MPa</label>
+                <div style="font-size:0.78rem; color:#64748b; margin-bottom:6px;">Δp u odnosu na 1 MPa: <strong id="z4-dp" style="color:#1d4ed8;">0.0</strong> MPa</div>
+                <input type="range" id="z4-p" min="1" max="10" step="0.1" value="1" style="width: 100%; accent-color: #2563eb;">
+                <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#64748b;margin-top:3px;"><span>1 MPa</span><span>10 MPa</span></div>
             </div>
             
             <div style="background: #ffffff; padding: 14px; border: 1px solid #e2e8f0; border-radius: 16px;">
@@ -745,6 +699,14 @@ $$E = -\frac{\Delta p}{\Delta V/V_1} = -\frac{(2-1)\cdot 10^6}{(995-1000)/1000} 
                 <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Pouka</div>
                 <p id="z4-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.55;"></p>
             </div>
+
+            <div style="background:#ffffff; padding:12px 14px; border:1px solid #e2e8f0; border-radius:16px;">
+                <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; color:#64748b; margin-bottom:8px;">Log-usporedba modula stlačivosti E</div>
+                <div style="font-size:0.8rem; color:#1d4ed8; margin-bottom:3px;">Voda ~ 2000 MPa</div>
+                <div style="height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-bottom:8px;"><div style="height:100%; width:100%; background:linear-gradient(90deg,#60a5fa,#1d4ed8);"></div></div>
+                <div style="font-size:0.8rem; color:#b91c1c; margin-bottom:3px;">Zrak ~ 0.1 MPa</div>
+                <div style="height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden;"><div style="height:100%; width:6%; background:linear-gradient(90deg,#fca5a5,#ef4444);"></div></div>
+            </div>
         </div>
     </div>
 </div>
@@ -775,15 +737,17 @@ Modul stlačivosti nije samo broj u formuli. On određuje koliko se gornji klip 
 
     function updateZ4() {
         const p = parseFloat(z4pS.value);
-        document.getElementById('z4-v-p').textContent = p.toFixed(0);
-        document.getElementById('z4-v-p-side').textContent = p.toFixed(0);
+        document.getElementById('z4-v-p').textContent = p.toFixed(1);
+        document.getElementById('z4-v-p-side').textContent = p.toFixed(1);
+        document.getElementById('z4-dp').textContent = (p - 1).toFixed(1);
 
-        const liquidCompression = (p / 2340) * 100;
-        const gasCompression = Math.min((p / 100) * 82, 82);
+        const dP = Math.max(p - 1, 0);
+        const liquidCompression = Math.max(0, (dP / 2000) * 100);
+        const gasCompression = Math.min((1 - 1 / Math.max(p, 1)) * 100, 90);
         const liquidVolume = 1000 * (1 - liquidCompression / 100);
         const gasVolume = 1000 * (1 - gasCompression / 100);
 
-        document.getElementById('z4-bar-liquid').style.width = `${Math.min(liquidCompression * 12, 100)}%`;
+        document.getElementById('z4-bar-liquid').style.width = `${Math.min(liquidCompression * 300, 100)}%`;
         document.getElementById('z4-val-liquid').textContent = `${liquidCompression.toFixed(2)}%`;
         document.getElementById('z4-bar-gas').style.width = `${gasCompression.toFixed(1)}%`;
         document.getElementById('z4-val-gas').textContent = `${gasCompression.toFixed(1)}%`;
@@ -802,7 +766,7 @@ Modul stlačivosti nije samo broj u formuli. On određuje koliko se gornji klip 
 
         const left = { x: 34, y: 60, w: 190, h: 210 };
         const right = { x: 300, y: 60, w: 190, h: 210 };
-        const liqTop = left.y + liqComp * 1.6;
+        const liqTop = left.y + liqComp * 20;
         const gasTop = right.y + gasComp * 1.9;
 
         drawChamber(left, liqTop, '#60a5fa', '#1d4ed8', 'Tekućina', 'velik E, mali ΔV');
@@ -830,8 +794,8 @@ Modul stlačivosti nije samo broj u formuli. On određuje koliko se gornji klip 
             z4ctx.fill();
         });
 
-        drawPressureArrow(left.x + left.w / 2, 18, left.x + left.w / 2, liqTop - 6, '#2563eb', `p = ${p.toFixed(0)} MPa`);
-        drawPressureArrow(right.x + right.w / 2, 18, right.x + right.w / 2, gasTop - 6, '#dc2626', `p = ${p.toFixed(0)} MPa`);
+        drawPressureArrow(left.x + left.w / 2, 18, left.x + left.w / 2, liqTop - 6, '#2563eb', `p = ${p.toFixed(1)} MPa`);
+        drawPressureArrow(right.x + right.w / 2, 18, right.x + right.w / 2, gasTop - 6, '#dc2626', `p = ${p.toFixed(1)} MPa`);
 
         requestAnimationFrame(updateZ4);
     }
@@ -933,7 +897,8 @@ $$\rho_h = \rho_0 + \Delta\rho = 1025 + 31{,}4 = 1056{,}4\ \text{kg/m}^3 \quad (
         <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 15px;">
             <div style="background: #ffffff; padding: 15px; border: 1px solid #e2e8f0;">
                 <label style="font-weight: 600; color: #1e293b;">Dubina: <span id="z5-v-depth">0</span> m</label>
-                <input type="range" id="z5-depth" min="0" max="7000" step="100" value="0" style="width: 100%; accent-color: #38bdf8;">
+                <input type="range" id="z5-depth" min="0" max="10000" step="100" value="0" style="width: 100%; accent-color: #38bdf8;">
+                <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#64748b; margin-top:3px;"><span>0</span><span>10 000</span></div>
             </div>
 
             <div style="background: #eff6ff; padding: 15px; border: 1px solid #0369a1;">
@@ -941,8 +906,13 @@ $$\rho_h = \rho_0 + \Delta\rho = 1025 + 31{,}4 = 1056{,}4\ \text{kg/m}^3 \quad (
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
                     <div style="color: #475569;">Tlak:</div><div style="font-weight: 700; color: #1e293b;"><span id="z5-res-p">0.1</span> MPa</div>
                     <div style="color: #475569;">Gustoća:</div><div style="font-weight: 700; color: #1e293b;"><span id="z5-res-rho">1025</span> kg/m³</div>
-                    <div style="color: #475569;">Porast ρ:</div><div style="font-weight: 700; color: #ef4444;"><span id="z5-res-perc">0.00</span> %</div>
+                    <div style="color: #475569;">Porast ρ:</div><div id="z5-perc-badge" style="font-weight: 700; color: #166534;"><span id="z5-res-perc">0.00</span> %</div>
                 </div>
+            </div>
+
+            <div style="background:#ffffff; padding:12px; border:1px solid #dbeafe; border-radius:10px;">
+                <div style="font-size:0.74rem; font-weight:800; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Graf: tlak i gustoća po dubini</div>
+                <canvas id="z5-chart" width="340" height="180" style="width:100%; height:auto; display:block;"></canvas>
             </div>
         </div>
     </div>
@@ -959,6 +929,8 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
     const z5line = document.getElementById('z5-depth-line');
     const z5c = document.getElementById('z5-molecules');
     const z5ctx = z5c.getContext('2d');
+    const z5chart = document.getElementById('z5-chart');
+    const z5chartCtx = z5chart.getContext('2d');
 
     function updateZ5() {
         const d = parseFloat(z5dS.value);
@@ -973,20 +945,93 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
         document.getElementById('z5-res-rho').innerText = rho.toFixed(1);
         document.getElementById('z5-res-perc').innerText = perc.toFixed(2);
 
-        const yPerc = (d / 7000) * 80 + 10;
+        const yPerc = (d / 10000) * 80 + 10;
         z5sub.style.top = yPerc + "%";
         z5line.style.top = yPerc + "%";
         z5sub.innerText = d > 500 ? "🛸" : "🚢";
 
+        const oceanTop = [56, 189, 248];
+        const oceanBottom = [8, 47, 73];
+        const tr = Math.min(d / 10000, 1);
+        const r = Math.round(oceanTop[0] + (oceanBottom[0] - oceanTop[0]) * tr);
+        const g = Math.round(oceanTop[1] + (oceanBottom[1] - oceanTop[1]) * tr);
+        const b = Math.round(oceanTop[2] + (oceanBottom[2] - oceanTop[2]) * tr);
+        document.getElementById('z5-ocean-bg').style.background = `linear-gradient(to bottom, rgb(${r},${g},${b}) 0%, #0369a1 50%, #082f49 100%)`;
+
+        const badge = document.getElementById('z5-perc-badge');
+        badge.style.color = perc < 1 ? '#166534' : (perc < 2 ? '#a16207' : '#b91c1c');
+
         // Draw molecular grid density
         z5ctx.clearRect(0,0,400,350);
         z5ctx.fillStyle = "rgba(56, 189, 248, 0.3)";
-        const step = 20 - (perc * 2);
+        const step = Math.max(8, 20 - (perc * 2));
         for(let x=0; x<400; x+=step) {
             for(let y=0; y<350; y+=step) {
                 z5ctx.fillRect(x, y, 2, 2);
             }
         }
+
+        drawChart(d);
+    }
+
+    function drawChart(currentDepth) {
+        const c = z5chartCtx;
+        const w = z5chart.width;
+        const h = z5chart.height;
+        c.clearRect(0, 0, w, h);
+        c.fillStyle = '#ffffff';
+        c.fillRect(0, 0, w, h);
+
+        const pArea = {l: 36, r: w - 28, t: 12, b: h - 26};
+        c.strokeStyle = '#cbd5e1';
+        c.beginPath();
+        c.moveTo(pArea.l, pArea.t);
+        c.lineTo(pArea.l, pArea.b);
+        c.lineTo(pArea.r, pArea.b);
+        c.stroke();
+
+        c.fillStyle = '#64748b';
+        c.font = '10px Inter';
+        c.fillText('Dubina (m)', 4, 10);
+        c.fillText('p (MPa)', pArea.r - 36, 10);
+        c.fillText('rho (kg/m3)', pArea.r - 70, h - 6);
+
+        const dMax = 10000;
+        const dNow = Math.max(0, Math.min(currentDepth, dMax));
+        const n = Math.max(2, Math.floor(dNow / 200));
+        c.strokeStyle = '#1d4ed8';
+        c.lineWidth = 2;
+        c.beginPath();
+        for (let i = 0; i <= n; i++) {
+            const d = (i / n) * dNow;
+            const p = 0.1 + (1025 * 9.81 * d / 1e6);
+            const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
+            const y = pArea.t + (p / 101) * (pArea.b - pArea.t);
+            if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+        }
+        c.stroke();
+
+        c.strokeStyle = '#dc2626';
+        c.lineWidth = 2;
+        c.beginPath();
+        for (let i = 0; i <= n; i++) {
+            const d = (i / n) * dNow;
+            const p = 0.1 + (1025 * 9.81 * d / 1e6);
+            const rho = 1025 * (1 + (p - 0.1) / 2340);
+            const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
+            const y = pArea.b - ((rho - 1025) / 45) * (pArea.b - pArea.t);
+            if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+        }
+        c.stroke();
+
+        const cx = pArea.l + (dNow / dMax) * (pArea.r - pArea.l);
+        c.strokeStyle = '#94a3b8';
+        c.setLineDash([4, 4]);
+        c.beginPath();
+        c.moveTo(cx, pArea.t);
+        c.lineTo(cx, pArea.b);
+        c.stroke();
+        c.setLineDash([]);
     }
     z5dS.oninput = updateZ5; updateZ5();
 })();
@@ -1087,6 +1132,24 @@ $$F_{\tau s} = \tau_s \cdot \pi d L = -\frac{\beta d^2 \pi L}{4}$$
             <div style="font-size: 0.78rem; color: #134e4a;">v_max u središtu presjeka</div>
         </div>
     </div>
+
+    <div style="margin-top:12px; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.82rem; color:#334155;">
+            <thead>
+                <tr style="text-align:left; border-bottom:1px solid #e2e8f0;">
+                    <th style="padding:6px 4px;">Veličina</th>
+                    <th style="padding:6px 4px;">Vrijednost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td style="padding:6px 4px;">$\tau(r=0)$</td><td style="padding:6px 4px;"><span id="z6-res-tau-center">0.00</span> Pa</td></tr>
+                <tr><td style="padding:6px 4px;">$\tau(r=d/4)$</td><td style="padding:6px 4px;"><span id="z6-res-tau-quarter-tbl">1.25</span> Pa</td></tr>
+                <tr><td style="padding:6px 4px;">$\tau(r=d/2)$</td><td style="padding:6px 4px;"><span id="z6-res-tau-wall-tbl">2.50</span> Pa</td></tr>
+                <tr><td style="padding:6px 4px;">$v_{max}$</td><td style="padding:6px 4px;"><span id="z6-res-vmax-tbl">1.56</span> m/s</td></tr>
+                <tr><td style="padding:6px 4px;">$F_{total}$</td><td style="padding:6px 4px;"><span id="z6-res-force-wall-tbl">1.57</span> N</td></tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="fizikalni-uvid">
@@ -1109,13 +1172,26 @@ Klikni bilo gdje na cijev da bi istražio profil brzine i tangencijalno naprezan
         size: 1.8 + Math.random() * 1.6
     }));
     let mousePos = null;
+    let dragMode = false;
+    let probeYRatio = null;
     let frame = 0;
 
     canvas.onmousemove = (e) => {
         const rect = canvas.getBoundingClientRect();
         mousePos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        if (dragMode && probeYRatio !== null) {
+            probeYRatio = Math.max(0, Math.min(1, mousePos.y / rect.height));
+        }
     };
     canvas.onmouseleave = () => { mousePos = null; tooltip.style.display = 'none'; };
+    canvas.onmousedown = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        dragMode = true;
+        probeYRatio = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    };
+    window.addEventListener('mouseup', () => {
+        dragMode = false;
+    });
 
     function clamp(value, min, max) {
         return Math.max(min, Math.min(max, value));
@@ -1181,6 +1257,11 @@ Klikni bilo gdje na cijev da bi istražio profil brzine i tangencijalno naprezan
         document.getElementById('z6-res-tau-quarter').innerText = tauQuarter.toFixed(2);
         document.getElementById('z6-res-force-wall').innerText = F_tau.toFixed(2);
         document.getElementById('z6-res-vmax').innerText = v_max.toFixed(2);
+        document.getElementById('z6-res-tau-center').innerText = '0.00';
+        document.getElementById('z6-res-tau-quarter-tbl').innerText = tauQuarter.toFixed(2);
+        document.getElementById('z6-res-tau-wall-tbl').innerText = tauWall.toFixed(2);
+        document.getElementById('z6-res-vmax-tbl').innerText = v_max.toFixed(2);
+        document.getElementById('z6-res-force-wall-tbl').innerText = F_tau.toFixed(2);
 
         const w = canvas.width;
         const h = canvas.height;
@@ -1353,8 +1434,9 @@ Klikni bilo gdje na cijev da bi istražio profil brzine i tangencijalno naprezan
         ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + chart.h - 2);
 
         // Interactive highlight by radial position
-        if (mousePos && mousePos.y >= topWall && mousePos.y <= bottomWall) {
-            const r_inspect_mm = ((mousePos.y - cy) / drawR) * R;
+        const probeY = probeYRatio === null ? (mousePos ? mousePos.y : null) : (probeYRatio * h);
+        if (probeY !== null && probeY >= topWall && probeY <= bottomWall) {
+            const r_inspect_mm = ((probeY - cy) / drawR) * R;
             const r_m = r_inspect_mm / 1000;
             const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - r_m**2));
             const tau = Math.abs(beta * r_m / 2);
@@ -1362,8 +1444,8 @@ Klikni bilo gdje na cijev da bi istražio profil brzine i tangencijalno naprezan
             const inspectXChart = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
 
             tooltip.style.display = 'block';
-            tooltip.style.left = (mousePos.x + 15) + 'px';
-            tooltip.style.top = (mousePos.y + 15) + 'px';
+            tooltip.style.left = ((mousePos ? mousePos.x : chart.x) + 15) + 'px';
+            tooltip.style.top = (probeY + 15) + 'px';
             document.getElementById('z6-tt-r').innerText = r_inspect_mm.toFixed(1);
             document.getElementById('z6-tt-v').innerText = v.toFixed(3);
             document.getElementById('z6-tt-tau').innerText = tau.toFixed(2);
@@ -1371,20 +1453,20 @@ Klikni bilo gdje na cijev da bi istražio profil brzine i tangencijalno naprezan
             ctx.strokeStyle = "rgba(239, 68, 68, 0.42)";
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            ctx.moveTo(channel.x, mousePos.y);
-            ctx.lineTo(chart.x + chart.w, mousePos.y);
+            ctx.moveTo(channel.x, probeY);
+            ctx.lineTo(chart.x + chart.w, probeY);
             ctx.stroke();
             ctx.setLineDash([]);
 
             ctx.fillStyle = "#ef4444";
             ctx.beginPath();
-            ctx.arc(channel.x + 14, mousePos.y, 4.5, 0, Math.PI * 2);
+            ctx.arc(channel.x + 14, probeY, 4.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
             ctx.arc(inspectXChart, inspectYChart, 5, 0, Math.PI * 2);
             ctx.fill();
 
-            drawArrow(ctx, channel.x + channel.w - 86, mousePos.y, channel.x + channel.w - 86 + Math.min(58, 14 + tau * 9), mousePos.y, "#ef4444", 2.5);
+            drawArrow(ctx, channel.x + channel.w - 86, probeY, channel.x + channel.w - 86 + Math.min(58, 14 + tau * 9), probeY, "#ef4444", 2.5);
         } else {
             tooltip.style.display = 'none';
         }
@@ -1454,14 +1536,25 @@ $$v_B = \frac{F_\tau\,\delta_u}{\mu\,a^2} = \frac{376\cdot 6\cdot 10^{-6}}{0{,}0
             <div style="background: white; padding: 12px; border: 1px solid #e2e8f0;">
                 <label style="font-weight: 600; color: #475569;">Kut α: <span id="z7-v-alpha">20</span>°</label>
                 <input type="range" id="z7-alpha" min="5" max="45" step="1" value="20" style="width: 100%; accent-color: #3b82f6;">
+                <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#64748b;margin:2px 0 8px;"><span>5°</span><span>45°</span></div>
                 <label style="font-weight: 600; margin-top: 10px; display: block; color: #475569;">Viskoznost μ: <span id="z7-v-mu">7</span> mPa·s</label>
                 <input type="range" id="z7-mu" min="1" max="50" step="1" value="7" style="width: 100%; accent-color: #3b82f6;">
+                <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#64748b;margin:2px 0 8px;"><span>1</span><span>50</span></div>
                 <label style="font-weight: 600; margin-top: 10px; display: block; color: #475569;">Sloj ulja δ: <span id="z7-v-delta">6</span> μm</label>
                 <input type="range" id="z7-delta" min="1" max="50" step="1" value="6" style="width: 100%; accent-color: #3b82f6;">
+                <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#64748b;margin-top:2px;"><span>1 μm</span><span>50 μm</span></div>
             </div>
             <div style="background: #f0fdf4; padding: 12px; border: 1px solid #bbf7d0;">
                 <div style="font-weight: 700; color: #166534; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 4px;">Ustaljena brzina v_B</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #166534;"><span id="z7-res-v">5.16</span> m/s</div>
+            </div>
+
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px;">
+                <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase; margin-bottom:8px;">Balans sila na kosini</div>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#b91c1c;"><span>$F_{tang}=G\sin\alpha$</span><strong><span id="z7-res-fg">376.2</span> N</strong></div>
+                <div style="height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden; margin:3px 0 8px;"><div id="z7-bar-fg" style="height:100%; width:100%; background:linear-gradient(90deg,#fca5a5,#ef4444);"></div></div>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#1d4ed8;"><span>$F_v=\mu(v/\delta)a^2$</span><strong><span id="z7-res-fv">376.2</span> N</strong></div>
+                <div style="height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden;"><div id="z7-bar-fv" style="height:100%; width:100%; background:linear-gradient(90deg,#93c5fd,#2563eb);"></div></div>
             </div>
         </div>
     </div>
@@ -1483,11 +1576,20 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
         const mu = parseFloat(z7mS.value) / 1000;
         const delta = parseFloat(z7dS.value) / 1e6;
         const G = 1100; const side = 0.25;
-        const v = (G * Math.sin(alpha) * delta) / (mu * side * side);
+        const Ft = G * Math.sin(alpha);
+        const v = (Ft * delta) / (mu * side * side);
+        const Fv = mu * (v / delta) * side * side;
         document.getElementById('z7-v-alpha').innerText = z7aS.value;
         document.getElementById('z7-v-mu').innerText = z7mS.value;
         document.getElementById('z7-v-delta').innerText = z7dS.value;
         document.getElementById('z7-res-v').innerText = v.toFixed(2);
+        document.getElementById('z7-res-fg').innerText = Ft.toFixed(1);
+        document.getElementById('z7-res-fv').innerText = Fv.toFixed(1);
+
+        const refF = Math.max(Ft, Fv, 1);
+        document.getElementById('z7-bar-fg').style.width = `${(Ft / refF * 100).toFixed(1)}%`;
+        document.getElementById('z7-bar-fv').style.width = `${(Fv / refF * 100).toFixed(1)}%`;
+
         z7Pos += v * 0.5; if(z7Pos > 600) z7Pos = -100;
         z7ctx.clearRect(0,0,500,300);
         z7ctx.save();
@@ -1498,16 +1600,29 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
         z7ctx.fillStyle = "#475569";
         z7ctx.fillRect(z7Pos, -40, 60, 40);
         const cx = z7Pos + 30, cy = -20;
-        drawArrow(z7ctx, cx, cy, cx, cy + 50/Math.cos(alpha), "#166534", "G"); 
-        drawArrow(z7ctx, cx, cy, cx - 40, cy, "#ef4444", "Fτ"); 
+        drawArrow(z7ctx, cx, cy, cx + 40, cy + 14, "#ef4444", "Gsinα");
+        drawArrow(z7ctx, cx, cy, cx - 40, cy - 14, "#2563eb", "Fv");
         z7ctx.restore();
         z7zctx.clearRect(0,0,100,60);
         z7zctx.fillStyle = "rgba(49, 130, 206, 0.4)";
         z7zctx.fillRect(0, 10, 100, 40);
-        z7zctx.strokeStyle = "#3b82f6"; z7zctx.lineWidth = 2;
-        z7zctx.beginPath(); z7zctx.moveTo(10, 50); z7zctx.lineTo(10 + Math.min(v*5, 80), 10); z7zctx.stroke();
+        for (let i = 0; i <= 4; i++) {
+            const t = i / 4;
+            const y = 50 - t * 36;
+            const len = 10 + t * Math.min(v * 6, 70);
+            z7zctx.strokeStyle = `rgba(37, 99, 235, ${0.35 + 0.15 * i})`;
+            z7zctx.lineWidth = 2;
+            z7zctx.beginPath();
+            z7zctx.moveTo(8, y);
+            z7zctx.lineTo(8 + len, y);
+            z7zctx.stroke();
+        }
         z7zctx.fillStyle = "#1e293b"; z7zctx.fillRect(0, 0, 100, 10); 
         z7zctx.fillRect(0, 50, 100, 10); 
+        z7zctx.fillStyle = '#334155';
+        z7zctx.font = '9px Inter';
+        z7zctx.fillText('v=0', 72, 58);
+        z7zctx.fillText('vB', 72, 12);
         requestAnimationFrame(updateZ7);
     }
     function drawArrow(ctx, x1, y1, x2, y2, color, label) {

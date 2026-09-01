@@ -107,7 +107,7 @@ Ispod možete interaktivno istražiti oba principa.
     </div>
 </div>
 
-<script>
+<script type="text/plain">
 (function() {
     const canvas = document.getElementById('v1-intro-canvas');
     if (!canvas) return;
@@ -473,7 +473,7 @@ Ispod možete interaktivno istražiti oba principa.
             [rhoS, hS, extraS].forEach((slider) => slider.addEventListener('input', update));
             update();
         })();
-        </script>
+        </script
         ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
         ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
         ctx.closePath();
@@ -502,6 +502,92 @@ Ispod možete interaktivno istražiti oba principa.
 })();
 </script>
 ````
+```{=html}
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const canvas = $('v1-intro-canvas');
+  const ctx = canvas?.getContext('2d');
+  const controls = {
+    force: $('v1-pascal-force'), ratio: $('v1-pascal-ratio'),
+    speed: $('v1-newton-speed'), mu: $('v1-newton-mu')
+  };
+  if (!ctx || Object.values(controls).some((element) => !element)) return;
+
+  let tab = 'pascal';
+  let frame = 0;
+  const area1 = 12 / 10000;
+  const gap = 0.025;
+  const setText = (id, value) => { const element = $(id); if (element) element.textContent = value; };
+
+  function values() {
+    const force = Number(controls.force.value);
+    const ratio = Number(controls.ratio.value);
+    const speed = Number(controls.speed.value);
+    const mu = Number(controls.mu.value);
+    return { force, ratio, speed, mu, pressure: force / area1, output: force * ratio, gradient: speed / gap, tau: mu * speed / gap };
+  }
+
+  function update() {
+    const v = values();
+    setText('v1-pascal-force-val', v.force.toFixed(0));
+    setText('v1-pascal-ratio-val', v.ratio.toFixed(1));
+    setText('v1-pascal-pressure', (v.pressure / 1e6).toFixed(2));
+    setText('v1-pascal-output', v.output.toFixed(0));
+    setText('v1-badge-f1', v.force.toFixed(0));
+    setText('v1-badge-p', (v.pressure / 1e6).toFixed(2));
+    setText('v1-badge-f2', v.output.toFixed(0));
+    setText('v1-newton-speed-val', v.speed.toFixed(2));
+    setText('v1-newton-mu-val', v.mu.toFixed(2));
+    setText('v1-newton-gradient', v.gradient.toFixed(1));
+    setText('v1-newton-tau', v.tau.toFixed(1));
+    $('v1-pascal-explainer').textContent = `Tlak je jednak u cijelom zatvorenom ulju. S omjerom površina ${v.ratio.toFixed(1)} izlazna sila iznosi ${v.output.toFixed(0)} N.`;
+    $('v1-newton-explainer').textContent = `Za μ = ${v.mu.toFixed(2)} Pa·s i gradijent ${v.gradient.toFixed(1)} s⁻¹ smično naprezanje iznosi ${v.tau.toFixed(1)} Pa.`;
+    $('v1-scene-caption').innerHTML = tab === 'pascal'
+      ? 'Tlak se prenosi jednak u svim smjerovima; veća površina daje veću silu <strong>F₂</strong>.'
+      : 'Brzina raste od nepomične donje do pomične gornje ploče; <strong>τ = μ·dv/dy</strong>.';
+  }
+
+  function arrow(x1, y1, x2, y2, color, label = '') {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - 10 * Math.cos(angle - .5), y2 - 10 * Math.sin(angle - .5)); ctx.lineTo(x2 - 10 * Math.cos(angle + .5), y2 - 10 * Math.sin(angle + .5)); ctx.closePath(); ctx.fill();
+    if (label) { ctx.font = '700 13px Inter, sans-serif'; ctx.fillText(label, x2 + 8, y2 - 7); }
+  }
+
+  function drawPascal(v) {
+    ctx.fillStyle = '#f8fbff'; ctx.fillRect(0, 0, 520, 360);
+    const pulse = 8 + 5 * Math.sin(frame / 12), left = 94, right = 382, base = 300, top = 112, rw = 52 + v.ratio * 11;
+    ctx.fillStyle = 'rgba(37,99,235,.30)'; ctx.beginPath();
+    ctx.moveTo(left - 26, top + 62); ctx.lineTo(left - 26, base); ctx.lineTo(right + rw / 2, base); ctx.lineTo(right + rw / 2, top + 34); ctx.lineTo(right - rw / 2, top + 34); ctx.lineTo(right - rw / 2, 242); ctx.lineTo(left + 26, 242); ctx.lineTo(left + 26, top + 62); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#334155'; ctx.fillRect(left - 22, top + 76 + pulse, 44, 14); ctx.fillRect(right - rw / 2 + 4, top + 46 - pulse / v.ratio, rw - 8, 14);
+    arrow(left, top + 10, left, top + 68 + pulse, '#2563eb', 'F₁'); arrow(right, top + 64, right, top - 6, '#0f766e', 'F₂');
+    ctx.fillStyle = '#0f172a'; ctx.font = '700 14px Inter, sans-serif'; ctx.fillText(`p = ${(v.pressure / 1e6).toFixed(2)} MPa`, 20, 30); ctx.fillText(`F₂ = ${v.output.toFixed(0)} N`, 330, 72);
+    ctx.font = '13px Inter, sans-serif'; ctx.fillStyle = '#475569'; ctx.fillText('A₁ = 12 cm²', 48, 332); ctx.fillText(`A₂ = ${(12 * v.ratio).toFixed(0)} cm²`, 340, 332);
+  }
+
+  function drawNewton(v) {
+    ctx.fillStyle = '#fffaf5'; ctx.fillRect(0, 0, 520, 360);
+    const x = 65, y = 85, w = 315, h = 190;
+    ctx.fillStyle = 'rgba(251,146,60,.22)'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#1f2937'; ctx.fillRect(x, y - 19, w, 17); ctx.fillStyle = '#475569'; ctx.fillRect(x, y + h, w, 15);
+    for (let i = 0; i <= 6; i++) { const t = i / 6, yy = y + h - t * h, length = 28 + t * v.speed * 70; arrow(x + 25, yy, x + 25 + length, yy, `hsl(${205 - t * 42},78%,48%)`, i === 6 ? 'v' : ''); }
+    const ratio = Math.min(v.tau / 55, 1); ctx.fillStyle = '#fee2e2'; ctx.fillRect(435, 92, 42, 180); ctx.fillStyle = '#dc2626'; ctx.fillRect(435, 92 + (1 - ratio) * 180, 42, ratio * 180);
+    ctx.fillStyle = '#7f1d1d'; ctx.font = '700 14px Inter, sans-serif'; ctx.fillText('τ', 449, 80); ctx.fillText(`${v.tau.toFixed(1)} Pa`, 423, 294); ctx.fillStyle = '#9a3412'; ctx.font = '13px Inter, sans-serif'; ctx.fillText(`dv/dy = ${v.gradient.toFixed(1)} s⁻¹`, 208, 52); ctx.fillText(`μ = ${v.mu.toFixed(2)} Pa·s`, 208, 72);
+  }
+
+  function render() { const v = values(); if (tab === 'pascal') drawPascal(v); else drawNewton(v); frame += 1; requestAnimationFrame(render); }
+  function setTab(next) {
+    tab = next; $('v1-pascal-panel').style.display = next === 'pascal' ? 'flex' : 'none'; $('v1-newton-panel').style.display = next === 'newton' ? 'flex' : 'none';
+    $('btn-pascal').style.cssText += `;background:${next === 'pascal' ? '#2563eb' : '#e2e8f0'};color:${next === 'pascal' ? '#fff' : '#475569'}`;
+    $('btn-newton').style.cssText += `;background:${next === 'newton' ? '#ea580c' : '#e2e8f0'};color:${next === 'newton' ? '#fff' : '#475569'}`; update();
+  }
+  $('btn-pascal').addEventListener('click', () => setTab('pascal')); $('btn-newton').addEventListener('click', () => setTab('newton'));
+  Object.values(controls).forEach((control) => control.addEventListener('input', update)); setTab('pascal'); render();
+})();
+</script>
+```
 ```{=html}
 <div class="mf1-note-grid">
     <div class="mf1-kriterij">

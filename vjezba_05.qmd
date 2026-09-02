@@ -61,6 +61,48 @@ div[id^="v5-"][style*="max-width"] canvas {
   height: auto !important;
 }
 
+/* Ista legenda vrijedi za sve glavne skice: plavo je tlak, crveno rezultanta. */
+.v5-diagram-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.8rem 0 0;
+  color: #475569;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.v5-diagram-key span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.v5-diagram-key i { width: 1rem; height: 0.25rem; border-radius: 999px; display: inline-block; }
+.v5-diagram-key .pressure { background: #0ea5e9; }
+.v5-diagram-key .centroid { background: #3b82f6; }
+.v5-diagram-key .resultant { background: #ef4444; }
+
+/* U tri uvodna primjera skica je važnija od paralelnog dashboarda. */
+:is(#v5-principle-explorer, #v5-lab-v5, #v5-z41-container) > div[style*="display: grid"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+:is(#v5-principle-explorer, #v5-lab-v5, #v5-z41-container) > div[style*="display: grid"] > div:first-child {
+  height: auto !important;
+  padding: 1rem !important;
+}
+
+#v5-principle-canvas,
+#v5-z41-canvas {
+  width: 100% !important;
+  max-height: 430px;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+#v5-v5-canvas {
+  width: 100% !important;
+  max-height: 500px;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
 /* Legende i objašnjenja ne smiju zaklanjati fizikalnu scenu. */
 :is(#v5-lab-v5, #v5-patm-analyzer, #v5-gate-premium, #v5-z38-container,
     #v5-z39-container, #v5-integration-premium, #v5-multi-master-container)
@@ -122,6 +164,7 @@ div[id^="v5-"][style*="max-width"] canvas {
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 35px;">
         <div style="background: #ffffff; border-radius: 20px; padding: 10px; border: 1px solid #e2e8f0; height: 420px; position: relative;">
             <canvas id="v5-principle-canvas" width="450" height="400" style="width: 100%; height: 100%;"></canvas>
+            <div class="v5-diagram-key" aria-label="Legenda skice"><span><i class="pressure"></i>lokalni tlak</span><span><i class="centroid"></i>težište T</span><span><i class="resultant"></i>rezultanta F_R u C_P</span></div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
@@ -198,33 +241,41 @@ div[id^="v5-"][style*="max-width"] canvas {
         draw(a, h, b, rho, zT, zF, pT, force);
     }
     function draw(a, h, b, rho, zT, zF, pT, force) {
-        ctx.clearRect(0, 0, 450, 400); const scale = 55; const offX = 140; const offY = 40;
+        ctx.clearRect(0, 0, 450, 400); const scale = 55; const offX = 172; const offY = 48;
+        ctx.fillStyle = '#f0f9ff'; ctx.fillRect(18, offY, 414, 278);
         ctx.setLineDash([5, 5]); ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(20, offY); ctx.lineTo(430, offY); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#0369a1'; ctx.font = '700 13px Inter'; ctx.fillText('slobodna površina', 22, offY - 10);
         const tY = offY + a * scale; const bY = tY + h * scale;
-        const pTop = a * 35; const pBot = (a + h) * 35;
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.15)'; ctx.beginPath(); ctx.moveTo(offX, tY); ctx.lineTo(offX+pTop, tY); ctx.lineTo(offX+pBot, bY); ctx.lineTo(offX, bY); ctx.fill();
+        const pTop = a * 28; const pBot = (a + h) * 28;
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.18)'; ctx.beginPath(); ctx.moveTo(offX + 10, tY); ctx.lineTo(offX+pTop+10, tY); ctx.lineTo(offX+pBot+10, bY); ctx.lineTo(offX+10, bY); ctx.fill();
         for(let i=0; i<=h; i+=0.4) {
             let currY = tY + i*scale; let currP = pTop + (i/h)*(pBot-pTop);
-            drawArrow(ctx, offX, currY, offX + currP, currY, "rgba(56, 189, 248, 0.5)", 1);
+            drawArrow(ctx, offX + currP + 10, currY, offX + 10, currY, "rgba(14, 165, 233, 0.62)", 1.4);
         }
-        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 6; ctx.lineCap = "round";
-        ctx.beginPath(); ctx.moveTo(offX, tY); ctx.lineTo(offX, bY); ctx.stroke();
+        ctx.fillStyle = '#475569'; ctx.fillRect(offX - 10, tY, 20, bY - tY);
+        ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.strokeRect(offX - 10, tY, 20, bY - tY);
+        ctx.fillStyle = '#0f172a'; ctx.font = '700 12px Inter'; ctx.fillText('uronjena ploha', offX - 42, bY + 21);
         const tyPos = offY + zT * scale; const fyPos = offY + zF * scale;
-        ctx.fillStyle = "#0f172a"; ctx.font = 'bold 12px Inter';
-        ctx.fillText(`p(a) = ${(rho * 9.81 * a / 1000).toFixed(1)} kPa`, offX + pTop + 10, tY + 4);
-        ctx.fillText(`p(a+h) = ${(rho * 9.81 * (a + h) / 1000).toFixed(1)} kPa`, offX + pBot + 10, bY + 4);
+        ctx.fillStyle = "#0f172a"; ctx.font = '700 12px Inter';
+        ctx.fillText(`p_vrh = ${(rho * 9.81 * a / 1000).toFixed(1)} kPa`, offX + pTop + 18, tY + 4);
+        ctx.fillText(`p_dno = ${(rho * 9.81 * (a + h) / 1000).toFixed(1)} kPa`, offX + pBot + 18, bY + 4);
         ctx.setLineDash([3, 3]); ctx.strokeStyle = "#64748b"; ctx.beginPath(); ctx.moveTo(offX - 100, tyPos); ctx.lineTo(offX, tyPos); ctx.stroke(); ctx.setLineDash([]);
         ctx.fillStyle = "#64748b"; ctx.beginPath(); ctx.arc(offX, tyPos, 4, 0, 7); ctx.fill();
+        ctx.fillStyle = '#2563eb'; ctx.fillText('T · težište', offX + 18, tyPos - 10);
         ctx.strokeStyle = "#f87171"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(offX - 70, fyPos); ctx.lineTo(offX, fyPos); ctx.stroke();
         ctx.fillStyle = "#f87171"; ctx.beginPath(); ctx.arc(offX, fyPos, 6, 0, 7); ctx.fill();
-        drawArrow(ctx, offX - 120, fyPos, offX - 10, fyPos, "#ef4444", 4);
+        ctx.fillText('C_P · centar pritiska', offX + 18, fyPos + 20);
+        drawArrow(ctx, offX - 126, fyPos, offX - 14, fyPos, "#ef4444", 4);
+        ctx.fillStyle = '#dc2626'; ctx.font = '700 14px Inter'; ctx.fillText('F_R', offX - 122, fyPos - 10);
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(34, offY); ctx.lineTo(34, tyPos); ctx.stroke();
+        drawArrow(ctx, 34, offY, 34, tyPos, '#475569', 1.5); ctx.fillStyle = '#334155'; ctx.fillText('z_T', 42, (offY + tyPos) / 2);
         ctx.fillStyle = "#1d4ed8";
-        ctx.fillText(`A = ${b.toFixed(1)} · ${h.toFixed(1)} = ${(b * h).toFixed(2)} m²`, 18, 338);
+        ctx.fillText(`p = ρ g z;  A = ${b.toFixed(1)} · ${h.toFixed(1)} = ${(b * h).toFixed(2)} m²`, 18, 348);
         ctx.fillStyle = "#0f172a";
-        ctx.fillText(`p_T = ${pT.toFixed(2)} kPa`, 18, 356);
+        ctx.fillText(`p_T = ${pT.toFixed(2)} kPa`, 18, 368);
         ctx.fillStyle = "#dc2626";
-        ctx.fillText(`F = ${force.toFixed(2)} kN`, 18, 374);
+        ctx.fillText(`F_R = ${force.toFixed(2)} kN`, 18, 388);
     }
     function drawArrow(ctx, x1, y1, x2, y2, color, width) {
         const headlen = 10; const angle = Math.atan2(y2-y1, x2-x1);
@@ -292,11 +343,7 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
         <div style="background: #ffffff; border-radius: 24px; padding: 15px; border: 1px solid #e2e8f0; height: 550px; position: relative; overflow: hidden;">
             <canvas id="v5-v5-canvas" width="600" height="550" style="width: 100%; height: 100%; border-radius: 12px;"></canvas>
-            <div style="position: absolute; bottom: 30px; left: 30px; display: flex; flex-direction: column; gap: 10px;">
-                <div style="background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 12px; border: 1px solid #fee2e2; font-size: 0.75rem; font-weight: 800; color: #ef4444;">🔴 SILA F (Rezultanta)</div>
-                <div style="background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 12px; border: 1px solid #dbeafe; font-size: 0.75rem; font-weight: 800; color: #3b82f6;">🔵 Fₓ (Potisak)</div>
-                <div style="background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 12px; border: 1px solid #dcfce7; font-size: 0.75rem; font-weight: 800; color: #10b981;">🟢 Fz (Težina)</div>
-            </div>
+            <div class="v5-diagram-key" aria-label="Legenda vektora"><span><i class="pressure"></i>slobodna površina</span><span><i class="resultant"></i>F_R iz C_P</span><span><i class="centroid"></i>F_H i F_V</span></div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;">
@@ -330,16 +377,16 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
                     <span id="v5-v5-shape-name" style="font-family: monospace; font-weight: 800; color: #c4b5fd;">Pravokutnik</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #94a3b8; font-size: 0.85rem;">UKUPNA SILA F</span>
+                    <span style="color: #94a3b8; font-size: 0.85rem;">REZULTANTA F_R</span>
                     <span id="v5-v5-out-f" style="font-family: monospace; font-weight: 900; font-size: 1.4rem; color: #f87171;">0.0 kN</span>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div style="background: #1e293b; padding: 12px; border-radius: 12px;">
-                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">Fₓ (Potisak)</span>
+                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">F_H · horizontalno</span>
                         <span id="v5-v5-out-fx" style="font-family: monospace; font-weight: 700; color: #60a5fa;">0.0 kN</span>
                     </div>
                     <div style="background: #1e293b; padding: 12px; border-radius: 12px;">
-                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">Fz (Težina)</span>
+                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">F_V · vertikalno</span>
                         <span id="v5-v5-out-fz" style="font-family: monospace; font-weight: 700; color: #10b981;">0.0 kN</span>
                     </div>
                 </div>
@@ -434,18 +481,24 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
         ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(yF*scale, 0, 7, 0, 7); ctx.fill();
         ctx.fillStyle = '#dbeafe'; ctx.font = 'bold 12px Inter';
         ctx.fillText('T', yT*scale + 10, -8);
-        ctx.fillText('Ch', yF*scale + 10, 18);
+        ctx.fillText('C_P', yF*scale + 10, 18);
         ctx.restore();
-        const fAnchorX = yF * scale * Math.cos(alpha); const fAnchorY = yF * scale * Math.sin(alpha);
+        const fAnchorX = originX + yF * scale * Math.cos(alpha); const fAnchorY = originY + yF * scale * Math.sin(alpha);
         const nx = Math.sin(alpha); const ny = -Math.cos(alpha); const vLen = 130;
         function dA(x1,y1,x2,y2,c,w) {
             const h = 10; const a = Math.atan2(y2-y1, x2-x1);
             ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-h*Math.cos(a-0.4),y2-h*Math.sin(a-0.4)); ctx.lineTo(x2-h*Math.cos(a+0.4),y2-h*Math.sin(a+0.4)); ctx.fillStyle=c; ctx.fill();
         }
-        dA(fAnchorX - nx*vLen, fAnchorY - ny*vLen, fAnchorX, fAnchorY - ny*vLen, '#3b82f6', 2);
-        dA(fAnchorX, fAnchorY - ny*vLen, fAnchorX, fAnchorY, '#10b981', 2);
-        dA(fAnchorX - nx*vLen, fAnchorY - ny*vLen, fAnchorX, fAnchorY, '#ef4444', 5);
+        const endX = fAnchorX + nx * vLen; const endY = fAnchorY + ny * vLen;
+        dA(fAnchorX, fAnchorY, endX, fAnchorY, '#3b82f6', 3);
+        dA(endX, fAnchorY, endX, endY, '#10b981', 3);
+        dA(fAnchorX, fAnchorY, endX, endY, '#ef4444', 5);
+        ctx.font = '700 13px Inter';
+        ctx.fillStyle = '#2563eb'; ctx.fillText('F_H', endX - 32, fAnchorY - 10);
+        ctx.fillStyle = '#059669'; ctx.fillText('F_V', endX + 8, (fAnchorY + endY) / 2);
+        ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', (fAnchorX + endX) / 2 - 10, (fAnchorY + endY) / 2 - 10);
+        ctx.fillStyle = '#0f172a'; ctx.fillText('C_P', fAnchorX + 10, fAnchorY + 18);
         ctx.fillStyle = '#0f172a'; ctx.font = 'bold 13px Inter'; ctx.fillText(shapeName, 18, 34);
         ctx.fillStyle = '#1d4ed8'; ctx.fillText(`z_T = ${zT.toFixed(2)} m`, 18, 490);
         ctx.fillStyle = '#dc2626'; ctx.fillText(`z_F = ${zF.toFixed(2)} m`, 18, 512);
@@ -501,6 +554,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 35px;">
         <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 450px; overflow: hidden;">
             <canvas id="v5-z41-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+            <div class="v5-diagram-key" aria-label="Legenda zaklopke"><span><i class="pressure"></i>raspodjela tlaka</span><span><i class="centroid"></i>težište T</span><span><i class="resultant"></i>F_H u C_P</span></div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 20px;">
@@ -524,7 +578,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
             <div style="background: #0f172a; padding: 20px; border-radius: 24px; color: white;">
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #94a3b8; font-size: 0.8rem;">Sila Fh:</span>
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Rezultanta F_H:</span>
                         <span id="v5-z41-fh" style="font-family: monospace; font-weight: 700; color: #38bdf8;">618 kN</span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
@@ -609,7 +663,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
         ctx.stroke();
         ctx.fillStyle = '#2563eb';
         ctx.font = 'bold 12px Inter';
-        ctx.fillText('slobodna povrsina', 62, waterY - 10);
+        ctx.fillText('slobodna površina', 62, waterY - 10);
 
         ctx.strokeStyle = '#1e293b';
         ctx.lineWidth = 4;
@@ -694,7 +748,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
             ctx.beginPath();
             ctx.arc(gateX, fPos, 8, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillText('Ch', gateX + 12, fPos + 4);
+            ctx.fillText('C_P', gateX + 12, fPos + 4);
 
             ctx.setLineDash([6, 6]);
             ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
@@ -706,7 +760,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
             ctx.setLineDash([]);
             drawArrow(gateX - 120, fPos, gateX - 14, fPos, '#ef4444', 4);
             ctx.fillStyle = '#ef4444';
-            ctx.fillText('Fh', gateX - 142, fPos + 4);
+            ctx.fillText('F_H', gateX - 142, fPos + 4);
 
             drawArrow(gateX + 18, gateTopY, gateX + 18 + Math.min(72, 10 + Rb * 0.08), gateTopY, '#f59e0b', 3.5);
             ctx.fillStyle = '#f59e0b';
@@ -855,7 +909,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak te se njegov ut
             </div>
             <div style="background: #0f172a; padding: 25px; border-radius: 20px; color: white;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="color: #94a3b8; font-size: 0.8rem;">Sila vode Fₕ</span>
+                    <span style="color: #94a3b8; font-size: 0.8rem;">Rezultanta vode F_H</span>
                     <span id="v5-gate-p-fh" style="font-family: monospace; color: #60a5fa; font-weight: 700;">--- kN</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding-top: 10px; border-top: 1px dashed #334155;">
@@ -953,7 +1007,7 @@ Trokut visine $h$, baze $b$, nalazi se u vertikalnom položaju uronjen u tekući
                         <span id="v5-z37-pt-val" style="font-family: monospace; font-weight: 700; color: #c4b5fd;">--- kPa</span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #94a3b8; font-size: 0.8rem;">Sila Fh:</span>
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Rezultanta F_H:</span>
                         <span id="v5-z37-f-val" style="font-family: monospace; font-weight: 700; color: #38bdf8;">--- kN</span>
                     </div>
                 </div>
@@ -1111,7 +1165,7 @@ Trokut visine $h$, baze $b$, nalazi se u vertikalnom položaju uronjen u tekući
         ctx.beginPath();
         ctx.arc(ox, fy, 8, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillText('Ch', ox + 12, fy + 4);
+        ctx.fillText('C_P', ox + 12, fy + 4);
 
         const fArrowLen = Math.min(190, 38 + Fh * 2.2);
         ctx.setLineDash([6, 6]);
@@ -1172,7 +1226,7 @@ Trokut visine $h$ i baze $b$ uronjen je vertikalno u tekućinu tako da mu se vrh
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
-                    <span style="font-weight: 600; color: #475569;">Centar tlaka Ch</span>
+                    <span style="font-weight: 600; color: #475569;">Centar pritiska C_P</span>
                 </div>
             </div>
         </div>
@@ -1369,7 +1423,7 @@ Trokut visine $h$ i baze $b$ uronjen je vertikalno u tekućinu tako da mu se vrh
         ctx.beginPath();
         ctx.arc(ox, fPos, 8, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillText('Ch', ox + 12, fPos + 4);
+        ctx.fillText('C_P', ox + 12, fPos + 4);
 
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
@@ -1417,7 +1471,7 @@ Krug promjera $d$ vertikalno je uronjen u tekućinu, pri čemu dotiče površinu
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
-                    <span style="font-weight: 600; color: #475569;">Centar tlaka Ch (5d/8)</span>
+                    <span style="font-weight: 600; color: #475569;">Centar pritiska C_P (5d/8)</span>
                 </div>
             </div>
         </div>
@@ -1599,7 +1653,7 @@ Krug promjera $d$ vertikalno je uronjen u tekućinu, pri čemu dotiče površinu
         ctx.beginPath();
         ctx.arc(ox, fPos, 8, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillText('Ch', ox + 12, fPos + 4);
+        ctx.fillText('C_P', ox + 12, fPos + 4);
 
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
@@ -1796,7 +1850,7 @@ Polukrug polumjera $r$ vertikalno je uronjen u tekućinu tako da mu se ravna tet
         ctx.beginPath();
         ctx.arc(ox, fPos, 8, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillText('Ch', ox + 12, fPos + 4);
+        ctx.fillText('C_P', ox + 12, fPos + 4);
 
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';

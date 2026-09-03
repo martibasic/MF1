@@ -932,23 +932,27 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak te se njegov ut
     const canvas = document.getElementById('v5-gate-p-canvas'); const ctx = canvas.getContext('2d');
     const aS = document.getElementById('v5-gate-p-a-slider');
     function update() {
-        const alpha = parseFloat(aS.value) * Math.PI / 180; const h1 = 3.0; const L = 4.24; const b = 5.0;
-        const zT = h1 + (L/2) * Math.sin(alpha); const Fh = (1000 * 9.81 * zT * (L * b)) / 1000;
-        const yTi = h1 / Math.sin(alpha) + L/2; const yFi = yTi + (b * L**3 / 12) / (yTi * (L * b));
-        const F_req = (Fh * (yFi - h1/Math.sin(alpha))) / (L/2);
+        const alpha = parseFloat(aS.value) * Math.PI / 180; const h1 = 3.0; const h2 = 0.5; const b = 5.0;
+        const L = h1 / Math.sin(alpha); const zT = h2 + h1 / 2;
+        const Fh = (1000 * 9.81 * zT * (L * b)) / 1000;
+        const yTop = h2 / Math.sin(alpha); const yTi = yTop + L / 2;
+        const IG = b * L**3 / 12; const yFi = yTi + IG / (yTi * L * b);
+        const armHyd = yFi - yTop; const W = 200 * 9.81 / 1000; // kN, kao i Fh
+        const F_req = 2 * (Fh * armHyd + W * (L / 2) * Math.cos(alpha)) / L;
         document.getElementById('v5-gate-p-fh').innerText = Fh.toFixed(1) + " kN";
         document.getElementById('v5-gate-p-fres').innerText = F_req.toFixed(1) + " kN";
-        draw(alpha, h1, L, yFi);
+        draw(alpha, h1, h2, L, yFi);
     }
-    function draw(alpha, h1, L, yFi) {
-        ctx.clearRect(0, 0, 450, 400); const scale = 35; const waterY = 60; const hX = 150; const hY = waterY + h1 * scale;
+    function draw(alpha, h1, h2, L, yFi) {
+        ctx.clearRect(0, 0, 450, 400); const scale = 35; const waterY = 60; const hX = 150; const hY = waterY + h2 * scale;
         ctx.fillStyle = '#e0f2fe'; ctx.fillRect(0, waterY, 450, 340);
         ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(450, waterY); ctx.stroke();
         const eX = hX + L * scale * Math.cos(alpha); const eY = hY + L * scale * Math.sin(alpha);
         ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hX, hY); ctx.lineTo(eX, eY); ctx.stroke();
-        const fDist = (yFi - h1/Math.sin(alpha)) * scale; const fX = hX + fDist * Math.cos(alpha); const fY = hY + fDist * Math.sin(alpha);
+        const fDist = (yFi - h2/Math.sin(alpha)) * scale; const fX = hX + fDist * Math.cos(alpha); const fY = hY + fDist * Math.sin(alpha);
         ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(hX, hY, 6, 0, 7); ctx.fill();
         ctx.beginPath(); ctx.arc(fX, fY, 5, 0, 7); ctx.fill();
+        ctx.font = '700 13px Inter'; ctx.fillStyle = '#dc2626'; ctx.fillText('B', hX + 10, hY - 8); ctx.fillText('C_P', fX + 10, fY + 3);
     }
     aS.oninput = update; update();
 })();

@@ -247,7 +247,9 @@ div[id^="v5-"][style*="max-width"] canvas {
         ctx.beginPath(); ctx.moveTo(20, offY); ctx.lineTo(430, offY); ctx.stroke(); ctx.setLineDash([]);
         ctx.fillStyle = '#0369a1'; ctx.font = '700 13px Inter'; ctx.fillText('slobodna površina', 22, offY - 10);
         const tY = offY + a * scale; const bY = tY + h * scale;
-        const pTop = a * 28; const pBot = (a + h) * 28;
+        // Duljina profila prati p = rho g z; skala je grafička, ali nije normalizirana po gustoći.
+        const pressureScale = 22 * (rho / 1000);
+        const pTop = a * pressureScale; const pBot = (a + h) * pressureScale;
         ctx.fillStyle = 'rgba(56, 189, 248, 0.18)'; ctx.beginPath(); ctx.moveTo(offX + 10, tY); ctx.lineTo(offX+pTop+10, tY); ctx.lineTo(offX+pBot+10, bY); ctx.lineTo(offX+10, bY); ctx.fill();
         for(let i=0; i<=h; i+=0.4) {
             let currY = tY + i*scale; let currP = pTop + (i/h)*(pBot-pTop);
@@ -256,6 +258,7 @@ div[id^="v5-"][style*="max-width"] canvas {
         ctx.fillStyle = '#475569'; ctx.fillRect(offX - 10, tY, 20, bY - tY);
         ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.strokeRect(offX - 10, tY, 20, bY - tY);
         ctx.fillStyle = '#0f172a'; ctx.font = '700 12px Inter'; ctx.fillText('uronjena ploha', offX - 42, bY + 21);
+        ctx.fillStyle = '#475569'; ctx.font = '600 11px Inter'; ctx.fillText('duljine strelica: relativna skala tlaka', 205, 316);
         const tyPos = offY + zT * scale; const fyPos = offY + zF * scale;
         ctx.fillStyle = "#0f172a"; ctx.font = '700 12px Inter';
         ctx.fillText(`p_vrh = ${(rho * 9.81 * a / 1000).toFixed(1)} kPa`, offX + pTop + 18, tY + 4);
@@ -349,10 +352,10 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
             <div style="background: #f8fafc; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;">
                 <span style="display: block; font-weight: 800; color: #1e293b; font-size: 0.75rem; margin-bottom: 15px; text-transform: uppercase;">Geometrija plohe</span>
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                    <button class="v5-v5-btn active" data-shape="rect" onclick="v5_setShape('rect')">⬛</button>
-                    <button class="v5-v5-btn" data-shape="tri" onclick="v5_setShape('tri')">▲</button>
-                    <button class="v5-v5-btn" data-shape="circle" onclick="v5_setShape('circle')">●</button>
-                    <button class="v5-v5-btn" data-shape="semi" onclick="v5_setShape('semi')">◓</button>
+                    <button class="v5-v5-btn active" data-shape="rect" onclick="v5_setShape('rect')">Pravokutnik</button>
+                    <button class="v5-v5-btn" data-shape="tri" onclick="v5_setShape('tri')">Trokut</button>
+                    <button class="v5-v5-btn" data-shape="circle" onclick="v5_setShape('circle')">Krug</button>
+                    <button class="v5-v5-btn" data-shape="semi" onclick="v5_setShape('semi')">Polukrug</button>
                 </div>
             </div>
             <div style="background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 20px;">
@@ -421,7 +424,7 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
     </div>
 </div>
 <style>
-    .v5-v5-btn { padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; background: white; cursor: pointer; font-size: 1.4rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+    .v5-v5-btn { padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 12px; background: white; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
     .v5-v5-btn.active { background: #3b82f6; color: white; border-color: #2563eb; }
 </style>
 <script>
@@ -429,11 +432,13 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
     const canvas = document.getElementById('v5-v5-canvas'); const ctx = canvas.getContext('2d');
     const aS = document.getElementById('v5-v5-a-slider'); const zS = document.getElementById('v5-v5-z-slider');
     let curShape = 'rect';
+    // Sve veličine ispod koriste se i za račun i za crtež: h je duljina po plohi,
+    // b baza, d promjer, r polumjer. I_G je drugi moment oko centroidalne osi.
     const shapeMeta = {
-        rect: { name: 'Pravokutnik', area: 17.5, yT: 1.75, I0: 17.86 },
-        tri: { name: 'Trokut', area: 8.75, yT: 2.33, I0: 5.95 },
-        circle: { name: 'Krug', area: 7.07, yT: 1.5, I0: 3.98 },
-        semi: { name: 'Polukrug', area: 3.53, yT: 0.64, I0: 0.56 }
+        rect: { name: 'Pravokutnik', kind: 'rect', h: 3.5, b: 5, area: 17.5, yT: 1.75, IG: 17.5 * 3.5 ** 2 / 12, label: 'h = 3,5 m; b = 5,0 m' },
+        tri: { name: 'Trokut (vrh gore)', kind: 'tri', h: 3.5, b: 5, area: 8.75, yT: 2 * 3.5 / 3, IG: 5 * 3.5 ** 3 / 36, label: 'h = 3,5 m; b = 5,0 m' },
+        circle: { name: 'Krug', kind: 'circle', d: 3, r: 1.5, area: Math.PI * 1.5 ** 2, yT: 1.5, IG: Math.PI * 1.5 ** 4 / 4, label: 'd = 3,0 m' },
+        semi: { name: 'Polukrug (tetiva gore)', kind: 'semi', r: 1.5, area: Math.PI * 1.5 ** 2 / 2, yT: 4 * 1.5 / (3 * Math.PI), IG: (Math.PI / 8 - 8 / (9 * Math.PI)) * 1.5 ** 4, label: 'r = 1,5 m' }
     };
     window.v5_setShape = function(s) {
         curShape = s;
@@ -442,13 +447,13 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
     };
     function update() {
         const deg = parseFloat(aS.value); const alpha = deg * Math.PI / 180;
-        const a = parseFloat(zS.value); const L = 3.5;
+        const a = parseFloat(zS.value);
         document.getElementById('v5-v5-a-val').innerText = deg + '°';
         document.getElementById('v5-v5-z-val').innerText = a.toFixed(1) + ' m';
         const yA = a / Math.sin(alpha);
         const meta = shapeMeta[curShape];
-        const Area = meta.area; const yT = yA + meta.yT; const I0 = meta.I0;
-        const yF = yT + I0 / (yT * Area); const zT = yT * Math.sin(alpha); const zF = yF * Math.sin(alpha);
+        const Area = meta.area; const yT = yA + meta.yT; const IG = meta.IG;
+        const yF = yT + IG / (yT * Area); const zT = yT * Math.sin(alpha); const zF = yF * Math.sin(alpha);
         const F = 9.81 * zT * Area;
         document.getElementById('v5-v5-out-f').innerText = F.toFixed(1) + ' kN';
         document.getElementById('v5-v5-out-fx').innerText = (F * Math.sin(alpha)).toFixed(1) + ' kN';
@@ -459,23 +464,23 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
         document.getElementById('v5-v5-out-zt').innerText = zT.toFixed(2) + ' m';
         document.getElementById('v5-v5-out-zf').innerText = zF.toFixed(2) + ' m';
         document.getElementById('v5-v5-out-dz').innerText = (zF - zT).toFixed(2) + ' m';
-        document.getElementById('v5-v5-explainer').innerText = `${meta.name} daje površinu ${Area.toFixed(2)} m². Kod nagiba ${deg.toFixed(0)}° i dubine vrha ${a.toFixed(1)} m, težište je na y_T = ${yT.toFixed(2)} m odnosno z_T = ${zT.toFixed(2)} m. Zato rezultanta iznosi ${F.toFixed(1)} kN, a hvatište tone još ${(zF - zT).toFixed(2)} m ispod težišta.`;
-        draw(alpha, a, L, yT, yF, meta.name, zT, zF);
+        document.getElementById('v5-v5-explainer').innerText = `${meta.name} (${meta.label}) daje A = ${Area.toFixed(2)} m². Lanac je y_T → z_T = y_T sin α → F_R → y_F. Promjena gustoće ili širine mijenjala bi F_R, ali ne i geometrijski pomak C_P − T.`;
+        draw(alpha, a, meta, yT, yF, zT, zF);
     }
-    function draw(alpha, a, L, yT, yF, shapeName, zT, zF) {
+    function draw(alpha, a, meta, yT, yF, zT, zF) {
         ctx.clearRect(0, 0, 600, 550); const originX = 150; const originY = 80; const scale = 50; 
         ctx.fillStyle = '#f0f9ff'; ctx.fillRect(0, originY, 600, 470);
         ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, originY); ctx.lineTo(600, originY); ctx.stroke();
         ctx.fillStyle = '#0369a1'; ctx.font = 'bold 12px Inter'; ctx.fillText('slobodna površina', 18, originY - 12);
         ctx.save(); ctx.translate(originX, originY);
-        const sA = (a / Math.sin(alpha)) * scale; const sL = L * scale;
+        const sA = (a / Math.sin(alpha)) * scale;
         ctx.save(); ctx.rotate(alpha); 
         ctx.fillStyle = 'rgba(71, 85, 105, 0.95)'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 4;
         ctx.beginPath();
-        if(curShape==='rect') ctx.rect(sA, -25, sL, 50);
-        else if(curShape==='tri') { ctx.moveTo(sA, 0); ctx.lineTo(sA+sL, 35); ctx.lineTo(sA+sL, -35); ctx.closePath(); }
-        else if(curShape==='circle') ctx.arc(sA + sL/2, 0, sL/2, 0, Math.PI*2);
-        else ctx.arc(sA, 0, sL, -1.57, 1.57);
+        if(meta.kind==='rect') ctx.rect(sA, -25, meta.h * scale, 50);
+        else if(meta.kind==='tri') { ctx.moveTo(sA, 0); ctx.lineTo(sA + meta.h * scale, 35); ctx.lineTo(sA + meta.h * scale, -35); ctx.closePath(); }
+        else if(meta.kind==='circle') ctx.arc(sA + meta.r * scale, 0, meta.r * scale, 0, Math.PI * 2);
+        else ctx.arc(sA, 0, meta.r * scale, -Math.PI / 2, Math.PI / 2);
         ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#3b82f6'; ctx.beginPath(); ctx.arc(yT*scale, 0, 5, 0, 7); ctx.fill();
         ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(yF*scale, 0, 7, 0, 7); ctx.fill();
@@ -499,7 +504,8 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
         ctx.fillStyle = '#059669'; ctx.fillText('F_V', endX + 8, (fAnchorY + endY) / 2);
         ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', (fAnchorX + endX) / 2 - 10, (fAnchorY + endY) / 2 - 10);
         ctx.fillStyle = '#0f172a'; ctx.fillText('C_P', fAnchorX + 10, fAnchorY + 18);
-        ctx.fillStyle = '#0f172a'; ctx.font = 'bold 13px Inter'; ctx.fillText(shapeName, 18, 34);
+        ctx.fillStyle = '#0f172a'; ctx.font = 'bold 13px Inter'; ctx.fillText(meta.name, 18, 34);
+        ctx.fillStyle = '#475569'; ctx.font = '600 12px Inter'; ctx.fillText(meta.label, 18, 54);
         ctx.fillStyle = '#1d4ed8'; ctx.fillText(`z_T = ${zT.toFixed(2)} m`, 18, 490);
         ctx.fillStyle = '#dc2626'; ctx.fillText(`z_F = ${zF.toFixed(2)} m`, 18, 512);
         ctx.restore();
@@ -762,12 +768,13 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
             ctx.fillStyle = '#ef4444';
             ctx.fillText('F_H', gateX - 142, fPos + 4);
 
-            drawArrow(gateX + 18, gateTopY, gateX + 18 + Math.min(72, 10 + Rb * 0.08), gateTopY, '#f59e0b', 3.5);
-            ctx.fillStyle = '#f59e0b';
-            ctx.fillText('R_A', gateX + 22, gateTopY - 10);
-            drawArrow(gateX + 18, bottomY - 4, gateX + 18 + Math.min(90, 10 + Rb * 0.12), bottomY - 4, '#facc15', 3.5);
-            ctx.fillStyle = '#ca8a04';
-            ctx.fillText('R_B', gateX + 22, bottomY - 14);
+            // Moment se vodi oko zgloba A; R_A se zato ne crta kao lažno izračunata strelica.
+            const armX = gateX + 62;
+            ctx.setLineDash([4, 4]); ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(armX, gateTopY); ctx.lineTo(armX, fPos); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#475569'; ctx.font = '700 11px Inter'; ctx.fillText('d_A,F', armX + 8, (gateTopY + fPos) / 2);
+            drawArrow(gateX + 18, bottomY - 4, gateX + 18 + Math.min(90, 10 + Rb * 0.12), bottomY - 4, '#8b5cf6', 3.5);
+            ctx.fillStyle = '#7c3aed'; ctx.fillText('R_B', gateX + 22, bottomY - 14);
         }
 
         drawArrow(30, 60, 30, bottomY, '#475569', 2);
@@ -1957,6 +1964,7 @@ Polukrug polumjera $r$ vertikalno je uronjen u tekućinu tako da mu se ravna tet
         ctx.clearRect(0, 0, 500, 450);
         const scale = 30; const ox = 100; const bottomY = 400;
         const waterY = bottomY - hv * scale;
+        const topX = ox + (hv / Math.tan(alpha)) * scale;
 
         ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
         ctx.beginPath();
@@ -1967,10 +1975,8 @@ Polukrug polumjera $r$ vertikalno je uronjen u tekućinu tako da mu se ravna tet
         ctx.fill();
 
         ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 10;
-        ctx.beginPath();
-        ctx.moveTo(ox, bottomY);
-        ctx.lineTo(ox + (12/Math.tan(alpha))*scale, bottomY - 12*scale);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ox, bottomY); ctx.lineTo(topX, waterY); ctx.stroke();
+        ctx.fillStyle = '#0369a1'; ctx.font = '700 12px Inter'; ctx.fillText('slobodna površina', 16, waterY - 10);
 
         ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(400, waterY); ctx.stroke();
@@ -1978,16 +1984,19 @@ Polukrug polumjera $r$ vertikalno je uronjen u tekućinu tako da mu se ravna tet
         for(let i=0; i<=hv; i+=1) {
             let y = bottomY - i*scale;
             let pLen = (hv-i) * 15;
-            let lx = ox + (i/Math.tan(alpha))*scale;
-            drawArrow(ctx, lx, y, lx - pLen*Math.sin(alpha), y + pLen*Math.cos(alpha), '#3b82f6', 2);
+            let lx = topX - (i/Math.tan(alpha))*scale;
+            drawArrow(ctx, lx - pLen*Math.sin(alpha), y + pLen*Math.cos(alpha), lx, y, '#38bdf8', 2);
         }
 
-        const fPosDist = (hv - zFh) / Math.sin(alpha);
-        const fx = ox + (fPosDist * Math.cos(alpha));
-        const fy = bottomY - (hv - zFh) * scale;
+        const fx = topX - (zFh / Math.tan(alpha)) * scale;
+        const fy = waterY + zFh * scale;
 
         ctx.fillStyle = '#ef4444';
         ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.fill();
+        drawArrow(ctx, fx, fy, fx + 105*Math.sin(alpha), fy - 105*Math.cos(alpha), '#ef4444', 5);
+        ctx.font = '700 14px Inter'; ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', fx + 28, fy - 32);
+        ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(topX - (hv/2/Math.tan(alpha))*scale, waterY + hv*scale/2, 5, 0, 7); ctx.fill();
+        ctx.fillStyle = '#2563eb'; ctx.fillText('T', topX - (hv/2/Math.tan(alpha))*scale + 10, waterY + hv*scale/2 - 8);
     }
 
     function drawArrow(ctx, x1, y1, x2, y2, color, width) {
@@ -2081,6 +2090,7 @@ Sila je integral tlaka po površini: $F = \int p \, dA$. Ovaj widget vizualizira
             <h4 style="color: #38bdf8; margin: 0; font-weight: 800;">📐 Diferencijalna analiza</h4>
             <input type="range" id="v5-int-p-slider" min="4" max="60" value="12" style="width: 100%;">
             <div id="v5-int-p-count" style="color: #38bdf8; font-weight: 800; text-align:center;">12 elemenata</div>
+            <div id="v5-int-p-results" style="padding:1rem; border:1px solid #334155; border-radius:12px; color:#e2e8f0; line-height:1.6;"></div>
         </div>
     </div>
 </div>
@@ -2091,12 +2101,18 @@ Sila je integral tlaka po površini: $F = \int p \, dA$. Ovaj widget vizualizira
     function draw() {
         const count = parseInt(slider.value); document.getElementById('v5-int-p-count').innerText = count + " elemenata";
         ctx.clearRect(0, 0, 450, 400); const h = 280, w = 50, ox = 60, oy = 60, dz = h / count;
+        const hM = 3, bM = 2, rho = 1000, g = 9.81, dzM = hM / count;
+        let FN = 0, MN = 0;
         ctx.fillStyle = '#f1f5f9'; ctx.fillRect(ox, oy, w, h);
         for(let i=0; i<count; i++) {
             let z = (i + 0.5) * dz; let p_scaled = (z / h) * 250;
             ctx.fillStyle = 'rgba(56, 189, 248, 0.3)'; ctx.fillRect(ox + w + 2, oy + i*dz + 1, p_scaled, dz - 2);
+            const zM = (i + 0.5) * dzM; const dF = rho * g * zM * bM * dzM;
+            FN += dF; MN += zM * dF;
         }
-        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(ox + w/2, oy + (2/3)*h, 7, 0, 7); ctx.fill();
+        const zFN = MN / FN; const FExact = rho * g * bM * hM*hM/2; const zFExact = 2*hM/3;
+        document.getElementById('v5-int-p-results').innerHTML = `Za svaku traku: <strong>ΔFᵢ = ρgzᵢbΔz</strong><br>F_N = ${(FN/1000).toFixed(3)} kN; F = ${(FExact/1000).toFixed(3)} kN<br>pogreška = ${(100*(FN-FExact)/FExact).toFixed(2)} %<br>z<sub>F,N</sub> = ${zFN.toFixed(3)} m; z<sub>F</sub> = ${zFExact.toFixed(3)} m`;
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(ox + w/2, oy + (zFExact/hM)*h, 7, 0, 7); ctx.fill();
     }
     slider.oninput = draw; draw();
 })();
@@ -2169,7 +2185,9 @@ Zbog različitih gustoća ($\rho_{ulje} < \rho_{voda}$), profil tlaka dobiva kar
                 <div id="v5-rho1-master-label" style="text-align: right; font-family: monospace; font-weight: 800; color: #b45309;">800 kg/m³</div>
             </div>
             <div style="background: #0f172a; padding: 30px; border-radius: 24px; color: white;">
-                <span id="v5-ftot-master-res" style="font-family: monospace; color: #f87171; font-weight: 900; font-size: 1.5rem;">--- kN</span>
+                <div style="color:#94a3b8; font-size:.9rem;">Rezultanta po jediničnoj širini</div>
+                <span id="v5-ftot-master-res" style="font-family: monospace; color: #f87171; font-weight: 900; font-size: 1.5rem;">--- kN/m</span>
+                <div style="margin-top:.75rem; color:#cbd5e1;">$z_F=$ <strong id="v5-zf-master-res" style="color:#f87171;">---</strong></div>
             </div>
         </div>
     </div>
@@ -2182,11 +2200,15 @@ Zbog različitih gustoća ($\rho_{ulje} < \rho_{voda}$), profil tlaka dobiva kar
         const r1 = parseFloat(r1S.value); const r2 = 1000; const g = 9.81; const h1 = 1.5, h2 = 2.5;
         document.getElementById('v5-rho1-master-label').innerText = r1 + " kg/m³";
         const pI = r1 * g * h1; const pB = pI + r2 * g * h2;
-        document.getElementById('v5-ftot-master-res').innerText = ((pI*h2 + r2*g*h2*h2/2 + r1*g*h1*h1/2)/1000).toFixed(1) + " kN";
+        const force = r1*g*h1*h1/2 + pI*h2 + r2*g*h2*h2/2;
+        const moment = r1*g*h1**3/3 + pI*(h1*h2 + h2*h2/2) + r2*g*(h1*h2*h2/2 + h2**3/3);
+        const zF = moment / force;
+        document.getElementById('v5-ftot-master-res').innerText = (force/1000).toFixed(1) + " kN/m";
+        document.getElementById('v5-zf-master-res').innerText = zF.toFixed(2) + " m";
         tag.style.top = (50 + h1 * 85 - 20) + "px"; tag.innerText = "p_suč = " + (pI/1000).toFixed(1) + " kPa";
-        draw(r1, h1, h2, pI, pB);
+        draw(r1, h1, h2, pI, pB, zF);
     }
-    function draw(r1, h1, h2, pI, pB) {
+    function draw(r1, h1, h2, pI, pB, zF) {
         ctx.clearRect(0, 0, 500, 450); const ox = 80, oy = 50, sy = 85, ps = 0.015;
         ctx.fillStyle = '#fef3c7'; ctx.fillRect(0, oy, 500, h1 * sy);
         ctx.fillStyle = '#e0f2fe'; ctx.fillRect(0, oy + h1 * sy, 500, h2 * sy);
@@ -2194,6 +2216,11 @@ Zbog različitih gustoća ($\rho_{ulje} < \rho_{voda}$), profil tlaka dobiva kar
         const pix = pI * ps; const pbx = pB * ps;
         ctx.fillStyle = 'rgba(146, 64, 14, 0.15)'; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox+pix, oy+h1*sy); ctx.lineTo(ox, oy+h1*sy); ctx.fill();
         ctx.fillStyle = 'rgba(3, 105, 161, 0.15)'; ctx.beginPath(); ctx.moveTo(ox, oy+h1*sy); ctx.lineTo(ox+pix, oy+h1*sy); ctx.lineTo(ox+pbx, oy+(h1+h2)*sy); ctx.lineTo(ox, oy+(h1+h2)*sy); ctx.fill();
+        const fy = oy + zF * sy;
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(ox, fy, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ox - 90, fy); ctx.lineTo(ox - 8, fy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ox - 8, fy); ctx.lineTo(ox - 20, fy - 7); ctx.lineTo(ox - 20, fy + 7); ctx.fill();
+        ctx.font = '700 13px Inter'; ctx.fillText('F_R u C_P', ox - 155, fy - 10);
     }
     r1S.oninput = update; update();
 })();
@@ -2233,8 +2260,9 @@ Potrebno je odrediti rezultirajuću silu tlaka i hvatište sile za vertikalnu pr
                 <span style="color: #94a3b8; font-size: 0.75rem;">UKUPNA SILA F:</span>
                 <div id="v5-z45-f-res" style="font-family: monospace; color: #f87171; font-weight: 900; font-size: 1.4rem;">206.0 kN</div>
             </div>
-            <div style="font-size: 0.8rem; color: #94a3b8; line-height: 1.5;">
-                Rezultat: $z_{Fh} = \mathbf{3,633 \, m}$
+            <div style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.5;">
+                Centar pritiska: <strong id="v5-z45-zf-res" style="color:#f87171;">--- m</strong><br>
+                $z_F=z_T+\frac{h_z^2}{12z_T}$
             </div>
         </div>
     </div>
@@ -2254,7 +2282,9 @@ Potrebno je odrediti rezultirajuću silu tlaka i hvatište sile za vertikalnu pr
         const hz = 3.0; const b = 2.0; const rho = 1000; const g = 9.81;
         const zT = h1 + hz/2;
         const F = (rho * g * zT * hz * b) / 1000;
+        const zF = zT + hz * hz / (12 * zT);
         document.getElementById('v5-z45-f-res').innerText = F.toFixed(1) + " kN";
+        document.getElementById('v5-z45-zf-res').innerText = zF.toFixed(3) + " m";
     }
 
     function draw(zAnim) {
@@ -2304,7 +2334,7 @@ Potrebno je odrediti rezultirajuću silu tlaka i hvatište sile za vertikalnu pr
 <hr class='zadatak-sep'>
 
 ### Dodatni primjer Z46 — Vertikalna trokutna zaklopka (Integral) {.unnumbered}
-Potrebno je odrediti silu i hvatište za trokutnu zaklopku baze $b_z = 4 \, m$ i visine $h_z = 3 \, m$.
+Potrebno je odrediti silu i hvatište za trokutnu zaklopku baze $b_z = 4 \, m$ i visine $h_z = 3 \, m$. U ovom simboličkom primjeru baza je na slobodnoj površini, a vrh je dolje: bez zadane dubine gornjeg ruba ne bi bilo dopušteno prikazati jedinstven numerički rezultat.
 
 <hr class="widget-sep">
 <div class="widget-label">⚙ Interaktivni simulator</div>
@@ -2324,8 +2354,9 @@ Potrebno je odrediti silu i hvatište za trokutnu zaklopku baze $b_z = 4 \, m$ i
                 Širina trake se linearno smanjuje s dubinom. Kod integracije, ovo značajno mijenja doprinos svakog sloja ukupnoj sili.
             </div>
             <div style="background: #0f172a; padding: 20px; border-radius: 16px; color: white;">
-                <span style="color: #94a3b8; font-size: 0.7rem;">REZULTAT:</span>
-                <div style="font-family: monospace; font-weight: 800; color: #f87171;">z_Fh = 7,071 m</div>
+                <span style="color: #94a3b8; font-size: 0.8rem;">ZA BAZU NA SLOBODNOJ POVRŠINI:</span>
+                <div style="font-family: monospace; font-weight: 800; color: #f87171;">z_F = h/2 = 1,500 m</div>
+                <div style="margin-top:0.55rem; color:#cbd5e1; font-size:0.9rem;">$dF=\rho g z\,b(z)\,dz$, gdje je $b(z)=b_z(1-z/h_z)$.</div>
             </div>
         </div>
     </div>
@@ -2462,9 +2493,26 @@ Pravokutna zaklopka duljine $h_z = 2 \, m$ i širine $b_z = 3 \, m$ nagnuta je p
 Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delta x$ definiran centrifugalnim momentom tromosti $I_{xz}$.
 
 <hr class="widget-sep">
-            </div>
-        </div>
+<div class="widget-label">⚙ Interaktivni simulator</div>
+
+```{=html}
+<div id="v5-z48-container" class="mf1-widget" style="max-width:900px; margin:2rem auto; padding:1.5rem; background:#fff; border:1px solid #d9e2ec; border-radius:16px;">
+  <h4 style="margin:0 0 .5rem;">Z48 — Bočni pomak centra pritiska</h4>
+  <p style="margin:0 0 1rem;">Pomakni gornji vrh trokuta. Tlak raste s dubinom, zato se <strong>C_P</strong> ne dobiva pomakom “od oka”, nego momentom raspodijeljenog tlaka.</p>
+  <div style="display:grid; grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr); gap:1.5rem;">
+    <div><canvas id="v5-z48-canvas" width="500" height="400" style="width:100%; height:auto; background:#f8fafc; border:1px solid #d9e2ec; border-radius:12px;"></canvas></div>
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+      <label style="font-weight:700;">Bočni pomak vrha s <span id="v5-z48-s-val">0.80</span> m</label>
+      <input type="range" id="v5-z48-s-slider" min="-1.5" max="1.5" step="0.05" value="0.8">
+      <div style="padding:1rem; background:#f8fafc; border:1px solid #d9e2ec; border-radius:12px;">
+        <div>Težište: <strong id="v5-z48-xt">---</strong></div>
+        <div>Centar pritiska: <strong id="v5-z48-xf">---</strong></div>
+        <div style="margin-top:.5rem; color:#dc2626;">Δx = <strong id="v5-z48-dx">---</strong></div>
+        <div style="margin-top:.5rem;">$x_T=s/3$, $x_F=s/4$, $z_F=3h/4$</div>
+      </div>
+      <p id="v5-z48-explainer" style="margin:0;"></p>
     </div>
+  </div>
 </div>
 <script>
 (function() {
@@ -2473,31 +2521,38 @@ Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delt
     const sS = document.getElementById('v5-z48-s-slider');
 
     function update() {
-        const offset = parseFloat(sS.value);
-        const dxF = (offset / 280);
-        document.getElementById('v5-z48-dx').innerText = (dxF > 0 ? "+" : "") + dxF.toFixed(3) + " m";
-        draw(offset);
+        const s = parseFloat(sS.value); const h = 3;
+        const xT = s / 3; const xF = s / 4; const dx = xF - xT;
+        document.getElementById('v5-z48-s-val').innerText = s.toFixed(2);
+        document.getElementById('v5-z48-xt').innerText = xT.toFixed(3) + ' m';
+        document.getElementById('v5-z48-xf').innerText = xF.toFixed(3) + ' m';
+        document.getElementById('v5-z48-dx').innerText = (dx >= 0 ? '+' : '') + dx.toFixed(3) + ' m';
+        document.getElementById('v5-z48-explainer').innerText = Math.abs(s) < 0.001 ? 'Simetričan trokut daje Δx = 0: C_P i T leže na osi simetrije.' : 'Pomak vrha mijenja bočni moment tlaka. C_P se pomiče prema osi, ali manje od težišta jer dublji, širi dio trokuta nosi veći tlak.';
+        draw(s, h);
     }
 
-    function draw(offset) {
+    function draw(s, h) {
         ctx.clearRect(0, 0, 500, 400);
-        const cx = 250, cy = 80, h = 240, b = 180;
-        ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
-        for(let i=0; i<10; i++) { ctx.beginPath(); ctx.moveTo(i*50, 0); ctx.lineTo(i*50, 400); ctx.stroke(); }
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.2)'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3;
+        const cx = 250, cy = 55, scale = 85, hp = h * scale, b = 3;
+        const apexX = cx + s * scale, leftX = cx - b * scale / 2, rightX = cx + b * scale / 2;
+        ctx.fillStyle = '#f0f9ff'; ctx.fillRect(0, cy, 500, 345);
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(20, cy); ctx.lineTo(480, cy); ctx.stroke();
+        ctx.fillStyle = '#0369a1'; ctx.font = '700 13px Inter'; ctx.fillText('slobodna površina', 24, cy - 9);
+        ctx.fillStyle = 'rgba(71,85,105,.9)'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(cx + offset, cy);
-        ctx.lineTo(cx - b/2, cy + h);
-        ctx.lineTo(cx + b/2, cy + h);
+        ctx.moveTo(apexX, cy); ctx.lineTo(leftX, cy + hp); ctx.lineTo(rightX, cy + hp);
         ctx.closePath();
         ctx.fill(); ctx.stroke();
-        const tx = cx + offset/3; const ty = cy + (2/3)*h;
+        const tx = cx + s * scale / 3, ty = cy + 2 * hp / 3;
         ctx.fillStyle = '#3b82f6'; ctx.beginPath(); ctx.arc(tx, ty, 5, 0, 7); ctx.fill();
-        const fx = tx + (offset/6); const fy = ty + 30;
+        const fx = cx + s * scale / 4, fy = cy + 3 * hp / 4;
         ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.fill();
-        ctx.setLineDash([2,2]); ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(fx, ty); ctx.lineTo(fx, fy); ctx.stroke();
+        ctx.setLineDash([3,3]); ctx.strokeStyle = '#64748b'; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(fx, ty); ctx.lineTo(fx, fy); ctx.stroke();
         ctx.setLineDash([]);
+        ctx.font = '700 13px Inter'; ctx.fillStyle = '#2563eb'; ctx.fillText('T', tx + 9, ty - 7);
+        ctx.fillStyle = '#dc2626'; ctx.fillText('C_P', fx + 10, fy + 4);
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy + 65); ctx.stroke();
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(fx, fy + 65); ctx.lineTo(fx - 7, fy + 53); ctx.lineTo(fx + 7, fy + 53); ctx.fill(); ctx.fillText('F_R', fx + 10, fy + 52);
     }
     sS.oninput = update; update();
 })();
@@ -2505,11 +2560,7 @@ Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delt
 ```
 
 <div class="fizikalni-uvid">
-
-<div class="fizikalni-uvid">
-💡 Uoči kako nesimetrija (pomak vrha) uzrokuje da centar tlaka "pobjegne" u stranu.
-</div>
-
+💡 Uoči: kada je $s=0$, iz računa automatski slijedi $Delta x=0$. Asimetrija nije dekoracija crteža, nego promjena momenta raspodijeljenog tlaka.
 </div>
 ***
 

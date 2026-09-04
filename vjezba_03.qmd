@@ -33,22 +33,6 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
 
 ```{=html}
 <style>
-/* Vježba 03 — zajednički, lokalno ograničen standard za sve interaktivne blokove. */
-.mf1-lab {
-  max-width: 980px !important;
-  margin: 1.75rem auto !important;
-  padding: 1.5rem !important;
-  background: #ffffff !important;
-  border: 1px solid #d9e2ec !important;
-  border-radius: 16px !important;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06) !important;
-}
-
-.mf1-lab :is([class$="-kicker"], .v3-kicker) {
-  font-size: 0.84rem !important;
-  letter-spacing: 0.06em !important;
-}
-
 .mf1-lab :is([class$="-note"], .v3-note) {
   min-width: 0 !important;
   padding: 0.8rem 1rem !important;
@@ -64,45 +48,6 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
   color: inherit !important;
 }
 
-.mf1-lab :is([class$="-control"] label, [class$="-controls"] label, .v3-control label, label) {
-  font-size: 0.95rem !important;
-  line-height: 1.4 !important;
-}
-
-.mf1-lab :is([class$="-metric"] small, .v3-metric small, .v3-impact-card small) {
-  font-size: 0.82rem !important;
-  line-height: 1.35 !important;
-}
-
-.mf1-lab :is([class$="-explainer"], .v3-explainer, p) {
-  font-size: 0.96rem !important;
-  line-height: 1.58 !important;
-}
-
-.mf1-lab input[type="range"] {
-  min-height: 30px;
-  cursor: pointer;
-}
-
-.mf1-lab button {
-  min-height: 42px;
-  font-size: 0.95rem !important;
-}
-
-.mf1-lab :is(canvas, svg) {
-  display: block;
-  max-width: 100%;
-  height: auto !important;
-}
-
-@media (max-width: 700px) {
-  .mf1-lab {
-    margin: 1.25rem 0 !important;
-    padding: 1rem !important;
-    border-radius: 12px !important;
-  }
-
-}
 </style>
 ```
 
@@ -165,13 +110,13 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         </div>
         <div id="v3-text-acc" class="v3-control" style="display:none;">
             <label>Horizontalno ubrzanje aₓ: <span id="v3-intro-acc-val" style="color:#dc2626;">2.5</span> m/s²</label>
-            <input type="range" id="v3-intro-acc" min="0" max="10" step="0.5" value="2.5" style="accent-color:#dc2626;">
+            <input type="range" id="v3-intro-acc" min="0" max="4" step="0.5" value="2.5" style="accent-color:#dc2626;">
         </div>
     </div>
 
     <div class="v3-impact" id="v3-impact-strip">
-        <div class="v3-impact-card"><small>Promjena klizača</small><strong id="v3-impact-1">ρ₂ raste</strong></div>
-        <div class="v3-impact-card"><small>Direktan efekt</small><strong id="v3-impact-2">h₂ pada</strong></div>
+        <div class="v3-impact-card"><small>Ulaz modela</small><strong id="v3-impact-1">ρ₂</strong></div>
+        <div class="v3-impact-card"><small>Izravna posljedica</small><strong id="v3-impact-2">h₂ = h₁ρ₁/ρ₂</strong></div>
         <div class="v3-impact-card"><small>Fizikalna poruka</small><strong id="v3-impact-3">isti tlak na referentnoj ravnini</strong></div>
     </div>
 
@@ -262,8 +207,8 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         updateMetrics('Visina drugog stupca', h2.toFixed(2), ' m', 'Tlak u referentnoj ravnini', pref.toFixed(2), ' kPa', 'Omjer visina h₂/h₁', (h2 / h1).toFixed(2), '');
         sceneCaption.textContent = 'Promjena gustoće ne mijenja uvjet ravnoteže: tlak u istoj referentnoj ravnini mora ostati jednak s obje strane spojene posude.';
         explainer.textContent = `Za ρ₂ = ${rho2.toFixed(0)} kg/m³ drugi stupac mora imati visinu ${h2.toFixed(2)} m kako bi tlak u zajedničkoj referentnoj ravnini ostao ${pref.toFixed(2)} kPa. Gušći fluid treba manju visinu da bi dao isti hidrostatski tlak.`;
-        impact1.textContent = rho2 >= 1300 ? 'ρ₂ raste' : 'ρ₂ pada';
-        impact2.textContent = rho2 >= 1300 ? 'h₂ pada' : 'h₂ raste';
+        impact1.textContent = `ρ₂ = ${rho2.toFixed(0)} kg/m³`;
+        impact2.textContent = 'h₂ = h₁ρ₁ / ρ₂';
         impact3.textContent = 'isti tlak na referentnoj ravnini';
 
         ctx.clearRect(0, 0, logicalW, logicalH);
@@ -334,8 +279,8 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         updateMetrics('Nagib površine', alphaDeg.toFixed(1), '°', 'Efektivna gravitacija', geff.toFixed(2), ' m/s²', 'Razlika razina Δh', deltaH.toFixed(2), ' m');
         sceneCaption.textContent = 'Kad spremnik ubrzava, slobodna površina zauzima položaj okomit na vektor efektivne gravitacije g_eff.';
         explainer.textContent = `Za aₓ = ${ax.toFixed(1)} m/s² rezultantno polje sila više nije okomito prema dolje nego je nagnuto. Zato se slobodna površina naginje za ${alphaDeg.toFixed(1)}°, a preko duljine spremnika od ${tankL.toFixed(1)} m nastaje razlika razina od približno ${deltaH.toFixed(2)} m.`;
-        impact1.textContent = ax >= 2.5 ? 'aₓ raste' : 'aₓ pada';
-        impact2.textContent = ax >= 2.5 ? 'nagib i Δh rastu' : 'nagib i Δh padaju';
+        impact1.textContent = `aₓ = ${ax.toFixed(1)} m/s²`;
+        impact2.textContent = 'tan α = aₓ / g';
         impact3.textContent = 'slobodna ploha prati smjer g_eff';
 
         ctx.clearRect(0, 0, logicalW, logicalH);
@@ -346,7 +291,8 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         const tankW = 420;
         const tankH = 190;
         const hMid = tankY + 92;
-        const dy = (tankW / 2) * Math.tan(alpha) * 0.35;
+        const pxPerMetre = tankW / tankL;
+        const dy = (deltaH / 2) * pxPerMetre;
 
         ctx.strokeStyle = '#1f2937';
         ctx.lineWidth = 3;
@@ -476,104 +422,6 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         return { ctx, logicalWidth, logicalHeight };
     };
 
-    // Improve readability of canvas annotations across widgets without rewriting each draw routine.
-    window.mf1EnhanceCanvasReadability = function(canvas, options) {
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx || ctx.__mf1ReadablePatched) return;
-        const minFontPx = options && options.minFontPx ? options.minFontPx : 16;
-        const minLineWidth = options && options.minLineWidth ? options.minLineWidth : 1.6;
-        const drawLabelBg = options && Object.prototype.hasOwnProperty.call(options, 'drawLabelBg') ? options.drawLabelBg : true;
-        const fontPxRe = /(\d+(?:\.\d+)?)px/;
-
-        const originalFillText = ctx.fillText.bind(ctx);
-        const originalStrokeText = ctx.strokeText.bind(ctx);
-        const originalStroke = ctx.stroke.bind(ctx);
-
-        function drawRoundedRect(x, y, w, h, r) {
-            const rr = Math.min(r, w / 2, h / 2);
-            ctx.beginPath();
-            ctx.moveTo(x + rr, y);
-            ctx.arcTo(x + w, y, x + w, y + h, rr);
-            ctx.arcTo(x + w, y + h, x, y + h, rr);
-            ctx.arcTo(x, y + h, x, y, rr);
-            ctx.arcTo(x, y, x + w, y, rr);
-            ctx.closePath();
-        }
-
-        function maybeDrawLabelBackdrop(text, x, y) {
-            if (!drawLabelBg) return;
-            if (typeof text !== 'string') return;
-            if (text.length < 2 || text.length > 42) return;
-            const wordCount = text.trim().split(/\s+/).length;
-            if (wordCount > 8) return;
-
-            const tm = ctx.measureText(text);
-            const ascent = tm.actualBoundingBoxAscent || 11;
-            const descent = tm.actualBoundingBoxDescent || 5;
-            const padX = 6;
-            const padY = 3;
-            const bx = x - padX;
-            const by = y - ascent - padY;
-            const bw = tm.width + padX * 2;
-            const bh = ascent + descent + padY * 2;
-
-            ctx.save();
-            ctx.fillStyle = 'rgba(255,255,255,0.82)';
-            drawRoundedRect(bx, by, bw, bh, 6);
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(148,163,184,0.45)';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        function withReadableFont(drawFn, text, x, y, maxWidth) {
-            const prevFont = ctx.font;
-            const match = prevFont && prevFont.match(fontPxRe);
-            if (match) {
-                const px = parseFloat(match[1]);
-                if (Number.isFinite(px) && px < minFontPx) {
-                    ctx.font = prevFont.replace(fontPxRe, `${minFontPx}px`);
-                }
-            }
-            // Keep labels visually consistent and more legible in busy sketches.
-            if (!/Inter|Segoe UI|Arial|sans-serif/i.test(ctx.font)) {
-                ctx.font = `${ctx.font}, "Segoe UI", Arial, sans-serif`;
-            }
-            maybeDrawLabelBackdrop(text, x, y);
-            if (typeof maxWidth === 'number') {
-                drawFn(text, x, y, maxWidth);
-            } else {
-                drawFn(text, x, y);
-            }
-            ctx.font = prevFont;
-        }
-
-        ctx.fillText = function(text, x, y, maxWidth) {
-            withReadableFont(originalFillText, text, x, y, maxWidth);
-        };
-
-        ctx.strokeText = function(text, x, y, maxWidth) {
-            withReadableFont(originalStrokeText, text, x, y, maxWidth);
-        };
-
-        ctx.stroke = function() {
-            const prevWidth = ctx.lineWidth;
-            if (prevWidth < minLineWidth) ctx.lineWidth = minLineWidth;
-            const prevJoin = ctx.lineJoin;
-            const prevCap = ctx.lineCap;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            originalStroke();
-            ctx.lineWidth = prevWidth;
-            ctx.lineJoin = prevJoin;
-            ctx.lineCap = prevCap;
-        };
-
-        ctx.__mf1ReadablePatched = true;
-    };
-
     function triggerInputs(root) {
         root.querySelectorAll('input, select').forEach((el) => {
             el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -644,8 +492,6 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
     function init() {
         const widgets = Array.from(document.querySelectorAll('.mf1-lab'));
         widgets.forEach(setupWidget);
-        const canvases = Array.from(document.querySelectorAll('.mf1-lab canvas'));
-        canvases.forEach((canvas) => window.mf1EnhanceCanvasReadability(canvas, { minFontPx: 16, minLineWidth: 1.6, drawLabelBg: true }));
     }
 
     if (document.readyState === 'loading') {
@@ -2382,7 +2228,7 @@ Pritisak na tekućinu u zatvorenoj posudi prenosi se nesmanjen u sve dijelove te
 
 ### N3: Sila hidrostatskog tlaka na ravnu stijenu (Branu)
 
-Hidrostatski tlak raste linearno s dubinom, što rezultira trokutastom raspodjelom tlaka. Ukupna sila djeluje u točki koja se naziva **centar tlaka**, a nalazi se na $2/3$ dubine od površine (odnosno $h/3$ od dna).
+Hidrostatski tlak raste linearno s dubinom, što rezultira trokutastom raspodjelom tlaka. Ukupna sila djeluje u točki koja se naziva **centar pritiska** $C_P$, a nalazi se na $2/3$ dubine od površine (odnosno $h/3$ od dna).
 
 ```{=html}
 <div class="mf1-lab" id="z-n3-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">

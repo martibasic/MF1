@@ -29,23 +29,8 @@ Ispod možete interaktivno istražiti oba principa.
             <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 620px;">Promijeni ulaznu silu, omjer površina, brzinu pomične ploče i viskoznost, pa prati kako se isti fizikalni zakon odmah pretvara u novu sliku tlaka, profil brzine i smično naprezanje.</p>
         </div>
         <div style="display: flex; gap: 10px;">
-            <button type="button" id="btn-pascal" style="padding: 10px 16px; border-radius: 999px; border: none; cursor: pointer; background: #2563eb; color: white; font-weight: 700; transition: 0.2s;">Pascalov zakon</button>
-            <button type="button" id="btn-newton" style="padding: 10px 16px; border-radius: 999px; border: none; cursor: pointer; background: #e2e8f0; color: #475569; font-weight: 700; transition: 0.2s;">Newtonov zakon</button>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px;">
-        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 8px 10px;">
-            <div style="font-size: 0.68rem; color: #1d4ed8; font-weight: 800; text-transform: uppercase;">Ulazna sila</div>
-            <div style="font-size: 1.02rem; color: #1e3a8a; font-weight: 800;"><span id="v1-badge-f1">120</span> N</div>
-        </div>
-        <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 8px 10px;">
-            <div style="font-size: 0.68rem; color: #4338ca; font-weight: 800; text-transform: uppercase;">Tlak p</div>
-            <div style="font-size: 1.02rem; color: #312e81; font-weight: 800;"><span id="v1-badge-p">1.00</span> MPa</div>
-        </div>
-        <div style="background: #ecfeff; border: 1px solid #a5f3fc; border-radius: 12px; padding: 8px 10px;">
-            <div style="font-size: 0.68rem; color: #0f766e; font-weight: 800; text-transform: uppercase;">Izlazna sila</div>
-            <div style="font-size: 1.02rem; color: #115e59; font-weight: 800;"><span id="v1-badge-f2">480</span> N</div>
+            <button type="button" id="btn-pascal" aria-pressed="true" aria-controls="v1-pascal-panel" style="padding: 10px 16px; border-radius: 999px; border: none; cursor: pointer; background: #2563eb; color: white; font-weight: 700; transition: 0.2s;">Pascalov zakon</button>
+            <button type="button" id="btn-newton" aria-pressed="false" aria-controls="v1-newton-panel" style="padding: 10px 16px; border-radius: 999px; border: none; cursor: pointer; background: #e2e8f0; color: #475569; font-weight: 700; transition: 0.2s;">Newtonov zakon</button>
         </div>
     </div>
 
@@ -86,6 +71,7 @@ Ispod možete interaktivno istražiti oba principa.
             </div>
 
             <div id="v1-newton-panel" style="display: none; flex-direction: column; gap: 14px;">
+                <p style="margin: 0; color: #475569; font-size: 0.9rem; line-height: 1.5;">U ovom uvodnom prikazu zračnost δ je fiksna; njezin se utjecaj detaljno istražuje u Vježbi 2.</p>
                 <div style="padding: 16px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 16px;">
                     <div style="font-size: 0.75rem; color: #c2410c; text-transform: uppercase; font-weight: 800; margin-bottom: 10px;">Ulazi sustava</div>
                     <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Brzina gornje ploče: <span id="v1-newton-speed-val" style="color: #ea580c;">1.20</span> m/s</label>
@@ -149,9 +135,6 @@ Ispod možete interaktivno istražiti oba principa.
     setText('v1-pascal-ratio-val', v.ratio.toFixed(1));
     setText('v1-pascal-pressure', (v.pressure / 1e6).toFixed(2));
     setText('v1-pascal-output', v.output.toFixed(0));
-    setText('v1-badge-f1', v.force.toFixed(0));
-    setText('v1-badge-p', (v.pressure / 1e6).toFixed(2));
-    setText('v1-badge-f2', v.output.toFixed(0));
     setText('v1-newton-speed-val', v.speed.toFixed(2));
     setText('v1-newton-mu-val', v.mu.toFixed(2));
     setText('v1-newton-gradient', v.gradient.toFixed(1));
@@ -195,8 +178,8 @@ Ispod možete interaktivno istražiti oba principa.
 
   function setTab(next) {
     tab = next; $('v1-pascal-panel').style.display = next === 'pascal' ? 'flex' : 'none'; $('v1-newton-panel').style.display = next === 'newton' ? 'flex' : 'none';
-    $('btn-pascal').style.cssText += `;background:${next === 'pascal' ? '#2563eb' : '#e2e8f0'};color:${next === 'pascal' ? '#fff' : '#475569'}`;
-    $('btn-newton').style.cssText += `;background:${next === 'newton' ? '#ea580c' : '#e2e8f0'};color:${next === 'newton' ? '#fff' : '#475569'}`; update();
+    $('btn-pascal').style.background = next === 'pascal' ? '#2563eb' : '#e2e8f0'; $('btn-pascal').style.color = next === 'pascal' ? '#fff' : '#475569'; $('btn-pascal').setAttribute('aria-pressed', String(next === 'pascal'));
+    $('btn-newton').style.background = next === 'newton' ? '#ea580c' : '#e2e8f0'; $('btn-newton').style.color = next === 'newton' ? '#fff' : '#475569'; $('btn-newton').setAttribute('aria-pressed', String(next === 'newton')); update();
   }
   $('btn-pascal').addEventListener('click', () => setTab('pascal')); $('btn-newton').addEventListener('click', () => setTab('newton'));
   Object.values(controls).forEach((control) => control.addEventListener('input', update)); setTab('pascal');
@@ -910,9 +893,9 @@ Linearna procjena $\Delta\rho/\rho_1\approx\Delta p/K$ ovdje daje $3{,}06\ \%$; 
 
 ````{=html}
 <div class="mf1-lab" id="z5-advanced-widget" style="max-width: 900px; margin: 30px auto; font-family: 'Inter', sans-serif; padding: 25px; background: #f8fafc; border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1e293b; margin-top: 0; font-weight: 700;">Z5: Gustoća fluida na dubini oceana</h4>
-    <p class="widget-idea">Mijenjaš dubinu: tlak raste s hidrostatskim stupcem, a voda se zato malo zgusne.</p>
-    <div class="widget-equation">$\rho = \rho_0\exp\left(\frac{p-p_0}{K}\right)$</div>
+    <h4 style="text-align: center; color: #1e293b; margin-top: 0; font-weight: 700;">Zadatak 3: Gustoća fluida na dubini oceana</h4>
+    <p class="widget-idea">Mijenjaš dubinu u samokonzistentnom hidrostatskom modelu s konstantnim volumenskim modulom K.</p>
+    <div class="widget-equation">$\rho(z)=\frac{\rho_0}{1-\rho_0gz/K}$, $\quad p(z)=p_0-K\ln\!\left(1-\rho_0gz/K\right)$</div>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
         <div style="flex: 1.5; min-width: 320px; position: relative; height: 350px; overflow: hidden; border: 1px solid #e2e8f0; background: #ffffff;">
             <div id="z5-ocean-bg" style="width: 100%; height: 100%; background: linear-gradient(to bottom, #38bdf8 0%, #0369a1 50%, #082f49 100%); position: relative;">
@@ -924,6 +907,7 @@ Linearna procjena $\Delta\rho/\rho_1\approx\Delta p/K$ ovdje daje $3{,}06\ \%$; 
                 </div>
                 <!-- Molecular grid (using canvas for performance) -->
                 <canvas id="z5-molecules" width="400" height="350" style="width: 100%; height: 100%; pointer-events: none;"></canvas>
+                <div style="position:absolute; left:10px; bottom:10px; max-width:250px; color:#ffffff; font-size:0.78rem; line-height:1.35; background:rgba(15,23,42,.48); border-radius:8px; padding:6px 8px;">Kvalitativni prikaz povećanja gustoće — nije molekularna skala.</div>
             </div>
         </div>
         
@@ -970,9 +954,13 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
         document.getElementById('z5-v-depth').innerText = d;
         document.getElementById('z5-v-depth-val').innerText = d;
         
-        const p = 0.1 + (1025 * 9.81 * d / 1e6);
-        const K = 2340;
-        const rho = 1025 * Math.exp((p - 0.1) / K);
+        const rho0 = 1025;
+        const g0 = 9.81;
+        const K = 2.34e9;
+        const p0 = 0.1e6;
+        const compression = (rho0 * g0 * d) / K;
+        const rho = rho0 / (1 - compression);
+        const p = (p0 - K * Math.log(1 - compression)) / 1e6;
         const perc = ((rho/1025)-1)*100;
         
         document.getElementById('z5-res-p').innerText = p.toFixed(1);
@@ -1025,10 +1013,10 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
         c.stroke();
 
         c.fillStyle = '#64748b';
-        c.font = '10px Inter';
-        c.fillText('Dubina (m)', 4, 10);
-        c.fillText('p (MPa)', pArea.r - 36, 10);
-        c.fillText('rho (kg/m3)', pArea.r - 70, h - 6);
+        c.font = '12px Inter';
+        c.fillText('Dubina (m)', 4, 13);
+        c.fillText('p (MPa)', pArea.r - 42, 13);
+        c.fillText('ρ (kg/m³)', pArea.r - 72, h - 7);
 
         const dMax = 10000;
         const dNow = Math.max(0, Math.min(currentDepth, dMax));
@@ -1038,9 +1026,10 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
         c.beginPath();
         for (let i = 0; i <= n; i++) {
             const d = (i / n) * dNow;
-            const p = 0.1 + (1025 * 9.81 * d / 1e6);
+            const compression = (1025 * 9.81 * d) / 2.34e9;
+            const p = (0.1e6 - 2.34e9 * Math.log(1 - compression)) / 1e6;
             const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
-            const y = pArea.t + (p / 101) * (pArea.b - pArea.t);
+            const y = pArea.b - (p / 105) * (pArea.b - pArea.t);
             if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
         }
         c.stroke();
@@ -1050,8 +1039,8 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
         c.beginPath();
         for (let i = 0; i <= n; i++) {
             const d = (i / n) * dNow;
-            const p = 0.1 + (1025 * 9.81 * d / 1e6);
-            const rho = 1025 * Math.exp((p - 0.1) / 2340);
+            const compression = (1025 * 9.81 * d) / 2.34e9;
+            const rho = 1025 / (1 - compression);
             const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
             const y = pArea.b - ((rho - 1025) / 45) * (pArea.b - pArea.t);
             if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
@@ -1102,11 +1091,11 @@ cijevi iznosi $L$, odrediti ukupnu tangencijalnu silu na stijenkama cijevi.
 2. **Newtonov zakon** $\tau = \mu\,dv/dr$ daje opće naprezanje:
 $$\tau(r) = -\frac{\beta r}{2}$$
 3. **Naprezanje na stijenci** ($r = d/2$):
-$$\tau_s = -\frac{\beta d}{4}$$
+$$\tau_w = -\frac{\beta d}{4},\qquad |\tau_w|=\frac{\beta d}{4}$$
 4. **Naprezanje na $r = d/4$:**
 $$\tau_{d/4} = -\frac{\beta d}{8}$$
 5. **Ukupna sila** na plaštu $A = \pi d L$:
-$$F_{\tau s} = \tau_s \cdot \pi d L = -\frac{\beta d^2 \pi L}{4}$$
+$$F_{\tau s} = \tau_w\pi dL=-\frac{\beta d^2\pi L}{4},\qquad |F_{\tau s}|=\frac{\beta d^2\pi L}{4}$$
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
@@ -1147,9 +1136,9 @@ $$F_{\tau s} = \tau_s \cdot \pi d L = -\frac{\beta d^2 \pi L}{4}$$
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 15px;">
         <div style="background: #fee2e2; border: 1px solid #fecaca; padding: 14px;">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #b91c1c; text-transform: uppercase; margin-bottom: 4px;">Naprezanje na stijenci</div>
+            <div style="font-size: 0.72rem; font-weight: 700; color: #b91c1c; text-transform: uppercase; margin-bottom: 4px;">Intenzitet naprezanja na stijenci</div>
             <div style="font-size: 1.35rem; font-weight: 800; color: #991b1b;"><span id="z6-res-tau-wall">2.50</span> Pa</div>
-            <div style="font-size: 0.78rem; color: #7f1d1d;">tau_s = beta d / 4</div>
+            <div style="font-size: 0.78rem; color: #7f1d1d;">|τ_w| = βd / 4</div>
         </div>
         <div style="background: #fff7ed; border: 1px solid #fed7aa; padding: 14px;">
             <div style="font-size: 0.72rem; font-weight: 700; color: #c2410c; text-transform: uppercase; margin-bottom: 4px;">Naprezanje na r = d/4</div>
@@ -1157,9 +1146,9 @@ $$F_{\tau s} = \tau_s \cdot \pi d L = -\frac{\beta d^2 \pi L}{4}$$
             <div style="font-size: 0.78rem; color: #9a3412;">tau_d/4 = beta d / 8</div>
         </div>
         <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 14px;">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #1d4ed8; text-transform: uppercase; margin-bottom: 4px;">Ukupna sila na stijenci</div>
+            <div style="font-size: 0.72rem; font-weight: 700; color: #1d4ed8; text-transform: uppercase; margin-bottom: 4px;">Intenzitet ukupne sile na stijenci</div>
             <div style="font-size: 1.35rem; font-weight: 800; color: #1e40af;"><span id="z6-res-force-wall">1.57</span> N</div>
-            <div style="font-size: 0.78rem; color: #1e3a8a;">F_tau = tau_s pi d L</div>
+            <div style="font-size: 0.78rem; color: #1e3a8a;">|F_τ| = |τ_w|πdL</div>
         </div>
         <div style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 14px;">
             <div style="font-size: 0.72rem; font-weight: 700; color: #0f766e; text-transform: uppercase; margin-bottom: 4px;">Maksimalna brzina na osi</div>

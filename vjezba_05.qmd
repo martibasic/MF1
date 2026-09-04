@@ -19,43 +19,6 @@ Ovaj interaktivni istraživač omogućuje vam da vizualizirate kako promjena dub
 
 ```{=html}
 <style>
-/* Vježba 05 — lokalni standard za čitljivost i responzivnost interaktivnih laboratorija. */
-.mf1-lab {
-  margin: 1.75rem auto !important;
-  padding: 1.5rem !important;
-  background: #ffffff !important;
-  border: 1px solid #d9e2ec !important;
-  border-radius: 16px !important;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06) !important;
-  color: #334155 !important;
-}
-
-.mf1-lab h4 {
-  font-size: 1.3rem !important;
-  line-height: 1.3 !important;
-}
-
-.mf1-lab :is(label, p) {
-  font-size: 0.96rem !important;
-  line-height: 1.55 !important;
-}
-
-.mf1-lab input[type="range"] {
-  min-height: 30px;
-  cursor: pointer;
-}
-
-.mf1-lab button {
-  min-height: 42px;
-  font-size: 0.95rem !important;
-}
-
-.mf1-lab canvas {
-  display: block;
-  max-width: 100%;
-  height: auto !important;
-}
-
 /* Ista legenda vrijedi za sve glavne skice: plavo je tlak, crveno rezultanta. */
 .v5-diagram-key {
   display: flex;
@@ -69,7 +32,8 @@ Ovaj interaktivni istraživač omogućuje vam da vizualizirate kako promjena dub
 
 .v5-diagram-key span { display: inline-flex; align-items: center; gap: 0.35rem; }
 .v5-diagram-key i { width: 1rem; height: 0.25rem; border-radius: 999px; display: inline-block; }
-.v5-diagram-key .pressure { background: #0ea5e9; }
+.v5-diagram-key .free-surface { background: #0ea5e9; }
+.v5-diagram-key .pressure { background: #38bdf8; }
 .v5-diagram-key .centroid { background: #3b82f6; }
 .v5-diagram-key .resultant { background: #ef4444; }
 
@@ -154,12 +118,6 @@ Ovaj interaktivni istraživač omogućuje vam da vizualizirate kako promjena dub
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
-  }
-
-  .mf1-lab {
-    margin: 1.25rem 0 !important;
-    padding: 1rem !important;
-    border-radius: 12px !important;
   }
 
 }
@@ -336,7 +294,9 @@ window.MF1V5.prepareCanvas = function(canvas, context, logicalWidth, logicalHeig
 Za ravnu plohu račun ide u dva koraka: prvo određujemo ukupnu silu preko tlaka u težištu plohe, a zatim položaj hvatišta preko geometrije plohe i njezina drugog momenta površine.
 
 $$F = p_T \cdot A = (\rho \cdot g \cdot z_T) \cdot A$$
-$$z_F = z_T + \frac{I_{x0}}{z_T \cdot A} \cdot \sin^2(\alpha)$$
+$$z_F = z_T + \frac{I_G}{z_T \cdot A} \cdot \sin^2(\alpha)$$
+
+Ovdje je $I_G$ drugi moment površine oko centroidalne osi u ravnini plohe, paralelne slobodnoj površini.
 
 ```{=html}
 <div class="mf1-bridge">
@@ -354,7 +314,7 @@ $$z_F = z_T + \frac{I_{x0}}{z_T \cdot A} \cdot \sin^2(\alpha)$$
     </div>
     <div class="mf1-warning">
         <h4>Česta pogreška</h4>
-        <p>Najčešća greška je zamijeniti dubinu vrha plohe s dubinom težišta ili ubaciti nagib dvaput: jednom kroz $z_T$ i drugi put kroz dodatni faktor sinus. Time sila ispadne prevelika, a centar tlaka ode preduboko.</p>
+        <p>Najčešća greška je zamijeniti dubinu vrha plohe s dubinom težišta ili ubaciti nagib dvaput: jednom kroz $z_T$ i drugi put kroz dodatni faktor sinus. Time sila ispadne prevelika, a centar pritiska ode preduboko.</p>
     </div>
 </div>
 ```
@@ -388,7 +348,7 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
         <div class="v5-scene v5-scene--600x550" style="background: #ffffff; border: 1px solid #e2e8f0;">
             <canvas id="v5-v5-canvas" width="600" height="550" aria-label="Nagnuta uronjena ploha s težištem, centrom pritiska, rezultantom i komponentama sile"></canvas>
         </div>
-            <div class="v5-diagram-key" aria-label="Legenda vektora"><span><i class="pressure"></i>slobodna površina</span><span><i class="resultant"></i>F_R iz C_P</span><span><i class="centroid"></i>F_H i F_V</span></div>
+            <div class="v5-diagram-key" aria-label="Legenda vektora"><span><i class="free-surface"></i>slobodna površina</span><span><i class="resultant"></i>F_R iz C_P</span><span><i class="centroid"></i>F_x i F_z</span></div>
         </div>
         <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;">
@@ -427,11 +387,11 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div style="background:#f8fafc; padding:12px; border:1px solid #e2e8f0; border-radius:12px;">
-                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">F_H · horizontalno</span>
+                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">F_x · potpisana vodoravna komponenta</span>
                         <span id="v5-v5-out-fx" style="font-family:monospace; font-weight:700; color:#0b7898;">0.0 kN</span>
                     </div>
                     <div style="background:#f8fafc; padding:12px; border:1px solid #e2e8f0; border-radius:12px;">
-                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">F_V · vertikalno</span>
+                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">F_z · potpisana vertikalna komponenta</span>
                         <span id="v5-v5-out-fz" style="font-family:monospace; font-weight:700; color:#198754;">0.0 kN</span>
                     </div>
                 </div>
@@ -549,8 +509,8 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
         dA(endX, fAnchorY, endX, endY, '#10b981', 3);
         dA(fAnchorX, fAnchorY, endX, endY, '#ef4444', 5);
         ctx.font = '700 13px Inter';
-        ctx.fillStyle = '#2563eb'; ctx.fillText('F_H', endX - 32, fAnchorY - 10);
-        ctx.fillStyle = '#059669'; ctx.fillText('F_V', endX + 8, (fAnchorY + endY) / 2);
+        ctx.fillStyle = '#2563eb'; ctx.fillText('F_x', endX - 32, fAnchorY - 10);
+        ctx.fillStyle = '#059669'; ctx.fillText('F_z', endX + 8, (fAnchorY + endY) / 2);
         ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', (fAnchorX + endX) / 2 - 10, (fAnchorY + endY) / 2 - 10);
         ctx.fillStyle = '#0f172a'; ctx.fillText('C_P', fAnchorX + 10, fAnchorY + 18);
         ctx.fillStyle = '#0f172a'; ctx.font = 'bold 13px Inter'; ctx.fillText(meta.name, 18, 34);
@@ -570,7 +530,7 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
 
 ## 4. Referentna tablica: Geometrijska svojstva ploha
 
-| Oblik | Površina ($A$) | Težište ($z_T$ od baze/vrha) | Drugi moment površine ($I_{x0}$) |
+| Oblik | Površina ($A$) | Težište ($z_T$ od baze/vrha) | Drugi moment površine ($I_G$) |
 | :--- | :--- | :--- | :--- |
 | **Pravokutnik** | $b \cdot h$ | $h/2$ | $b \cdot h^3 / 12$ |
 | **Trokut** (baza b, visina h) | $b \cdot h / 2$ | $h/3$ (od baze) | $b \cdot h^3 / 36$ |
@@ -613,7 +573,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
         <div class="v5-scene v5-scene--500x450" style="background: #f8fafc; border: 1px solid #e2e8f0;">
             <canvas id="v5-z41-canvas" width="500" height="450" aria-label="Vertikalna zaklopka sa zglobom A, raspodjelom tlaka, težištem i centrom pritiska"></canvas>
         </div>
-            <div class="v5-diagram-key" aria-label="Legenda zaklopke"><span><i class="pressure"></i>raspodjela tlaka</span><span><i class="centroid"></i>težište T</span><span><i class="resultant"></i>F_H u C_P</span></div>
+            <div class="v5-diagram-key" aria-label="Legenda zaklopke"><span><i class="pressure"></i>raspodjela tlaka</span><span><i class="centroid"></i>težište T</span><span><i class="resultant"></i>F_R u C_P</span></div>
         </div>
 
         <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 20px;">
@@ -637,7 +597,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
             <div style="background: #0f172a; padding: 20px; border-radius: 24px; color: white;">
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #94a3b8; font-size: 0.8rem;">Rezultanta F_H:</span>
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Rezultanta F_R:</span>
                         <span id="v5-z41-fh" style="font-family: monospace; font-weight: 700; color: #38bdf8;">618 kN</span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
@@ -820,7 +780,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
             ctx.setLineDash([]);
             drawArrow(gateX - 120, fPos, gateX - 14, fPos, '#ef4444', 4);
             ctx.fillStyle = '#ef4444';
-            ctx.fillText('F_H', gateX - 142, fPos + 4);
+            ctx.fillText('F_R', gateX - 142, fPos + 4);
 
             // Moment se vodi oko zgloba A; R_A se zato ne crta kao lažno izračunata strelica.
             const armX = gateX + 62;
@@ -1050,7 +1010,20 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak te se njegov ut
 
 <div class="rjesenje-label">Rješenje</div>
 
-$F = \mathbf{521 \text{ kN}}$.
+1. **Geometrija zaklopke:** zadana vertikalna projekcija je $h_1=3\,\mathrm m$, pa je duljina plohe
+$$L=\frac{h_1}{\sin45^\circ}=4{,}243\,\mathrm m.$$
+2. **Površina i težište:**
+$$A=bL=5L=21{,}213\,\mathrm{m^2},\qquad z_T=h_2+\frac{h_1}{2}=2{,}000\,\mathrm m.$$
+3. **Hidrostatska rezultanta:**
+$$F_R=\rho gz_TA=416{,}2\,\mathrm{kN}.$$
+4. **Centar pritiska:** uzduž plohe je $y_T=h_2/\sin\alpha+L/2=2{,}828\,\mathrm m$ i $I_G=bL^3/12$. Zato
+$$y_F=y_T+\frac{I_G}{y_TA}=3{,}359\,\mathrm m,$$
+pa je krak rezultante oko zgloba B $l_R=y_F-h_2/\sin\alpha=2{,}652\,\mathrm m$.
+5. **Težina zaklopke:** $G=mg=1{,}962\,\mathrm{kN}$ djeluje okomito prema dolje u težištu; njezin je momentni krak $\tfrac L2\cos\alpha$.
+6. **Momenti oko B:** na pragu otvaranja sila $F_{min}$ djeluje okomito na plohu u težištu, pa vrijedi
+$$F_{min}\frac L2=F_Rl_R+G\frac L2\cos\alpha.$$
+7. **Konačno:**
+$$F_{min}=521{,}6\,\mathrm{kN}\approx522\,\mathrm{kN}.$$
 
 
 ## Dodatni primjeri {.unnumbered}
@@ -1082,7 +1055,7 @@ Polukrug ima drukčiju raspodjelu površine po dubini od punog kruga, pa ima i d
 <hr class='zadatak-sep'>
 
 ### Dodatni primjer Z43 — Brana s nagnutom stjenkom {.unnumbered}
-43. Brana duljine 20 m zadržava 7 m visoku razinu vode na način prikazan na slici. Potrebno je odrediti rezultirajuću silu tlaka na branu, kao i visinu od površine do središta djelovanja sile tlaka na branu.
+Brana duljine 20 m zadržava 7 m visoku razinu vode na način prikazan na slici. Potrebno je odrediti rezultantnu silu tlaka na branu i dubinu centra pritiska.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
@@ -1223,12 +1196,12 @@ Polukrug ima drukčiju raspodjelu površine po dubini od punog kruga, pa ima i d
 
 <div class="rjesenje-label">Rješenje</div>
 
-$F = \mathbf{5,54 \text{ MN}}, z_{Fh} = \mathbf{4,66 \text{ m}}$.
+$F = 5,54 \text{ MN}, \qquad z_{Fh} = 4,66 \text{ m}$.
 
 ## 6. Napredni fizikalni uvidi
 
 ### Asimetrija i bočni pomak hvatišta (Zadatak 48)
-Kod asimetričnih ploha (npr. trokut u Z48), raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delta x$ definiran centrifugalnim momentom tromosti $I_{xz}$.
+Kod asimetričnih ploha (npr. trokut u Z48), raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delta x$. Veličina $I_{xz}=\int_A xz\,dA$ je produkt inercije površine: geometrijska mjera istodobne raspodjele površine po koordinatama $x$ i $z$, a nije maseni moment tromosti.
 
 Asimetričnu plohu obrađuje Z48 na kraju vježbe: iz istog tlaka $p=\rho gz$ računa se $x_F=\int_A xp\,dA/\int_A p\,dA$. Time se bočni pomak $\Delta x$ povezuje s geometrijom, a ne s proizvoljnom vizualnom korelacijom.
 
@@ -1317,7 +1290,7 @@ Ovaj primjer koristi opći lanac iz laboratorija **Geometrija i nagib**: $z_T=h_
 <hr class='zadatak-sep'>
 
 ### Dodatni primjer Z48 — Asimetrična trokutna zaklopka {.unnumbered}
-Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delta x$ definiran centrifugalnim momentom tromosti $I_{xz}$.
+Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delta x$ koji ovisi o produktu inercije površine $I_{xz}=\int_Axz\,dA$.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>

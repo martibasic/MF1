@@ -73,9 +73,9 @@ Komponenta $F_H$ računa se kao sila na vertikalnu projekciju zakrivljene plohe,
         </div>
         <div class="cp-result" aria-live="polite">
           <div><span><strong>F<sub>H</sub></strong> = sila na vertikalnu projekciju</span><span id="cp-fh">—</span></div>
-          <div><span><strong>F<sub>V</sub></strong> = težina zamišljenog fluida</span><span id="cp-fv">—</span></div>
+          <div><span><strong>F<sub>V</sub></strong> = težina pripadnog kontrolnog volumena</span><span id="cp-fv">—</span></div>
           <div><span><strong>F<sub>R</sub></strong> = √(F<sub>H</sub>² + F<sub>V</sub>²)</span><span id="cp-fr">—</span></div>
-          <div><span><strong>θ</strong> = atan(F<sub>V</sub>/F<sub>H</sub>)</span><span id="cp-theta">—</span></div>
+          <div><span><strong>φ<sub>R</sub></strong> = atan2(F<sub>V</sub>, F<sub>H</sub>)</span><span id="cp-theta">—</span></div>
         </div>
         <p class="cp-note" id="cp-note"></p>
       </div>
@@ -137,7 +137,7 @@ Komponenta $F_H$ računa se kao sila na vertikalnu projekciju zakrivljene plohe,
     const FH = rho * g * zT * Av / 1000;
     const FV = rho * g * V / 1000;
     const FR = Math.hypot(FH, FV);
-    const theta = Math.atan2(FV, FH) * 180 / Math.PI;
+    const phiR = Math.atan2(FV, FH) * 180 / Math.PI;
     const xV = (-h * R * (R / 2) - (Math.PI * R * R / 4) * (4 * R / (3 * Math.PI))) / (h * R + Math.PI * R * R / 4);
 
     ui.h.textContent = h.toFixed(2).replace('.', ',');
@@ -145,11 +145,11 @@ Komponenta $F_H$ računa se kao sila na vertikalnu projekciju zakrivljene plohe,
     ui.fh.textContent = fmt(FH) + ' kN/m';
     ui.fv.textContent = fmt(FV) + ' kN/m ↑';
     ui.fr.textContent = fmt(FR) + ' kN/m';
-    ui.theta.textContent = fmt(theta) + '°';
+    ui.theta.textContent = fmt(phiR) + '°';
 
     const messages = {
       1: 'Svaka strelica prikazuje tlak p = ρgz: na većoj dubini strelica je veća, a smjer joj je uvijek normala na plohu. Sve normale četvrtine cilindra prolaze kroz središte C.',
-      2: 'Vodoravna komponenta F<sub>H</sub> jednaka je sili na vertikalnu projekciju A<sub>v</sub> = Rb. Okomita komponenta F<sub>V</sub> jednaka je težini stvarnog ili zamišljenog volumena fluida iznad plohe.',
+      2: 'Vodoravna komponenta F<sub>H</sub> jednaka je sili na vertikalnu projekciju A<sub>v</sub> = Rb. Magnituda F<sub>V</sub> jednaka je težini stvarnog ili pomoćnog kontrolnog volumena; u ovom položaju djeluje prema gore.',
       3: 'Komponente se geometrijski zbrajaju: F<sub>R</sub> = √(F<sub>H</sub>² + F<sub>V</sub>²). Za kružni luk pravac djelovanja prolazi kroz C jer svi lokalni tlakovi imaju radijalan smjer.'
     };
     const captions = {
@@ -271,19 +271,19 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
 
 1.  **Horizontalna komponenta ($F_H$):** Ona djeluje na vertikalnu projekciju plohe (pravokutnik visine $R$ i širine $1\text{ m}$).
     *   Vertikalna projekcija ima površinu $A_v=Rb=0,8\text{ m}^2$, a njezino je težište na dubini $z_T=s+R/2=4,6\text{ m}$.
-    *   $F_H=\rho g z_T A_v=1000\cdot9,81\cdot4,6\cdot0,8=\mathbf{36,1\text{ kN/m}}$.
+    *   $F_H=\rho g z_T A_v=1000\cdot9,81\cdot4,6\cdot0,8=36,1\text{ kN/m}$.
 
 2.  **Vertikalna komponenta ($F_V$):** Ona je jednaka težini zamišljenog stupca tekućine iznad plohe. Budući da je tekućina *ispod* plohe, sila djeluje prema gore (uzgon).
     *   Prvo uzmemo silu na zamišljeni pravokutni stupac $F_y=\rho gH(Rb)$, a zatim oduzmemo težinu izostavljenog dijela $W_f=\rho g\left(R^2-\pi R^2/4\right)b$.
-    *   $F_V=F_y-W_f=\mathbf{37,9\text{ kN/m}}$ prema gore.
+    *   $F_V=F_y-W_f=37,9\text{ kN/m}$ prema gore.
 
-3.  **Rezultantna sila ($F_R$) i kut ($\alpha$):**
-    *   $F_R=\sqrt{F_H^2+F_V^2}=\mathbf{52,3\text{ kN/m}}$.
-    *   Kut djelovanja: $\alpha=\arctan(F_V/F_H)=\mathbf{46,4^\circ}$. Linija sile prolazi kroz središte C jer su sve elementarne sile tlaka normalne na kružnu plohu, odnosno radijalne su.
+3.  **Rezultantna sila ($F_R$) i smjer ($\varphi_R$):**
+    *   $F_R=\sqrt{F_H^2+F_V^2}=52,3\text{ kN/m}$.
+    *   Smjer rezultante: $\varphi_R=\operatorname{atan2}(F_V,F_H)=46,4^\circ$. Linija sile prolazi kroz središte C jer su sve elementarne sile tlaka normalne na kružnu plohu, odnosno radijalne su.
 
 4.  **Težina cilindra ($G_c$):** Da bi se vrata otvorila, moment težine mora biti jednak momentu hidrostatske sile oko točke A.
     *   $\sum M_A=0\implies F_RR\sin\alpha-G_cR=0$.
-    *   Kako je $F_R\sin\alpha=F_V$, na pragu otvaranja vrijedi $G_c=F_V\approx\mathbf{37,9\text{ kN/m}}$.
+    *   Kako je $F_R\sin\varphi_R=F_V$, na pragu otvaranja vrijedi $G_c=F_V\approx37,9\text{ kN/m}$.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
@@ -420,14 +420,14 @@ Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\
 
 1.  **Horizontalna sila ($F_H$):**
     *   Djeluje na pravokutnik BF ($R \times b$). Težište je na $z_{TAX} = h_1 + R/2 = 3,05\text{ m}$.
-    *   $F_H = \rho \cdot g \cdot z_{TAX} \cdot (R \cdot b) = \mathbf{66667\text{ N}}$.
-    *   **Položaj ($z_{FH}$):** Koristi se formula za centar tlaka: $z_{FH} = z_{TAX} + \frac{I_{x0}}{z_{TAX} \cdot A} = \mathbf{3,09\text{ m}}$.
+    *   $F_H = \rho \cdot g \cdot z_{TAX} \cdot (R \cdot b) = 66667\text{ N}$.
+    *   **Položaj ($z_{FH}$):** Koristi se formula za centar pritiska: $z_{FH} = z_{TAX} + \frac{I_G}{z_{TAX} \cdot A} = 3,09\text{ m}$, gdje je $I_G$ drugi moment projekcijske površine oko centroidalne osi paralelne slobodnoj površini.
 
 2.  **Vertikalna sila ($F_V$):**
     *   Magnituda je jednaka težini kontrolnog volumena sastavljenog od pravokutnika ($h_1 \cdot R \cdot b$) i četvrtine kruga ($\frac{R^2 \pi}{4} \cdot b$). Za orijentaciju Z50, u kojoj je voda lijevo od plohe, komponenta je usmjerena prema gore; za zrcalni Z51 mijenja smjer prema dolje.
-    *   $V = 7,587\text{ m}^3 \implies F_V = \rho \cdot g \cdot V = \mathbf{74277,6\text{ N}}$.
+    *   $V = 7,587\text{ m}^3 \implies F_V = \rho \cdot g \cdot V = 74277,6\text{ N}$.
     *   **Položaj ($x_{FV}$):** Određuje se preko statičkog momenta volumena (zbroj momenata pojedinih dijelova kroz ukupni volumen).
-    *   $x_{FV} = \mathbf{0,584 \text{ m}}$ od vertikalne osi koja prolazi kroz točku B.
+    *   $x_{FV} = 0,584 \text{ m}$ od vertikalne osi koja prolazi kroz točku B.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
@@ -552,16 +552,16 @@ Cilindrični spremnik težine $G=79\,\mathrm{N}$ djelomično je potopljen. Potre
 
 1.  **Tlak u cilindru ($p_m$):**
     Budući da je razina vode u cilindru niža za $h_2$ od razine vani, unutar cilindra vlada pretlak koji drži tu razinu.
-    *   $p_m = \rho_v \cdot g \cdot h_2 = 1000 \cdot 9,81 \cdot 0,2 = \mathbf{1962\text{ Pa}}$.
+    *   $p_m = \rho_v \cdot g \cdot h_2 = 1000 \cdot 9,81 \cdot 0,2 = 1962\text{ Pa}$.
 
 2.  **Visina manometra ($h_1$):**
     Taj isti pretlak $p_m$ djeluje na manometar s fluidom gustoće $\rho_{mf} = 2,1 \cdot 1000 = 2100\text{ kg/m}^3$.
-    *   $p_m = \rho_{mf} \cdot g \cdot h_1 \implies h_1 = \frac{1962}{2100 \cdot 9,81} = \mathbf{0,095\text{ m}}$.
+    *   $p_m = \rho_{mf} \cdot g \cdot h_1 \implies h_1 = \frac{1962}{2100 \cdot 9,81} = 0,095\text{ m}$.
 
 3.  **Sila zadržavanja ($F$):**
     Postavljamo ravnotežu sila u vertikalnom smjeru. Na spremnik djeluje vanjska sila $F$ prema dolje, težina $G$ prema dolje, a tlak zraka $p_m$ gura odozdo prema gore na gornju bazu cilindra (površina $A_c$).
     *   $F + G = p_m \cdot A_c$
-    *   $F = p_m \cdot \frac{D^2 \pi}{4} - G = 1962 \cdot \frac{0,3^2 \pi}{4} - 79 = \mathbf{59,7\text{ N}}$.
+    *   $F = p_m \cdot \frac{D^2 \pi}{4} - G = 1962 \cdot \frac{0,3^2 \pi}{4} - 79 = 59,7\text{ N}$.
 
 **Zaključak:** Sila $F$ je pozitivna, što znači da moramo pritiskati spremnik prema dolje kako bi on ostao potopljen na toj dubini, jer ga tlak zarobljenog zraka "gura" van poput plovka.
 
@@ -673,14 +673,14 @@ Potrebno je odrediti intenzitet i lokaciju horizontalne i vertikalne komponente 
 1.  **Horizontalna komponenta ($F_H$):**
     *   Vertikalna projekcija plohe je pravokutnik visine $R \cdot \sin(\alpha)$.
     *   Dubina težišta projekcije (uz pretpostavku da je površina na razini točke B): $z_{TAX} = \frac{R \cdot \sin(60^\circ)}{2} = 2,598 \text{ m}$.
-    *   **Iznos sile:** $F_H = \rho \cdot g \cdot z_{TAX} \cdot A_x = 998 \cdot 9,81 \cdot 2,598 \cdot (10 \cdot 6 \cdot \sin 60^\circ) = \mathbf{1322 \text{ kN}}$.
-    *   **Položaj ($z_{FH}$):** Nalazi se na $1/3$ visine projekcije od dna: $z_{FH} = \mathbf{1,732 \text{ m}}$.
+    *   **Iznos sile:** $F_H = \rho \cdot g \cdot z_{TAX} \cdot A_x = 998 \cdot 9,81 \cdot 2,598 \cdot (10 \cdot 6 \cdot \sin 60^\circ) = 1322 \text{ kN}$.
+    *   **Položaj ($z_{FH}$):** Nalazi se na $1/3$ visine projekcije od dna: $z_{FH} = 1,732 \text{ m}$.
 
 2.  **Vertikalna komponenta ($F_V$):**
     *   Određuje se preko volumena tekućine iznad zakrivljene plohe AB. Presjek tog volumena dobiva se kao pravokutni trokut umanjen za kružni odsječak: $A_{ABC}=\frac12R^2\sin\alpha(1-\cos\alpha)-\frac12R^2(\alpha-\sin\alpha)$, pri čemu je $\alpha$ u radijanima.
     *   $A_{ABC}=4,533\text{ m}^2$, pa je volumen $V_{ABC}=A_{ABC}b=45,331\text{ m}^3$.
-    *   **Iznos sile:** $F_V = \rho \cdot g \cdot V_{ABC} = \mathbf{443810 \text{ N}}$.
-    *   **Položaj ($x_{FV}$):** Izračunom statičkog momenta površine dobiva se krak $x_{FV} = \mathbf{0,842 \text{ m}}$.
+    *   **Iznos sile:** $F_V = \rho \cdot g \cdot V_{ABC} = 443810 \text{ N}$.
+    *   **Položaj ($x_{FV}$):** Izračunom statičkog momenta površine dobiva se krak $x_{FV} = 0,842 \text{ m}$.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
@@ -798,16 +798,16 @@ Elastični balon promjera $30 \text{ cm}$ napunjen je zrakom i privezan za dno. 
 <div class="rjesenje-label">Rješenje</div>
 
 1.  **Promjena promjera balona:**
-    *   Iz ovisnosti $p \cdot D^2 = konst.$ slijedi: $D_2 = D_1 \cdot \sqrt{p_1 / p_2} = 0,3 \cdot \sqrt{0,1 / 1,6} = \mathbf{0,075 \text{ m}}$.
+    *   Iz ovisnosti $p \cdot D^2 = konst.$ slijedi: $D_2 = D_1 \cdot \sqrt{p_1 / p_2} = 0,3 \cdot \sqrt{0,1 / 1,6} = 0,075 \text{ m}$.
     *   Povećanje vanjskog tlaka drastično stisne balon.
 
 2.  **Uzgonska sila ($F_U$):**
-    *   Početna: $F_{U,1} = \rho \cdot g \cdot \frac{D_1^3 \pi}{6} = \mathbf{138,7 \text{ N}}$.
-    *   Konačna: $F_{U,2} = \rho \cdot g \cdot \frac{D_2^3 \pi}{6} = \mathbf{2,17 \text{ N}}$.
+    *   Početna: $F_{U,1} = \rho \cdot g \cdot \frac{D_1^3 \pi}{6} = 138,7 \text{ N}$.
+    *   Konačna: $F_{U,2} = \rho \cdot g \cdot \frac{D_2^3 \pi}{6} = 2,17 \text{ N}$.
 
 3.  **Promjena sile u užetu:**
     *   Budući da je težina balona zanemariva, sila u užetu jednaka je uzgonu.
-    *   Postotna promjena: $\Delta F_U = \frac{138,7 - 2,17}{138,7} \cdot 100 = \mathbf{98,4 \%}$.
+    *   Postotna promjena: $\Delta F_U = \frac{138,7 - 2,17}{138,7} \cdot 100 = 98,4 \%$.
     *   **Zaključak:** Sila u užetu se smanjila za 98,4% jer je balon zbog stlačivanja izgubio većinu svog volumena, a time i uzgona.
 
 <hr class="widget-sep">
@@ -848,7 +848,7 @@ Potrebno je odrediti volumni udio ledenjaka koji je potopljen u morskoj vodi te 
     *   $\rho_L \cdot g \cdot V_{ukupno} = \rho_{mv} \cdot g \cdot V_{potopljeno}$.
 
 2.  **Izračun volumnog udjela:**
-    *   $\frac{V_{potopljeno}}{V_{ukupno}} = \frac{\rho_L}{\rho_{mv}} = \frac{917}{1042} = \mathbf{0,88}$ (ili **88%**).
+    *   $\frac{V_{potopljeno}}{V_{ukupno}} = \frac{\rho_L}{\rho_{mv}} = \frac{917}{1042} = 0,88$ (ili **88%**).
     *   **Zaključak:** Čak 88% volumena ledenjaka nalazi se ispod površine mora.
 
 <hr class="widget-sep">

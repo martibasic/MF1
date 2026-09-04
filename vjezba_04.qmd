@@ -14,6 +14,8 @@ Ključne zakonitosti:
 2.  **Izobare:** Plohe konstantnog tlaka su uvijek **okomite** na vektor rezultantne masene sile $\vec{f}_{eff}$.
 3.  **Slobodna površina:** Izobara na kojoj vlada atmosferski tlak.
 
+Kod **translacije** je $\vec g_{eff}=\vec g-\vec a$ uniformno efektivno polje. Kod **krute rotacije** centrifugalni član $\omega^2r$ raste s radijusom, pa efektivno polje nije jedan konstantan vektor u cijelom fluidu; slobodna je površina lokalno okomita na polje, a integracija daje paraboloid.
+
 Za čistu rotaciju oko vertikalne osi vrijedi $z(r)=h_c+\omega^2r^2/(2g)$. Ako nema prelijevanja, očuvanje volumena daje $\pi R^2h_0=2\pi\int_0^R z(r)r\,dr$, odnosno $h_c=h_0-\omega^2R^2/(4g)$. Zato $\omega=0$ vraća ravnu površinu, a radijalna razlika tlaka $\Delta p_r=\rho\omega^2R^2/2$ raste s $\omega^2$.
 
 ::: {.mf1-bridge}
@@ -24,52 +26,6 @@ U Vježbi 3 slobodna se površina nagnula zbog translacijskog ubrzanja. Ovdje is
 
 ```{=html}
 <style>
-    .mf1-lab {
-        font-family: 'Inter', system-ui, sans-serif !important;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
-        border: 1px solid #dbe7f3 !important;
-        border-radius: 24px !important;
-        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08) !important;
-        padding: 22px !important;
-        margin: 2rem auto !important;
-        color: #0f172a;
-    }
-
-    .mf1-lab h4 {
-        margin: 0 0 4px;
-        font-size: clamp(1.22rem, 2vw, 1.48rem) !important;
-        line-height: 1.18;
-        color: #0f172a;
-        font-weight: 800;
-    }
-
-    .mf1-lab p {
-        color: #475569;
-        line-height: 1.58;
-        font-size: 0.94rem;
-        max-width: 760px;
-    }
-
-    .mf1-lab label {
-        display: block;
-        color: #334155;
-        font-size: 0.82rem !important;
-        line-height: 1.35 !important;
-        font-weight: 700 !important;
-        margin-bottom: 8px;
-    }
-
-    .mf1-lab canvas {
-        display: block;
-        width: 100%;
-        height: auto;
-    }
-
-    .mf1-lab input[type="range"] {
-        width: 100%;
-        cursor: ew-resize;
-    }
-
     .mf1v4-kicker {
         font-size: 0.70rem;
         font-weight: 800;
@@ -363,31 +319,9 @@ U Vježbi 3 slobodna se površina nagnula zbog translacijskog ubrzanja. Ovdje is
     }
 
     @media (max-width: 640px) {
-        .mf1-lab {
-            padding: 18px !important;
-        }
-
         .mf1v4-minis {
             grid-template-columns: 1fr;
         }
-    }
-
-    /* Završni UX prolaz: tipografija i hijerarhija ostaju lokalne za Vježbu 04. */
-    :is(#v4-intro-principle-widget, #z34-advanced-widget, #z35-advanced-widget,
-        #p1-advanced-widget, #z36-centrifugal-widget, #p2-ring-tank-widget,
-        #p3-inclined-rotation-widget, #v4-comparison-widget) {
-        background: #ffffff !important;
-        border-color: #d9e2ec !important;
-        border-radius: 16px !important;
-        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06) !important;
-        padding: 1.5rem !important;
-    }
-
-    :is(#v4-intro-principle-widget, #z34-advanced-widget, #z35-advanced-widget,
-        #p1-advanced-widget, #z36-centrifugal-widget, #p2-ring-tank-widget,
-        #p3-inclined-rotation-widget, #v4-comparison-widget) label {
-        font-size: 0.95rem !important;
-        line-height: 1.4 !important;
     }
 
     .mf1v4-kicker,
@@ -429,137 +363,22 @@ U Vježbi 3 slobodna se površina nagnula zbog translacijskog ubrzanja. Ovdje is
     .mf1v4-branch strong { font-size: 0.95rem !important; }
     .mf1v4-mini strong { font-size: 1.15rem !important; }
 
-    :is(#v4-intro-principle-widget, #z34-advanced-widget, #z35-advanced-widget,
-        #p1-advanced-widget, #z36-centrifugal-widget, #p2-ring-tank-widget,
-        #p3-inclined-rotation-widget, #v4-comparison-widget) input[type="range"] {
-        min-height: 30px;
-    }
-
-    @media (max-width: 640px) {
-        :is(#v4-intro-principle-widget, #z34-advanced-widget, #z35-advanced-widget,
-            #p1-advanced-widget, #z36-centrifugal-widget, #p2-ring-tank-widget,
-            #p3-inclined-rotation-widget, #v4-comparison-widget) {
-            padding: 1rem !important;
-            margin: 1.25rem 0 !important;
-            border-radius: 12px !important;
-        }
-    }
 </style>
 
 <script>
-(function() {
-    if (window.mf1V4CanvasEnhancerInstalled) return;
-    window.mf1V4CanvasEnhancerInstalled = true;
-
-    const originalGetContext = HTMLCanvasElement.prototype.getContext;
-    const fontPxRe = /(\d+(?:\.\d+)?)px/;
-
-    function patchContext(canvas, ctx) {
-        if (!ctx || ctx.__mf1ReadablePatched) return ctx;
-
-        const ratio = Math.min(window.devicePixelRatio || 1, 2);
-        const logicalW = parseInt(canvas.getAttribute('width'), 10) || canvas.width || 900;
-        const logicalH = parseInt(canvas.getAttribute('height'), 10) || canvas.height || 360;
-
-        if (!canvas.__mf1HiDpiApplied) {
-            canvas.width = Math.round(logicalW * ratio);
-            canvas.height = Math.round(logicalH * ratio);
-            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-            ctx.imageSmoothingEnabled = true;
-            canvas.__mf1HiDpiApplied = true;
-        }
-
-        const fillText = ctx.fillText.bind(ctx);
-        const strokeText = ctx.strokeText.bind(ctx);
-        const stroke = ctx.stroke.bind(ctx);
-
-        function drawLabelBg(text, x, y) {
-            if (typeof text !== 'string') return;
-            const trimmed = text.trim();
-            if (trimmed.length < 2 || trimmed.length > 44) return;
-            if (trimmed.split(/\s+/).length > 8) return;
-
-            const tm = ctx.measureText(text);
-            const ascent = tm.actualBoundingBoxAscent || 11;
-            const descent = tm.actualBoundingBoxDescent || 5;
-            const padX = 6;
-            const padY = 3;
-            const bx = x - padX;
-            const by = y - ascent - padY;
-            const bw = tm.width + padX * 2;
-            const bh = ascent + descent + padY * 2;
-
-            ctx.save();
-            ctx.fillStyle = 'rgba(255,255,255,0.82)';
-            ctx.beginPath();
-            ctx.moveTo(bx + 6, by);
-            ctx.arcTo(bx + bw, by, bx + bw, by + bh, 6);
-            ctx.arcTo(bx + bw, by + bh, bx, by + bh, 6);
-            ctx.arcTo(bx, by + bh, bx, by, 6);
-            ctx.arcTo(bx, by, bx + bw, by, 6);
-            ctx.closePath();
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(148,163,184,0.45)';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        function withReadableFont(drawFn, text, x, y, maxWidth) {
-            const prevFont = ctx.font;
-            const match = prevFont && prevFont.match(fontPxRe);
-            if (match && parseFloat(match[1]) < 18) {
-                ctx.font = prevFont.replace(fontPxRe, '18px');
-            }
-            if (!/Inter|Segoe UI|Arial|sans-serif/i.test(ctx.font)) {
-                ctx.font = `${ctx.font}, "Segoe UI", Arial, sans-serif`;
-            }
-
-            drawLabelBg(text, x, y);
-
-            if (typeof maxWidth === 'number') {
-                drawFn(text, x, y, maxWidth);
-            } else {
-                drawFn(text, x, y);
-            }
-
-            ctx.font = prevFont;
-        }
-
-        ctx.fillText = function(text, x, y, maxWidth) {
-            withReadableFont(fillText, text, x, y, maxWidth);
-        };
-
-        ctx.strokeText = function(text, x, y, maxWidth) {
-            withReadableFont(strokeText, text, x, y, maxWidth);
-        };
-
-        ctx.stroke = function() {
-            const prevWidth = ctx.lineWidth;
-            const prevJoin = ctx.lineJoin;
-            const prevCap = ctx.lineCap;
-            if (prevWidth < 2.2) ctx.lineWidth = 2.2;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            const result = stroke();
-            ctx.lineWidth = prevWidth;
-            ctx.lineJoin = prevJoin;
-            ctx.lineCap = prevCap;
-            return result;
-        };
-
-        ctx.__mf1ReadablePatched = true;
-        return ctx;
+window.MF1V4 = window.MF1V4 || {};
+window.MF1V4.prepareCanvas = function(canvas, ctx, logicalWidth, logicalHeight) {
+    const box = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.max(1, Math.round(box.width * dpr));
+    const height = Math.max(1, Math.round(box.height * dpr));
+    if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
     }
-
-    HTMLCanvasElement.prototype.getContext = function(type, ...args) {
-        const ctx = originalGetContext.call(this, type, ...args);
-        if (type === '2d') {
-            return patchContext(this, ctx);
-        }
-        return ctx;
-    };
-})();
+    ctx.setTransform(width / logicalWidth, 0, 0, height / logicalHeight, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+};
 </script>
 ```
 
@@ -585,14 +404,14 @@ U Vježbi 3 slobodna se površina nagnula zbog translacijskog ubrzanja. Ovdje is
             <input type="range" id="v4-ax-slider" min="-10" max="10" step="0.1" value="3" style="accent-color:#ef4444;">
         </div>
         <div class="mf1v4-slider">
-            <label>Vertikalno ubrzanje a_z: <span id="v4-az-badge" class="mf1v4-slider-value">0.0 m/s²</span></label>
+            <label>Vertikalno ubrzanje a_z, + prema gore: <span id="v4-az-badge" class="mf1v4-slider-value">0.0 m/s²</span></label>
             <input type="range" id="v4-az-slider" min="-5" max="10" step="0.1" value="0" style="accent-color:#2563eb;">
         </div>
         <div id="v4-hero-card" class="mf1v4-hero">
             <small>Ključni ishod</small>
             <strong>Nagib = <span id="v4-angle-val">0.0</span>°</strong>
             <div class="mf1v4-hero-sub" id="v4-scene-note">lijevi rub raste</div>
-            <div class="mf1v4-hero-formula">tanθ = |f_x| / f_z</div>
+            <div class="mf1v4-hero-formula">|θ| = arctan(|f_x| / f_z)</div>
         </div>
     </div>
 
@@ -608,7 +427,7 @@ U Vježbi 3 slobodna se površina nagnula zbog translacijskog ubrzanja. Ovdje is
         </div>
 
         <div class="mf1v4-logic">
-            <div class="mf1v4-logic-hd">If–else logika</div>
+            <div class="mf1v4-logic-hd">Smjer nagiba iz fizikalnog odnosa</div>
             <div id="v4-logic-left" class="mf1v4-branch tone-blue">
                 <strong>IF f_x &lt; 0</strong>
                 <div>Rezultanta se naginje ulijevo pa lijevi rub tekućine raste, a desni pada.</div>
@@ -646,7 +465,7 @@ U Vježbi 3 slobodna se površina nagnula zbog translacijskog ubrzanja. Ovdje is
         const totalMag = Math.sqrt(totalX * totalX + totalY * totalY);
         const theta = Math.atan2(totalX, totalY);
 
-        document.getElementById('v4-angle-val').innerText = (theta * 180 / Math.PI).toFixed(1);
+        document.getElementById('v4-angle-val').innerText = Math.abs(theta * 180 / Math.PI).toFixed(1);
         document.getElementById('v4-total-x').innerText = totalX.toFixed(1);
         document.getElementById('v4-total-y').innerText = totalY.toFixed(1);
         document.getElementById('v4-total-mag').innerText = totalMag.toFixed(1);
@@ -670,7 +489,7 @@ U Vježbi 3 slobodna se površina nagnula zbog translacijskog ubrzanja. Ovdje is
             document.getElementById('v4-logic-flat').classList.add('mf1v4-on');
         }
 
-        document.getElementById('v4-explainer').innerText = `Račun uvijek ide istim redom: prvo zbrojiš gravitaciju i ubrzanje u efektivno polje sila (${totalX.toFixed(1)}, ${totalY.toFixed(1)}) m/s², a tek onda iz tog vektora čitaš nagib. Ovdje dobivaš kut ${(theta * 180 / Math.PI).toFixed(1)}°, pri čemu horizontalna komponenta bira stranu rasta, a vertikalna komponenta određuje koliko je sustav "težak".`;
+        document.getElementById('v4-explainer').innerText = `Uz konvenciju a_z pozitivno prema gore vrijedi f_z=g+a_z. Najprije dobivaš efektivno polje (${totalX.toFixed(1)}, ${totalY.toFixed(1)}) m/s², zatim magnitudu nagiba |θ|=${Math.abs(theta * 180 / Math.PI).toFixed(1)}°. Predznak f_x ne mijenja tu magnitudu, nego samo određuje raste li površina ulijevo ili udesno.`;
 
         draw(ax, az, g, theta, totalMag);
     }
@@ -842,7 +661,7 @@ Vertikalni cilindar rotira oko svoje osi. Potrebno je odrediti granični broj ok
         </div>
 
         <div class="mf1v4-logic">
-            <div class="mf1v4-logic-hd">If–else logika</div>
+            <div class="mf1v4-logic-hd">Odnos fizikalnih doprinosa</div>
             <div id="z34-logic-safe" class="mf1v4-branch tone-green">
                 <strong>IF z(R) &lt; H</strong>
                 <div>Rub je još ispod vrha spremnika pa sustav radi bez prelijevanja.</div>
@@ -1074,7 +893,7 @@ Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike
 
     <div class="mf1v4-cbar">
         <div class="mf1v4-slider">
-            <label>Ubrzanje a_z: <span id="z35-v-a" class="mf1v4-slider-value">5.0 m/s²</span></label>
+            <label>Ubrzanje a_z, + prema gore: <span id="z35-v-a" class="mf1v4-slider-value">5.0 m/s²</span></label>
             <input type="range" id="z35-a-slider" min="-9" max="20" value="5" style="accent-color:#2563eb;">
         </div>
         <div class="mf1v4-slider">
@@ -1082,10 +901,10 @@ Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike
             <input type="range" id="z35-n-slider" min="0" max="300" value="90" style="accent-color:#ef4444;">
         </div>
         <div id="z35-hero-card" class="mf1v4-hero">
-            <small>Dominantni mehanizam</small>
-            <strong id="z35-hero-title">porast po visini</strong>
-            <div class="mf1v4-hero-sub" id="z35-hero-sub">Δp_v je veći od radijalnog doprinosa</div>
-            <div class="mf1v4-hero-formula">p(r,z) = ρ(g+a)z + ρω²r²/2</div>
+            <small>Omjer doprinosa</small>
+            <strong id="z35-hero-title">χ = 0,00</strong>
+            <div class="mf1v4-hero-sub" id="z35-hero-sub">χ = Δp_r / Δp_v</div>
+            <div class="mf1v4-hero-formula">χ = Δp_r / Δp_v</div>
         </div>
     </div>
 
@@ -1101,18 +920,18 @@ Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike
         </div>
 
         <div class="mf1v4-logic">
-            <div class="mf1v4-logic-hd">If–else logika</div>
+            <div class="mf1v4-logic-hd">Odnos fizikalnih doprinosa</div>
             <div id="z35-logic-v" class="mf1v4-branch tone-blue">
-                <strong>IF Δp_v ≫ Δp_r</strong>
-                <div>Glavna promjena tlaka dolazi iz dubine, a radijalni dio je samo korekcija uz stijenu.</div>
+                <strong>χ &lt; 1</strong>
+                <div>Vertikalni doprinos Δp_v veći je od radijalnog doprinosa Δp_r.</div>
             </div>
             <div id="z35-logic-balance" class="mf1v4-branch tone-green">
-                <strong>IF Δp_v ≈ Δp_r</strong>
-                <div>Oba doprinosa su usporediva pa bez oba člana ne vidiš stvarnu raspodjelu tlaka.</div>
+                <strong>χ = 1</strong>
+                <div>Doprinosi su jednaki: Δp_r = Δp_v.</div>
             </div>
             <div id="z35-logic-r" class="mf1v4-branch tone-orange">
-                <strong>IF Δp_r &gt; Δp_v</strong>
-                <div>Rotacija dominira i najveća promjena tlaka događa se prema stijenci spremnika.</div>
+                <strong>χ &gt; 1</strong>
+                <div>Radijalni doprinos Δp_r veći je od vertikalnog doprinosa Δp_v.</div>
             </div>
         </div>
     </div>
@@ -1127,7 +946,7 @@ Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike
             const dpv = rho * (g + a) * H; const dpr = (rho * w*w * R*R) / 2;
             const hero = document.getElementById('z35-hero-card');
             const total = (dpv + dpr) / 1000;
-            const ratio = dpr / Math.max(dpv, 1);
+            const chi = dpr / dpv;
             document.getElementById('z35-v-a').innerText = `${a.toFixed(1)} m/s²`;
             document.getElementById('z35-v-n').innerText = `${n.toFixed(0)} o/min`;
             document.getElementById('z35-res-geff').innerText = (g + a).toFixed(1);
@@ -1139,24 +958,22 @@ Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike
                 document.getElementById(id).classList.remove('mf1v4-on');
             });
 
-            if (ratio < 0.65) {
+            document.getElementById('z35-hero-title').innerText = `χ = ${chi.toFixed(2)}`;
+            if (chi < 1) {
                 hero.className = 'mf1v4-hero';
-                document.getElementById('z35-hero-title').innerText = 'porast po visini';
-                document.getElementById('z35-hero-sub').innerText = `ukupni porast na kritičnoj točki je oko ${total.toFixed(1)} kPa`;
+                document.getElementById('z35-hero-sub').innerText = `Δp_v je ${ (1 / Math.max(chi, 1e-9)).toFixed(2)}× veći od Δp_r`;
                 document.getElementById('z35-logic-v').classList.add('mf1v4-on');
-            } else if (ratio > 1.35) {
+            } else if (chi > 1) {
                 hero.className = 'mf1v4-hero hero-orange';
-                document.getElementById('z35-hero-title').innerText = 'rotacija dominira';
-                document.getElementById('z35-hero-sub').innerText = `radijalni član je ${(ratio).toFixed(2)}× jači od vertikalnog`;
+                document.getElementById('z35-hero-sub').innerText = `Δp_r je ${chi.toFixed(2)}× veći od Δp_v`;
                 document.getElementById('z35-logic-r').classList.add('mf1v4-on');
             } else {
                 hero.className = 'mf1v4-hero hero-green';
-                document.getElementById('z35-hero-title').innerText = 'oba člana su bitna';
-                document.getElementById('z35-hero-sub').innerText = `na kritičnoj točki ukupno dobivaš oko ${total.toFixed(1)} kPa`;
+                document.getElementById('z35-hero-sub').innerText = 'Δp_r = Δp_v';
                 document.getElementById('z35-logic-balance').classList.add('mf1v4-on');
             }
 
-            document.getElementById('z35-explainer').innerText = `Pedagoška poanta ovog zadatka nije samo u formuli nego u rastavljanju problema: pri a_z = ${a.toFixed(1)} m/s² efektivna težina je ${(g + a).toFixed(1)} m/s² pa daje ${(dpv / 1000).toFixed(1)} kPa po visini, dok rotacija s ω = ${w.toFixed(1)} rad/s daje ${(dpr / 1000).toFixed(1)} kPa prema stijenci. Tek njihov zbroj daje stvarnu kartu tlaka.`;
+            document.getElementById('z35-explainer').innerText = `Uz konvenciju a_z pozitivno prema gore, g_eff = g+a_z = ${(g + a).toFixed(1)} m/s². Zato je Δp_v = ${(dpv / 1000).toFixed(1)} kPa, a pri ω = ${w.toFixed(1)} rad/s je Δp_r = ${(dpr / 1000).toFixed(1)} kPa. Omjer χ = ${chi.toFixed(2)} uspoređuje ih bez proizvoljnih pragova; ukupni porast na točki koja uključuje oba smjera iznosi ${total.toFixed(1)} kPa.`;
             draw(w, a, g, H, R, rho);
         }
         function draw(w, a, g, H, R, rho) {
@@ -1276,7 +1093,7 @@ Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba 
         </div>
 
         <div class="mf1v4-logic">
-            <div class="mf1v4-logic-hd">If–else logika</div>
+            <div class="mf1v4-logic-hd">Odnos fizikalnih doprinosa</div>
             <div id="p1-logic-gravity" class="mf1v4-branch tone-blue">
                 <strong>IF g sinα &gt; aₓ</strong>
                 <div>Projekcija težine niz kosinu nadvlada ubrzanje pa bočni član ostaje pozitivan.</div>
@@ -1445,7 +1262,7 @@ $$\rho_f (gh - \frac{\omega^2 R_1^2}{2}) = \rho_v (gh - \frac{\omega^2 R_2^2}{2}
         </div>
 
         <div class="mf1v4-logic">
-            <div class="mf1v4-logic-hd">If–else logika</div>
+            <div class="mf1v4-logic-hd">Odnos fizikalnih doprinosa</div>
             <div id="z36-logic-singular" class="mf1v4-branch tone-red">
                 <strong>IF lijevi član ≈ 0</strong>
                 <div>Model postaje vrlo osjetljiv i male promjene daju ogromnu promjenu procijenjene gustoće.</div>
@@ -1585,7 +1402,7 @@ Prstenasti cilindar rotira kutnom brzinom $\omega$. Odrediti uvjet za suho dno.
         </div>
 
         <div class="mf1v4-logic">
-            <div class="mf1v4-logic-hd">If–else logika</div>
+            <div class="mf1v4-logic-hd">Odnos fizikalnih doprinosa</div>
             <div id="p2-logic-wet" class="mf1v4-branch tone-green">
                 <strong>IF h_c &gt; 0</strong>
                 <div>Središte dna je još pokriveno pa je cijelo dno mokro.</div>
@@ -1744,7 +1561,7 @@ Kada je cilindrična posuda nagnuta u odnosu na vertikalu, relativno mirovanje j
         </div>
 
         <div class="mf1v4-logic">
-            <div class="mf1v4-logic-hd">If–else logika</div>
+            <div class="mf1v4-logic-hd">Odnos fizikalnih doprinosa</div>
             <div id="p3-logic-small" class="mf1v4-branch tone-orange">
                 <strong>IF α je malen</strong>
                 <div>Trebaš vrlo veliko translacijsko ubrzanje jer je tanα malen i sustav je teško ostvariti.</div>
@@ -1905,7 +1722,7 @@ Kada je cilindrična posuda nagnuta u odnosu na vertikalu, relativno mirovanje j
     <div class="mf1v4-bottom" style="margin-top:12px;">
         <div id="comp-explainer" class="mf1v4-note"></div>
         <div class="mf1v4-logic">
-            <div class="mf1v4-logic-hd">If–else logika</div>
+            <div class="mf1v4-logic-hd">Odnos fizikalnih doprinosa</div>
             <div id="comp-logic-rest" class="mf1v4-branch tone-green">
                 <strong>IF aₓ = 0 i ω = 0</strong>
                 <div>Ostaje obična hidrostatika i slobodna površina je ravna i vodoravna.</div>

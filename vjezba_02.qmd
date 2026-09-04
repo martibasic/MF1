@@ -1,25 +1,25 @@
 # Vježba 2 — Viskoznost i površinska napetost {.unnumbered}
 
-Ova vježba obrađuje pojam viskoznosti kao unutarnjeg trenja fluida te površinsku napetost. Naučit ćete primjenjivati Newtonov zakon viskoznosti na različite geometrije i razumjeti kapilarne pojave.
+U Vježbi 1 uvedena je relacija između gradijenta brzine i smičnog naprezanja. Ovdje je primjenjujemo na složenije geometrije te uvodimo površinske sile: kapilarnost i Young–Laplaceov tlak.
 
 ## Fizikalni uvod
 
 Viskoznost predstavlja otpor fluida prema gibanju, odnosno unutarnje trenje koje se javlja zbog međumolekularnih sila. Kada se fluid giba, slojevi fluida se opiru međusobnom klizanju, što rezultira smičnim naprezanjem. Newtonov zakon viskoznosti opisuje linearnu ovisnost naprezanja o gradijentu brzine.
 
-$$\tau = \mu \frac{dv}{dy}$$
+$$\tau=\mu\frac{du}{dy}$$
 
 Gdje je:
-- $\tau$ [Pa] – smično naprezanje
-- $\mu$ [Pa·s] – dinamička viskoznost
-- $dv/dy$ [1/s] – gradijent brzine (promjena brzine po visini sloja)
+- $\tau$ — smično naprezanje u $\mathrm{Pa}$
+- $\mu$ — dinamička viskoznost u $\mathrm{Pa\,s}$
+- $du/dy$ — gradijent brzine u $\mathrm{s^{-1}}$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <style>
 /* Vježba 02 — zajednički UI/UX standard, ograničen samo na interaktivne widgete. */
-[id^="widget-"] {
+.mf1-lab {
   max-width: 980px !important;
   margin: 1.75rem auto !important;
   padding: 1.5rem !important;
@@ -29,17 +29,17 @@ Gdje je:
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06) !important;
 }
 
-[id^="widget-"] :is(.widget-kicker, [class$="-kicker"]) {
+.mf1-lab :is(.widget-kicker, [class$="-kicker"]) {
   font-size: 0.84rem !important;
   letter-spacing: 0.06em !important;
 }
 
-[id^="widget-"] :is(.widget-subtitle, .widget-idea, [class$="-subtitle"]) {
+.mf1-lab :is(.widget-subtitle, .widget-idea, [class$="-subtitle"]) {
   font-size: 0.98rem !important;
   line-height: 1.55 !important;
 }
 
-[id^="widget-"] :is(.formula-chip, [class$="-note"]) {
+.mf1-lab :is(.formula-chip, [class$="-note"]) {
   min-width: 0 !important;
   padding: 0.8rem 1rem !important;
   background: #f8fafc !important;
@@ -50,37 +50,37 @@ Gdje je:
   line-height: 1.5 !important;
 }
 
-[id^="widget-"] :is(.formula-chip, [class$="-note"]) * {
+.mf1-lab :is(.formula-chip, [class$="-note"]) * {
   color: inherit !important;
 }
 
-[id^="widget-"] :is(.control-card label, [class$="-control"] label, [class$="-controls"] label) {
+.mf1-lab :is(.control-card label, [class$="-control"] label, [class$="-controls"] label) {
   font-size: 0.95rem !important;
   line-height: 1.4 !important;
 }
 
-[id^="widget-"] :is(.metric-label, [class$="-metric"] small) {
+.mf1-lab :is(.metric-label, [class$="-metric"] small) {
   font-size: 0.82rem !important;
   line-height: 1.35 !important;
 }
 
-[id^="widget-"] :is(.explain-text, [class$="-explainer"]) {
+.mf1-lab :is(.explain-text, [class$="-explainer"]) {
   font-size: 0.96rem !important;
   line-height: 1.58 !important;
 }
 
-[id^="widget-"] input[type="range"] {
+.mf1-lab input[type="range"] {
   min-height: 30px;
   cursor: pointer;
 }
 
-[id^="widget-"] button {
+.mf1-lab button {
   min-height: 42px;
   font-size: 0.95rem !important;
 }
 
-[id^="widget-"] canvas,
-[id^="widget-"] svg {
+.mf1-lab canvas,
+.mf1-lab svg {
   display: block;
   max-width: 100%;
   height: auto !important;
@@ -102,27 +102,24 @@ Gdje je:
 }
 
 @media (max-width: 700px) {
-  [id^="widget-"] {
+  .mf1-lab {
     margin: 1.25rem 0 !important;
     padding: 1rem !important;
     border-radius: 12px !important;
   }
 
-  [id^="widget-"] :is(.widget-title, [class$="-title"]) {
+  .mf1-lab :is(.widget-title, [class$="-title"]) {
     font-size: 1.18rem !important;
     line-height: 1.3 !important;
   }
 
-  [id^="widget-"] [style*="grid-template-columns: 1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
 }
 </style>
 ```
 
 ```{=html}
 <!-- WIDGET: Osnove viskoznosti (Newtonov zakon) -->
-<div class="widget-container" id="widget-visc-basics">
+<div class="widget-container mf1-lab" id="widget-visc-basics">
     <style>
         #widget-visc-basics {
             max-width: 980px;
@@ -275,7 +272,7 @@ Gdje je:
         <div>
             <div class="widget-kicker">Laboratorij viskoznosti</div>
             <h3 class="widget-title">Newtonov zakon kao lanac uzroka i posljedice</h3>
-            <p class="widget-subtitle">Gornja ploča zadaje brzinu, razmak među pločama određuje strminu profila, a viskoznost pretvara taj gradijent u smično naprezanje. Widget sada to prikazuje kao tri jasna koraka, ne samo kao animaciju čestica.</p>
+            <p class="widget-subtitle">Gornja ploča zadaje brzinu, razmak među pločama određuje strminu profila, a viskoznost pretvara taj gradijent u smično naprezanje. Strujanje čestica prikazuje relativnu brzinu pojedinog sloja.</p>
         </div>
         <div class="formula-chip">
             <div style="font-weight: 800; color: #93c5fd; margin-bottom: 4px;">Jednadžba uživo</div>
@@ -398,7 +395,7 @@ Gdje je:
 
             document.getElementById('visc-explainer').textContent = `Ako gornju ploču pomakneš na ${v.toFixed(1)} m/s kroz zračnost ${deltaMm.toFixed(0)} mm, gradijent brzine naraste na ${gradient.toFixed(0)} s⁻¹. Viskoznost μ = ${mu.toFixed(2)} Pa·s taj gradijent zatim pretvara u smično naprezanje od ${tau.toFixed(1)} Pa. Dakle, brzina i razmak određuju strminu profila, a viskoznost određuje koliko će taj profil "koštati" u naprezanju.`;
 
-            caption.innerHTML = `Lijevo vidiš slojeve fluida između ploča, desno njihov linearni profil brzine. Kada smanjiš <strong>δ</strong>, ista brzina mora se "prelomiti" na manjoj udaljenosti, pa <strong>dv/dy</strong> brzo raste.`;
+            caption.innerHTML = `Lijevo vidiš slojeve fluida između ploča, desno njihov linearni profil brzine. Čestice su tragači: njihove su brzine prikazane u relativnoj skali. Kada smanjiš <strong>δ</strong>, ista brzina mora se "prelomiti" na manjoj udaljenosti, pa <strong>dv/dy</strong> brzo raste.`;
 
             draw(v, mu, gapPx, gradient, tau);
         }
@@ -502,16 +499,20 @@ Gdje je:
             ctx.fillText('τ', stressBarX - 2, stressTop - 8);
             ctx.fillText(`${tau.toFixed(1)} Pa`, stressBarX - 38, stressTop + stressHeight + 18);
 
-            requestAnimationFrame(update);
+        }
+
+        function animate() {
+            update();
+            requestAnimationFrame(animate);
         }
 
         [vSl, muSl, hSl].forEach((slider) => slider.addEventListener('input', update));
-        update();
+        animate();
     })();
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Što je gornja ploča brža ili je razmak među pločama manji, to je gradijent brzine strmiji. Veća viskoznost zatim taj gradijent pretvara u veće smično naprezanje.
+Što je gornja ploča brža ili je razmak među pločama manji, to je gradijent brzine strmiji. Veća viskoznost zatim taj gradijent pretvara u veće smično naprezanje.
 </div>
 ```
 
@@ -537,12 +538,14 @@ Gdje je:
 
 U inženjerskoj praksi mnogi fluidi ne slijede linearni Newtonov zakon. Njihovo ponašanje opisuje se **Power-law modelom**:
 
-$$\tau = K \cdot \left( \frac{dv}{dy} \right)^n$$
+$$\tau = K_c\dot\gamma^n,\qquad \dot\gamma=\left|\frac{dv}{dy}\right|$$
 
 - $n = 1$: Newtonski fluid (voda, zrak, ulje)
 - $n < 1$: Pseudoplastični (shear-thinning) - npr. boja, krv, kečap
 - $n > 1$: Dilatantni (shear-thickening) - npr. mješavina škroba i vode
-- **Binghamova plastika**: Potreban je početni naprezanje $\tau_0$ da bi uopće potekli (npr. pasta za zube)
+- **Binghamova plastika**: Nakon praga tečenja vrijedi $	au=	au_0+mu_p\dot\gamma$ (npr. pasta za zube).
+
+Ovdje je $K_c$ indeks konzistencije; nije volumenski modul iz Vježbe 1.
 
 <hr class="zadatak-sep">
 
@@ -569,11 +572,11 @@ Ulje dinamičke viskoznosti $\mu$ ispunjava zračnost $\delta$. Potrebno je odre
 $$T = \int_a^{a+b} \frac{2\pi \mu \omega \tan^3\alpha}{\delta \cos\alpha} y^3 dy = \mathbf{\frac{\pi \mu \omega \tan^3\alpha}{2 \delta \cos\alpha} [(a+b)^4 - a^4]}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- GEOMETRIJSKI WIDGET ZA ZADATAK 10 -->
-<div class="widget-container" id="widget-z10-vfinal" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z10-vfinal" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z10-vfinal .z10-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z10-vfinal .z10-kicker { font-size:0.74rem; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; font-weight:800; margin-bottom:6px; }
@@ -834,16 +837,20 @@ $$T = \int_a^{a+b} \frac{2\pi \mu \omega \tan^3\alpha}{\delta \cos\alpha} y^3 dy
             ctxTop.font = 'bold 11px Inter';
             ctxTop.fillText('lokalni τ', barX - 10, barTop - 10);
 
-            requestAnimationFrame(update);
+        }
+
+        function animate() {
+            update();
+            requestAnimationFrame(animate);
         }
 
         [slA, slB, slAlpha, slY].forEach((slider) => slider.addEventListener('input', update));
-        update();
+        animate();
     })();
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Okretni moment ovisi o četvrtoj potenciji polumjera ($y \tan \alpha$), što znači da gornji širi dijelovi stošca doprinose momentu znatno više nego donji uži dijelovi.
+Okretni moment ovisi o četvrtoj potenciji polumjera ($y \tan \alpha$), što znači da gornji širi dijelovi stošca doprinose momentu znatno više nego donji uži dijelovi.
 </div>
 ```
 
@@ -872,11 +879,11 @@ Krnji stožac rotira konstantnom kutnom brzinom od $200 \, \text{rad/s}$ unutar 
 4. **Pad snage na 80 °C:** $P_{80} = P_{20} \cdot \frac{0,0078}{0,1} = \mathbf{21,9 \, \text{W}}$ (Smanjenje za 92,2%).
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- ZADATAK 11: Simulator rotacijskog trenja -->
-<div class="widget-container" id="widget-z11-v8" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z11-v8" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z11-v8 .z11-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z11-v8 .z11-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -1094,7 +1101,6 @@ Krnji stožac rotira konstantnom kutnom brzinom od $200 \, \text{rad/s}$ unutar 
             ctx.font = 'bold 12px Inter';
             ctx.fillText('P', gaugeX - 5, gaugeY + 6);
 
-            requestAnimationFrame(animate);
         }
 
         [wS, tS].forEach((slider) => slider.addEventListener('input', update));
@@ -1104,7 +1110,7 @@ Krnji stožac rotira konstantnom kutnom brzinom od $200 \, \text{rad/s}$ unutar 
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Viskoznost ulja dramatično pada s porastom temperature, što izravno smanjuje potrebnu snagu za rotaciju. Ovo je ključno u sustavima podmazivanja strojeva.
+Viskoznost ulja dramatično pada s porastom temperature, što izravno smanjuje potrebnu snagu za rotaciju. Ovo je ključno u sustavima podmazivanja strojeva.
 </div>
 ```
 
@@ -1130,11 +1136,11 @@ Pri temperaturi $60 \, \text{°C}$ površinska napetost žive iznosi $0,47 \, \t
 - **Živa:** $h_{Hg} = \frac{2 \cdot \sigma \cdot \cos \theta}{\rho \cdot g \cdot R} = \frac{2 \cdot 0,47 \cdot \cos 130^\circ}{13480 \cdot 9,81 \cdot 0,0003} = \mathbf{-15,2 \, \text{mm}}$ (kapilarna depresija)
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- ZADATAK 12: Usporedna kapilarnost -->
-<div class="widget-container" id="widget-z12-vdual-fixed" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z12-vdual-fixed" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z12-vdual-fixed .z12-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z12-vdual-fixed .z12-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -1308,7 +1314,6 @@ Pri temperaturi $60 \, \text{°C}$ površinska napetost žive iznosi $0,47 \, \t
             ctx.fillText('pozitivan član daje uspon', 90, 112);
             ctx.fillText('negativan član daje depresiju', 530, 112);
 
-            requestAnimationFrame(update);
         }
 
         rSl.addEventListener('input', update);
@@ -1317,7 +1322,7 @@ Pri temperaturi $60 \, \text{°C}$ površinska napetost žive iznosi $0,47 \, \t
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Voda se uspinje u kapilari zbog jače adhezije (privlačenje staklu), dok se živa spušta (depresija) zbog jače kohezije (privlačenje samoj sebi).
+Voda se uspinje u kapilari zbog jače adhezije (privlačenje staklu), dok se živa spušta (depresija) zbog jače kohezije (privlačenje samoj sebi).
 </div>
 ```
 
@@ -1341,12 +1346,14 @@ Kuglolika kap vode temperature $25 \, \text{°C}$ u dodiru sa zrakom ima promjer
 
 $$\Delta p = \frac{4\sigma}{D} \implies \sigma = \frac{\Delta p \cdot D}{4} = \frac{565 \cdot 0,0005}{4} = \mathbf{0,0706 \, \text{N/m}}$$
 
+Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\sigma/D$. Sapunasti mjehurić ima dvije površine i za njega bi pri istom promjeru faktor bio dvostruk. Granica modela je jasna: $D/2$ daje dvostruko veći $\Delta p$.
+
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- ZADATAK 13: Young-Laplace -->
-<div class="widget-container" id="widget-z13-advanced" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z13-advanced" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z13-advanced .z13-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z13-advanced .z13-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -1511,7 +1518,6 @@ $$\Delta p = \frac{4\sigma}{D} \implies \sigma = \frac{\Delta p \cdot D}{4} = \f
             ctx.fillStyle = '#e2e8f0';
             ctx.fillText(`promjer D`, cx - 26, 304);
 
-            requestAnimationFrame(update);
         }
 
         slD.addEventListener('input', update);
@@ -1521,7 +1527,7 @@ $$\Delta p = \frac{4\sigma}{D} \implies \sigma = \frac{\Delta p \cdot D}{4} = \f
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Što je promjer kapi manji, to je zakrivljenost veća, a površinska napetost "jače" stišće unutrašnjost, uzrokujući veći unutarnji nadtlak.
+Što je promjer kapi manji, to je zakrivljenost veća, a površinska napetost "jače" stišće unutrašnjost, uzrokujući veći unutarnji nadtlak.
 </div>
 ```
 
@@ -1546,11 +1552,11 @@ Staklena cijev uronjena je u živu kao što je prikazano na slici. Temperatura i
 $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cdot \pi \cdot (0,035 + 0,025) \cdot 0,642 = \mathbf{0,0623 \, \text{N}}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- ZADATAK 14: Sila na cijevi -->
-<div class="widget-container" id="widget-z14-advanced" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z14-advanced" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z14-advanced .z14-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z14-advanced .z14-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -1713,7 +1719,6 @@ $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cd
             ctx.font = 'bold 11px Inter';
             ctx.fillText('|cos θ|', barX - 12, barY - 10);
 
-            requestAnimationFrame(update);
         }
 
         slDo.addEventListener('input', update);
@@ -1723,7 +1728,7 @@ $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cd
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Sila površinske napetosti djeluje po cijelom perimetru dodira (unutarnjem i vanjskom bridu cijevi). Ukupna vertikalna komponenta ovisi o kosinusu kuta kvašenja.
+Sila površinske napetosti djeluje po cijelom perimetru dodira (unutarnjem i vanjskom bridu cijevi). Ukupna vertikalna komponenta ovisi o kosinusu kuta kvašenja.
 </div>
 ```
 
@@ -1747,15 +1752,17 @@ Potrebno je odrediti maksimalan promjer čelične i aluminijske kuglice koje mog
 
 $$D_{max} = \sqrt{\frac{6\sigma}{\rho g}}$$
 
+Ova procjena uzima maksimalnu vertikalnu komponentu površinske napetosti po obodu i zanemaruje mali uronjeni volumen na granici plutanja, pa je $F_U\approx0$. Potpuni dijagram sila bio bi $G=F_{\sigma,z}+F_U$; ako je uzgon važan, mora se računati iz stvarno uronjenog volumena, a ne iz promjera kuglice naslijepo.
+
 - **Čelik:** $D = \sqrt{\frac{6 \cdot 0,073}{7800 \cdot 9,81}} = \mathbf{2,4 \, \text{mm}}$
 - **Aluminij:** $D = \sqrt{\frac{6 \cdot 0,073}{2700 \cdot 9,81}} = \mathbf{4,1 \, \text{mm}}$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- ZADATAK 15: Plutajuća kuglica -->
-<div class="widget-container" id="widget-z15-vfinal" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z15-vfinal" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z15-vfinal .z15-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z15-vfinal .z15-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -1779,8 +1786,8 @@ $$D_{max} = \sqrt{\frac{6\sigma}{\rho g}}$$
     <div class="z15-head">
         <div>
             <div class="z15-kicker">Z15 laboratorij plutanja</div>
-            <h4 class="z15-title">Kuglica pluta samo dok je obodna sila površinske napetosti jača od težine</h4>
-            <p class="z15-sub">Ovaj zadatak je zapravo natjecanje dviju skala: težina raste s volumenom kuglice, a nosiva sila površinske napetosti samo s opsegom kontakta. Zato veće kuglice vrlo brzo izgube mogućnost plutanja.</p>
+            <h4 class="z15-title">Površinska napetost može nositi kuglicu kada nadvlada njezinu težinu</h4>
+            <p class="z15-sub">Ovo je idealizirana procjena s $F_U\approx0$: težina raste s volumenom kuglice, a maksimalna obodna sila površinske napetosti samo s opsegom kontakta. Zato veće kuglice vrlo brzo izgube mogućnost plutanja.</p>
         </div>
         <div class="z15-note">
             <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Ključni kontrast</div>
@@ -1922,7 +1929,6 @@ $$D_{max} = \sqrt{\frac{6\sigma}{\rho g}}$$
             ctx.fillText('Fg', barX + 2, barY - 10);
             ctx.fillText('Fσ', barX + 71, barY - 10);
 
-            requestAnimationFrame(update);
         }
 
         dS.addEventListener('input', update);
@@ -1932,7 +1938,7 @@ $$D_{max} = \sqrt{\frac{6\sigma}{\rho g}}$$
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Kuglica pluta iako je gušća od vode jer sila površinske napetosti (koja djeluje duž opsega) nadjačava njezinu težinu.
+Kuglica pluta iako je gušća od vode jer sila površinske napetosti (koja djeluje duž opsega) nadjačava njezinu težinu.
 </div>
 ```
 
@@ -1958,11 +1964,11 @@ Staklena cijev na slici koristi se za mjerenje pretlaka u spremniku vode $p_1$. 
 2. **Prava visina:** $H_o = 170 - 29 = \mathbf{141 \, \text{mm}}$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- ZADATAK 16: Vizualizacija kapilarne greške -->
-<div class="widget-container" id="widget-z16-advanced" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z16-advanced" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z16-advanced .z16-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z16-advanced .z16-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -2113,7 +2119,6 @@ Staklena cijev na slici koristi se za mjerenje pretlaka u spremniku vode $p_1$. 
             ctx.fillStyle = '#1d4ed8';
             ctx.fillText('greška', barX - 8, barY - 10);
 
-            requestAnimationFrame(update);
         }
 
         slDc.addEventListener('input', update);
@@ -2122,7 +2127,7 @@ Staklena cijev na slici koristi se za mjerenje pretlaka u spremniku vode $p_1$. 
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Pri mjerenju tlaka uskim cijevima (manometri), tekućina se uspinje više od stvarne razine. Tu grešku moramo oduzeti od očitanja kako bismo dobili pravi tlak.
+Pri mjerenju tlaka uskim cijevima (manometri), tekućina se uspinje više od stvarne razine. Tu grešku moramo oduzeti od očitanja kako bismo dobili pravi tlak.
 </div>
 ```
 
@@ -2167,11 +2172,11 @@ Voda sa otopljenim hranjivim tvarima prenosi se u gornje dijelove biljke pomoću
 $$h = \frac{2 \cdot 0,073 \cdot \cos 15^\circ}{998,2 \cdot 9,81 \cdot 0,0000025} = \mathbf{5,76 \, \text{m}}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- ZADATAK 18: Kapilarnost u ksilemu -->
-<div class="widget-container" id="widget-z18-advanced" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z18-advanced" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z18-advanced .z18-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z18-advanced .z18-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -2301,7 +2306,7 @@ $$h = \frac{2 \cdot 0,073 \cdot \cos 15^\circ}{998,2 \cdot 9,81 \cdot 0,0000025}
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Kapilarnost je dovoljna za podizanje vode u niskom bilju. Za visoka stabla (npr. sekvoje), priroda koristi dodatni mehanizam transpiracijskog vlaka.
+Kapilarnost je dovoljna za podizanje vode u niskom bilju. Za visoka stabla (npr. sekvoje), priroda koristi dodatni mehanizam transpiracijskog vlaka.
 </div>
 ```
 
@@ -2334,7 +2339,7 @@ $$\mathbf{\bar{\rho}_u = 0,911}$$
 
 ```{=html}
 <!-- ZADATAK 19: Napredna analiza višeslojnog statičkog tlaka -->
-<div class="widget-container" id="widget-z19-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z19-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z19-advanced .z19-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z19-advanced .z19-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -2530,10 +2535,16 @@ $$\mathbf{\bar{\rho}_u = 0,911}$$
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Hidrostatski tlak u višeslojnim sustavima računa se kao suma doprinosa svakog pojedinog sloja. Nagib linije na grafu p(z) direktno je proporcionalan gustoći fluida u tom sloju.
+Hidrostatski tlak u višeslojnim sustavima računa se kao suma doprinosa svakog pojedinog sloja. Nagib linije na grafu p(z) direktno je proporcionalan gustoći fluida u tom sloju.
 </div>
 
 ```
+
+::: {.mf1-bridge}
+#### Prijelaz prema statici fluida
+
+U završnim primjerima više ne pratimo gradijent brzine ni površinsku silu, nego promjenu tlaka s dubinom: $dp=\rho g\,dh$. U Vježbi 3 taj se postupak sustavno razvija za manometre i mirujuće fluide.
+:::
 
 <hr class="zadatak-sep">
 
@@ -2565,7 +2576,7 @@ $$h_{i3} = \frac{24000}{1020 \cdot 9,81} = \mathbf{2,4 \text{ m}}$$
 
 ```{=html}
 <!-- ZADATAK 20: Napredni simulator IV infuzije -->
-<div class="widget-container" id="widget-z20-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z20-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z20-advanced .z20-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z20-advanced .z20-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -2765,7 +2776,6 @@ $$h_{i3} = \frac{24000}{1020 \cdot 9,81} = \mathbf{2,4 \text{ m}}$$
 
         function animate() {
             update();
-            requestAnimationFrame(animate);
         }
 
         slH.addEventListener('input', update);
@@ -2775,7 +2785,7 @@ $$h_{i3} = \frac{24000}{1020 \cdot 9,81} = \mathbf{2,4 \text{ m}}$$
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Da bi infuzija tekla u venu, hidrostatski tlak stupca tekućine mora biti veći od krvnog tlaka u toj točki. U suprotnom, krv će krenuti prema gore u cjevčicu infuzije.
+Da bi infuzija tekla u venu, hidrostatski tlak stupca tekućine mora biti veći od krvnog tlaka u toj točki. U suprotnom, krv će krenuti prema gore u cjevčicu infuzije.
 </div>
 
 ```
@@ -2809,7 +2819,7 @@ $$\Delta p_{err} = 78443,2 - 78419,6 = 23,6 \text{ Pa} \approx \mathbf{0,03\%}$$
 
 ```{=html}
 <!-- ZADATAK 21: Vizualizacija utjecaja težine zraka -->
-<div class="widget-container" id="widget-z21-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z21-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z21-advanced .z21-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z21-advanced .z21-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -2977,7 +2987,7 @@ $$\Delta p_{err} = 78443,2 - 78419,6 = 23,6 \text{ Pa} \approx \mathbf{0,03\%}$$
     </script>
 </div>
 
-<div class="widget-container" id="widget-air-extremes" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #bfdbfe; background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(59, 130, 246, 0.08);">
+<div class="widget-container mf1-lab" id="widget-air-extremes" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #bfdbfe; background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(59, 130, 246, 0.08);">
     <style>
         #widget-air-extremes .air-head { text-align:center; margin-bottom:18px; }
         #widget-air-extremes .air-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
@@ -3049,7 +3059,7 @@ $$\Delta p_{err} = 78443,2 - 78419,6 = 23,6 \text{ Pa} \approx \mathbf{0,03\%}$$
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 U većini strojarskih proračuna težina zraka se zanemaruje jer je voda oko 830 puta gušća. Ipak, kod velikih visinskih razlika (rudnici, neboderi) ili visokih tlakova (spremnici pod tlakom), doprinos zraka postaje mjerljiv.
+U većini strojarskih proračuna težina zraka se zanemaruje jer je voda oko 830 puta gušća. Ipak, kod velikih visinskih razlika (rudnici, neboderi) ili visokih tlakova (spremnici pod tlakom), doprinos zraka postaje mjerljiv.
 </div>
 
 ```
@@ -3084,7 +3094,7 @@ $$p_1 = p_{m1} + p_{atm} = 58723 + 85600 = \mathbf{144,3 \text{ kPa}}$$
 
 ```{=html}
 <!-- ZADATAK 22: Napredna analiza manometra na visini -->
-<div class="widget-container" id="widget-z22-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="widget-container mf1-lab" id="widget-z22-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z22-advanced .z22-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z22-advanced .z22-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -3247,7 +3257,7 @@ $$p_1 = p_{m1} + p_{atm} = 58723 + 85600 = \mathbf{144,3 \text{ kPa}}$$
     </script>
 </div>
 <div class="fizikalni-uvid">
-💡 Barometarski (atmosferski) tlak opada s nadmorskom visinom. To znači da će manometar koji mjeri pretlak, pri istom apsolutnom tlaku u spremniku, pokazivati veći otklon na planini nego na razini mora.
+Barometarski (atmosferski) tlak opada s nadmorskom visinom. To znači da će manometar koji mjeri pretlak, pri istom apsolutnom tlaku u spremniku, pokazivati veći otklon na planini nego na razini mora.
 </div>
 
 ```

@@ -8,23 +8,33 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
 
 1.  **Fundamentalna jednadžba hidrostatike:**
     $$\nabla p = \rho \vec{f}$$
-    Za nestlačive fluide u polju gravitacije, integracija daje linearnu raspodjelu tlaka:
-    $$p = p_0 + \rho g h$$
+    Ako je $z$ geodetska visina, pozitivna prema gore, vrijedi $\frac{dp}{dz}=-\rho g$. Ovdje je $h$ **dubina mjerena prema dolje**, pa integracija daje
+    $$p = p_0 + \rho g h.$$
 
 2.  **Relativno mirovanje:** Kada se spremnik giba konstantnim ubrzanjem $\vec{a}$, fluid miruje relativno u odnosu na stijenke pod utjecajem efektivne gravitacije:
     $$\vec{g}_{eff} = \vec{g} - \vec{a}$$
     Slobodna površina tekućine postavlja se okomito na vektor $\vec{g}_{eff}$.
 
 3.  **Arhimedov zakon:** Svako tijelo uronjeno u tekućinu gubi na težini onoliko koliko iznosi težina istisnute tekućine:
-    $$F_u = \rho_{fluid} \cdot g \cdot V_{istisnut}$$
+    $$F_U=\rho_f gV_{ist}.$$
+
+    Sila uzgona prolazi kroz težište istisnutog volumena, odnosno centar uzgona.
+
+::: {.mf1-bridge}
+#### Pravilo manometra
+
+1. Odaberi točku poznatog tlaka i hodaj kroz stupce fluida.
+2. Prema dolje tlak raste za $\rho g\,\Delta h$, a prema gore se za isti doprinos smanjuje.
+3. Na istoj razini istog povezanog mirujućeg fluida tlak je jednak; na idealnom sučelju tlak je kontinuiran.
+:::
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <style>
 /* Vježba 03 — zajednički, lokalno ograničen standard za sve interaktivne blokove. */
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) {
+.mf1-lab {
   max-width: 980px !important;
   margin: 1.75rem auto !important;
   padding: 1.5rem !important;
@@ -34,12 +44,12 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06) !important;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) :is([class$="-kicker"], .v3-kicker) {
+.mf1-lab :is([class$="-kicker"], .v3-kicker) {
   font-size: 0.84rem !important;
   letter-spacing: 0.06em !important;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) :is([class$="-note"], .v3-note) {
+.mf1-lab :is([class$="-note"], .v3-note) {
   min-width: 0 !important;
   padding: 0.8rem 1rem !important;
   background: #f8fafc !important;
@@ -50,81 +60,54 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
   line-height: 1.5 !important;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) :is([class$="-note"], .v3-note) * {
+.mf1-lab :is([class$="-note"], .v3-note) * {
   color: inherit !important;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) :is([class$="-control"] label, [class$="-controls"] label, .v3-control label, label) {
+.mf1-lab :is([class$="-control"] label, [class$="-controls"] label, .v3-control label, label) {
   font-size: 0.95rem !important;
   line-height: 1.4 !important;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) :is([class$="-metric"] small, .v3-metric small, .v3-impact-card small) {
+.mf1-lab :is([class$="-metric"] small, .v3-metric small, .v3-impact-card small) {
   font-size: 0.82rem !important;
   line-height: 1.35 !important;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) :is([class$="-explainer"], .v3-explainer, p) {
+.mf1-lab :is([class$="-explainer"], .v3-explainer, p) {
   font-size: 0.96rem !important;
   line-height: 1.58 !important;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) :is([style*="font-size: 0."], [style*="font-size:0."]) {
-  font-size: 0.9rem !important;
-  line-height: 1.5 !important;
-}
-
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) input[type="range"] {
+.mf1-lab input[type="range"] {
   min-height: 30px;
   cursor: pointer;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) button {
+.mf1-lab button {
   min-height: 42px;
   font-size: 0.95rem !important;
 }
 
-:is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) :is(canvas, svg) {
+.mf1-lab :is(canvas, svg) {
   display: block;
   max-width: 100%;
   height: auto !important;
 }
 
-/* Dugi opisi pripadaju uz skicu, a ne preko nje. */
-#z-n5-widget [style*="position: absolute"],
-#z-n6-widget [style*="position: absolute"],
-#z-n7-widget [style*="position: absolute"],
-#z-n8-widget [style*="position: absolute"] {
-  position: static !important;
-  width: auto !important;
-  margin: 0.85rem 0 0 !important;
-  padding: 0.8rem 0.95rem !important;
-  background: #f8fafc !important;
-  border: 1px solid #d9e2ec !important;
-  border-radius: 10px !important;
-  color: #334155 !important;
-}
-
 @media (max-width: 700px) {
-  :is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) {
+  .mf1-lab {
     margin: 1.25rem 0 !important;
     padding: 1rem !important;
     border-radius: 12px !important;
   }
 
-  :is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) [style*="min-width"] {
-    min-width: 0 !important;
-  }
-
-  :is(#v3-intro-widget, [id^="widget-"], [id^="z-n"]) [style*="grid-template-columns: 1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
 }
 </style>
 ```
 
 ```{=html}
-<div id="v3-intro-widget" style="max-width: 980px; margin: 20px auto; padding: 22px; font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="v3-intro-widget" style="max-width: 980px; margin: 20px auto; padding: 22px; font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #v3-intro-widget .v3-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #v3-intro-widget .v3-kicker { font-size:0.82rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#475569; margin-bottom:6px; }
@@ -221,7 +204,6 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
     const impact2 = document.getElementById('v3-impact-2');
     const impact3 = document.getElementById('v3-impact-3');
     let currentTab = 'manometar';
-    let phase = 0;
 
     window.switchV3Tab = function(tab) {
         currentTab = tab;
@@ -307,7 +289,7 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
 
         ctx.strokeStyle = '#2563eb';
         ctx.beginPath();
-        ctx.moveTo(leftX, leftTop + Math.sin(phase) * 2);
+        ctx.moveTo(leftX, leftTop);
         ctx.lineTo(leftX, baseY);
         ctx.lineTo(385, baseY);
         ctx.stroke();
@@ -316,7 +298,7 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         ctx.beginPath();
         ctx.moveTo(385, baseY);
         ctx.lineTo(rightX, baseY);
-        ctx.lineTo(rightX, rightTop + Math.sin(phase + 0.8) * 2);
+        ctx.lineTo(rightX, rightTop);
         ctx.stroke();
 
         ctx.setLineDash([7, 6]);
@@ -371,8 +353,8 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         ctx.strokeRect(tankX, tankY, tankW, tankH);
         ctx.fillStyle = 'rgba(37,99,235,0.16)';
         ctx.beginPath();
-        ctx.moveTo(tankX, hMid + dy + Math.sin(phase) * 2);
-        ctx.lineTo(tankX + tankW, hMid - dy + Math.sin(phase + 0.5) * 2);
+        ctx.moveTo(tankX, hMid + dy);
+        ctx.lineTo(tankX + tankW, hMid - dy);
         ctx.lineTo(tankX + tankW, tankY + tankH);
         ctx.lineTo(tankX, tankY + tankH);
         ctx.closePath();
@@ -410,16 +392,9 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         }
     }
 
-    function animate() {
-        phase += 0.04;
-        update();
-        requestAnimationFrame(animate);
-    }
-
     rhoS.addEventListener('input', update);
     accS.addEventListener('input', update);
     window.switchV3Tab('manometar');
-    animate();
 })();
 </script>
 ```
@@ -463,29 +438,24 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
         font-weight: 600;
     }
 
-    div[id$="-widget"] input[type="range"],
-    #v3-intro-widget input[type="range"] {
+    .mf1-lab input[type="range"] {
         cursor: ew-resize;
     }
 
-    #v3-intro-widget label,
-    div[id$="-widget"] label {
+    .mf1-lab label {
         font-size: 0.95rem;
         line-height: 1.38;
     }
 
-    #v3-intro-widget [class*="metric"] small,
-    div[id$="-widget"] [class*="metric"] small {
+    .mf1-lab [class*="metric"] small {
         font-size: 0.78rem;
     }
 
-    #v3-intro-widget [class*="metric"] strong,
-    div[id$="-widget"] [class*="metric"] strong {
+    .mf1-lab [class*="metric"] strong {
         font-size: 1.28rem;
     }
 
-    #v3-intro-widget [class*="explainer"],
-    div[id$="-widget"] [class*="explainer"] {
+    .mf1-lab [class*="explainer"] {
         font-size: 0.94rem;
         line-height: 1.58;
     }
@@ -672,9 +642,9 @@ Statika fluida proučava fluide u stanju mirovanja. Budući da fluidi u mirovanj
     }
 
     function init() {
-        const widgets = Array.from(document.querySelectorAll('#v3-intro-widget, div[id$="-widget"]'));
+        const widgets = Array.from(document.querySelectorAll('.mf1-lab'));
         widgets.forEach(setupWidget);
-        const canvases = Array.from(document.querySelectorAll('#v3-intro-widget canvas, div[id$="-widget"] canvas'));
+        const canvases = Array.from(document.querySelectorAll('.mf1-lab canvas'));
         canvases.forEach((canvas) => window.mf1EnhanceCanvasReadability(canvas, { minFontPx: 16, minLineWidth: 1.6, drawLabelBg: true }));
     }
 
@@ -729,10 +699,10 @@ $$h_2 = \frac{p_{pm} + \rho_v g h_1 - \rho_u g h_3}{\rho_{Hg} g}$$
 $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{13600 \cdot 9,81} = \mathbf{0,469 \, \text{m}}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="widget-z24-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z24-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
 <style>
     #widget-z24-advanced .z24-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
     #widget-z24-advanced .z24-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -1031,13 +1001,11 @@ $$h_2 = \frac{65000 + 1000 \cdot 9,81 \cdot 0,3 - 720 \cdot 9,81 \cdot 0,75}{136
 </div>
 
 <div class="fizikalni-uvid">
-💡 Ravnoteža se postiže kada stupac žive ($h_2$) balansira tlak plina, težinu vode i suprotni uzgon stupca ulja ($h_3$).
+Ravnoteža se postiže kada stupac žive ($h_2$) balansira tlak plina, težinu vode i suprotni uzgon stupca ulja ($h_3$).
 </div>
 ```
 
 <hr class="zadatak-sep">
-
-<hr class='zadatak-sep'>
 
 ### Zadatak Z25 — Ravnoteža klipa i tlak u komorama {.unnumbered}
 
@@ -1064,11 +1032,13 @@ $$p_A^* = p_c^* + \rho_v g h_1 = 353,6 + 1000 \cdot 9,81 \cdot 0,25 = \mathbf{28
 3. **Pretlak u komori B:**
 $$p_B^* = p_c^* - \rho_v g (h_2 - h_1) = 353,6 - 1000 \cdot 9,81 \cdot (0,5 - 0,25) = \mathbf{-2099 \, \text{Pa}}$$
 
+Težina klipa najprije određuje samo lokalni pretlak neposredno pod klipom $p_c^*$. Tlakove u komorama A i B potom dobivamo zasebnim hidrostatskim hodom prema njihovim visinama; negativan rezultat za B ovdje je manometarski, ne apsolutni tlak.
+
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="widget-z25-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z25-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z25-advanced .z25-head, #widget-z26-advanced .z26-head, #widget-z27-advanced .z27-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z25-advanced .z25-kicker, #widget-z26-advanced .z26-kicker, #widget-z27-advanced .z27-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -1283,13 +1253,11 @@ $$p_B^* = p_c^* - \rho_v g (h_2 - h_1) = 353,6 - 1000 \cdot 9,81 \cdot (0,5 - 0,
 </div>
 
 <div class="fizikalni-uvid">
-💡 Klip stvara bazni pretlak $p_c = G_k/A_k$. Zbog visinske razlike $h_1$ i $h_2$, tlak u komori A je veći, dok u B može nastupiti vakuum.
+Klip stvara bazni pretlak $p_c = G_k/A_k$. Zbog visinske razlike $h_1$ i $h_2$, tlak u komori A je veći, dok u B može nastupiti vakuum.
 </div>
 ```
 
 <hr class="zadatak-sep">
-
-<hr class='zadatak-sep'>
 
 ### Zadatak Z30 — Areometar {.unnumbered}
 
@@ -1316,7 +1284,7 @@ $$\rho_? = \rho_v \cdot \frac{h_1}{h_1 - h_2}$$
 $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}$$
 
 ```{=html}
-<div id="widget-z30-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z30-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <div class="z30-head">
         <div>
             <div class="z30-kicker">Z30 laboratorij areometra</div>
@@ -1506,8 +1474,6 @@ $$\rho_? = 1000 \cdot \frac{0,1}{0,1 - 0,005} = \mathbf{1052,6 \, \text{kg/m}^3}
 
 <hr class="zadatak-sep">
 
-<hr class='zadatak-sep'>
-
 ### Zadatak Z31 — Ubrzanje spremnika - Orijentacija {.unnumbered}
 
 Spremnik pravokutnog presjeka visine 80 cm, tlocrtnih dimenzija 2 m x 0,6 m, napunjen je vodom. Potrebno ga je transportirati vozilom koje jednoliko ubrzava od stanja mirovanja do brzine od 90 km/h u vremenu od 10 s. Potrebno je odrediti dopuštenu inicijalnu visinu vode u spremniku pri kojoj neće doći do prelijevanja. Također, odredite koja je orijentacija spremnika naspram smjera vožnje povoljnija.
@@ -1542,10 +1508,10 @@ $$h_{vmax} = 0,8 - \frac{0,6}{2} \cdot 0,2548 = \mathbf{0,724 \, \text{m}}$$
 **Zaključak:** Povoljnije je transportirati spremnik tako da je kraća stranica paralelna sa smjerom vožnje jer dopušta veći nivo punjenja.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="widget-z31-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z31-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z31-advanced .z31-head, #widget-z32-advanced .z32-head, #widget-z33-advanced .z33-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z31-advanced .z31-kicker, #widget-z32-advanced .z32-kicker, #widget-z33-advanced .z33-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -1778,13 +1744,11 @@ $$h_{vmax} = 0,8 - \frac{0,6}{2} \cdot 0,2548 = \mathbf{0,724 \, \text{m}}$$
 </div>
 
 <div class="fizikalni-uvid">
-💡 Nagib površine zavisi samo o ubrzanju, ali "podizanje" vode na rubovima direktno ovisi o duljini spremnika u smjeru kretanja. Okretanje spremnika kraćom stranom u smjeru vožnje dramatično smanjuje rizik od prelijevanja.
+Nagib površine zavisi samo o ubrzanju, ali "podizanje" vode na rubovima direktno ovisi o duljini spremnika u smjeru kretanja. Okretanje spremnika kraćom stranom u smjeru vožnje dramatično smanjuje rizik od prelijevanja.
 </div>
 ```
 
 <hr class="zadatak-sep">
-
-<hr class='zadatak-sep'>
 
 ### Zadatak Z32 — Otvoreni ubrzani spremnik: tlak na dnu {.unnumbered}
 
@@ -1814,7 +1778,7 @@ $$p_{dmax} = \rho \cdot g \cdot h_{max} = 1000 \cdot 9,81 \cdot 1,734 = \mathbf{
 $$p_{dmin} = \rho \cdot g \cdot h_{min} = 1000 \cdot 9,81 \cdot 0,266 = \mathbf{2,6 \, \text{kPa}}$$
 
 ```{=html}
-<div id="widget-z32-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z32-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <div class="z32-head">
         <div>
             <div class="z32-kicker">Z32 laboratorij tlaka na dnu</div>
@@ -1994,8 +1958,6 @@ $$p_{dmin} = \rho \cdot g \cdot h_{min} = 1000 \cdot 9,81 \cdot 0,266 = \mathbf{
 
 <hr class="zadatak-sep">
 
-<hr class='zadatak-sep'>
-
 ### Zadatak Z33 — Cisterna mlijeka: tlak u zatvorenom spremniku {.unnumbered}
 
 Mlijeko gustoće $1020 \, \text{kg/m}^3$ transportira se pravocrtno cestom konstantnog nagiba unutar spremnika cisterne promjera 3 m, duljine 7 m. Spremnik je potpuno ispunjen mlijekom, pri čemu cisterna konstantno ubrzava intenzitetom $2,5 \, \text{m/s}^2$. Ukoliko minimalan tlak u spremniku iznosi 100 kPa, odredite maksimalan pretlak u spremniku te mjesto na kojemu se pojavljuje.
@@ -2022,10 +1984,10 @@ Maksimalan pretlak (uz atmosferski tlak 101,3 kPa):
 $$p_{pmax} = p_{max} - p_{atm} = 147,7 - 101,3 = \mathbf{46,4 \, \text{kPa}}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="widget-z33-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z33-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <div class="z33-head">
         <div>
             <div class="z33-kicker">Z33 laboratorij zatvorene cisterne</div>
@@ -2220,6 +2182,8 @@ $$p_{pmax} = p_{max} - p_{atm} = 147,7 - 101,3 = \mathbf{46,4 \, \text{kPa}}$$
     </script>
 </div>
 
+```
+
 ## Napredni interaktivni koncepti statike fluida
 
 ### N1: Stabilnost plovnih tijela (Metacentar)
@@ -2227,7 +2191,7 @@ $$p_{pmax} = p_{max} - p_{atm} = 147,7 - 101,3 = \mathbf{46,4 \, \text{kPa}}$$
 Kada se plovno tijelo nagne, centar uzgona ($B$) pomiče se u smjeru nagiba. Sjecište okomice kroz novi centar uzgona i osi simetrije naziva se **metacentar ($M$)**. Ako je $M$ iznad težišta ($G$), tijelo je stabilno i stvara se moment ispravljanja. U protivnom, tijelo se prevrće.
 
 ```{=html}
-<div id="z-n1-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+<div class="mf1-lab" id="z-n1-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;">N1: Metacentarska visina i stabilnost broda</h4>
     <div style="display: flex; gap: 25px; flex-wrap: wrap;">
         <div style="flex: 1.5; min-width: 350px;">
@@ -2338,7 +2302,7 @@ Kada se plovno tijelo nagne, centar uzgona ($B$) pomiče se u smjeru nagiba. Sje
 Pritisak na tekućinu u zatvorenoj posudi prenosi se nesmanjen u sve dijelove tekućine. Ovaj widget pokazuje kako pritisak na jedan klip ravnomjerno podiže razinu u spojenim posudama različitih oblika.
 
 ```{=html}
-<div id="z-n2-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+<div class="mf1-lab" id="z-n2-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;">N2: Hidrostatski paradoks i prijenos tlaka</h4>
     <div style="display: flex; gap: 25px; flex-wrap: wrap;">
         <div style="flex: 1.5; min-width: 350px;">
@@ -2421,7 +2385,7 @@ Pritisak na tekućinu u zatvorenoj posudi prenosi se nesmanjen u sve dijelove te
 Hidrostatski tlak raste linearno s dubinom, što rezultira trokutastom raspodjelom tlaka. Ukupna sila djeluje u točki koja se naziva **centar tlaka**, a nalazi se na $2/3$ dubine od površine (odnosno $h/3$ od dna).
 
 ```{=html}
-<div id="z-n3-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+<div class="mf1-lab" id="z-n3-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;">N3: Raspodjela tlaka na vertikalnu branu</h4>
     <div style="display: flex; gap: 25px; flex-wrap: wrap;">
         <div style="flex: 1.5; min-width: 350px;">
@@ -2502,15 +2466,15 @@ Hidrostatski tlak raste linearno s dubinom, što rezultira trokutastom raspodjel
 Ubrzani spremnici iz prethodnih zadataka prikazuju **stacionarno** stanje. Međutim, kada se kamion naglo zaustavi ili krene, tekućina oscilira prije nego se smiri.
 
 ```{=html}
-<div id="z-n4-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+<div class="mf1-lab" id="z-n4-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;">N4: Osciliranje tekućine pri nagloj promjeni ubrzanja</h4>
     <div style="display: flex; gap: 25px; flex-wrap: wrap;">
         <div style="flex: 1.5; min-width: 350px;">
             <canvas id="n4-canvas" width="450" height="200" style="width: 100%; background: #f8fafc; border-radius: 12px; border: 1px solid #edf2f7;"></canvas>
         </div>
         <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; justify-content: center; gap: 15px;">
-            <button id="n4-start" style="padding: 15px; background: #ebf8ff; border: 2px solid #3182ce; color: #2b6cb0; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s;">▶️ Gurni spremnik (Ubrzaj)</button>
-            <button id="n4-stop" style="padding: 15px; background: #fff5f5; border: 2px solid #e53e3e; color: #c53030; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s;">🛑 Naglo kočenje!</button>
+            <button id="n4-start" style="padding: 15px; background: #ebf8ff; border: 2px solid #3182ce; color: #2b6cb0; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s;">Gurni spremnik (Ubrzaj)</button>
+            <button id="n4-stop" style="padding: 15px; background: #fff5f5; border: 2px solid #e53e3e; color: #c53030; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s;">Naglo kočenje!</button>
             <div style="padding: 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; font-size:0.82rem; color:#334155;">
                 Trenutni nagib: <strong id="n4-angle">0.0</strong>°<br>
                 Režim: <strong id="n4-mode">miruje</strong>
@@ -2526,8 +2490,9 @@ Ubrzani spremnici iz prethodnih zadataka prikazuju **stacionarno** stanje. Među
     let targetAngle = 0;
     let currentAngle = 0;
     let velocity = 0;
+    let animationFrame = null;
 
-    function loop() {
+    function tick() {
         const spring = 0.04;
         const damping = 0.94;
 
@@ -2538,7 +2503,20 @@ Ubrzani spremnici iz prethodnih zadataka prikazuju **stacionarno** stanje. Među
         document.getElementById('n4-angle').innerText = (currentAngle * 180 / Math.PI).toFixed(1);
 
         draw(currentAngle);
-        requestAnimationFrame(loop);
+        if (Math.abs(targetAngle - currentAngle) > 0.0005 || Math.abs(velocity) > 0.0005) {
+            animationFrame = requestAnimationFrame(tick);
+        } else {
+            currentAngle = targetAngle;
+            velocity = 0;
+            draw(currentAngle);
+            animationFrame = null;
+        }
+    }
+
+    function animateToTarget() {
+        if (animationFrame === null) {
+            animationFrame = requestAnimationFrame(tick);
+        }
     }
 
     function draw(angle) {
@@ -2561,10 +2539,10 @@ Ubrzani spremnici iz prethodnih zadataka prikazuju **stacionarno** stanje. Među
         ctx.beginPath(); ctx.moveTo(ox, oy-70-dh); ctx.lineTo(ox+w, oy-70+dh); ctx.stroke();
     }
 
-    startBtn.onclick = () => { targetAngle = Math.atan(4/9.81); velocity += 0.05; document.getElementById('n4-mode').innerText = 'ubrzavanje'; };
-    stopBtn.onclick = () => { targetAngle = 0; velocity = -0.2; document.getElementById('n4-mode').innerText = 'kočenje'; };
+    startBtn.onclick = () => { targetAngle = Math.atan(4/9.81); velocity += 0.05; document.getElementById('n4-mode').innerText = 'ubrzavanje'; animateToTarget(); };
+    stopBtn.onclick = () => { targetAngle = 0; velocity = -0.2; document.getElementById('n4-mode').innerText = 'kočenje'; animateToTarget(); };
 
-    loop();
+    draw(currentAngle);
 })();
 </script>
 
@@ -2575,7 +2553,7 @@ Ubrzani spremnici iz prethodnih zadataka prikazuju **stacionarno** stanje. Među
 Atmosferski zrak je stlačiv plin. Za razliku od nestlačivih kapljevina kod kojih tlak raste linearno, kod plinova u izotermnim uvjetima gustoća raste proporcionalno tlaku, što rezultira **eksponencijalnim** padom tlaka s visinom.
 
 ```{=html}
-<div id="z-n5-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+<div class="mf1-lab" id="z-n5-widget" style="max-width: 850px; margin: 20px auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 16px; padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 700;">N5: Tlak zraka s visinom (Altimetar)</h4>
     <div style="display: flex; gap: 25px; flex-wrap: wrap;">
         <div style="flex: 1.5; min-width: 350px; position: relative;">
@@ -2663,12 +2641,12 @@ Hidrostatski tlak raste s dubinom ($p = \rho g h$). To znači da donja polovica 
 
 ```{=html}
 <!-- WIDGET N6: G vs CP na kružnom segmentu -->
-<div id="z-n6-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📐 Analiza hvatišta: Težište (G) vs. Centar tlaka (CP)</h4>
+<div class="mf1-lab" id="z-n6-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">Analiza hvatišta: Težište (G) vs. Centar tlaka (CP)</h4>
 
     <div style="display: flex; gap: 30px; flex-wrap: wrap;">
         <!-- Vizualizacija -->
-        <div style="flex: 1.8; min-width: 400px; position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
+        <div style="flex: 1.8; min-width: min(400px, 100%); position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 400px;">
             <canvas id="n6-canvas" width="500" height="400" style="width: 100%; height: 100%;"></canvas>
 
             <div style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid #cbd5e0;">
@@ -2821,12 +2799,12 @@ Ukupna rezultantna sila sustava djeluje u točki koja se određuje pomoću **Var
 
 ```{=html}
 <!-- WIDGET N7: Kompozitna brana G vs CP -->
-<div id="z-n7-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">📐 Analiza dionica: Sile na kompozitnoj brani</h4>
+<div class="mf1-lab" id="z-n7-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+    <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">Analiza dionica: Sile na kompozitnoj brani</h4>
 
     <div style="display: flex; gap: 30px; flex-wrap: wrap;">
         <!-- Vizualizacija -->
-        <div style="flex: 1.8; min-width: 400px; position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
+        <div style="flex: 1.8; min-width: min(400px, 100%); position: relative; background: #f8fafc; border-radius: 15px; border: 1px solid #edf2f7; overflow: hidden; height: 450px;">
             <canvas id="n7-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
 
             <div style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid #cbd5e0; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
@@ -2871,7 +2849,7 @@ Ukupna rezultantna sila sustava djeluje u točki koja se određuje pomoću **Var
             <p style="font-size: 0.75rem; color: #718096; line-height: 1.5; font-style: italic;">
 <div class="fizikalni-uvid">
 <div class="fizikalni-uvid">
-💡 <b>Inženjerski uvid:</b> Ukupno hvatište cijele brane nalazi se između CP₁ i CP₂, bliže onom dijelu koji trpi veću silu (obično donji dio zbog većeg tlaka). </p> </div> </div> </div> </div>
+<b>Inženjerski uvid:</b> Ukupno hvatište cijele brane nalazi se između CP₁ i CP₂, bliže onom dijelu koji trpi veću silu (obično donji dio zbog većeg tlaka). </p> </div> </div> </div> </div>
 </div>
 
 <script>
@@ -2990,12 +2968,12 @@ Gdje je površina odsječka $A = R^2 \cos^{-1}\left(\frac{R-h}{R}\right) - (R-h)
 
 ```{=html}
 <!-- WIDGET N8: Fizikalno točan uzgon na cilindar -->
-<div id="z-n8-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+<div class="mf1-lab" id="z-n8-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 20px; padding: 30px; background: #ffffff; box-shadow: 0 15px 45px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
     <h4 style="text-align: center; color: #1a202c; margin-top: 0; margin-bottom: 25px; font-weight: 800;">🧪 Laboratorij: Arhimedov uzgon na valjku</h4>
 
     <div style="display: flex; gap: 30px; flex-wrap: wrap;">
         <!-- Lijeva strana: Vizualizacija -->
-        <div style="flex: 1.8; min-width: 400px; position: relative; background: #f0f9ff; border-radius: 15px; border: 1px solid #bee3f8; overflow: hidden; height: 400px;">
+        <div style="flex: 1.8; min-width: min(400px, 100%); position: relative; background: #f0f9ff; border-radius: 15px; border: 1px solid #bee3f8; overflow: hidden; height: 400px;">
             <canvas id="n8-canvas" width="500" height="400" style="width: 100%; height: 100%;"></canvas>
 
             <div style="position: absolute; bottom: 15px; left: 15px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; font-size: 0.75rem; border: 1px solid #3182ce;">
@@ -3030,7 +3008,7 @@ Gdje je površina odsječka $A = R^2 \cos^{-1}\left(\frac{R-h}{R}\right) - (R-h)
             <p style="font-size: 0.75rem; color: #718096; line-height: 1.5; font-style: italic;">
 <div class="fizikalni-uvid">
 <div class="fizikalni-uvid">
-💡 <b>Fizika:</b> Sila uzgona ne raste linearno s dubinom urona jer je poprečni presjek valjka varijabilan. Najbrže raste kada je uronjen do polovice (najveća širina). </p> </div> </div> </div> </div>
+<b>Fizika:</b> Sila uzgona ne raste linearno s dubinom urona jer je poprečni presjek valjka varijabilan. Najbrže raste kada je uronjen do polovice (najveća širina). </p> </div> </div> </div> </div>
 </div>
 
 <script>
@@ -3184,10 +3162,10 @@ $$\Delta p_{gr} = 3402 - 3394 = 8 \, \text{Pa}$$
 $$\Delta p_{gr} = \frac{8}{3402} \cdot 100 = \mathbf{0,2\%}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="widget-z23-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z23-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
 <style>
     #widget-z23-advanced .z23-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
     #widget-z23-advanced .z23-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -3416,13 +3394,11 @@ $$\Delta p_{gr} = \frac{8}{3402} \cdot 100 = \mathbf{0,2\%}$$
 </div>
 
 <div class="fizikalni-uvid">
-💡 Diferencijalni manometri koriste promjene tlaka kroz stupce različitih fluida. Gustoća zraka je toliko mala naspram gustoće tekućina da se njezin utjecaj na ukupnu razliku tlaka često može zanemariti.
+Diferencijalni manometri koriste promjene tlaka kroz stupce različitih fluida. Gustoća zraka je toliko mala naspram gustoće tekućina da se njezin utjecaj na ukupnu razliku tlaka često može zanemariti.
 </div>
 ```
 
 <hr class="zadatak-sep">
-
-<hr class='zadatak-sep'>
 
 ### Dodatni primjer Z26 — Nagnuti živin manometar {.unnumbered}
 
@@ -3455,10 +3431,10 @@ Iz geometrije zadanih cijevi:
 $$\sin\alpha = \frac{2h}{a} = \frac{2 \cdot 0,075}{0,268} = 0,56 \implies \alpha = \text{arcsin } 0,56 = \mathbf{34^\circ}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="widget-z26-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z26-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <div class="z26-head">
         <div>
             <div class="z26-kicker">Z26 laboratorij osjetljivosti</div>
@@ -3581,13 +3557,11 @@ $$\sin\alpha = \frac{2h}{a} = \frac{2 \cdot 0,075}{0,268} = 0,56 \implies \alpha
 </div>
 
 <div class="fizikalni-uvid">
-💡 Nagnute cijevi povećavaju osjetljivost manometra jer se mala promjena visine ($h$) očituje kao veći pomak duž cijevi ($L$).
+Nagnute cijevi povećavaju osjetljivost manometra jer se mala promjena visine ($h$) očituje kao veći pomak duž cijevi ($L$).
 </div>
 ```
 
 <hr class="zadatak-sep">
-
-<hr class='zadatak-sep'>
 
 ### Dodatni primjer Z27 — Više-fluidni spremnik i U-cijev {.unnumbered}
 
@@ -3612,10 +3586,10 @@ $$p_A^* = g \cdot \rho_v (\bar{\rho}_u \cdot h_u + \bar{\rho}_v \cdot h_v - \bar
 $$h_{Hg} = \frac{p_A^*}{\rho_{Hg} \cdot g} = \frac{470}{13600 \cdot 9,81} = \mathbf{3,53 \, \text{mm}}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="widget-z27-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z27-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <div class="z27-head">
         <div>
             <div class="z27-kicker">Z27 laboratorij ekvivalencije</div>
@@ -3732,13 +3706,11 @@ $$h_{Hg} = \frac{p_A^*}{\rho_{Hg} \cdot g} = \frac{470}{13600 \cdot 9,81} = \mat
 </div>
 
 <div class="fizikalni-uvid">
-💡 Ekvivalentni stupac žive pokazuje koliku bi visinu stupca žive zauzeo tlak koji stvara mješavina drugih fluida. Budući da je živa izrazito gusta, ta visina je obično vrlo mala.
+Ekvivalentni stupac žive pokazuje koliku bi visinu stupca žive zauzeo tlak koji stvara mješavina drugih fluida. Budući da je živa izrazito gusta, ta visina je obično vrlo mala.
 </div>
 ```
 
 <hr class="zadatak-sep">
-
-<hr class='zadatak-sep'>
 
 ### Dodatni primjer Z28 — Solarna jezera (nelinearna gustoća) {.unnumbered}
 
@@ -3766,10 +3738,10 @@ $$p_2 = p_1 + \int_0^h \rho(z) g dz$$
 $$p_2 = p_1 + \rho_0 \cdot g \cdot \frac{4h}{\pi} \cdot \ln(1 + \sqrt{2}) = \mathbf{54 \, \text{kPa}}$$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="widget-z28-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z28-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <style>
         #widget-z28-advanced .z28-head, #widget-z29-advanced .z29-head, #widget-z30-advanced .z30-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
         #widget-z28-advanced .z28-kicker, #widget-z29-advanced .z29-kicker, #widget-z30-advanced .z30-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
@@ -3962,8 +3934,6 @@ $$p_2 = p_1 + \rho_0 \cdot g \cdot \frac{4h}{\pi} \cdot \ln(1 + \sqrt{2}) = \mat
 
 <hr class="zadatak-sep">
 
-<hr class='zadatak-sep'>
-
 ### Dodatni primjer Z29 — Naftovod, spremnik zraka i manometar {.unnumbered}
 
 Naftovod i spremnik zraka volumena $1,3 \, \text{m}^3$ povezani su međusobno manometrom na način kao što je prikazano na slici. Ukoliko spremnik sadrži 15 kg zraka temperature 80°C, potrebno je odrediti apsolutan tlak u naftovodu, kao i promjenu razlike visina $\Delta h_{Hg2}$ koja će nastupiti kada se temperatura u spremniku zraka smanji na 20°C. Pretpostaviti konstantan tlak u naftovodu, volumen zraka u manometru zanemariti zbog relativno niskog udjela naspram volumena spremnika.
@@ -3990,7 +3960,7 @@ Promjena visine stupca žive uslijed hlađenja zraka na 20°C:
 $$\Delta h_{Hg2} = \mathbf{-1,23 \, \text{m}}$$
 
 ```{=html}
-<div id="widget-z29-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
+<div class="mf1-lab" id="widget-z29-advanced" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #dbe7f3; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
     <div class="z29-head">
         <div>
             <div class="z29-kicker">Z29 laboratorij toplinskog pada</div>

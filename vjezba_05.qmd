@@ -7,20 +7,20 @@ Razumijevanje hidrostatske sile na uronjene plohe temelj je projektiranja brana,
 1.  **Stevinov zakon:** U mirujućem fluidu, tlak raste linearno s dubinom prema izrazu $p(z) = p_a + \rho \cdot g \cdot z$. U većini inženjerskih problema koristimo relativni tlak (zanemarujući atmosferski $p_a$), pa smatramo da tlak na slobodnoj površini iznosi nula.
 2.  **Veličina sile ($F$):** Ukupna hidrostatska sila na ravnu plohu jednaka je umnošku tlaka u njezinu težištu ($p_T$) i ukupne površine plohe ($A$):
     $$F = p_T \cdot A = (\rho \cdot g \cdot z_T) \cdot A$$
-    Važno je zapamtiti da ova relacija vrijedi bez obzira na oblik ili nagib plohe.
-3.  **Hvatište sile ($z_F$):** Budući da tlak nije uniforman već raste s dubinom, "tijelo tlaka" je asimetrično (u obliku trapeza ili klina). Zbog toga rezultantna sila ne djeluje u težištu plohe ($z_T$), već uvijek na dubini **$z_F > z_T$**. Razmak između ove dvije točke izravno ovisi o geometriji plohe.
-4.  **Drugi moment površine ($I_G$):** To je geometrijska mjera raspodjele površine oko centroidalne osi paralelne slobodnoj površini. Veća raspodjela površine po dubini pojačava nejednolikost tlaka i pomiče centar pritiska dalje od težišta. (U literaturi se često naziva geometrijskim momentom tromosti.)
+    Za relativni tlak ta relacija vrijedi bez obzira na oblik ili nagib plohe. Jednoliki atmosferski tlak smije se izostaviti samo kada jednako djeluje na obje relevantne strane; inače dodaje $p_0A$ i vlastiti moment.
+3.  **Hvatište sile ($z_F$):** Ako se dubina mijenja po plohi, tlak nije uniforman pa se centar pritiska nalazi dublje od težišta površine. Za horizontalnu plohu na jednoj dubini tlak je uniforman i vrijedi **$z_F=z_T$**.
+4.  **Drugi moment površine ($I_G$):** To je geometrijska mjera raspodjele površine oko centroidalne osi paralelne slobodnoj površini. Veća raspodjela površine po dubini pojačava nejednolikost tlaka i pomiče centar pritiska dalje od težišta.
 5.  **Nagnute plohe:** Kod nagnutih ploha (pod kutom $\alpha$), proračune obično provodimo u koordinatnom sustavu $y$ koji prati ravninu plohe. Veza između vertikalne dubine $z$ i položaja na plohi $y$ je $z = y \cdot \sin\alpha$.
 
 Ovaj interaktivni istraživač omogućuje vam da vizualizirate kako promjena dubine i dimenzija plohe utječe na transformaciju profila tlaka i pomak hvatišta sile.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <style>
 /* Vježba 05 — lokalni standard za čitljivost i responzivnost interaktivnih laboratorija. */
-div[id^="v5-"][style*="max-width"] {
+.mf1-lab {
   margin: 1.75rem auto !important;
   padding: 1.5rem !important;
   background: #ffffff !important;
@@ -30,32 +30,27 @@ div[id^="v5-"][style*="max-width"] {
   color: #334155 !important;
 }
 
-div[id^="v5-"][style*="max-width"] h4 {
+.mf1-lab h4 {
   font-size: 1.3rem !important;
   line-height: 1.3 !important;
 }
 
-div[id^="v5-"][style*="max-width"] :is(label, p) {
+.mf1-lab :is(label, p) {
   font-size: 0.96rem !important;
   line-height: 1.55 !important;
 }
 
-div[id^="v5-"][style*="max-width"] :is([style*="font-size: 0."], [style*="font-size:0."]) {
-  font-size: 0.9rem !important;
-  line-height: 1.5 !important;
-}
-
-div[id^="v5-"][style*="max-width"] input[type="range"] {
+.mf1-lab input[type="range"] {
   min-height: 30px;
   cursor: pointer;
 }
 
-div[id^="v5-"][style*="max-width"] button {
+.mf1-lab button {
   min-height: 42px;
   font-size: 0.95rem !important;
 }
 
-div[id^="v5-"][style*="max-width"] canvas {
+.mf1-lab canvas {
   display: block;
   max-width: 100%;
   height: auto !important;
@@ -78,16 +73,6 @@ div[id^="v5-"][style*="max-width"] canvas {
 .v5-diagram-key .centroid { background: #3b82f6; }
 .v5-diagram-key .resultant { background: #ef4444; }
 
-/* U tri uvodna primjera skica je važnija od paralelnog dashboarda. */
-:is(#v5-principle-explorer, #v5-lab-v5, #v5-z41-container) > div[style*="display: grid"] {
-  grid-template-columns: minmax(0, 1fr) !important;
-}
-
-:is(#v5-principle-explorer, #v5-lab-v5, #v5-z41-container) > div[style*="display: grid"] > div:first-child {
-  height: auto !important;
-  padding: 1rem !important;
-}
-
 #v5-principle-canvas,
 #v5-z41-canvas {
   width: 100% !important;
@@ -103,18 +88,60 @@ div[id^="v5-"][style*="max-width"] canvas {
   margin: 0 auto;
 }
 
-/* Legende i objašnjenja ne smiju zaklanjati fizikalnu scenu. */
-:is(#v5-lab-v5, #v5-patm-analyzer, #v5-gate-premium, #v5-z38-container,
-    #v5-z39-container, #v5-integration-premium, #v5-multi-master-container)
-    [style*="position: absolute"] {
-  position: static !important;
-  width: auto !important;
-  margin: 0.85rem 0 0 !important;
-  padding: 0.8rem 0.95rem !important;
-  background: #f8fafc !important;
-  border: 1px solid #d9e2ec !important;
-  border-radius: 10px !important;
-  color: #334155 !important;
+/* Glavne scene V5 čitaju se prije svih kontrola: velika skica, zatim rezultati. */
+.v5-scene-first {
+  display: block !important;
+}
+
+.v5-scene-first > .v5-scene-stack,
+.v5-scene-first > .v5-controls-panel {
+  width: min(100%, 1040px);
+  margin-inline: auto;
+}
+
+.v5-scene-first > .v5-scene-stack {
+  margin-bottom: 1.35rem;
+}
+
+.v5-scene {
+  position: relative;
+  width: 100%;
+  height: auto !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.v5-scene--450x400 { aspect-ratio: 9 / 8; }
+.v5-scene--600x550 { aspect-ratio: 12 / 11; }
+.v5-scene--500x450 { aspect-ratio: 10 / 9; }
+.v5-scene--500x400 { aspect-ratio: 5 / 4; }
+
+.v5-scene canvas {
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  height: 100% !important;
+  margin: 0 !important;
+}
+
+.v5-scene-stack > .v5-diagram-key {
+  margin: 0.8rem 0 0;
+}
+
+@media (min-width: 1000px) {
+  #v5-principle-explorer,
+  #v5-lab-v5,
+  #v5-z41-container,
+  #v5-patm-analyzer,
+  #v5-gate-premium,
+  #v5-z43-container,
+  #v5-integration-premium,
+  #v5-z48-container {
+    width: min(1050px, calc(100vw - 270px)) !important;
+    max-width: none !important;
+  }
 }
 
 @media (max-width: 700px) {
@@ -129,26 +156,34 @@ div[id^="v5-"][style*="max-width"] canvas {
     max-width: 100% !important;
   }
 
-  div[id^="v5-"][style*="max-width"] {
+  .mf1-lab {
     margin: 1.25rem 0 !important;
     padding: 1rem !important;
     border-radius: 12px !important;
   }
 
-  div[id^="v5-"][style*="max-width"] [style*="min-width"] {
-    min-width: 0 !important;
-  }
-
-  div[id^="v5-"][style*="max-width"] [style*="grid-template-columns: 1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
 }
 </style>
 ```
 
 ```{=html}
+<script>
+window.MF1V5 = window.MF1V5 || {};
+window.MF1V5.prepareCanvas = function(canvas, context, logicalWidth, logicalHeight) {
+  const box = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const pixelWidth = Math.max(1, Math.round(box.width * dpr));
+  const pixelHeight = Math.max(1, Math.round(box.height * dpr));
+  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+    canvas.width = pixelWidth;
+    canvas.height = pixelHeight;
+  }
+  context.setTransform(pixelWidth / logicalWidth, 0, 0, pixelHeight / logicalHeight, 0, 0);
+};
+</script>
+
 <!-- WIDGET: PRINCIPLE EXPLORER -->
-<div id="v5-principle-explorer" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+<div class="mf1-lab" id="v5-principle-explorer" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
     <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 20px;">
         <div>
             <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 6px;">V5 istraživač principa</div>
@@ -161,12 +196,14 @@ div[id^="v5-"][style*="max-width"] canvas {
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 35px;">
-        <div style="background: #ffffff; border-radius: 20px; padding: 10px; border: 1px solid #e2e8f0; height: 420px; position: relative;">
-            <canvas id="v5-principle-canvas" width="450" height="400" style="width: 100%; height: 100%;"></canvas>
+    <div class="v5-scene-first">
+        <div class="v5-scene-stack">
+        <div class="v5-scene v5-scene--450x400" style="background: #ffffff; border: 1px solid #e2e8f0;">
+            <canvas id="v5-principle-canvas" width="450" height="400" aria-label="Vertikalna uronjena ploha s raspodjelom tlaka, težištem i centrom pritiska"></canvas>
+        </div>
             <div class="v5-diagram-key" aria-label="Legenda skice"><span><i class="pressure"></i>lokalni tlak</span><span><i class="centroid"></i>težište T</span><span><i class="resultant"></i>rezultanta F_R u C_P</span></div>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
                 <label style="display: block; font-weight: 700; color: #334155; font-size: 0.85rem; margin-bottom: 10px;">DUBINA VRHA (a)</label>
                 <input type="range" id="v5-p-a-slider" min="0" max="4" step="0.1" value="1" style="width: 100%;">
@@ -241,14 +278,15 @@ div[id^="v5-"][style*="max-width"] canvas {
         draw(a, h, b, rho, zT, zF, pT, force);
     }
     function draw(a, h, b, rho, zT, zF, pT, force) {
+        window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
         ctx.clearRect(0, 0, 450, 400); const scale = 55; const offX = 172; const offY = 48;
         ctx.fillStyle = '#f0f9ff'; ctx.fillRect(18, offY, 414, 278);
         ctx.setLineDash([5, 5]); ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(20, offY); ctx.lineTo(430, offY); ctx.stroke(); ctx.setLineDash([]);
         ctx.fillStyle = '#0369a1'; ctx.font = '700 13px Inter'; ctx.fillText('slobodna površina', 22, offY - 10);
         const tY = offY + a * scale; const bY = tY + h * scale;
-        // Duljina profila prati p = rho g z; skala je grafička, ali nije normalizirana po gustoći.
-        const pressureScale = 22 * (rho / 1000);
+        // Duljina profila prati p = ρgz; skala je relativna i ostavlja prostor za oznake pri krajnjim vrijednostima.
+        const pressureScale = Math.min(22 * (rho / 1000), 115 / Math.max(a + h, 0.1));
         const pTop = a * pressureScale; const pBot = (a + h) * pressureScale;
         ctx.fillStyle = 'rgba(56, 189, 248, 0.18)'; ctx.beginPath(); ctx.moveTo(offX + 10, tY); ctx.lineTo(offX+pTop+10, tY); ctx.lineTo(offX+pBot+10, bY); ctx.lineTo(offX+10, bY); ctx.fill();
         for(let i=0; i<=h; i+=0.4) {
@@ -269,7 +307,7 @@ div[id^="v5-"][style*="max-width"] canvas {
         ctx.strokeStyle = "#f87171"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(offX - 70, fyPos); ctx.lineTo(offX, fyPos); ctx.stroke();
         ctx.fillStyle = "#f87171"; ctx.beginPath(); ctx.arc(offX, fyPos, 6, 0, 7); ctx.fill();
         ctx.fillText('C_P · centar pritiska', offX + 18, fyPos + 20);
-        drawArrow(ctx, offX - 126, fyPos, offX - 14, fyPos, "#ef4444", 4);
+        drawArrow(ctx, offX + 14, fyPos, offX - 112, fyPos, "#ef4444", 4);
         ctx.fillStyle = '#dc2626'; ctx.font = '700 14px Inter'; ctx.fillText('F_R', offX - 122, fyPos - 10);
         ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(34, offY); ctx.lineTo(34, tyPos); ctx.stroke();
         drawArrow(ctx, 34, offY, 34, tyPos, '#475569', 1.5); ctx.fillStyle = '#334155'; ctx.fillText('z_T', 42, (offY + tyPos) / 2);
@@ -286,14 +324,16 @@ div[id^="v5-"][style*="max-width"] canvas {
         ctx.beginPath(); ctx.moveTo(x2, y2);
         ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5)); ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5)); ctx.fillStyle = color; ctx.fill();
     }
-    aS.oninput = update; hS.oninput = update; bS.oninput = update; rhoS.oninput = update; update();
+    aS.oninput = update; hS.oninput = update; bS.oninput = update; rhoS.oninput = update;
+    window.addEventListener('resize', update);
+    update();
 })();
 </script>
 ```
 
 ## 2. Matematički model i kriterij primjene
 
-Za ravnu plohu račun ide u dva koraka: prvo određujemo ukupnu silu preko tlaka u težištu plohe, a zatim položaj hvatišta preko geometrije plohe i njezina momenta tromosti.
+Za ravnu plohu račun ide u dva koraka: prvo određujemo ukupnu silu preko tlaka u težištu plohe, a zatim položaj hvatišta preko geometrije plohe i njezina drugog momenta površine.
 
 $$F = p_T \cdot A = (\rho \cdot g \cdot z_T) \cdot A$$
 $$z_F = z_T + \frac{I_{x0}}{z_T \cdot A} \cdot \sin^2(\alpha)$$
@@ -309,7 +349,7 @@ $$z_F = z_T + \frac{I_{x0}}{z_T \cdot A} \cdot \sin^2(\alpha)$$
         <ul>
             <li>Uvijek uvrsti <strong>vertikalnu dubinu težišta</strong> $z_T$, čak i kada je ploha nagnuta.</li>
             <li>Član $\sin^2(\alpha)$ ulazi samo u korekciju za položaj hvatišta, ne u samu definiciju ukupne sile ako je $z_T$ već izražen kao vertikalna dubina.</li>
-            <li>Moment tromosti uzimaj oko osi koja prolazi kroz težište plohe i paralelna je slobodnoj površini.</li>
+            <li>Drugi moment površine uzimaj oko osi koja prolazi kroz težište plohe i paralelna je slobodnoj površini.</li>
         </ul>
     </div>
     <div class="mf1-warning">
@@ -326,14 +366,14 @@ $$z_F = z_T + \frac{I_{x0}}{z_T \cdot A} \cdot \sin^2(\alpha)$$
 Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon konceptualnog istraživača. Koristi ga za povezivanje geometrije plohe, položaja centra tlaka i dekompozicije rezultantne sile na komponente $F_x$ i $F_z$. Svi vektori polaze iz **Centra tlaka ($z_F$)** na samom tijelu.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- DIGITALNI LABORATORIJ 5.0 -->
-<div id="v5-lab-v5" style="max-width: 1000px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 32px; padding: 40px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; box-shadow: 0 30px 70px rgba(0,0,0,0.1);">
+<div class="mf1-lab" id="v5-lab-v5" style="max-width: 1000px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 32px; padding: 40px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; box-shadow: 0 30px 70px rgba(0,0,0,0.1);">
     <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 22px;">
         <div>
-            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 6px;">Digitalni laboratorij</div>
+            <div style="font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 6px;">Parametarski prikaz</div>
             <h4 style="margin: 0; color: #0f172a; font-size: 1.42rem;">Geometrija plohe, dubina težišta i raspad rezultante u jednom prikazu</h4>
             <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 640px;">Ovdje više nije dovoljno vidjeti samo crvene i zelene vektore. Cilj je pratiti kako odabrani oblik daje <strong>površinu A</strong>, zatim <strong>položaj težišta y<sub>T</sub></strong>, potom <strong>vertikalnu dubinu z<sub>T</sub></strong>, pa iz toga nastaju <strong>F</strong>, <strong>F<sub>x</sub></strong>, <strong>F<sub>z</sub></strong> i dublje hvatište <strong>z<sub>F</sub></strong>.</p>
         </div>
@@ -343,19 +383,21 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
-        <div style="background: #ffffff; border-radius: 24px; padding: 15px; border: 1px solid #e2e8f0; height: 550px; position: relative; overflow: hidden;">
-            <canvas id="v5-v5-canvas" width="600" height="550" style="width: 100%; height: 100%; border-radius: 12px;"></canvas>
+    <div class="v5-scene-first">
+        <div class="v5-scene-stack">
+        <div class="v5-scene v5-scene--600x550" style="background: #ffffff; border: 1px solid #e2e8f0;">
+            <canvas id="v5-v5-canvas" width="600" height="550" aria-label="Nagnuta uronjena ploha s težištem, centrom pritiska, rezultantom i komponentama sile"></canvas>
+        </div>
             <div class="v5-diagram-key" aria-label="Legenda vektora"><span><i class="pressure"></i>slobodna površina</span><span><i class="resultant"></i>F_R iz C_P</span><span><i class="centroid"></i>F_H i F_V</span></div>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;">
                 <span style="display: block; font-weight: 800; color: #1e293b; font-size: 0.75rem; margin-bottom: 15px; text-transform: uppercase;">Geometrija plohe</span>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                    <button class="v5-v5-btn active" data-shape="rect" onclick="v5_setShape('rect')">Pravokutnik</button>
-                    <button class="v5-v5-btn" data-shape="tri" onclick="v5_setShape('tri')">Trokut</button>
-                    <button class="v5-v5-btn" data-shape="circle" onclick="v5_setShape('circle')">Krug</button>
-                    <button class="v5-v5-btn" data-shape="semi" onclick="v5_setShape('semi')">Polukrug</button>
+                <div class="v5-shape-options">
+                    <button class="v5-v5-btn active" data-shape="rect" aria-pressed="true" onclick="v5_setShape('rect')">Pravokutnik</button>
+                    <button class="v5-v5-btn" data-shape="tri" aria-pressed="false" onclick="v5_setShape('tri')">Trokut</button>
+                    <button class="v5-v5-btn" data-shape="circle" aria-pressed="false" onclick="v5_setShape('circle')">Krug</button>
+                    <button class="v5-v5-btn" data-shape="semi" aria-pressed="false" onclick="v5_setShape('semi')">Polukrug</button>
                 </div>
             </div>
             <div style="background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 20px;">
@@ -374,46 +416,46 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
                     <input type="range" id="v5-v5-z-slider" min="0.1" max="4" step="0.1" value="1.0" style="width: 100%;">
                 </div>
             </div>
-            <div style="background: #0f172a; padding: 30px; border-radius: 24px; color: white;">
+            <div class="v5-results-panel" style="background:#ffffff; padding:30px; border:1px solid #cbd5e1; border-radius:24px; color:#17324d;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                    <span style="color: #94a3b8; font-size: 0.85rem;">AKTIVNI OBLIK</span>
-                    <span id="v5-v5-shape-name" style="font-family: monospace; font-weight: 800; color: #c4b5fd;">Pravokutnik</span>
+                    <span style="color:#475569; font-size:0.85rem;">AKTIVNI OBLIK</span>
+                    <span id="v5-v5-shape-name" style="font-family:monospace; font-weight:800; color:#0c5874;">Pravokutnik</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #94a3b8; font-size: 0.85rem;">REZULTANTA F_R</span>
-                    <span id="v5-v5-out-f" style="font-family: monospace; font-weight: 900; font-size: 1.4rem; color: #f87171;">0.0 kN</span>
+                    <span style="color:#475569; font-size:0.85rem;">REZULTANTA F_R</span>
+                    <span id="v5-v5-out-f" style="font-family:monospace; font-weight:900; font-size:1.4rem; color:#b91c1c;">0.0 kN</span>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div style="background: #1e293b; padding: 12px; border-radius: 12px;">
-                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">F_H · horizontalno</span>
-                        <span id="v5-v5-out-fx" style="font-family: monospace; font-weight: 700; color: #60a5fa;">0.0 kN</span>
+                    <div style="background:#f8fafc; padding:12px; border:1px solid #e2e8f0; border-radius:12px;">
+                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">F_H · horizontalno</span>
+                        <span id="v5-v5-out-fx" style="font-family:monospace; font-weight:700; color:#0b7898;">0.0 kN</span>
                     </div>
-                    <div style="background: #1e293b; padding: 12px; border-radius: 12px;">
-                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">F_V · vertikalno</span>
-                        <span id="v5-v5-out-fz" style="font-family: monospace; font-weight: 700; color: #10b981;">0.0 kN</span>
+                    <div style="background:#f8fafc; padding:12px; border:1px solid #e2e8f0; border-radius:12px;">
+                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">F_V · vertikalno</span>
+                        <span id="v5-v5-out-fz" style="font-family:monospace; font-weight:700; color:#198754;">0.0 kN</span>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
-                    <div style="background: #1e293b; padding: 12px; border-radius: 12px;">
-                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">yₜ po plohi</span>
-                        <span id="v5-v5-out-yt" style="font-family: monospace; font-weight: 700; color: #e2e8f0;">0.00 m</span>
+                    <div style="background:#f8fafc; padding:12px; border:1px solid #e2e8f0; border-radius:12px;">
+                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">yₜ po plohi</span>
+                        <span id="v5-v5-out-yt" style="font-family:monospace; font-weight:700; color:#17324d;">0.00 m</span>
                     </div>
-                    <div style="background: #1e293b; padding: 12px; border-radius: 12px;">
-                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">y_F po plohi</span>
-                        <span id="v5-v5-out-yf" style="font-family: monospace; font-weight: 700; color: #fca5a5;">0.00 m</span>
+                    <div style="background:#f8fafc; padding:12px; border:1px solid #e2e8f0; border-radius:12px;">
+                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">y_F po plohi</span>
+                        <span id="v5-v5-out-yf" style="font-family:monospace; font-weight:700; color:#b91c1c;">0.00 m</span>
                     </div>
-                    <div style="background: #1e293b; padding: 12px; border-radius: 12px;">
-                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">zₜ = yₜ sin α</span>
-                        <span id="v5-v5-out-zt" style="font-family: monospace; font-weight: 700; color: #60a5fa;">0.00 m</span>
+                    <div style="background:#f8fafc; padding:12px; border:1px solid #e2e8f0; border-radius:12px;">
+                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">zₜ = yₜ sin α</span>
+                        <span id="v5-v5-out-zt" style="font-family:monospace; font-weight:700; color:#0b7898;">0.00 m</span>
                     </div>
-                    <div style="background: #1e293b; padding: 12px; border-radius: 12px;">
-                        <span style="color: #94a3b8; font-size: 0.65rem; display: block; margin-bottom: 4px;">z_F = y_F sin α</span>
-                        <span id="v5-v5-out-zf" style="font-family: monospace; font-weight: 700; color: #f87171;">0.00 m</span>
+                    <div style="background:#f8fafc; padding:12px; border:1px solid #e2e8f0; border-radius:12px;">
+                        <span style="color:#475569; font-size:0.8rem; display:block; margin-bottom:4px;">z_F = y_F sin α</span>
+                        <span id="v5-v5-out-zf" style="font-family:monospace; font-weight:700; color:#b91c1c;">0.00 m</span>
                     </div>
                 </div>
-                <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #94a3b8; font-size: 0.8rem;">Pomak hvatišta Δz</span>
-                    <span id="v5-v5-out-dz" style="font-family: monospace; font-weight: 800; color: #fbbf24;">0.00 m</span>
+                <div style="margin-top:14px; padding-top:12px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#475569; font-size:0.8rem;">Pomak hvatišta Δz</span>
+                    <span id="v5-v5-out-dz" style="font-family:monospace; font-weight:800; color:#9a6e08;">0.00 m</span>
                 </div>
             </div>
             <div style="padding: 14px 16px; background: #fff7ed; border: 1px solid #fdba74; border-radius: 16px; color: #7c2d12;">
@@ -424,8 +466,10 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
     </div>
 </div>
 <style>
-    .v5-v5-btn { padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 12px; background: white; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+    .v5-shape-options { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; }
+    .v5-v5-btn { min-height:42px; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 12px; background: white; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
     .v5-v5-btn.active { background: #3b82f6; color: white; border-color: #2563eb; }
+    @media (max-width: 800px) { .v5-shape-options { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
 </style>
 <script>
 (function() {
@@ -442,7 +486,11 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
     };
     window.v5_setShape = function(s) {
         curShape = s;
-        document.querySelectorAll('.v5-v5-btn').forEach(b => b.classList.toggle('active', b.dataset.shape === s));
+        document.querySelectorAll('.v5-v5-btn').forEach(b => {
+            const active = b.dataset.shape === s;
+            b.classList.toggle('active', active);
+            b.setAttribute('aria-pressed', String(active));
+        });
         update();
     };
     function update() {
@@ -468,6 +516,7 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
         draw(alpha, a, meta, yT, yF, zT, zF);
     }
     function draw(alpha, a, meta, yT, yF, zT, zF) {
+        window.MF1V5.prepareCanvas(canvas, ctx, 600, 550);
         ctx.clearRect(0, 0, 600, 550); const originX = 150; const originY = 80; const scale = 50; 
         ctx.fillStyle = '#f0f9ff'; ctx.fillRect(0, originY, 600, 470);
         ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, originY); ctx.lineTo(600, originY); ctx.stroke();
@@ -510,7 +559,9 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
         ctx.fillStyle = '#dc2626'; ctx.fillText(`z_F = ${zF.toFixed(2)} m`, 18, 512);
         ctx.restore();
     }
-    aS.oninput = update; zS.oninput = update; update();
+    aS.oninput = update; zS.oninput = update;
+    window.addEventListener('resize', update);
+    update();
 })();
 </script>
 ```
@@ -519,7 +570,7 @@ Ovaj laboratorij je namjerno zadržan kao jedini dodatni uvodni widget nakon kon
 
 ## 4. Referentna tablica: Geometrijska svojstva ploha
 
-| Oblik | Površina ($A$) | Težište ($z_T$ od baze/vrha) | Moment tromosti ($I_{x0}$) |
+| Oblik | Površina ($A$) | Težište ($z_T$ od baze/vrha) | Drugi moment površine ($I_{x0}$) |
 | :--- | :--- | :--- | :--- |
 | **Pravokutnik** | $b \cdot h$ | $h/2$ | $b \cdot h^3 / 12$ |
 | **Trokut** (baza b, visina h) | $b \cdot h / 2$ | $h/3$ (od baze) | $b \cdot h^3 / 36$ |
@@ -547,23 +598,25 @@ Pravokutna zaklopka visine 3 m, širine 6 m ovješena je gornjom stranicom na mj
 Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u proračunu može ispustiti utjecaj okolnog tlaka. Rezultirajuća sila na zaklopku tada je jednaka hidrostatskoj sili.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- WIDGET: Z41 RECTANGULAR GATE HINGED AT A -->
-<div id="v5-z41-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
+<div id="v5-z41-container" class="mf1-widget mf1-lab" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
     <div style="background: linear-gradient(135deg, #475569 0%, #1e293b 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
-        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 41: Zaklopka u točki A</h4>
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">Zadatak 41: Zaklopka u točki A</h4>
         <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">Ravnoteža momenata</div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 35px;">
-        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 450px; overflow: hidden;">
-            <canvas id="v5-z41-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+    <div class="v5-scene-first">
+        <div class="v5-scene-stack">
+        <div class="v5-scene v5-scene--500x450" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+            <canvas id="v5-z41-canvas" width="500" height="450" aria-label="Vertikalna zaklopka sa zglobom A, raspodjelom tlaka, težištem i centrom pritiska"></canvas>
+        </div>
             <div class="v5-diagram-key" aria-label="Legenda zaklopke"><span><i class="pressure"></i>raspodjela tlaka</span><span><i class="centroid"></i>težište T</span><span><i class="resultant"></i>F_H u C_P</span></div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f1f5f9; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px;">
                 <div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
@@ -650,6 +703,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
     }
 
     function draw(h1, h2, depthTop, subH, zT, zFh, Fh, Rb) {
+        window.MF1V5.prepareCanvas(canvas, ctx, 500, 450);
         ctx.clearRect(0, 0, 500, 450);
         const scale = 60;
         const bottomY = 400;
@@ -783,6 +837,7 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
     }
 
     h1S.oninput = h2S.oninput = update;
+    window.addEventListener('resize', update);
     update();
 })();
 </script>
@@ -812,22 +867,24 @@ Voda se nalazi u spremniku dubokom 25 m, duljine 150 m čije su stjenke presjeka
 ```
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- ATMOSPHERIC ANALYZER -->
-<div id="v5-patm-analyzer" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: linear-gradient(145deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
+<div id="v5-patm-analyzer" class="mf1-lab" style="max-width: 900px;">
     <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
-        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 44: Atmosferski tlak</h4>
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">Zadatak 44: Atmosferski tlak</h4>
         <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">Δh = p_atm / (ρg)</div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 35px;">
-        <div style="background: #ffffff; border-radius: 20px; padding: 10px; border: 1px solid #e2e8f0; height: 400px; position: relative; overflow: hidden;">
-            <canvas id="v5-patm-canvas" width="450" height="400" style="width: 100%; height: 100%;"></canvas>
+    <div class="v5-scene-first">
+        <div class="v5-scene-stack">
+        <div class="v5-scene v5-scene--450x400" style="background: #ffffff; border: 1px solid #e2e8f0;">
+            <canvas id="v5-patm-canvas" width="450" height="400" aria-label="Nagnuta stijenka spremnika s nadomjesnom visinom atmosferskog tlaka i raspodjelom tlaka"></canvas>
             <div style="position: absolute; top: 105px; left: 20px; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">STVARNA POVRŠINA</div>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 20px;">
+        </div>
+        <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <span style="font-weight: 700; color: #334155; font-size: 0.85rem;">Atmosferski tlak pₐₜₘ</span>
@@ -865,6 +922,7 @@ Voda se nalazi u spremniku dubokom 25 m, duljine 150 m čije su stjenke presjeka
         draw(dh, h);
     }
     function draw(dh, h) {
+        window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
         ctx.clearRect(0, 0, 450, 400); const scale = 8; const ox = 80; const oy = 120;
         ctx.fillStyle = 'rgba(249, 115, 22, 0.05)'; ctx.fillRect(0, oy - dh*scale, 450, dh*scale);
         ctx.fillStyle = '#f0f9ff'; ctx.fillRect(0, oy, 450, 400 - oy);
@@ -875,7 +933,9 @@ Voda se nalazi u spremniku dubokom 25 m, duljine 150 m čije su stjenke presjeka
         ctx.strokeStyle = '#f97316'; ctx.lineWidth = 2; ctx.stroke();
         ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(20, oy); ctx.lineTo(430, oy); ctx.stroke();
     }
-    slider.oninput = update; update();
+    slider.oninput = update;
+    window.addEventListener('resize', update);
+    update();
 })();
 </script>
 ```
@@ -899,24 +959,25 @@ Pravokutna zaklopka mase 200 kg, široka u smjeru slike 5 m, prikazana na slici,
 Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak te se njegov utjecaj može ispustiti. Trenje u zglobu zanemariti.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- PREMIUM GATE SIMULATOR (Z42) -->
-<div id="v5-gate-premium" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08);">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 35px;">
-        <div style="background: #ffffff; border-radius: 20px; padding: 10px; border: 1px solid #e2e8f0; height: 420px; position: relative; overflow: hidden;">
-            <canvas id="v5-gate-p-canvas" width="450" height="400" style="width: 100%; height: 100%;"></canvas>
-            <div style="position: absolute; top: 55px; left: 135px; background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">ZGLOB B</div>
+<div id="v5-gate-premium" class="mf1-lab" style="max-width: 900px;">
+    <div class="v5-scene-first">
+        <div class="v5-scene-stack">
+        <div class="v5-scene v5-scene--450x400" style="background: #ffffff; border: 1px solid #e2e8f0;">
+            <canvas id="v5-gate-p-canvas" width="450" height="400" aria-label="Nagnuta zaklopka sa zglobom B, točkom A, kutom alfa, težištem, centrom pritiska i silama"></canvas>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 20px;">
+        </div>
+        <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
                 <label style="font-weight: 700; color: #334155; font-size: 0.85rem;">Nagib &alpha;</label>
                 <input type="range" id="v5-gate-p-a-slider" min="15" max="75" step="1" value="45" style="width: 100%;">
             </div>
             <div style="background: #0f172a; padding: 25px; border-radius: 20px; color: white;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="color: #94a3b8; font-size: 0.8rem;">Rezultanta vode F_H</span>
+                    <span style="color: #94a3b8; font-size: 0.8rem;">Hidrostatska rezultanta F_R</span>
                     <span id="v5-gate-p-fh" style="font-family: monospace; color: #60a5fa; font-weight: 700;">--- kN</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding-top: 10px; border-top: 1px dashed #334155;">
@@ -934,17 +995,20 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak te se njegov ut
     function update() {
         const alpha = parseFloat(aS.value) * Math.PI / 180; const h1 = 3.0; const h2 = 0.5; const b = 5.0;
         const L = h1 / Math.sin(alpha); const zT = h2 + h1 / 2;
-        const Fh = (1000 * 9.81 * zT * (L * b)) / 1000;
+        const FR = (1000 * 9.81 * zT * (L * b)) / 1000;
         const yTop = h2 / Math.sin(alpha); const yTi = yTop + L / 2;
         const IG = b * L**3 / 12; const yFi = yTi + IG / (yTi * L * b);
         const armHyd = yFi - yTop; const W = 200 * 9.81 / 1000; // kN, kao i Fh
-        const F_req = 2 * (Fh * armHyd + W * (L / 2) * Math.cos(alpha)) / L;
-        document.getElementById('v5-gate-p-fh').innerText = Fh.toFixed(1) + " kN";
+        const F_req = 2 * (FR * armHyd + W * (L / 2) * Math.cos(alpha)) / L;
+        document.getElementById('v5-gate-p-fh').innerText = FR.toFixed(1) + " kN";
         document.getElementById('v5-gate-p-fres').innerText = F_req.toFixed(1) + " kN";
         draw(alpha, h1, h2, L, yFi);
     }
     function draw(alpha, h1, h2, L, yFi) {
-        ctx.clearRect(0, 0, 450, 400); const scale = 35; const waterY = 60; const hX = 150; const hY = waterY + h2 * scale;
+        window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
+        ctx.clearRect(0, 0, 450, 400);
+        const scale = Math.min(55, 255 / Math.max(L * Math.cos(alpha), 0.1), 245 / Math.max(L * Math.sin(alpha), 0.1));
+        const waterY = 55; const hX = 105; const hY = waterY + h2 * scale;
         ctx.fillStyle = '#e0f2fe'; ctx.fillRect(0, waterY, 450, 340);
         ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(450, waterY); ctx.stroke();
         const eX = hX + L * scale * Math.cos(alpha); const eY = hY + L * scale * Math.sin(alpha);
@@ -952,9 +1016,34 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak te se njegov ut
         const fDist = (yFi - h2/Math.sin(alpha)) * scale; const fX = hX + fDist * Math.cos(alpha); const fY = hY + fDist * Math.sin(alpha);
         ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(hX, hY, 6, 0, 7); ctx.fill();
         ctx.beginPath(); ctx.arc(fX, fY, 5, 0, 7); ctx.fill();
-        ctx.font = '700 13px Inter'; ctx.fillStyle = '#dc2626'; ctx.fillText('B', hX + 10, hY - 8); ctx.fillText('C_P', fX + 10, fY + 3);
+        const tX = hX + L * scale * Math.cos(alpha) / 2; const tY = hY + L * scale * Math.sin(alpha) / 2;
+        ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(tX, tY, 5, 0, 7); ctx.fill();
+        const nx = Math.sin(alpha); const ny = -Math.cos(alpha);
+        for (let q = 0.18; q < 0.98; q += 0.16) {
+            const x = hX + q * (eX - hX); const y = hY + q * (eY - hY); const len = 18 + 28 * q;
+            drawArrow(x - len * nx, y - len * ny, x, y, '#38bdf8', 1.8);
+        }
+        const forceLen = Math.min(70, (430 - fX) / Math.max(nx, 0.1), (fY - 24) / Math.max(-ny, 0.1));
+        drawArrow(fX, fY, fX + forceLen * nx, fY + forceLen * ny, '#dc2626', 4);
+        drawArrow(tX, tY, tX - 52 * nx, tY - 52 * ny, '#16a34a', 3.5);
+        drawArrow(tX, tY, tX, Math.min(365, tY + 55), '#475569', 2.5);
+        ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(hX, hY, 25, 0, alpha); ctx.stroke();
+        ctx.font = '700 13px Inter'; ctx.fillStyle = '#dc2626'; ctx.fillText('B', hX + 10, hY - 9); ctx.fillText('C_P', fX + 9, fY + 4);
+        ctx.fillStyle = '#2563eb'; ctx.fillText('T', tX + 8, tY - 7);
+        ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', fX + 14, fY - 18);
+        ctx.fillStyle = '#15803d'; ctx.fillText('F_min', tX - 66 * nx - 22, tY - 66 * ny + 4);
+        ctx.fillStyle = '#475569'; ctx.fillText('G = mg', tX + 8, Math.min(382, tY + 49));
+        ctx.fillStyle = '#334155'; ctx.fillText('A', eX + 8, eY + 4); ctx.fillText('α', hX + 32 * Math.cos(alpha / 2), hY + 32 * Math.sin(alpha / 2));
     }
-    aS.oninput = update; update();
+    function drawArrow(x1, y1, x2, y2, color, width) {
+        const head = 9; const angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - head * Math.cos(angle - 0.5), y2 - head * Math.sin(angle - 0.5)); ctx.lineTo(x2 - head * Math.cos(angle + 0.5), y2 - head * Math.sin(angle + 0.5)); ctx.fill();
+    }
+    aS.oninput = update;
+    window.addEventListener('resize', update);
+    update();
 })();
 </script>
 ```
@@ -996,22 +1085,23 @@ Polukrug ima drukčiju raspodjelu površine po dubini od punog kruga, pa ima i d
 43. Brana duljine 20 m zadržava 7 m visoku razinu vode na način prikazan na slici. Potrebno je odrediti rezultirajuću silu tlaka na branu, kao i visinu od površine do središta djelovanja sile tlaka na branu.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- WIDGET: Z43 INCLINED DAM -->
-<div id="v5-z43-container" class="mf1-widget" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
+<div id="v5-z43-container" class="mf1-widget mf1-lab" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; border-radius: 24px; padding: 35px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden;">
     <div style="background: linear-gradient(135deg, #334155 0%, #0f172a 100%); padding: 20px; margin: -35px -35px 25px -35px; color: white; display: flex; justify-content: space-between; align-items: center;">
-        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">📐 Zadatak 43: Nagnuta brana</h4>
+        <h4 style="margin: 0; color: white; font-weight: 800; font-size: 1.25rem;">Zadatak 43: Nagnuta brana</h4>
         <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">z_Fh = 2/3 hv</div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 35px;">
-        <div style="background: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; position: relative; height: 450px; overflow: hidden;">
-            <canvas id="v5-z43-canvas" width="500" height="450" style="width: 100%; height: 100%;"></canvas>
+    <div class="v5-scene-first">
+        <div class="v5-scene-stack">
+        <div class="v5-scene v5-scene--500x450" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+            <canvas id="v5-z43-canvas" width="500" height="450" aria-label="Nagnuta brana s lokalnim tlakovima, težištem i rezultantnom silom"></canvas>
         </div>
-
-        <div style="display: flex; flex-direction: column; gap: 20px;">
+        </div>
+        <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 20px;">
             <div style="background: #f1f5f9; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px;">
                 <div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
@@ -1071,8 +1161,10 @@ Polukrug ima drukčiju raspodjelu površine po dubini od punog kruga, pa ima i d
     }
 
     function draw(hv, alpha, zFh) {
+        window.MF1V5.prepareCanvas(canvas, ctx, 500, 450);
         ctx.clearRect(0, 0, 500, 450);
-        const scale = 30; const ox = 100; const bottomY = 400;
+        const ox = 100; const bottomY = 400;
+        const scale = Math.min(30, 335 / hv, 330 / Math.max(hv / Math.tan(alpha), 0.1));
         const waterY = bottomY - hv * scale;
         const topX = ox + (hv / Math.tan(alpha)) * scale;
 
@@ -1091,11 +1183,11 @@ Polukrug ima drukčiju raspodjelu površine po dubini od punog kruga, pa ima i d
         ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(400, waterY); ctx.stroke();
 
-        for(let i=0; i<=hv; i+=1) {
-            let y = bottomY - i*scale;
-            let pLen = (hv-i) * 15;
-            let lx = topX - (i/Math.tan(alpha))*scale;
-            drawArrow(ctx, lx - pLen*Math.sin(alpha), y + pLen*Math.cos(alpha), lx, y, '#38bdf8', 2);
+        for(let z=0; z<=hv; z+=1) {
+            const y = waterY + z * scale;
+            const lx = topX - (z / Math.tan(alpha)) * scale;
+            const pLen = Math.min(12 + z * 7, 58);
+            drawArrow(ctx, lx - pLen * Math.sin(alpha), y - pLen * Math.cos(alpha), lx, y, '#38bdf8', 2);
         }
 
         const fx = topX - (zFh / Math.tan(alpha)) * scale;
@@ -1103,10 +1195,13 @@ Polukrug ima drukčiju raspodjelu površine po dubini od punog kruga, pa ima i d
 
         ctx.fillStyle = '#ef4444';
         ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.fill();
-        drawArrow(ctx, fx, fy, fx + 105*Math.sin(alpha), fy - 105*Math.cos(alpha), '#ef4444', 5);
-        ctx.font = '700 14px Inter'; ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', fx + 28, fy - 32);
+        const forceLen = Math.min(92, (475 - fx) / Math.max(Math.sin(alpha), 0.1), (425 - fy) / Math.max(Math.cos(alpha), 0.1));
+        drawArrow(ctx, fx, fy, fx + forceLen * Math.sin(alpha), fy + forceLen * Math.cos(alpha), '#ef4444', 5);
+        ctx.font = '700 14px Inter'; ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', fx + 16, fy + 27);
         ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(topX - (hv/2/Math.tan(alpha))*scale, waterY + hv*scale/2, 5, 0, 7); ctx.fill();
         ctx.fillStyle = '#2563eb'; ctx.fillText('T', topX - (hv/2/Math.tan(alpha))*scale + 10, waterY + hv*scale/2 - 8);
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(topX, waterY, 28, Math.PI - alpha, Math.PI); ctx.stroke();
+        ctx.fillStyle = '#334155'; ctx.fillText('α', topX - 42, waterY + 20);
     }
 
     function drawArrow(ctx, x1, y1, x2, y2, color, width) {
@@ -1120,6 +1215,7 @@ Polukrug ima drukčiju raspodjelu površine po dubini od punog kruga, pa ima i d
     }
 
     hvS.oninput = aS.oninput = update;
+    window.addEventListener('resize', update);
     update();
 })();
 </script>
@@ -1140,23 +1236,25 @@ Asimetričnu plohu obrađuje Z48 na kraju vježbe: iz istog tlaka $p=\rho gz$ ra
 Sila je integral tlaka po površini: $F = \int p \, dA$. Ovaj widget vizualizira diferencijalni pristup gdje plohu dijelimo na beskonačno male horizontalne trake visine $dz$.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <!-- PREMIUM INTEGRATION VISUALIZER -->
-<div id="v5-integration-premium" style="max-width: 900px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif; border-radius: 24px; padding: 35px; background: #0f172a; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
-    <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px;">
-        <div style="background: rgba(255,255,255,0.02); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); height: 400px; position: relative; overflow: hidden;">
-            <canvas id="v5-int-p-canvas" width="450" height="400" style="width: 100%; height: 100%;"></canvas>
-            <div style="position: absolute; top: 20px; left: 20px; background: rgba(56, 189, 248, 0.1); padding: 10px 15px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.3);">
-                <code style="color: #38bdf8; font-size: 0.9rem; font-weight: 800;">dF = &rho; · g · z · dA</code>
+<div id="v5-integration-premium" class="mf1-lab" style="max-width: 900px;">
+    <div class="v5-scene-first">
+        <div class="v5-scene-stack">
+        <div class="v5-scene v5-scene--450x400" style="background: #f8fafc; border: 1px solid #d7e3ea;">
+            <canvas id="v5-int-p-canvas" width="450" height="400" aria-label="Diferencijalna podjela plohe na horizontalne trake i zbrajanje sila tlaka"></canvas>
+            <div style="position: absolute; top: 20px; left: 20px; background: #eef8fc; padding: 10px 15px; border-radius: 10px; border: 1px solid #b8dce7;">
+                <code style="color: #0b7898; font-size: 0.9rem; font-weight: 800;">dF = &rho; · g · z · dA</code>
             </div>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 25px;">
-            <h4 style="color: #38bdf8; margin: 0; font-weight: 800;">📐 Diferencijalna analiza</h4>
+        </div>
+        <div class="v5-controls-panel" style="display: flex; flex-direction: column; gap: 1rem;">
+            <h4 style="color: #0b5f79; margin: 0; font-weight: 800;">Diferencijalna analiza</h4>
             <input type="range" id="v5-int-p-slider" min="4" max="60" value="12" style="width: 100%;">
-            <div id="v5-int-p-count" style="color: #38bdf8; font-weight: 800; text-align:center;">12 elemenata</div>
-            <div id="v5-int-p-results" style="padding:1rem; border:1px solid #334155; border-radius:12px; color:#e2e8f0; line-height:1.6;"></div>
+            <div id="v5-int-p-count" style="color: #0b5f79; font-weight: 800; text-align:center;">12 elemenata</div>
+            <div id="v5-int-p-results" style="padding:1rem; border:1px solid #d7e3ea; border-radius:12px; color:#334155; line-height:1.6;"></div>
         </div>
     </div>
 </div>
@@ -1165,6 +1263,7 @@ Sila je integral tlaka po površini: $F = \int p \, dA$. Ovaj widget vizualizira
     const canvas = document.getElementById('v5-int-p-canvas'); const ctx = canvas.getContext('2d');
     const slider = document.getElementById('v5-int-p-slider');
     function draw() {
+        window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
         const count = parseInt(slider.value); document.getElementById('v5-int-p-count').innerText = count + " elemenata";
         ctx.clearRect(0, 0, 450, 400); const h = 280, w = 50, ox = 60, oy = 60, dz = h / count;
         const hM = 3, bM = 2, rho = 1000, g = 9.81, dzM = hM / count;
@@ -1180,12 +1279,14 @@ Sila je integral tlaka po površini: $F = \int p \, dA$. Ovaj widget vizualizira
         document.getElementById('v5-int-p-results').innerHTML = `Za svaku traku: <strong>ΔFᵢ = ρgzᵢbΔz</strong><br>F_N = ${(FN/1000).toFixed(3)} kN; F = ${(FExact/1000).toFixed(3)} kN<br>pogreška = ${(100*(FN-FExact)/FExact).toFixed(2)} %<br>z<sub>F,N</sub> = ${zFN.toFixed(3)} m; z<sub>F</sub> = ${zFExact.toFixed(3)} m`;
         ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(ox + w/2, oy + (zFExact/hM)*h, 7, 0, 7); ctx.fill();
     }
-    slider.oninput = draw; draw();
+    slider.oninput = draw;
+    window.addEventListener('resize', draw);
+    draw();
 })();
 </script>
 ```
 
-## 7. Master klasa: Dinamika promjena
+## 7. Parametarski uvidi
 
 ### Usporedba orijentacija: Utjecaj nagiba na hvatište
 Promatrajte kako se Centar tlaka ($F$) približava težištu ($T$) kako plohu polažemo vodoravno. U horizontalnom položaju ($\alpha = 0^\circ$), ekscentricitet potpuno nestaje jer je tlak uniforman.
@@ -1219,15 +1320,19 @@ Ovaj primjer koristi opći lanac iz laboratorija **Geometrija i nagib**: $z_T=h_
 Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delta x$ definiran centrifugalnim momentom tromosti $I_{xz}$.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="v5-z48-container" class="mf1-widget" style="max-width:900px; margin:2rem auto; padding:1.5rem; background:#fff; border:1px solid #d9e2ec; border-radius:16px;">
+<div id="v5-z48-container" class="mf1-widget mf1-lab" style="max-width:900px; margin:2rem auto; padding:1.5rem; background:#fff; border:1px solid #d9e2ec; border-radius:16px;">
   <h4 style="margin:0 0 .5rem;">Z48 — Bočni pomak centra pritiska</h4>
   <p style="margin:0 0 1rem;">Pomakni gornji vrh trokuta. Tlak raste s dubinom, zato se <strong>C_P</strong> ne dobiva pomakom “od oka”, nego momentom raspodijeljenog tlaka.</p>
-  <div style="display:grid; grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr); gap:1.5rem;">
-    <div><canvas id="v5-z48-canvas" width="500" height="400" style="width:100%; height:auto; background:#f8fafc; border:1px solid #d9e2ec; border-radius:12px;"></canvas></div>
-    <div style="display:flex; flex-direction:column; gap:1rem;">
+  <div class="v5-scene-first">
+    <div class="v5-scene-stack">
+      <div class="v5-scene v5-scene--500x400" style="background:#f8fafc; border:1px solid #d9e2ec;">
+        <canvas id="v5-z48-canvas" width="500" height="400" aria-label="Asimetrična trokutna zaklopka s težištem, centrom pritiska i bočnim pomakom"></canvas>
+      </div>
+    </div>
+    <div class="v5-controls-panel" style="display:flex; flex-direction:column; gap:1rem;">
       <label style="font-weight:700;">Bočni pomak vrha s <span id="v5-z48-s-val">0.80</span> m</label>
       <input type="range" id="v5-z48-s-slider" min="-1.5" max="1.5" step="0.05" value="0.8">
       <div style="padding:1rem; background:#f8fafc; border:1px solid #d9e2ec; border-radius:12px;">
@@ -1258,6 +1363,7 @@ Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delt
     }
 
     function draw(s, h) {
+        window.MF1V5.prepareCanvas(canvas, ctx, 500, 400);
         ctx.clearRect(0, 0, 500, 400);
         const cx = 250, cy = 55, scale = 85, hp = h * scale, b = 3;
         const apexX = cx + s * scale, leftX = cx - b * scale / 2, rightX = cx + b * scale / 2;
@@ -1280,16 +1386,22 @@ Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delt
         ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy + 65); ctx.stroke();
         ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(fx, fy + 65); ctx.lineTo(fx - 7, fy + 53); ctx.lineTo(fx + 7, fy + 53); ctx.fill(); ctx.fillText('F_R', fx + 10, fy + 52);
     }
-    sS.oninput = update; update();
+    sS.oninput = update;
+    window.addEventListener('resize', update);
+    update();
 })();
 </script>
 ```
 
 <div class="fizikalni-uvid">
-💡 Uoči: kada je $s=0$, iz računa automatski slijedi $Delta x=0$. Asimetrija nije dekoracija crteža, nego promjena momenta raspodijeljenog tlaka.
+Uoči: kada je $s=0$, iz računa automatski slijedi $\Delta x=0$. Asimetrija nije dekoracija crteža, nego promjena momenta raspodijeljenog tlaka.
 </div>
-***
+
+::: {.mf1-bridge}
+#### Prijelaz prema zakrivljenim plohama
+
+U Vježbi 6 komponenta $F_H$ na zakrivljenoj plohi računa se upravo na njezinoj vertikalnoj projekciji, s istim profilom tlaka i centrom pritiska koji su ovdje razvijeni.
+:::
 
 ### Zaključak vježbe
 Hidrostatska sila ovisi o tlaku u težištu plohe, dok njezino hvatište ovisi o geometriji plohe i raspodjeli tlaka. Kod nagnutih ploha proračune započnite definiranjem koordinate y duž kosine.
-

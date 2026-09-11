@@ -2,17 +2,17 @@
 
 ## Fizikalni uvod: Reynoldsov broj i dinamika cjevovoda
 
-Strujanje realnog fluida u zatvorenim kanalima i cijevima određeno je odnosom sila inercije i sila viskoznosti, što kvantificiramo pomoću bezdimenzijskog **Reynoldsovog broja ($Re$)**:
-$$Re = \frac{\rho v d}{\mu} = \frac{v d}{\nu}$$
+Strujanje realnog fluida u zatvorenim kanalima i cijevima određeno je odnosom inercijskih i viskoznih učinaka. Taj odnos opisuje bezdimenzijski **Reynoldsov broj ($Re$)**:
+$$Re = \frac{\rho vD}{\mu} = \frac{vD}{\nu}.$$
 
 Ovisno o vrijednosti $Re$, strujanje poprima bitno različite karakteristike:
-*   **Laminarno strujanje ($Re < 2320$):** Fluid se giba u pravilnim, paralelnim slojevima bez međusobnog miješanja. Profil brzine u poprečnom presjeku je **parabola**, a gubici energije su linearno proporcionalni brzini.
+*   **Laminarno strujanje ($Re < 2320$):** Fluid se giba u pravilnim slojevima. Za potpuno razvijeno strujanje u kružnoj cijevi profil brzine je paraboličan: proizlazi iz ravnoteže gradijenta tlaka i viskoznih naprezanja uz no-slip uvjet na stijenci.
 *   **Prijelazno područje ($2320 < Re < 4000$):** Nestabilan režim strujanja kod kojeg dolazi do povremenih pojava turbulencije.
-*   **Turbulentno strujanje ($Re > 4000$):** Kaotično i nepravilno gibanje s izraženim vrtloženjem. Profil brzine postaje **plosnat** zbog intenzivnog miješanja impulsa čestica, a gubici energije ovise o kvadratu brzine.
+*   **Turbulentno strujanje ($Re > 4000$):** Gibanje je vrtložno, a profil brzine postaje plosnatiji zbog miješanja količine gibanja. U Darcy–Weisbachovoj jednadžbi član $v^2/(2g)$ je eksplicitan, dok Darcyjev faktor trenja $\lambda$ može dodatno ovisiti o $Re$ i relativnoj hrapavosti $k/D$.
 
 ### Otpori i hidrauličke mreže
 
-Ukupni pad tlaka u cjevovodu rezultat je **linijskih otpora** (trenje duž stijenki cijevi) i **lokalnih otpora** (promjene smjera strujanja, ventili, suženja). Kod turbulentnog strujanja, intenzitet trenja izrazito ovisi o **relativnoj hrapavosti ($\epsilon/D$)** unutrašnje stijenke cijevi.
+Ukupni pad tlaka u cjevovodu rezultat je **linijskih gubitaka** (trenje duž stijenki cijevi) i **lokalnih gubitaka** (promjene smjera strujanja, ventili, suženja). Kod turbulentnog strujanja Darcyjev faktor trenja ovisi o **relativnoj hrapavosti ($k/D$)** unutrašnje stijenke cijevi.
 
 U inženjerskoj praksi često rješavamo složene sustave cjevovoda:
 1.  **Serijsko spajanje:** Volumenski protok $Q$ je isti kroz sve dionice, dok su ukupni gubici energije zbroj gubitaka na svakoj pojedinačnoj dionici.
@@ -40,32 +40,11 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
 - **Krivulje:** svaka krivulja odgovara jednoj vrijednosti relativne hrapavosti $k/D$ (od $0$ za idealno glatku cijev do $0{,}05$ za vrlo hrapavu). Vrijednosti $k/D$ označene su s desne strane dijagrama.
 - **Laminarna linija** ($Re < 2320$): ravna crta s nagibom $-1$ — to je izravni zakon $\lambda = 64/Re$.
 
-**Kako odabrati postupak — if–else logika**
+**Odabir postupka prema režimu strujanja**
 
-```
-IF Re < 2320  →  LAMINARNO strujanje
-    λ = 64 / Re          ← formula, dijagram nije potreban
-    Profil brzine: paraboličan (Hagen-Poiseuille)
-
-ELSE IF 2320 ≤ Re ≤ 4000  →  PRIJELAZNO područje
-    λ nije pouzdano definirano — strujanje nestabilno
-    Inženjerska praxis: uzeti konzervativniju (veću) vrijednost
-    ili redizajnirati sustav da izbjegne ovo područje
-
-ELSE  (Re > 4000)  →  TURBULENTNO strujanje
-
-    IF k/D ≈ 0  (hidraulički glatka cijev)
-        λ ovisi samo o Re  → pratiti krivulju k/D → 0
-        Za Re < 10^5: Blasiusova formula  λ = 0.316 · Re^(-0.25)
-
-    ELSE IF k/D > 0  I  Re nije prevelik  (prijelazno turbulentno)
-        λ ovisi i o Re i o k/D  → Moodyjev dijagram ili Colebrook
-
-    ELSE  (Re > ~10^5 i k/D nije zanemariva)  →  kvadratni zakon
-        λ ovisi SAMO o k/D  (vodoravna asimptota na dijagramu)
-        λ ≈ [1 / (-2·log(k / (3.71·D)))]²  ← Nikuradseova formula
-        Praktično: povećanje brzine više ne mijenja λ
-```
+- Za $Re<2320$ i potpuno razvijeno laminarno strujanje u kružnoj cijevi vrijedi $\lambda=64/Re$; Moodyjev dijagram nije potreban.
+- U prijelaznom području ($2320\lesssim Re\lesssim4000$) tok može biti nestabilan i procjena $\lambda$ osjetljiva. Standardne korelacije zato treba primjenjivati oprezno.
+- Za turbulentno strujanje $\lambda$ se određuje Moodyjevim dijagramom, Colebrook–Whiteovom jednadžbom ili navedenom eksplicitnom aproksimacijom. Pri dovoljno velikom $Re$ za zadanu relativnu hrapavost viskozni utjecaj na $\lambda$ postaje malen, pa se $\lambda$ približava asimptoti određenoj uglavnom s $k/D$.
 
 **Praktični savjeti za primjenu**
 
@@ -1017,7 +996,7 @@ ELSE  (Re > 4000)  →  TURBULENTNO strujanje
 })();
 </script>
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">⚙ Interaktivni prikaz</div>
 
 ```{=html}
 <!-- WIDGET: Laminarni pad tlaka (Hagen-Poiseuille) -->
@@ -1242,6 +1221,46 @@ ELSE  (Re > 4000)  →  TURBULENTNO strujanje
             font-size: 0.84rem;
             line-height: 1.58;
         }
+        #z120-laminar-widget .z120-shell {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+        }
+        #z120-laminar-widget .z120-title {
+            font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+        }
+        #z120-laminar-widget .z120-scene {
+            border-radius: 16px;
+        }
+        #z120-laminar-widget .z120-pressure,
+        #z120-laminar-widget .z120-state,
+        #z120-laminar-widget .z120-controls,
+        #z120-laminar-widget .z120-metric,
+        #z120-laminar-widget .z120-physics,
+        #z120-laminar-widget .z120-explainer {
+            border-radius: 14px;
+            box-shadow: none;
+        }
+        #z120-laminar-widget .z120-model-status {
+            margin: 12px 0 0;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+        #z120-laminar-widget .z120-model-status.is-valid {
+            color: #166534;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+        #z120-laminar-widget .z120-model-status.is-outside {
+            color: #9a3412;
+            background: #fff7ed;
+            border: 1px solid #fdba74;
+        }
         @media (max-width: 960px) {
             #z120-laminar-widget .z120-head,
             #z120-laminar-widget .z120-summary,
@@ -1264,12 +1283,12 @@ ELSE  (Re > 4000)  →  TURBULENTNO strujanje
             <div>
                 <div class="z120-kicker">Laminarni gubici tlaka — Hagen–Poiseuille</div>
                 <h4 class="z120-title">Laminarno strujanje u cijevi: kako temperatura utječe na pad tlaka</h4>
-                <p class="z120-sub">Podesi temperaturu i brzinu — simulator prikazuje laminarno strujanje i izračunava pad tlaka putem lanca T &rarr; &mu; &rarr; Re &rarr; &lambda; &rarr; &Delta;p.</p>
+                <p class="z120-sub">Temperatura mijenja viskoznost vode, a brzina određuje Reynoldsov broj. Prikaz slijedi lanac T &rarr; &mu; &rarr; Re &rarr; &lambda; &rarr; &Delta;p.</p>
             </div>
             <div class="z120-chip">T -> μ -> Re -> λ -> Δp</div>
         </div>
 
-        <div class="z120-note"><strong>Kako čitati laminarni slučaj:</strong> Ovdje temperatura najprije mijenja dinamičku viskoznost <strong>μ</strong>, a tek to mijenja Reynoldsov broj i koeficijent trenja <strong>λ = 64/Re</strong>. Zato je lanac <strong>T -> μ -> Re -> λ -> Δp</strong> važniji od samog završnog pada tlaka.</div>
+        <div class="z120-note"><strong>Kako čitati laminarni slučaj:</strong> Pri zadanoj srednjoj brzini Hagen–Poiseuilleova jednadžba daje <strong>&Delta;p = 32&mu;Lv/D<sup>2</sup></strong>. Temperatura zato najprije mijenja dinamičku viskoznost <strong>&mu;</strong>, zatim <strong>Re</strong> i <strong>&lambda; = 64/Re</strong>, a na kraju potreban pad tlaka.</div>
 
         <div class="z120-stage">
             <div class="z120-scene">
@@ -1290,7 +1309,8 @@ ELSE  (Re > 4000)  →  TURBULENTNO strujanje
                     <div class="z120-state-title">Fizikalna stanja</div>
                     <div class="z120-row"><span>Reynolds Re</span><b id="z120-res-re">1836</b></div>
                     <div class="z120-row"><span>Pad tlaka Δp</span><b id="z120-res-dp">188.2 kPa</b></div>
-                    <div class="z120-row is-divider"><span>Gubitak h<wbr>w</span><b id="z120-res-hw">19.2 m</b></div>
+                    <div class="z120-row is-divider"><span>Gubitak h<sub>w</sub></span><b id="z120-res-hw">19.2 m</b></div>
+                    <p id="z120-model-status" class="z120-model-status is-valid"></p>
                 </div>
             </div>
         </div>
@@ -1320,7 +1340,7 @@ ELSE  (Re > 4000)  →  TURBULENTNO strujanje
                 </div>
                 <div class="z120-physics">
                     <div class="z120-physics-title">Fizikalni uvid</div>
-                    Kod laminarnog strujanja pad tlaka je direktno proporcionalan brzini i viskoznosti. Kako temperatura raste, viskoznost vode opada, pa isti tok traži sve manji utrošak energije.
+                    U laminarnom području pri zadanoj brzini vrijedi &Delta;p = 32&mu;Lv/D<sup>2</sup>: pad tlaka raste s viskoznošću i dužinom, a jako se smanjuje s većim promjerom cijevi. Porast temperature vode obično smanjuje &mu;.
                 </div>
             </div>
 
@@ -1371,7 +1391,20 @@ ELSE  (Re > 4000)  →  TURBULENTNO strujanje
         document.getElementById('z120-res-mu').innerText = mu.toFixed(5) + ' Pa s';
         document.getElementById('z120-res-lambda').innerText = lambda.toFixed(4);
         document.getElementById('z120-p2-gauge').innerText = Math.max(0, 200 - dp).toFixed(1) + ' kPa';
-        document.getElementById('z120-explainer').textContent = `Pri temperaturi ${T.toFixed(0)}°C dinamička viskoznost je ${mu.toFixed(5)} Pa s, pa za brzinu ${v.toFixed(1)} m/s dobivaš Re ≈ ${Math.round(Re)} i laminarni koeficijent λ = ${lambda.toFixed(4)}. To vodi do pada tlaka ${dp.toFixed(1)} kPa i gubitka energije ${hw.toFixed(1)} m.`;
+        document.getElementById('z120-explainer').textContent =
+            'Pri ' + T.toFixed(0) + ' °C je μ = ' + mu.toFixed(5) +
+            ' Pa s. Za v = ' + v.toFixed(1) + ' m/s slijedi Re ≈ ' +
+            Math.round(Re) + ', λ = ' + lambda.toFixed(4) +
+            ' te Δp = ' + dp.toFixed(1) + ' kPa.';
+
+        const modelStatus = document.getElementById('z120-model-status');
+        if (Re < 2320) {
+            modelStatus.className = 'z120-model-status is-valid';
+            modelStatus.textContent = 'Re je u laminarnom području: prikaz koristi Hagen–Poiseuilleov model i λ = 64/Re.';
+        } else {
+            modelStatus.className = 'z120-model-status is-outside';
+            modelStatus.textContent = 'Za ovaj skup parametara Reynoldsov broj više nije u laminarnom području; Hagen–Poiseuilleov model ovdje više nije odgovarajući model gubitka.';
+        }
     }
 
     function draw() {
@@ -1462,7 +1495,7 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
     $$
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">⚙ Interaktivni prikaz</div>
 
 ```{=html}
 <!-- WIDGET: Difuzor i lokalni gubici -->
@@ -1679,6 +1712,35 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
             font-size: 0.84rem;
             line-height: 1.58;
         }
+        #z122-diffuser-widget .z122-shell {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+        }
+        #z122-diffuser-widget .z122-title {
+            font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+        }
+        #z122-diffuser-widget .z122-scene {
+            border-radius: 16px;
+        }
+        #z122-diffuser-widget .z122-status,
+        #z122-diffuser-widget .z122-balance,
+        #z122-diffuser-widget .z122-metric,
+        #z122-diffuser-widget .z122-controls,
+        #z122-diffuser-widget .z122-physics,
+        #z122-diffuser-widget .z122-explainer {
+            border-radius: 14px;
+            box-shadow: none;
+        }
+        #z122-sep-warn {
+            background: #fff7ed;
+            color: #9a3412;
+            border: 1px solid #fdba74;
+            box-shadow: none;
+        }
         @media (max-width: 960px) {
             #z122-diffuser-widget .z122-head,
             #z122-diffuser-widget .z122-summary,
@@ -1699,13 +1761,13 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
         <div class="z122-head">
             <div>
                 <div class="z122-kicker">Z122 difuzor</div>
-                <h4 class="z122-title">Dobitak tlaka vrijedi samo dok difuzor širi tok dovoljno nježno da granični sloj ostane priljubljen uz stijenku</h4>
-                <p class="z122-sub">Ovaj polish čita difuzor istim redoslijedom kao novije widgete: najprije vidiš širenje scene, zatim stanje odvajanja i bilancu učinaka, a tek onda podešavaš kut i ulaznu brzinu.</p>
+                <h4 class="z122-title">Širenje presjeka i stvarni povrat tlaka u difuzoru</h4>
+                <p class="z122-sub">Kako se presjek povećava, vrijedi A<sub>2</sub> &gt; A<sub>1</sub> pa je v<sub>2</sub> &lt; v<sub>1</sub>. Dio brzinske visine može se vratiti u tlak, ali se ukupna mehanička visina smanjuje za lokalni gubitak h<sub>L</sub>.</p>
             </div>
             <div class="z122-chip">v₁ -> v₂ -> p₂</div>
         </div>
 
-        <div class="z122-note"><strong>Kako čitati difuzor:</strong> U urednom difuzoru strujnice se otvaraju glatko, brzina pada s <strong>v₁</strong> na <strong>v₂</strong>, a dio brzinske visine vraća se u tlak. Kad kut postane prevelik, granični sloj se odvaja od stijenke i uz zid nastaju vrtložne zone koje pretvaraju dobitak u dodatni lokalni gubitak.</div>
+        <div class="z122-note"><strong>Kako čitati difuzor:</strong> Idealni difuzor pretvara dio brzinske visine u tlak bez gubitka. Stvarni difuzor ima lokalni gubitak; za zadatak je uzet &beta;<sub>1</sub> = &beta;<sub>2</sub> = 1,06. Veći kut širenja povećava nepovoljan gradijent tlaka i sklonost odvajanju, ali univerzalna granična vrijednost kuta ne postoji.</div>
 
         <div class="z122-stage">
             <div class="z122-scene">
@@ -1713,21 +1775,21 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
             </div>
             <div class="z122-summary">
                 <div class="z122-status">
-                    <div class="z122-status-title">Stanje graničnog sloja</div>
-                    <p class="z122-status-copy">Mali kutovi dopuštaju uredan povrat tlaka. Veći kut tjera tok da se odlijepi od stijenke, pa dio dobitka odlazi u vrtložne zone i dodatne gubitke.</p>
-                    <div id="z122-sep-warn">ODVAJANJE STRUJE UZ STIJENKU</div>
+                    <div class="z122-status-title">Stvarni učinak širenja</div>
+                    <p class="z122-status-copy">Smanjenje brzine pogoduje porastu statičkog tlaka, dok lokalni gubitak smanjuje ukupnu mehaničku visinu. Veći kut samo kvalitativno povećava sklonost dodatnim gubicima.</p>
+                    <div id="z122-sep-warn">VEĆA SKLONOST LOKALNIM GUBICIMA</div>
                 </div>
                 <div class="z122-summary-side">
                     <div class="z122-balance">
                         <div class="z122-balance-title">Bilanca učinaka</div>
-                        <div class="z122-row"><span>Koeficijent ζ</span><b id="z122-res-zeta">0.07</b></div>
+                        <div class="z122-row"><span>Koeficijent ζ (model)</span><b id="z122-res-zeta">0.07</b></div>
                         <div class="z122-row"><span>Lokalni gubitak hwm</span><b id="z122-res-hwm">0.18 m</b></div>
                         <div class="z122-row"><span>Izlazni tlak p₂</span><b id="z122-res-p2" style="color:#c2410c;">169.1 kPa</b></div>
                     </div>
                     <div class="z122-metrics">
                         <div class="z122-metric"><small>v₂</small><strong id="z122-res-v2">0.00 m/s</strong></div>
                         <div class="z122-metric"><small>Δ(v²/2g)</small><strong id="z122-res-dhead">0.00 m</strong></div>
-                        <div class="z122-metric"><small>Režim kuta</small><strong id="z122-res-regime">miran</strong></div>
+                        <div class="z122-metric"><small>Odabrani kut</small><strong id="z122-res-regime">30°</strong></div>
                     </div>
                 </div>
             </div>
@@ -1747,7 +1809,7 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
 
             <div class="z122-physics">
                 <div class="z122-physics-title">Fizikalni uvid</div>
-                Difuzor idealno pretvara dio brzinske visine natrag u tlak. No čim se širenje previše agresivno otvori, tok više ne prati stijenu i lokalni gubitak brzo raste unatoč nižoj izlaznoj brzini.
+                Budući da je A<sub>2</sub> veći od A<sub>1</sub>, izlazna je brzina manja. Zato p<sub>2</sub> može porasti iako ukupna mehanička visina opada: razlika je lokalni gubitak h<sub>L</sub>.
             </div>
 
             <div class="z122-explainer"><strong>Tumačenje scene:</strong> <span id="z122-explainer"></span></div>
@@ -1763,7 +1825,7 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
     const v1S = document.getElementById('z122-v1-slider');
     const lanes = [-0.82, -0.62, -0.42, -0.22, 0, 0.22, 0.42, 0.62, 0.82];
     const particles = [];
-    const state = { alpha: 30, v1: 7, v2: 3.11, zeta: 0.07, hwm: 0.18, deltaHead: 0.18, p2: 169.1, separated: true, regime: 'odvajanje', time: 0 };
+    const state = { alpha: 30, v1: 7, v2: 3.11, zeta: 0.07, hwm: 0.18, deltaHead: 0.18, p2: 169.1, lossTendency: 0.45, time: 0 };
 
     lanes.forEach((lane, laneIndex) => {
         for (let index = 0; index < 8; index++) {
@@ -1772,10 +1834,8 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
     });
 
     function getZeta(alpha) {
-        if (alpha <= 8) return 0.05 + (8 - alpha) * 0.004;
-        if (alpha <= 14) return 0.05 + (alpha - 8) * 0.02;
-        if (alpha <= 25) return 0.17 + (alpha - 14) * 0.03;
-        return 0.5 + (alpha - 25) * 0.045;
+        const scale = alpha / 30;
+        return 0.035 + 0.035 * scale * scale;
     }
 
     function getGeometry(alpha) {
@@ -1799,12 +1859,12 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
         return geometry.halfOut;
     }
 
-    function streamlineY(x, lane, geometry, separated) {
+    function streamlineY(x, lane, geometry, lossTendency) {
         const half = getHalfHeight(x, geometry) - 8;
         let localLane = lane;
-        if (separated && x > geometry.inletEnd + 0.35 * geometry.diffL && Math.abs(lane) > 0.58) {
+        if (x > geometry.inletEnd + 0.35 * geometry.diffL && Math.abs(lane) > 0.58) {
             const t = Math.min(1, (x - (geometry.inletEnd + 0.35 * geometry.diffL)) / (0.65 * geometry.diffL));
-            localLane = lane * (1 - 0.32 * t);
+            localLane = lane * (1 - 0.32 * t * lossTendency);
         }
         return geometry.cy + localLane * half;
     }
@@ -1815,14 +1875,15 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
         const p1 = 150;
         const rho = 1000;
         const g = 9.81;
+        const beta = 1.06;
         const d1 = 0.06;
         const d2 = 0.09;
         const v2 = v1 * Math.pow(d1 / d2, 2);
         const zeta = getZeta(alpha);
         const hwm = zeta * (v1 * v1 / (2 * g));
-        const deltaHead = (v1 * v1 - v2 * v2) / (2 * g);
-        const p2 = p1 + (rho * (((v1 * v1) - (v2 * v2)) / 2 - g * hwm)) / 1000;
-        const regime = alpha <= 10 ? 'povoljno' : (alpha <= 18 ? 'granično' : 'odvajanje');
+        const deltaHead = beta * (v1 * v1 - v2 * v2) / (2 * g);
+        const p2 = p1 + rho * g * (deltaHead - hwm) / 1000;
+        const lossTendency = (alpha - 5) / 55;
 
         state.alpha = alpha;
         state.v1 = v1;
@@ -1831,19 +1892,23 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
         state.hwm = hwm;
         state.deltaHead = deltaHead;
         state.p2 = p2;
-        state.separated = alpha > 18;
-        state.regime = regime;
+        state.lossTendency = lossTendency;
 
         document.getElementById('z122-v-alpha').textContent = alpha.toFixed(0);
         document.getElementById('z122-v-v1').textContent = v1.toFixed(1);
         document.getElementById('z122-res-zeta').textContent = zeta.toFixed(2);
-        document.getElementById('z122-res-hwm').textContent = hwm.toFixed(2) + ' m';
+        document.getElementById('z122-res-hwm').textContent = hwm.toFixed(3) + ' m';
         document.getElementById('z122-res-p2').textContent = p2.toFixed(1) + ' kPa';
         document.getElementById('z122-res-v2').textContent = v2.toFixed(2) + ' m/s';
         document.getElementById('z122-res-dhead').textContent = deltaHead.toFixed(2) + ' m';
-        document.getElementById('z122-res-regime').textContent = regime;
-        document.getElementById('z122-explainer').textContent = `Za kut ${alpha.toFixed(0)}° i ulaznu brzinu ${v1.toFixed(1)} m/s idealno bi se moglo vratiti ${deltaHead.toFixed(2)} m brzinske visine. No stvarni difuzor pritom gubi ${hwm.toFixed(2)} m zbog lokalnog otpora, pa izlazni tlak završava na ${p2.toFixed(1)} kPa. Kad kut pređe približno 18°, uz stijenku se pojavljuju vrtložne zone odvajanja.`;
-        document.getElementById('z122-sep-warn').style.display = state.separated ? 'block' : 'none';
+        document.getElementById('z122-res-regime').textContent = alpha.toFixed(0) + '°';
+        document.getElementById('z122-explainer').textContent =
+            'Pri α = ' + alpha.toFixed(0) + '° i v₁ = ' + v1.toFixed(1) +
+            ' m/s brzinska se visina smanji za ' + deltaHead.toFixed(2) +
+            ' m. Model lokalnog gubitka daje hL = ' + hwm.toFixed(3) +
+            ' m i p₂ = ' + p2.toFixed(1) +
+            ' kPa; veći kut ovdje samo kvalitativno označuje veću sklonost gubicima.';
+        document.getElementById('z122-sep-warn').style.display = 'block';
     }
 
     function draw() {
@@ -1887,8 +1952,8 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
         lanes.forEach((lane) => {
             ctx.beginPath();
             for (let x = geometry.inletStart; x <= geometry.outletEnd; x += 10) {
-                const wiggle = (state.regime === 'povoljno' ? 0 : state.regime === 'granično' ? 2.5 : 4.5) * Math.sin((x * 0.025) + state.time * 0.015 + lane * 4) * (Math.abs(lane) * 0.65);
-                const y = streamlineY(x, lane, geometry, state.separated) + wiggle;
+                const wiggle = (0.5 + 4 * state.lossTendency) * Math.sin((x * 0.025) + state.time * 0.015 + lane * 4) * (Math.abs(lane) * 0.65);
+                const y = streamlineY(x, lane, geometry, state.lossTendency) + wiggle;
                 if (x === geometry.inletStart) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             }
@@ -1899,23 +1964,21 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
             const laneSpeed = 0.55 + (1 - Math.abs(particle.lane)) * 0.65;
             particle.phase = (particle.phase + 0.0018 * state.v1 * laneSpeed * particle.bias) % 1;
             const x = geometry.inletStart + particle.phase * (geometry.outletEnd - geometry.inletStart);
-            const wiggle = (state.regime === 'povoljno' ? 0 : state.regime === 'granično' ? 2.5 : 4.5) * Math.sin((x * 0.025) + state.time * 0.015 + particle.lane * 4) * (Math.abs(particle.lane) * 0.65);
-            const y = streamlineY(x, particle.lane, geometry, state.separated) + wiggle;
-            ctx.fillStyle = Math.abs(particle.lane) > 0.62 && state.separated ? '#f97316' : '#2563eb';
+            const wiggle = (0.5 + 4 * state.lossTendency) * Math.sin((x * 0.025) + state.time * 0.015 + particle.lane * 4) * (Math.abs(particle.lane) * 0.65);
+            const y = streamlineY(x, particle.lane, geometry, state.lossTendency) + wiggle;
+            ctx.fillStyle = '#2563eb';
             ctx.beginPath();
             ctx.arc(x, y, 2.2, 0, Math.PI * 2);
             ctx.fill();
         });
 
-        if (state.separated) {
-            ctx.strokeStyle = 'rgba(249,115,22,0.9)';
-            ctx.lineWidth = 2;
-            [geometry.cy - geometry.halfOut + 22, geometry.cy + geometry.halfOut - 22].forEach((yCenter, index) => {
-                ctx.beginPath();
-                ctx.arc(geometry.outletStart + 70, yCenter, 18, index === 0 ? Math.PI * 0.1 : Math.PI * 1.1, index === 0 ? Math.PI * 1.85 : Math.PI * 0.85, index !== 0);
-                ctx.stroke();
-            });
-        }
+        ctx.strokeStyle = 'rgba(249,115,22,' + (0.15 + 0.6 * state.lossTendency) + ')';
+        ctx.lineWidth = 2;
+        [geometry.cy - geometry.halfOut + 22, geometry.cy + geometry.halfOut - 22].forEach((yCenter, index) => {
+            ctx.beginPath();
+            ctx.arc(geometry.outletStart + 70, yCenter, 18, index === 0 ? Math.PI * 0.1 : Math.PI * 1.1, index === 0 ? Math.PI * 1.85 : Math.PI * 0.85, index !== 0);
+            ctx.stroke();
+        });
 
         ctx.strokeStyle = '#0f766e';
         ctx.lineWidth = 2;
@@ -1975,7 +2038,7 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
 4. $z_1 = z_2 + h_w = \mathbf{31,8 \, \text{m}}$.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">⚙ Interaktivni prikaz</div>
 
 ```{=html}
 <!-- WIDGET: Budžet gubitaka cjevovoda -->
@@ -2194,6 +2257,28 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
             font-size: 0.84rem;
             line-height: 1.58;
         }
+        #z123-budget-widget .z123-shell {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+        }
+        #z123-budget-widget .z123-title {
+            font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+        }
+        #z123-budget-widget .z123-scene {
+            border-radius: 16px;
+        }
+        #z123-budget-widget .z123-total,
+        #z123-budget-widget .z123-metric,
+        #z123-budget-widget .z123-controls,
+        #z123-budget-widget .z123-breakdown,
+        #z123-budget-widget .z123-explainer {
+            border-radius: 14px;
+            box-shadow: none;
+        }
         @media (max-width: 960px) {
             #z123-budget-widget .z123-head,
             #z123-budget-widget .z123-summary,
@@ -2214,13 +2299,13 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
         <div class="z123-head">
             <div>
                 <div class="z123-kicker">Z123 budžet gubitaka</div>
-                <h4 class="z123-title">Tek kad razdvojiš linijske i lokalne gubitke postaje jasno koliko visoku uzvodnu kotu sustav doista traži</h4>
-                <p class="z123-sub">Widget sada prvo prikazuje energijsku sliku između spremnika, odmah ispod daje ukupni gubitak i ključne brojeve `Re`, `λ` i `z₁`, a tek niže razlaže koliko otpada na trenje duž cijevi, a koliko na lokalne elemente.</p>
+                <h4 class="z123-title">Energetska bilanca između dvaju otvorenih spremnika</h4>
+                <p class="z123-sub">Slobodne su površine spremnika pri atmosferskom tlaku, pa se raspoloživa visina između njih troši na linijske i lokalne gubitke: h<sub>L</sub> = h<sub>L,lin</sub> + h<sub>L,loc</sub>.</p>
             </div>
-            <div class="z123-chip">h_w = h_w,lin + h_w,loc</div>
+            <div class="z123-chip">h<sub>L</sub> = h<sub>L,lin</sub> + h<sub>L,loc</sub></div>
         </div>
 
-        <div class="z123-note"><strong>Kako čitati budžet:</strong> Prvo iz protoka i hrapavosti dobivaš <strong>Re</strong> i <strong>λ</strong>, zatim razdvajaš linijske i lokalne gubitke u istom cjevovodu. Tek njihov zbroj daje ukupni gubitak <strong>h_w</strong>, a on određuje potrebnu kotu slobodne površine <strong>z₁</strong>.</div>
+        <div class="z123-note"><strong>Kako čitati bilancu:</strong> Hrapavost povećava relativnu hrapavost <strong>k/D</strong>, a time može povećati <strong>&lambda;</strong> i linijski gubitak. Lokalni elementi ne „troše protok”; oni disipiraju mehaničku energiju toka. Njihov se doprinos zbraja s trenjem u cijevi.</div>
 
         <div class="z123-stage">
             <div class="z123-scene">
@@ -2228,14 +2313,14 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
             </div>
             <div class="z123-summary">
                 <div class="z123-total">
-                    <small>Ukupni gubitak h_w</small>
-                    <strong id="z123-hw-total">27.8 m</strong>
-                    <span>To je ukupna visina energije koju cjevovod mora potrošiti između uzvodnog i nizvodnog spremnika.</span>
+                    <small>Potrebna uzvodna kota z₁</small>
+                    <strong id="z123-hw-total">31.8 m</strong>
+                    <span>Za slobodne površine pri atmosferskom tlaku vrijedi z₁ − z₂ = h<sub>L</sub>.</span>
                 </div>
                 <div class="z123-metrics">
                     <div class="z123-metric"><small>Re</small><strong id="z123-re-card">0</strong></div>
                     <div class="z123-metric"><small>λ</small><strong id="z123-lambda-card">0.0000</strong></div>
-                    <div class="z123-metric"><small>z₁</small><strong id="z123-z1-card">0.0 m</strong></div>
+                    <div class="z123-metric"><small>Ukupni h<sub>L</sub></small><strong id="z123-z1-card">0.0 m</strong></div>
                 </div>
             </div>
         </div>
@@ -2259,8 +2344,8 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
                     <div id="z123-bar-local" style="width: 10%;" title="Lokalni gubici"></div>
                 </div>
                 <div class="z123-breakdown-legend">
-                    <span>LINIJSKI (Trenje)</span>
-                    <span>LOKALNI (Zeta)</span>
+                    <span id="z123-legend-friction">LINIJSKI (trenje)</span>
+                    <span id="z123-legend-local">LOKALNI (elementi)</span>
                 </div>
             </div>
 
@@ -2298,16 +2383,24 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
         const z1 = 4 + hw_total;
 
         const perc_lin = (hw_lin / hw_total) * 100;
+        const perc_loc = 100 - perc_lin;
 
         document.getElementById('z123-v-vdot').innerText = vdot_l.toFixed(1);
         document.getElementById('z123-v-k').innerText = k_mm.toFixed(2);
-        document.getElementById('z123-hw-total').innerText = hw_total.toFixed(1) + " m";
+        document.getElementById('z123-hw-total').innerText = z1.toFixed(1) + " m";
         document.getElementById('z123-bar-friction').style.width = perc_lin + "%";
-        document.getElementById('z123-bar-local').style.width = (100 - perc_lin) + "%";
+        document.getElementById('z123-bar-local').style.width = perc_loc + "%";
+        document.getElementById('z123-legend-friction').textContent = 'LINIJSKI: ' + perc_lin.toFixed(0) + ' %';
+        document.getElementById('z123-legend-local').textContent = 'LOKALNI: ' + perc_loc.toFixed(0) + ' %';
         document.getElementById('z123-re-card').textContent = Math.round(Re);
         document.getElementById('z123-lambda-card').textContent = lambda.toFixed(4);
-        document.getElementById('z123-z1-card').textContent = z1.toFixed(1) + ' m';
-        document.getElementById('z123-explainer').textContent = `Za protok ${vdot_l.toFixed(1)} L/s i hrapavost ${k_mm.toFixed(2)} mm dobivaš Re ≈ ${Math.round(Re)} i λ = ${lambda.toFixed(4)}. Linijski gubitak tada iznosi ${hw_lin.toFixed(1)} m, lokalni ${hw_loc.toFixed(1)} m, pa ukupni gubitak ${hw_total.toFixed(1)} m traži uzvodnu kotu z₁ ≈ ${z1.toFixed(1)} m.`;
+        document.getElementById('z123-z1-card').textContent = hw_total.toFixed(1) + ' m';
+        document.getElementById('z123-explainer').textContent =
+            'Za Q = ' + vdot_l.toFixed(1) + ' L/s i k = ' + k_mm.toFixed(2) +
+            ' mm je Re ≈ ' + Math.round(Re) + ' i λ = ' + lambda.toFixed(4) +
+            '. Linijski gubitak iznosi ' + hw_lin.toFixed(1) +
+            ' m, lokalni ' + hw_loc.toFixed(1) + ' m, pa je hL = ' +
+            hw_total.toFixed(1) + ' m i potrebna kota z₁ = ' + z1.toFixed(1) + ' m.';
 
         draw(hw_total, hw_lin, hw_loc);
     }
@@ -2407,7 +2500,7 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 4. $H_{pump} = (z_B - z_A) + h_{wl1} = \mathbf{18,93 \, \text{m}}$.
 
 <hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
+<div class="widget-label">⚙ Interaktivni prikaz</div>
 
 ```{=html}
 <!-- WIDGET: Paralelne cijevi i raspodjela protoka -->
@@ -2623,6 +2716,28 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
             font-size: 0.84rem;
             line-height: 1.58;
         }
+        #z124-parallel-widget .z124-shell {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+        }
+        #z124-parallel-widget .z124-title {
+            font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+        }
+        #z124-parallel-widget .z124-scene {
+            border-radius: 16px;
+        }
+        #z124-parallel-widget .z124-pressure,
+        #z124-parallel-widget .z124-metric,
+        #z124-parallel-widget .z124-controls,
+        #z124-parallel-widget .z124-split,
+        #z124-parallel-widget .z124-explainer {
+            border-radius: 14px;
+            box-shadow: none;
+        }
         @media (max-width: 960px) {
             #z124-parallel-widget .z124-head,
             #z124-parallel-widget .z124-summary,
@@ -2643,13 +2758,13 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
         <div class="z124-head">
             <div>
                 <div class="z124-kicker">Z124 paralelne grane</div>
-                <h4 class="z124-title">Raspodjela protoka ne bira se “po osjećaju”, nego iz uvjeta da obje grane troše istu visinu energije</h4>
-                <p class="z124-sub">Novi raspored prvo izdvaja samu mrežu cijevi, odmah ispod daje tlak u račvi i ključne brzine, a zatim odvojeno pokazuje koje dvije kontrole mijenjaju odnos otpora i kako se protok dijeli između grana.</p>
+                <h4 class="z124-title">Raspodjela protoka u paralelnim cijevima</h4>
+                <p class="z124-sub">U čvorištu vrijedi Q = Q<sub>1</sub> + Q<sub>2</sub>, a između istih čvorova obje grane imaju jednak gubitak visine: h<sub>L,1</sub> = h<sub>L,2</sub>.</p>
             </div>
-            <div class="z124-chip">h<wbr>w,1 = h<wbr>w,2</div>
+            <div class="z124-chip">h<sub>L,1</sub> = h<sub>L,2</sub></div>
         </div>
 
-        <div class="z124-note"><strong>Kako čitati paralelne grane:</strong> U obje grane pad energije mora biti isti, pa raspodjela ne ovisi proizvoljno o protoku nego o hidrauličkom otporu svake grane. Šira cijev zato preuzima veći dio ukupnog protoka jer za isti gubitak može nositi veću brzinu.</div>
+        <div class="z124-note"><strong>Kako čitati paralelne grane:</strong> Raspodjela nije proizvoljna: grana s manjim hidrauličkim otporom preuzima veći dio ukupnog protoka. Povećanjem otpora jedne grane njezin se dio protoka smanjuje, a ostatak ukupnog protoka prelazi u drugu granu.</div>
 
         <div class="z124-stage">
             <div class="z124-scene">
@@ -2659,7 +2774,7 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
                 <div class="z124-pressure">
                     <small>Tlak u račvi p_R</small>
                     <strong id="z124-pr-val">--- kPa</strong>
-                    <span>To je raspoloživi tlak u točki gdje se ukupni protok dijeli na dvije grane koje moraju završiti s istim gubitkom energije.</span>
+                    <span>U izračunu je <span id="z124-hl-equality">h<sub>L,1</sub> = h<sub>L,2</sub></span>, pa se ukupni protok raspodjeljuje prema otporu grana.</span>
                 </div>
                 <div class="z124-metrics">
                     <div class="z124-metric">
@@ -2693,11 +2808,11 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
             <div class="z124-split">
                 <div class="z124-split-title">Raspodjela protoka</div>
                 <div class="z124-split-item">
-                    <div class="z124-bar-label"><span>Cijev 1 (40 mm)</span><b id="z124-v1-out">4.1 L/s</b></div>
+                    <div class="z124-bar-label"><span>Cijev 1 (40 mm): Q<sub>1</sub>/Q</span><b id="z124-v1-out">4.1 L/s (14 %)</b></div>
                     <div class="z124-track"><div id="z124-bar-v1" style="width: 14%;"></div></div>
                 </div>
                 <div class="z124-split-item">
-                    <div class="z124-bar-label"><span>Cijev 2 (<span id="z124-d2-label">80</span> mm)</span><b id="z124-v2-out">25.9 L/s</b></div>
+                    <div class="z124-bar-label"><span>Cijev 2 (<span id="z124-d2-label">80</span> mm): Q<sub>2</sub>/Q</span><b id="z124-v2-out">25.9 L/s (86 %)</b></div>
                     <div class="z124-track"><div id="z124-bar-v2" style="width: 86%;"></div></div>
                 </div>
             </div>
@@ -2731,6 +2846,7 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
         const vdot2 = A2 * v2 * 1000;
 
         const hw = lam1 * (L / d1) * (v1 * v1 / (2 * g));
+        const hw2 = lam2 * (L / d2) * (v2 * v2 / (2 * g));
         const pr = (rho * g * (13 - 5 + hw)) / 1000;
 
         state.v1 = v1;
@@ -2745,15 +2861,21 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
         document.getElementById('z124-v-vtot').innerText = vtot_l;
         document.getElementById('z124-v-d2').innerText = d2_mm;
         document.getElementById('z124-d2-label').innerText = d2_mm;
-        document.getElementById('z124-v1-out').innerText = vdot1.toFixed(1) + ' L/s';
-        document.getElementById('z124-v2-out').innerText = vdot2.toFixed(1) + ' L/s';
+        document.getElementById('z124-v1-out').innerText = vdot1.toFixed(1) + ' L/s (' + (vdot1 / vtot_l * 100).toFixed(0) + ' %)';
+        document.getElementById('z124-v2-out').innerText = vdot2.toFixed(1) + ' L/s (' + (vdot2 / vtot_l * 100).toFixed(0) + ' %)';
         document.getElementById('z124-bar-v1').style.width = (vdot1 / vtot_l * 100) + '%';
         document.getElementById('z124-bar-v2').style.width = (vdot2 / vtot_l * 100) + '%';
+        document.getElementById('z124-hl-equality').innerHTML = 'h<sub>L,1</sub> = ' + hw.toFixed(2) + ' m; h<sub>L,2</sub> = ' + hw2.toFixed(2) + ' m';
         document.getElementById('z124-pr-val').innerText = pr.toFixed(1) + ' kPa';
         document.getElementById('z124-v1-card').textContent = v1.toFixed(2) + ' m/s';
         document.getElementById('z124-v2-card').textContent = v2.toFixed(2) + ' m/s';
         document.getElementById('z124-ratio-card').textContent = ratio_v.toFixed(2);
-        document.getElementById('z124-explainer').textContent = `Za ukupni protok ${vtot_l.toFixed(0)} L/s i promjer druge cijevi ${d2_mm.toFixed(0)} mm uvjet jednakog gubitka daje omjer brzina v₂/v₁ = ${ratio_v.toFixed(2)}. Zato prva grana nosi ${vdot1.toFixed(1)} L/s, druga ${vdot2.toFixed(1)} L/s, a tlak u račvi ispada ${pr.toFixed(1)} kPa.`;
+        document.getElementById('z124-explainer').textContent =
+            'Za Q = ' + vtot_l.toFixed(0) + ' L/s i D₂ = ' +
+            d2_mm.toFixed(0) + ' mm uvjet jednakih gubitaka daje v₂/v₁ = ' +
+            ratio_v.toFixed(2) + '. Zato Q₁ = ' + vdot1.toFixed(1) +
+            ' L/s, Q₂ = ' + vdot2.toFixed(1) + ' L/s, a pR = ' +
+            pr.toFixed(1) + ' kPa. Promjena promjera druge grane mijenja njezin otpor i time raspodjelu protoka.';
     }
 
     function draw() {
@@ -2797,8 +2919,8 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 
         ctx.fillStyle = '#1e293b';
         ctx.font = 'bold 12px Inter';
-        ctx.fillText('grana 1', ox + 92, cy - 106);
-        ctx.fillText('grana 2', ox + 92, cy + 118);
+        ctx.fillText('grana 1: Q₁', ox + 82, cy - 106);
+        ctx.fillText('grana 2: Q₂', ox + 82, cy + 118);
 
         particles.forEach((particle) => {
             const currentV = particle.branch === 1 ? state.v1 : state.v2;
@@ -2826,8 +2948,8 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 
         ctx.fillStyle = '#334155';
         ctx.font = '12px Inter';
-        ctx.fillText('Qtot', ox - 48, cy - 22);
-        ctx.fillText('isti gubitak energije u obje grane', ox + 112, cy + 22);
+        ctx.fillText('Q = Q₁ + Q₂', ox - 58, cy - 22);
+        ctx.fillText('hL,1 = hL,2', ox + 130, cy + 22);
     }
 
     function frame() {

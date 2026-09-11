@@ -149,6 +149,160 @@ Za $n=150\,\mathrm{o/min}$ je $\omega=15,708\,\mathrm{rad/s}$ i $U=r\omega=31,42
 
 ### Dodatni primjer Z112 — Flyboard dinamika {.unnumbered}
 
+```{=html}
+<style>
+/* Grafičke scene V12: fizikalni objekt, tok, vektori i tek zatim matematika. */
+.v12x-stage{padding:clamp(.75rem,2vw,1.25rem);background:linear-gradient(180deg,#fdfefe 0%,#f5f9fc 100%)}
+.v12x-stage svg[data-v12-scene]{display:block;width:100%;height:auto;min-height:0;border:1px solid #cbd9e4;border-radius:14px;background:#fbfdfe}
+.v12x-stage svg[data-v12-scene] text{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+@media(max-width:420px){.v12x-stage svg[data-v12-scene]{border-radius:11px}}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+  const C = { fluid:'#15a7c9', v:'#1269b0', u:'#147a55', w:'#c95d12', f:'#b93645', g:'#b7791f', m:'#0f8f86', ink:'#10283c', steel:'#5b7282', pale:'#dff4fa', guide:'#91a4b3', white:'#ffffff' };
+  const num = function (x, d) { return Number(x).toLocaleString('hr-HR', { minimumFractionDigits:d || 0, maximumFractionDigits:d || 0 }); };
+  const clamp = function (x, a, b) { return Math.max(a, Math.min(b, x)); };
+  const value = function (root, key) { const el = root.querySelector('[data-k="' + key + '"]'); return el ? Number(el.value) : 0; };
+  const part = function (tag, attrs, text) {
+    let out = '<' + tag;
+    Object.keys(attrs || {}).forEach(function (key) { out += ' ' + key + '="' + attrs[key] + '"'; });
+    return out + '>' + (text || '') + '</' + tag + '>';
+  };
+  const text = function (x, y, label, color, size, weight, anchor) {
+    return part('text', { x:x, y:y, fill:color || C.ink, 'font-size':size || 15, 'font-weight':weight || 600, 'text-anchor':anchor || 'start' }, label);
+  };
+  const marker = function (id, color) {
+    return '<marker id="' + id + '" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,4.5 L0,9 z" fill="' + color + '"/></marker>';
+  };
+  const defs = function (id) {
+    return '<defs>' + marker(id + '-v', C.v) + marker(id + '-u', C.u) + marker(id + '-w', C.w) + marker(id + '-f', C.f) + marker(id + '-g', C.g) + marker(id + '-m', C.m) + marker(id + '-fluid', C.fluid) + '</defs>';
+  };
+  const arrow = function (id, x1, y1, x2, y2, kind, label, dx, dy, width) {
+    const color = C[kind];
+    const lab = label ? text((x1 + x2) / 2 + (dx || 0), (y1 + y2) / 2 + (dy || -8), label, color, 15, 750) : '';
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + color + '" stroke-width="' + (width || 4) + '" stroke-linecap="round" marker-end="url(#' + id + '-' + kind + ')"/>' + lab;
+  };
+  const scene = function (root, id, label, box) {
+    let svg = root.querySelector('svg[data-v12-scene="' + id + '"]');
+    if (!svg) {
+      const old = root.querySelector('.v12x-stage svg');
+      if (!old) return null;
+      svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('data-v12-scene', id);
+      svg.setAttribute('role', 'img');
+      old.replaceWith(svg);
+    }
+    svg.setAttribute('viewBox', box);
+    svg.setAttribute('aria-label', label);
+    return svg;
+  };
+  const drawPelton = function (phase) {
+    const root = document.querySelector('#v12-pelton');
+    if (!root) return;
+    const v1 = value(root, 'v'), ratio = value(root, 'u'), beta = value(root, 'b'), keep = value(root, 'k');
+    const u = v1 * ratio, w1 = v1 - u, rad = beta * Math.PI / 180, w2x = keep * w1 * Math.cos(rad), w2y = -keep * w1 * Math.sin(rad);
+    const svg = scene(root, 'pelton', 'Peltonova sapnica šalje cijan mlaz u dvostruku žlicu na rotoru; mlaz se dijeli i izlazi natrag.', '0 0 960 430');
+    if (!svg) return;
+    const spin = (phase * (20 + 2.4 * u)) % 360, vs = clamp(v1 * 1.75, 38, 126), us = clamp(u * 1.75, 0, 118), ws = clamp(w1 * 1.75, 18, 118);
+    const inset = 690, ix = 730, iy = 132, ex = clamp(w2x * 1.75, -100, 55), ey = clamp(w2y * 1.75, -85, 85);
+    const spokes = [0,45,90,135].map(function(a) { const z=(a+spin)*Math.PI/180; return '<line x1="500" y1="215" x2="' + (500+88*Math.cos(z)) + '" y2="' + (215+88*Math.sin(z)) + '" stroke="#8ea3b0" stroke-width="6" stroke-linecap="round"/>'; }).join('');
+    const particles = [0,1,2,3].map(function(i) { const x=185+((phase*42+i*57)%235); return '<circle cx="' + x + '" cy="184" r="4" fill="#d9fbff"/>'; }).join('');
+    svg.innerHTML = defs('pelton') +
+      '<rect width="960" height="430" fill="#fbfdfe"/><path d="M58 198H142V158H178V210H142V198H58" fill="#708594" stroke="' + C.ink + '" stroke-width="3"/><path d="M170 184H425" stroke="' + C.fluid + '" stroke-width="24" stroke-linecap="round"/><path d="M170 184H425" stroke="#bdf4fb" stroke-width="8" stroke-linecap="round"/>' + particles +
+      arrow('pelton', 208, 135, 208 + vs, 135, 'v', 'V₁', 0, -10, 4) + text(72, 235, 'sapnica', C.steel, 15, 700) +
+      '<circle cx="500" cy="215" r="106" fill="#eef3f5" stroke="' + C.steel + '" stroke-width="7"/><circle cx="500" cy="215" r="18" fill="#cad6dc" stroke="' + C.ink + '" stroke-width="4"/><g>' + spokes + '</g>' +
+      '<path d="M433 143 Q476 184 454 214 Q476 246 433 286 Q491 265 522 215 Q491 165 433 143Z" fill="#d4e1e6" stroke="' + C.ink + '" stroke-width="5" stroke-linejoin="round"/><path d="M430 184 L459 214 L430 244" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/><path d="M425 184 C456 183 465 160 486 148" fill="none" stroke="' + C.fluid + '" stroke-width="15" stroke-linecap="round"/><path d="M425 184 C456 238 465 263 486 278" fill="none" stroke="' + C.fluid + '" stroke-width="15" stroke-linecap="round"/><path d="M486 148 C456 143 407 132 366 122" fill="none" stroke="' + C.fluid + '" stroke-width="11" stroke-linecap="round"/><path d="M486 278 C456 286 407 297 366 307" fill="none" stroke="' + C.fluid + '" stroke-width="11" stroke-linecap="round"/>' +
+      '<line x1="500" y1="215" x2="575" y2="145" stroke="' + C.guide + '" stroke-width="2" stroke-dasharray="6 5"/>' + text(548, 177, 'r', C.guide, 16, 750) +
+      '<path d="M564 296 A102 102 0 0 0 610 239" fill="none" stroke="' + C.m + '" stroke-width="5" marker-end="url(#pelton-m)"/>' + text(600, 284, 'ω', C.m, 16, 750) +
+      arrow('pelton', 372, 330, 372 + us, 330, 'u', 'U', 0, -10, 4) +
+      '<rect x="' + inset + '" y="30" width="235" height="236" rx="14" fill="#ffffff" stroke="#cbd9e4" stroke-width="2"/>' + text(710, 59, 'BRZINSKI TROKUT', C.ink, 14, 800) + text(710, 82, 'V = U + W', C.steel, 14, 650) +
+      arrow('pelton', ix, iy, ix + us, iy, 'u', 'U', 0, -10, 4) + arrow('pelton', ix + us, iy, ix + us + ws, iy, 'w', 'W₁', 0, 24, 4) + arrow('pelton', ix, iy + 46, ix + vs, iy + 46, 'v', 'V₁', 0, -10, 4) +
+      arrow('pelton', ix, 220, ix + us, 220, 'u', 'U', 0, -10, 4) + arrow('pelton', ix + us, 220, ix + us + ex, 220 + ey, 'w', 'W₂', 3, -10, 4) + arrow('pelton', ix, 246, ix + us + ex, 246 + ey, 'v', 'V₂', 2, 20, 4) +
+      '<rect x="690" y="286" width="235" height="104" rx="14" fill="#f5fafc" stroke="#cbd9e4" stroke-width="2"/>' + text(710, 314, 'P(U) — pomoćni prikaz', C.ink, 14, 750) + '<path d="M714 370 Q808 304 902 370" fill="none" stroke="' + C.v + '" stroke-width="4"/><line x1="' + (714 + 188*ratio) + '" y1="342" x2="' + (714 + 188*ratio) + '" y2="376" stroke="' + C.f + '" stroke-width="4"/>' + text(714, 410, 'glavna scena: mlaz, žlica i rotor', C.steel, 13, 600);
+  };
+  const drawValve = function () {
+    const root = document.querySelector('#v12-valve');
+    if (!root) return;
+    const q = value(root, 'q'), p = value(root, 'p'), flow = clamp(q * 60, 28, 112), pressure = clamp(p * .85, 20, 120);
+    const svg = scene(root, 'valve', 'Dovodna cijev vodi vodu kroz prirubnicu i tijelo slavine prema izlaznoj sapnici; prikazani su kontrolni volumen i sile.', '0 0 960 370');
+    if (!svg) return;
+    svg.innerHTML = defs('valve') + '<rect width="960" height="370" fill="#fbfdfe"/><path d="M55 205 H245" stroke="#687d89" stroke-width="58" stroke-linecap="round"/><path d="M55 205 H245" stroke="#dff4fa" stroke-width="38" stroke-linecap="round"/><rect x="220" y="154" width="38" height="102" fill="#d5dde2" stroke="' + C.ink + '" stroke-width="4"/><line x1="228" y1="160" x2="228" y2="250" stroke="#71869b" stroke-width="4"/><line x1="249" y1="160" x2="249" y2="250" stroke="#71869b" stroke-width="4"/>' +
+      '<path d="M258 205 H365 Q406 205 406 164 V115 H538" fill="none" stroke="#657985" stroke-width="68" stroke-linejoin="round"/><path d="M258 205 H365 Q406 205 406 164 V115 H538" fill="none" stroke="#dff4fa" stroke-width="44" stroke-linejoin="round"/><path d="M338 148 H425 V205 H338 Z" fill="#bfcbd1" stroke="' + C.ink + '" stroke-width="4"/><path d="M365 148 V100 H400 V148" fill="#879ba5" stroke="' + C.ink + '" stroke-width="4"/><circle cx="382" cy="93" r="28" fill="#dbe5e9" stroke="' + C.ink + '" stroke-width="4"/><line x1="382" y1="65" x2="382" y2="121" stroke="#748b96" stroke-width="5"/><path d="M538 115 H638" stroke="#657985" stroke-width="42"/><path d="M538 115 H638" stroke="#dff4fa" stroke-width="25"/><path d="M638 115 H760" stroke="' + C.fluid + '" stroke-width="18" stroke-linecap="round"/><path d="M638 115 H760" stroke="#c8f8fd" stroke-width="6" stroke-linecap="round"/>' +
+      '<rect x="150" y="48" width="535" height="237" rx="18" fill="none" stroke="' + C.guide + '" stroke-width="2" stroke-dasharray="9 6"/>' + text(505, 306, 'kontrolni volumen', C.guide, 14, 650) + text(205, 142, 'prirubnica', C.ink, 15, 800) +
+      arrow('valve', 168, 182, 168 + pressure, 182, 'f', 'p₁A', 0, -12, 4) + arrow('valve', 560, 84, 560 + flow, 84, 'v', 'v₂', 0, -10, 4) + arrow('valve', 430, 225, 430, 285, 'g', 'W', 10, 8, 4) + arrow('valve', 238, 268, 238 - clamp(45 + p*.35, 55, 105), 268 - clamp(q*18, 10, 38), 'f', 'Fₚ', -15, -12, 5) +
+      '<rect x="760" y="165" width="160" height="125" rx="14" fill="#ffffff" stroke="#cbd9e4" stroke-width="2"/>' + text(782, 194, 'BILANCA SILA', C.ink, 14, 800) + '<line x1="790" y1="260" x2="890" y2="260" stroke="' + C.guide + '" stroke-width="2"/><line x1="810" y1="278" x2="810" y2="205" stroke="' + C.guide + '" stroke-width="2"/>' + arrow('valve', 810, 250, 870, 228, 'f', 'R', 6, -7, 4) + text(790, 300, 'reakcija na prirubnici', C.steel, 12, 600);
+  };
+  const fixCantilever = function () {
+    const root = document.querySelector('#v12-cantilever');
+    if (!root) return;
+    const L = value(root, 'l'), H = value(root, 'h'), v = value(root, 'v'), md = 1000 * Math.PI * .1 * .1 / 4 * v, gp = 12 * 9.81, mg = .5 * gp * L * L, mv = -H * md * v, ma = mg + mv, l0 = Math.sqrt(-2 * mv / gp);
+    const put = function(k, val) { const e=root.querySelector('[data-v="' + k + '"]'); if(e) e.textContent=val; };
+    put('md', num(md,2) + ' kg/s'); put('gp',num(gp,1) + ' N/m'); put('mg','+' + num(mg,1) + ' N m'); put('mv',num(mv,1) + ' N m'); put('ma',num(ma,1) + ' N m'); put('l0',num(l0,2) + ' m');
+    const c=root.querySelector('[data-c]'); if(c) c.textContent='Raspodijeljena težina daje +' + num(mg,1) + ' N m, a mlaz ' + num(mv,1) + ' N m. Pri L = ' + num(l0,2) + ' m rezultantni je moment nula.';
+    const f=root.querySelector('.v12x-formula'); if(f) f.innerHTML='$\\dot m=\\rho(\\pi d^2/4)v$, $G\\prime=m\\prime g$, $M_A=(G\\prime/2)L^2-H\\dot m v$. Za $M_A=0$ vrijedi $L=\\sqrt{2H\\dot m v/G\\prime}$; za izvorne podatke to je $1,55\\,\\mathrm m$.';
+    const svg=scene(root,'cantilever','Konzolni L-cjevovod učvršćen je u A; raspodijeljena težina kraka i mlaz na izlazu stvaraju momente suprotnih predznaka.','0 0 960 400');
+    if(!svg) return;
+    const x=205,y=334,top=y-clamp(H*78,52,220),width=clamp(L*125,38,390), outlet=x+width, scale=110/Math.max(Math.abs(mg),Math.abs(mv),1), posG=800+mg*scale, posV=800+mv*scale, posA=800+ma*scale;
+    let weights=''; for(let i=1;i<=7;i++){const px=x+width*i/8;weights+=arrow('cantilever',px,top-24,px,top+18,'g','',0,0,2);}
+    svg.innerHTML=defs('cantilever')+'<rect width="960" height="400" fill="#fbfdfe"/><path d="M80 '+y+' H230" stroke="#7d909a" stroke-width="9"/><path d="M160 '+y+' l45 -42 v84 z" fill="#c9d4d9" stroke="'+C.ink+'" stroke-width="3"/><path d="M'+x+' '+y+' V'+top+' H'+outlet+'" fill="none" stroke="#536b78" stroke-width="44" stroke-linejoin="round"/><path d="M'+x+' '+y+' V'+top+' H'+outlet+'" fill="none" stroke="#dff4fa" stroke-width="26" stroke-linejoin="round"/><circle cx="'+x+'" cy="'+y+'" r="8" fill="'+C.ink+'"/>'+text(x-14,y+29,'A',C.ink,16,800)+'<path d="M'+outlet+' '+top+' H'+(outlet+92)+'" stroke="'+C.fluid+'" stroke-width="18" stroke-linecap="round"/><path d="M'+outlet+' '+top+' H'+(outlet+92)+'" stroke="#d8fbff" stroke-width="6" stroke-linecap="round"/>'+weights+arrow('cantilever',outlet-4,top+35,outlet-clamp(60+v*12,70,125),top+35,'f','F mlaz',-5,-10,5)+'<line x1="'+(x-40)+'" y1="'+y+'" x2="'+(x-40)+'" y2="'+top+'" stroke="'+C.guide+'" stroke-width="2" stroke-dasharray="6 5"/>'+text(x-67,(y+top)/2,'H',C.guide,15,750)+'<line x1="'+x+'" y1="'+(top-45)+'" x2="'+outlet+'" y2="'+(top-45)+'" stroke="'+C.guide+'" stroke-width="2" stroke-dasharray="6 5"/>'+text((x+outlet)/2,top-53,'L',C.guide,15,750)+'<line x1="'+(x+width/2)+'" y1="'+(top-8)+'" x2="'+(x+width/2)+'" y2="'+(top+33)+'" stroke="'+C.g+'" stroke-width="5" marker-end="url(#cantilever-g)"/>'+text(x+width/2+9,top-14,'G′L',C.g,15,750)+'<text x="'+(x+width/2-18)+'" y="'+(top+54)+'" fill="'+C.guide+'" font-size="13">L/2</text>'+
+      '<rect x="590" y="45" width="320" height="300" rx="14" fill="#ffffff" stroke="#cbd9e4" stroke-width="2"/>'+text(614,76,'BILANCA MOMENATA U A',C.ink,14,800)+text(614,103,'NEGATIVNO',C.steel,12,750)+text(794,103,'0',C.steel,12,750)+text(840,103,'POZITIVNO',C.steel,12,750)+'<line x1="622" y1="130" x2="888" y2="130" stroke="'+C.guide+'" stroke-width="3"/><line x1="800" y1="116" x2="800" y2="146" stroke="'+C.ink+'" stroke-width="3"/><line x1="'+clamp(posV,626,884)+'" y1="130" x2="'+clamp(posV,626,884)+'" y2="170" stroke="'+C.f+'" stroke-width="5"/>'+text(clamp(posV,626,884),190,'M mlaz',C.f,13,750,'middle')+'<line x1="'+clamp(posG,626,884)+'" y1="130" x2="'+clamp(posG,626,884)+'" y2="170" stroke="'+C.g+'" stroke-width="5"/>'+text(clamp(posG,626,884),211,'M težina',C.g,13,750,'middle')+'<circle cx="'+clamp(posA,626,884)+'" cy="252" r="9" fill="'+C.m+'"/><line x1="622" y1="252" x2="888" y2="252" stroke="'+C.guide+'" stroke-width="2"/>'+text(clamp(posA,626,884),280,'M_A = '+num(ma,1)+' N m',C.m,14,800,'middle')+text(614,322,'Pri L = L* markeri se ponište oko nule.',C.steel,13,600);
+  };
+  const drawSprinkler = function (phase) {
+    const root=document.querySelector('#v12-sprinkler'); if(!root)return;
+    const q=value(root,'q'), rpm=value(root,'n'), r=value(root,'r'), om=rpm*2*Math.PI/60, U=r*om, W=q/1000/(4*Math.PI*.01*.01/4), V=U-W, R=clamp(66+r*120,88,190), a=(phase*rpm*.12)%360, svg=scene(root,'sprinkler','Pogled odozgo na rotirajuću prskalicu s glavčinom, četiri mlaznice, tangencijalnim mlazevima i brzinama u jednoj sapnici.','0 0 960 420'); if(!svg)return;
+    const arms=[0,90,180,270].map(function(deg){const ang=(deg+a)*Math.PI/180,x=300+R*Math.cos(ang),y=210+R*Math.sin(ang),tx=-Math.sin(ang),ty=Math.cos(ang),jx=x+tx*52,jy=y+ty*52;return '<line x1="300" y1="210" x2="'+x+'" y2="'+y+'" stroke="#607786" stroke-width="21" stroke-linecap="round"/><circle cx="'+x+'" cy="'+y+'" r="13" fill="#cbd7dc" stroke="'+C.ink+'" stroke-width="3"/><line x1="'+x+'" y1="'+y+'" x2="'+jx+'" y2="'+jy+'" stroke="'+C.fluid+'" stroke-width="13" stroke-linecap="round"/>';}).join('');
+    const us=clamp(U*2,0,120),ws=clamp(W*.65,28,125),vs=clamp(Math.abs(V)*.75,18,125);
+    svg.innerHTML=defs('sprinkler')+'<rect width="960" height="420" fill="#fbfdfe"/><circle cx="300" cy="210" r="'+(R+28)+'" fill="#e7f8fb" opacity=".6"/>'+arms+'<circle cx="300" cy="210" r="34" fill="#dbe7eb" stroke="'+C.ink+'" stroke-width="4"/><circle cx="300" cy="210" r="9" fill="'+C.ink+'"/><path d="M214 125 A120 120 0 0 1 385 115" fill="none" stroke="'+C.m+'" stroke-width="6" marker-end="url(#sprinkler-m)"/>'+text(365,96,'smjer vrtnje',C.m,14,750)+'<line x1="300" y1="210" x2="'+(300+R)+'" y2="210" stroke="'+C.guide+'" stroke-width="2" stroke-dasharray="6 5"/>'+text(300+R/2,200,'r',C.guide,16,750)+'<rect x="590" y="55" width="300" height="286" rx="16" fill="#ffffff" stroke="#cbd9e4" stroke-width="2"/>'+text(614,87,'BRZINSKI TROKUT NA SAPNICI',C.ink,14,800)+text(614,110,'U = rω; V = U + W',C.steel,14,650)+arrow('sprinkler',638,176,638+us,176,'u','U',0,-10,4)+arrow('sprinkler',638+us,176,638+us-ws,176,'w','Wₒᵤₜ',0,24,4)+arrow('sprinkler',638,235,638+(V<0?-vs:vs),235,'v','Vθ,izl',0,24,4)+'<line x1="638" y1="278" x2="830" y2="278" stroke="'+C.guide+'" stroke-width="2"/>'+text(638,306,'Moment koristi apsolutni Vθ,izl.',C.steel,13,650)+text(638,328,'4 mlaznice · U='+num(U,1)+' m/s',C.steel,13,650);
+  };
+  const drawWind = function () {
+    const root=document.querySelector('#v12-wind'); if(!root)return;
+    const D=value(root,'d'),v=value(root,'v'),e=value(root,'e'), R=clamp(34+D*.55,54,118), len=clamp(34+v*8,55,145), wake=R*(1+.32*e), svg=scene(root,'wind','Tehnički prikaz vjetroturbine: dolazni zrak prolazi kroz translucentni rotor disk promjera D i usporava se u nizvodnoj struji.','0 0 960 360'); if(!svg)return;
+    const incoming=[100,155,210].map(function(y){return arrow('wind',70,y,70+len,y,'v','',0,0,3);}).join(''), outgoing=[120,180,240].map(function(y){return arrow('wind',640,y,640+len*.72,y,'v','',0,0,3);}).join('');
+    svg.innerHTML=defs('wind')+'<rect width="960" height="360" fill="#fbfdfe"/><path d="M70 '+(180-R*.72)+' C270 '+(180-R*.72)+' 330 '+(180-R)+' 470 '+(180-R)+' L470 '+(180+R)+' C330 '+(180+R)+' 270 '+(180+R*.72)+' 70 '+(180+R*.72)+'Z" fill="'+C.fluid+'" opacity=".14"/><path d="M490 '+(180-R)+' C650 '+(180-wake)+' 760 '+(180-wake*.82)+' 895 '+(180-wake*.64)+' L895 '+(180+wake*.64)+' C760 '+(180+wake*.82)+' 650 '+(180+wake)+' 490 '+(180+R)+'Z" fill="'+C.fluid+'" opacity=".12"/>'+incoming+outgoing+'<line x1="500" y1="180" x2="500" y2="318" stroke="#627884" stroke-width="13"/><path d="M444 320 H556 L535 334 H465 Z" fill="#718792" stroke="'+C.ink+'" stroke-width="3"/><circle cx="500" cy="180" r="'+R+'" fill="'+C.fluid+'" opacity=".16" stroke="'+C.m+'" stroke-width="7"/><path d="M500 180 L'+(500+R*.78)+' '+(180-R*.28)+' M500 180 L'+(500-R*.65)+' '+(180-R*.48)+' M500 180 L'+(500-R*.25)+' '+(180+R*.78)+'" stroke="'+C.steel+'" stroke-width="9" stroke-linecap="round"/><line x1="'+(500-R)+'" y1="'+(180-R-16)+'" x2="'+(500+R)+'" y2="'+(180-R-16)+'" stroke="'+C.guide+'" stroke-width="2" marker-start="url(#wind-m)" marker-end="url(#wind-m)"/>'+text(500,180-R-26,'D = '+num(D,0)+' m',C.guide,15,750,'middle')+text(104,76,'dolazni tok v₁',C.v,15,750)+text(670,83,'usporeni tok v₂',C.v,15,750)+arrow('wind',538,255,538,206,'f','reakcija',10,-4,4)+text(92,335,'A = πD²/4 · veći D povećava swept area',C.steel,14,650);
+  };
+  const drawHeli = function (phase) {
+    const root=document.querySelector('#v12-heli'); if(!root)return;
+    const mass=value(root,'m'),D=value(root,'d'),A=Math.PI*D*D/4,T=mass*1000*9.81,v=Math.sqrt(T/(1.18*A)),rotW=clamp(D*23,190,440), down=clamp(42+v*4,70,118), cargo=mass>10, dash=(phase*38)%42, svg=scene(root,'heli','Helikopter u lebdenju s tehnički nacrtanim trupom, rotorom, nizvodnim stupcem zraka te jednakim potiskom i težinom.','0 0 960 385'); if(!svg)return;
+    svg.innerHTML=defs('heli')+'<rect width="960" height="385" fill="#fbfdfe"/><path d="M'+(480-rotW/2)+' 78 H'+(480+rotW/2)+'" stroke="'+C.ink+'" stroke-width="9" stroke-linecap="round"/><ellipse cx="480" cy="92" rx="'+(rotW/2)+'" ry="20" fill="'+C.fluid+'" opacity=".12" stroke="'+C.m+'" stroke-width="2" stroke-dasharray="7 5"/><path d="M408 158 Q472 120 548 156 L574 191 L526 214 H424 L385 190 Z" fill="#d7e1e5" stroke="'+C.ink+'" stroke-width="4"/><path d="M548 166 H683 L728 184 L678 197 H552" fill="#c5d1d7" stroke="'+C.ink+'" stroke-width="4"/><path d="M438 214 L414 255 M516 214 L542 255" stroke="'+C.ink+'" stroke-width="6" stroke-linecap="round"/><path d="M385 190 L342 196" stroke="'+C.ink+'" stroke-width="4"/><path d="M'+(480-down)+' 224 C'+(420-down/2)+' 292 '+(432-down/2)+' 342 '+(480-down*.72)+' 350 H'+(480+down*.72)+' C'+(528+down/2)+' 342 '+(540+down/2)+' 292 '+(480+down)+' 224 Z" fill="'+C.fluid+'" opacity=".20"/><path d="M430 230 V340 M468 230 V350 M505 230 V350 M540 230 V340" stroke="'+C.fluid+'" stroke-width="5" stroke-dasharray="16 10" stroke-dashoffset="'+dash+'" marker-end="url(#heli-fluid)"/>'+arrow('heli',392,164,392,94,'f','T',10,-6,5)+arrow('heli',570,182,570,252,'g','W=mg',12,8,5)+text(652,260,'nizvodna struja v_w',C.fluid,15,750)+text(652,283,'A = '+num(A,1)+' m²',C.steel,14,650)+(cargo?'<line x1="480" y1="218" x2="480" y2="285" stroke="'+C.steel+'" stroke-width="3"/><rect x="456" y="285" width="48" height="35" rx="4" fill="#d7b36c" stroke="'+C.ink+'" stroke-width="3"/>'+text(450,342,'dodatni teret',C.g,13,700):'')+text(63,350,'U hoveru: T = mg; strelice su jednake duljine.',C.steel,14,650);
+  };
+  const drawGate = function () {
+    const root=document.querySelector('#v12-gate'); if(!root)return;
+    const h1=value(root,'h1'),h2=Math.min(value(root,'h2'),h1-.05), base=320, a=clamp(h1*62,45,245), b=clamp(h2*62,25,190), svg=scene(root,'gate','Bočni presjek ustave s višom uzvodnom i nižom nizvodnom razinom vode, trokutastim dijagramima hidrostatskog tlaka i tokom ispod ploče.','0 0 960 405'); if(!svg)return;
+    const leftY=base-a,rightY=base-b, force=clamp((h1*h1-h2*h2)*8,30,130);
+    svg.innerHTML=defs('gate')+'<rect width="960" height="405" fill="#fbfdfe"/><path d="M45 '+base+' H915" stroke="#718792" stroke-width="10"/><path d="M65 '+leftY+' H420 V'+base+' H65 Z" fill="'+C.fluid+'" opacity=".25"/><path d="M530 '+rightY+' H895 V'+base+' H530 Z" fill="'+C.fluid+'" opacity=".25"/><path d="M65 '+leftY+' H420 M530 '+rightY+' H895" stroke="'+C.fluid+'" stroke-width="5"/><rect x="438" y="48" width="54" height="272" rx="4" fill="#c8d3d8" stroke="'+C.ink+'" stroke-width="4"/><path d="M420 '+base+' H438 M492 '+base+' H530" stroke="'+C.ink+'" stroke-width="8"/><path d="M245 '+(base-16)+' H400" stroke="'+C.fluid+'" stroke-width="17" stroke-linecap="round" marker-end="url(#gate-fluid)"/><path d="M530 '+(base-16)+' H700" stroke="'+C.fluid+'" stroke-width="12" stroke-linecap="round" marker-end="url(#gate-fluid)"/><rect x="395" y="'+(base-50)+'" width="140" height="62" rx="9" fill="none" stroke="'+C.guide+'" stroke-width="2" stroke-dasharray="7 5"/>'+text(418,base-61,'kontrolni volumen',C.guide,13,650)+
+      '<path d="M420 '+leftY+' L358 '+base+' L420 '+base+' Z" fill="'+C.f+'" opacity=".20" stroke="'+C.f+'" stroke-width="2"/><path d="M530 '+rightY+' L590 '+base+' L530 '+base+' Z" fill="'+C.f+'" opacity=".16" stroke="'+C.f+'" stroke-width="2"/>'+text(290,base-10,'p₁',C.f,15,750)+text(600,base-10,'p₂',C.f,15,750)+'<line x1="92" y1="'+leftY+'" x2="92" y2="'+base+'" stroke="'+C.guide+'" stroke-width="2"/><line x1="84" y1="'+leftY+'" x2="100" y2="'+leftY+'" stroke="'+C.guide+'" stroke-width="2"/><line x1="84" y1="'+base+'" x2="100" y2="'+base+'" stroke="'+C.guide+'" stroke-width="2"/>'+text(64,(leftY+base)/2,'h₁',C.guide,15,750)+'<line x1="865" y1="'+rightY+'" x2="865" y2="'+base+'" stroke="'+C.guide+'" stroke-width="2"/><line x1="857" y1="'+rightY+'" x2="873" y2="'+rightY+'" stroke="'+C.guide+'" stroke-width="2"/><line x1="857" y1="'+base+'" x2="873" y2="'+base+'" stroke="'+C.guide+'" stroke-width="2"/>'+text(876,(rightY+base)/2,'h₂',C.guide,15,750)+arrow('gate',420,150,420+force,150,'f','F ustave',0,-10,5)+arrow('gate',245,base-66,350,base-66,'v','v₁',0,-10,4)+arrow('gate',555,base-66,650,base-66,'v','v₂',0,-10,4)+
+      '<rect x="170" y="348" width="620" height="38" rx="12" fill="#ffffff" stroke="#cbd9e4" stroke-width="2"/>'+arrow('gate',205,367,292,367,'f','Fhydro,1',0,-10,3)+arrow('gate',430,367,365,367,'f','−Fhydro,2',-2,-10,3)+arrow('gate',560,367,640,367,'v','Fimpuls',0,-10,3)+arrow('gate',700,367,758,367,'f','Fgate',0,-10,4);
+  };
+  const drawFly = function () {
+    const root=document.querySelector('#v12-fly'); if(!root)return;
+    const jetV=value(root,'v'), status=(root.querySelector('[data-status]') || {}).textContent || '', hit=status.match(/t=([0-9]+(?:,[0-9]+)?)/), time=hit?Number(hit[1].replace(',','.')):0, A=4*Math.PI*.05*.05/4,m=150,g=9.81,F=1000*A*jetV*jetV,a=(F-m*g)/m,t10=a>0?Math.sqrt(20/a):Infinity,vc=a>0?a*t10:0,cut=isFinite(t10)&&time>t10,after=cut?time-t10:0,y=cut?10+vc*after-.5*g*after*after:(a>0?.5*a*time*time:0),vy=cut?vc-g*after:(a>0?a*time:0),landed=y<0,shownY=Math.max(0,y),yy=334-clamp(shownY*19,0,246),jets=!cut&&!landed, svg=scene(root,'fly','Osoba na Flyboardu s četiri sapnice, vodenim mlazovima, potiskom, težinom i visinskom skalom; nakon prekida mlaza nastavlja se gibati prema gore.','0 0 960 430'); if(!svg)return;
+    const nozzle=[-28,-10,10,28].map(function(dx){return '<circle cx="'+(332+dx)+'" cy="'+(yy+34)+'" r="5" fill="'+C.ink+'"/>'+(jets?'<path d="M'+(332+dx)+' '+(yy+39)+' L'+(322+dx)+' '+Math.min(366,yy+125)+'" stroke="'+C.fluid+'" stroke-width="9" stroke-linecap="round"/><path d="M'+(332+dx)+' '+(yy+39)+' L'+(322+dx)+' '+Math.min(366,yy+125)+'" stroke="#d4fbff" stroke-width="2"/>':'');}).join('');
+    svg.innerHTML=defs('fly')+'<rect width="960" height="430" fill="#fbfdfe"/><path d="M45 372 H915" stroke="'+C.fluid+'" stroke-width="30"/><path d="M45 358 H915" stroke="#bceff7" stroke-width="5"/><line x1="100" y1="62" x2="100" y2="356" stroke="'+C.guide+'" stroke-width="3"/><line x1="91" y1="334" x2="109" y2="334" stroke="'+C.guide+'" stroke-width="2"/><line x1="91" y1="144" x2="109" y2="144" stroke="'+C.guide+'" stroke-width="2"/>'+text(55,339,'0 m',C.guide,14,700)+text(48,149,'10 m',C.guide,14,700)+'<path d="M120 144 H850" stroke="'+C.g+'" stroke-width="2" stroke-dasharray="7 5"/>'+text(725,134,'prekid pri 10 m',C.g,14,700)+'<circle cx="332" cy="'+(yy-54)+'" r="19" fill="#d9e3e7" stroke="'+C.ink+'" stroke-width="3"/><path d="M332 '+(yy-35)+' V'+(yy+4)+' M332 '+(yy-22)+' L305 '+(yy-3)+' M332 '+(yy-22)+' L359 '+(yy-3)+' M332 '+(yy+4)+' L312 '+(yy+31)+' M332 '+(yy+4)+' L350 '+(yy+31)+'" fill="none" stroke="'+C.ink+'" stroke-width="6" stroke-linecap="round"/><rect x="286" y="'+(yy+28)+'" width="92" height="11" rx="5" fill="#617986" stroke="'+C.ink+'" stroke-width="2"/>'+nozzle+(jets?arrow('fly',405,yy+8,405,yy-60,'f','T',12,-4,5):'')+arrow('fly',457,yy-3,457,yy+72,'g','W=mg',12,8,5)+text(610,205,'y = '+num(shownY,2)+' m',C.ink,18,800)+text(610,234,'v = '+num(landed?0:vy,2)+' m/s',C.steel,15,650)+text(610,262,landed?'na tlu':(cut?'mlaz isključen: a = −g':'mlaz uključen'),landed?C.ink:(cut?C.f:C.fluid),15,750)+((cut&&!landed)?'<path d="M650 292 H812" stroke="'+C.v+'" stroke-width="3" marker-end="url(#fly-v)"/>'+text(650,282,'brzina ostaje kontinuirana',C.v,14,700):'')+text(605,330,landed?'mlaz je isključen; sustav je ponovno na tlu':(jets?'4 sapnice · aktivan mlaz = potisak':'mlaz je isključen; brzina se mijenja zbog gravitacije'),C.steel,14,650);
+  };
+  const bind = function (id, fn) {
+    const root=document.querySelector(id); if(!root)return;
+    root.querySelectorAll('input').forEach(function(el){el.addEventListener('input',function(){requestAnimationFrame(fn);});});
+    root.querySelectorAll('button').forEach(function(el){el.addEventListener('click',function(){setTimeout(fn,0);});});
+    fn();
+  };
+  const plainHeader = function (selector, content) { const el=document.querySelector(selector); if(el) el.textContent=content; };
+  plainHeader('#v12-sprinkler .v12x-head h3', 'Četiri mlaznice: moment računa apsolutnu izlaznu komponentu Vθ');
+  plainHeader('#v12-wind .v12x-head h3', 'Promjer ulazi s D², a brzina vjetra s v³ u raspoloživu snagu');
+  plainHeader('#v12-heli .v12x-head h3', 'Za lebdenje vrijedi T = mg');
+  plainHeader('#v12-fly .v12x-head h3', 'Pri prekidu mlaza brzina ostaje, a ubrzanje se promijeni u −g');
+  bind('#v12-valve', drawValve); bind('#v12-cantilever', fixCantilever); bind('#v12-wind', drawWind); bind('#v12-gate', drawGate);
+  let last=0;
+  function animate(now) {
+    if(now-last>34){ last=now; drawPelton(now/1000); drawSprinkler(now/1000); drawHeli(now/1000); drawFly(); }
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+});
+</script>
+```
+
 Osoba na Flyboard-u penje se na visinu 10 metara. Četiri sapnice promjera 5 cm, pričvršćene na noge, omogućuju podizanje osobe i sustava Flyboard ukupne mase 150 kg. Potrebno je odrediti minimalnu brzinu mlaza za lebdenje. Ako je brzina mlaza 15 m/s, treba odrediti potrebno vrijeme za postizanje zadane visine i brzinu podizanja. Zatim treba odrediti koliko će se sustav podignuti iznad visine od 10 m ako se dotok vode prekine točno pri dosezanju te visine, te koliko će se vremena osoba zadržati iznad 10 m.
 
 <div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$H=10\,\text{m}$, $4 \times d=5\,\text{cm}$, $m=150\,\text{kg}$, $v=15\,\text{m/s}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$v_{min}$; $t$; $w$; $\Delta H$; $\Delta t$</span></div></div>

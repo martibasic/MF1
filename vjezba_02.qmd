@@ -233,6 +233,9 @@ Preko zakrivljene granice vrijedi $\Delta p=\sigma(1/R_1+1/R_2)$. Za kap tekući
         #widget-visc-basics .metric-cyan .metric-value { color: #0f766e; }
         #widget-visc-basics .visc-chain { margin:0 0 14px; padding:12px 14px; border:1px solid #fed7aa; border-radius:14px; background:#fff7ed; color:#7c2d12; font-size:0.88rem; line-height:1.55; }
         #widget-visc-basics .visc-chain strong { color:#9a3412; }
+        #widget-visc-basics .visc-presets { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:-2px 0 14px; color:#475569; font-size:.82rem; }
+        #widget-visc-basics .visc-presets button { border:1px solid #bcd2df; border-radius:9px; background:#fff; color:#234863; padding:.45rem .65rem; font-weight:750; cursor:pointer; }
+        #widget-visc-basics .visc-presets button[aria-pressed=true] { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
         #widget-visc-basics .explain-box {
             padding: 14px 16px;
             background: #f8fafc;
@@ -282,6 +285,12 @@ Preko zakrivljene granice vrijedi $\Delta p=\sigma(1/R_1+1/R_2)$. Za kap tekući
             <label>Zračnost δ: <span id="h-slider-val">10</span> mm</label>
             <input type="range" id="h-slider" min="2" max="30" value="10" step="1">
         </div>
+    </div>
+
+    <div class="visc-presets" role="group" aria-label="Provjera utjecaja samo viskoznosti">
+        <strong>Sanity check — U i δ ostaju isti:</strong>
+        <button type="button" data-visc-mu="0.10" aria-pressed="true">μ = 0,10 Pa·s</button>
+        <button type="button" data-visc-mu="0.30" aria-pressed="false">μ = 0,30 Pa·s</button>
     </div>
 
     <div class="metrics">
@@ -503,8 +512,18 @@ Preko zakrivljene granice vrijedi $\Delta p=\sigma(1/R_1+1/R_2)$. Za kap tekući
         }
 
         vSl.addEventListener('input', () => { lastChanged = 'speed'; update(); });
-        muSl.addEventListener('input', () => { lastChanged = 'viscosity'; update(); });
+        function syncMuPresets() {
+            document.querySelectorAll('#widget-visc-basics [data-visc-mu]').forEach(button => {
+                button.setAttribute('aria-pressed', String(Math.abs(+button.dataset.viscMu - +muSl.value) < 0.001));
+            });
+        }
+        document.querySelectorAll('#widget-visc-basics [data-visc-mu]').forEach(button => button.addEventListener('click', () => {
+            muSl.value = button.dataset.viscMu;
+            muSl.dispatchEvent(new Event('input', { bubbles:true }));
+        }));
+        muSl.addEventListener('input', () => { lastChanged = 'viscosity'; syncMuPresets(); update(); });
         hSl.addEventListener('input', () => { lastChanged = 'gap'; update(); });
+        syncMuPresets();
         update();
         animate();
     })();
@@ -1177,7 +1196,11 @@ Najprije promatramo ravnotežu na stupcu u jednoj kapilari. Površinska sila dje
         #widget-z12-vdual-fixed .z12-sub { margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px; }
         #widget-z12-vdual-fixed .z12-note { background:rgba(15,23,42,0.92); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px; }
         #widget-z12-vdual-fixed .z12-scene { position:relative; background:radial-gradient(circle at top, #ffffff 0%, #f8fafc 72%); border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; margin-bottom:16px; }
-        #widget-z12-vdual-fixed canvas { display:block; width:100%; height:auto; }
+        #widget-z12-vdual-fixed canvas { display:none; }
+        #widget-z12-vdual-fixed #z12-vector { display:block; width:100%; height:auto; }
+        #widget-z12-vdual-fixed .z12-presets { display:flex; gap:8px; flex-wrap:wrap; margin:-4px 0 14px; }
+        #widget-z12-vdual-fixed .z12-presets button { border:1px solid #bcd2df; border-radius:9px; background:#fff; color:#234863; padding:.45rem .65rem; font-weight:750; cursor:pointer; }
+        #widget-z12-vdual-fixed .z12-presets button[aria-pressed=true] { background:#0f766e; border-color:#0f766e; color:#fff; }
         #widget-z12-vdual-fixed .z12-controls { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; }
         #widget-z12-vdual-fixed .z12-control, #widget-z12-vdual-fixed .z12-metric, #widget-z12-vdual-fixed .z12-explainer { background:#fff; border:1px solid #e2e8f0; border-radius:14px; }
         #widget-z12-vdual-fixed .z12-control { padding:14px 16px; }
@@ -1188,7 +1211,11 @@ Najprije promatramo ravnotežu na stupcu u jednoj kapilari. Površinska sila dje
         #widget-z12-vdual-fixed .z12-metric small { display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px; }
         #widget-z12-vdual-fixed .z12-metric strong { font-size:1.18rem; font-weight:800; }
         #widget-z12-vdual-fixed .z12-explainer { padding:14px 16px; background:#f8fafc; font-size:0.84rem; color:#334155; line-height:1.55; }
-        #widget-z12-vdual-fixed .z12-label { position:absolute; top:14px; font-size:0.78rem; font-weight:800; width:50%; text-align:center; }
+        #widget-z12-vdual-fixed .z12-label { display:none; }
+        @media (max-width:640px) {
+            #widget-z12-vdual-fixed .z12-scene { overflow-x:auto; }
+            #widget-z12-vdual-fixed #z12-vector { width:720px; max-width:none; }
+        }
     </style>
 
     <div class="z12-head">
@@ -1199,15 +1226,23 @@ Najprije promatramo ravnotežu na stupcu u jednoj kapilari. Površinska sila dje
         </div>
         <div class="z12-note">
             <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Znak odlučuje smjer</div>
-            <div>Voda: <strong>θ = 0°</strong> -> <strong>cos θ > 0</strong></div>
-            <div>Živa: <strong>θ = 130°</strong> -> <strong>cos θ < 0</strong></div>
+            <div>Voda: <strong>θ = 0°</strong> → <strong>cos θ &gt; 0</strong></div>
+            <div>Živa: <strong>θ = 130°</strong> → <strong>cos θ &lt; 0</strong></div>
             <div>zato jedna tekućina ide gore, a druga dolje</div>
         </div>
+    </div>
+
+    <div class="z12-presets" role="group" aria-label="Provjera utjecaja kuta kvašenja">
+        <strong style="align-self:center;color:#475569;font-size:.82rem;">Lokalni vektorski pokus:</strong>
+        <button type="button" data-z12-theta="30" aria-pressed="true">θ &lt; 90° · uspon</button>
+        <button type="button" data-z12-theta="90" aria-pressed="false">θ = 90° · bez pomaka</button>
+        <button type="button" data-z12-theta="130" aria-pressed="false">θ &gt; 90° · depresija</button>
     </div>
 
     <div class="z12-scene">
         <span class="z12-label" style="left:0; color:#2563eb;">Voda: konkavni menisk i kapilarni uspon</span>
         <span class="z12-label" style="right:0; color:#475569;">Živa: konveksni menisk i kapilarna depresija</span>
+        <svg id="z12-vector" viewBox="0 0 900 440" role="img" aria-label="Vektorski prikaz kapilarnog uspona, depresije i projekcije površinske napetosti"></svg>
         <canvas id="canvas-z12-dual" width="900" height="420"></canvas>
     </div>
 
@@ -1349,6 +1384,78 @@ Najprije promatramo ravnotežu na stupcu u jednoj kapilari. Površinska sila dje
         update();
     })();
     </script>
+    <script>
+    (() => {
+        const root = document.getElementById('widget-z12-vdual-fixed');
+        const svg = root?.querySelector('#z12-vector');
+        const slider = root?.querySelector('#r-slider-z12-dual');
+        if (!root || !svg || !slider) return;
+        let conceptTheta = 30;
+        const fmt = (n, d = 1) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits: d, maximumFractionDigits: d });
+        function renderVector() {
+            const rMm = +slider.value;
+            const g = 9.81;
+            const hWaterMm = 1000 * 2 * 0.0662 / (983.7 * g * rMm / 1000);
+            const hMercuryMm = 1000 * 2 * 0.47 * Math.cos(130 * Math.PI / 180) / (13480 * g * rMm / 1000);
+            const baseY = 300;
+            const tubeHalf = 16 + 28 * rMm / 1.5;
+            const waterShift = Math.min(128, Math.abs(hWaterMm) * 2.15);
+            const mercuryShift = Math.min(92, Math.abs(hMercuryMm) * 2.15);
+            const waterY = baseY - waterShift;
+            const mercuryY = baseY + mercuryShift;
+            const theta = conceptTheta * Math.PI / 180;
+            const contactX = 405, contactY = 220, length = 68;
+            const endX = contactX + Math.sin(theta) * length;
+            const endY = contactY - Math.cos(theta) * length;
+            const arcX = contactX + Math.sin(theta) * 31;
+            const arcY = contactY - Math.cos(theta) * 31;
+            const verticalEnd = contactY - Math.cos(theta) * length;
+            const relation = conceptTheta < 90 ? 'cos θ > 0 → uspon' : conceptTheta > 90 ? 'cos θ < 0 → depresija' : 'cos θ = 0 → nema kapilarnog pomaka';
+            svg.innerHTML = `
+              <defs>
+                <marker id="z12-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
+                <marker id="z12-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
+                <marker id="z12-arr-gray" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#6b7280"/></marker>
+              </defs>
+              <rect width="900" height="440" fill="#fff"/>
+              <rect x="42" y="${baseY}" width="292" height="112" rx="10" fill="#dbeafe"/>
+              <path d="M${190-tubeHalf} 108V390M${190+tubeHalf} 108V390" stroke="#64748b" stroke-width="5"/>
+              <path d="M${190-tubeHalf} ${waterY}Q190 ${waterY+18} ${190+tubeHalf} ${waterY}V390H${190-tubeHalf}Z" fill="#60a5fa" opacity=".78"/>
+              <path d="M${190-tubeHalf} ${waterY}Q190 ${waterY+18} ${190+tubeHalf} ${waterY}" fill="none" stroke="#1d4ed8" stroke-width="4"/>
+              <path d="M145 ${baseY}V${waterY}" stroke="#2563eb" stroke-width="3" marker-end="url(#z12-arr-blue)"/>
+              <text x="75" y="76" fill="#1d4ed8" font-size="19" font-weight="800">VODA · θ = 0°</text>
+              <text x="135" y="${(baseY+waterY)/2}" text-anchor="end" fill="#1d4ed8" font-size="16" font-weight="800">h = +${fmt(hWaterMm)} mm</text>
+              <text x="80" y="414" fill="#475569" font-size="14">konkavan meniskus</text>
+              <rect x="566" y="${baseY}" width="292" height="112" rx="10" fill="#e5e7eb"/>
+              <path d="M${710-tubeHalf} 108V390M${710+tubeHalf} 108V390" stroke="#64748b" stroke-width="5"/>
+              <path d="M${710-tubeHalf} ${mercuryY}Q710 ${mercuryY-18} ${710+tubeHalf} ${mercuryY}V390H${710-tubeHalf}Z" fill="#9ca3af" opacity=".9"/>
+              <path d="M${710-tubeHalf} ${mercuryY}Q710 ${mercuryY-18} ${710+tubeHalf} ${mercuryY}" fill="none" stroke="#4b5563" stroke-width="4"/>
+              <path d="M790 ${baseY}V${mercuryY}" stroke="#6b7280" stroke-width="3" marker-end="url(#z12-arr-gray)"/>
+              <text x="610" y="76" fill="#4b5563" font-size="19" font-weight="800">ŽIVA · θ = 130°</text>
+              <text x="800" y="370" text-anchor="middle" fill="#4b5563" font-size="16" font-weight="800">h = ${fmt(hMercuryMm)} mm</text>
+              <text x="608" y="414" fill="#475569" font-size="14">konveksan meniskus</text>
+              <rect x="325" y="104" width="250" height="218" rx="16" fill="#f8fafc" stroke="#cbd5e1"/>
+              <text x="450" y="130" text-anchor="middle" fill="#334155" font-size="15" font-weight="800">LOKALNA GEOMETRIJA KONTAKTA</text>
+              <path d="M${contactX} 158V278" stroke="#64748b" stroke-width="7"/>
+              <circle cx="${contactX}" cy="${contactY}" r="5" fill="#0f172a"/>
+              <path d="M${contactX} ${contactY}L${endX} ${endY}" stroke="#0f9b8e" stroke-width="6" marker-end="url(#z12-arr-teal)"/>
+              <text x="${endX+8}" y="${endY-5}" fill="#0f766e" font-size="17" font-weight="800">σ</text>
+              <path d="M${contactX} ${contactY-31}A31 31 0 0 1 ${arcX} ${arcY}" fill="none" stroke="#ea580c" stroke-width="3"/>
+              <text x="${contactX+34}" y="${contactY-13}" fill="#c2410c" font-size="17" font-weight="800">θ = ${conceptTheta}°</text>
+              <path d="M535 ${contactY}V${verticalEnd}" stroke="#2563eb" stroke-width="5" marker-end="url(#z12-arr-blue)"/>
+              <text x="545" y="${(contactY+verticalEnd)/2}" fill="#1d4ed8" font-size="14" font-weight="800">σ cos θ</text>
+              <text x="450" y="300" text-anchor="middle" fill="#334155" font-size="15" font-weight="800">${relation}</text>
+              <text x="450" y="430" text-anchor="middle" fill="#64748b" font-size="13">promjer i vertikalni pomak prikazani su u uvećanoj, odvojenoj skali</text>`;
+        }
+        root.querySelectorAll('[data-z12-theta]').forEach(button => button.addEventListener('click', () => {
+            conceptTheta = +button.dataset.z12Theta;
+            root.querySelectorAll('[data-z12-theta]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+            renderVector();
+        }));
+        slider.addEventListener('input', renderVector);
+        renderVector();
+    })();
+    </script>
 </div>
 <div class="fizikalni-uvid">
 Voda se uspinje u kapilari zbog jače adhezije (privlačenje staklu), dok se živa spušta (depresija) zbog jače kohezije (privlačenje samoj sebi).
@@ -1389,8 +1496,12 @@ Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\s
         #widget-z13-advanced .z13-title { margin:0; color:#0f172a; font-size:1.42rem; }
         #widget-z13-advanced .z13-sub { margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px; }
         #widget-z13-advanced .z13-note { background:rgba(15,23,42,0.92); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px; }
-        #widget-z13-advanced .z13-scene { position:relative; background:#0f172a; border-radius:18px; overflow:hidden; margin-bottom:16px; }
-        #widget-z13-advanced canvas { display:block; width:100%; height:auto; }
+        #widget-z13-advanced .z13-scene { position:relative; background:#f8fafc; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; margin-bottom:16px; }
+        #widget-z13-advanced canvas { display:none; }
+        #widget-z13-advanced #z13-vector { display:block; width:100%; height:auto; }
+        #widget-z13-advanced .z13-presets { display:flex; gap:8px; flex-wrap:wrap; margin:-4px 0 14px; }
+        #widget-z13-advanced .z13-presets button { border:1px solid #bcd2df; border-radius:9px; background:#fff; color:#234863; padding:.45rem .65rem; font-weight:750; cursor:pointer; }
+        #widget-z13-advanced .z13-presets button[aria-pressed=true] { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
         #widget-z13-advanced .z13-controls { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; }
         #widget-z13-advanced .z13-control, #widget-z13-advanced .z13-metric, #widget-z13-advanced .z13-explainer { background:#fff; border:1px solid #e2e8f0; border-radius:14px; }
         #widget-z13-advanced .z13-control { padding:14px 16px; }
@@ -1401,6 +1512,10 @@ Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\s
         #widget-z13-advanced .z13-metric small { display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px; }
         #widget-z13-advanced .z13-metric strong { font-size:1.18rem; font-weight:800; }
         #widget-z13-advanced .z13-explainer { padding:14px 16px; background:#f8fafc; font-size:0.84rem; color:#334155; line-height:1.55; }
+        @media (max-width:640px) {
+            #widget-z13-advanced .z13-scene { overflow-x:auto; }
+            #widget-z13-advanced #z13-vector { width:720px; max-width:none; }
+        }
     </style>
 
     <div class="z13-head">
@@ -1412,12 +1527,18 @@ Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\s
         <div class="z13-note">
             <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Jednadžba</div>
             <div><strong>Δp = 4σ / D</strong></div>
-            <div>manji <strong>D</strong> -> veći <strong>Δp</strong></div>
-            <div>veći <strong>σ</strong> -> veće "stezanje" kapi</div>
+            <div>manji <strong>D</strong> → veći <strong>Δp</strong></div>
+            <div>veći <strong>σ</strong> → veće „stezanje” kapi</div>
         </div>
     </div>
 
+    <div class="z13-presets" role="group" aria-label="Provjera utjecaja udvostručenja promjera">
+        <button type="button" data-z13-d="0.5" aria-pressed="true">Referentno: D = 0,50 mm</button>
+        <button type="button" data-z13-d="1" aria-pressed="false">Sanity check: D × 2</button>
+    </div>
+
     <div class="z13-scene">
+        <svg id="z13-vector" viewBox="0 0 900 430" role="img" aria-label="Vektorska usporedba kapi promjera D i 2D te pripadnih nadtlakova"></svg>
         <canvas id="canvas-yl" width="900" height="320"></canvas>
     </div>
 
@@ -1435,7 +1556,7 @@ Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\s
     <div class="z13-metrics">
         <div class="z13-metric"><small>Unutarnji nadtlak Δp</small><strong style="color:#1d4ed8;"><span id="yl-res-dp">584</span> Pa</strong></div>
         <div class="z13-metric"><small>Polumjer kapi</small><strong style="color:#c2410c;"><span id="z13-res-r">0.25</span> mm</strong></div>
-        <div class="z13-metric"><small>Relativna zakrivljenost 1/D</small><strong style="color:#b91c1c;"><span id="z13-res-curv">2.00</span> mm⁻¹</strong></div>
+        <div class="z13-metric"><small>Obrnuti promjer 1/D</small><strong style="color:#b91c1c;"><span id="z13-res-curv">2.00</span> mm⁻¹</strong></div>
     </div>
 
     <div class="z13-explainer" id="z13-explainer"></div>
@@ -1478,7 +1599,7 @@ Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\s
             document.getElementById('yl-res-dp').textContent = Math.round(dp);
             document.getElementById('z13-res-r').textContent = radiusMm.toFixed(2);
             document.getElementById('z13-res-curv').textContent = curvature.toFixed(2);
-        document.getElementById('z13-explainer').textContent = `Za promjer ${Dmm.toFixed(2)} mm površinska napetost σ = ${sigma.toFixed(3)} N/m daje unutarnji nadtlak od ${Math.round(dp)} Pa. Smanjenjem promjera zakrivljenost raste na ${curvature.toFixed(2)} mm⁻¹, pa raste i nadtlak. Zato male kapi i mjehuri imaju znatno veći unutarnji tlak od velikih.`;
+        document.getElementById('z13-explainer').textContent = `Za promjer ${Dmm.toFixed(2)} mm površinska napetost σ = ${sigma.toFixed(3)} N/m daje unutarnji nadtlak od ${Math.round(dp)} Pa. Smanjenjem promjera pokazatelj zakrivljenosti 1/D raste na ${curvature.toFixed(2)} mm⁻¹, pa raste i nadtlak. Zato male kapi i mjehuri imaju znatno veći unutarnji tlak od velikih.`;
 
             draw(Dmm, dp, sigma);
         }
@@ -1554,6 +1675,86 @@ Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\s
         update();
     })();
     </script>
+    <script>
+    (() => {
+        const root = document.getElementById('widget-z13-advanced');
+        const svg = root?.querySelector('#z13-vector');
+        const dSlider = root?.querySelector('#yl-slider-d');
+        const sigmaSlider = root?.querySelector('#yl-slider-sig');
+        if (!root || !svg || !dSlider || !sigmaSlider) return;
+        const fmt = (n, d = 0) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits:d, maximumFractionDigits:d });
+
+        function inwardArrows(cx, cy, radius, length) {
+            return Array.from({ length:8 }, (_, index) => {
+                if (index === 2) return '';
+                const angle = index * Math.PI / 4;
+                const x1 = cx + Math.cos(angle) * (radius + length);
+                const y1 = cy + Math.sin(angle) * (radius + length);
+                const x2 = cx + Math.cos(angle) * (radius + 5);
+                const y2 = cy + Math.sin(angle) * (radius + 5);
+                return `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#0f9b8e" stroke-width="4" marker-end="url(#z13-arr-teal)"/>`;
+            }).join('');
+        }
+
+        function pressureArrows(cx, cy, radius, length) {
+            return [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2].map(angle => {
+                const x1 = cx + Math.cos(angle) * 10;
+                const y1 = cy + Math.sin(angle) * 10;
+                const x2 = cx + Math.cos(angle) * Math.min(radius - 10, length);
+                const y2 = cy + Math.sin(angle) * Math.min(radius - 10, length);
+                return `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#7c3aed" stroke-width="4" marker-end="url(#z13-arr-violet)"/>`;
+            }).join('');
+        }
+
+        function renderVector() {
+            const Dmm = +dSlider.value;
+            const sigma = +sigmaSlider.value;
+            const dpD = 4 * sigma / (Dmm / 1000);
+            const dp2D = dpD / 2;
+            const cx1 = 220, cx2 = 680, cy = 250, r1 = 54, r2 = 104;
+            svg.innerHTML = `
+              <defs>
+                <radialGradient id="z13-drop-small" cx="35%" cy="28%"><stop offset="0" stop-color="#dbeafe"/><stop offset=".58" stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></radialGradient>
+                <radialGradient id="z13-drop-large" cx="35%" cy="28%"><stop offset="0" stop-color="#e0f2fe"/><stop offset=".58" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0284c7"/></radialGradient>
+                <marker id="z13-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
+                <marker id="z13-arr-violet" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#7c3aed"/></marker>
+                <marker id="z13-arr-dark" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#334155"/></marker>
+              </defs>
+              <rect width="900" height="430" fill="#fff"/>
+              <text x="450" y="32" text-anchor="middle" fill="#0f172a" font-size="20" font-weight="800">ISTA TEKUĆINA I σ · PROMIJENJENA JE SAMO ZAKRIVLJENOST</text>
+              <circle cx="${cx1}" cy="${cy}" r="${r1}" fill="url(#z13-drop-small)" stroke="#1d4ed8" stroke-width="4"/>
+              <circle cx="${cx2}" cy="${cy}" r="${r2}" fill="url(#z13-drop-large)" stroke="#0369a1" stroke-width="4"/>
+              ${inwardArrows(cx1, cy, r1, 44)}
+              ${inwardArrows(cx2, cy, r2, 34)}
+              ${pressureArrows(cx1, cy, r1, 42)}
+              ${pressureArrows(cx2, cy, r2, 42)}
+              <path d="M${cx1-r1} 326H${cx1+r1}" stroke="#334155" stroke-width="3" marker-start="url(#z13-arr-dark)" marker-end="url(#z13-arr-dark)"/>
+              <path d="M${cx2-r2} 366H${cx2+r2}" stroke="#334155" stroke-width="3" marker-start="url(#z13-arr-dark)" marker-end="url(#z13-arr-dark)"/>
+              <text x="${cx1}" y="352" text-anchor="middle" fill="#334155" font-size="17" font-weight="800">D = ${fmt(Dmm, 2)} mm</text>
+              <text x="${cx2}" y="396" text-anchor="middle" fill="#334155" font-size="17" font-weight="800">2D = ${fmt(2 * Dmm, 2)} mm</text>
+              <rect x="105" y="50" width="230" height="44" rx="12" fill="#eef2ff" stroke="#c4b5fd"/>
+              <text x="220" y="78" text-anchor="middle" fill="#5b21b6" font-size="18" font-weight="800">Δp(D) = ${fmt(dpD)} Pa</text>
+              <rect x="565" y="50" width="230" height="44" rx="12" fill="#eef2ff" stroke="#c4b5fd"/>
+              <text x="680" y="78" text-anchor="middle" fill="#5b21b6" font-size="18" font-weight="800">Δp(2D) = ${fmt(dp2D)} Pa</text>
+              <rect x="374" y="166" width="152" height="126" rx="14" fill="#f8fafc" stroke="#cbd5e1"/>
+              <text x="450" y="193" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="800">D × 2</text>
+              <text x="450" y="216" text-anchor="middle" fill="#1d4ed8" font-size="16" font-weight="800">Δp ÷ 2</text>
+              <path d="M392 246H424" stroke="#7c3aed" stroke-width="5" marker-end="url(#z13-arr-violet)"/>
+              <text x="435" y="251" fill="#5b21b6" font-size="12" font-weight="750">Δp prema van</text>
+              <path d="M392 273H424" stroke="#0f9b8e" stroke-width="5" marker-end="url(#z13-arr-teal)"/>
+              <text x="435" y="278" fill="#0f766e" font-size="12" font-weight="750">rezultanta σ</text>
+              <text x="450" y="420" text-anchor="middle" fill="#64748b" font-size="12">Strelice prikazuju smjerove djelovanja na zakrivljeni element površine.</text>`;
+        }
+
+        root.querySelectorAll('[data-z13-d]').forEach(button => button.addEventListener('click', () => {
+            dSlider.value = button.dataset.z13D;
+            dSlider.dispatchEvent(new Event('input', { bubbles:true }));
+            root.querySelectorAll('[data-z13-d]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        }));
+        [dSlider, sigmaSlider].forEach(input => input.addEventListener('input', renderVector));
+        renderVector();
+    })();
+    </script>
 </div>
 <div class="fizikalni-uvid">
 Smanjenjem promjera kapi raste zakrivljenost slobodne površine, a time i unutarnji nadtlak određen Young–Laplaceovim zakonom.
@@ -1593,7 +1794,11 @@ $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cd
         #widget-z14-advanced .z14-sub { margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px; }
         #widget-z14-advanced .z14-note { background:rgba(15,23,42,0.92); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:240px; }
         #widget-z14-advanced .z14-scene { background:#fff; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; margin-bottom:16px; }
-        #widget-z14-advanced canvas { display:block; width:100%; height:auto; }
+        #widget-z14-advanced canvas { display:none; }
+        #widget-z14-advanced #z14-vector { display:block; width:100%; height:auto; }
+        #widget-z14-advanced .z14-presets { display:flex; gap:8px; flex-wrap:wrap; margin:-4px 0 14px; }
+        #widget-z14-advanced .z14-presets button { border:1px solid #bcd2df; border-radius:9px; background:#fff; color:#234863; padding:.45rem .65rem; font-weight:750; cursor:pointer; }
+        #widget-z14-advanced .z14-presets button[aria-pressed=true] { background:#0f766e; border-color:#0f766e; color:#fff; }
         #widget-z14-advanced .z14-controls { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; }
         #widget-z14-advanced .z14-control, #widget-z14-advanced .z14-metric, #widget-z14-advanced .z14-explainer { background:#fff; border:1px solid #e2e8f0; border-radius:14px; }
         #widget-z14-advanced .z14-control { padding:14px 16px; }
@@ -1604,6 +1809,10 @@ $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cd
         #widget-z14-advanced .z14-metric small { display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px; }
         #widget-z14-advanced .z14-metric strong { font-size:1.18rem; font-weight:800; }
         #widget-z14-advanced .z14-explainer { padding:14px 16px; background:#f8fafc; font-size:0.84rem; color:#334155; line-height:1.55; }
+        @media (max-width:640px) {
+            #widget-z14-advanced .z14-scene { overflow-x:auto; }
+            #widget-z14-advanced #z14-vector { width:720px; max-width:none; }
+        }
     </style>
     <div class="z14-head">
         <div>
@@ -1619,7 +1828,14 @@ $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cd
         </div>
     </div>
 
+    <div class="z14-presets" role="group" aria-label="Provjera predznaka vertikalne projekcije">
+        <button type="button" data-z14-theta="50" aria-pressed="true">θ = 50° · Fσ,z &gt; 0</button>
+        <button type="button" data-z14-theta="90" aria-pressed="false">θ = 90° · Fσ,z = 0</button>
+        <button type="button" data-z14-theta="130" aria-pressed="false">θ = 130° · Fσ,z &lt; 0</button>
+    </div>
+
     <div class="z14-scene">
+        <svg id="z14-vector" viewBox="0 0 900 380" role="img" aria-label="Vektorski prikaz unutarnjega i vanjskoga kontaktnog perimetra te projekcije sile površinske napetosti"></svg>
         <canvas id="canvas-z14-v2" width="900" height="320"></canvas>
     </div>
 
@@ -1756,6 +1972,85 @@ $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cd
         update();
     })();
     </script>
+    <script>
+    (() => {
+        const root = document.getElementById('widget-z14-advanced');
+        const svg = root?.querySelector('#z14-vector');
+        const doSlider = root?.querySelector('#z14-slider-do');
+        const thetaSlider = root?.querySelector('#z14-slider-theta');
+        if (!root || !svg || !doSlider || !thetaSlider) return;
+        const fmt = (n, d) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits:d, maximumFractionDigits:d });
+
+        function renderVector() {
+            const doMm = +doSlider.value;
+            const diMm = 25;
+            const thetaDeg = +thetaSlider.value;
+            const theta = thetaDeg * Math.PI / 180;
+            const cosTheta = Math.cos(theta);
+            const perimeter = Math.PI * (doMm + diMm);
+            const force = 0.514 * perimeter / 1000 * cosTheta;
+            const outerR = 1.7 * doMm;
+            const innerR = 1.7 * diMm;
+            const contactX = 630, contactY = 213, length = 92;
+            const endX = contactX + Math.sin(theta) * length;
+            const endY = contactY - Math.cos(theta) * length;
+            const arcR = 43;
+            const arcX = contactX + Math.sin(theta) * arcR;
+            const arcY = contactY - Math.cos(theta) * arcR;
+            const projectionY = contactY - cosTheta * length;
+            const relation = Math.abs(cosTheta) < 0.001
+                ? 'cos θ = 0 → nema vertikalne projekcije'
+                : cosTheta > 0
+                    ? 'cos θ > 0 → projekcija je prema +z'
+                    : 'cos θ < 0 → projekcija je prema −z';
+            const projection = Math.abs(cosTheta) < 0.001
+                ? `<circle cx="800" cy="${contactY}" r="6" fill="#2563eb"/><text x="818" y="${contactY+5}" fill="#1d4ed8" font-size="15" font-weight="800">Fσ,z = 0</text>`
+                : `<path d="M800 ${contactY}V${projectionY}" stroke="#2563eb" stroke-width="6" marker-end="url(#z14-arr-blue)"/><text x="812" y="${(contactY+projectionY)/2}" fill="#1d4ed8" font-size="15" font-weight="800">Fσ,z</text>`;
+            const signForce = (force >= 0 ? '+' : '') + fmt(force, 4);
+
+            svg.innerHTML = `
+              <defs>
+                <marker id="z14-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
+                <marker id="z14-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
+              </defs>
+              <rect width="900" height="380" fill="#fff"/>
+              <text x="175" y="34" text-anchor="middle" fill="#0f172a" font-size="19" font-weight="800">POGLED ODOZGO</text>
+              <text x="675" y="34" text-anchor="middle" fill="#0f172a" font-size="19" font-weight="800">LOKALNA GEOMETRIJA KONTAKTA</text>
+              <circle cx="175" cy="184" r="${outerR}" fill="#e2e8f0" stroke="#0f9b8e" stroke-width="7"/>
+              <circle cx="175" cy="184" r="${innerR}" fill="#fff" stroke="#0f9b8e" stroke-width="7"/>
+              <path d="M175 ${184-outerR}V${184-innerR}" stroke="#334155" stroke-width="2"/>
+              <text x="292" y="134" fill="#0f766e" font-size="15" font-weight="800">vanjski rub: πd₀</text>
+              <path d="M${175+outerR*.72} ${184-outerR*.72}L284 130" stroke="#64748b" stroke-width="2"/>
+              <text x="292" y="162" fill="#0f766e" font-size="15" font-weight="800">unutarnji rub: πdᵢ</text>
+              <path d="M${175+innerR*.72} ${184-innerR*.72}L284 158" stroke="#64748b" stroke-width="2"/>
+              <rect x="55" y="298" width="335" height="54" rx="13" fill="#ecfdf5" stroke="#99f6e4"/>
+              <text x="222" y="321" text-anchor="middle" fill="#115e59" font-size="16" font-weight="800">Lkontakt = π(d₀ + dᵢ)</text>
+              <text x="222" y="343" text-anchor="middle" fill="#334155" font-size="15">= ${fmt(perimeter, 1)} mm</text>
+              <rect x="520" y="72" width="330" height="218" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+              <path d="M${contactX} 105V270" stroke="#64748b" stroke-width="10"/>
+              <path d="M${contactX-92} ${contactY+58}Q${contactX-42} ${contactY+42*cosTheta} ${contactX} ${contactY}Q${contactX+50} ${contactY-22*cosTheta} 748 ${contactY+58}" fill="none" stroke="#64748b" stroke-width="4"/>
+              <path d="M${contactX} ${contactY}L${endX} ${endY}" stroke="#0f9b8e" stroke-width="7" marker-end="url(#z14-arr-teal)"/>
+              <text x="${endX-6}" y="${endY-12}" fill="#0f766e" font-size="17" font-weight="800">σ</text>
+              <path d="M${contactX} ${contactY-arcR}A${arcR} ${arcR} 0 0 1 ${arcX} ${arcY}" fill="none" stroke="#ea580c" stroke-width="4"/>
+              <text x="670" y="145" fill="#c2410c" font-size="17" font-weight="800">θ = ${thetaDeg}°</text>
+              <path d="M800 98V275" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5"/>
+              <text x="812" y="96" fill="#64748b" font-size="14" font-weight="800">+z</text>
+              ${projection}
+              <rect x="485" y="306" width="380" height="54" rx="13" fill="#eff6ff" stroke="#bfdbfe"/>
+              <text x="675" y="329" text-anchor="middle" fill="#1e3a8a" font-size="16" font-weight="800">Fσ,z = σ Lkontakt cos θ = ${signForce} N</text>
+              <text x="675" y="350" text-anchor="middle" fill="#334155" font-size="14">${relation}</text>
+              <text x="450" y="373" text-anchor="middle" fill="#64748b" font-size="12">Prikazane su stvarne veze veličina; promjeri i lokalni detalj namjerno su u različitim uvećanjima.</text>`;
+        }
+
+        root.querySelectorAll('[data-z14-theta]').forEach(button => button.addEventListener('click', () => {
+            thetaSlider.value = button.dataset.z14Theta;
+            thetaSlider.dispatchEvent(new Event('input', { bubbles:true }));
+            root.querySelectorAll('[data-z14-theta]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        }));
+        [doSlider, thetaSlider].forEach(input => input.addEventListener('input', renderVector));
+        renderVector();
+    })();
+    </script>
 </div>
 <div class="fizikalni-uvid">
 Sila površinske napetosti djeluje po cijelom perimetru dodira (unutarnjem i vanjskom bridu cijevi). Ukupna vertikalna komponenta ovisi o kosinusu kuta kvašenja.
@@ -1800,7 +2095,11 @@ Ova procjena uzima maksimalnu vertikalnu komponentu površinske napetosti po obo
         #widget-z15-vfinal .z15-sub { margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px; }
         #widget-z15-vfinal .z15-note { background:rgba(15,23,42,0.92); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:240px; }
         #widget-z15-vfinal .z15-scene { background:#fff; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; margin-bottom:16px; }
-        #widget-z15-vfinal canvas { display:block; width:100%; height:auto; }
+        #widget-z15-vfinal canvas { display:none; }
+        #widget-z15-vfinal #z15-vector { display:block; width:100%; height:auto; }
+        #widget-z15-vfinal .z15-presets { display:flex; gap:8px; flex-wrap:wrap; margin:-4px 0 14px; }
+        #widget-z15-vfinal .z15-presets button { border:1px solid #bcd2df; border-radius:9px; background:#fff; color:#234863; padding:.45rem .65rem; font-weight:750; cursor:pointer; }
+        #widget-z15-vfinal .z15-presets button[aria-pressed=true] { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
         #widget-z15-vfinal .z15-controls { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; }
         #widget-z15-vfinal .z15-control, #widget-z15-vfinal .z15-metric, #widget-z15-vfinal .z15-explainer { background:#fff; border:1px solid #e2e8f0; border-radius:14px; }
         #widget-z15-vfinal .z15-control { padding:14px 16px; }
@@ -1812,22 +2111,32 @@ Ova procjena uzima maksimalnu vertikalnu komponentu površinske napetosti po obo
         #widget-z15-vfinal .z15-metric strong { font-size:1.18rem; font-weight:800; }
         #widget-z15-vfinal .z15-explainer { padding:14px 16px; background:#f8fafc; font-size:0.84rem; color:#334155; line-height:1.55; }
         #widget-z15-vfinal .z15-status { text-align:center; font-weight:800; padding:12px; border-radius:12px; }
+        @media (max-width:640px) {
+            #widget-z15-vfinal .z15-scene { overflow-x:auto; }
+            #widget-z15-vfinal #z15-vector { width:720px; max-width:none; }
+        }
     </style>
     <div class="z15-head">
         <div>
             <div class="z15-kicker">Z15 laboratorij plutanja</div>
             <h4 class="z15-title">Površinska napetost može nositi kuglicu kada nadvlada njezinu težinu</h4>
-            <p class="z15-sub">Ovo je idealizirana procjena s $F_U\approx0$: težina raste s volumenom kuglice, a maksimalna obodna sila površinske napetosti samo s opsegom kontakta. Zato veće kuglice vrlo brzo izgube mogućnost plutanja.</p>
+            <p class="z15-sub">Ovo je idealizirana procjena s F<sub>U</sub> ≈ 0: težina raste s volumenom kuglice, a maksimalna obodna sila površinske napetosti samo s opsegom kontakta. Zato veće kuglice vrlo brzo izgube mogućnost plutanja.</p>
         </div>
         <div class="z15-note">
             <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Ključni kontrast</div>
-            <div><strong>F_g ~ d³</strong></div>
-            <div><strong>F_σ ~ d</strong></div>
-            <div>pretpostavke: F_U≈0, maksimalna vertikalna komponenta F_σ i idealizirana kontaktna linija</div>
+            <div><strong>G ∝ d<sup>3</sup></strong></div>
+            <div><strong>F<sub>σ,z,max</sub> ∝ d</strong></div>
+            <div>pretpostavke: F<sub>U</sub> ≈ 0, maksimalna vertikalna komponenta površinske sile i idealizirana kontaktna linija</div>
         </div>
     </div>
 
+    <div class="z15-presets" role="group" aria-label="Provjera skaliranja s promjerom kuglice">
+        <button type="button" data-z15-d="2" aria-pressed="true">Referentno: d = 2,0 mm</button>
+        <button type="button" data-z15-d="4" aria-pressed="false">Sanity check: d × 2</button>
+    </div>
+
     <div class="z15-scene">
+        <svg id="z15-vector" viewBox="0 0 900 390" role="img" aria-label="Vektorski prikaz deformirane slobodne površine, kontaktne linije, težine i površinske sile na kuglici"></svg>
         <canvas id="canvas-z15-vfinal" width="900" height="300"></canvas>
     </div>
 
@@ -1846,12 +2155,12 @@ Ova procjena uzima maksimalnu vertikalnu komponentu površinske napetosti po obo
     </div>
 
     <div class="z15-metrics">
-        <div class="z15-metric"><small>Težina kuglice Fg</small><strong style="color:#b91c1c;"><span id="z15-res-fg">0.0001</span> N</strong></div>
-        <div class="z15-metric"><small>Površinska sila Fσ</small><strong style="color:#1d4ed8;"><span id="z15-res-fs">0.0005</span> N</strong></div>
+        <div class="z15-metric"><small>Težina kuglice G</small><strong style="color:#b91c1c;"><span id="z15-res-fg">0.0001</span> N</strong></div>
+        <div class="z15-metric"><small>Maks. vertikalna Fσ,z,max</small><strong style="color:#1d4ed8;"><span id="z15-res-fs">0.0005</span> N</strong></div>
         <div class="z15-metric"><small>Maks. promjer za materijal</small><strong style="color:#0f766e;"><span id="z15-res-dmax">4.1</span> mm</strong></div>
     </div>
 
-    <div style="margin:0 0 14px;padding:11px 13px;border:1px solid #fde68a;border-radius:12px;background:#fffbeb;color:#78350f;font-size:.87rem;line-height:1.5;"><strong>Skaliranje pri udvostručenju promjera:</strong> težina $G\propto d^3$ poraste 8 puta, a maksimalna površinska sila $F_\sigma\propto d$ samo 2 puta. Zato se sigurnosna rezerva brzo smanjuje.</div>
+    <div style="margin:0 0 14px;padding:11px 13px;border:1px solid #fde68a;border-radius:12px;background:#fffbeb;color:#78350f;font-size:.87rem;line-height:1.5;"><strong>Skaliranje pri udvostručenju promjera:</strong> težina G ∝ d<sup>3</sup> poraste 8 puta, a maksimalna vertikalna površinska sila F<sub>σ,z,max</sub> ∝ d samo 2 puta. Zato se sigurnosna rezerva brzo smanjuje.</div>
 
     <div class="z15-explainer" id="z15-explainer"></div>
 
@@ -1901,7 +2210,7 @@ Ova procjena uzima maksimalnu vertikalnu komponentu površinske napetosti po obo
             status.textContent = floats ? 'IDEALIZIRANI MODEL DOPUŠTA NOŠENJE' : 'NI MAKSIMALNA POVRŠINSKA SILA NIJE DOVOLJNA';
             status.style.background = floats ? '#f0fdf4' : '#fff5f5';
             status.style.color = floats ? '#166534' : '#b91c1c';
-            document.getElementById('z15-explainer').textContent = `Za ${material.toLowerCase()} kuglicu promjera ${dMm.toFixed(1)} mm težina iznosi ${Fg.toFixed(4)} N, dok idealizirana maksimalna površinska sila može dati ${Fs.toFixed(4)} N uz kontaktnu liniju. Uz pretpostavke F_U≈0 i maksimalne vertikalne komponente, granica je oko ${dMax.toFixed(1)} mm: model ${floats ? 'još dopušta nošenje' : 'više ne dopušta nošenje'}.`;
+            document.getElementById('z15-explainer').textContent = `Za ${material.toLowerCase()} kuglicu promjera ${dMm.toFixed(1)} mm težina iznosi ${Fg.toFixed(4)} N, dok idealizirana maksimalna površinska sila može dati ${Fs.toFixed(4)} N uz kontaktnu liniju. Uz pretpostavku zanemarivoga uzgona i maksimalne vertikalne komponente, granica je oko ${dMax.toFixed(1)} mm: model ${floats ? 'još dopušta nošenje' : 'više ne dopušta nošenje'}.`;
 
             draw(dMm, Fg, Fs, floats);
         }
@@ -1966,6 +2275,97 @@ Ova procjena uzima maksimalnu vertikalnu komponentu površinske napetosti po obo
         dS.addEventListener('input', update);
         mS.addEventListener('change', update);
         update();
+    })();
+    </script>
+    <script>
+    (() => {
+        const root = document.getElementById('widget-z15-vfinal');
+        const svg = root?.querySelector('#z15-vector');
+        const dSlider = root?.querySelector('#d-slider-z15');
+        const materialSelect = root?.querySelector('#mat-select-z15');
+        if (!root || !svg || !dSlider || !materialSelect) return;
+        const fmt = (n, d) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits:d, maximumFractionDigits:d });
+
+        function renderVector() {
+            const dMm = +dSlider.value;
+            const rho = +materialSelect.value;
+            const material = rho === 7800 ? 'čelik' : 'aluminij';
+            const d = dMm / 1000;
+            const sigma = 0.073;
+            const g = 9.81;
+            const Fg = rho * Math.PI * Math.pow(d, 3) * g / 6;
+            const Fs = Math.PI * d * sigma;
+            const floats = Fg <= Fs;
+            const ratio = Fg / Fs;
+            const cx = 344;
+            const r = 52 + (dMm - 0.5) / 5.5 * 28;
+            const cy = floats ? 174 + Math.min(28, ratio * 23) : 221;
+            const contactY = cy + r * 0.60;
+            const contactDX = r * 0.80;
+            const leftX = cx - contactDX;
+            const rightX = cx + contactDX;
+            const surfaceY = 244;
+            const forceScale = Math.min(74, 38 + ratio * 28);
+            const statusText = floats ? 'Fσ,z,max ≥ G' : 'G > Fσ,z,max';
+            const statusColor = floats ? '#166534' : '#b91c1c';
+            const statusFill = floats ? '#f0fdf4' : '#fff1f2';
+            const contactLine = floats ? '#f59e0b' : '#ef4444';
+
+            svg.innerHTML = `
+              <defs>
+                <radialGradient id="z15-ball" cx="34%" cy="28%"><stop offset="0" stop-color="#f8fafc"/><stop offset=".3" stop-color="#cbd5e1"/><stop offset="1" stop-color="#475569"/></radialGradient>
+                <linearGradient id="z15-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bae6fd" stop-opacity=".8"/><stop offset="1" stop-color="#38bdf8" stop-opacity=".42"/></linearGradient>
+                <marker id="z15-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
+                <marker id="z15-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
+                <marker id="z15-arr-red" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#dc2626"/></marker>
+              </defs>
+              <rect width="900" height="390" fill="#fff"/>
+              <text x="340" y="30" text-anchor="middle" fill="#0f172a" font-size="19" font-weight="800">DIJAGRAM SILA I DEFORMIRANA SLOBODNA POVRŠINA</text>
+              <path d="M0 ${surfaceY}C120 ${surfaceY} 190 ${surfaceY} ${leftX} ${contactY}L${rightX} ${contactY}C500 ${surfaceY} 585 ${surfaceY} 650 ${surfaceY}V390H0Z" fill="url(#z15-water)"/>
+              <path d="M0 ${surfaceY}C120 ${surfaceY} 190 ${surfaceY} ${leftX} ${contactY}" fill="none" stroke="#0284c7" stroke-width="5"/>
+              <path d="M${rightX} ${contactY}C500 ${surfaceY} 585 ${surfaceY} 650 ${surfaceY}" fill="none" stroke="#0284c7" stroke-width="5"/>
+              <path d="M18 ${surfaceY}H635" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="8 7"/>
+              <text x="28" y="${surfaceY-12}" fill="#0369a1" font-size="14">neporemećena razina vode</text>
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#z15-ball)" stroke="#334155" stroke-width="4"/>
+              <circle cx="${leftX}" cy="${contactY}" r="7" fill="${contactLine}" stroke="#fff" stroke-width="3"/>
+              <circle cx="${rightX}" cy="${contactY}" r="7" fill="${contactLine}" stroke="#fff" stroke-width="3"/>
+              <path d="M${leftX} ${contactY}L${leftX-68} ${contactY-58}" stroke="#0f9b8e" stroke-width="7" marker-end="url(#z15-arr-teal)"/>
+              <path d="M${rightX} ${contactY}L${rightX+68} ${contactY-58}" stroke="#0f9b8e" stroke-width="7" marker-end="url(#z15-arr-teal)"/>
+              <path d="M${leftX} ${contactY}V${contactY-58}" stroke="#2563eb" stroke-width="4" stroke-dasharray="6 5" marker-end="url(#z15-arr-blue)"/>
+              <path d="M${rightX} ${contactY}V${contactY-58}" stroke="#2563eb" stroke-width="4" stroke-dasharray="6 5" marker-end="url(#z15-arr-blue)"/>
+              <text x="${leftX-78}" y="${contactY-67}" fill="#0f766e" font-size="16" font-weight="800">σ · tangenta</text>
+              <text x="${rightX+28}" y="${contactY-67}" fill="#1d4ed8" font-size="15" font-weight="800">vertikalne projekcije</text>
+              <path d="M${cx} ${cy}V${cy+forceScale}" stroke="#dc2626" stroke-width="7" marker-end="url(#z15-arr-red)"/>
+              <text x="${cx+14}" y="${cy+forceScale*.62}" fill="#b91c1c" font-size="18" font-weight="800">G</text>
+              <path d="M${cx} ${cy-r-12}V${cy-r-74}" stroke="#2563eb" stroke-width="7" marker-end="url(#z15-arr-blue)"/>
+              <text x="${cx+14}" y="${cy-r-50}" fill="#1d4ed8" font-size="17" font-weight="800">Fσ,z,max</text>
+              <text x="344" y="354" text-anchor="middle" fill="#9a3412" font-size="14" font-weight="800">narančaste točke: presjek kontaktne linije opsega πd</text>
+              <text x="344" y="374" text-anchor="middle" fill="#64748b" font-size="13">uzgon FU zanemaren je samo u ovoj procjeni graničnog promjera</text>
+              <rect x="665" y="52" width="215" height="286" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+              <text x="772" y="82" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="800">BILANCA MODELA</text>
+              <text x="690" y="116" fill="#475569" font-size="15">materijal</text>
+              <text x="854" y="116" text-anchor="end" fill="#0f172a" font-size="15" font-weight="800">${material}</text>
+              <text x="690" y="148" fill="#475569" font-size="15">d</text>
+              <text x="854" y="148" text-anchor="end" fill="#0f172a" font-size="15" font-weight="800">${fmt(dMm, 1)} mm</text>
+              <text x="690" y="180" fill="#475569" font-size="15">G ∝ d³</text>
+              <text x="854" y="180" text-anchor="end" fill="#b91c1c" font-size="15" font-weight="800">${fmt(Fg, 4)} N</text>
+              <text x="690" y="212" fill="#475569" font-size="15">Fσ,z,max ∝ d</text>
+              <text x="854" y="212" text-anchor="end" fill="#1d4ed8" font-size="15" font-weight="800">${fmt(Fs, 4)} N</text>
+              <path d="M688 231H856" stroke="#cbd5e1" stroke-width="2"/>
+              <text x="690" y="260" fill="#475569" font-size="15">G/Fσ,z,max</text>
+              <text x="854" y="260" text-anchor="end" fill="${statusColor}" font-size="17" font-weight="800">${fmt(ratio, 2)}</text>
+              <rect x="683" y="279" width="179" height="43" rx="10" fill="${statusFill}" stroke="${statusColor}"/>
+              <text x="772" y="297" text-anchor="middle" fill="${statusColor}" font-size="12" font-weight="800">${floats ? 'RAVNOTEŽA MOGUĆA' : 'SILA NIJE DOVOLJNA'}</text>
+              <text x="772" y="314" text-anchor="middle" fill="${statusColor}" font-size="11">${statusText}</text>`;
+        }
+
+        root.querySelectorAll('[data-z15-d]').forEach(button => button.addEventListener('click', () => {
+            dSlider.value = button.dataset.z15D;
+            dSlider.dispatchEvent(new Event('input', { bubbles:true }));
+            root.querySelectorAll('[data-z15-d]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        }));
+        [dSlider, materialSelect].forEach(input => input.addEventListener(input === materialSelect ? 'change' : 'input', renderVector));
+        renderVector();
     })();
     </script>
 </div>

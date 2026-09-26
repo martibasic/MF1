@@ -18,7 +18,7 @@
 .v11x-locators{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;padding:0 1rem 1rem;background:#f8fbfd}.v11x-vector{min-width:0;padding:.9rem;border:1px solid #d5e2ea;border-radius:.75rem;background:#fff}.v11x-vector h5{margin:0 0 .3rem;color:#31536b;font-size:.94rem}.v11x-vector p{margin:0 0 .65rem;color:#587083;font-size:.86rem;line-height:1.45}.v11x-vector svg{min-height:240px}
 .v11x-explain{margin:0 1rem 1rem;padding:1rem;border-left:5px solid #1976b9;border-radius:.4rem .75rem .75rem .4rem;background:#edf8fd}.v11x-explain h5{margin:0 0 .35rem;color:#17324d}.v11x-explain p{margin:0;color:#254b65;line-height:1.58}.v11x-chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.45rem;margin:0 1rem 1rem;padding:0;background:transparent}.v11x-chain div{position:relative;padding:.65rem .7rem;border:1px solid #d5e2ea;border-radius:.6rem;background:#fff;color:#254b65;font-size:.84rem;line-height:1.42}.v11x-chain strong{display:block;margin-bottom:.15rem;color:#31536b;font-size:.77rem;text-transform:uppercase;letter-spacing:.035em}.v11x-chain div:not(:last-child)::after{position:absolute;right:-.55rem;top:50%;z-index:1;content:"→";color:#1976b9;font-size:1.1rem;font-weight:800}
 .v11x-note{padding:.9rem 1rem;border-left:4px solid #1976b9;border-radius:.35rem .65rem .65rem .35rem;background:#edf8fd;line-height:1.6}.v11x-force-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}.v11x-force-list div{padding:.9rem;border:1px solid #d5e2ea;border-radius:.7rem;background:#fff;color:#254b65;line-height:1.55}.v11x-force-list strong{display:block;color:#31536b;margin-bottom:.2rem}
-.v11x-flow{stroke-dasharray:18 13;animation:v11x-flow 1.45s linear infinite}@keyframes v11x-flow{to{stroke-dashoffset:-62}}@media(prefers-reduced-motion:reduce){.v11x-flow{animation:none!important}}
+.v11x-flow{stroke-dasharray:18 13}@keyframes v11x-flow{to{stroke-dashoffset:-62}}@media(prefers-reduced-motion:reduce){.v11x-flow{animation:none!important}}
 .v11x-svg-label{font:700 18px Inter,system-ui,sans-serif;fill:#31536b}.v11x-svg-small{font:600 14px Inter,system-ui,sans-serif;fill:#587083}.v11x-svg-tiny{font:600 12px Inter,system-ui,sans-serif;fill:#587083}.v11x-svg-flow{fill:#1976b9}.v11x-svg-force{fill:#b11f38}.v11x-svg-pressure{fill:#5f4da5}.v11x-svg-amber{fill:#a45e12}
 @media(max-width:760px){.v11-data{grid-template-columns:1fr}.v11-data dt{padding-bottom:.2rem}.v11-data dd{padding-top:.2rem}.v11x-controls,.v11x-locators,.v11x-primary-row{grid-template-columns:1fr}.v11x-values{grid-template-columns:repeat(3,minmax(0,1fr))}.v11x-chain{grid-template-columns:1fr;margin-inline:.75rem}.v11x-chain div:not(:last-child)::after{right:auto;left:50%;top:auto;bottom:-.86rem;transform:rotate(90deg)}.v11x-toolbar{padding:.65rem .75rem}.v11x-scene{padding:.55rem}.v11x-explain{margin-inline:.75rem}.v11x-force-list{grid-template-columns:1fr}.v11-static{padding:.2rem}.v11-solution mjx-container[display="true"],.v11x-shell mjx-container[display="true"]{display:block;max-width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:.25rem;text-align:left}}
 @media(max-width:430px){.v11x-values{grid-template-columns:1fr}.v11x-primary output{font-size:1.5rem}.v11x-button{font-size:.82rem;padding:.43rem .55rem}.v11x-svg-small{font-size:12px}.v11x-svg-label{font-size:15px}}
@@ -48,33 +48,349 @@ Za koljeno najprije računamo $\vec R_{wall\to fluid}$. Sila fluida na koljeno j
 <section class="v11x-shell v11x-task" id="v11-momentum-lab" aria-labelledby="v11-momentum-title">
 <header class="v11x-head"><h4 id="v11-momentum-title">Istraživač količine gibanja i sila</h4><p>Promatra se fluid unutar isprekidanog kontrolnog volumena. Desna strana jednadžbe nije „sila mlaza”: ona je promjena toka količine gibanja koju moraju proizvesti tlačne sile i stijenka.</p></header>
 <div class="v11x-toolbar"><div class="v11x-toolbar__group"><span class="v11x-toolbar__label">Preset</span><button class="v11x-button is-active" type="button" data-v11m-preset="z100">Izvorni Z100 · 30°</button><button class="v11x-button" type="button" data-v11m-preset="straight">Ravna cijev · 0°</button><button class="v11x-button" type="button" data-v11m-preset="ninety">Koljeno · 90°</button><button class="v11x-button" type="button" data-v11m-preset="z101">Izvorni Z101 · 180°</button></div><div class="v11x-toolbar__group"><span class="v11x-toolbar__label">Slojevi</span><button class="v11x-button" type="button" data-v11m-layer="velocity" aria-pressed="true">Brzine</button><button class="v11x-button" type="button" data-v11m-layer="momentum" aria-pressed="true">ΔṖ</button><button class="v11x-button" type="button" data-v11m-layer="pressure" aria-pressed="true">Tlačne sile</button><button class="v11x-button" type="button" data-v11m-layer="reaction" aria-pressed="true">Reakcije</button><button class="v11x-button" type="button" data-v11m-layer="cv" aria-pressed="true">Kontrolni volumen</button></div></div>
-<div class="v11x-scene"><svg viewBox="0 0 1000 500" role="img" aria-labelledby="v11-momentum-svg-title"><title id="v11-momentum-svg-title">Koljeno s ulazom, izlazom, kontrolnim volumenom, brzinama, tlakom i reakcijom stijenke</title><defs><marker id="v11m-blue" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#1976b9"/></marker><marker id="v11m-red" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#c53b3b"/></marker><marker id="v11m-purple" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#6e5bb5"/></marker></defs><g id="v11m-layer-cv"><rect x="35" y="35" width="925" height="395" rx="20" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="10 8"/><text x="55" y="65" class="v11x-svg-small">isprekidano: kontrolni volumen</text></g><path id="v11m-pipe-shell" d="M80 230H370C430 230 480 180 630 150L650 200C500 235 440 290 370 290H80Z" fill="#617989" stroke="#405b6d" stroke-width="4"/><path id="v11m-pipe-fluid" d="M85 245H370C430 245 485 195 628 166L642 188C500 222 440 275 370 275H85Z" fill="#9ed8f3"/><path id="v11m-trace" class="v11x-flow" d="M105 260H370Q440 260 635 177" fill="none" stroke="#1976b9" stroke-width="6"/><g id="v11m-layer-velocity"><path id="v11m-v1" d="M145 190H300" fill="none" stroke="#1976b9" stroke-width="6" marker-end="url(#v11m-blue)"/><path id="v11m-v2" d="M590 155L720 100" fill="none" stroke="#1976b9" stroke-width="6" marker-end="url(#v11m-blue)"/><text id="v11m-v1-label" x="150" y="175" class="v11x-svg-label v11x-svg-flow">v₁</text><text id="v11m-v2-label" x="725" y="96" class="v11x-svg-label v11x-svg-flow">v₂</text><path id="v11m-sec1" d="M100 225V295" stroke="#405b6d" stroke-width="4"/><path id="v11m-sec2" d="M635 143L660 203" stroke="#405b6d" stroke-width="4"/><text x="75" y="320" class="v11x-svg-small">presjek 1, A₁</text><text id="v11m-sec2-label" x="660" y="215" class="v11x-svg-small">presjek 2, A₂</text></g><g id="v11m-layer-pressure"><path id="v11m-p1-arrow" d="M125 335H270" fill="none" stroke="#6e5bb5" stroke-width="6" marker-end="url(#v11m-purple)"/><text id="v11m-p1-label" x="145" y="365" class="v11x-svg-small v11x-svg-pressure">p₁A₁</text><text id="v11m-p2-label" x="745" y="245" class="v11x-svg-small v11x-svg-pressure">p₂,g = 0</text></g><g id="v11m-layer-reaction"><path id="v11m-R" d="M470 365H305" fill="none" stroke="#c53b3b" stroke-width="6" marker-end="url(#v11m-red)"/><text id="v11m-R-label" x="320" y="405" class="v11x-svg-small v11x-svg-force">R = F(stijenka → fluid)</text><text id="v11m-fluid-label" x="530" y="405" class="v11x-svg-tiny v11x-svg-force">F(fluid → koljeno) = −R</text></g><path d="M850 385H920M850 385V315" stroke="#405b6d" stroke-width="3" marker-end="url(#v11m-blue)"/><text x="914" y="405" class="v11x-svg-small">x</text><text x="832" y="322" class="v11x-svg-small">z</text></svg><div class="v11x-legend"><span class="v11x-key v11x-key--flow"><i></i>fluid i brzine</span><span class="v11x-key v11x-key--pressure"><i></i>tlačna sila</span><span class="v11x-key v11x-key--force"><i></i>reakcija stijenke</span><span class="v11x-key v11x-key--cv"><i></i>kontrolni volumen</span></div></div>
+<div class="v11x-scene"><svg viewBox="0 0 1000 500" role="img" aria-labelledby="v11-momentum-svg-title"><title id="v11-momentum-svg-title">Koljeno s ulazom, izlazom, kontrolnim volumenom, brzinama, tlakom i reakcijom stijenke</title><defs><marker id="v11m-blue" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L9 4.5L0 9Z" fill="#1976b9"/></marker><marker id="v11m-red" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L9 4.5L0 9Z" fill="#c53b3b"/></marker><marker id="v11m-purple" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L9 4.5L0 9Z" fill="#6e5bb5"/></marker></defs><g id="v11m-layer-cv"><rect x="35" y="35" width="925" height="395" rx="20" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="10 8"/><text x="55" y="65" class="v11x-svg-small">isprekidano: kontrolni volumen</text></g><path id="v11m-pipe-shell" d="M80 230H370C430 230 480 180 630 150L650 200C500 235 440 290 370 290H80Z" fill="#617989" stroke="#405b6d" stroke-width="4"/><path id="v11m-pipe-fluid" d="M85 245H370C430 245 485 195 628 166L642 188C500 222 440 275 370 275H85Z" fill="#9ed8f3"/><path id="v11m-trace" class="v11x-flow" d="M105 260H370Q440 260 635 177" fill="none" stroke="#1976b9" stroke-width="6"/><g id="v11m-layer-velocity"><path id="v11m-v1" d="M145 190H300" fill="none" stroke="#1976b9" stroke-width="6" marker-end="url(#v11m-blue)"/><path id="v11m-v2" d="M590 155L720 100" fill="none" stroke="#1976b9" stroke-width="6" marker-end="url(#v11m-blue)"/><text id="v11m-v1-label" x="150" y="175" class="v11x-svg-label v11x-svg-flow">v₁</text><text id="v11m-v2-label" x="725" y="96" class="v11x-svg-label v11x-svg-flow">v₂</text><path id="v11m-sec1" d="M100 225V295" stroke="#405b6d" stroke-width="4"/><path id="v11m-sec2" d="M635 143L660 203" stroke="#405b6d" stroke-width="4"/><text x="75" y="320" class="v11x-svg-small">presjek 1, A₁</text><text id="v11m-sec2-label" x="660" y="215" class="v11x-svg-small">presjek 2, A₂</text></g><g id="v11m-layer-pressure"><path id="v11m-p1-arrow" d="M125 335H270" fill="none" stroke="#6e5bb5" stroke-width="6" marker-end="url(#v11m-purple)"/><text id="v11m-p1-label" x="145" y="365" class="v11x-svg-small v11x-svg-pressure">p₁A₁</text><text id="v11m-p2-label" x="745" y="245" class="v11x-svg-small v11x-svg-pressure">p₂,g = 0</text></g><g id="v11m-layer-reaction"><path id="v11m-R" d="M470 365H305" fill="none" stroke="#c53b3b" stroke-width="6" marker-end="url(#v11m-red)"/><text id="v11m-R-label" x="320" y="405" class="v11x-svg-small v11x-svg-force">R = F(stijenka → fluid)</text><text id="v11m-fluid-label" x="530" y="405" class="v11x-svg-tiny v11x-svg-force">F(fluid → koljeno) = −R</text></g><path d="M850 385H920M850 385V315" stroke="#405b6d" stroke-width="3" marker-end="url(#v11m-blue)"/><text x="914" y="405" class="v11x-svg-small">x</text><text x="832" y="322" class="v11x-svg-small">z</text></svg><div class="v11x-legend"><span class="v11x-key v11x-key--flow"><i></i>fluid i brzine</span><span class="v11x-key v11x-key--pressure"><i></i>tlačna sila</span><span class="v11x-key v11x-key--force"><i></i>reakcija stijenke</span><span class="v11x-key v11x-key--cv"><i></i>kontrolni volumen</span></div></div>
 <div class="v11x-controls"><div class="v11x-control"><label for="v11m-alpha">Kut izlaza α <output id="v11m-alpha-out"></output></label><input id="v11m-alpha" type="range" min="0" max="180" step="1" value="30"></div><div class="v11x-control"><label for="v11m-mdot">Maseni protok ṁ <output id="v11m-mdot-out"></output></label><input id="v11m-mdot" type="range" min="5" max="20" step="0.5" value="14"></div><div class="v11x-control"><label for="v11m-ratio">Omjer presjeka A₂/A₁ <output id="v11m-ratio-out"></output></label><input id="v11m-ratio" type="range" min="0.06" max="1" step="0.0001" value="0.061946902654867"></div><div class="v11x-control"><label for="v11m-p1">Manometarski tlak p₁ <output id="v11m-p1-out"></output></label><input id="v11m-p1" type="range" min="0" max="250" step="0.1" value="202.176"></div></div>
 <div class="v11x-primary-row"><div class="v11x-primary"><span>Potrebna reakcija stijenke |R|</span><output id="v11m-Rmag"></output><small>$\vec R=\vec F_{wall\to fluid}$; sila fluida na koljeno jednaka je $-\vec R$.</small></div><div class="v11x-values"><div class="v11x-value"><span>Rₓ</span><output id="v11m-Rx"></output></div><div class="v11x-value"><span>R_z</span><output id="v11m-Rz"></output></div><div class="v11x-value"><span>p₁A₁</span><output id="v11m-pA"></output></div></div></div>
-<div class="v11x-locators"><section class="v11x-vector"><h5>Promjena vektora brzine</h5><p>$\Delta\vec v=\vec v_2-\vec v_1$. Obje brzine počinju u istoj točki, a ljubičasta strelica ih zatvara.</p><svg viewBox="0 0 500 290" role="img" aria-label="Vektorsko oduzimanje ulazne i izlazne brzine"><defs><marker id="v11m-vector-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="v11m-vector-violet" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#6e5bb5"/></marker></defs><path d="M55 230H450M55 230V35" stroke="#8195a4" stroke-width="2"/><path id="v11m-loc-v1" d="M75 220H180" stroke="#1976b9" stroke-width="5" marker-end="url(#v11m-vector-blue)"/><path id="v11m-loc-v2" d="M75 220L220 90" stroke="#1976b9" stroke-width="5" marker-end="url(#v11m-vector-blue)"/><path id="v11m-loc-dv" d="M180 220L220 90" stroke="#6e5bb5" stroke-width="5" marker-end="url(#v11m-vector-violet)"/><text id="v11m-loc-v1-label" x="120" y="210" class="v11x-svg-small v11x-svg-flow">v₁</text><text id="v11m-loc-v2-label" x="220" y="82" class="v11x-svg-small v11x-svg-flow">v₂</text><text id="v11m-loc-dv-label" x="235" y="160" class="v11x-svg-small v11x-svg-pressure">Δv</text><text x="438" y="250" class="v11x-svg-small">x</text><text x="35" y="46" class="v11x-svg-small">z</text></svg><p id="v11m-vector-values"></p></section><section class="v11x-vector"><h5>Bilanca vanjskih sila</h5><p>Ljubičasta tlačna sila i crvena reakcija zbrajaju se u promjenu toka količine gibanja.</p><svg viewBox="0 0 500 290" role="img" aria-label="Vektorska bilanca tlačne sile, reakcije i promjene toka količine gibanja"><defs><marker id="v11m-force-purple" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#6e5bb5"/></marker><marker id="v11m-force-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker><marker id="v11m-force-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker></defs><path d="M45 230H455M45 230V35" stroke="#8195a4" stroke-width="2"/><path id="v11m-force-p" d="M80 215H190" stroke="#6e5bb5" stroke-width="5" marker-end="url(#v11m-force-purple)"/><path id="v11m-force-r" d="M190 215L120 150" stroke="#c53b3b" stroke-width="5" marker-end="url(#v11m-force-red)"/><path id="v11m-force-m" d="M80 215L120 150" stroke="#1976b9" stroke-width="5" marker-end="url(#v11m-force-blue)"/><text id="v11m-force-p-label" x="95" y="205" class="v11x-svg-small v11x-svg-pressure">p₁A₁</text><text id="v11m-force-r-label" x="185" y="142" class="v11x-svg-small v11x-svg-force">R</text><text id="v11m-force-m-label" x="110" y="250" class="v11x-svg-small v11x-svg-flow">ΔṖ</text></svg><p id="v11m-force-values"></p></section></div>
+<div class="v11x-locators"><section class="v11x-vector"><h5>Promjena vektora brzine</h5><p>$\Delta\vec v=\vec v_2-\vec v_1$. Obje brzine počinju u istoj točki, a ljubičasta strelica ih zatvara.</p><svg viewBox="0 0 500 290" role="img" aria-label="Vektorsko oduzimanje ulazne i izlazne brzine"><defs><marker id="v11m-vector-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="v11m-vector-violet" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#6e5bb5"/></marker></defs><path d="M55 230H450M55 230V35" stroke="#8195a4" stroke-width="2"/><path id="v11m-loc-v1" d="M75 220H180" stroke="#1976b9" stroke-width="5" marker-end="url(#v11m-vector-blue)"/><path id="v11m-loc-v2" d="M75 220L220 90" stroke="#1976b9" stroke-width="5" marker-end="url(#v11m-vector-blue)"/><path id="v11m-loc-dv" d="M180 220L220 90" stroke="#6e5bb5" stroke-width="5" marker-end="url(#v11m-vector-violet)"/><text id="v11m-loc-v1-label" x="120" y="210" class="v11x-svg-small v11x-svg-flow">v₁</text><text id="v11m-loc-v2-label" x="220" y="82" class="v11x-svg-small v11x-svg-flow">v₂</text><text id="v11m-loc-dv-label" x="235" y="160" class="v11x-svg-small v11x-svg-pressure">Δv</text><text x="438" y="250" class="v11x-svg-small">x</text><text x="35" y="46" class="v11x-svg-small">z</text></svg><p id="v11m-vector-values"></p></section><section class="v11x-vector"><h5>Bilanca vanjskih sila</h5><p>Ljubičasta tlačna sila i crvena reakcija zbrajaju se u promjenu toka količine gibanja.</p><svg viewBox="0 0 500 290" role="img" aria-label="Vektorska bilanca tlačne sile, reakcije i promjene toka količine gibanja"><defs><marker id="v11m-force-purple" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#6e5bb5"/></marker><marker id="v11m-force-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker><marker id="v11m-force-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker></defs><path d="M45 230H455M45 230V35" stroke="#8195a4" stroke-width="2"/><path id="v11m-force-p" d="M80 215H190" stroke="#6e5bb5" stroke-width="5" marker-end="url(#v11m-force-purple)"/><path id="v11m-force-r" d="M190 215L120 150" stroke="#c53b3b" stroke-width="5" marker-end="url(#v11m-force-red)"/><path id="v11m-force-m" d="M80 215L120 150" stroke="#1976b9" stroke-width="5" marker-end="url(#v11m-force-blue)"/><text id="v11m-force-p-label" x="95" y="205" class="v11x-svg-small v11x-svg-pressure">p₁A₁</text><text id="v11m-force-r-label" x="185" y="142" class="v11x-svg-small v11x-svg-force">R</text><text id="v11m-force-m-label" x="110" y="250" class="v11x-svg-small v11x-svg-flow">ΔṖ</text></svg><p id="v11m-force-values"></p></section></div>
 <div class="v11x-explain"><h5>Zašto se rezultat promijenio?</h5><p id="v11m-why"></p></div>
 <div class="v11x-chain"><div><strong>Promjena</strong><span id="v11m-chain-change"></span></div><div><strong>Vektori brzine</strong><span id="v11m-chain-v"></span></div><div><strong>Tok količine gibanja</strong><span id="v11m-chain-p"></span></div><div><strong>Vanjske sile</strong><span id="v11m-chain-r"></span></div></div>
 </section>
 
 <script>
 (() => {
- const root=document.getElementById('v11-momentum-lab');if(!root)return;
- const alpha=root.querySelector('#v11m-alpha'),mdot=root.querySelector('#v11m-mdot'),ratio=root.querySelector('#v11m-ratio'),p1=root.querySelector('#v11m-p1'),fmt=(n,k=2)=>n.toLocaleString('hr-HR',{minimumFractionDigits:k,maximumFractionDigits:k});
- const layers={velocity:true,momentum:true,pressure:true,reaction:true,cv:true};const scene=root.querySelector('.v11x-scene svg');scene.insertAdjacentHTML('beforeend','<g id="v11m-layer-momentum"><path id="v11m-dp-arrow" d="M790 350L870 310" fill="none" stroke="#1976b9" stroke-width="6" marker-end="url(#v11m-blue)"/><text id="v11m-dp-label" x="790" y="378" class="v11x-svg-small v11x-svg-flow">ΔṖ</text></g><g id="v11m-geometry"><path id="v11m-alpha-arc" d="M410 300A42 42 0 0 0 446 279" fill="none" stroke="#8195a4" stroke-width="3"/><text id="v11m-alpha-label" x="452" y="288" class="v11x-svg-small">α</text></g>');let state,previousState,lastChanged='initial',activePreset='z100';
- function read(){return{alpha:+alpha.value,mdot:+mdot.value,ratio:+ratio.value,p1:+p1.value*1000}}
- function compute(raw){const rho=1000,A1=.0113,beta=1.03,A2=A1*raw.ratio,v1=raw.mdot/(rho*A1),v2=raw.mdot/(rho*A2),rad=raw.alpha*Math.PI/180,v2x=v2*Math.cos(rad),v2z=v2*Math.sin(rad),dvx=v2x-v1,dvz=v2z,dpx=beta*raw.mdot*dvx,dpz=beta*raw.mdot*dvz,pA=raw.p1*A1,rx=dpx-pA,rz=dpz,R=Math.hypot(rx,rz);return{...raw,rho,A1,A2,beta,v1,v2,rad,v2x,v2z,dvx,dvz,dpx,dpz,pA,rx,rz,R}}
- function pt(x,y){return{x,y}}function shape(s){const e=pt(Math.cos(s.rad),-Math.sin(s.rad)),n=pt(Math.sin(s.rad),Math.cos(s.rad)),B=pt(410,300),C=pt(410,180),radius=120,wi=78,wo=Math.max(19,78*Math.sqrt(s.ratio)),steps=Math.max(1,Math.ceil(s.alpha/8)),points=[{x:80,y:300,dir:0,w:wi},{x:B.x,y:B.y,dir:0,w:wi}];for(let i=1;i<=steps;i++){const a=s.rad*i/steps;points.push({x:B.x+radius*Math.sin(a),y:C.y+radius*Math.cos(a),dir:a,w:wi})}const bend=points[points.length-1],neck=pt(bend.x+38*e.x,bend.y+38*e.y),end=pt(bend.x+135*e.x,bend.y+135*e.y);points.push({x:neck.x,y:neck.y,dir:s.rad,w:wo},{x:end.x,y:end.y,dir:s.rad,w:wo});const outline=width=>{const left=points.map(p=>pt(p.x+Math.sin(p.dir)*width(p.w)/2,p.y+Math.cos(p.dir)*width(p.w)/2)),right=[...points].reverse().map(p=>pt(p.x-Math.sin(p.dir)*width(p.w)/2,p.y-Math.cos(p.dir)*width(p.w)/2));return 'M'+left.map(p=>p.x+' '+p.y).join('L')+'L'+right.map(p=>p.x+' '+p.y).join('L')+'Z'};const arc=s.alpha<.5?'M105 300H'+end.x:'M105 300H'+B.x+' A'+radius+' '+radius+' 0 '+(s.alpha>90?1:0)+' 0 '+bend.x+' '+bend.y+' L'+end.x+' '+end.y;const ar=42,ae=pt(B.x+ar*Math.sin(s.rad),B.y-ar+ar*Math.cos(s.rad));return{shell:outline(w=>w),fluid:outline(w=>Math.max(10,w-22)),trace:arc,end,bend,outDir:e,n,wo,alphaPath:s.alpha<.5?'M'+B.x+' '+B.y:'M'+B.x+' '+B.y+' A'+ar+' '+ar+' 0 '+(s.alpha>90?1:0)+' 0 '+ae.x+' '+ae.y,alphaLabel:pt(ae.x+9,ae.y-6)}}
- function setPath(id,d){root.querySelector(id).setAttribute('d',d)}
- function drawScene(s){const g=shape(s);setPath('#v11m-pipe-shell',g.shell);setPath('#v11m-pipe-fluid',g.fluid);setPath('#v11m-trace',g.trace);root.querySelector('#v11m-trace').style.animationDuration=Math.max(.45,2.4/(.3+s.mdot/8))+'s';const len1=80+45*Math.min(1,s.v1/2),len2=48+35*Math.min(1,s.v2/25),v2start=pt(g.end.x-96*g.outDir.x,g.end.y-96*g.outDir.y),v2end=pt(v2start.x+len2*g.outDir.x,v2start.y+len2*g.outDir.y),sec2a=pt(g.end.x-g.n.x*g.wo/2,g.end.y-g.n.y*g.wo/2),sec2b=pt(g.end.x+g.n.x*g.wo/2,g.end.y+g.n.y*g.wo/2),label=pt(g.end.x+g.n.x*(g.wo/2+15),g.end.y+g.n.y*(g.wo/2+15));setPath('#v11m-v1','M145 274H'+(145+len1));setPath('#v11m-v2','M'+v2start.x+' '+v2start.y+'L'+v2end.x+' '+v2end.y);setPath('#v11m-sec1','M100 261V339');setPath('#v11m-sec2','M'+sec2a.x+' '+sec2a.y+'L'+sec2b.x+' '+sec2b.y);root.querySelector('#v11m-v1-label').setAttribute('x',150);root.querySelector('#v11m-v1-label').setAttribute('y',258);root.querySelector('#v11m-v2-label').setAttribute('x',v2end.x+g.n.x*9);root.querySelector('#v11m-v2-label').setAttribute('y',v2end.y+g.n.y*9);root.querySelector('#v11m-sec2-label').setAttribute('x',label.x);root.querySelector('#v11m-sec2-label').setAttribute('y',label.y);const pLen=20+125*s.p1/250000;setPath('#v11m-p1-arrow','M83 300H'+(83+pLen));root.querySelector('#v11m-p1-label').setAttribute('x',85);root.querySelector('#v11m-p1-label').setAttribute('y',356);root.querySelector('#v11m-p1-label').textContent='p₁A₁ = '+fmt(s.pA/1000,2)+' kN';root.querySelector('#v11m-p2-label').setAttribute('x',label.x);root.querySelector('#v11m-p2-label').setAttribute('y',label.y+22);root.querySelector('#v11m-p2-label').textContent='p₂,g = 0';const rScale=105/Math.max(1000,Math.abs(s.rx),Math.abs(s.rz)),rb=pt(468,392),rp=pt(rb.x+s.rx*rScale,rb.y-s.rz*rScale);setPath('#v11m-R','M'+rb.x+' '+rb.y+'L'+rp.x+' '+rp.y);root.querySelector('#v11m-R-label').setAttribute('x',Math.min(710,Math.max(90,rp.x-32)));root.querySelector('#v11m-R-label').setAttribute('y',Math.min(458,Math.max(76,rp.y+25)));root.querySelector('#v11m-R-label').textContent='R = ('+fmt(s.rx/1000,2)+', '+fmt(s.rz/1000,2)+') kN';root.querySelector('#v11m-fluid-label').setAttribute('x',520);root.querySelector('#v11m-fluid-label').setAttribute('y',430);const dScale=92/Math.max(900,Math.abs(s.dpx),Math.abs(s.dpz)),db=pt(790,350),dp=pt(db.x+s.dpx*dScale,db.y-s.dpz*dScale);setPath('#v11m-dp-arrow','M'+db.x+' '+db.y+'L'+dp.x+' '+dp.y);root.querySelector('#v11m-dp-label').setAttribute('x',db.x);root.querySelector('#v11m-dp-label').setAttribute('y',382);root.querySelector('#v11m-dp-label').textContent='ΔṖ = βṁ(v₂ − v₁)';setPath('#v11m-alpha-arc',g.alphaPath);root.querySelector('#v11m-alpha-label').setAttribute('x',g.alphaLabel.x);root.querySelector('#v11m-alpha-label').setAttribute('y',g.alphaLabel.y);root.querySelector('#v11m-alpha-label').textContent='α = '+fmt(s.alpha,0)+'°';root.querySelector('#v11m-v2-label').textContent='v₂';root.querySelector('#v11m-sec2-label').textContent='A₂ = '+fmt(s.A2*1e4,2)+' cm²'}
- function drawLocators(s){const O=pt(75,220),scale=150/Math.max(5,s.v1,s.v2),a=pt(O.x+scale*s.v1,O.y),b=pt(O.x+scale*s.v2x,O.y-scale*s.v2z);setPath('#v11m-loc-v1','M'+O.x+' '+O.y+'L'+a.x+' '+a.y);setPath('#v11m-loc-v2','M'+O.x+' '+O.y+'L'+b.x+' '+b.y);setPath('#v11m-loc-dv','M'+a.x+' '+a.y+'L'+b.x+' '+b.y);root.querySelector('#v11m-loc-v1-label').setAttribute('x',(O.x+a.x)/2);root.querySelector('#v11m-loc-v1-label').setAttribute('y',O.y-10);root.querySelector('#v11m-loc-v2-label').setAttribute('x',b.x+6);root.querySelector('#v11m-loc-v2-label').setAttribute('y',b.y-8);root.querySelector('#v11m-loc-dv-label').setAttribute('x',(a.x+b.x)/2+6);root.querySelector('#v11m-loc-dv-label').setAttribute('y',(a.y+b.y)/2);root.querySelector('#v11m-vector-values').textContent='Δvₓ = '+fmt(s.dvx,2)+' m/s; Δv_z = '+fmt(s.dvz,2)+' m/s; |Δv| = '+fmt(Math.hypot(s.dvx,s.dvz),2)+' m/s.';const F=pt(80,215),fs=130/Math.max(800,Math.abs(s.pA),Math.abs(s.rx),Math.abs(s.rz),Math.abs(s.dpx),Math.abs(s.dpz)),P=pt(F.x+s.pA*fs,F.y),R=pt(P.x+s.rx*fs,P.y-s.rz*fs),M=pt(F.x+s.dpx*fs,F.y-s.dpz*fs);setPath('#v11m-force-p','M'+F.x+' '+F.y+'L'+P.x+' '+P.y);setPath('#v11m-force-r','M'+P.x+' '+P.y+'L'+R.x+' '+R.y);setPath('#v11m-force-m','M'+F.x+' '+F.y+'L'+M.x+' '+M.y);root.querySelector('#v11m-force-p-label').setAttribute('x',(F.x+P.x)/2);root.querySelector('#v11m-force-r-label').setAttribute('x',R.x+5);root.querySelector('#v11m-force-r-label').setAttribute('y',R.y-6);root.querySelector('#v11m-force-m-label').setAttribute('x',M.x+5);root.querySelector('#v11m-force-m-label').setAttribute('y',M.y+16);root.querySelector('#v11m-force-values').textContent='ΔṖ = ('+fmt(s.dpx,0)+', '+fmt(s.dpz,0)+') N; p₁A₁ + R = ΔṖ.'}
- function why(s){if(!previousState||lastChanged==='initial'||lastChanged==='preset')return 'Ulazni tok dolazi u smjeru +x, a izlazni je zakrenut za '+fmt(s.alpha,0)+'°. Stijenka mora na fluid djelovati silom R tako da zajedno s tlačnom silom proizvede upravo ΔṖ = βṁ(v₂ − v₁).';const b=previousState;if(lastChanged==='alpha')return 'Kut je '+(s.alpha>b.alpha?'povećan':'smanjen')+' s '+fmt(b.alpha,0)+'° na '+fmt(s.alpha,0)+'°. Iznos v₂ ostaje '+fmt(s.v2,2)+' m/s, ali se mijenjaju komponente: v₂x je '+fmt(s.v2x,2)+' m/s, a v₂z '+fmt(s.v2z,2)+' m/s. Zato se promijenio vektorski tok ΔṖ i potrebne komponente Rₓ, R_z.';if(lastChanged==='mdot')return 'Maseni protok je '+(s.mdot>b.mdot?'povećan':'smanjen')+' s '+fmt(b.mdot,1)+' na '+fmt(s.mdot,1)+' kg/s. Pri stalnim A₁ i A₂ rastu i masa po sekundi i obje brzine, pa u ovom modelu βṁΔv raste približno s ṁ²; reakcija zato ne raste samo linearno.';if(lastChanged==='ratio')return 'Omjer A₂/A₁ je '+(s.ratio>b.ratio?'povećan':'smanjen')+' s '+fmt(b.ratio,3)+' na '+fmt(s.ratio,3)+'. Izlazna površina sada je '+fmt(s.A2*1e4,2)+' cm², pa iz v₂=ṁ/(ρA₂) slijedi v₂ = '+fmt(s.v2,2)+' m/s. Promijenila se izlazna strelica, zatim ΔṖ i na kraju R.';return 'Tlak p₁ je '+(s.p1>b.p1?'povećan':'smanjen')+' s '+fmt(b.p1/1000,0)+' na '+fmt(s.p1/1000,0)+' kPa. Brzine i momentum-target nisu se promijenili, ali tlačna sila p₁A₁ jest; Rₓ se zato mijenja u suprotnom smjeru kako bi zbroj vanjskih sila ostao jednak ΔṖ.'}
- function sync(s){alpha.value=s.alpha;root.querySelector('#v11m-alpha-out').value=fmt(s.alpha,0)+'°';root.querySelector('#v11m-mdot-out').value=fmt(s.mdot,1)+' kg/s';root.querySelector('#v11m-ratio-out').value=fmt(s.ratio,3);root.querySelector('#v11m-p1-out').value=fmt(s.p1/1000,0)+' kPa';root.querySelector('#v11m-Rmag').value=fmt(s.R/1000,3)+' kN';root.querySelector('#v11m-Rx').value=fmt(s.rx/1000,3)+' kN';root.querySelector('#v11m-Rz').value=fmt(s.rz/1000,3)+' kN';root.querySelector('#v11m-pA').value=fmt(s.pA/1000,3)+' kN';root.querySelector('#v11m-why').textContent=why(s);root.querySelector('#v11m-chain-change').textContent=lastChanged==='initial'?'izvorni Z100':lastChanged;root.querySelector('#v11m-chain-v').textContent='v₂ = ('+fmt(s.v2x,2)+', '+fmt(s.v2z,2)+') m/s';root.querySelector('#v11m-chain-p').textContent='ΔṖ = ('+fmt(s.dpx,0)+', '+fmt(s.dpz,0)+') N';root.querySelector('#v11m-chain-r').textContent='R = ('+fmt(s.rx,0)+', '+fmt(s.rz,0)+') N'}
- function applyLayers(){Object.keys(layers).forEach(k=>{const el=root.querySelector('#v11m-layer-'+k);if(el)el.style.display=layers[k]?'':'none'})}
- function update(){state=compute(read());sync(state);drawScene(state);drawLocators(state);applyLayers()}
- function change(key){previousState=state?{...state}:null;lastChanged=key;activePreset='';root.querySelectorAll('[data-v11m-preset]').forEach(b=>b.classList.remove('is-active'));update()}
- const presets={z100:{alpha:30,mdot:14,ratio:7/113,p1:202.2},straight:{alpha:0,mdot:14,ratio:1,p1:0},ninety:{alpha:90,mdot:14,ratio:7/113,p1:0},z101:{alpha:180,mdot:14,ratio:7/113,p1:202.2}};
- root.querySelectorAll('[data-v11m-preset]').forEach(btn=>btn.addEventListener('click',()=>{previousState=state?{...state}:null;lastChanged='preset';activePreset=btn.dataset.v11mPreset;const p=presets[activePreset];alpha.value=p.alpha;mdot.value=p.mdot;ratio.value=p.ratio;p1.value=p.p1;root.querySelectorAll('[data-v11m-preset]').forEach(b=>b.classList.toggle('is-active',b===btn));update()}));
- root.querySelectorAll('[data-v11m-layer]').forEach(btn=>btn.addEventListener('click',()=>{const k=btn.dataset.v11mLayer;layers[k]=!layers[k];btn.setAttribute('aria-pressed',String(layers[k]));applyLayers()}));[[alpha,'alpha'],[mdot,'mdot'],[ratio,'ratio'],[p1,'p1']].forEach(([el,key])=>el.addEventListener('input',()=>change(key)));update();
+  const root = document.getElementById("v11-momentum-lab");
+  if (!root) return;
+  const alpha = root.querySelector("#v11m-alpha"),
+    mdot = root.querySelector("#v11m-mdot"),
+    ratio = root.querySelector("#v11m-ratio"),
+    p1 = root.querySelector("#v11m-p1"),
+    fmt = (n, k = 2) => n.toLocaleString("hr-HR", { minimumFractionDigits: k, maximumFractionDigits: k });
+  const layers = { velocity: true, momentum: true, pressure: true, reaction: true, cv: true };
+  const scene = root.querySelector(".v11x-scene svg");
+  scene.insertAdjacentHTML(
+    "beforeend",
+    '<g id="v11m-layer-momentum"><path id="v11m-dp-arrow" d="M790 350L870 310" fill="none" stroke="#1976b9" stroke-width="6" marker-end="url(#v11m-blue)"/><text id="v11m-dp-label" x="790" y="378" class="v11x-svg-small v11x-svg-flow">ΔṖ</text></g><g id="v11m-geometry"><path id="v11m-alpha-arc" d="M410 300A42 42 0 0 0 446 279" fill="none" stroke="#8195a4" stroke-width="3"/><text id="v11m-alpha-label" x="452" y="288" class="v11x-svg-small">α</text></g>',
+  );
+  let state,
+    previousState,
+    lastChanged = "initial",
+    activePreset = "z100";
+  function read() {
+    return { alpha: +alpha.value, mdot: +mdot.value, ratio: +ratio.value, p1: +p1.value * 1000 };
+  }
+  function compute(raw) {
+    const rho = 1000,
+      A1 = 0.0113,
+      beta = 1.03,
+      A2 = A1 * raw.ratio,
+      v1 = raw.mdot / (rho * A1),
+      v2 = raw.mdot / (rho * A2),
+      rad = (raw.alpha * Math.PI) / 180,
+      v2x = v2 * Math.cos(rad),
+      v2z = v2 * Math.sin(rad),
+      dvx = v2x - v1,
+      dvz = v2z,
+      dpx = beta * raw.mdot * dvx,
+      dpz = beta * raw.mdot * dvz,
+      pA = raw.p1 * A1,
+      rx = dpx - pA,
+      rz = dpz,
+      R = Math.hypot(rx, rz);
+    return { ...raw, rho, A1, A2, beta, v1, v2, rad, v2x, v2z, dvx, dvz, dpx, dpz, pA, rx, rz, R };
+  }
+  function pt(x, y) {
+    return { x, y };
+  }
+  function shape(s) {
+    const e = pt(Math.cos(s.rad), -Math.sin(s.rad)),
+      n = pt(Math.sin(s.rad), Math.cos(s.rad)),
+      B = pt(410, 300),
+      C = pt(410, 180),
+      radius = 120,
+      wi = 56,
+      wo = 56 * Math.sqrt(s.ratio),
+      steps = Math.max(1, Math.ceil(s.alpha / 8)),
+      points = [
+        { x: 80, y: 300, dir: 0, w: wi },
+        { x: B.x, y: B.y, dir: 0, w: wi },
+      ];
+    for (let i = 1; i <= steps; i++) {
+      const a = (s.rad * i) / steps;
+      points.push({ x: B.x + radius * Math.sin(a), y: C.y + radius * Math.cos(a), dir: a, w: wi });
+    }
+    const bend = points[points.length - 1],
+      neck = pt(bend.x + 38 * e.x, bend.y + 38 * e.y),
+      end = pt(bend.x + 135 * e.x, bend.y + 135 * e.y);
+    points.push({ x: neck.x, y: neck.y, dir: s.rad, w: wo }, { x: end.x, y: end.y, dir: s.rad, w: wo });
+    const outline = (width) => {
+      const left = points.map((p) =>
+          pt(p.x + (Math.sin(p.dir) * width(p.w)) / 2, p.y + (Math.cos(p.dir) * width(p.w)) / 2),
+        ),
+        right = [...points]
+          .reverse()
+          .map((p) => pt(p.x - (Math.sin(p.dir) * width(p.w)) / 2, p.y - (Math.cos(p.dir) * width(p.w)) / 2));
+      return "M" + left.map((p) => p.x + " " + p.y).join("L") + "L" + right.map((p) => p.x + " " + p.y).join("L") + "Z";
+    };
+    const arc =
+      s.alpha < 0.5
+        ? "M105 300H" + end.x
+        : "M105 300H" +
+          B.x +
+          " A" +
+          radius +
+          " " +
+          radius +
+          " 0 " +
+          (s.alpha > 180 ? 1 : 0) +
+          " 0 " +
+          bend.x +
+          " " +
+          bend.y +
+          " L" +
+          end.x +
+          " " +
+          end.y;
+    const ar = 42,
+      ae = pt(B.x + ar * Math.cos(s.rad), B.y - ar * Math.sin(s.rad));
+    return {
+      shell: outline((w) => w+16),
+      fluid: outline((w) => w),
+      trace: arc,
+      end,
+      bend,
+      outDir: e,
+      n,
+      wo,
+      alphaPath:
+        s.alpha < 0.5
+          ? "M" + B.x + " " + B.y
+          : "M" + (B.x+ar) + " " + B.y + " A" + ar + " " + ar + " 0 " + (s.alpha > 180 ? 1 : 0) + " 0 " + ae.x + " " + ae.y,
+      alphaLabel: pt(ae.x + 9, ae.y - 6),
+    };
+  }
+  function setPath(id,d){const el=root.querySelector(id);el.setAttribute('d',d);const p=d.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi)?.map(Number);if(el.hasAttribute('marker-end')&&p){const len=p.length===3?Math.abs(p[2]-p[0]):p.length===4?Math.hypot(p[2]-p[0],p[3]-p[1]):1;el.style.visibility=len<1e-9?'hidden':'';}}
+  function drawScene(s) {
+    const g = shape(s);
+    setPath("#v11m-pipe-shell", g.shell);
+    setPath("#v11m-pipe-fluid", g.fluid);
+    setPath("#v11m-trace", g.trace);
+    root.querySelector("#v11m-trace").style.animationDuration = Math.max(0.45, 2.4 / (0.3 + s.mdot / 8)) + "s";
+    const vs=85/Math.max(s.v1,s.v2,1), fs=105/Math.max(s.R,Math.hypot(s.dpx,s.dpz),s.pA,1),
+      len1 = vs*s.v1, len2=vs*s.v2,
+      v2start = pt(g.end.x - 96 * g.outDir.x, g.end.y - 96 * g.outDir.y),
+      v2end = pt(v2start.x + len2 * g.outDir.x, v2start.y + len2 * g.outDir.y),
+      sec2a = pt(g.end.x - (g.n.x * g.wo) / 2, g.end.y - (g.n.y * g.wo) / 2),
+      sec2b = pt(g.end.x + (g.n.x * g.wo) / 2, g.end.y + (g.n.y * g.wo) / 2),
+      label = pt(g.end.x + g.n.x * (g.wo / 2 + 15), g.end.y + g.n.y * (g.wo / 2 + 15));
+    setPath("#v11m-v1", "M145 274H" + (145 + len1));
+    setPath("#v11m-v2", "M" + v2start.x + " " + v2start.y + "L" + v2end.x + " " + v2end.y);
+    setPath("#v11m-sec1", "M100 261V339");
+    setPath("#v11m-sec2", "M" + sec2a.x + " " + sec2a.y + "L" + sec2b.x + " " + sec2b.y);
+    root.querySelector("#v11m-v1-label").setAttribute("x", 150);
+    root.querySelector("#v11m-v1-label").setAttribute("y", 258);
+    root.querySelector("#v11m-v2-label").setAttribute("x", v2end.x + g.n.x * 9);
+    root.querySelector("#v11m-v2-label").setAttribute("y", v2end.y + g.n.y * 9);
+    root.querySelector("#v11m-sec2-label").setAttribute("x", label.x);
+    root.querySelector("#v11m-sec2-label").setAttribute("y", label.y);
+    const pLen = fs*s.pA;
+    setPath("#v11m-p1-arrow", "M83 300H" + (83 + pLen));
+    root.querySelector("#v11m-p1-label").setAttribute("x", 85);
+    root.querySelector("#v11m-p1-label").setAttribute("y", 356);
+    root.querySelector("#v11m-p1-label").textContent = "p₁A₁ = " + fmt(s.pA / 1000, 2) + " kN";
+    root.querySelector("#v11m-p2-label").setAttribute("x", label.x);
+    root.querySelector("#v11m-p2-label").setAttribute("y", label.y + 22);
+    root.querySelector("#v11m-p2-label").textContent = "p₂,g = 0";
+    const rScale = fs,
+      rb = pt(468, 392),
+      rp = pt(rb.x + s.rx * rScale, rb.y - s.rz * rScale);
+    setPath("#v11m-R", "M" + rb.x + " " + rb.y + "L" + rp.x + " " + rp.y);
+    root.querySelector("#v11m-R-label").setAttribute("x", Math.min(710, Math.max(90, rp.x - 32)));
+    root.querySelector("#v11m-R-label").setAttribute("y", Math.min(458, Math.max(76, rp.y + 25)));
+    root.querySelector("#v11m-R-label").textContent =
+      "R = (" + fmt(s.rx / 1000, 2) + ", " + fmt(s.rz / 1000, 2) + ") kN";
+    root.querySelector("#v11m-fluid-label").setAttribute("x", 520);
+    root.querySelector("#v11m-fluid-label").setAttribute("y", 430);
+    const dScale = fs,
+      db = pt(790, 350),
+      dp = pt(db.x + s.dpx * dScale, db.y - s.dpz * dScale);
+    setPath("#v11m-dp-arrow", "M" + db.x + " " + db.y + "L" + dp.x + " " + dp.y);
+    root.querySelector("#v11m-dp-label").setAttribute("x", db.x);
+    root.querySelector("#v11m-dp-label").setAttribute("y", 382);
+    root.querySelector("#v11m-dp-label").textContent = "ΔṖ = βṁ(v₂ − v₁)";
+    setPath("#v11m-alpha-arc", g.alphaPath);
+    root.querySelector("#v11m-alpha-label").setAttribute("x", g.alphaLabel.x);
+    root.querySelector("#v11m-alpha-label").setAttribute("y", g.alphaLabel.y);
+    root.querySelector("#v11m-alpha-label").textContent = "α = " + fmt(s.alpha, 0) + "°";
+    root.querySelector("#v11m-v2-label").textContent = "v₂";
+    root.querySelector("#v11m-sec2-label").textContent = "A₂ = " + fmt(s.A2 * 1e4, 2) + " cm²";
+  }
+  function drawLocators(s) {
+    const O = pt(230, 220),
+      scale = 150 / Math.max(5, s.v1, s.v2),
+      a = pt(O.x + scale * s.v1, O.y),
+      b = pt(O.x + scale * s.v2x, O.y - scale * s.v2z);
+    setPath("#v11m-loc-v1", "M" + O.x + " " + O.y + "L" + a.x + " " + a.y);
+    setPath("#v11m-loc-v2", "M" + O.x + " " + O.y + "L" + b.x + " " + b.y);
+    setPath("#v11m-loc-dv", "M" + a.x + " " + a.y + "L" + b.x + " " + b.y);
+    root.querySelector("#v11m-loc-v1-label").setAttribute("x", (O.x + a.x) / 2);
+    root.querySelector("#v11m-loc-v1-label").setAttribute("y", O.y - 10);
+    root.querySelector("#v11m-loc-v2-label").setAttribute("x", b.x + 6);
+    root.querySelector("#v11m-loc-v2-label").setAttribute("y", b.y - 8);
+    root.querySelector("#v11m-loc-dv-label").setAttribute("x", (a.x + b.x) / 2 + 6);
+    root.querySelector("#v11m-loc-dv-label").setAttribute("y", (a.y + b.y) / 2);
+    root.querySelector("#v11m-vector-values").textContent =
+      "Δvₓ = " +
+      fmt(s.dvx, 2) +
+      " m/s; Δv_z = " +
+      fmt(s.dvz, 2) +
+      " m/s; |Δv| = " +
+      fmt(Math.hypot(s.dvx, s.dvz), 2) +
+      " m/s.";
+    const F = pt(230, 215),
+      fs = 130 / Math.max(800, Math.abs(s.pA), Math.abs(s.rx), Math.abs(s.rz), Math.abs(s.dpx), Math.abs(s.dpz)),
+      P = pt(F.x + s.pA * fs, F.y),
+      R = pt(P.x + s.rx * fs, P.y - s.rz * fs),
+      M = pt(F.x + s.dpx * fs, F.y - s.dpz * fs);
+    setPath("#v11m-force-p", "M" + F.x + " " + F.y + "L" + P.x + " " + P.y);
+    setPath("#v11m-force-r", "M" + P.x + " " + P.y + "L" + R.x + " " + R.y);
+    setPath("#v11m-force-m", "M" + F.x + " " + F.y + "L" + M.x + " " + M.y);
+    root.querySelector("#v11m-force-p-label").setAttribute("x", (F.x + P.x) / 2);
+    root.querySelector("#v11m-force-r-label").setAttribute("x", R.x + 5);
+    root.querySelector("#v11m-force-r-label").setAttribute("y", R.y - 6);
+    root.querySelector("#v11m-force-m-label").setAttribute("x", M.x + 5);
+    root.querySelector("#v11m-force-m-label").setAttribute("y", M.y + 16);
+    root.querySelector("#v11m-force-values").textContent =
+      "ΔṖ = (" + fmt(s.dpx, 0) + ", " + fmt(s.dpz, 0) + ") N; p₁A₁ + R = ΔṖ.";
+  }
+  function why(s) {
+    if (!previousState || lastChanged === "initial" || lastChanged === "preset")
+      return (
+        "Ulazni tok dolazi u smjeru +x, a izlazni je zakrenut za " +
+        fmt(s.alpha, 0) +
+        "°. Stijenka mora na fluid djelovati silom R tako da zajedno s tlačnom silom proizvede upravo ΔṖ = βṁ(v₂ − v₁)."
+      );
+    const b = previousState;
+    if (lastChanged === "alpha")
+      return (
+        "Kut je " +
+        (s.alpha > b.alpha ? "povećan" : "smanjen") +
+        " s " +
+        fmt(b.alpha, 0) +
+        "° na " +
+        fmt(s.alpha, 0) +
+        "°. Iznos v₂ ostaje " +
+        fmt(s.v2, 2) +
+        " m/s, ali se mijenjaju komponente: v₂x je " +
+        fmt(s.v2x, 2) +
+        " m/s, a v₂z " +
+        fmt(s.v2z, 2) +
+        " m/s. Zato se promijenio vektorski tok ΔṖ i potrebne komponente Rₓ, R_z."
+      );
+    if (lastChanged === "mdot")
+      return (
+        "Maseni protok je " +
+        (s.mdot > b.mdot ? "povećan" : "smanjen") +
+        " s " +
+        fmt(b.mdot, 1) +
+        " na " +
+        fmt(s.mdot, 1) +
+        " kg/s. Pri stalnim A₁ i A₂ rastu i masa po sekundi i obje brzine, pa u ovom modelu βṁΔv raste približno s ṁ²; reakcija zato ne raste samo linearno."
+      );
+    if (lastChanged === "ratio")
+      return (
+        "Omjer A₂/A₁ je " +
+        (s.ratio > b.ratio ? "povećan" : "smanjen") +
+        " s " +
+        fmt(b.ratio, 3) +
+        " na " +
+        fmt(s.ratio, 3) +
+        ". Izlazna površina sada je " +
+        fmt(s.A2 * 1e4, 2) +
+        " cm², pa iz v₂=ṁ/(ρA₂) slijedi v₂ = " +
+        fmt(s.v2, 2) +
+        " m/s. Promijenila se izlazna strelica, zatim ΔṖ i na kraju R."
+      );
+    return (
+      "Tlak p₁ je " +
+      (s.p1 > b.p1 ? "povećan" : "smanjen") +
+      " s " +
+      fmt(b.p1 / 1000, 0) +
+      " na " +
+      fmt(s.p1 / 1000, 0) +
+      " kPa. Brzine i tok količine gibanja nisu se promijenili, ali tlačna sila p₁A₁ jest; Rₓ se zato mijenja u suprotnom smjeru kako bi zbroj vanjskih sila ostao jednak ΔṖ."
+    );
+  }
+  function sync(s) {
+    alpha.value = s.alpha;
+    root.querySelector("#v11m-alpha-out").value = fmt(s.alpha, 0) + "°";
+    root.querySelector("#v11m-mdot-out").value = fmt(s.mdot, 1) + " kg/s";
+    root.querySelector("#v11m-ratio-out").value = fmt(s.ratio, 3);
+    root.querySelector("#v11m-p1-out").value = fmt(s.p1 / 1000, 0) + " kPa";
+    root.querySelector("#v11m-Rmag").value = fmt(s.R / 1000, 3) + " kN";
+    root.querySelector("#v11m-Rx").value = fmt(s.rx / 1000, 3) + " kN";
+    root.querySelector("#v11m-Rz").value = fmt(s.rz / 1000, 3) + " kN";
+    root.querySelector("#v11m-pA").value = fmt(s.pA / 1000, 3) + " kN";
+    root.querySelector("#v11m-why").textContent = why(s);
+    root.querySelector("#v11m-chain-change").textContent = lastChanged === "initial" ? "izvorni Z100" : lastChanged;
+    root.querySelector("#v11m-chain-v").textContent = "v₂ = (" + fmt(s.v2x, 2) + ", " + fmt(s.v2z, 2) + ") m/s";
+    root.querySelector("#v11m-chain-p").textContent = "ΔṖ = (" + fmt(s.dpx, 0) + ", " + fmt(s.dpz, 0) + ") N";
+    root.querySelector("#v11m-chain-r").textContent = "R = (" + fmt(s.rx, 0) + ", " + fmt(s.rz, 0) + ") N";
+  }
+  function applyLayers() {
+    Object.keys(layers).forEach((k) => {
+      const el = root.querySelector("#v11m-layer-" + k);
+      if (el) el.style.display = layers[k] ? "" : "none";
+    });
+  }
+  function update() {
+    state = compute(read());
+    sync(state);
+    drawScene(state);
+    drawLocators(state);
+    applyLayers();
+  }
+  function change(key) {
+    previousState = state ? { ...state } : null;
+    lastChanged = key;
+    activePreset = "";
+    root.querySelectorAll("[data-v11m-preset]").forEach((b) => b.classList.remove("is-active"));
+    update();
+  }
+  const presets = {
+    z100: { alpha: 30, mdot: 14, ratio: 7 / 113, p1: 202.2 },
+    straight: { alpha: 0, mdot: 14, ratio: 1, p1: 0 },
+    ninety: { alpha: 90, mdot: 14, ratio: 7 / 113, p1: 0 },
+    z101: { alpha: 180, mdot: 14, ratio: 7 / 113, p1: 202.2 },
+  };
+  root.querySelectorAll("[data-v11m-preset]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      previousState = state ? { ...state } : null;
+      lastChanged = "preset";
+      activePreset = btn.dataset.v11mPreset;
+      const p = presets[activePreset];
+      alpha.value = p.alpha;
+      mdot.value = p.mdot;
+      ratio.value = p.ratio;
+      p1.value = p.p1;
+      root.querySelectorAll("[data-v11m-preset]").forEach((b) => b.classList.toggle("is-active", b === btn));
+      update();
+    }),
+  );
+  root.querySelectorAll("[data-v11m-layer]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const k = btn.dataset.v11mLayer;
+      layers[k] = !layers[k];
+      btn.setAttribute("aria-pressed", String(layers[k]));
+      applyLayers();
+    }),
+  );
+  [
+    [alpha, "alpha"],
+    [mdot, "mdot"],
+    [ratio, "ratio"],
+    [p1, "p1"],
+  ].forEach(([el, key]) => el.addEventListener("input", () => change(key)));
+  update();
 })();
 </script>
 
@@ -105,7 +421,7 @@ Za $h=0$ slijedi $T_{empty}=(D/d)^2\,2\sqrt{h_0}/(C_d\sqrt{2g})=127{,}71\ \mathr
 
 <section class="v11x-shell v11x-task" id="v11-z97-lab" aria-labelledby="v11-z97-title">
 <header class="v11x-head"><h4 id="v11-z97-title">Pražnjenje spremnika: razina i vrijeme na istoj sceni</h4><p>Spremnik je lijevo, a egzaktna krivulja $h/h_0$ prema $t/T$ desno. Prikaz ne koristi Eulerovu integraciju: za svako stanje vrijedi analitičko rješenje.</p></header>
-<div class="v11x-scene"><svg viewBox="0 0 1000 410" role="img" aria-labelledby="v11-z97-svg-title"><title id="v11-z97-svg-title">Prazni spremnik lijevo i graf relativne razine prema relativnom vremenu desno</title><defs><marker id="v11-z97-arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker></defs><path d="M85 55V330H380V55" fill="none" stroke="#537084" stroke-width="6"/><rect id="v11-z97-water" x="92" y="105" width="281" height="219" fill="#cdeafa"/><path id="v11-z97-level" d="M92 105H373" stroke="#1976b9" stroke-width="5"/><path d="M380 280H505" stroke="#537084" stroke-width="22"/><path id="v11-z97-jet" class="v11x-flow" d="M392 280H505" fill="none" stroke="#4baee5" stroke-width="11" marker-end="url(#v11-z97-arrow)"/><path d="M55 105V324M45 105H67M45 324H67" fill="none" stroke="#cf741c" stroke-width="3"/><text x="18" y="220" class="v11x-svg-label v11x-svg-amber">h(t)</text><text x="155" y="42" class="v11x-svg-label">spremnik</text><text x="400" y="255" class="v11x-svg-small">sapnica d</text><path d="M580 330H935M580 60V330" stroke="#8195a4" stroke-width="3"/><path d="M580 195H935" stroke="#d5e2ea" stroke-width="2" stroke-dasharray="5 6"/><path id="v11-z97-curve" d="M580 60L935 330" fill="none" stroke="#1976b9" stroke-width="5"/><path d="M580 60L935 330" fill="none" stroke="#cf741c" stroke-width="3" stroke-dasharray="8 6"/><circle id="v11-z97-point" cx="580" cy="60" r="8" fill="#c53b3b"/><text x="570" y="43" class="v11x-svg-small">h/h₀</text><text x="917" y="358" class="v11x-svg-small">t/T</text><text x="670" y="88" class="v11x-svg-small v11x-svg-flow">egzaktno: h/h₀ = (1 − t/T)²</text><text x="700" y="315" class="v11x-svg-small v11x-svg-amber">pogrešno: konstantni Q</text></svg></div>
+<div class="v11x-scene"><svg viewBox="0 0 1000 410" role="img" aria-labelledby="v11-z97-svg-title"><title id="v11-z97-svg-title">Prazni spremnik lijevo i graf relativne razine prema relativnom vremenu desno</title><defs><marker id="v11-z97-arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker></defs><path d="M85 55V330H380V55" fill="none" stroke="#537084" stroke-width="6"/><rect id="v11-z97-water" x="92" y="105" width="281" height="219" fill="#cdeafa"/><path id="v11-z97-level" d="M92 105H373" stroke="#1976b9" stroke-width="5"/><path d="M380 280H505" stroke="#537084" stroke-width="22"/><path id="v11-z97-jet" class="v11x-flow" d="M392 280H505" fill="none" stroke="#4baee5" stroke-width="11" marker-end="url(#v11-z97-arrow)"/><path d="M55 105V324M45 105H67M45 324H67" fill="none" stroke="#cf741c" stroke-width="3"/><text x="18" y="220" class="v11x-svg-label v11x-svg-amber">h(t)</text><text x="155" y="42" class="v11x-svg-label">spremnik</text><text x="400" y="255" class="v11x-svg-small">sapnica d</text><path d="M580 330H935M580 60V330" stroke="#8195a4" stroke-width="3"/><path d="M580 195H935" stroke="#d5e2ea" stroke-width="2" stroke-dasharray="5 6"/><path id="v11-z97-curve" d="M580 60L935 330" fill="none" stroke="#1976b9" stroke-width="5"/><path d="M580 60L935 330" fill="none" stroke="#cf741c" stroke-width="3" stroke-dasharray="8 6"/><circle id="v11-z97-point" cx="580" cy="60" r="8" fill="#c53b3b"/><text x="570" y="43" class="v11x-svg-small">h/h₀</text><text x="917" y="358" class="v11x-svg-small">t/T</text><text x="670" y="88" class="v11x-svg-small v11x-svg-flow">egzaktno: h/h₀ = (1 − t/T)²</text><text x="700" y="315" class="v11x-svg-small v11x-svg-amber">pogrešno: konstantni Q</text></svg></div>
 <div class="v11x-controls"><div class="v11x-control"><label for="v11-z97-diameter">Promjer spremnika D <output id="v11-z97-D-out"></output></label><input id="v11-z97-diameter" type="range" min="0.3" max="1.2" step="0.01" value="0.5"></div><div class="v11x-control"><label for="v11-z97-nozzle">Promjer sapnice d <output id="v11-z97-d-out"></output></label><input id="v11-z97-nozzle" type="range" min="10" max="80" step="1" value="25"></div><div class="v11x-control"><label for="v11-z97-h0">Početna visina h₀ <output id="v11-z97-h0-out"></output></label><input id="v11-z97-h0" type="range" min="0.2" max="2" step="0.02" value="0.5"></div><div class="v11x-control"><label for="v11-z97-cd">Koeficijent C<sub>d</sub> <output id="v11-z97-cd-out"></output></label><input id="v11-z97-cd" type="range" min="0.6" max="1" step="0.01" value="1"></div><div class="v11x-control"><label for="v11-z97-time">Odabrano vrijeme t <output id="v11-z97-t-out"></output></label><input id="v11-z97-time" type="range" min="0" max="127.71" step="0.1" value="0"><div class="v11x-toolbar__group" style="margin-top:.55rem"><button id="v11-z97-play" class="v11x-button" type="button" aria-pressed="false">Pokreni prikaz</button><button id="v11-z97-reset" class="v11x-button" type="button">Izvorni slučaj</button></div></div></div>
 <div class="v11x-primary-row"><div class="v11x-primary"><span>Vrijeme potpunog pražnjenja</span><output id="v11-z97-T"></output><small>Egzaktno vrijeme do $h=0$.</small></div><div class="v11x-values"><div class="v11x-value"><span>Trenutna visina</span><output id="v11-z97-h"></output></div><div class="v11x-value"><span>Brzina izlaza</span><output id="v11-z97-v"></output></div><div class="v11x-value"><span>Trenutni protok Q</span><output id="v11-z97-q"></output></div></div></div>
 <div class="v11x-explain"><h5>Zašto se stanje promijenilo?</h5><p id="v11-z97-why"></p></div>
@@ -114,20 +430,182 @@ Za $h=0$ slijedi $T_{empty}=(D/d)^2\,2\sqrt{h_0}/(C_d\sqrt{2g})=127{,}71\ \mathr
 
 <script>
 (() => {
- const root=document.getElementById('v11-z97-lab');if(!root)return;
- const D=root.querySelector('#v11-z97-diameter'),d=root.querySelector('#v11-z97-nozzle'),h0=root.querySelector('#v11-z97-h0'),cd=root.querySelector('#v11-z97-cd'),time=root.querySelector('#v11-z97-time'),play=root.querySelector('#v11-z97-play'),reset=root.querySelector('#v11-z97-reset');
- const fmt=(n,k=2)=>n.toLocaleString('hr-HR',{minimumFractionDigits:k,maximumFractionDigits:k});let state,previousState,lastChanged='initial',frame=0,playing=false,start=0,origin=0;
- function readInputs(){return{D:+D.value,d:+d.value/1000,h0:+h0.value,cd:+cd.value,t:+time.value}}
- function compute(raw){const A=Math.PI*raw.D*raw.D/4,a=Math.PI*raw.d*raw.d/4,T=2*A*Math.sqrt(raw.h0)/(raw.cd*a*Math.sqrt(2*9.81)),t=Math.min(raw.t,T),rootH=Math.max(0,Math.sqrt(raw.h0)-raw.cd*a*Math.sqrt(2*9.81)*t/(2*A)),h=rootH*rootH,v=raw.cd*Math.sqrt(2*9.81*h),q=a*v;return{...raw,A,a,T,t,h,v,q}}
- function draw(s){const top=105,bottom=324,y=bottom-(s.h/s.h0)*(bottom-top);root.querySelector('#v11-z97-water').setAttribute('y',y);root.querySelector('#v11-z97-water').setAttribute('height',bottom-y);root.querySelector('#v11-z97-level').setAttribute('d','M92 '+y+'H373');let curve='';for(let i=0;i<=48;i++){const f=i/48,x=580+355*f,yv=60+270*(1-(1-f)*(1-f));curve+=(i?'L':'M')+x+' '+yv}root.querySelector('#v11-z97-curve').setAttribute('d',curve);const f=s.t/s.T;root.querySelector('#v11-z97-point').setAttribute('cx',580+355*f);root.querySelector('#v11-z97-point').setAttribute('cy',60+270*(1-s.h/s.h0));root.querySelector('#v11-z97-jet').style.animationDuration=Math.max(.45,1.9/(.2+s.v/5))+'s'}
- function why(s){if(!previousState||lastChanged==='initial')return 'Razina ne pada linearno: kako je h manji, Torricellijeva brzina i protok Q su manji. Zato završni dio pražnjenja traje dulje nego što bi sugerirao početni protok.';const b=previousState;if(lastChanged==='D')return 'Promjer spremnika promijenjen je s '+fmt(b.D,2)+' na '+fmt(s.D,2)+' m. Površina A se mijenja s D²: za istu promjenu razine treba promijeniti više ili manje volumena, pa se vrijeme T promijenilo na '+fmt(s.T,2)+' s.';if(lastChanged==='d')return 'Promjer sapnice promijenjen je s '+fmt(b.d*1000,0)+' na '+fmt(s.d*1000,0)+' mm. Izlazna površina a mijenja se s d², pa se pri istoj visini promijenio Q i vrijeme pražnjenja.';if(lastChanged==='h0')return 'Početna visina promijenjena je s '+fmt(b.h0,2)+' na '+fmt(s.h0,2)+' m. Veća visina istodobno povećava početnu brzinu i početni volumen; ukupno vrijedi T ∝ √h₀.';if(lastChanged==='cd')return 'Koeficijent protjecanja promijenjen je s '+fmt(b.cd,2)+' na '+fmt(s.cd,2)+'. Izraz Q=aCᵈ√(2gh) zato se izravno promijenio, pa se razina spušta novom brzinom.';return 'Za t = '+fmt(s.t,1)+' s ostaje '+fmt(100*s.h/s.h0,1)+' % početne visine. Kako h pada, padaju i v te Q jer vrijedi Q ∝ √h.'}
- function sync(s){time.max=s.T.toFixed(2);if(+time.value>s.T)time.value=s.T;root.querySelector('#v11-z97-D-out').value=fmt(s.D,2)+' m';root.querySelector('#v11-z97-d-out').value=fmt(s.d*1000,0)+' mm';root.querySelector('#v11-z97-h0-out').value=fmt(s.h0,2)+' m';root.querySelector('#v11-z97-cd-out').value=fmt(s.cd,2);root.querySelector('#v11-z97-t-out').value=fmt(s.t,1)+' s';root.querySelector('#v11-z97-T').value=fmt(s.T,2)+' s';root.querySelector('#v11-z97-h').value=fmt(s.h,3)+' m';root.querySelector('#v11-z97-v').value=fmt(s.v,3)+' m/s';root.querySelector('#v11-z97-q').value=fmt(s.q*1000,3)+' L/s';root.querySelector('#v11-z97-why').textContent=why(s);root.querySelector('#v11-z97-chain-a').textContent='A = '+fmt(s.A,3)+' m², a = '+fmt(s.a*1e6,0)+' mm²';root.querySelector('#v11-z97-chain-q').textContent='Q = '+fmt(s.q*1000,3)+' L/s';root.querySelector('#v11-z97-chain-t').textContent='T = '+fmt(s.T,2)+' s'}
- function update(){state=compute(readInputs());sync(state);draw(state)}
- function stop(){playing=false;play.setAttribute('aria-pressed','false');play.textContent='Pokreni prikaz';if(frame)cancelAnimationFrame(frame)}
- function changed(key){previousState=state?{...state}:null;lastChanged=key;stop();update()}
- function tick(now){if(!playing)return;previousState=state?{...state}:null;lastChanged='time';time.value=Math.min(+time.max,origin+(now-start)/1000*(+time.max/12));update();if(+time.value>=+time.max){stop();return}frame=requestAnimationFrame(tick)}
- play.addEventListener('click',()=>{if(playing){stop();return}if(matchMedia('(prefers-reduced-motion:reduce)').matches){root.querySelector('#v11-z97-why').textContent='Animacija je isključena zbog postavke smanjenog gibanja; isto stanje možete istražiti klizačem vremena.';return}playing=true;start=performance.now();origin=+time.value;play.setAttribute('aria-pressed','true');play.textContent='Zaustavi prikaz';frame=requestAnimationFrame(tick)});
- reset.addEventListener('click',()=>{D.value=.5;d.value=25;h0.value=.5;cd.value=1;time.value=0;previousState=state?{...state}:null;lastChanged='initial';stop();update()});[[D,'D'],[d,'d'],[h0,'h0'],[cd,'cd'],[time,'time']].forEach(([el,key])=>el.addEventListener('input',()=>changed(key)));update();
+  const root = document.getElementById("v11-z97-lab");
+  if (!root) return;
+  const D = root.querySelector("#v11-z97-diameter"),
+    d = root.querySelector("#v11-z97-nozzle"),
+    h0 = root.querySelector("#v11-z97-h0"),
+    cd = root.querySelector("#v11-z97-cd"),
+    time = root.querySelector("#v11-z97-time"),
+    play = root.querySelector("#v11-z97-play"),
+    reset = root.querySelector("#v11-z97-reset");
+  const fmt = (n, k = 2) => n.toLocaleString("hr-HR", { minimumFractionDigits: k, maximumFractionDigits: k });
+  const speedLabel=document.createElement('label');speedLabel.textContent=' Brzina vremena ';const rate=document.createElement('select');rate.setAttribute('aria-label','Brzina vremena pražnjenja');for(const speed of [1,5,20]){const o=document.createElement('option');o.value=speed;o.textContent=speed+'×';rate.append(o);}speedLabel.append(rate);play.after(speedLabel);rate.addEventListener('change',()=>stop());document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
+ let state,
+    previousState,
+    lastChanged = "initial",
+    frame = 0,
+    playing = false,
+    start = 0,
+    origin = 0;
+  function readInputs() {
+    return { D: +D.value, d: +d.value / 1000, h0: +h0.value, cd: +cd.value, t: +time.value };
+  }
+  function compute(raw) {
+    const A = (Math.PI * raw.D * raw.D) / 4,
+      a = (Math.PI * raw.d * raw.d) / 4,
+      T = (2 * A * Math.sqrt(raw.h0)) / (raw.cd * a * Math.sqrt(2 * 9.81)),
+      t = Math.min(raw.t, T),
+      rootH = Math.max(0, Math.sqrt(raw.h0) - (raw.cd * a * Math.sqrt(2 * 9.81) * t) / (2 * A)),
+      h = rootH * rootH,
+      v = raw.cd * Math.sqrt(2 * 9.81 * h),
+      q = a * v;
+    return { ...raw, A, a, T, t, h, v, q };
+  }
+  function draw(s){
+ const svg=root.querySelector('.v11x-scene svg'), scale=Math.min(270/s.D,235/s.h0),left=110,right=left+s.D*scale,bottom=325,top=bottom-s.h0*scale,water=bottom-s.h*scale;
+ let curve='';for(let i=0;i<=60;i++){const f=i/60;curve+=(i?'L':'M')+(580+355*f)+' '+(60+270*(1-(1-f)**2));}
+ const arrow=MF1.svgArrow;
+ svg.innerHTML='<title>Pražnjenje kroz otvor pri dnu: stvarna skala spremnika, normirani graf</title>'+
+ '<path d="M'+left+' '+(top-15)+'V'+bottom+'H'+right+'V'+(top-15)+'" fill="none" stroke="#475569" stroke-width="5"/>'+
+ '<rect x="'+left+'" y="'+water+'" width="'+s.D*scale+'" height="'+s.h*scale+'" fill="#bae6fd"/>'+
+ '<path d="M'+left+' '+water+'H'+right+'" stroke="#0284c7" stroke-width="3"/>'+
+ '<path d="M'+right+' '+bottom+'h35" stroke="#0284c7" stroke-width="'+Math.max(1,s.d*scale)+'"/>'+
+ (s.h>1e-10?arrow(right+35,bottom,s.v*12,0,'#0284c7','Q/a'): '')+
+ '<text x="110" y="40">D='+fmt(s.D,2)+' m; h₀='+fmt(s.h0,2)+' m</text><text x="110" y="375">h='+fmt(s.h,3)+' m; otvor pri dnu, d='+fmt(s.d*1000,0)+' mm</text>'+
+ '<path d="M580 50V330H950" fill="none" stroke="#64748b" stroke-width="2"/><path d="'+curve+'" fill="none" stroke="#0284c7" stroke-width="3"/>'+
+ '<circle cx="'+(580+355*s.t/s.T)+'" cy="'+(330-270*s.h/s.h0)+'" r="6" fill="#dc2626"/>'+
+ '<text x="560" y="40">h/h₀</text><text x="940" y="360">t/T</text><text x="557" y="65">1</text><text x="557" y="335">0</text><text x="580" y="350">0</text><text x="933" y="350">1</text>';
+ }
+  function why(s) {
+    if (!previousState || lastChanged === "initial")
+      return "Razina ne pada linearno: kako je h manji, Torricellijeva brzina i protok Q su manji. Zato završni dio pražnjenja traje dulje nego što bi sugerirao početni protok.";
+    const b = previousState;
+    if (lastChanged === "D")
+      return (
+        "Promjer spremnika promijenjen je s " +
+        fmt(b.D, 2) +
+        " na " +
+        fmt(s.D, 2) +
+        " m. Površina A se mijenja s D²: za istu promjenu razine treba promijeniti više ili manje volumena, pa se vrijeme T promijenilo na " +
+        fmt(s.T, 2) +
+        " s."
+      );
+    if (lastChanged === "d")
+      return (
+        "Promjer sapnice promijenjen je s " +
+        fmt(b.d * 1000, 0) +
+        " na " +
+        fmt(s.d * 1000, 0) +
+        " mm. Izlazna površina a mijenja se s d², pa se pri istoj visini promijenio Q i vrijeme pražnjenja."
+      );
+    if (lastChanged === "h0")
+      return (
+        "Početna visina promijenjena je s " +
+        fmt(b.h0, 2) +
+        " na " +
+        fmt(s.h0, 2) +
+        " m. Veća visina istodobno povećava početnu brzinu i početni volumen; ukupno vrijedi T ∝ √h₀."
+      );
+    if (lastChanged === "cd")
+      return (
+        "Koeficijent protjecanja promijenjen je s " +
+        fmt(b.cd, 2) +
+        " na " +
+        fmt(s.cd, 2) +
+        ". Izraz Q=aCᵈ√(2gh) zato se izravno promijenio, pa se razina spušta novom brzinom."
+      );
+    return (
+      "Za t = " +
+      fmt(s.t, 1) +
+      " s ostaje " +
+      fmt((100 * s.h) / s.h0, 1) +
+      " % početne visine. Kako h pada, padaju i v te Q jer vrijedi Q ∝ √h."
+    );
+  }
+  function sync(s) {
+    time.max = s.T.toFixed(2);
+    if (+time.value > s.T) time.value = s.T;
+    root.querySelector("#v11-z97-D-out").value = fmt(s.D, 2) + " m";
+    root.querySelector("#v11-z97-d-out").value = fmt(s.d * 1000, 0) + " mm";
+    root.querySelector("#v11-z97-h0-out").value = fmt(s.h0, 2) + " m";
+    root.querySelector("#v11-z97-cd-out").value = fmt(s.cd, 2);
+    root.querySelector("#v11-z97-t-out").value = fmt(s.t, 1) + " s";
+    root.querySelector("#v11-z97-T").value = fmt(s.T, 2) + " s";
+    root.querySelector("#v11-z97-h").value = fmt(s.h, 3) + " m";
+    root.querySelector("#v11-z97-v").value = fmt(s.v, 3) + " m/s";
+    root.querySelector("#v11-z97-q").value = fmt(s.q * 1000, 3) + " L/s";
+    root.querySelector("#v11-z97-why").textContent = why(s);
+    root.querySelector("#v11-z97-chain-a").textContent =
+      "A = " + fmt(s.A, 3) + " m², a = " + fmt(s.a * 1e6, 0) + " mm²";
+    root.querySelector("#v11-z97-chain-q").textContent = "Q = " + fmt(s.q * 1000, 3) + " L/s";
+    root.querySelector("#v11-z97-chain-t").textContent = "T = " + fmt(s.T, 2) + " s";
+  }
+  function update() {
+    state = compute(readInputs());
+    sync(state);
+    draw(state);
+  }
+  function stop() {
+    playing = false;
+    play.setAttribute("aria-pressed", "false");
+    play.textContent = "Pokreni prikaz";
+    if (frame) cancelAnimationFrame(frame);
+  }
+  function changed(key) {
+    previousState = state ? { ...state } : null;
+    lastChanged = key;
+    stop();
+    update();
+  }
+  function tick(now) {
+    if (!playing) return;
+    previousState = state ? { ...state } : null;
+    lastChanged = "time";
+    time.value = Math.min(+time.max, origin + ((now - start) / 1000) * Number(rate.value));
+    update();
+    if (+time.value >= +time.max) {
+      stop();
+      return;
+    }
+    frame = requestAnimationFrame(tick);
+  }
+  play.addEventListener("click", () => {
+    if (playing) {
+      stop();
+      return;
+    }
+    if (matchMedia("(prefers-reduced-motion:reduce)").matches) {
+      root.querySelector("#v11-z97-why").textContent =
+        "Animacija je isključena zbog postavke smanjenog gibanja; isto stanje možete istražiti klizačem vremena.";
+      return;
+    }
+    playing = true;
+    start = performance.now();
+    origin = +time.value;
+    play.setAttribute("aria-pressed", "true");
+    play.textContent = "Zaustavi prikaz";
+    frame = requestAnimationFrame(tick);
+  });
+  reset.addEventListener("click", () => {
+    D.value = 0.5;
+    d.value = 25;
+    h0.value = 0.5;
+    cd.value = 1;
+    time.value = 0;
+    previousState = state ? { ...state } : null;
+    lastChanged = "initial";
+    stop();
+    update();
+  });
+  [
+    [D, "D"],
+    [d, "d"],
+    [h0, "h0"],
+    [cd, "cd"],
+    [time, "time"],
+  ].forEach(([el, key]) => el.addEventListener("input", () => changed(key)));
+  update();
 })();
 </script>
 
@@ -147,7 +625,7 @@ Za $h=0$ slijedi $T_{empty}=(D/d)^2\,2\sqrt{h_0}/(C_d\sqrt{2g})=127{,}71\ \mathr
 
 <section class="v11x-shell v11x-task" id="v11-z98-lab" aria-labelledby="v11-z98-title">
 <header class="v11x-head"><h4 id="v11-z98-title">Dva mlaza: ista ciljna točka, dva suprotna učinka</h4><p>Na lijevoj polovici vidi se stvarna geometrija zadatka; desno je univerzalna krivulja dometa. Markeri oba otvora ostaju na istoj ordinati jer su njihove visine komplementarne.</p></header>
-<div class="v11x-scene"><svg viewBox="0 0 1000 430" role="img" aria-labelledby="v11-z98-svg-title"><title id="v11-z98-svg-title">Spremnik s dvije parabolične putanje i univerzalni graf dometa</title><defs><marker id="v11-z98-arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker></defs><path d="M95 48V355H385V48" fill="none" stroke="#537084" stroke-width="6"/><path id="v11-z98-water" d="M101 75H379V355H101Z" fill="#cdeafa"/><path id="v11-z98-free" d="M101 75H379" stroke="#1976b9" stroke-width="5"/><path id="v11-z98-jet1" class="v11x-flow" d="M385 185L555 355" fill="none" stroke="#1976b9" stroke-width="7" marker-end="url(#v11-z98-arrow)"/><path id="v11-z98-jet2" class="v11x-flow" d="M385 245L555 355" fill="none" stroke="#4baee5" stroke-width="7" marker-end="url(#v11-z98-arrow)"/><path d="M55 355H570" stroke="#537084" stroke-width="5"/><circle cx="555" cy="355" r="8" fill="#c53b3b"/><path id="v11-z98-Hdim" d="M70 185V355" stroke="#cf741c" stroke-width="3"/><path id="v11-z98-h0dim" d="M410 75V185" stroke="#8195a4" stroke-width="2" stroke-dasharray="6 5"/><path id="v11-z98-hdim" d="M438 185V245" stroke="#8195a4" stroke-width="2" stroke-dasharray="6 5"/><text id="v11-z98-Hlabel" x="32" y="270" class="v11x-svg-label v11x-svg-amber">H</text><text id="v11-z98-h0label" x="416" y="135" class="v11x-svg-small">h₀</text><text id="v11-z98-hlabel" x="444" y="220" class="v11x-svg-small">h</text><text id="v11-z98-v1label" x="398" y="173" class="v11x-svg-small v11x-svg-flow">v₁</text><text id="v11-z98-v2label" x="398" y="265" class="v11x-svg-small v11x-svg-flow">v₂</text><text x="520" y="388" class="v11x-svg-small">ista točka: L</text><path d="M650 350H945M650 70V350" stroke="#8195a4" stroke-width="3"/><path d="M650 130H945" stroke="#d5e2ea" stroke-width="2" stroke-dasharray="5 6"/><path id="v11-z98-universal" d="M650 350L945 350" fill="none" stroke="#1976b9" stroke-width="5"/><circle id="v11-z98-marker1" cx="720" cy="180" r="7" fill="#1976b9"/><circle id="v11-z98-marker2" cx="820" cy="180" r="7" fill="#4baee5"/><text x="642" y="55" class="v11x-svg-small">L/H<sub>ukupno</sub></text><text x="885" y="378" class="v11x-svg-small">y/H<sub>ukupno</sub></text><text x="700" y="100" class="v11x-svg-small">L/H = 2√(y/H · (1−y/H))</text></svg></div>
+<div class="v11x-scene"><svg viewBox="0 0 1000 430" role="img" aria-labelledby="v11-z98-svg-title"><title id="v11-z98-svg-title">Spremnik s dvije parabolične putanje i univerzalni graf dometa</title><defs><marker id="v11-z98-arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker></defs><path d="M95 48V355H385V48" fill="none" stroke="#537084" stroke-width="6"/><path id="v11-z98-water" d="M101 75H379V355H101Z" fill="#cdeafa"/><path id="v11-z98-free" d="M101 75H379" stroke="#1976b9" stroke-width="5"/><path id="v11-z98-jet1" class="v11x-flow" d="M385 185L555 355" fill="none" stroke="#1976b9" stroke-width="7" marker-end="url(#v11-z98-arrow)"/><path id="v11-z98-jet2" class="v11x-flow" d="M385 245L555 355" fill="none" stroke="#4baee5" stroke-width="7" marker-end="url(#v11-z98-arrow)"/><path d="M55 355H570" stroke="#537084" stroke-width="5"/><circle cx="555" cy="355" r="8" fill="#c53b3b"/><path id="v11-z98-Hdim" d="M70 185V355" stroke="#cf741c" stroke-width="3"/><path id="v11-z98-h0dim" d="M410 75V185" stroke="#8195a4" stroke-width="2" stroke-dasharray="6 5"/><path id="v11-z98-hdim" d="M438 185V245" stroke="#8195a4" stroke-width="2" stroke-dasharray="6 5"/><text id="v11-z98-Hlabel" x="32" y="270" class="v11x-svg-label v11x-svg-amber">H</text><text id="v11-z98-h0label" x="416" y="135" class="v11x-svg-small">h₀</text><text id="v11-z98-hlabel" x="444" y="220" class="v11x-svg-small">h</text><text id="v11-z98-v1label" x="398" y="173" class="v11x-svg-small v11x-svg-flow">v₁</text><text id="v11-z98-v2label" x="398" y="265" class="v11x-svg-small v11x-svg-flow">v₂</text><text x="520" y="388" class="v11x-svg-small">ista točka: L</text><path d="M650 350H945M650 70V350" stroke="#8195a4" stroke-width="3"/><path d="M650 130H945" stroke="#d5e2ea" stroke-width="2" stroke-dasharray="5 6"/><path id="v11-z98-universal" d="M650 350L945 350" fill="none" stroke="#1976b9" stroke-width="5"/><circle id="v11-z98-marker1" cx="720" cy="180" r="7" fill="#1976b9"/><circle id="v11-z98-marker2" cx="820" cy="180" r="7" fill="#4baee5"/><text x="642" y="55" class="v11x-svg-small">L/H<sub>ukupno</sub></text><text x="885" y="378" class="v11x-svg-small">y/H<sub>ukupno</sub></text><text x="700" y="100" class="v11x-svg-small">L/H = 2√(y/H · (1−y/H))</text></svg></div>
 <div class="v11x-controls"><div class="v11x-control"><label for="v11-z98-L">Udaljenost do plohe L <output id="v11-z98-L-out"></output></label><input id="v11-z98-L" type="range" min="8.2" max="14" step="0.1" value="10"></div><div class="v11x-control"><label for="v11-z98-h0">Visina iznad gornje sapnice h₀ <output id="v11-z98-h0-out"></output></label><input id="v11-z98-h0" type="range" min="2" max="4" step="0.1" value="4"></div></div>
 <div class="v11x-primary-row"><div class="v11x-primary"><span>Pad gornjeg mlaza</span><output id="v11-z98-H"></output><small>Iz uvjeta $L=2\sqrt{Hh_0}$.</small></div><div class="v11x-values"><div class="v11x-value"><span>Razmak sapnica h</span><output id="v11-z98-h-out"></output></div><div class="v11x-value"><span>Brzina gornjeg mlaza v₁</span><output id="v11-z98-v1"></output></div><div class="v11x-value"><span>Vrijeme leta gornjeg mlaza</span><output id="v11-z98-t1"></output></div></div></div>
 <div class="v11x-explain"><h5>Zašto oba mlaza imaju isti domet?</h5><p id="v11-z98-why"></p></div>
@@ -156,13 +634,123 @@ Za $h=0$ slijedi $T_{empty}=(D/d)^2\,2\sqrt{h_0}/(C_d\sqrt{2g})=127{,}71\ \mathr
 
 <script>
 (() => {
- const root=document.getElementById('v11-z98-lab');if(!root)return;const L=root.querySelector('#v11-z98-L'),h0=root.querySelector('#v11-z98-h0'),fmt=(n,k=2)=>n.toLocaleString('hr-HR',{minimumFractionDigits:k,maximumFractionDigits:k});let state,previousState,lastChanged='initial';
- function read(){return{L:+L.value,h0:+h0.value}}function compute(raw){const g=9.81,H=raw.L*raw.L/(4*raw.h0),h=H-raw.h0,total=H+raw.h0,y1=H,y2=H-h,v1=Math.sqrt(2*g*raw.h0),v2=Math.sqrt(2*g*(raw.h0+h)),t1=Math.sqrt(2*H/g),t2=Math.sqrt(2*(H-h)/g),r1=v1*t1,r2=v2*t2;return{...raw,H,h,total,y1,y2,v1,v2,t1,t2,r1,r2}}
- function parabola(x0,y0,x1,y1){let d='';for(let i=0;i<=34;i++){const t=i/34;d+=(i?'L':'M')+(x0+(x1-x0)*t)+' '+(y0+(y1-y0)*t*t)}return d}
- function draw(s){const base=355,scale=280/(s.total*1.08),free=base-s.total*scale,o1=base-s.H*scale,o2=base-(s.H-s.h)*scale;root.querySelector('#v11-z98-water').setAttribute('d','M101 '+free+'H379V355H101Z');root.querySelector('#v11-z98-free').setAttribute('d','M101 '+free+'H379');root.querySelector('#v11-z98-jet1').setAttribute('d',parabola(385,o1,555,base));root.querySelector('#v11-z98-jet2').setAttribute('d',parabola(385,o2,555,base));root.querySelector('#v11-z98-Hdim').setAttribute('d','M70 '+o1+'V355');root.querySelector('#v11-z98-h0dim').setAttribute('d','M410 '+free+'V'+o1);root.querySelector('#v11-z98-hdim').setAttribute('d','M438 '+o1+'V'+o2);root.querySelector('#v11-z98-Hlabel').setAttribute('y',(o1+base)/2);root.querySelector('#v11-z98-h0label').setAttribute('y',(free+o1)/2);root.querySelector('#v11-z98-hlabel').setAttribute('y',(o1+o2)/2);root.querySelector('#v11-z98-v1label').setAttribute('y',o1-12);root.querySelector('#v11-z98-v2label').setAttribute('y',o2+20);let p='';for(let i=1;i<100;i++){const r=i/100,x=650+295*r,y=350-280*2*Math.sqrt(r*(1-r));p+=(i===1?'M':'L')+x+' '+y}root.querySelector('#v11-z98-universal').setAttribute('d',p);const r1=s.y1/s.total,r2=s.y2/s.total,yy=350-280*2*Math.sqrt(r1*(1-r1));root.querySelector('#v11-z98-marker1').setAttribute('cx',650+295*r1);root.querySelector('#v11-z98-marker1').setAttribute('cy',yy);root.querySelector('#v11-z98-marker2').setAttribute('cx',650+295*r2);root.querySelector('#v11-z98-marker2').setAttribute('cy',350-280*2*Math.sqrt(r2*(1-r2)))}
- function why(s){if(!previousState||lastChanged==='initial')return 'Gornji otvor ima veću tlačnu visinu od donjeg, pa je njegov mlaz brži; donji otvor je bliže podlozi pa njegov mlaz dulje leti. Dvije se promjene točno uravnoteže kada su otvori na komplementarnim visinama.';if(lastChanged==='L')return 'Udaljenost L promijenjena je s '+fmt(previousState.L,1)+' na '+fmt(s.L,1)+' m. Za veći domet geometrija traži veći pad H, a oba mlaza i dalje moraju završiti u istoj točki.';return 'Visina h₀ promijenjena je s '+fmt(previousState.h0,1)+' na '+fmt(s.h0,1)+' m. Gornji mlaz zato mijenja brzinu v₁, a konstrukcija istodobno prilagođava H i razmak h tako da oba markera ostanu na istoj vrijednosti L/H.'}
- function sync(s){root.querySelector('#v11-z98-L-out').value=fmt(s.L,1)+' m';root.querySelector('#v11-z98-h0-out').value=fmt(s.h0,1)+' m';root.querySelector('#v11-z98-H').value=fmt(s.H,2)+' m';root.querySelector('#v11-z98-h-out').value=fmt(s.h,2)+' m';root.querySelector('#v11-z98-v1').value=fmt(s.v1,2)+' m/s';root.querySelector('#v11-z98-t1').value=fmt(s.t1,2)+' s';root.querySelector('#v11-z98-why').textContent=why(s);root.querySelector('#v11-z98-chain-head').textContent='h₀ = '+fmt(s.h0,2)+' m';root.querySelector('#v11-z98-chain-speed').textContent='v₁ = '+fmt(s.v1,2)+' m/s';root.querySelector('#v11-z98-chain-time').textContent='t₁ = '+fmt(s.t1,2)+' s';root.querySelector('#v11-z98-chain-range').textContent='L₁ = L₂ = '+fmt(s.r1,2)+' m'}
- function update(){state=compute(read());sync(state);draw(state)}[[L,'L'],[h0,'h0']].forEach(([el,key])=>el.addEventListener('input',()=>{previousState=state?{...state}:null;lastChanged=key;update()}));update();
+  const root = document.getElementById("v11-z98-lab");
+  if (!root) return;
+  const L = root.querySelector("#v11-z98-L"),
+    h0 = root.querySelector("#v11-z98-h0"),
+    fmt = (n, k = 2) => n.toLocaleString("hr-HR", { minimumFractionDigits: k, maximumFractionDigits: k });
+  let state,
+    previousState,
+    lastChanged = "initial";
+  function read() {
+    return { L: +L.value, h0: +h0.value };
+  }
+  function compute(raw) {
+    const g = 9.81,
+      H = (raw.L * raw.L) / (4 * raw.h0),
+      h = H - raw.h0,
+      total = H + raw.h0,
+      y1 = H,
+      y2 = H - h,
+      v1 = Math.sqrt(2 * g * raw.h0),
+      v2 = Math.sqrt(2 * g * (raw.h0 + h)),
+      t1 = Math.sqrt((2 * H) / g),
+      t2 = Math.sqrt((2 * (H - h)) / g),
+      r1 = v1 * t1,
+      r2 = v2 * t2;
+    return { ...raw, H, h, total, y1, y2, v1, v2, t1, t2, r1, r2 };
+  }
+  function parabola(x0, y0, x1, y1) {
+    let d = "";
+    for (let i = 0; i <= 34; i++) {
+      const t = i / 34;
+      d += (i ? "L" : "M") + (x0 + (x1 - x0) * t) + " " + (y0 + (y1 - y0) * t * t);
+    }
+    return d;
+  }
+  function draw(s) {
+    const base = 355,
+      scale = Math.min(260/s.total,170/s.L),
+      free = base - s.total * scale,
+      o1 = base - s.H * scale,
+      o2 = base - (s.H - s.h) * scale;
+    root.querySelector("#v11-z98-water").setAttribute("d", "M101 " + free + "H379V355H101Z");
+    root.querySelector("#v11-z98-free").setAttribute("d", "M101 " + free + "H379");
+    root.querySelector("#v11-z98-jet1").setAttribute("d", parabola(385, o1, 385+s.L*scale, base));
+    root.querySelector("#v11-z98-jet2").setAttribute("d", parabola(385, o2, 385+s.L*scale, base));
+    root.querySelector("#v11-z98-Hdim").setAttribute("d", "M70 " + o1 + "V355");
+    root.querySelector("#v11-z98-h0dim").setAttribute("d", "M410 " + free + "V" + o1);
+    root.querySelector("#v11-z98-hdim").setAttribute("d", "M438 " + o1 + "V" + o2);
+    root.querySelector("#v11-z98-Hlabel").setAttribute("y", (o1 + base) / 2);
+    root.querySelector("#v11-z98-h0label").setAttribute("y", (free + o1) / 2);
+    root.querySelector("#v11-z98-hlabel").setAttribute("y", (o1 + o2) / 2);
+    root.querySelector("#v11-z98-v1label").setAttribute("y", o1 - 12);
+    root.querySelector("#v11-z98-v2label").setAttribute("y", o2 + 20);
+    let target=root.querySelector('#v11-z98-target');if(!target){target=document.createElementNS('http://www.w3.org/2000/svg','circle');target.id='v11-z98-target';target.setAttribute('r',5);target.setAttribute('fill','#dc2626');root.querySelector('.v11x-scene svg').append(target);}target.setAttribute('cx',385+s.L*scale);target.setAttribute('cy',base);
+ let p = "";
+    for (let i = 1; i < 100; i++) {
+      const r = i / 100,
+        x = 650 + 295 * r,
+        y = 350 - 280 * 2 * Math.sqrt(r * (1 - r));
+      p += (i === 1 ? "M" : "L") + x + " " + y;
+    }
+    root.querySelector("#v11-z98-universal").setAttribute("d", p);
+    const r1 = s.y1 / s.total,
+      r2 = s.y2 / s.total,
+      yy = 350 - 280 * 2 * Math.sqrt(r1 * (1 - r1));
+    root.querySelector("#v11-z98-marker1").setAttribute("cx", 650 + 295 * r1);
+    root.querySelector("#v11-z98-marker1").setAttribute("cy", yy);
+    root.querySelector("#v11-z98-marker2").setAttribute("cx", 650 + 295 * r2);
+    root.querySelector("#v11-z98-marker2").setAttribute("cy", 350 - 280 * 2 * Math.sqrt(r2 * (1 - r2)));
+  }
+  function why(s) {
+    if (!previousState || lastChanged === "initial")
+      return "Gornji otvor ima manju tlačnu visinu i sporiji mlaz, ali dulje vrijeme pada; donji mlaz brže istječe i kraće pada. Dvije se promjene točno uravnoteže kada su otvori na komplementarnim visinama.";
+    if (lastChanged === "L")
+      return (
+        "Udaljenost L promijenjena je s " +
+        fmt(previousState.L, 1) +
+        " na " +
+        fmt(s.L, 1) +
+        " m. Za veći domet geometrija traži veći pad H, a oba mlaza i dalje moraju završiti u istoj točki."
+      );
+    return (
+      "Visina h₀ promijenjena je s " +
+      fmt(previousState.h0, 1) +
+      " na " +
+      fmt(s.h0, 1) +
+      " m. Gornji mlaz zato mijenja brzinu v₁, a konstrukcija istodobno prilagođava H i razmak h tako da oba markera ostanu na istoj vrijednosti L/H."
+    );
+  }
+  function sync(s) {
+    root.querySelector("#v11-z98-L-out").value = fmt(s.L, 1) + " m";
+    root.querySelector("#v11-z98-h0-out").value = fmt(s.h0, 1) + " m";
+    root.querySelector("#v11-z98-H").value = fmt(s.H, 2) + " m";
+    root.querySelector("#v11-z98-h-out").value = fmt(s.h, 2) + " m";
+    root.querySelector("#v11-z98-v1").value = fmt(s.v1, 2) + " m/s";
+    root.querySelector("#v11-z98-t1").value = fmt(s.t1, 2) + " s";
+    root.querySelector("#v11-z98-why").textContent = why(s);
+    root.querySelector("#v11-z98-chain-head").textContent = "h₀ = " + fmt(s.h0, 2) + " m";
+    root.querySelector("#v11-z98-chain-speed").textContent = "v₁ = " + fmt(s.v1, 2) + " m/s";
+    root.querySelector("#v11-z98-chain-time").textContent = "t₁ = " + fmt(s.t1, 2) + " s";
+    root.querySelector("#v11-z98-chain-range").textContent = "L₁ = L₂ = " + fmt(s.r1, 2) + " m";
+  }
+  function update() {
+    state = compute(read());
+    sync(state);
+    draw(state);
+  }
+  [
+    [L, "L"],
+    [h0, "h0"],
+  ].forEach(([el, key]) =>
+    el.addEventListener("input", () => {
+      previousState = state ? { ...state } : null;
+      lastChanged = key;
+      update();
+    }),
+  );
+  update();
 })();
 </script>
 
@@ -175,34 +763,48 @@ Za $h=0$ slijedi $T_{empty}=(D/d)^2\,2\sqrt{h_0}/(C_d\sqrt{2g})=127{,}71\ \mathr
 <dl class="v11-data"><dt>Zadano</dt><dd>$H_1=0{,}8\ \mathrm{m}$, $L=2{,}2\ \mathrm{m}$, $d=0{,}01\ \mathrm{m}$, $R=1{,}4\ \mathrm{m}$, $r=1\ \mathrm{m}$, $p_{m0}=44000\ \mathrm{Pa}$, $\omega=3{,}7\ \mathrm{rad/s}$, $\rho=998\ \mathrm{kg/m^3}$.</dd><dt>Odrediti</dt><dd>$\dot V$ i $p_{mA}$.</dd></dl>
 
 <div class="v11-solution">
-<h4>Rješenje</h4>
-<p>Za fluid relativno miran u spremniku vrijedi $p/(\rho g)+z-\omega^2r^2/(2g)=C$. Pri istoj koti tlak zato raste s radijusom: $p(r_2)-p(r_1)=\rho\omega^2(r_2^2-r_1^2)/2$. Cijev rotira zajedno sa spremnikom, pa se u energetskoj bilanci koristi relativna brzina $w$ i centrifugalni potencijal.</p>
-<p>Prema geometriji iz PDF-a spuštanje tjemena paraboloida određuje vanjski radijus spremnika, pa je $\Delta z=\omega^2R^2/(4g)$. Radijus $r$ ostaje lokalni radijus točke A u izrazu za tlak. Od točke 0 do izlaza slijedi
-$$
-w=\sqrt{\frac{2p_{m0}}{\rho}-2g\left(L+H_1+\frac{\omega^2R^2}{4g}\right)}=3{,}99\ \mathrm{m/s},
-\qquad
-\dot V=w\frac{\pi d^2}{4}=0{,}313\ \mathrm{L/s}.
-$$
-U točki A dobiva se $p_{mA}=\rho\omega^2r^2/2+\rho g(L+H_1)=36{,}2\ \mathrm{kPa}$. Znak rotacijskog člana dolazi iz geometrije i ne daje opće pravilo da veća $\omega$ uvijek smanjuje ili povećava izlaznu brzinu.</p>
+<h4>Energetska bilanca s eksplicitnim koordinatama</h4>
+<p>Za relativno miran fluid vrijedi $p/(\rho g)+z-\omega^2r^2/(2g)=C$. Od točke 0 u velikom spremniku do atmosferskog izlaza E, zanemarujući gubitke i relativnu brzinu u spremniku:</p>
+$$w_E^2=\frac{2p_{m0}}{\rho}+\omega^2(r_E^2-r_0^2)-2g(z_E-z_0),\qquad Q=\frac{\pi d^2}{4}w_E.$$
+$$p_{mA}=p_{m0}+\rho g(z_0-z_A)+\frac{\rho\omega^2}{2}(r_A^2-r_0^2).$$
+<p><strong>Geometrija mora biti zadana:</strong> izvorna PDF skica nije priložena ovoj zbirci. Sam tekst ne određuje kote i radijus izlaza, pa raniji brojčani rezultat nije potvrđen. Istraživač ispod prikazuje jasno definiran model: $r_0=z_0=0$, $r_A=r=1\,\mathrm m$, $z_A=-H_1=-0{,}8\,\mathrm m$, dok se $r_E$ i $z_E$ zadaju zasebno. Početna kota izlaza u ovom modelu jest $L=2{,}2\,\mathrm m$; to nije rekonstrukcija nedostupne izvorne skice.</p>
 </div>
-
 <section class="v11x-shell v11x-task" id="v11-z99-lab" aria-labelledby="v11-z99-title">
-<header class="v11x-head"><h4 id="v11-z99-title">Rotirajući spremnik: geometrija određuje tlak i relativnu brzinu</h4><p>Slobodna površina je paraboloid: njezina zakrivljenost i tlak u A računaju se iz istog $\omega$. Cijev se promatra u sustavu koji rotira sa spremnikom, zato je izlazna brzina relativna brzina $w$.</p></header>
-<div class="v11x-scene"><svg viewBox="0 0 1000 430" role="img" aria-labelledby="v11-z99-svg-title"><title id="v11-z99-svg-title">Rotirajući spremnik s paraboličnom slobodnom površinom, točkom A i izlaznom cijevi</title><defs><marker id="v11-z99-arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker></defs><path d="M165 55V355H605V55M165 355H605" fill="none" stroke="#537084" stroke-width="6"/><path id="v11-z99-water" d="M171 145Q385 215 599 145V349H171Z" fill="#cdeafa"/><path id="v11-z99-surface" d="M171 145Q385 215 599 145" fill="none" stroke="#1976b9" stroke-width="5"/><path d="M385 32V370" stroke="#8195a4" stroke-width="3" stroke-dasharray="8 6"/><path d="M430 288H735V120H900" fill="none" stroke="#637b8c" stroke-width="22"/><path id="v11-z99-flow" class="v11x-flow" d="M430 288H735V120H900" fill="none" stroke="#70c5ee" stroke-width="11" marker-end="url(#v11-z99-arrow)"/><circle cx="385" cy="300" r="7" fill="#cf741c"/><circle cx="430" cy="288" r="7" fill="#c53b3b"/><path d="M385 332H430M385 375H600" stroke="#cf741c" stroke-width="3"/><path d="M385 327V346M430 327V346M385 370V389M600 370V389" stroke="#cf741c" stroke-width="3"/><path id="v11-z99-dzdim" d="M635 145V215" stroke="#cf741c" stroke-width="3"/><text x="362" y="24" class="v11x-svg-small">os rotacije</text><text x="360" y="292" class="v11x-svg-label v11x-svg-amber">0</text><text x="436" y="316" class="v11x-svg-label v11x-svg-force">A</text><text x="394" y="326" class="v11x-svg-small">r</text><text x="485" y="370" class="v11x-svg-small">R</text><text x="645" y="180" class="v11x-svg-small v11x-svg-amber">Δz</text><text x="760" y="105" class="v11x-svg-small">L</text><text x="848" y="108" class="v11x-svg-small">izlaz, p<sub>atm</sub>, w</text><text x="220" y="92" class="v11x-svg-small">slobodna površina: z(r) − z(0) = ω²r²/(2g)</text></svg></div>
-<div class="v11x-controls"><div class="v11x-control"><label for="v11-z99-omega">Kutna brzina ω <output id="v11-z99-omega-out"></output></label><input id="v11-z99-omega" type="range" min="0" max="7" step="0.1" value="3.7"></div><div class="v11x-control"><label for="v11-z99-p0">Pretlak u točki 0 p<sub>m0</sub> <output id="v11-z99-p0-out"></output></label><input id="v11-z99-p0" type="range" min="20" max="70" step="1" value="44"></div></div>
-<div class="v11x-primary-row"><div class="v11x-primary"><span>Volumenski protok</span><output id="v11-z99-q"></output><small>Vrijedi samo ako raspoloživa energija daje $w^2\geq0$.</small></div><div class="v11x-values"><div class="v11x-value"><span>Spuštanje tjemena Δz</span><output id="v11-z99-dz"></output></div><div class="v11x-value"><span>Pretlak u A</span><output id="v11-z99-pa"></output></div><div class="v11x-value"><span>Relativna brzina w</span><output id="v11-z99-w"></output></div></div></div>
-<div class="v11x-explain"><h5>Zašto se rezultat promijenio?</h5><p id="v11-z99-why"></p></div>
-<div class="v11x-chain"><div><strong>Rotacija</strong><span id="v11-z99-chain-omega"></span></div><div><strong>Slobodna površina</strong><span id="v11-z99-chain-dz"></span></div><div><strong>Relativna energija</strong><span id="v11-z99-chain-w"></span></div><div><strong>Izlaz</strong><span id="v11-z99-chain-q"></span></div></div>
+<header class="v11x-head"><h4 id="v11-z99-title">Rotirajući spremnik: tlak, kota i centrifugalni potencijal</h4><p>Pomiči izlaz i usporedi gravitacijski i rotacijski doprinos energiji. Sve koordinate odnose se na točku 0 na osi. Spremnik je dovoljno velik za kvazistacionarno istjecanje.</p></header>
+<div class="v11x-scene"><svg viewBox="0 0 1000 480" role="img" aria-label="Eksplicitna geometrija rotirajućeg spremnika i izlaza E"></svg></div>
+<div class="v11x-controls">
+<div class="v11x-control"><label for="v11-z99-omega">Kutna brzina ω <output id="v11-z99-omega-out"></output></label><input id="v11-z99-omega" type="range" min="0" max="7" step="0.1" value="3.7"></div>
+<div class="v11x-control"><label for="v11-z99-p0">Pretlak u 0 <output id="v11-z99-p0-out"></output></label><input id="v11-z99-p0" type="range" min="20" max="70" step="1" value="44"></div>
+<div class="v11x-control"><label for="v11-z99-re">Radijus izlaza r_E <output id="v11-z99-re-out"></output></label><input id="v11-z99-re" type="range" min="1.6" max="2.8" step=".1" value="1.6"></div>
+<div class="v11x-control"><label for="v11-z99-ze">Kota izlaza z_E <output id="v11-z99-ze-out"></output></label><input id="v11-z99-ze" type="range" min="1" max="8" step=".1" value="2.2"></div>
+</div>
+<div class="v11x-primary-row"><div class="v11x-primary"><span>Volumenski protok</span><output id="v11-z99-q"></output><small>Idealni model bez gubitaka; relativna brzina u velikom spremniku zanemarena.</small></div><div class="v11x-values"><div class="v11x-value"><span>Radijalna razlika razine Δz_R</span><output id="v11-z99-dz"></output></div><div class="v11x-value"><span>Pretlak u A</span><output id="v11-z99-pa"></output></div><div class="v11x-value"><span>Relativna brzina w_E</span><output id="v11-z99-w"></output></div></div></div>
+<div class="v11x-explain"><h5>Bilanca i uvjeti modela</h5><p id="v11-z99-why"></p></div>
 </section>
-
 <script>
-(() => {
- const root=document.getElementById('v11-z99-lab');if(!root)return;const omega=root.querySelector('#v11-z99-omega'),p0=root.querySelector('#v11-z99-p0'),fmt=(n,k=2)=>n.toLocaleString('hr-HR',{minimumFractionDigits:k,maximumFractionDigits:k});let state,previousState,lastChanged='initial';
- function read(){return{omega:+omega.value,p0:+p0.value*1000}}function compute(raw){const rho=998,g=9.81,R=1.4,r=1,H1=.8,L=2.2,d=.01,dz=raw.omega*raw.omega*R*R/(4*g),head=2*raw.p0/rho-2*g*(L+H1+dz),w=Math.sqrt(Math.max(0,head)),q=Math.PI*d*d/4*w,pa=rho*raw.omega*raw.omega*r*r/2+rho*g*(L+H1);return{...raw,rho,g,R,r,H1,L,d,dz,head,w,q,pa,flows:head>=0}}
- function draw(s){const edge=150,center=edge+Math.min(110,s.dz*120);root.querySelector('#v11-z99-water').setAttribute('d','M171 '+edge+'Q385 '+center+' 599 '+edge+'V349H171Z');root.querySelector('#v11-z99-surface').setAttribute('d','M171 '+edge+'Q385 '+center+' 599 '+edge);root.querySelector('#v11-z99-dzdim').setAttribute('d','M635 '+edge+'V'+center);root.querySelector('#v11-z99-flow').style.animationDuration=Math.max(.5,2.1/(.3+s.w/2))+'s'}
- function why(s){if(!previousState||lastChanged==='initial')return 'Rotacija ne dodaje proizvoljnu „visinu”: zakrivljenost slijedi iz ω². Isti geometrijski član Δz ulazi u energetsku bilancu cijevi, dok lokalni radijus r određuje centrifugalni dio tlaka u A.';if(lastChanged==='omega')return 'Kutna brzina promijenjena je s '+fmt(previousState.omega,1)+' na '+fmt(s.omega,1)+' rad/s. Centrifugalno ubrzanje raste s ω²r, zato je paraboloid zakrivljeniji i pₘ,A raste. U ovoj geometriji veći Δz povećava potrebnu relativnu energiju cijevi, pa se w '+(s.w<previousState.w?'smanjio':'povećao')+'.';return 'Pretlak u točki 0 promijenjen je s '+fmt(previousState.p0/1000,0)+' na '+fmt(s.p0/1000,0)+' kPa. Tlak je površinska energija dostupna za strujanje, pa se u izrazu za w² mijenja član 2pₘ0/ρ; geometrija i slobodna površina ostaju iste.'}
- function sync(s){root.querySelector('#v11-z99-omega-out').value=fmt(s.omega,1)+' rad/s';root.querySelector('#v11-z99-p0-out').value=fmt(s.p0/1000,0)+' kPa';root.querySelector('#v11-z99-dz').value=fmt(s.dz,3)+' m';root.querySelector('#v11-z99-pa').value=fmt(s.pa/1000,2)+' kPa';root.querySelector('#v11-z99-w').value=fmt(s.w,3)+' m/s';root.querySelector('#v11-z99-q').value=s.flows?fmt(s.q*1000,3)+' L/s':'nema istjecanja';root.querySelector('#v11-z99-why').textContent=why(s);root.querySelector('#v11-z99-chain-omega').textContent='ω = '+fmt(s.omega,1)+' rad/s';root.querySelector('#v11-z99-chain-dz').textContent='Δz = '+fmt(s.dz,3)+' m';root.querySelector('#v11-z99-chain-w').textContent='w = '+fmt(s.w,3)+' m/s';root.querySelector('#v11-z99-chain-q').textContent=s.flows?'Q = '+fmt(s.q*1000,3)+' L/s':'w² < 0'}
- function update(){state=compute(read());sync(state);draw(state)}[[omega,'omega'],[p0,'p0']].forEach(([el,key])=>el.addEventListener('input',()=>{previousState=state?{...state}:null;lastChanged=key;update()}));update();
+(()=>{
+ const root=document.getElementById('v11-z99-lab'),svg=root.querySelector('svg'),fmt=(x,d=2)=>x.toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});
+ const el=k=>root.querySelector('#v11-z99-'+k),get=k=>+el(k).value;
+ function update(){
+  const omega=get('omega'),p0=get('p0')*1000,re=get('re'),ze=get('ze'),rho=998,g=9.81,R=1.4,rA=1,zA=-.8;
+  const head=2*p0/rho+omega*omega*re*re-2*g*ze,w=Math.sqrt(Math.max(0,head)),q=Math.PI*.01**2/4*w,pa=p0-rho*g*zA+rho*omega*omega*rA*rA/2;
+  const zc=p0/(rho*g),rise=omega*omega*R*R/(2*g),zmax=Math.max(zc+rise,ze)+.5,scale=310/(zmax-zA),Y=z=>365-(z-zA)*scale,X=r=>290+r*105;
+  for(const k of ['omega','p0','re','ze'])el(k+'-out').value=fmt(get(k),k==='p0'?0:1)+(k==='omega'?' rad/s':k==='p0'?' kPa':' m');
+  el('dz').value=fmt(rise,3)+' m';el('pa').value=fmt(pa/1000,2)+' kPa';el('w').value=head>=0?fmt(w,3)+' m/s':'—';el('q').value=head>=0?fmt(q*1000,3)+' L/s':'nema istjecanja prema E';
+  el('why').textContent='w_E² = '+fmt(2*p0/rho)+' + '+fmt(omega*omega*re*re)+' − '+fmt(2*g*ze)+' = '+fmt(head)+' m²/s². '+(head<0?'Za atmosferski izlaz na ovoj koti nema raspoložive energije; nacrtana cijev nije pretpostavljena potpuno ispunjenom. ':'Tlak u A i površina slijede iz istog integrala relativnog mirovanja. ')+'Pretlak pₘ0 zadaje trenutačnu razinu z(0); volumen zato nije neovisno zadan. Radijalna razlika Δz_R = ω²R²/(2g).';
+  let surface='';for(let i=0;i<=80;i++){const r=-R+2*R*i/80;surface+=(i?'L':'M')+X(r)+' '+Y(zc+omega*omega*r*r/(2*g));}
+  const eX=X(re),eY=Y(ze),aX=X(rA),aY=Y(zA),exitX=eX;
+  svg.innerHTML='<rect width="1000" height="480" fill="#fbfdff"/><text x="35" y="28" font-size="17">Shematski meridijalni presjek; r i z imaju zasebne linearne skale.</text>'+
+   '<path d="'+surface+'L'+X(R)+' '+aY+'H'+X(-R)+'Z" fill="#cdeafa"/><path d="'+surface+'" fill="none" stroke="#0284c7" stroke-width="3"/>'+
+   '<path d="M'+X(-R)+' '+Y(zmax)+'V'+aY+'H'+X(R)+'V'+Y(zmax)+'" fill="none" stroke="#58768b" stroke-width="5"/><path d="M290 42V390" stroke="#94a3b8" stroke-dasharray="5 5"/>'+
+   '<path d="M'+aX+' '+aY+'H650V'+eY+'H'+exitX+'" fill="none" stroke="#64748b" stroke-width="14"/>'+
+   (head>=0?'<path d="M'+aX+' '+aY+'H650V'+eY+'H'+exitX+'" fill="none" stroke="#7dd3fc" stroke-width="8"/>'+MF1.svgArrow(exitX,eY,-w*6,0,'#0284c7','w_E'):'')+
+   '<circle cx="290" cy="'+Y(0)+'" r="5" fill="#d97706"/><text x="266" y="'+(Y(0)-9)+'">0</text><circle cx="'+aX+'" cy="'+aY+'" r="5" fill="#dc2626"/><text x="'+(aX+12)+'" y="'+(aY+24)+'">A (1; −0,8) m</text><circle cx="'+exitX+'" cy="'+eY+'" r="5" fill="#0284c7"/><text x="'+(exitX+14)+'" y="'+(eY-15)+'">E: r_E='+fmt(re,1)+' m, z_E='+fmt(ze,1)+' m</text>'+
+   '<text x="50" y="420">p_A = pₘ0 + ρgH₁ + ρω²r_A²/2; r₀ = z₀ = 0.</text><text x="50" y="450">Tlačne i gravitacijske visine: model bez gubitaka; R = 1,4 m, d = 10 mm.</text>';
+  // Reference line marks the actual outlet radius outside the reservoir.
+  svg.innerHTML+='<path d="M'+eX+' '+eY+'V395" stroke="#94a3b8" stroke-dasharray="3 4"/><text x="'+(eX-10)+'" y="408">r_E</text>';
+ }
+ root.querySelectorAll('input').forEach(e=>e.addEventListener('input',update));update();
 })();
 </script>
 
@@ -214,7 +816,7 @@ U točki A dobiva se $p_{mA}=\rho\omega^2r^2/2+\rho g(L+H_1)=36{,}2\ \mathrm{kPa
 
 <dl class="v11-data"><dt>Zadano</dt><dd>$\dot m=14\ \mathrm{kg/s}$, $\alpha=30^\circ$, $A_1=0{,}0113\ \mathrm{m^2}$, $A_2=0{,}0007\ \mathrm{m^2}$, $h=0{,}3\ \mathrm{m}$, $\beta_k=1{,}03$, $p_2=p_{atm}$, $\rho=1000\ \mathrm{kg/m^3}$.</dd><dt>Odrediti</dt><dd>$p_1$ i $\vec F_R$.</dd></dl>
 
-<svg class="v11-static" viewBox="0 0 900 330" role="img" aria-labelledby="z100-svg-title"><title id="z100-svg-title">Konvergentno koljeno s kontrolnim volumenom i silama</title><defs><marker id="z100-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="z100-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker><marker id="z100-pressure" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#6e5bb5"/></marker></defs><path d="M90 215H380L620 95H790M90 275H380L620 135H790" fill="none" stroke="#6d8595" stroke-width="18"/><path d="M90 221H380L620 101H790M90 269H380L620 129H790" fill="none" stroke="#8dd0f3" stroke-width="10"/><path d="M65 180H805V300H65Z" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="9 6"/><path d="M130 190H300" stroke="#1976b9" stroke-width="5" marker-end="url(#z100-blue)"/><path d="M635 145L750 85" stroke="#1976b9" stroke-width="5" marker-end="url(#z100-blue)"/><path d="M145 245H275" stroke="#6e5bb5" stroke-width="5" marker-end="url(#z100-pressure)"/><path d="M385 265H250M385 265V170" stroke="#c53b3b" stroke-width="5" marker-end="url(#z100-red)"/><text x="150" y="180" class="v11-svg-label">v₁</text><text x="690" y="80" class="v11-svg-label">v₂</text><text x="170" y="235" class="v11-svg-small">p₁A₁</text><text x="205" y="300" class="v11-svg-small" fill="#b11f38">Rₓ</text><text x="395" y="175" class="v11-svg-small" fill="#b11f38">R_z</text><text x="775" y="120" class="v11-svg-small">p₂,g = 0</text><text x="80" y="170" class="v11-svg-small">kontrolni volumen</text><text x="480" y="280" class="v11-svg-small">x →, z ↑</text></svg>
+<svg class="v11-static" viewBox="0 0 900 330" role="img" aria-labelledby="z100-svg-title"><title id="z100-svg-title">Konvergentno koljeno s kontrolnim volumenom i silama</title><defs><marker id="z100-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="z100-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker><marker id="z100-pressure" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#6e5bb5"/></marker></defs><path d="M90 215H380L620 95H790M90 275H380L620 135H790" fill="none" stroke="#6d8595" stroke-width="18"/><path d="M90 221H380L620 101H790M90 269H380L620 129H790" fill="none" stroke="#8dd0f3" stroke-width="10"/><path d="M65 180H805V300H65Z" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="9 6"/><path d="M130 190H300" stroke="#1976b9" stroke-width="5" marker-end="url(#z100-blue)"/><path d="M635 145L750 85" stroke="#1976b9" stroke-width="5" marker-end="url(#z100-blue)"/><path d="M145 245H275" stroke="#6e5bb5" stroke-width="5" marker-end="url(#z100-pressure)"/><path d="M385 265H250M385 265V170" stroke="#c53b3b" stroke-width="5" marker-end="url(#z100-red)"/><text x="150" y="180" class="v11-svg-label">v₁</text><text x="690" y="80" class="v11-svg-label">v₂</text><text x="170" y="235" class="v11-svg-small">p₁A₁</text><text x="205" y="300" class="v11-svg-small" fill="#b11f38">Rₓ</text><text x="395" y="175" class="v11-svg-small" fill="#b11f38">R_z</text><text x="775" y="120" class="v11-svg-small">p₂,g = 0</text><text x="80" y="170" class="v11-svg-small">kontrolni volumen</text><text x="480" y="280" class="v11-svg-small">x →, z ↑</text></svg>
 
 <div class="v11-solution">
 <h4>Rješenje</h4>
@@ -237,7 +839,7 @@ Slijedi $R_x=-2053\ \mathrm{N}$, $R_z=+144\ \mathrm{N}$ i $|\vec R|=2058\ \mathr
 
 <dl class="v11-data"><dt>Zadano</dt><dd>$\dot m=14\ \mathrm{kg/s}$, $\alpha=180^\circ$, $A_1=0{,}0113\ \mathrm{m^2}$, $A_2=0{,}0007\ \mathrm{m^2}$, $h=0{,}3\ \mathrm{m}$, $\beta_k=1{,}03$, $p_2=p_{atm}$, $\rho=1000\ \mathrm{kg/m^3}$.</dd><dt>Odrediti</dt><dd>$\vec F_R$.</dd></dl>
 
-<svg class="v11-static" viewBox="0 0 900 320" role="img" aria-labelledby="z101-svg-title"><title id="z101-svg-title">U-koljeno s ulazom udesno i izlazom ulijevo</title><defs><marker id="z101-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="z101-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker><marker id="z101-pressure" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#6e5bb5"/></marker></defs><path d="M120 225H540Q690 225 690 115Q690 55 610 55H310M120 275H540Q740 275 740 115Q740 5 610 5H310" fill="none" stroke="#6d8595" stroke-width="18"/><path d="M120 231H540Q680 231 680 115Q680 65 610 65H310M120 269H540Q730 269 730 115Q730 15 610 15H310" fill="none" stroke="#8dd0f3" stroke-width="10"/><path d="M80 180H780V300H80Z" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="9 6"/><path d="M150 205H330" stroke="#1976b9" stroke-width="5" marker-end="url(#z101-blue)"/><path d="M520 40H350" stroke="#1976b9" stroke-width="5" marker-end="url(#z101-blue)"/><path d="M170 250H330" stroke="#6e5bb5" stroke-width="5" marker-end="url(#z101-pressure)"/><path d="M470 275H250" stroke="#c53b3b" stroke-width="5" marker-end="url(#z101-red)"/><text x="170" y="195" class="v11-svg-label">v₁</text><text x="440" y="32" class="v11-svg-label">v₂</text><text x="175" y="245" class="v11-svg-small">p₁A₁</text><text x="290" y="305" class="v11-svg-small" fill="#b11f38">Rₓ</text><text x="85" y="170" class="v11-svg-small">kontrolni volumen</text><text x="275" y="92" class="v11-svg-small">p₂,g = 0</text></svg>
+<svg class="v11-static" viewBox="0 0 900 320" role="img" aria-labelledby="z101-svg-title"><title id="z101-svg-title">U-koljeno s ulazom udesno i izlazom ulijevo</title><defs><marker id="z101-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="z101-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker><marker id="z101-pressure" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#6e5bb5"/></marker></defs><path d="M120 225H540Q690 225 690 115Q690 55 610 55H310M120 275H540Q740 275 740 115Q740 5 610 5H310" fill="none" stroke="#6d8595" stroke-width="18"/><path d="M120 231H540Q680 231 680 115Q680 65 610 65H310M120 269H540Q730 269 730 115Q730 15 610 15H310" fill="none" stroke="#8dd0f3" stroke-width="10"/><path d="M80 180H780V300H80Z" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="9 6"/><path d="M150 205H330" stroke="#1976b9" stroke-width="5" marker-end="url(#z101-blue)"/><path d="M520 40H350" stroke="#1976b9" stroke-width="5" marker-end="url(#z101-blue)"/><path d="M170 250H330" stroke="#6e5bb5" stroke-width="5" marker-end="url(#z101-pressure)"/><path d="M470 275H250" stroke="#c53b3b" stroke-width="5" marker-end="url(#z101-red)"/><text x="170" y="195" class="v11-svg-label">v₁</text><text x="440" y="32" class="v11-svg-label">v₂</text><text x="175" y="245" class="v11-svg-small">p₁A₁</text><text x="290" y="305" class="v11-svg-small" fill="#b11f38">Rₓ</text><text x="85" y="170" class="v11-svg-small">kontrolni volumen</text><text x="275" y="92" class="v11-svg-small">p₂,g = 0</text></svg>
 
 <div class="v11-solution">
 <h4>Rješenje</h4>
@@ -254,7 +856,7 @@ Slijedi $R_x=-2053\ \mathrm{N}$, $R_z=+144\ \mathrm{N}$ i $|\vec R|=2058\ \mathr
 
 <dl class="v11-data"><dt>Zadano</dt><dd>$v_{sr}=20\ \mathrm{m/s}$, $\dot m=10\ \mathrm{kg/s}$, $p_{atm}=101325\ \mathrm{Pa}$, $\rho=1000\ \mathrm{kg/m^3}$.</dd><dt>Odrediti</dt><dd>$\vec F_R$.</dd></dl>
 
-<svg class="v11-static" viewBox="0 0 900 300" role="img" aria-labelledby="z102-svg-title"><title id="z102-svg-title">Mlaz koji udara okomito u ravnu ploču i raspršuje se po njenoj ravnini</title><defs><marker id="z102-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="z102-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker></defs><path d="M80 155H470" stroke="#70c5ee" stroke-width="20"/><path d="M470 155V70M470 155V240" stroke="#70c5ee" stroke-width="14"/><path d="M490 45V265" stroke="#405b6d" stroke-width="20"/><path d="M125 120H350" stroke="#1976b9" stroke-width="5" marker-end="url(#z102-blue)"/><path d="M610 155H750" stroke="#c53b3b" stroke-width="5" marker-end="url(#z102-red)"/><text x="150" y="108" class="v11-svg-label" fill="#1976b9">v₁</text><text x="585" y="142" class="v11-svg-small" fill="#b11f38">fluid na ploču</text><text x="505" y="65" class="v11-svg-small">izlazi po ravnini ploče</text><text x="120" y="190" class="v11-svg-small">kontrolni volumen oko udara</text></svg>
+<svg class="v11-static" viewBox="0 0 900 300" role="img" aria-labelledby="z102-svg-title"><title id="z102-svg-title">Mlaz koji udara okomito u ravnu ploču i raspršuje se po njenoj ravnini</title><defs><marker id="z102-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="z102-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker></defs><path d="M80 155H470" stroke="#70c5ee" stroke-width="20"/><path d="M470 155V70M470 155V240" stroke="#70c5ee" stroke-width="14"/><path d="M490 45V265" stroke="#405b6d" stroke-width="20"/><path d="M125 120H350" stroke="#1976b9" stroke-width="5" marker-end="url(#z102-blue)"/><path d="M610 155H750" stroke="#c53b3b" stroke-width="5" marker-end="url(#z102-red)"/><text x="150" y="108" class="v11-svg-label" fill="#1976b9">v₁</text><text x="585" y="142" class="v11-svg-small" fill="#b11f38">fluid na ploču</text><text x="505" y="65" class="v11-svg-small">izlazi po ravnini ploče</text><text x="120" y="190" class="v11-svg-small">kontrolni volumen oko udara</text></svg>
 
 <div class="v11-solution">
 <h4>Rješenje</h4>
@@ -264,7 +866,7 @@ Slijedi $R_x=-2053\ \mathrm{N}$, $R_z=+144\ \mathrm{N}$ i $|\vec R|=2058\ \mathr
 
 <section class="v11x-shell v11x-task" id="v11-z102-lab" aria-labelledby="v11-z102-title">
 <header class="v11x-head"><h4 id="v11-z102-title">Mlaz na ploču: mijenja se normalna, ne i nužno ukupna brzina</h4><p>Voda nakon udara struji uz ravninu ploče. Njezina normalna izlazna komponenta je zbog simetrije nula, pa ploča mora ukloniti ulazni tok količine gibanja u x-smjeru.</p></header>
-<div class="v11x-scene"><svg viewBox="0 0 1000 330" role="img" aria-labelledby="v11-z102-svg-title"><title id="v11-z102-svg-title">Mlaz koji udara u ploču i nakon udara teče uz njezinu ravninu</title><defs><marker id="v11z102-blue" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#1976b9"/></marker><marker id="v11z102-red" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#c53b3b"/></marker></defs><rect x="60" y="45" width="780" height="230" rx="18" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="10 8"/><path id="v11-z102-jet" class="v11x-flow" d="M105 160H505" fill="none" stroke="#70c5ee" stroke-width="28"/><path id="v11-z102-spread1" class="v11x-flow" d="M505 160Q555 100 690 90" fill="none" stroke="#70c5ee" stroke-width="17"/><path id="v11-z102-spread2" class="v11x-flow" d="M505 160Q555 220 690 230" fill="none" stroke="#70c5ee" stroke-width="17"/><path d="M525 55V265" stroke="#405b6d" stroke-width="24"/><path id="v11-z102-v-arrow" d="M150 115H360" fill="none" stroke="#1976b9" stroke-width="6" marker-end="url(#v11z102-blue)"/><path id="v11-z102-force" d="M650 160H815" fill="none" stroke="#c53b3b" stroke-width="6" marker-end="url(#v11z102-red)"/><text x="160" y="98" class="v11x-svg-label v11x-svg-flow">v₁</text><text x="545" y="48" class="v11x-svg-small">ploča</text><text x="560" y="113" class="v11x-svg-small v11x-svg-flow">tok uz ravninu ploče</text><text x="560" y="250" class="v11x-svg-small v11x-svg-flow">tok uz ravninu ploče</text><text x="680" y="145" class="v11x-svg-small v11x-svg-force">fluid na ploču</text><text x="82" y="35" class="v11x-svg-small">kontrolni volumen</text><text x="850" y="180" class="v11x-svg-small">x</text></svg></div>
+<div class="v11x-scene"><svg viewBox="0 0 1000 330" role="img" aria-labelledby="v11-z102-svg-title"><title id="v11-z102-svg-title">Mlaz koji udara u ploču i nakon udara teče uz njezinu ravninu</title><defs><marker id="v11z102-blue" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L9 4.5L0 9Z" fill="#1976b9"/></marker><marker id="v11z102-red" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L9 4.5L0 9Z" fill="#c53b3b"/></marker></defs><rect x="60" y="45" width="780" height="230" rx="18" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="10 8"/><path id="v11-z102-jet" class="v11x-flow" d="M105 160H505" fill="none" stroke="#70c5ee" stroke-width="28"/><path id="v11-z102-spread1" class="v11x-flow" d="M505 160Q555 100 690 90" fill="none" stroke="#70c5ee" stroke-width="17"/><path id="v11-z102-spread2" class="v11x-flow" d="M505 160Q555 220 690 230" fill="none" stroke="#70c5ee" stroke-width="17"/><path d="M525 55V265" stroke="#405b6d" stroke-width="24"/><path id="v11-z102-v-arrow" d="M150 115H360" fill="none" stroke="#1976b9" stroke-width="6" marker-end="url(#v11z102-blue)"/><path id="v11-z102-force" d="M650 160H815" fill="none" stroke="#c53b3b" stroke-width="6" marker-end="url(#v11z102-red)"/><text x="160" y="98" class="v11x-svg-label v11x-svg-flow">v₁</text><text x="545" y="48" class="v11x-svg-small">ploča</text><text x="560" y="113" class="v11x-svg-small v11x-svg-flow">tok uz ravninu ploče</text><text x="560" y="250" class="v11x-svg-small v11x-svg-flow">tok uz ravninu ploče</text><text x="680" y="145" class="v11x-svg-small v11x-svg-force">fluid na ploču</text><text x="82" y="35" class="v11x-svg-small">kontrolni volumen</text><text x="850" y="180" class="v11x-svg-small">x</text></svg></div>
 <div class="v11x-controls"><div class="v11x-control"><label for="v11-z102-mdot">Maseni protok ṁ <output id="v11-z102-mdot-out"></output></label><input id="v11-z102-mdot" type="range" min="2" max="20" step="0.5" value="10"></div><div class="v11x-control"><label for="v11-z102-v">Srednja ulazna brzina v <output id="v11-z102-v-out"></output></label><input id="v11-z102-v" type="range" min="5" max="30" step="1" value="20"></div></div>
 <div class="v11x-primary-row"><div class="v11x-primary"><span>Sila oslonca na ploču</span><output id="v11-z102-support"></output><small>Usmjerena je ulijevo, suprotno sili fluida na ploču.</small></div><div class="v11x-values"><div class="v11x-value"><span>v<sub>out,x</sub></span><output id="v11-z102-vout"></output></div><div class="v11x-value"><span>Promjena brzine Δvₓ</span><output id="v11-z102-dv"></output></div><div class="v11x-value"><span>Sila fluida na ploču</span><output id="v11-z102-fluid"></output></div></div></div>
 <div class="v11x-explain"><h5>Zašto se sila promijenila?</h5><p id="v11-z102-why"></p></div>
@@ -273,11 +875,82 @@ Slijedi $R_x=-2053\ \mathrm{N}$, $R_z=+144\ \mathrm{N}$ i $|\vec R|=2058\ \mathr
 
 <script>
 (() => {
- const root=document.getElementById('v11-z102-lab');if(!root)return;const mdot=root.querySelector('#v11-z102-mdot'),v=root.querySelector('#v11-z102-v'),fmt=(n,k=1)=>n.toLocaleString('hr-HR',{minimumFractionDigits:k,maximumFractionDigits:k});let state,previousState,lastChanged='initial';
- function compute(){const m=+mdot.value,vi=+v.value,vo=0,wall=m*(vo-vi),fluid=-wall;return{m,vi,vo,wall,fluid}}function draw(s){const l=95+145*s.vi/30;root.querySelector('#v11-z102-v-arrow').setAttribute('d','M150 115H'+(150+l));root.querySelector('#v11-z102-force').setAttribute('d','M650 160H'+(650+45+110*s.fluid/600));root.querySelector('#v11-z102-jet').style.animationDuration=Math.max(.45,2.2/(.3+s.vi/10))+'s'}
- function why(s){if(!previousState||lastChanged==='initial')return 'Voda ne mora stati nakon udara: struji gore i dolje uz ploču. Zbog simetrije se te tangencijalne struje ponište samo u normalnom x-smjeru, pa je promjena toka količine gibanja jednaka −ṁv.';if(lastChanged==='v')return 'Brzina je '+(s.vi>previousState.vi?'povećana':'smanjena')+' s '+fmt(previousState.vi,0)+' na '+fmt(s.vi,0)+' m/s. Svaki kilogram vode zato donosi više ili manje normalne količine gibanja; pri istom ṁ sila se mijenja izravno s v.';return 'Maseni protok je '+(s.m>previousState.m?'povećan':'smanjen')+' s '+fmt(previousState.m,1)+' na '+fmt(s.m,1)+' kg/s. U svakoj sekundi u ploču dolazi više ili manje vode iste brzine, pa se proporcionalno mijenja tok količine gibanja i sila oslonca.'}
- function sync(s){root.querySelector('#v11-z102-mdot-out').value=fmt(s.m,1)+' kg/s';root.querySelector('#v11-z102-v-out').value=fmt(s.vi,0)+' m/s';root.querySelector('#v11-z102-support').value=fmt(s.fluid,0)+' N ←';root.querySelector('#v11-z102-vout').value='0 m/s';root.querySelector('#v11-z102-dv').value=fmt(-s.vi,1)+' m/s';root.querySelector('#v11-z102-fluid').value=fmt(s.fluid,0)+' N →';root.querySelector('#v11-z102-why').textContent=why(s);root.querySelector('#v11-z102-chain-in').textContent='ṁv = '+fmt(s.m*s.vi,0)+' N';root.querySelector('#v11-z102-chain-m').textContent='ΔṖₓ = '+fmt(s.wall,0)+' N';root.querySelector('#v11-z102-chain-f').textContent='|F| = '+fmt(s.fluid,0)+' N'}
- function update(){state=compute();sync(state);draw(state)}[[mdot,'mdot'],[v,'v']].forEach(([el,key])=>el.addEventListener('input',()=>{previousState=state?{...state}:null;lastChanged=key;update()}));update();
+  const root = document.getElementById("v11-z102-lab");
+  if (!root) return;
+  const mdot = root.querySelector("#v11-z102-mdot"),
+    v = root.querySelector("#v11-z102-v"),
+    fmt = (n, k = 1) => n.toLocaleString("hr-HR", { minimumFractionDigits: k, maximumFractionDigits: k });
+  let state,
+    previousState,
+    lastChanged = "initial";
+  function compute() {
+    const m = +mdot.value,
+      vi = +v.value,
+      vo = 0,
+      wall = m * (vo - vi),
+      fluid = -wall;
+    return { m, vi, vo, wall, fluid };
+  }
+  function draw(s){
+ const svg=root.querySelector('.v11x-scene svg'),d=Math.sqrt(4*s.m/(1000*s.vi*Math.PI)),w=d*800,fs=.22;
+ svg.innerHTML='<title>Mlaz na ploču: sila fluida i sila oslonca</title>'+
+ '<path d="M100 190H480Q515 190 515 130V75M480 190Q515 190 515 250V305" fill="none" stroke="#bae6fd" stroke-width="'+w+'"/>'+
+ '<path d="M540 60V330" stroke="#475569" stroke-width="12"/>'+MF1.svgArrow(130,190,s.vi*7,0,'#0284c7','v')+
+ MF1.svgArrow(540,190,s.fluid*fs,0,'#dc2626','F fluid → ploča')+MF1.svgArrow(540,285,-s.fluid*fs,0,'#7c3aed','F oslonca')+
+ '<text x="90" y="35">A=ṁ/(ρv); d='+fmt(d*1000,1)+' mm (promjer mlaza povećan za prikaz)</text>'+
+ '<text x="90" y="360">Simetrični izlazi uz ploču: v izl,x = 0; sile na ploču jednake su i suprotne.</text>';
+}
+  function why(s) {
+    if (!previousState || lastChanged === "initial")
+      return "Voda ne mora stati nakon udara: struji gore i dolje uz ploču. Zbog simetrije se te tangencijalne struje ponište samo u normalnom x-smjeru, pa je promjena toka količine gibanja jednaka −ṁv.";
+    if (lastChanged === "v")
+      return (
+        "Brzina je " +
+        (s.vi > previousState.vi ? "povećana" : "smanjena") +
+        " s " +
+        fmt(previousState.vi, 0) +
+        " na " +
+        fmt(s.vi, 0) +
+        " m/s. Svaki kilogram vode zato donosi više ili manje normalne količine gibanja; pri istom ṁ sila se mijenja izravno s v."
+      );
+    return (
+      "Maseni protok je " +
+      (s.m > previousState.m ? "povećan" : "smanjen") +
+      " s " +
+      fmt(previousState.m, 1) +
+      " na " +
+      fmt(s.m, 1) +
+      " kg/s. U svakoj sekundi u ploču dolazi više ili manje vode iste brzine, pa se proporcionalno mijenja tok količine gibanja i sila oslonca."
+    );
+  }
+  function sync(s) {
+    root.querySelector("#v11-z102-mdot-out").value = fmt(s.m, 1) + " kg/s";
+    root.querySelector("#v11-z102-v-out").value = fmt(s.vi, 0) + " m/s";
+    root.querySelector("#v11-z102-support").value = fmt(s.fluid, 0) + " N ←";
+    root.querySelector("#v11-z102-vout").value = "0 m/s";
+    root.querySelector("#v11-z102-dv").value = fmt(-s.vi, 1) + " m/s";
+    root.querySelector("#v11-z102-fluid").value = fmt(s.fluid, 0) + " N →";
+    root.querySelector("#v11-z102-why").textContent = why(s);
+    root.querySelector("#v11-z102-chain-in").textContent = "ṁv = " + fmt(s.m * s.vi, 0) + " N";
+    root.querySelector("#v11-z102-chain-m").textContent = "ΔṖₓ = " + fmt(s.wall, 0) + " N";
+    root.querySelector("#v11-z102-chain-f").textContent = "|F| = " + fmt(s.fluid, 0) + " N";
+  }
+  function update() {
+    state = compute();
+    sync(state);
+    draw(state);
+  }
+  [
+    [mdot, "mdot"],
+    [v, "v"],
+  ].forEach(([el, key]) =>
+    el.addEventListener("input", () => {
+      previousState = state ? { ...state } : null;
+      lastChanged = key;
+      update();
+    }),
+  );
+  update();
 })();
 </script>
 
@@ -289,18 +962,18 @@ Slijedi $R_x=-2053\ \mathrm{N}$, $R_z=+144\ \mathrm{N}$ i $|\vec R|=2058\ \mathr
 
 <dl class="v11-data"><dt>Zadano</dt><dd>$d=10\ \mathrm{m}$, $P=400\ \mathrm{W}$, $v_1=3{,}13\ \mathrm{m/s}$, $2v_1=6{,}26\ \mathrm{m/s}$, $p_{atm}=101325\ \mathrm{Pa}$, $\rho_z=1{,}2\ \mathrm{kg/m^3}$.</dd><dt>Odrediti</dt><dd>$\eta$ i $\vec F_R$.</dd></dl>
 
-<svg class="v11-static" viewBox="0 0 900 310" role="img" aria-labelledby="z103-svg-title"><title id="z103-svg-title">Kontrolni volumen zraka kroz rotor vjetroturbine</title><defs><marker id="z103-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="z103-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker></defs><path d="M80 65Q270 120 400 95Q570 75 830 40M80 245Q270 190 400 215Q570 235 830 270" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="9 6"/><path d="M85 155H355" stroke="#70c5ee" stroke-width="18" marker-end="url(#z103-blue)"/><ellipse cx="430" cy="155" rx="26" ry="105" fill="#edf6fb" stroke="#405b6d" stroke-width="5"/><path d="M430 55V255M375 155H485" stroke="#405b6d" stroke-width="5"/><path d="M500 155H790" stroke="#9ed8f3" stroke-width="12" marker-end="url(#z103-blue)"/><path d="M290 280H440" stroke="#c53b3b" stroke-width="5" marker-end="url(#z103-red)"/><text x="155" y="135" class="v11-svg-label" fill="#1976b9">v₁</text><text x="665" y="135" class="v11-svg-label" fill="#1976b9">v₂</text><text x="390" y="38" class="v11-svg-small">rotor, D</text><text x="245" y="300" class="v11-svg-small" fill="#b11f38">potisak na stup</text><text x="85" y="45" class="v11-svg-small">kontrolni volumen zraka</text></svg>
+<svg class="v11-static" viewBox="0 0 900 310" role="img" aria-labelledby="z103-svg-title"><title id="z103-svg-title">Kontrolni volumen zraka kroz rotor vjetroturbine</title><defs><marker id="z103-blue" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="z103-red" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#c53b3b"/></marker></defs><path d="M80 65Q270 120 400 95Q570 75 830 40M80 245Q270 190 400 215Q570 235 830 270" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="9 6"/><path d="M85 155H355" stroke="#70c5ee" stroke-width="18" marker-end="url(#z103-blue)"/><ellipse cx="430" cy="155" rx="26" ry="105" fill="#edf6fb" stroke="#405b6d" stroke-width="5"/><path d="M430 55V255M375 155H485" stroke="#405b6d" stroke-width="5"/><path d="M500 155H790" stroke="#9ed8f3" stroke-width="12" marker-end="url(#z103-blue)"/><path d="M290 280H440" stroke="#c53b3b" stroke-width="5" marker-end="url(#z103-red)"/><text x="155" y="135" class="v11-svg-label" fill="#1976b9">v₁</text><text x="665" y="135" class="v11-svg-label" fill="#1976b9">v₂</text><text x="390" y="38" class="v11-svg-small">rotor, D</text><text x="245" y="300" class="v11-svg-small" fill="#b11f38">potisak na stup</text><text x="85" y="45" class="v11-svg-small">kontrolni volumen zraka</text></svg>
 
 <div class="v11-solution">
 <h4>Rješenje</h4>
 <p>Površina rotora je $A=\pi D^2/4=78{,}54\ \mathrm{m^2}$, a raspoloživa snaga vjetra $P_{wind}=\rho Av_1^3/2=1{,}445\ \mathrm{kW}$. Učinkovitost je zato $\eta=P/P_{wind}=0{,}2768$, odnosno $27{,}68\%$.</p>
-<p>Za silu se ovdje dosljedno koristi pojednostavljeni energetsko-momentum model $\dot m=\rho Av_1$, $P=\dot m(v_1^2-v_2^2)/2$ i $F=\dot m(v_1-v_2)$. Time je $v_2=2{,}662\ \mathrm{m/s}$ i $F=138\ \mathrm{N}$ u smjeru strujanja, odnosno udesno na skici. Pri dvostrukoj brzini i istoj učinkovitosti korisna snaga postaje $3{,}2\ \mathrm{kW}$, a sila približno $553\ \mathrm{N}$. Ovaj model nije actuator-disk model; Betzov limit zato se ne uvodi.</p>
+<p>Za idealni rotor rabi se teorija diska. Pretpostavljamo da zadana korisna snaga odgovara mehaničkoj snazi rotora, odnosno da su gubici pretvorbe zanemareni: $C_P=\eta$. Vrijedi $C_P=4a(1-a)^2$, pri čemu biramo granu $0\le a\le1/3$. Brzina kroz disk je $v_d=v_1(1-a)$, u dalekom tragu $v_2=v_1(1-2a)$, a stvarni maseni protok $\dot m=\rho A v_d$. Zato je $F=\dot m(v_1-v_2)=P/v_d$. Dobiva se $a=0{,}08214$, $v_d=2{,}873\ \mathrm{m/s}$, $v_2=2{,}616\ \mathrm{m/s}$ i $F=139{,}2\ \mathrm N$. Pri dvostrukoj brzini snaga je $3{,}2\ \mathrm{kW}$, a sila $556{,}9\ \mathrm N$. Ako zadana učinkovitost uključuje nepoznate gubitke generatora, sila se bez dodatnih podataka ne može jednoznačno odrediti.</p>
 </div>
 
 <section class="v11x-shell v11x-task" id="v11-z103-lab" aria-labelledby="v11-z103-title">
-<header class="v11x-head"><h4 id="v11-z103-title">Vjetroturbina: zašto snaga raste s kubom brzine?</h4><p>Ovdje se dosljedno rabi pojednostavljeni energetsko-momentum model iz rješenja zadatka, bez actuator-disk ili Betzova modela. Marker na grafu pokazuje trenutačnu raspoloživu snagu vjetra.</p></header>
+<header class="v11x-head"><h4 id="v11-z103-title">Vjetroturbina: zašto snaga raste s kubom brzine?</h4><p>Idealni disk usporava struju: brzina kroz rotor manja je od uzvodne brzine. Snaga pretvorbe uzima se bez mehaničkih i električnih gubitaka. Marker na grafu pokazuje trenutačnu raspoloživu snagu vjetra.</p></header>
 <div class="v11x-toolbar"><div class="v11x-toolbar__group"><span class="v11x-toolbar__label">Izvorni slučajevi</span><button id="v11-z103-base" class="v11x-button is-active" type="button">v₁ = 3,13 m/s</button><button id="v11-z103-double" class="v11x-button" type="button">2v₁ = 6,26 m/s</button></div><span class="v11x-toolbar__label">η se kalibrira iz P = 0,4 kW pri izvornom slučaju</span></div>
-<div class="v11x-scene"><svg viewBox="0 0 1000 390" role="img" aria-labelledby="v11-z103-svg-title"><title id="v11-z103-svg-title">Rotor s brzinama zraka i graf raspoložive snage vjetra prema brzini</title><defs><marker id="v11z103-blue" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#1976b9"/></marker><marker id="v11z103-red" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#c53b3b"/></marker></defs><path d="M55 65Q180 112 350 95Q475 78 595 70M55 280Q180 232 350 250Q475 270 595 278" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="9 7"/><path id="v11-z103-in" class="v11x-flow" d="M90 170H355" fill="none" stroke="#70c5ee" stroke-width="25" marker-end="url(#v11z103-blue)"/><ellipse id="v11-z103-rotor" cx="420" cy="170" rx="30" ry="112" fill="#edf6fb" stroke="#405b6d" stroke-width="6"/><path d="M420 58V282M360 170H480" stroke="#405b6d" stroke-width="6"/><path id="v11-z103-out" class="v11x-flow" d="M485 170H640" fill="none" stroke="#9ed8f3" stroke-width="17" marker-end="url(#v11z103-blue)"/><path id="v11-z103-force" d="M285 305H455" fill="none" stroke="#c53b3b" stroke-width="6" marker-end="url(#v11z103-red)"/><text id="v11-z103-v1label" x="145" y="140" class="v11x-svg-label v11x-svg-flow">v₁</text><text id="v11-z103-v2label" x="540" y="145" class="v11x-svg-label v11x-svg-flow">v₂</text><text id="v11-z103-dlabel" x="365" y="35" class="v11x-svg-small">rotor, D</text><text x="275" y="335" class="v11x-svg-small v11x-svg-force">potisak zraka na stup</text><path d="M705 320H950M705 55V320" stroke="#8195a4" stroke-width="3"/><path id="v11-z103-curve" d="M705 320L950 55" fill="none" stroke="#1976b9" stroke-width="5"/><path d="M705 170H950" stroke="#d5e2ea" stroke-width="2" stroke-dasharray="5 6"/><circle id="v11-z103-marker" cx="800" cy="220" r="8" fill="#c53b3b"/><text x="695" y="42" class="v11x-svg-small">P<sub>wind</sub></text><text x="930" y="348" class="v11x-svg-small">v</text><text x="750" y="80" class="v11x-svg-small">P<sub>wind</sub> ∝ v³</text></svg></div>
+<div class="v11x-scene"><svg viewBox="0 0 1000 390" role="img" aria-labelledby="v11-z103-svg-title"><title id="v11-z103-svg-title">Rotor s brzinama zraka i graf raspoložive snage vjetra prema brzini</title><defs><marker id="v11z103-blue" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L9 4.5L0 9Z" fill="#1976b9"/></marker><marker id="v11z103-red" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L9 4.5L0 9Z" fill="#c53b3b"/></marker></defs><path d="M55 65Q180 112 350 95Q475 78 595 70M55 280Q180 232 350 250Q475 270 595 278" fill="none" stroke="#8195a4" stroke-width="3" stroke-dasharray="9 7"/><path id="v11-z103-in" class="v11x-flow" d="M90 170H355" fill="none" stroke="#70c5ee" stroke-width="25" marker-end="url(#v11z103-blue)"/><ellipse id="v11-z103-rotor" cx="420" cy="170" rx="30" ry="112" fill="#edf6fb" stroke="#405b6d" stroke-width="6"/><path d="M420 58V282M360 170H480" stroke="#405b6d" stroke-width="6"/><path id="v11-z103-out" class="v11x-flow" d="M485 170H640" fill="none" stroke="#9ed8f3" stroke-width="17" marker-end="url(#v11z103-blue)"/><path id="v11-z103-force" d="M285 305H455" fill="none" stroke="#c53b3b" stroke-width="6" marker-end="url(#v11z103-red)"/><text id="v11-z103-v1label" x="145" y="140" class="v11x-svg-label v11x-svg-flow">v₁</text><text id="v11-z103-v2label" x="540" y="145" class="v11x-svg-label v11x-svg-flow">v₂</text><text id="v11-z103-dlabel" x="365" y="35" class="v11x-svg-small">rotor, D</text><text x="275" y="335" class="v11x-svg-small v11x-svg-force">potisak zraka na stup</text><path d="M705 320H950M705 55V320" stroke="#8195a4" stroke-width="3"/><path id="v11-z103-curve" d="M705 320L950 55" fill="none" stroke="#1976b9" stroke-width="5"/><path d="M705 170H950" stroke="#d5e2ea" stroke-width="2" stroke-dasharray="5 6"/><circle id="v11-z103-marker" cx="800" cy="220" r="8" fill="#c53b3b"/><text x="695" y="42" class="v11x-svg-small">P<sub>wind</sub></text><text x="930" y="348" class="v11x-svg-small">v</text><text x="750" y="80" class="v11x-svg-small">P<sub>wind</sub> ∝ v³</text></svg></div>
 <div class="v11x-controls"><div class="v11x-control"><label for="v11-z103-v">Brzina vjetra v₁ <output id="v11-z103-v-out"></output></label><input id="v11-z103-v" type="range" min="1.5" max="8" step="0.01" value="3.13"></div><div class="v11x-control"><label for="v11-z103-D">Promjer rotora D <output id="v11-z103-D-out"></output></label><input id="v11-z103-D" type="range" min="5" max="20" step="0.1" value="10"></div></div>
 <div class="v11x-primary-row"><div class="v11x-primary"><span>Potisak vjetra na stup</span><output id="v11-z103-F"></output><small>U smjeru strujanja; oslonac stupa djeluje suprotno.</small></div><div class="v11x-values"><div class="v11x-value"><span>Učinkovitost η</span><output id="v11-z103-eta"></output></div><div class="v11x-value"><span>Raspoloživa snaga vjetra</span><output id="v11-z103-pwind"></output></div><div class="v11x-value"><span>Korisna snaga</span><output id="v11-z103-p"></output></div></div></div>
 <div class="v11x-explain"><h5>Zašto se rezultat promijenio?</h5><p id="v11-z103-why"></p></div>
@@ -309,36 +982,114 @@ Slijedi $R_x=-2053\ \mathrm{N}$, $R_z=+144\ \mathrm{N}$ i $|\vec R|=2058\ \mathr
 
 <script>
 (() => {
- const root=document.getElementById('v11-z103-lab');if(!root)return;const v=root.querySelector('#v11-z103-v'),D=root.querySelector('#v11-z103-D'),base=root.querySelector('#v11-z103-base'),double=root.querySelector('#v11-z103-double'),fmt=(n,k=2)=>n.toLocaleString('hr-HR',{minimumFractionDigits:k,maximumFractionDigits:k});let state,previousState,lastChanged='initial';
- const rho=1.2,baseV=3.13,baseD=10,baseA=Math.PI*baseD*baseD/4,eta=400/(.5*rho*baseA*baseV*baseV*baseV);
- function compute(){const vi=+v.value,dia=+D.value,A=Math.PI*dia*dia/4,pwind=.5*rho*A*vi*vi*vi,p=eta*pwind,mdot=rho*A*vi,v2=Math.sqrt(Math.max(0,vi*vi-2*p/mdot)),F=mdot*(vi-v2);return{vi,dia,A,pwind,p,mdot,v2,F,eta}}
- function draw(s){const inL=115+150*s.vi/8,outL=95+145*s.v2/8,forceL=70+125*Math.min(1,s.F/600);root.querySelector('#v11-z103-in').setAttribute('d','M90 170H'+(90+inL));root.querySelector('#v11-z103-out').setAttribute('d','M485 170H'+(485+outL));root.querySelector('#v11-z103-force').setAttribute('d','M285 305H'+(285+forceL));root.querySelector('#v11-z103-in').style.animationDuration=Math.max(.45,2.1/(.3+s.vi/3))+'s';root.querySelector('#v11-z103-out').style.animationDuration=Math.max(.45,2.1/(.3+s.v2/3))+'s';root.querySelector('#v11-z103-v1label').textContent='v₁ = '+fmt(s.vi,2)+' m/s';root.querySelector('#v11-z103-v2label').textContent='v₂ = '+fmt(s.v2,2)+' m/s';root.querySelector('#v11-z103-dlabel').textContent='rotor: D = '+fmt(s.dia,1)+' m';root.querySelector('#v11-z103-rotor').setAttribute('ry',Math.min(120,60+5*s.dia));const vmax=8,pmax=.5*rho*s.A*vmax*vmax*vmax*1.12;let path='';for(let i=0;i<=64;i++){const x=i/64*vmax,y=.5*rho*s.A*x*x*x,px=705+245*x/vmax,py=320-250*y/pmax;path+=(i?'L':'M')+px+' '+py}root.querySelector('#v11-z103-curve').setAttribute('d',path);root.querySelector('#v11-z103-marker').setAttribute('cx',705+245*s.vi/vmax);root.querySelector('#v11-z103-marker').setAttribute('cy',320-250*s.pwind/pmax)}
- function why(s){if(!previousState||lastChanged==='initial')return 'Snaga vjetra sadrži dva učinka: kinetička energija svakog kilograma zraka raste s v², a kroz rotor u sekundi prolazi masa proporcionalna v. Zato P₍wind₎ raste s v³; pri dvostrukoj brzini raste osam puta.';if(lastChanged==='v')return 'Brzina vjetra je '+(s.vi>previousState.vi?'povećana':'smanjena')+' s '+fmt(previousState.vi,2)+' na '+fmt(s.vi,2)+' m/s. Kinetička energija po kilogramu mijenja se s v², a maseni tok zraka s v, pa je P₍wind₎ sada '+fmt(s.pwind/1000,3)+' kW i prati kub brzine. Potisak prati promjenu momentuma i ovdje raste s v².';return 'Promjer rotora je '+(s.dia>previousState.dia?'povećan':'smanjen')+' s '+fmt(previousState.dia,1)+' na '+fmt(s.dia,1)+' m. Površina presjeka mijenja se s D², pa kroz rotor prolazi proporcionalno više zraka; pri istoj brzini rastu P₍wind₎ i potisak u istom omjeru kao A.'}
- function sync(s){root.querySelector('#v11-z103-v-out').value=fmt(s.vi,2)+' m/s';root.querySelector('#v11-z103-D-out').value=fmt(s.dia,1)+' m';root.querySelector('#v11-z103-F').value=fmt(s.F,0)+' N →';root.querySelector('#v11-z103-eta').value=fmt(100*s.eta,2)+' %';root.querySelector('#v11-z103-pwind').value=fmt(s.pwind/1000,3)+' kW';root.querySelector('#v11-z103-p').value=fmt(s.p/1000,3)+' kW';root.querySelector('#v11-z103-why').textContent=why(s);root.querySelector('#v11-z103-chain-a').textContent='A = '+fmt(s.A,2)+' m²';root.querySelector('#v11-z103-chain-m').textContent='ṁ = '+fmt(s.mdot,1)+' kg/s';root.querySelector('#v11-z103-chain-p').textContent='P₍wind₎ = '+fmt(s.pwind/1000,3)+' kW';root.querySelector('#v11-z103-chain-f').textContent='F = '+fmt(s.F,0)+' N'}
- function update(){state=compute();sync(state);draw(state)}function setSource(speed){previousState=state?{...state}:null;lastChanged='initial';v.value=speed;D.value=10;base.classList.toggle('is-active',speed===baseV);double.classList.toggle('is-active',speed!==baseV);update()}base.addEventListener('click',()=>setSource(baseV));double.addEventListener('click',()=>setSource(2*baseV));[[v,'v'],[D,'D']].forEach(([el,key])=>el.addEventListener('input',()=>{previousState=state?{...state}:null;lastChanged=key;base.classList.remove('is-active');double.classList.remove('is-active');update()}));update();
+  const root = document.getElementById("v11-z103-lab");
+  if (!root) return;
+  const v = root.querySelector("#v11-z103-v"),
+    D = root.querySelector("#v11-z103-D"),
+    base = root.querySelector("#v11-z103-base"),
+    double = root.querySelector("#v11-z103-double"),
+    fmt = (n, k = 2) => n.toLocaleString("hr-HR", { minimumFractionDigits: k, maximumFractionDigits: k });
+  let state,
+    previousState,
+    lastChanged = "initial";
+  const rho = 1.2,
+    baseV = 3.13,
+    baseD = 10,
+    baseA = (Math.PI * baseD * baseD) / 4,
+    eta = 400 / (0.5 * rho * baseA * baseV * baseV * baseV);
+  function compute() {
+    const vi = +v.value,
+      dia = +D.value,
+      A = (Math.PI * dia * dia) / 4,
+      pwind = 0.5 * rho * A * vi * vi * vi,
+      p = eta * pwind,
+      disk = MF1.actuatorDisk(rho,A,vi,eta),
+      mdot = disk.mass, v2=disk.wake, F=disk.force;
+    return { vi, dia, A, pwind, p, mdot, v2, F, eta, vd:disk.disk };
+  }
+  function draw(s){
+ const svg=root.querySelector('.v11x-scene svg'),r=s.dia*5,ru=r*Math.sqrt(s.vd/s.vi),rw=r*Math.sqrt(s.vd/s.v2),fs=130/Math.max(s.F,600),vs=20;
+ let curve='';const pmax=.5*rho*s.A*8**3*1.12;for(let i=0;i<=64;i++){const v=i/8;curve+=(i?'L':'M')+(705+245*v/8)+' '+(320-250*.5*rho*s.A*v**3/pmax);}
+ svg.innerHTML='<title>Idealni disk: očuvanje mase i snaga vjetra</title>'+
+ '<path d="M70 '+(170-ru)+'Q260 '+(170-ru)+' 370 '+(170-r)+'Q510 '+(170-rw)+' 645 '+(170-rw)+'L645 '+(170+rw)+'Q510 '+(170+rw)+' 370 '+(170+r)+'Q260 '+(170+ru)+' 70 '+(170+ru)+'Z" fill="#e0f2fe" stroke="#94a3b8" stroke-dasharray="6 5"/>'+
+ '<ellipse cx="370" cy="170" rx="14" ry="'+r+'" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>'+MF1.svgArrow(90,170,s.vi*vs,0,'#0284c7','v₁')+MF1.svgArrow(460,170,s.v2*vs,0,'#0284c7','v₂')+
+ MF1.svgArrow(370,310,s.F*fs,0,'#dc2626','F')+MF1.svgArrow(370,348,-s.F*fs,0,'#7c3aed','reakcija oslonca')+
+ '<text x="75" y="35">D='+fmt(s.dia,1)+' m; v diska='+fmt(s.vd,2)+' m/s</text><text x="75" y="375">ṁ = ρA v diska; P = F v diska; Cₚ = '+fmt(s.eta,4)+'</text>'+
+ '<path d="M705 55V320H950" fill="none" stroke="#64748b" stroke-width="2"/><path d="'+curve+'" fill="none" stroke="#0284c7" stroke-width="3"/>'+
+ '<circle cx="'+(705+245*s.vi/8)+'" cy="'+(320-250*s.pwind/pmax)+'" r="6" fill="#dc2626"/><text x="710" y="40">P vjetra [kW]</text><text x="880" y="350">v [m/s]</text><text x="697" y="340">0</text><text x="945" y="340">8</text><text x="690" y="65">'+fmt(pmax/1000,1)+'</text>';
+}
+  function why(s) {
+    if (!previousState || lastChanged === "initial")
+      return "Snaga vjetra sadrži dva učinka: kinetička energija svakog kilograma zraka raste s v², a kroz rotor u sekundi prolazi masa proporcionalna v. Zato P₍wind₎ raste s v³; pri dvostrukoj brzini raste osam puta.";
+    if (lastChanged === "v")
+      return (
+        "Brzina vjetra je " +
+        (s.vi > previousState.vi ? "povećana" : "smanjena") +
+        " s " +
+        fmt(previousState.vi, 2) +
+        " na " +
+        fmt(s.vi, 2) +
+        " m/s. Kinetička energija po kilogramu mijenja se s v², a maseni tok zraka s v, pa je P₍wind₎ sada " +
+        fmt(s.pwind / 1000, 3) +
+        " kW i prati kub brzine. Potisak prati promjenu momentuma i ovdje raste s v²."
+      );
+    return (
+      "Promjer rotora je " +
+      (s.dia > previousState.dia ? "povećan" : "smanjen") +
+      " s " +
+      fmt(previousState.dia, 1) +
+      " na " +
+      fmt(s.dia, 1) +
+      " m. Površina presjeka mijenja se s D², pa kroz rotor prolazi proporcionalno više zraka; pri istoj brzini rastu P₍wind₎ i potisak u istom omjeru kao A."
+    );
+  }
+  function sync(s) {
+    root.querySelector("#v11-z103-v-out").value = fmt(s.vi, 2) + " m/s";
+    root.querySelector("#v11-z103-D-out").value = fmt(s.dia, 1) + " m";
+    root.querySelector("#v11-z103-F").value = fmt(s.F, 0) + " N →";
+    root.querySelector("#v11-z103-eta").value = fmt(100 * s.eta, 2) + " %";
+    root.querySelector("#v11-z103-pwind").value = fmt(s.pwind / 1000, 3) + " kW";
+    root.querySelector("#v11-z103-p").value = fmt(s.p / 1000, 3) + " kW";
+    root.querySelector("#v11-z103-why").textContent = why(s);
+    root.querySelector("#v11-z103-chain-a").textContent = "A = " + fmt(s.A, 2) + " m²";
+    root.querySelector("#v11-z103-chain-m").textContent = "ṁ = " + fmt(s.mdot, 1) + " kg/s";
+    root.querySelector("#v11-z103-chain-p").textContent = "P₍wind₎ = " + fmt(s.pwind / 1000, 3) + " kW";
+    root.querySelector("#v11-z103-chain-f").textContent = "F = " + fmt(s.F, 0) + " N";
+  }
+  function update() {
+    state = compute();
+    sync(state);
+    draw(state);
+  }
+  function setSource(speed) {
+    previousState = state ? { ...state } : null;
+    lastChanged = "initial";
+    v.value = speed;
+    D.value = 10;
+    base.classList.toggle("is-active", speed === baseV);
+    double.classList.toggle("is-active", speed !== baseV);
+    update();
+  }
+  base.addEventListener("click", () => setSource(baseV));
+  double.addEventListener("click", () => setSource(2 * baseV));
+  [
+    [v, "v"],
+    [D, "D"],
+  ].forEach(([el, key]) =>
+    el.addEventListener("input", () => {
+      previousState = state ? { ...state } : null;
+      lastChanged = key;
+      base.classList.remove("is-active");
+      double.classList.remove("is-active");
+      update();
+    }),
+  );
+  update();
 })();
 </script>
 
 <script>
-(() => {
- const scene=id=>document.querySelector('#'+id+' .v11x-scene svg');
- const add=(id,markup)=>{const svg=scene(id);if(svg&&!svg.querySelector('[data-v11-technical]'))svg.insertAdjacentHTML('beforeend',markup)};
- add('v11-z97-lab','<g data-v11-technical><defs><marker id="v11p-z97-flow" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#1976b9"/></marker></defs><path d="M92 42H373M92 34V50M373 34V50" fill="none" stroke="#8195a4" stroke-width="2"/><text id="v11p-z97-D" x="202" y="31" text-anchor="middle" class="v11x-svg-small">D</text><path d="M393 302H490" fill="none" stroke="#1976b9" stroke-width="4" marker-end="url(#v11p-z97-flow)"/><text id="v11p-z97-Q" x="414" y="324" class="v11x-svg-small v11x-svg-flow">Q(t)</text><path d="M380 266V294" stroke="#cf741c" stroke-width="3"/><text id="v11p-z97-d" x="389" y="265" class="v11x-svg-small v11x-svg-amber">d</text></g>');
- add('v11-z98-lab','<g data-v11-technical><path d="M555 315V365" stroke="#405b6d" stroke-width="5"/><path d="M537 355H574" stroke="#c53b3b" stroke-width="4"/><text x="478" y="305" class="v11x-svg-small">zajednička ciljna točka</text><text id="v11p-z98-symmetry" x="646" y="395" class="v11x-svg-small">komplementarne visine: y₁ + y₂ = H</text></g>');
- add('v11-z99-lab','<g data-v11-technical><defs><marker id="v11p-z99-rot" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#a45e12"/></marker></defs><path d="M325 115A72 72 0 0 1 445 115" fill="none" stroke="#cf741c" stroke-width="4" marker-end="url(#v11p-z99-rot)"/><text id="v11p-z99-omega" x="358" y="108" class="v11x-svg-small v11x-svg-amber">ω</text><path d="M430 288V335" stroke="#6e5bb5" stroke-width="3"/><text x="438" y="346" class="v11x-svg-small v11x-svg-pressure">pₘ,A</text></g>');
- add('v11-z102-lab','<g data-v11-technical><defs><marker id="v11p-z102-red" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#c53b3b"/></marker></defs><path d="M515 290H390" fill="none" stroke="#c53b3b" stroke-width="5" marker-end="url(#v11p-z102-red)"/><text x="338" y="315" class="v11x-svg-small v11x-svg-force">oslonac na ploču</text><path d="M505 160H545" stroke="#8195a4" stroke-width="2" stroke-dasharray="5 4"/><text x="450" y="145" class="v11x-svg-small">ravnina simetrije</text></g>');
- add('v11-z103-lab','<g data-v11-technical><defs><marker id="v11p-z103-red" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#c53b3b"/></marker></defs><path d="M420 282V338H485" fill="none" stroke="#405b6d" stroke-width="12" stroke-linecap="round"/><path d="M420 320H325" fill="none" stroke="#c53b3b" stroke-width="5" marker-end="url(#v11p-z103-red)"/><text x="285" y="350" class="v11x-svg-small v11x-svg-force">reakcija tla na stup</text><text id="v11p-z103-wake" x="505" y="205" class="v11x-svg-small v11x-svg-flow">usporeni trag: v₂ &lt; v₁</text></g>');
- const out=(selector,text)=>{const el=document.querySelector(selector);if(el)el.textContent=text};
- const refresh=()=>{
-  const D=document.querySelector('#v11-z97-diameter'),d=document.querySelector('#v11-z97-nozzle'),omega=document.querySelector('#v11-z99-omega'),v=document.querySelector('#v11-z103-v');
-  if(D)out('#v11p-z97-D','D = '+Number(D.value).toLocaleString('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m');
-  if(d)out('#v11p-z97-d','d = '+Number(d.value).toLocaleString('hr-HR',{maximumFractionDigits:0})+' mm');
-  if(omega)out('#v11p-z99-omega','ω = '+Number(omega.value).toLocaleString('hr-HR',{minimumFractionDigits:1,maximumFractionDigits:1})+' rad/s');
-  if(v)out('#v11p-z103-wake','usporeni trag: v₂ < v₁ = '+Number(v.value).toLocaleString('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m/s');
- };
- document.querySelectorAll('#v11-z97-lab input,#v11-z99-lab input,#v11-z103-lab input').forEach(el=>el.addEventListener('input',refresh));
- refresh();
-})();
+/* All dimensions and vectors are drawn from the widget state. */
 </script>
 
 ## Kako rješavati zadatak količine gibanja?

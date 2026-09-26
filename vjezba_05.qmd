@@ -209,82 +209,159 @@ window.MF1V5.prepareCanvas = function(canvas, context, logicalWidth, logicalHeig
     </div>
 </div>
 <script>
-(function() {
-    const canvas = document.getElementById('v5-principle-canvas'); const ctx = canvas.getContext('2d');
-    const aS = document.getElementById('v5-p-a-slider'); const hS = document.getElementById('v5-p-h-slider');
-    const bS = document.getElementById('v5-p-b-slider'); const rhoS = document.getElementById('v5-p-rho-slider');
-    function update() {
-        const a = parseFloat(aS.value); const h = parseFloat(hS.value);
-        const b = parseFloat(bS.value); const rho = parseFloat(rhoS.value);
-        const g = 9.81;
-        const area = b * h;
-        const zT = a + h/2; const zF = zT + (h*h)/(12*zT);
-        const pT = rho * g * zT / 1000;
-        const deltaP = rho * g * h / 1000;
-        const force = rho * g * zT * area / 1000;
-        document.getElementById('v5-p-a-val').innerText = a.toFixed(1);
-        document.getElementById('v5-p-h-val').innerText = h.toFixed(1);
-        document.getElementById('v5-p-b-val').innerText = b.toFixed(1);
-        document.getElementById('v5-p-rho-val').innerText = rho.toFixed(0);
-        document.getElementById('v5-p-area').innerText = area.toFixed(2) + " m²";
-        document.getElementById('v5-p-zt').innerText = zT.toFixed(2) + " m";
-        document.getElementById('v5-p-pt').innerText = pT.toFixed(2) + " kPa";
-        document.getElementById('v5-p-dp').innerText = deltaP.toFixed(2) + " kPa";
-        document.getElementById('v5-p-force').innerText = force.toFixed(2) + " kN";
-        document.getElementById('v5-p-zf').innerText = zF.toFixed(2) + " m";
-        document.getElementById('v5-p-explainer').innerText = `S porastom dubine raste tlak u težištu, a time i rezultantna sila. Budući da dublji dijelovi plohe daju veći doprinos, centar pritiska nalazi se ispod težišta.`;
-        draw(a, h, b, rho, zT, zF, pT, force);
+(function () {
+  const canvas = document.getElementById("v5-principle-canvas");
+  const ctx = canvas.getContext("2d");
+  const aS = document.getElementById("v5-p-a-slider");
+  const hS = document.getElementById("v5-p-h-slider");
+  const bS = document.getElementById("v5-p-b-slider");
+  const rhoS = document.getElementById("v5-p-rho-slider");
+  function update() {
+    const a = parseFloat(aS.value);
+    const h = parseFloat(hS.value);
+    const b = parseFloat(bS.value);
+    const rho = parseFloat(rhoS.value);
+    const g = 9.81;
+    const area = b * h;
+    const zT = a + h / 2;
+    const zF = zT + (h * h) / (12 * zT);
+    const pT = (rho * g * zT) / 1000;
+    const deltaP = (rho * g * h) / 1000;
+    const force = (rho * g * zT * area) / 1000;
+    document.getElementById("v5-p-a-val").innerText = a.toFixed(1);
+    document.getElementById("v5-p-h-val").innerText = h.toFixed(1);
+    document.getElementById("v5-p-b-val").innerText = b.toFixed(1);
+    document.getElementById("v5-p-rho-val").innerText = rho.toFixed(0);
+    document.getElementById("v5-p-area").innerText = area.toFixed(2) + " m²";
+    document.getElementById("v5-p-zt").innerText = zT.toFixed(2) + " m";
+    document.getElementById("v5-p-pt").innerText = pT.toFixed(2) + " kPa";
+    document.getElementById("v5-p-dp").innerText = deltaP.toFixed(2) + " kPa";
+    document.getElementById("v5-p-force").innerText = force.toFixed(2) + " kN";
+    document.getElementById("v5-p-zf").innerText = zF.toFixed(2) + " m";
+    document.getElementById("v5-p-explainer").innerText =
+      `S porastom dubine raste tlak u težištu, a time i rezultantna sila. Budući da dublji dijelovi plohe daju veći doprinos, centar pritiska nalazi se ispod težišta.`;
+    draw(a, h, b, rho, zT, zF, pT, force);
+  }
+  function draw(a, h, b, rho, zT, zF, pT, force) {
+    window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
+    ctx.clearRect(0, 0, 450, 400);
+    const scale = Math.min(55, 240 / (a + h));
+    const offX = 172;
+    const offY = 48;
+    ctx.fillStyle = "#f0f9ff";
+    ctx.fillRect(18, offY, 414, 278);
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, offY);
+    ctx.lineTo(430, offY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#0369a1";
+    ctx.font = "700 13px Inter";
+    ctx.fillText("slobodna površina", 22, offY - 10);
+    const tY = offY + a * scale;
+    const bY = tY + h * scale;
+    // Duljina profila prati p = ρgz; skala je relativna i ostavlja prostor za oznake pri krajnjim vrijednostima.
+    const pressureScale = Math.min(22 * (rho / 1000), 115 / Math.max(a + h, 0.1));
+    const pTop = a * pressureScale;
+    const pBot = (a + h) * pressureScale;
+    ctx.fillStyle = "rgba(56, 189, 248, 0.18)";
+    ctx.beginPath();
+    ctx.moveTo(offX + 10, tY);
+    ctx.lineTo(offX + pTop + 10, tY);
+    ctx.lineTo(offX + pBot + 10, bY);
+    ctx.lineTo(offX + 10, bY);
+    ctx.fill();
+    for (let i = 0; i <= h; i += 0.4) {
+      let currY = tY + i * scale;
+      let currP = pTop + (i / h) * (pBot - pTop);
+      drawArrow(ctx, offX + currP + 10, currY, offX + 10, currY, "rgba(14, 165, 233, 0.62)", 1.4);
     }
-    function draw(a, h, b, rho, zT, zF, pT, force) {
-        window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
-        ctx.clearRect(0, 0, 450, 400); const scale = 55; const offX = 172; const offY = 48;
-        ctx.fillStyle = '#f0f9ff'; ctx.fillRect(18, offY, 414, 278);
-        ctx.setLineDash([5, 5]); ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(20, offY); ctx.lineTo(430, offY); ctx.stroke(); ctx.setLineDash([]);
-        ctx.fillStyle = '#0369a1'; ctx.font = '700 13px Inter'; ctx.fillText('slobodna površina', 22, offY - 10);
-        const tY = offY + a * scale; const bY = tY + h * scale;
-        // Duljina profila prati p = ρgz; skala je relativna i ostavlja prostor za oznake pri krajnjim vrijednostima.
-        const pressureScale = Math.min(22 * (rho / 1000), 115 / Math.max(a + h, 0.1));
-        const pTop = a * pressureScale; const pBot = (a + h) * pressureScale;
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.18)'; ctx.beginPath(); ctx.moveTo(offX + 10, tY); ctx.lineTo(offX+pTop+10, tY); ctx.lineTo(offX+pBot+10, bY); ctx.lineTo(offX+10, bY); ctx.fill();
-        for(let i=0; i<=h; i+=0.4) {
-            let currY = tY + i*scale; let currP = pTop + (i/h)*(pBot-pTop);
-            drawArrow(ctx, offX + currP + 10, currY, offX + 10, currY, "rgba(14, 165, 233, 0.62)", 1.4);
-        }
-        ctx.fillStyle = '#475569'; ctx.fillRect(offX - 10, tY, 20, bY - tY);
-        ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.strokeRect(offX - 10, tY, 20, bY - tY);
-        ctx.fillStyle = '#0f172a'; ctx.font = '700 12px Inter'; ctx.fillText('uronjena ploha', offX - 42, bY + 21);
-        ctx.fillStyle = '#475569'; ctx.font = '600 11px Inter'; ctx.fillText('duljine strelica: relativna skala tlaka', 205, 316);
-        const tyPos = offY + zT * scale; const fyPos = offY + zF * scale;
-        ctx.fillStyle = "#0f172a"; ctx.font = '700 12px Inter';
-        ctx.fillText(`p_vrh = ${(rho * 9.81 * a / 1000).toFixed(1)} kPa`, offX + pTop + 18, tY + 4);
-        ctx.fillText(`p_dno = ${(rho * 9.81 * (a + h) / 1000).toFixed(1)} kPa`, offX + pBot + 18, bY + 4);
-        ctx.setLineDash([3, 3]); ctx.strokeStyle = "#64748b"; ctx.beginPath(); ctx.moveTo(offX - 100, tyPos); ctx.lineTo(offX, tyPos); ctx.stroke(); ctx.setLineDash([]);
-        ctx.fillStyle = "#64748b"; ctx.beginPath(); ctx.arc(offX, tyPos, 4, 0, 7); ctx.fill();
-        ctx.fillStyle = '#2563eb'; ctx.fillText('T · težište', offX + 18, tyPos - 10);
-        ctx.strokeStyle = "#f87171"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(offX - 70, fyPos); ctx.lineTo(offX, fyPos); ctx.stroke();
-        ctx.fillStyle = "#f87171"; ctx.beginPath(); ctx.arc(offX, fyPos, 6, 0, 7); ctx.fill();
-        ctx.fillText('C_P · centar pritiska', offX + 18, fyPos + 20);
-        drawArrow(ctx, offX + 14, fyPos, offX - 112, fyPos, "#ef4444", 4);
-        ctx.fillStyle = '#dc2626'; ctx.font = '700 14px Inter'; ctx.fillText('F_R', offX - 122, fyPos - 10);
-        ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(34, offY); ctx.lineTo(34, tyPos); ctx.stroke();
-        drawArrow(ctx, 34, offY, 34, tyPos, '#475569', 1.5); ctx.fillStyle = '#334155'; ctx.fillText('z_T', 42, (offY + tyPos) / 2);
-        ctx.fillStyle = "#1d4ed8";
-        ctx.fillText(`p = ρ g z;  A = ${b.toFixed(1)} · ${h.toFixed(1)} = ${(b * h).toFixed(2)} m²`, 18, 348);
-        ctx.fillStyle = "#0f172a";
-        ctx.fillText(`p_T = ${pT.toFixed(2)} kPa`, 18, 368);
-        ctx.fillStyle = "#dc2626";
-        ctx.fillText(`F_R = ${force.toFixed(2)} kN`, 18, 388);
-    }
-    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
-        const headlen = 10; const angle = Math.atan2(y2-y1, x2-x1);
-        ctx.strokeStyle = color; ctx.lineWidth = width; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5)); ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5)); ctx.fillStyle = color; ctx.fill();
-    }
-    aS.oninput = update; hS.oninput = update; bS.oninput = update; rhoS.oninput = update;
-    window.addEventListener('resize', update);
-    update();
+    ctx.fillStyle = "#475569";
+    ctx.fillRect(offX - 10, tY, 20, bY - tY);
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(offX - 10, tY, 20, bY - tY);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "700 12px Inter";
+    ctx.fillText("uronjena ploha", offX - 42, bY + 21);
+    ctx.fillStyle = "#475569";
+    ctx.font = "600 11px Inter";
+    ctx.fillText("duljine strelica: relativna skala tlaka", 205, 316);
+    const tyPos = offY + zT * scale;
+    const fyPos = offY + zF * scale;
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "700 12px Inter";
+    ctx.fillText(`p_vrh = ${((rho * 9.81 * a) / 1000).toFixed(1)} kPa`, offX + pTop + 18, tY + 4);
+    ctx.fillText(`p_dno = ${((rho * 9.81 * (a + h)) / 1000).toFixed(1)} kPa`, offX + pBot + 18, bY + 4);
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = "#64748b";
+    ctx.beginPath();
+    ctx.moveTo(offX - 100, tyPos);
+    ctx.lineTo(offX, tyPos);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#64748b";
+    ctx.beginPath();
+    ctx.arc(offX, tyPos, 4, 0, 7);
+    ctx.fill();
+    ctx.fillStyle = "#2563eb";
+    ctx.fillText("T · težište", offX + 18, tyPos - 10);
+    ctx.strokeStyle = "#f87171";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(offX - 70, fyPos);
+    ctx.lineTo(offX, fyPos);
+    ctx.stroke();
+    ctx.fillStyle = "#f87171";
+    ctx.beginPath();
+    ctx.arc(offX, fyPos, 6, 0, 7);
+    ctx.fill();
+    ctx.fillText("C_P · centar pritiska", offX + 18, fyPos + 20);
+    drawArrow(ctx, offX + 14, fyPos, offX - 112, fyPos, "#ef4444", 4);
+    ctx.fillStyle = "#dc2626";
+    ctx.font = "700 14px Inter";
+    ctx.fillText("F_R", offX - 122, fyPos - 10);
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(34, offY);
+    ctx.lineTo(34, tyPos);
+    ctx.stroke();
+    drawArrow(ctx, 34, offY, 34, tyPos, "#475569", 1.5);
+    ctx.fillStyle = "#334155";
+    ctx.fillText("z_T", 42, (offY + tyPos) / 2);
+    ctx.fillStyle = "#1d4ed8";
+    ctx.fillText(`p = ρ g z;  A = ${b.toFixed(1)} · ${h.toFixed(1)} = ${(b * h).toFixed(2)} m²`, 18, 348);
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText(`p_T = ${pT.toFixed(2)} kPa`, 18, 368);
+    ctx.fillStyle = "#dc2626";
+    ctx.fillText(`F_R = ${force.toFixed(2)} kN`, 18, 388);
+  }
+  function drawArrow(ctx, x1, y1, x2, y2, color, width) {
+    const headlen = 10;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+  aS.oninput = update;
+  hS.oninput = update;
+  bS.oninput = update;
+  rhoS.oninput = update;
+  window.addEventListener("resize", update);
+  update();
 })();
 </script>
 ```
@@ -366,7 +443,7 @@ Prikaz povezuje geometriju plohe, položaj centra pritiska i rastavljanje rezult
                         <label style="font-weight: 700; color: #475569; font-size: 0.85rem;">Nagib &alpha;</label>
                         <span id="v5-v5-a-val" style="font-family: monospace; font-weight: 800; color: #3b82f6;">45°</span>
                     </div>
-                    <input type="range" id="v5-v5-a-slider" min="15" max="90" value="45" style="width: 100%;">
+                    <input type="range" id="v5-v5-a-slider" min="0" max="90" value="45" style="width: 100%;">
                 </div>
                 <div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
@@ -432,96 +509,121 @@ Prikaz povezuje geometriju plohe, položaj centra pritiska i rastavljanje rezult
     @media (max-width: 800px) { .v5-shape-options { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
 </style>
 <script>
-(function() {
-    const canvas = document.getElementById('v5-v5-canvas'); const ctx = canvas.getContext('2d');
-    const aS = document.getElementById('v5-v5-a-slider'); const zS = document.getElementById('v5-v5-z-slider');
-    let curShape = 'rect';
-    // Sve veličine ispod koriste se i za račun i za crtež: h je duljina po plohi,
-    // b baza, d promjer, r polumjer. I_G je drugi moment oko centroidalne osi.
-    const shapeMeta = {
-        rect: { name: 'Pravokutnik', kind: 'rect', h: 3.5, b: 5, area: 17.5, yT: 1.75, IG: 17.5 * 3.5 ** 2 / 12, label: 'h = 3,5 m; b = 5,0 m' },
-        tri: { name: 'Trokut (vrh gore)', kind: 'tri', h: 3.5, b: 5, area: 8.75, yT: 2 * 3.5 / 3, IG: 5 * 3.5 ** 3 / 36, label: 'h = 3,5 m; b = 5,0 m' },
-        circle: { name: 'Krug', kind: 'circle', d: 3, r: 1.5, area: Math.PI * 1.5 ** 2, yT: 1.5, IG: Math.PI * 1.5 ** 4 / 4, label: 'd = 3,0 m' },
-        semi: { name: 'Polukrug (tetiva gore)', kind: 'semi', r: 1.5, area: Math.PI * 1.5 ** 2 / 2, yT: 4 * 1.5 / (3 * Math.PI), IG: (Math.PI / 8 - 8 / (9 * Math.PI)) * 1.5 ** 4, label: 'r = 1,5 m' }
-    };
-    window.v5_setShape = function(s) {
-        curShape = s;
-        document.querySelectorAll('.v5-v5-btn').forEach(b => {
-            const active = b.dataset.shape === s;
-            b.classList.toggle('active', active);
-            b.setAttribute('aria-pressed', String(active));
-        });
-        update();
-    };
-    function update() {
-        const deg = parseFloat(aS.value); const alpha = deg * Math.PI / 180;
-        const a = parseFloat(zS.value);
-        document.getElementById('v5-v5-a-val').innerText = deg + '°';
-        document.getElementById('v5-v5-z-val').innerText = a.toFixed(1) + ' m';
-        const yA = a / Math.sin(alpha);
-        const meta = shapeMeta[curShape];
-        const Area = meta.area; const yT = yA + meta.yT; const IG = meta.IG;
-        const yF = yT + IG / (yT * Area); const zT = yT * Math.sin(alpha); const zF = yF * Math.sin(alpha);
-        const F = 9.81 * zT * Area;
-        document.getElementById('v5-v5-out-f').innerText = F.toFixed(1) + ' kN';
-        document.getElementById('v5-v5-out-fx').innerText = (F * Math.sin(alpha)).toFixed(1) + ' kN';
-        document.getElementById('v5-v5-out-fz').innerText = (F * Math.cos(alpha)).toFixed(1) + ' kN';
-        document.getElementById('v5-v5-shape-name').innerText = meta.name;
-        document.getElementById('v5-v5-out-yt').innerText = yT.toFixed(2) + ' m';
-        document.getElementById('v5-v5-out-yf').innerText = yF.toFixed(2) + ' m';
-        document.getElementById('v5-v5-out-zt').innerText = zT.toFixed(2) + ' m';
-        document.getElementById('v5-v5-out-zf').innerText = zF.toFixed(2) + ' m';
-        document.getElementById('v5-v5-out-dz').innerText = (zF - zT).toFixed(2) + ' m';
-        document.getElementById('v5-v5-explainer').innerText = `${meta.name} (${meta.label}) daje A = ${Area.toFixed(2)} m². Redoslijed proračuna je y_T → z_T = y_T sin α → F_R → y_F. Promjena gustoće ili širine mijenja F_R, ali ne i geometrijski pomak C_P − T.`;
-        draw(alpha, a, meta, yT, yF, zT, zF);
-    }
-    function draw(alpha, a, meta, yT, yF, zT, zF) {
-        window.MF1V5.prepareCanvas(canvas, ctx, 600, 550);
-        ctx.clearRect(0, 0, 600, 550); const originX = 150; const originY = 80; const scale = 50; 
-        ctx.fillStyle = '#f0f9ff'; ctx.fillRect(0, originY, 600, 470);
-        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, originY); ctx.lineTo(600, originY); ctx.stroke();
-        ctx.fillStyle = '#0369a1'; ctx.font = 'bold 12px Inter'; ctx.fillText('slobodna površina', 18, originY - 12);
-        ctx.save(); ctx.translate(originX, originY);
-        const sA = (a / Math.sin(alpha)) * scale;
-        ctx.save(); ctx.rotate(alpha); 
-        ctx.fillStyle = 'rgba(71, 85, 105, 0.95)'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 4;
-        ctx.beginPath();
-        if(meta.kind==='rect') ctx.rect(sA, -25, meta.h * scale, 50);
-        else if(meta.kind==='tri') { ctx.moveTo(sA, 0); ctx.lineTo(sA + meta.h * scale, 35); ctx.lineTo(sA + meta.h * scale, -35); ctx.closePath(); }
-        else if(meta.kind==='circle') ctx.arc(sA + meta.r * scale, 0, meta.r * scale, 0, Math.PI * 2);
-        else ctx.arc(sA, 0, meta.r * scale, -Math.PI / 2, Math.PI / 2);
-        ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#3b82f6'; ctx.beginPath(); ctx.arc(yT*scale, 0, 5, 0, 7); ctx.fill();
-        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(yF*scale, 0, 7, 0, 7); ctx.fill();
-        ctx.fillStyle = '#dbeafe'; ctx.font = 'bold 12px Inter';
-        ctx.fillText('T', yT*scale + 10, -8);
-        ctx.fillText('C_P', yF*scale + 10, 18);
-        ctx.restore();
-        const fAnchorX = originX + yF * scale * Math.cos(alpha); const fAnchorY = originY + yF * scale * Math.sin(alpha);
-        const nx = Math.sin(alpha); const ny = -Math.cos(alpha); const vLen = 130;
-        function dA(x1,y1,x2,y2,c,w) {
-            const h = 10; const a = Math.atan2(y2-y1, x2-x1);
-            ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-h*Math.cos(a-0.4),y2-h*Math.sin(a-0.4)); ctx.lineTo(x2-h*Math.cos(a+0.4),y2-h*Math.sin(a+0.4)); ctx.fillStyle=c; ctx.fill();
-        }
-        const endX = fAnchorX + nx * vLen; const endY = fAnchorY + ny * vLen;
-        dA(fAnchorX, fAnchorY, endX, fAnchorY, '#3b82f6', 3);
-        dA(endX, fAnchorY, endX, endY, '#10b981', 3);
-        dA(fAnchorX, fAnchorY, endX, endY, '#ef4444', 5);
-        ctx.font = '700 13px Inter';
-        ctx.fillStyle = '#2563eb'; ctx.fillText('F_x', endX - 32, fAnchorY - 10);
-        ctx.fillStyle = '#059669'; ctx.fillText('F_z', endX + 8, (fAnchorY + endY) / 2);
-        ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', (fAnchorX + endX) / 2 - 10, (fAnchorY + endY) / 2 - 10);
-        ctx.fillStyle = '#0f172a'; ctx.fillText('C_P', fAnchorX + 10, fAnchorY + 18);
-        ctx.fillStyle = '#0f172a'; ctx.font = 'bold 13px Inter'; ctx.fillText(meta.name, 18, 34);
-        ctx.fillStyle = '#475569'; ctx.font = '600 12px Inter'; ctx.fillText(meta.label, 18, 54);
-        ctx.fillStyle = '#1d4ed8'; ctx.fillText(`z_T = ${zT.toFixed(2)} m`, 18, 490);
-        ctx.fillStyle = '#dc2626'; ctx.fillText(`z_F = ${zF.toFixed(2)} m`, 18, 512);
-        ctx.restore();
-    }
-    aS.oninput = update; zS.oninput = update;
-    window.addEventListener('resize', update);
+(function () {
+  const canvas = document.getElementById("v5-v5-canvas");
+  const ctx = canvas.getContext("2d");
+  const aS = document.getElementById("v5-v5-a-slider");
+  const zS = document.getElementById("v5-v5-z-slider");
+  let curShape = "rect";
+  // Sve veličine ispod koriste se i za račun i za crtež: h je duljina po plohi,
+  // b baza, d promjer, r polumjer. I_G je drugi moment oko centroidalne osi.
+  const shapeMeta = {
+    rect: {
+      name: "Pravokutnik",
+      kind: "rect",
+      h: 3.5,
+      b: 5,
+      area: 17.5,
+      yT: 1.75,
+      IG: (17.5 * 3.5 ** 2) / 12,
+      label: "h = 3,5 m; b = 5,0 m",
+    },
+    tri: {
+      name: "Trokut (vrh gore)",
+      kind: "tri",
+      h: 3.5,
+      b: 5,
+      area: 8.75,
+      yT: (2 * 3.5) / 3,
+      IG: (5 * 3.5 ** 3) / 36,
+      label: "h = 3,5 m; b = 5,0 m",
+    },
+    circle: {
+      name: "Krug",
+      kind: "circle",
+      d: 3,
+      r: 1.5,
+      area: Math.PI * 1.5 ** 2,
+      yT: 1.5,
+      IG: (Math.PI * 1.5 ** 4) / 4,
+      label: "d = 3,0 m",
+    },
+    semi: {
+      name: "Polukrug (tetiva gore)",
+      kind: "semi",
+      r: 1.5,
+      area: (Math.PI * 1.5 ** 2) / 2,
+      yT: (4 * 1.5) / (3 * Math.PI),
+      IG: (Math.PI / 8 - 8 / (9 * Math.PI)) * 1.5 ** 4,
+      label: "r = 1,5 m",
+    },
+  };
+  window.v5_setShape = function (s) {
+    curShape = s;
+    document.querySelectorAll(".v5-v5-btn").forEach((b) => {
+      const active = b.dataset.shape === s;
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-pressed", String(active));
+    });
     update();
+  };
+  function update() {
+    const deg = parseFloat(aS.value);
+    const alpha = (deg * Math.PI) / 180;
+    const a = parseFloat(zS.value);
+    document.getElementById("v5-v5-a-val").innerText = deg + "°";
+    document.getElementById("v5-v5-z-val").innerText = a.toFixed(1) + " m";
+    const yA = alpha > 0 ? a / Math.sin(alpha) : Infinity;
+    const meta = shapeMeta[curShape];
+    const Area = meta.area;
+    const yT = yA + meta.yT;
+    const IG = meta.IG;
+    const yF = yT + IG / (yT * Area);
+    const zT = a + meta.yT * Math.sin(alpha);
+    const zF = zT + IG * Math.sin(alpha)**2 / (zT * Area);
+    const F = 9.81 * zT * Area;
+    document.getElementById("v5-v5-out-f").innerText = F.toFixed(1) + " kN";
+    document.getElementById("v5-v5-out-fx").innerText = (F * Math.sin(alpha)).toFixed(1) + " kN";
+    document.getElementById("v5-v5-out-fz").innerText = (F * Math.cos(alpha)).toFixed(1) + " kN";
+    document.getElementById("v5-v5-shape-name").innerText = meta.name;
+    document.getElementById("v5-v5-out-yt").innerText = Number.isFinite(yT) ? yT.toFixed(2) + " m" : "— (vodoravna ploha)";
+    document.getElementById("v5-v5-out-yf").innerText = Number.isFinite(yF) ? yF.toFixed(2) + " m" : "— (vodoravna ploha)";
+    document.getElementById("v5-v5-out-zt").innerText = zT.toFixed(2) + " m";
+    document.getElementById("v5-v5-out-zf").innerText = zF.toFixed(2) + " m";
+    document.getElementById("v5-v5-out-dz").innerText = (zF - zT).toFixed(2) + " m";
+    document.getElementById("v5-v5-explainer").innerText =
+      `${meta.name} (${meta.label}) daje A = ${Area.toFixed(2)} m². Redoslijed proračuna je y_T → z_T = y_T sin α → F_R → y_F. Promjena gustoće ili širine mijenja F_R, ali ne i geometrijski pomak C_P − T.`;
+    draw(alpha, a, meta, yT, yF, zT, zF);
+  }
+  function draw(alpha,a,meta,yT,yF,zT,zF) {
+  window.MF1V5.prepareCanvas(canvas,ctx,600,550);ctx.clearRect(0,0,600,550);
+  const h=meta.h||meta.d||meta.r, sc=Math.min(62,290/(a+h*Math.sin(alpha))), x0=90,y0=65+a*sc;
+  const x1=x0+h*sc*Math.cos(alpha),y1=y0+h*sc*Math.sin(alpha);
+  ctx.fillStyle='#e0f2fe';ctx.beginPath();ctx.moveTo(35,65);ctx.lineTo(x0,65);ctx.lineTo(x0,y0);ctx.lineTo(x1,y1);ctx.lineTo(x1,405);ctx.lineTo(35,405);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#0ea5e9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(35,65);ctx.lineTo(x0,65);ctx.stroke();
+  ctx.font='13px system-ui';ctx.fillStyle='#075985';ctx.fillText('Bočni presjek • slobodna površina',35,42);
+  ctx.strokeStyle='#334155';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+  const sf=meta.yT+meta.IG*Math.sin(alpha)/(meta.area*zT), fx=x0+sf*sc*Math.cos(alpha),fy=y0+sf*sc*Math.sin(alpha);
+  const tx=x0+meta.yT*sc*Math.cos(alpha),ty=y0+meta.yT*sc*Math.sin(alpha);
+  ctx.fillStyle='#2563eb';ctx.beginPath();ctx.arc(tx,ty,5,0,7);ctx.fill();ctx.fillText('T',tx-20,ty+22);
+  ctx.fillStyle='#dc2626';ctx.beginPath();ctx.arc(fx,fy,5,0,7);ctx.fill();ctx.fillText('C_P',fx+10,fy+20);
+  const F=9.81*zT*meta.area, vs=Math.min(.30,105/F), dx=F*vs*Math.sin(alpha),dy=-F*vs*Math.cos(alpha);
+  MF1.arrow(ctx,fx,fy,dx,0,'#2563eb',2,'Fₓ');MF1.arrow(ctx,fx+dx,fy,0,dy,'#059669',2,'Fz');MF1.arrow(ctx,fx,fy,dx,dy,'#dc2626',3,'F_R');
+  ctx.fillStyle='#475569';ctx.fillText('Vektori: zajednička prilagođena skala',35,438);
+  ctx.fillText('z_T = '+zT.toFixed(2)+' m; z_F = '+zF.toFixed(2)+' m',35,462);
+  // Oblik plohe prikazuje se u njezinoj ravnini, odvojeno od bočnog presjeka.
+  ctx.save();ctx.translate(470,175);const ps=24;ctx.fillStyle='#cbd5e1';ctx.strokeStyle='#475569';ctx.lineWidth=2;ctx.beginPath();
+  if(meta.kind==='rect')ctx.rect(-meta.b*ps/2,0,meta.b*ps,h*ps);
+  else if(meta.kind==='tri'){ctx.moveTo(0,0);ctx.lineTo(-meta.b*ps/2,h*ps);ctx.lineTo(meta.b*ps/2,h*ps);ctx.closePath();}
+  else if(meta.kind==='circle')ctx.arc(0,meta.r*ps,meta.r*ps,0,Math.PI*2);
+  else{ctx.arc(0,0,meta.r*ps,0,Math.PI);ctx.closePath();}ctx.fill();ctx.stroke();
+  ctx.fillStyle='#2563eb';ctx.beginPath();ctx.arc(0,meta.yT*ps,4,0,7);ctx.fill();ctx.fillStyle='#dc2626';ctx.beginPath();ctx.arc(0,sf*ps,4,0,7);ctx.fill();ctx.restore();
+  ctx.fillStyle='#334155';ctx.fillText('Pogled normalno na plohu',382,132);ctx.fillText(meta.name,382,320);ctx.fillText(meta.label,382,343);
+ }
+  aS.oninput = update;
+  zS.oninput = update;
+  window.addEventListener("resize", update);
+  update();
 })();
 </script>
 ```
@@ -615,197 +717,206 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak, pa se u prora�
 </div>
 
 <script>
-(function() {
-    const canvas = document.getElementById('v5-z41-canvas');
-    const ctx = canvas.getContext('2d');
-    const h1S = document.getElementById('v5-z41-h1-slider');
-    const h2S = document.getElementById('v5-z41-h2-slider');
+(function () {
+  const canvas = document.getElementById("v5-z41-canvas");
+  const ctx = canvas.getContext("2d");
+  const h1S = document.getElementById("v5-z41-h1-slider");
+  const h2S = document.getElementById("v5-z41-h2-slider");
 
-    function drawArrow(x1, y1, x2, y2, color, width) {
-        const headlen = 10;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
+  function drawArrow(x1, y1, x2, y2, color, width) {
+    const headlen = 10;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function update() {
+    const h1 = parseFloat(h1S.value);
+    const h2 = parseFloat(h2S.value);
+    const b = 6.0;
+    const rho = 1000;
+    const g = 9.81;
+    const depthTop = Math.max(0, h2 - h1);
+    const subH = Math.min(h1, h2);
+    const zT = depthTop + subH / 2;
+    const area = subH * b;
+    const Fh = subH > 0 ? (rho * g * zT * area) / 1000 : 0;
+    const zFh = subH > 0 ? zT + (subH * subH) / (12 * zT) : 0;
+    const arm = subH > 0 ? h1 - subH + zFh - depthTop : 0;
+    const Rb = h1 > 0 ? (Fh * arm) / h1 : 0;
+
+    document.getElementById("v5-z41-h1-val").innerText = h1.toFixed(1) + " m";
+    document.getElementById("v5-z41-h2-val").innerText = h2.toFixed(1) + " m";
+    document.getElementById("v5-z41-fh").innerText = Fh.toFixed(1) + " kN";
+    document.getElementById("v5-z41-zf").innerText = subH > 0 ? zFh.toFixed(2) + " m" : "---";
+    document.getElementById("v5-z41-rb").innerText = Rb.toFixed(1) + " kN";
+
+    draw(h1, h2, depthTop, subH, zT, zFh, Fh, Rb);
+  }
+
+  function draw(h1, h2, depthTop, subH, zT, zFh, Fh, Rb) {
+    window.MF1V5.prepareCanvas(canvas, ctx, 500, 450);
+    ctx.clearRect(0, 0, 500, 450);
+    const scale = Math.min(60,330/Math.max(h1,h2));
+    const bottomY = 400;
+    const gateX = 350;
+    const leftWallX = 50;
+    const waterY = bottomY - h2 * scale;
+    const gateTopY = bottomY - h1 * scale;
+    const wetTopY = bottomY - subH * scale;
+
+    ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+    ctx.fillRect(leftWallX, waterY, gateX - leftWallX, h2 * scale);
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(leftWallX, waterY);
+    ctx.lineTo(gateX, waterY);
+    ctx.stroke();
+    ctx.fillStyle = "#2563eb";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText("slobodna površina", 62, waterY - 10);
+
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(leftWallX, 50);
+    ctx.lineTo(leftWallX, bottomY);
+    ctx.lineTo(450, bottomY);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(gateX, gateTopY);
+    ctx.lineTo(gateX, bottomY);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.arc(gateX, gateTopY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#1e293b";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText("A", gateX + 12, gateTopY + 4);
+    ctx.fillRect(gateX - 5, bottomY - 10, 10, 10);
+    ctx.fillText("B", gateX + 12, bottomY - 4);
+
+    if (subH > 0) {
+      const pTop = depthTop * 20;
+      const pBot = (depthTop + subH) * 20;
+      ctx.fillStyle = "rgba(37, 99, 235, 0.15)";
+      ctx.beginPath();
+      ctx.moveTo(gateX, wetTopY);
+      ctx.lineTo(gateX - pTop, wetTopY);
+      ctx.lineTo(gateX - pBot, bottomY);
+      ctx.lineTo(gateX, bottomY);
+      ctx.closePath();
+      ctx.fill();
+
+      for (let i = 0; i <= 12; i++) {
+        const frac = i / 12;
+        const y = wetTopY + frac * (bottomY - wetTopY);
+        const depth = depthTop + frac * subH;
+        const len = depth * 20;
+        ctx.strokeStyle = `rgba(37, 99, 235, ${0.16 + 0.42 * frac})`;
+        ctx.lineWidth = 1 + frac;
         ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
+        ctx.moveTo(gateX - len, y);
+        ctx.lineTo(gateX, y);
         ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
-        ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
-        ctx.fillStyle = color;
-        ctx.fill();
+      }
+
+      const tPos = waterY + zT * scale;
+      const fPos = waterY + zFh * scale;
+      ctx.setLineDash([5, 5]);
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = "#3b82f6";
+      ctx.beginPath();
+      ctx.moveTo(82, tPos);
+      ctx.lineTo(gateX - 14, tPos);
+      ctx.stroke();
+      ctx.strokeStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.moveTo(82, fPos);
+      ctx.lineTo(gateX - 14, fPos);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#3b82f6";
+      ctx.font = "bold 11px Inter";
+      ctx.fillText("z_T", 86, tPos - 6);
+      ctx.fillStyle = "#ef4444";
+      ctx.fillText("z_Fh", 86, fPos - 6);
+
+      ctx.fillStyle = "#3b82f6";
+      ctx.beginPath();
+      ctx.arc(gateX, tPos, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#1e293b";
+      ctx.font = "bold 12px Inter";
+      ctx.fillText("T", gateX + 12, tPos + 4);
+
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.arc(gateX, fPos, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillText("C_P", gateX + 12, fPos + 4);
+
+      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.45)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(gateX, fPos);
+      ctx.lineTo(gateX - 120, fPos);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      MF1.arrow(ctx,gateX,fPos,100,0,"#ef4444",4);
+      ctx.fillStyle = "#ef4444";
+      ctx.fillText("F_R", gateX - 142, fPos + 4);
+
+      // Moment se vodi oko zgloba A; R_A se zato ne crta kao lažno izračunata strelica.
+      const armX = gateX + 62;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = "#64748b";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(armX, gateTopY);
+      ctx.lineTo(armX, fPos);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#475569";
+      ctx.font = "700 11px Inter";
+      ctx.fillText("d_A,F", armX + 8, (gateTopY + fPos) / 2);
+      MF1.arrow(ctx,gateX,bottomY,-100*Rb/Fh,0,"#8b5cf6",3.5);
+      ctx.fillStyle = "#7c3aed";
+      ctx.fillText("R_B", gateX + 22, bottomY - 14);
     }
 
-    function update() {
-        const h1 = parseFloat(h1S.value);
-        const h2 = parseFloat(h2S.value);
-        const b = 6.0;
-        const rho = 1000;
-        const g = 9.81;
-        const depthTop = Math.max(0, h2 - h1);
-        const subH = Math.min(h1, h2);
-        const zT = depthTop + subH / 2;
-        const area = subH * b;
-        const Fh = subH > 0 ? (rho * g * zT * area) / 1000 : 0;
-        const zFh = subH > 0 ? zT + (subH * subH) / (12 * zT) : 0;
-        const arm = subH > 0 ? zFh - depthTop : 0;
-        const Rb = h1 > 0 ? (Fh * arm) / h1 : 0;
+    drawArrow(30, 60, 30, bottomY, "#475569", 2);
+    ctx.fillStyle = "#334155";
+    ctx.fillText("z", 22, bottomY + 14);
+  }
 
-        document.getElementById('v5-z41-h1-val').innerText = h1.toFixed(1) + ' m';
-        document.getElementById('v5-z41-h2-val').innerText = h2.toFixed(1) + ' m';
-        document.getElementById('v5-z41-fh').innerText = Fh.toFixed(1) + ' kN';
-        document.getElementById('v5-z41-zf').innerText = subH > 0 ? zFh.toFixed(2) + ' m' : '---';
-        document.getElementById('v5-z41-rb').innerText = Rb.toFixed(1) + ' kN';
-
-        draw(h1, h2, depthTop, subH, zT, zFh, Fh, Rb);
-    }
-
-    function draw(h1, h2, depthTop, subH, zT, zFh, Fh, Rb) {
-        window.MF1V5.prepareCanvas(canvas, ctx, 500, 450);
-        ctx.clearRect(0, 0, 500, 450);
-        const scale = 60;
-        const bottomY = 400;
-        const gateX = 350;
-        const leftWallX = 50;
-        const waterY = bottomY - h2 * scale;
-        const gateTopY = bottomY - h1 * scale;
-        const wetTopY = bottomY - subH * scale;
-
-        ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-        ctx.fillRect(leftWallX, waterY, gateX - leftWallX, h2 * scale);
-        ctx.strokeStyle = '#2563eb';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(leftWallX, waterY);
-        ctx.lineTo(gateX, waterY);
-        ctx.stroke();
-        ctx.fillStyle = '#2563eb';
-        ctx.font = 'bold 12px Inter';
-        ctx.fillText('slobodna površina', 62, waterY - 10);
-
-        ctx.strokeStyle = '#1e293b';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(leftWallX, 50);
-        ctx.lineTo(leftWallX, bottomY);
-        ctx.lineTo(450, bottomY);
-        ctx.stroke();
-
-        ctx.strokeStyle = '#475569';
-        ctx.lineWidth = 8;
-        ctx.beginPath();
-        ctx.moveTo(gateX, gateTopY);
-        ctx.lineTo(gateX, bottomY);
-        ctx.stroke();
-
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(gateX, gateTopY, 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#1e293b';
-        ctx.font = 'bold 12px Inter';
-        ctx.fillText('A', gateX + 12, gateTopY + 4);
-        ctx.fillRect(gateX - 5, bottomY - 10, 10, 10);
-        ctx.fillText('B', gateX + 12, bottomY - 4);
-
-        if (subH > 0) {
-            const pTop = depthTop * 20;
-            const pBot = (depthTop + subH) * 20;
-            ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
-            ctx.beginPath();
-            ctx.moveTo(gateX, wetTopY);
-            ctx.lineTo(gateX - pTop, wetTopY);
-            ctx.lineTo(gateX - pBot, bottomY);
-            ctx.lineTo(gateX, bottomY);
-            ctx.closePath();
-            ctx.fill();
-
-            for (let i = 0; i <= 12; i++) {
-                const frac = i / 12;
-                const y = wetTopY + frac * (bottomY - wetTopY);
-                const depth = depthTop + frac * subH;
-                const len = depth * 20;
-                ctx.strokeStyle = `rgba(37, 99, 235, ${0.16 + 0.42 * frac})`;
-                ctx.lineWidth = 1 + frac;
-                ctx.beginPath();
-                ctx.moveTo(gateX - len, y);
-                ctx.lineTo(gateX, y);
-                ctx.stroke();
-            }
-
-            const tPos = waterY + zT * scale - depthTop * scale;
-            const fPos = waterY + zFh * scale - depthTop * scale;
-            ctx.setLineDash([5, 5]);
-            ctx.lineWidth = 1.4;
-            ctx.strokeStyle = '#3b82f6';
-            ctx.beginPath();
-            ctx.moveTo(82, tPos);
-            ctx.lineTo(gateX - 14, tPos);
-            ctx.stroke();
-            ctx.strokeStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.moveTo(82, fPos);
-            ctx.lineTo(gateX - 14, fPos);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.fillStyle = '#3b82f6';
-            ctx.font = 'bold 11px Inter';
-            ctx.fillText('z_T', 86, tPos - 6);
-            ctx.fillStyle = '#ef4444';
-            ctx.fillText('z_Fh', 86, fPos - 6);
-
-            ctx.fillStyle = '#3b82f6';
-            ctx.beginPath();
-            ctx.arc(gateX, tPos, 6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#1e293b';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText('T', gateX + 12, tPos + 4);
-
-            ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.arc(gateX, fPos, 8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillText('C_P', gateX + 12, fPos + 4);
-
-            ctx.setLineDash([6, 6]);
-            ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(gateX, fPos);
-            ctx.lineTo(gateX - 120, fPos);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            drawArrow(gateX - 120, fPos, gateX - 14, fPos, '#ef4444', 4);
-            ctx.fillStyle = '#ef4444';
-            ctx.fillText('F_R', gateX - 142, fPos + 4);
-
-            // Moment se vodi oko zgloba A; R_A se zato ne crta kao lažno izračunata strelica.
-            const armX = gateX + 62;
-            ctx.setLineDash([4, 4]); ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.moveTo(armX, gateTopY); ctx.lineTo(armX, fPos); ctx.stroke(); ctx.setLineDash([]);
-            ctx.fillStyle = '#475569'; ctx.font = '700 11px Inter'; ctx.fillText('d_A,F', armX + 8, (gateTopY + fPos) / 2);
-            drawArrow(gateX + 18, bottomY - 4, gateX + 18 + Math.min(90, 10 + Rb * 0.12), bottomY - 4, '#8b5cf6', 3.5);
-            ctx.fillStyle = '#7c3aed'; ctx.fillText('R_B', gateX + 22, bottomY - 14);
-        }
-
-        drawArrow(30, 60, 30, bottomY, '#475569', 2);
-        ctx.fillStyle = '#334155';
-        ctx.fillText('z', 22, bottomY + 14);
-    }
-
-    h1S.oninput = h2S.oninput = update;
-    window.addEventListener('resize', update);
-    update();
+  h1S.oninput = h2S.oninput = update;
+  window.addEventListener("resize", update);
+  update();
 })();
 </script>
 ```
 
 <hr class='zadatak-sep'>
 
-### Zadatak Z44 (CENGEL 3.143) — Brana s atmosferskim pretlakom {.unnumbered}
+### Zadatak Z44 (CENGEL 3.143) — Brana: apsolutno i neto opterećenje {.unnumbered}
 Voda se nalazi u spremniku dubokom 25 m, duljine 150 m čije su stjenke presjeka jednakostraničnog trokuta, prikazano na slici. Potrebno je odrediti ukupnu silu koja djeluje na unutarnje stjenke spremnika, uzimajući u obzir hidrostatski i atmosferski tlak, zatim pravac djelovanja te sile i njezinu horizontalnu komponentu. Atmosferski tlak iznosi $100 \, \text{kPa}$.
 
 <div class="zadano-grid">
@@ -866,36 +977,42 @@ Voda se nalazi u spremniku dubokom 25 m, duljine 150 m čije su stjenke presjeka
     </div>
 </div>
 <script>
-(function() {
-    const canvas = document.getElementById('v5-patm-canvas'); const ctx = canvas.getContext('2d');
-    const slider = document.getElementById('v5-patm-slider');
-    function update() {
-        const patm = parseFloat(slider.value); const rho = 1000; const g = 9.81; const h = 25; const L = 150;
-        const dh = (patm * 1000) / (rho * g);
-        const zT = dh + h/2;
-        const Area = (h / Math.sin(60 * Math.PI/180)) * L; // Aproksimacija nagnute stjenke
-        const Ftot = (rho * g * zT * Area) / 1e6; // MN
+(function () {
+  const canvas = document.getElementById("v5-patm-canvas");
+  const ctx = canvas.getContext("2d");
+  const slider = document.getElementById("v5-patm-slider");
+  function update() {
+    const patm = parseFloat(slider.value);
+    const rho = 1000;
+    const g = 9.81;
+    const h = 25;
+    const L = 150;
+    const dh = (patm * 1000) / (rho * g);
+    const zT = dh + h / 2;
+    const Area = (h / Math.sin((60 * Math.PI) / 180)) * L; // Točna površina jedne stjenke
+    const Ftot = (rho * g * zT * Area) / 1e6; // MN
 
-        document.getElementById('v5-patm-badge').innerText = patm + " kPa";
-        document.getElementById('v5-dh-val').innerText = dh.toFixed(2) + " m";
-        document.getElementById('v5-patm-ftot').innerText = Ftot.toFixed(0) + " MN";
-        draw(dh, h);
-    }
-    function draw(dh, h) {
-        window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
-        ctx.clearRect(0, 0, 450, 400); const scale = 8; const ox = 80; const oy = 120;
-        ctx.fillStyle = 'rgba(249, 115, 22, 0.05)'; ctx.fillRect(0, oy - dh*scale, 450, dh*scale);
-        ctx.fillStyle = '#f0f9ff'; ctx.fillRect(0, oy, 450, 400 - oy);
-        ctx.setLineDash([4, 4]); ctx.strokeStyle = '#f97316'; ctx.beginPath(); ctx.moveTo(20, oy - dh*scale); ctx.lineTo(430, oy - dh*scale); ctx.stroke(); ctx.setLineDash([]);
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy + h*scale); ctx.stroke();
-        const pS = 0.8; const pT = dh * scale * pS; const pB = (dh + h) * scale * pS;
-        ctx.fillStyle = 'rgba(249, 115, 22, 0.2)'; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + pT, oy); ctx.lineTo(ox + pB, oy + h*scale); ctx.lineTo(ox, oy + h*scale); ctx.fill();
-        ctx.strokeStyle = '#f97316'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(20, oy); ctx.lineTo(430, oy); ctx.stroke();
-    }
-    slider.oninput = update;
-    window.addEventListener('resize', update);
-    update();
+    document.getElementById("v5-patm-badge").innerText = patm + " kPa";
+    document.getElementById("v5-dh-val").innerText = dh.toFixed(2) + " m";
+    document.getElementById("v5-patm-ftot").innerText = Ftot.toFixed(0) + " MN";
+    draw(dh, h);
+  }
+  function draw(dh,h){
+ window.MF1V5.prepareCanvas(canvas,ctx,450,400);ctx.clearRect(0,0,450,400);
+ const sc=7,alpha=Math.PI/3,x0=275,y0=90,x1=x0-h/Math.tan(alpha)*sc,y1=y0+h*sc;
+ ctx.fillStyle='#e0f2fe';ctx.beginPath();ctx.moveTo(30,y0);ctx.lineTo(x0,y0);ctx.lineTo(x1,y1);ctx.lineTo(30,y1);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#0ea5e9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(30,y0);ctx.lineTo(x0,y0);ctx.stroke();
+ ctx.strokeStyle='#334155';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+ const zF=h/2+h*h/(12*(dh+h/2)),xx=x0-zF/Math.tan(alpha)*sc,yy=y0+zF*sc;
+ for(let i=0;i<=8;i++){const z=h*i/8,x=x0-z/Math.tan(alpha)*sc,y=y0+z*sc,len=(dh+z)*1.7;MF1.arrow(ctx,x,y,len*Math.sin(alpha),len*Math.cos(alpha),'#f97316',1.7);}
+ MF1.arrow(ctx,xx,yy,80*Math.sin(alpha),80*Math.cos(alpha),'#dc2626',3,'F_abs');
+ const area=h/Math.sin(alpha)*150,net=9810*h/2*area/1e6;
+ ctx.font='13px system-ui';ctx.fillStyle='#334155';ctx.fillText('α = 60° • jedna unutarnja stijenka',28,30);ctx.fillText('z_F,abs = '+zF.toFixed(2)+' m',28,325);
+ ctx.fillText('Neto uz isti vanjski p_atm: '+net.toFixed(1)+' MN',28,350);ctx.fillText('Atmosferski doprinos tada se poništava.',28,373);
+}
+  slider.oninput = update;
+  window.addEventListener("resize", update);
+  update();
 })();
 </script>
 ```
@@ -949,61 +1066,123 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak te se njegov ut
     </div>
 </div>
 <script>
-(function() {
-    const canvas = document.getElementById('v5-gate-p-canvas'); const ctx = canvas.getContext('2d');
-    const aS = document.getElementById('v5-gate-p-a-slider');
-    function update() {
-        const alpha = parseFloat(aS.value) * Math.PI / 180; const h1 = 3.0; const h2 = 0.5; const b = 5.0;
-        const L = h1 / Math.sin(alpha); const zT = h2 + h1 / 2;
-        const FR = (1000 * 9.81 * zT * (L * b)) / 1000;
-        const yTop = h2 / Math.sin(alpha); const yTi = yTop + L / 2;
-        const IG = b * L**3 / 12; const yFi = yTi + IG / (yTi * L * b);
-        const armHyd = yFi - yTop; const W = 200 * 9.81 / 1000; // kN, kao i Fh
-        const F_req = 2 * (FR * armHyd + W * (L / 2) * Math.cos(alpha)) / L;
-        document.getElementById('v5-gate-p-fh').innerText = FR.toFixed(1) + " kN";
-        document.getElementById('v5-gate-p-fres').innerText = F_req.toFixed(1) + " kN";
-        draw(alpha, h1, h2, L, yFi);
+(function () {
+  const canvas = document.getElementById("v5-gate-p-canvas");
+  const ctx = canvas.getContext("2d");
+  const aS = document.getElementById("v5-gate-p-a-slider");
+  function update() {
+    const alpha = (parseFloat(aS.value) * Math.PI) / 180;
+    const h1 = 3.0;
+    const h2 = 0.5;
+    const b = 5.0;
+    const L = h1 / Math.sin(alpha);
+    const zT = h2 + h1 / 2;
+    const FR = (1000 * 9.81 * zT * (L * b)) / 1000;
+    const yTop = h2 / Math.sin(alpha);
+    const yTi = yTop + L / 2;
+    const IG = (b * L ** 3) / 12;
+    const yFi = yTi + IG / (yTi * L * b);
+    const armHyd = yFi - yTop;
+    const W = (200 * 9.81) / 1000; // kN, kao i Fh
+    const F_req = (2 * (FR * armHyd + W * (L / 2) * Math.cos(alpha))) / L;
+    document.getElementById("v5-gate-p-fh").innerText = FR.toFixed(1) + " kN";
+    document.getElementById("v5-gate-p-fres").innerText = F_req.toFixed(1) + " kN";
+    draw(alpha, h1, h2, L, yFi);
+  }
+  function draw(alpha, h1, h2, L, yFi) {
+    window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
+    ctx.clearRect(0, 0, 450, 400);
+    const scale = Math.min(55, 255 / Math.max(L * Math.cos(alpha), 0.1), 245 / Math.max(L * Math.sin(alpha), 0.1));
+    const waterY = 55;
+    const hX = 335;
+    const hY = waterY + h2 * scale;
+    ctx.fillStyle = "#e0f2fe";
+    ctx.beginPath();ctx.moveTo(20,waterY);ctx.lineTo(hX,waterY);ctx.lineTo(hX,hY);ctx.lineTo(hX-L*scale*Math.cos(alpha),hY+L*scale*Math.sin(alpha));ctx.lineTo(20,hY+L*scale*Math.sin(alpha));ctx.closePath();ctx.fill();
+    ctx.strokeStyle = "#0ea5e9";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, waterY);
+    ctx.lineTo(450, waterY);
+    ctx.stroke();
+    const eX = hX - L * scale * Math.cos(alpha);
+    const eY = hY + L * scale * Math.sin(alpha);
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineWidth = 8;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(hX, hY);
+    ctx.lineTo(eX, eY);
+    ctx.stroke();
+    const fDist = (yFi - h2 / Math.sin(alpha)) * scale;
+    const fX = hX - fDist * Math.cos(alpha);
+    const fY = hY + fDist * Math.sin(alpha);
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.arc(hX, hY, 6, 0, 7);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(fX, fY, 5, 0, 7);
+    ctx.fill();
+    const tX = hX - (L * scale * Math.cos(alpha)) / 2;
+    const tY = hY + (L * scale * Math.sin(alpha)) / 2;
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath();
+    ctx.arc(tX, tY, 5, 0, 7);
+    ctx.fill();
+    const nx = Math.sin(alpha);
+    const ny = Math.cos(alpha);
+    for (let q = 0.18; q < 0.98; q += 0.16) {
+      const x = hX + q * (eX - hX);
+      const y = hY + q * (eY - hY);
+      const len = (h2+q*h1)*14;
+      drawArrow(x - len * nx, y - len * ny, x, y, "#38bdf8", 1.8);
     }
-    function draw(alpha, h1, h2, L, yFi) {
-        window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
-        ctx.clearRect(0, 0, 450, 400);
-        const scale = Math.min(55, 255 / Math.max(L * Math.cos(alpha), 0.1), 245 / Math.max(L * Math.sin(alpha), 0.1));
-        const waterY = 55; const hX = 105; const hY = waterY + h2 * scale;
-        ctx.fillStyle = '#e0f2fe'; ctx.fillRect(0, waterY, 450, 340);
-        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(450, waterY); ctx.stroke();
-        const eX = hX + L * scale * Math.cos(alpha); const eY = hY + L * scale * Math.sin(alpha);
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hX, hY); ctx.lineTo(eX, eY); ctx.stroke();
-        const fDist = (yFi - h2/Math.sin(alpha)) * scale; const fX = hX + fDist * Math.cos(alpha); const fY = hY + fDist * Math.sin(alpha);
-        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(hX, hY, 6, 0, 7); ctx.fill();
-        ctx.beginPath(); ctx.arc(fX, fY, 5, 0, 7); ctx.fill();
-        const tX = hX + L * scale * Math.cos(alpha) / 2; const tY = hY + L * scale * Math.sin(alpha) / 2;
-        ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(tX, tY, 5, 0, 7); ctx.fill();
-        const nx = Math.sin(alpha); const ny = -Math.cos(alpha);
-        for (let q = 0.18; q < 0.98; q += 0.16) {
-            const x = hX + q * (eX - hX); const y = hY + q * (eY - hY); const len = 18 + 28 * q;
-            drawArrow(x - len * nx, y - len * ny, x, y, '#38bdf8', 1.8);
-        }
-        const forceLen = Math.min(70, (430 - fX) / Math.max(nx, 0.1), (fY - 24) / Math.max(-ny, 0.1));
-        drawArrow(fX, fY, fX + forceLen * nx, fY + forceLen * ny, '#dc2626', 4);
-        drawArrow(tX, tY, tX - 52 * nx, tY - 52 * ny, '#16a34a', 3.5);
-        drawArrow(tX, tY, tX, Math.min(365, tY + 55), '#475569', 2.5);
-        ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(hX, hY, 25, 0, alpha); ctx.stroke();
-        ctx.font = '700 13px Inter'; ctx.fillStyle = '#dc2626'; ctx.fillText('B', hX + 10, hY - 9); ctx.fillText('C_P', fX + 9, fY + 4);
-        ctx.fillStyle = '#2563eb'; ctx.fillText('T', tX + 8, tY - 7);
-        ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', fX + 14, fY - 18);
-        ctx.fillStyle = '#15803d'; ctx.fillText('F_min', tX - 66 * nx - 22, tY - 66 * ny + 4);
-        ctx.fillStyle = '#475569'; ctx.fillText('G = mg', tX + 8, Math.min(382, tY + 49));
-        ctx.fillStyle = '#334155'; ctx.fillText('A', eX + 8, eY + 4); ctx.fillText('α', hX + 32 * Math.cos(alpha / 2), hY + 32 * Math.sin(alpha / 2));
-    }
-    function drawArrow(x1, y1, x2, y2, color, width) {
-        const head = 9; const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - head * Math.cos(angle - 0.5), y2 - head * Math.sin(angle - 0.5)); ctx.lineTo(x2 - head * Math.cos(angle + 0.5), y2 - head * Math.sin(angle + 0.5)); ctx.fill();
-    }
-    aS.oninput = update;
-    window.addEventListener('resize', update);
-    update();
+    const forceLen = 70;
+    const FR=9.81*(h2+h1/2)*L*5,Freq=2*FR*(yFi-h2/Math.sin(alpha))/L+1.962*Math.cos(alpha),vs=forceLen/FR;
+    drawArrow(fX, fY, fX + forceLen * nx, fY + forceLen * ny, "#dc2626", 4);
+    drawArrow(tX, tY, tX - Freq*vs * nx, tY - Freq*vs * ny, "#16a34a", 3.5);
+    drawArrow(tX, tY, tX, tY + 1.962*vs, "#475569", 2.5);
+    ctx.strokeStyle = "#64748b";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(hX, hY, 25, Math.PI-alpha, Math.PI);
+    ctx.stroke();
+    ctx.font = "700 13px Inter";
+    ctx.fillStyle = "#dc2626";
+    ctx.fillText("B", hX + 10, hY - 9);
+    ctx.fillText("C_P", fX + 9, fY + 4);
+    ctx.fillStyle = "#2563eb";
+    ctx.fillText("T", tX + 8, tY - 7);
+    ctx.fillStyle = "#dc2626";
+    ctx.fillText("F_R", fX + 14, fY - 18);
+    ctx.fillStyle = "#15803d";
+    ctx.fillText("F_min", tX - 66 * nx - 22, tY - 66 * ny + 4);
+    ctx.fillStyle = "#475569";
+    ctx.fillText("G = mg", tX + 8, Math.min(382, tY + 49));
+    ctx.fillStyle = "#334155";
+    ctx.fillText("A", eX + 8, eY + 4);
+    ctx.fillText("α", hX - 32 * Math.cos(alpha / 2), hY + 32 * Math.sin(alpha / 2));
+  }
+  function drawArrow(x1, y1, x2, y2, color, width) {
+    const head = 9;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - head * Math.cos(angle - 0.5), y2 - head * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - head * Math.cos(angle + 0.5), y2 - head * Math.sin(angle + 0.5));
+    ctx.fill();
+  }
+  aS.oninput = update;
+  window.addEventListener("resize", update);
+  update();
 })();
 </script>
 ```
@@ -1109,87 +1288,125 @@ Brana duljine 20 m zadržava 7 m visoku razinu vode na način prikazan na slici.
 </div>
 
 <script>
-(function() {
-    const canvas = document.getElementById('v5-z43-canvas');
-    const ctx = canvas.getContext('2d');
-    const hvS = document.getElementById('v5-z43-hv-slider');
-    const aS = document.getElementById('v5-z43-a-slider');
+(function () {
+  const canvas = document.getElementById("v5-z43-canvas");
+  const ctx = canvas.getContext("2d");
+  const hvS = document.getElementById("v5-z43-hv-slider");
+  const aS = document.getElementById("v5-z43-a-slider");
 
-    function update() {
-        const hv = parseFloat(hvS.value);
-        const alphaDeg = parseFloat(aS.value);
-        const alpha = alphaDeg * Math.PI / 180;
-        const L = 20.0; const rho = 1000; const g = 9.81;
+  function update() {
+    const hv = parseFloat(hvS.value);
+    const alphaDeg = parseFloat(aS.value);
+    const alpha = (alphaDeg * Math.PI) / 180;
+    const L = 20.0;
+    const rho = 1000;
+    const g = 9.81;
 
-        const Area = (hv / Math.sin(alpha)) * L;
-        const F = (rho * g * (hv/2) * Area) / 1000;
-        const zFh = (2/3) * hv;
+    const Area = (hv / Math.sin(alpha)) * L;
+    const F = (rho * g * (hv / 2) * Area) / 1000;
+    const zFh = (2 / 3) * hv;
 
-        document.getElementById('v5-z43-hv-val').innerText = hv.toFixed(1) + ' m';
-        document.getElementById('v5-z43-a-val').innerText = alphaDeg + '°';
-        document.getElementById('v5-z43-f').innerText = (F/1000).toFixed(2) + ' MN';
-        document.getElementById('v5-z43-zf').innerText = zFh.toFixed(2) + ' m';
+    document.getElementById("v5-z43-hv-val").innerText = hv.toFixed(1) + " m";
+    document.getElementById("v5-z43-a-val").innerText = alphaDeg + "°";
+    document.getElementById("v5-z43-f").innerText = (F / 1000).toFixed(2) + " MN";
+    document.getElementById("v5-z43-zf").innerText = zFh.toFixed(2) + " m";
 
-        draw(hv, alpha, zFh);
+    draw(hv, alpha, zFh);
+  }
+
+  function draw(hv, alpha, zFh) {
+    window.MF1V5.prepareCanvas(canvas, ctx, 500, 450);
+    ctx.clearRect(0, 0, 500, 450);
+    const ox = 100;
+    const bottomY = 400;
+    const scale = Math.min(30, 335 / hv, 330 / Math.max(hv / Math.tan(alpha), 0.1));
+    const waterY = bottomY - hv * scale;
+    const topX = ox + (hv / Math.tan(alpha)) * scale;
+
+    ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
+    ctx.beginPath();
+    ctx.moveTo(0, waterY);
+    ctx.lineTo(ox + (hv / Math.tan(alpha)) * scale, waterY);
+    ctx.lineTo(ox, bottomY);
+    ctx.lineTo(0, bottomY);
+    ctx.fill();
+
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(ox, bottomY);
+    ctx.lineTo(topX, waterY);
+    ctx.stroke();
+    ctx.fillStyle = "#0369a1";
+    ctx.font = "700 12px Inter";
+    ctx.fillText("slobodna površina", 16, waterY - 10);
+
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, waterY);
+    ctx.lineTo(400, waterY);
+    ctx.stroke();
+
+    for (let z = 0; z <= hv; z += 1) {
+      const y = waterY + z * scale;
+      const lx = topX - (z / Math.tan(alpha)) * scale;
+      const pLen = z * 7;
+      drawArrow(ctx, lx - pLen * Math.sin(alpha), y - pLen * Math.cos(alpha), lx, y, "#38bdf8", 2);
     }
 
-    function draw(hv, alpha, zFh) {
-        window.MF1V5.prepareCanvas(canvas, ctx, 500, 450);
-        ctx.clearRect(0, 0, 500, 450);
-        const ox = 100; const bottomY = 400;
-        const scale = Math.min(30, 335 / hv, 330 / Math.max(hv / Math.tan(alpha), 0.1));
-        const waterY = bottomY - hv * scale;
-        const topX = ox + (hv / Math.tan(alpha)) * scale;
+    const fx = topX - (zFh / Math.tan(alpha)) * scale;
+    const fy = waterY + zFh * scale;
 
-        ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
-        ctx.beginPath();
-        ctx.moveTo(0, waterY);
-        ctx.lineTo(ox + (hv/Math.tan(alpha))*scale, waterY);
-        ctx.lineTo(ox, bottomY);
-        ctx.lineTo(0, bottomY);
-        ctx.fill();
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.arc(fx, fy, 7, 0, 7);
+    ctx.fill();
+    const forceLen = Math.min(
+      92,
+      (475 - fx) / Math.max(Math.sin(alpha), 0.1),
+      (425 - fy) / Math.max(Math.cos(alpha), 0.1),
+    );
+    drawArrow(ctx, fx, fy, fx + forceLen * Math.sin(alpha), fy + forceLen * Math.cos(alpha), "#ef4444", 5);
+    ctx.font = "700 14px Inter";
+    ctx.fillStyle = "#dc2626";
+    ctx.fillText("F_R", fx + 16, fy + 27);
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath();
+    ctx.arc(topX - (hv / 2 / Math.tan(alpha)) * scale, waterY + (hv * scale) / 2, 5, 0, 7);
+    ctx.fill();
+    ctx.fillStyle = "#2563eb";
+    ctx.fillText("T", topX - (hv / 2 / Math.tan(alpha)) * scale + 10, waterY + (hv * scale) / 2 - 8);
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(topX, waterY, 28, Math.PI - alpha, Math.PI);
+    ctx.stroke();
+    ctx.fillStyle = "#334155";
+    ctx.fillText("α", topX - 42, waterY + 20);
+  }
 
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 10;
-        ctx.beginPath(); ctx.moveTo(ox, bottomY); ctx.lineTo(topX, waterY); ctx.stroke();
-        ctx.fillStyle = '#0369a1'; ctx.font = '700 12px Inter'; ctx.fillText('slobodna površina', 16, waterY - 10);
+  function drawArrow(ctx, x1, y1, x2, y2, color, width) {
+    if(Math.hypot(x2-x1,y2-y1)<.1)return;
+    const headlen = Math.min(10,Math.hypot(x2-x1,y2-y1)*.4);
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - 0.5), y2 - headlen * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + 0.5), y2 - headlen * Math.sin(angle + 0.5));
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
 
-        ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, waterY); ctx.lineTo(400, waterY); ctx.stroke();
-
-        for(let z=0; z<=hv; z+=1) {
-            const y = waterY + z * scale;
-            const lx = topX - (z / Math.tan(alpha)) * scale;
-            const pLen = Math.min(12 + z * 7, 58);
-            drawArrow(ctx, lx - pLen * Math.sin(alpha), y - pLen * Math.cos(alpha), lx, y, '#38bdf8', 2);
-        }
-
-        const fx = topX - (zFh / Math.tan(alpha)) * scale;
-        const fy = waterY + zFh * scale;
-
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.fill();
-        const forceLen = Math.min(92, (475 - fx) / Math.max(Math.sin(alpha), 0.1), (425 - fy) / Math.max(Math.cos(alpha), 0.1));
-        drawArrow(ctx, fx, fy, fx + forceLen * Math.sin(alpha), fy + forceLen * Math.cos(alpha), '#ef4444', 5);
-        ctx.font = '700 14px Inter'; ctx.fillStyle = '#dc2626'; ctx.fillText('F_R', fx + 16, fy + 27);
-        ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(topX - (hv/2/Math.tan(alpha))*scale, waterY + hv*scale/2, 5, 0, 7); ctx.fill();
-        ctx.fillStyle = '#2563eb'; ctx.fillText('T', topX - (hv/2/Math.tan(alpha))*scale + 10, waterY + hv*scale/2 - 8);
-        ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(topX, waterY, 28, Math.PI - alpha, Math.PI); ctx.stroke();
-        ctx.fillStyle = '#334155'; ctx.fillText('α', topX - 42, waterY + 20);
-    }
-
-    function drawArrow(ctx, x1, y1, x2, y2, color, width) {
-        const headlen = 10; const angle = Math.atan2(y2-y1, x2-x1);
-        ctx.strokeStyle = color; ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2-headlen*Math.cos(angle-0.5), y2-headlen*Math.sin(angle-0.5));
-        ctx.lineTo(x2-headlen*Math.cos(angle+0.5), y2-headlen*Math.sin(angle+0.5));
-        ctx.fillStyle = color; ctx.fill();
-    }
-
-    hvS.oninput = aS.oninput = update;
-    window.addEventListener('resize', update);
-    update();
+  hvS.oninput = aS.oninput = update;
+  window.addEventListener("resize", update);
+  update();
 })();
 </script>
 ```
@@ -1232,29 +1449,52 @@ Sila je integral tlaka po površini: $F = \int p \, dA$. Ovaj widget vizualizira
     </div>
 </div>
 <script>
-(function() {
-    const canvas = document.getElementById('v5-int-p-canvas'); const ctx = canvas.getContext('2d');
-    const slider = document.getElementById('v5-int-p-slider');
-    function draw() {
-        window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
-        const count = parseInt(slider.value); document.getElementById('v5-int-p-count').innerText = count + " elemenata";
-        ctx.clearRect(0, 0, 450, 400); const h = 280, w = 50, ox = 60, oy = 60, dz = h / count;
-        const hM = 3, bM = 2, rho = 1000, g = 9.81, dzM = hM / count;
-        let FN = 0, MN = 0;
-        ctx.fillStyle = '#f1f5f9'; ctx.fillRect(ox, oy, w, h);
-        for(let i=0; i<count; i++) {
-            let z = (i + 0.5) * dz; let p_scaled = (z / h) * 250;
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.3)'; ctx.fillRect(ox + w + 2, oy + i*dz + 1, p_scaled, dz - 2);
-            const zM = (i + 0.5) * dzM; const dF = rho * g * zM * bM * dzM;
-            FN += dF; MN += zM * dF;
-        }
-        const zFN = MN / FN; const FExact = rho * g * bM * hM*hM/2; const zFExact = 2*hM/3;
-        document.getElementById('v5-int-p-results').innerHTML = `Za svaku traku: <strong>ΔFᵢ = ρgzᵢbΔz</strong><br>F_N = ${(FN/1000).toFixed(3)} kN; F = ${(FExact/1000).toFixed(3)} kN<br>pogreška = ${(100*(FN-FExact)/FExact).toFixed(2)} %<br>z<sub>F,N</sub> = ${zFN.toFixed(3)} m; z<sub>F</sub> = ${zFExact.toFixed(3)} m`;
-        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(ox + w/2, oy + (zFExact/hM)*h, 7, 0, 7); ctx.fill();
+(function () {
+  const canvas = document.getElementById("v5-int-p-canvas");
+  const ctx = canvas.getContext("2d");
+  const slider = document.getElementById("v5-int-p-slider");
+  function draw() {
+    window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
+    const count = parseInt(slider.value);
+    document.getElementById("v5-int-p-count").innerText = count + " elemenata";
+    ctx.clearRect(0, 0, 450, 400);
+    const h = 280,
+      w = 50,
+      ox = 60,
+      oy = 60,
+      dz = h / count;
+    const hM = 3,
+      bM = 2,
+      rho = 1000,
+      g = 9.81,
+      dzM = hM / count;
+    let FN = 0,
+      MN = 0;
+    ctx.fillStyle = "#f1f5f9";
+    ctx.fillRect(ox, oy, w, h);
+    for (let i = 0; i < count; i++) {
+      let z = (i + 0.5) * dz;
+      let p_scaled = (z / h) * 250;
+      ctx.fillStyle = "rgba(56, 189, 248, 0.3)";
+      ctx.fillRect(ox + w + 2, oy + i * dz + 1, p_scaled, Math.max(.5,dz-1));
+      const zM = (i + 0.5) * dzM;
+      const dF = rho * g * zM * bM * dzM;
+      FN += dF;
+      MN += zM * dF;
     }
-    slider.oninput = draw;
-    window.addEventListener('resize', draw);
-    draw();
+    const zFN = MN / FN;
+    const FExact = (rho * g * bM * hM * hM) / 2;
+    const zFExact = (2 * hM) / 3;
+    document.getElementById("v5-int-p-results").innerHTML =
+      `Za svaku traku: <strong>ΔFᵢ = ρgzᵢbΔz</strong><br>F_N = ${(FN / 1000).toFixed(3)} kN; F = ${(FExact / 1000).toFixed(3)} kN<br>pogreška = ${((100 * (FN - FExact)) / FExact).toFixed(2)} %<br>z<sub>F,N</sub> = ${zFN.toFixed(3)} m; z<sub>F</sub> = ${zFExact.toFixed(3)} m`;
+    ctx.fillStyle='#334155';ctx.font='12px system-ui';ctx.fillText('Pravokutnik: h = 3 m, b = 2 m, a = 0',40,25);ctx.fillText('p [kPa]: 0                 29,43',110,365);ctx.fillText('z [m] ↓',10,48);ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.arc(ox + w / 2, oy + (zFExact / hM) * h, 7, 0, 7);
+    ctx.fill();
+  }
+  slider.oninput = draw;
+  window.addEventListener("resize", draw);
+  draw();
 })();
 </script>
 ```
@@ -1319,49 +1559,93 @@ Kod asimetričnih ploha, raspodjela tlaka uzrokuje bočni pomak hvatišta $\Delt
   </div>
 </div>
 <script>
-(function() {
-    const canvas = document.getElementById('v5-z48-canvas');
-    const ctx = canvas.getContext('2d');
-    const sS = document.getElementById('v5-z48-s-slider');
+(function () {
+  const canvas = document.getElementById("v5-z48-canvas");
+  const ctx = canvas.getContext("2d");
+  const sS = document.getElementById("v5-z48-s-slider");
 
-    function update() {
-        const s = parseFloat(sS.value); const h = 3;
-        const xT = s / 3; const xF = s / 4; const dx = xF - xT;
-        document.getElementById('v5-z48-s-val').innerText = s.toFixed(2);
-        document.getElementById('v5-z48-xt').innerText = xT.toFixed(3) + ' m';
-        document.getElementById('v5-z48-xf').innerText = xF.toFixed(3) + ' m';
-        document.getElementById('v5-z48-dx').innerText = (dx >= 0 ? '+' : '') + dx.toFixed(3) + ' m';
-        document.getElementById('v5-z48-explainer').innerText = Math.abs(s) < 0.001 ? 'Simetričan trokut daje Δx = 0: C_P i T leže na osi simetrije.' : 'Pomak vrha mijenja bočni moment tlaka. C_P se pomiče prema osi, ali manje od težišta jer dublji, širi dio trokuta nosi veći tlak.';
-        draw(s, h);
-    }
+  function update() {
+    const s = parseFloat(sS.value);
+    const h = 3;
+    const xT = s / 3;
+    const xF = s / 4;
+    const dx = xF - xT;
+    document.getElementById("v5-z48-s-val").innerText = s.toFixed(2);
+    document.getElementById("v5-z48-xt").innerText = xT.toFixed(3) + " m";
+    document.getElementById("v5-z48-xf").innerText = xF.toFixed(3) + " m";
+    document.getElementById("v5-z48-dx").innerText = (dx >= 0 ? "+" : "") + dx.toFixed(3) + " m";
+    document.getElementById("v5-z48-explainer").innerText =
+      Math.abs(s) < 0.001
+        ? "Simetričan trokut daje Δx = 0: C_P i T leže na osi simetrije."
+        : "Pomak vrha mijenja bočni moment tlaka. C_P se pomiče prema osi, ali manje od težišta jer dublji, širi dio trokuta nosi veći tlak.";
+    draw(s, h);
+  }
 
-    function draw(s, h) {
-        window.MF1V5.prepareCanvas(canvas, ctx, 500, 400);
-        ctx.clearRect(0, 0, 500, 400);
-        const cx = 250, cy = 55, scale = 85, hp = h * scale, b = 3;
-        const apexX = cx + s * scale, leftX = cx - b * scale / 2, rightX = cx + b * scale / 2;
-        ctx.fillStyle = '#f0f9ff'; ctx.fillRect(0, cy, 500, 345);
-        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(20, cy); ctx.lineTo(480, cy); ctx.stroke();
-        ctx.fillStyle = '#0369a1'; ctx.font = '700 13px Inter'; ctx.fillText('slobodna površina', 24, cy - 9);
-        ctx.fillStyle = 'rgba(71,85,105,.9)'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(apexX, cy); ctx.lineTo(leftX, cy + hp); ctx.lineTo(rightX, cy + hp);
-        ctx.closePath();
-        ctx.fill(); ctx.stroke();
-        const tx = cx + s * scale / 3, ty = cy + 2 * hp / 3;
-        ctx.fillStyle = '#3b82f6'; ctx.beginPath(); ctx.arc(tx, ty, 5, 0, 7); ctx.fill();
-        const fx = cx + s * scale / 4, fy = cy + 3 * hp / 4;
-        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(fx, fy, 7, 0, 7); ctx.fill();
-        ctx.setLineDash([3,3]); ctx.strokeStyle = '#64748b'; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(fx, ty); ctx.lineTo(fx, fy); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.font = '700 13px Inter'; ctx.fillStyle = '#2563eb'; ctx.fillText('T', tx + 9, ty - 7);
-        ctx.fillStyle = '#dc2626'; ctx.fillText('C_P', fx + 10, fy + 4);
-        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy + 65); ctx.stroke();
-        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(fx, fy + 65); ctx.lineTo(fx - 7, fy + 53); ctx.lineTo(fx + 7, fy + 53); ctx.fill(); ctx.fillText('F_R', fx + 10, fy + 52);
-    }
-    sS.oninput = update;
-    window.addEventListener('resize', update);
-    update();
+  function draw(s, h) {
+    window.MF1V5.prepareCanvas(canvas, ctx, 500, 400);
+    ctx.clearRect(0, 0, 500, 400);
+    const cx = 250,
+      cy = 55,
+      scale = 85,
+      hp = h * scale,
+      b = 3;
+    const apexX = cx + s * scale,
+      leftX = cx - (b * scale) / 2,
+      rightX = cx + (b * scale) / 2;
+    ctx.fillStyle = "#f0f9ff";
+    ctx.fillRect(0, cy, 500, 345);
+    ctx.strokeStyle = "#0ea5e9";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, cy);
+    ctx.lineTo(480, cy);
+    ctx.stroke();
+    ctx.fillStyle = "#0369a1";
+    ctx.font = "700 13px Inter";
+    ctx.fillText("slobodna površina", 24, cy - 9);
+    ctx.fillStyle = "rgba(71,85,105,.9)";
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(apexX, cy);
+    ctx.lineTo(leftX, cy + hp);
+    ctx.lineTo(rightX, cy + hp);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    const tx = cx + (s * scale) / 3,
+      ty = cy + (2 * hp) / 3;
+    ctx.fillStyle = "#3b82f6";
+    ctx.beginPath();
+    ctx.arc(tx, ty, 5, 0, 7);
+    ctx.fill();
+    const fx = cx + (s * scale) / 4,
+      fy = cy + (3 * hp) / 4;
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.arc(fx, fy, 7, 0, 7);
+    ctx.fill();
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = "#64748b";
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(fx, ty);
+    ctx.lineTo(fx, fy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = "700 13px Inter";
+    ctx.fillStyle = "#2563eb";
+    ctx.fillText("T", tx + 9, ty - 7);
+    ctx.fillStyle = "#dc2626";
+    ctx.fillText("C_P", fx + 10, fy + 4);
+    // Pogled u ravninu plohe: sila je normalna na zaslon.
+    ctx.strokeStyle='#dc2626';ctx.lineWidth=2;ctx.beginPath();ctx.arc(fx,fy,11,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#dc2626';ctx.fillText('⊙ F_R: prema promatraču',155,360);
+
+  }
+  sS.oninput = update;
+  window.addEventListener("resize", update);
+  update();
 })();
 </script>
 ```

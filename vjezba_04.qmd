@@ -442,136 +442,152 @@ window.MF1V4.prepareCanvas = function(canvas, ctx, logicalWidth, logicalHeight) 
 </div>
 
 <script>
-(function() {
-    const canvas = document.getElementById('v4-principle-canvas');
-    const ctx = canvas.getContext('2d');
-    const axS = document.getElementById('v4-ax-slider');
-    const azS = document.getElementById('v4-az-slider');
+(function () {
+  const canvas = document.getElementById("v4-principle-canvas");
+  const ctx = canvas.getContext("2d");
+  const axS = document.getElementById("v4-ax-slider");
+  const azS = document.getElementById("v4-az-slider");
 
-    function update() {
-        const ax = parseFloat(axS.value);
-        const az = parseFloat(azS.value);
-        const g = 9.81;
-        const hero = document.getElementById('v4-hero-card');
+  function update() {
+    const ax = parseFloat(axS.value);
+    const az = parseFloat(azS.value);
+    const g = 9.81;
+    const hero = document.getElementById("v4-hero-card");
 
-        document.getElementById('v4-ax-badge').innerText = `${ax.toFixed(1)} m/s²`;
-        document.getElementById('v4-az-badge').innerText = `${az.toFixed(1)} m/s²`;
+    document.getElementById("v4-ax-badge").innerText = `${ax.toFixed(1)} m/s²`;
+    document.getElementById("v4-az-badge").innerText = `${az.toFixed(1)} m/s²`;
 
-        const totalX = -ax;
-        const totalY = g + az; 
-        const totalMag = Math.sqrt(totalX * totalX + totalY * totalY);
-        const theta = Math.atan2(totalX, totalY);
+    const totalX = -ax;
+    const totalY = g + az;
+    const totalMag = Math.sqrt(totalX * totalX + totalY * totalY);
+    const theta = Math.atan2(totalX, totalY);
 
-        document.getElementById('v4-angle-val').innerText = Math.abs(theta * 180 / Math.PI).toFixed(1);
-        document.getElementById('v4-total-x').innerText = totalX.toFixed(1);
-        document.getElementById('v4-total-y').innerText = totalY.toFixed(1);
-        document.getElementById('v4-total-mag').innerText = totalMag.toFixed(1);
+    document.getElementById("v4-angle-val").innerText = Math.abs((theta * 180) / Math.PI).toFixed(1);
+    document.getElementById("v4-total-x").innerText = totalX.toFixed(1);
+    document.getElementById("v4-total-y").innerText = totalY.toFixed(1);
+    document.getElementById("v4-total-mag").innerText = totalMag.toFixed(1);
 
-        ['v4-logic-left', 'v4-logic-flat', 'v4-logic-right'].forEach((id) => {
-            const node = document.getElementById(id);
-            node.classList.remove('mf1v4-on');
-        });
+    ["v4-logic-left", "v4-logic-flat", "v4-logic-right"].forEach((id) => {
+      const node = document.getElementById(id);
+      node.classList.remove("mf1v4-on");
+    });
 
-        if (totalX < -0.15) {
-            hero.className = 'mf1v4-hero';
-            document.getElementById('v4-scene-note').innerText = 'lijevi rub raste';
-            document.getElementById('v4-logic-left').classList.add('mf1v4-on');
-        } else if (totalX > 0.15) {
-            hero.className = 'mf1v4-hero hero-orange';
-            document.getElementById('v4-scene-note').innerText = 'desni rub raste';
-            document.getElementById('v4-logic-right').classList.add('mf1v4-on');
-        } else {
-            hero.className = 'mf1v4-hero hero-green';
-            document.getElementById('v4-scene-note').innerText = 'površina je gotovo ravna';
-            document.getElementById('v4-logic-flat').classList.add('mf1v4-on');
-        }
-
-        document.getElementById('v4-explainer').innerText = `Uz konvenciju a_z pozitivno prema gore vrijedi f_z=g+a_z. Najprije dobivaš efektivno polje (${totalX.toFixed(1)}, ${totalY.toFixed(1)}) m/s², zatim magnitudu nagiba |θ|=${Math.abs(theta * 180 / Math.PI).toFixed(1)}°. Predznak f_x ne mijenja tu magnitudu, nego samo određuje raste li površina ulijevo ili udesno.`;
-
-        draw(ax, az, g, theta, totalMag);
+    if (totalX < -0.15) {
+      hero.className = "mf1v4-hero";
+      document.getElementById("v4-scene-note").innerText = "lijevi rub raste";
+      document.getElementById("v4-logic-left").classList.add("mf1v4-on");
+    } else if (totalX > 0.15) {
+      hero.className = "mf1v4-hero hero-orange";
+      document.getElementById("v4-scene-note").innerText = "desni rub raste";
+      document.getElementById("v4-logic-right").classList.add("mf1v4-on");
+    } else {
+      hero.className = "mf1v4-hero hero-green";
+      document.getElementById("v4-scene-note").innerText = "površina je gotovo ravna";
+      document.getElementById("v4-logic-flat").classList.add("mf1v4-on");
     }
 
-    function draw(ax, az, g, theta, totalMag) {
-        const W = parseInt(canvas.getAttribute('width'), 10) || 960;
-        const H = parseInt(canvas.getAttribute('height'), 10) || 540;
-        ctx.clearRect(0, 0, W, H);
-        const boxSize = Math.min(H * 0.78, W * 0.48);
-        const cx = W * 0.29;
-        const cy = H * 0.60;
-        const scale = boxSize / 12.5;
+    document.getElementById("v4-explainer").innerText =
+      `Uz konvenciju a_z pozitivno prema gore vrijedi f_z=g+a_z. Najprije dobivaš efektivno polje (${totalX.toFixed(1)}, ${totalY.toFixed(1)}) m/s², zatim magnitudu nagiba |θ|=${Math.abs((theta * 180) / Math.PI).toFixed(1)}°. Predznak f_x ne mijenja tu magnitudu, nego samo određuje raste li površina ulijevo ili udesno.`;
 
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(cx - boxSize/2, cy - boxSize/2, boxSize, boxSize);
+    draw(ax, az, g, theta, totalMag);
+  }
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(cx - boxSize/2, cy - boxSize/2, boxSize, boxSize);
-        ctx.clip();
+  function draw(ax, az, g, theta, totalMag) {
+    const W = parseInt(canvas.getAttribute("width"), 10) || 960;
+    const H = parseInt(canvas.getAttribute("height"), 10) || 540;
+    ctx.clearRect(0, 0, W, H);
+    const boxSize = Math.min(H * 0.78, W * 0.48);
+    const cx = W * 0.29;
+    const cy = H * 0.6;
+    const scale = Math.min(boxSize*.33, H*.30) / Math.max(g,Math.abs(az),totalMag);
 
-        ctx.translate(cx, cy);
-        ctx.rotate(-theta);
-        
-        const grad = ctx.createLinearGradient(0, 0, 0, 200);
-        grad.addColorStop(0, "rgba(56, 189, 248, 0.5)");
-        grad.addColorStop(1, "rgba(2, 132, 199, 0.7)");
-        
-        ctx.fillStyle = grad;
-        ctx.fillRect(-400, 0, 800, 400); 
-        
-        ctx.strokeStyle = "#0284c7"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(-400, 0); ctx.lineTo(400, 0); ctx.stroke();
-        ctx.restore();
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(cx - boxSize / 2, cy - boxSize / 2, boxSize, boxSize);
 
-        ctx.strokeStyle = "#475569"; ctx.lineWidth = 6;
-        ctx.lineJoin = "round";
-        ctx.strokeRect(cx - boxSize/2, cy - boxSize/2, boxSize, boxSize);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(cx - boxSize / 2, cy - boxSize / 2, boxSize, boxSize);
+    ctx.clip();
 
-        const ox = cx, oy = cy; 
-        ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = "#cbd5e0"; ctx.lineWidth = 1;
-        ctx.strokeRect(ox, oy, -ax * scale, (g + az) * scale);
-        ctx.setLineDash([]);
+    ctx.translate(cx, cy);
+    ctx.rotate(-theta);
 
-        drawArrow(ox, oy, ox, oy + g * scale, "#94a3b8", "g", 2);
-        if(Math.abs(ax) > 0.1) drawArrow(ox, oy, ox - ax * scale, oy, "#f87171", "-aₓ", 2);
-        if(Math.abs(az) > 0.1) drawArrow(ox, oy, ox, oy + az * scale, "#60a5fa", "-a_z", 2);
+    const grad = ctx.createLinearGradient(0, 0, 0, 200);
+    grad.addColorStop(0, "rgba(56, 189, 248, 0.5)");
+    grad.addColorStop(1, "rgba(2, 132, 199, 0.7)");
 
-        ctx.shadowBlur = 15; ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
-        drawArrow(ox, oy, ox - ax * scale, oy + (g + az) * scale, "#ef4444", "fᵣ", 5);
-        ctx.shadowBlur = 0;
+    ctx.fillStyle = grad;
+    ctx.fillRect(-400, 0, 800, 400);
 
-        const infoX = W * 0.67;
-        const infoY = 110;
-        ctx.fillStyle = "#0f172a";
-        ctx.font = "bold 15px 'Inter', sans-serif";
-        ctx.fillText(`|f_eff| = ${totalMag.toFixed(1)} m/s²`, infoX, infoY);
-        ctx.fillText(`slobodna površina`, infoX, infoY + 42);
-        ctx.strokeStyle = "#0284c7";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(infoX, infoY + 64);
-        ctx.lineTo(infoX + 170, infoY + 64 + Math.tan(theta) * 42);
-        ctx.stroke();
-        ctx.fillStyle = "#475569";
-        ctx.font = "13px 'Inter', sans-serif";
-        ctx.fillText('uvijek je okomita na f_eff', infoX, infoY + 98);
-    }
+    ctx.strokeStyle = "#0284c7";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-400, 0);
+    ctx.lineTo(400, 0);
+    ctx.stroke();
+    ctx.restore();
 
-    function drawArrow(x1, y1, x2, y2, color, label, width) {
-        const headlen = 12;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 7), y2 - headlen * Math.sin(angle - Math.PI / 7));
-        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 7), y2 - headlen * Math.sin(angle + Math.PI / 7));
-        ctx.closePath(); ctx.fill();
-        ctx.font = "bold 14px 'Inter', sans-serif";
-        ctx.fillText(label, x2 + 12 * Math.cos(angle), y2 + 12 * Math.sin(angle));
-    }
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 6;
+    ctx.lineJoin = "round";
+    ctx.strokeRect(cx - boxSize / 2, cy - boxSize / 2, boxSize, boxSize);
 
-    [axS, azS].forEach(s => s.oninput = update);
-    update();
+    const ox = cx,
+      oy = cy;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = "#cbd5e0";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(ox, oy, -ax * scale, (g + az) * scale);
+    ctx.setLineDash([]);
+
+    drawArrow(ox, oy, ox, oy + g * scale, "#94a3b8", "g", 2);
+    if (Math.abs(ax) > 0.1) drawArrow(ox, oy, ox - ax * scale, oy, "#f87171", "-aₓ", 2);
+    if (Math.abs(az) > 0.1) drawArrow(ox, oy, ox, oy + az * scale, "#60a5fa", "-a_z", 2);
+
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
+    drawArrow(ox, oy, ox - ax * scale, oy + (g + az) * scale, "#ef4444", "fᵣ", 5);
+    ctx.shadowBlur = 0;
+
+    const infoX = W * 0.67;
+    const infoY = 110;
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 15px 'Inter', sans-serif";
+    ctx.fillText(`|f_eff| = ${totalMag.toFixed(1)} m/s²`, infoX, infoY);
+    ctx.fillText(`slobodna površina`, infoX, infoY + 42);
+    ctx.strokeStyle = "#0284c7";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(infoX, infoY + 64);
+    ctx.lineTo(infoX + 170*Math.cos(theta), infoY + 64 - 170*Math.sin(theta));
+    ctx.stroke();
+    ctx.fillStyle = "#475569";
+    ctx.font = "13px 'Inter', sans-serif";
+    ctx.fillText("uvijek je okomita na f_eff", infoX, infoY + 98);
+  }
+
+  function drawArrow(x1, y1, x2, y2, color, label, width) {
+    const headlen = 12;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 7), y2 - headlen * Math.sin(angle - Math.PI / 7));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 7), y2 - headlen * Math.sin(angle + Math.PI / 7));
+    ctx.closePath();
+    ctx.fill();
+    ctx.font = "bold 14px 'Inter', sans-serif";
+    ctx.fillText(label, x2 + 12 * Math.cos(angle), y2 + 12 * Math.sin(angle));
+  }
+
+  [axS, azS].forEach((s) => (s.oninput = update));
+  update();
 })();
 </script>
 ```
@@ -675,180 +691,192 @@ Vertikalni cilindar rotira oko svoje osi. Potrebno je odrediti granični broj ok
     </div>
     
     <script>
-    (function() {
-        const canvas = document.getElementById('z34-3d-canvas');
-        const ratio = Math.min(window.devicePixelRatio || 1, 2);
-        const logicalW = parseInt(canvas.getAttribute('width'), 10) || 1100;
-        const logicalH = parseInt(canvas.getAttribute('height'), 10) || 520;
-        canvas.width = Math.round(logicalW * ratio);
-        canvas.height = Math.round(logicalH * ratio);
-        const ctx = canvas.getContext('2d');
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-        ctx.imageSmoothingEnabled = true;
-        const nS = document.getElementById('z34-n-slider'); const h0S = document.getElementById('z34-h0-slider');
-        function update() {
-            const n = parseFloat(nS.value); const h0 = parseFloat(h0S.value);
-            const w = n * Math.PI / 30; const R = 0.1; const H = 0.6; const g = 9.81;
-            const hc = h0 - (w*w * R*R)/(4*g); const zmax = h0 + (w*w * R*R)/(4*g);
-            const wCrit = Math.sqrt((4 * g * (H - h0)) / (R * R));
-            const nCrit = (60 * wCrit) / (2 * Math.PI);
-            const hero = document.getElementById('z34-hero-card');
-            document.getElementById('z34-v-n').innerText = `${n.toFixed(0)} o/min`; document.getElementById('z34-v-h0').innerText = `${h0.toFixed(2)} m`;
-            document.getElementById('z34-res-hc').innerText = Math.max(hc, 0).toFixed(3); document.getElementById('z34-res-zmax').innerText = zmax.toFixed(3);
-            document.getElementById('z34-res-w').innerText = w.toFixed(2);
-            document.getElementById('z34-res-ncrit').innerText = Math.round(nCrit);
+(function () {
+  const canvas = document.getElementById("z34-3d-canvas");
+  const ratio = Math.min(window.devicePixelRatio || 1, 2);
+  const logicalW = parseInt(canvas.getAttribute("width"), 10) || 1100;
+  const logicalH = parseInt(canvas.getAttribute("height"), 10) || 520;
+  canvas.width = Math.round(logicalW * ratio);
+  canvas.height = Math.round(logicalH * ratio);
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  const nS = document.getElementById("z34-n-slider");
+  const h0S = document.getElementById("z34-h0-slider");
+  function update() {
+    const n = parseFloat(nS.value);
+    const h0 = parseFloat(h0S.value);
+    const w = (n * Math.PI) / 30;
+    const R = 0.1;
+    const H = 0.6;
+    const g = 9.81;
+    const liquid=MF1.rotatingTank(R,h0,w,H),hc=liquid.c,zmax=liquid.edge;
+    const wCrit=Math.sqrt(h0>=H/2?4*g*(H-h0)/(R*R):g*H*H/(h0*R*R));
+    const nCrit = (60 * wCrit) / (2 * Math.PI);
+    const hero = document.getElementById("z34-hero-card");
+    document.getElementById("z34-v-n").innerText = `${n.toFixed(0)} o/min`;
+    document.getElementById("z34-v-h0").innerText = `${h0.toFixed(2)} m`;
+    document.getElementById("z34-res-hc").innerText = Math.max(hc, 0).toFixed(3);
+    document.getElementById("z34-res-zmax").innerText = zmax.toFixed(3);
+    document.getElementById("z34-res-w").innerText = w.toFixed(2);
+    document.getElementById("z34-res-ncrit").innerText = Math.round(nCrit);
 
-            ['z34-logic-safe', 'z34-logic-critical', 'z34-logic-over'].forEach((id) => {
-                document.getElementById(id).classList.remove('mf1v4-on');
-            });
+    ["z34-logic-safe", "z34-logic-critical", "z34-logic-over"].forEach((id) => {
+      document.getElementById(id).classList.remove("mf1v4-on");
+    });
 
-            if (Math.abs(zmax - H) <= 0.01) {
-                hero.className = 'mf1v4-hero hero-orange';
-                document.getElementById('z34-hero-title').innerText = 'kritični rub';
-                document.getElementById('z34-hero-sub').innerText = 'z(R) je praktički dosegao vrh spremnika';
-                document.getElementById('z34-logic-critical').classList.add('mf1v4-on');
-            } else if (zmax > H) {
-                hero.className = 'mf1v4-hero hero-red';
-                document.getElementById('z34-hero-title').innerText = 'prelijevanje';
-                document.getElementById('z34-hero-sub').innerText = `rub je ${(zmax - H).toFixed(3)} m iznad vrha spremnika`;
-                document.getElementById('z34-logic-over').classList.add('mf1v4-on');
-            } else {
-                hero.className = 'mf1v4-hero hero-green';
-                document.getElementById('z34-hero-title').innerText = 'siguran rad';
-                document.getElementById('z34-hero-sub').innerText = `rub je ${(H - zmax).toFixed(3)} m ispod vrha spremnika`;
-                document.getElementById('z34-logic-safe').classList.add('mf1v4-on');
-            }
+    if (liquid.spilled>1e-10) {
+      hero.className="mf1v4-hero hero-red";document.getElementById("z34-hero-title").innerText="nakon prelijevanja";document.getElementById("z34-hero-sub").innerText="Izliveno "+(liquid.spilled*1000).toFixed(3)+" L; rub ostaje na H.";document.getElementById("z34-logic-over").classList.add("mf1v4-on");
+    } else if (Math.abs(zmax - H) <= 0.01) {
+      hero.className = "mf1v4-hero hero-orange";
+      document.getElementById("z34-hero-title").innerText = "kritični rub";
+      document.getElementById("z34-hero-sub").innerText = "z(R) je praktički dosegao vrh spremnika";
+      document.getElementById("z34-logic-critical").classList.add("mf1v4-on");
+    } else if (zmax > H) {
+      hero.className = "mf1v4-hero hero-red";
+      document.getElementById("z34-hero-title").innerText = "prelijevanje";
+      document.getElementById("z34-hero-sub").innerText = `rub je ${(zmax - H).toFixed(3)} m iznad vrha spremnika`;
+      document.getElementById("z34-logic-over").classList.add("mf1v4-on");
+    } else {
+      hero.className = "mf1v4-hero hero-green";
+      document.getElementById("z34-hero-title").innerText = "siguran rad";
+      document.getElementById("z34-hero-sub").innerText = `rub je ${(H - zmax).toFixed(3)} m ispod vrha spremnika`;
+      document.getElementById("z34-logic-safe").classList.add("mf1v4-on");
+    }
 
-            document.getElementById('z34-explainer').innerText = `Logika zadatka je kratka i čista: iz n računaš ω, iz ω dobivaš paraboloid, a zatim gledaš samo rub. Ovdje je ω = ${w.toFixed(2)} rad/s, središte je na ${Math.max(hc, 0).toFixed(3)} m, rub na ${zmax.toFixed(3)} m, a granični broj okretaja za zadani početni nivo iznosi približno ${Math.round(nCrit)} o/min.`;
-            draw(w, hc, zmax, H, R, n, nCrit);
-        }
-        function draw(w, hc, zmax, H, R, n, nCrit) {
-            ctx.clearRect(0, 0, logicalW, logicalH);
+    document.getElementById("z34-explainer").innerText =
+      `Logika zadatka je kratka i čista: iz n računaš ω, iz ω dobivaš paraboloid, a zatim gledaš samo rub. Ovdje je ω = ${w.toFixed(2)} rad/s, središte je na ${Math.max(hc, 0).toFixed(3)} m, rub na ${zmax.toFixed(3)} m, a granični broj okretaja za zadani početni nivo iznosi približno ${Math.round(nCrit)} o/min.`;
+    draw(w, hc, zmax, H, R, n, nCrit);
+  }
+  function draw(w, hc, zmax, H, R, n, nCrit) {
+    ctx.clearRect(0, 0, logicalW, logicalH);
 
-            const pad = 52;
-            const tankW = Math.min(520, logicalW * 0.46);
-            const tankH = Math.min(380, logicalH * 0.74);
-            const left = pad;
-            const top = Math.max(80, (logicalH - tankH) / 2);
-            const bottom = top + tankH;
-            const cx = left + tankW / 2;
-            const scaleX = tankW / (2 * R);
-            const scaleY = tankH / H;
+    const pad = 52;
+    const tankW = Math.min(380, logicalH * .74) / H * 2*R;
+    const tankH = Math.min(380, logicalH * 0.74);
+    const left = 170;
+    const top = Math.max(80, (logicalH - tankH) / 2);
+    const bottom = top + tankH;
+    const cx = left + tankW / 2;
+    const scaleX = tankW / (2 * R);
+    const scaleY = tankH / H;
 
-            const bg = ctx.createLinearGradient(0, 0, 0, logicalH);
-            bg.addColorStop(0, '#ffffff');
-            bg.addColorStop(1, '#f8fbff');
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, logicalW, logicalH);
+    const bg = ctx.createLinearGradient(0, 0, 0, logicalH);
+    bg.addColorStop(0, "#ffffff");
+    bg.addColorStop(1, "#f8fbff");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, logicalW, logicalH);
 
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillRect(logicalW * 0.56, top - 18, logicalW * 0.4, tankH + 36);
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(logicalW * 0.56, top - 18, logicalW * 0.4, tankH + 36);
 
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(left, top, tankW, tankH);
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(left, top, tankW, tankH);
 
-            const zClamp = (z) => Math.max(0, Math.min(z, H));
-            const surfY = (z) => bottom - z * scaleY;
+    const zClamp = (z) => Math.max(0, Math.min(z, H));
+    const surfY = (z) => bottom - z * scaleY;
 
-            const gradFluid = ctx.createLinearGradient(left, top, left, bottom);
-            gradFluid.addColorStop(0, 'rgba(125, 211, 252, 0.35)');
-            gradFluid.addColorStop(1, 'rgba(37, 99, 235, 0.58)');
-            ctx.fillStyle = gradFluid;
-            ctx.beginPath();
-            ctx.moveTo(left, surfY(zClamp(zmax)));
-            for (let px = 0; px <= tankW; px += 2) {
-                const x = left + px;
-                const r = Math.abs((x - cx) / scaleX);
-                const z = zClamp(hc + (w * w * r * r) / (2 * 9.81));
-                ctx.lineTo(x, surfY(z));
-            }
-            ctx.lineTo(left + tankW, bottom);
-            ctx.lineTo(left, bottom);
-            ctx.closePath();
-            ctx.fill();
+    const gradFluid = ctx.createLinearGradient(left, top, left, bottom);
+    gradFluid.addColorStop(0, "rgba(125, 211, 252, 0.35)");
+    gradFluid.addColorStop(1, "rgba(37, 99, 235, 0.58)");
+    ctx.fillStyle = gradFluid;
+    ctx.beginPath();
+    ctx.moveTo(left, surfY(zClamp(zmax)));
+    for (let px = 0; px <= tankW; px += 2) {
+      const x = left + px;
+      const r = Math.abs((x - cx) / scaleX);
+      const z = zClamp(hc + (w * w * r * r) / (2 * 9.81));
+      ctx.lineTo(x, surfY(z));
+    }
+    ctx.lineTo(left + tankW, bottom);
+    ctx.lineTo(left, bottom);
+    ctx.closePath();
+    ctx.fill();
 
-            ctx.strokeStyle = '#0369a1';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            for (let px = 0; px <= tankW; px += 2) {
-                const x = left + px;
-                const r = Math.abs((x - cx) / scaleX);
-                const z = zClamp(hc + (w * w * r * r) / (2 * 9.81));
-                const y = surfY(z);
-                if (px === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
+    ctx.strokeStyle = "#0369a1";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let px = 0; px <= tankW; px += 2) {
+      const x = left + px;
+      const r = Math.abs((x - cx) / scaleX);
+      const z = zClamp(hc + (w * w * r * r) / (2 * 9.81));
+      const y = surfY(z);
+      if (px === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
 
-            ctx.setLineDash([7, 6]);
-            ctx.strokeStyle = '#ef4444';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(left - 20, top);
-            ctx.lineTo(left + tankW + 20, top);
-            ctx.stroke();
-            ctx.setLineDash([]);
+    ctx.setLineDash([7, 6]);
+    ctx.strokeStyle = "#ef4444";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(left - 20, top);
+    ctx.lineTo(left + tankW + 20, top);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(cx, top - 16);
-            ctx.lineTo(cx, bottom + 16);
-            ctx.stroke();
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, top - 16);
+    ctx.lineTo(cx, bottom + 16);
+    ctx.stroke();
 
-            ctx.fillStyle = '#0f172a';
-            ctx.font = '700 17px Inter';
-            ctx.fillText('os rotacije', cx + 10, top - 20);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "700 17px Inter";
+    ctx.fillText("os rotacije", cx + 10, top - 20);
 
-            ctx.font = '700 16px Inter';
-            ctx.fillText('vrh spremnika H', left + tankW + 28, top + 6);
+    ctx.font = "700 16px Inter";
+    ctx.fillText("vrh spremnika H", left + tankW + 28, top + 6);
 
-            const yCenter = surfY(zClamp(hc));
-            const yRim = surfY(zClamp(zmax));
-            ctx.fillStyle = '#1d4ed8';
-            ctx.fillText(`h_c = ${Math.max(hc, 0).toFixed(3)} m`, left + tankW + 28, yCenter + 6);
-            ctx.fillStyle = '#0f766e';
-            ctx.fillText(`z(R) = ${zmax.toFixed(3)} m`, left + tankW + 28, yRim + 6);
+    const yCenter = surfY(zClamp(hc));
+    const yRim = surfY(zClamp(zmax));
+    ctx.fillStyle = "#1d4ed8";
+    ctx.fillText(`h_c = ${Math.max(hc, 0).toFixed(3)} m`, left + tankW + 28, yCenter + 6);
+    ctx.fillStyle = "#0f766e";
+    ctx.fillText(`z(R) = ${zmax.toFixed(3)} m`, left + tankW + 28, Math.max(top+30,yRim+6));
 
-            const infoX = logicalW * 0.59;
-            const infoY = top + 26;
-            const infoW = logicalW * 0.34;
-            const infoH = tankH - 52;
-            ctx.fillStyle = '#ffffff';
-            ctx.strokeStyle = '#cbd5e1';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.roundRect(infoX, infoY, infoW, infoH, 16);
-            ctx.fill();
-            ctx.stroke();
+    const infoX = logicalW * 0.59;
+    const infoY = top + 26;
+    const infoW = logicalW * 0.34;
+    const infoH = tankH - 52;
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(infoX, infoY, infoW, infoH, 16);
+    ctx.fill();
+    ctx.stroke();
 
-            ctx.fillStyle = '#0f172a';
-            ctx.font = '800 18px Inter';
-            ctx.fillText('Kako čitati skicu', infoX + 18, infoY + 34);
-            ctx.font = '600 16px Inter';
-            ctx.fillStyle = '#334155';
-            ctx.fillText(`n = ${n.toFixed(0)} o/min`, infoX + 18, infoY + 68);
-            ctx.fillText(`ω = ${w.toFixed(2)} rad/s`, infoX + 18, infoY + 94);
-            ctx.fillText(`n_crit ≈ ${Math.round(nCrit)} o/min`, infoX + 18, infoY + 120);
-            ctx.fillText('1) rotacija podiže rub', infoX + 18, infoY + 156);
-            ctx.fillText('2) središte se istodobno spušta', infoX + 18, infoY + 182);
-            ctx.fillText('3) kritično je kad z(R) dosegne H', infoX + 18, infoY + 208);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "800 18px Inter";
+    ctx.fillText("Kako čitati skicu", infoX + 18, infoY + 34);
+    ctx.font = "600 16px Inter";
+    ctx.fillStyle = "#334155";
+    ctx.fillText(`n = ${n.toFixed(0)} o/min`, infoX + 18, infoY + 68);
+    ctx.fillText(`ω = ${w.toFixed(2)} rad/s`, infoX + 18, infoY + 94);
+    ctx.fillText(`n_crit ≈ ${Math.round(nCrit)} o/min`, infoX + 18, infoY + 120);
+    ctx.fillText("1) rotacija podiže rub", infoX + 18, infoY + 156);
+    ctx.fillText("2) središte se istodobno spušta", infoX + 18, infoY + 182);
+    ctx.fillText("3) kritično je kad z(R) dosegne H", infoX + 18, infoY + 208);
 
-            const isOverflow = zmax > H;
-            ctx.fillStyle = isOverflow ? '#fee2e2' : '#dcfce7';
-            ctx.strokeStyle = isOverflow ? '#fca5a5' : '#86efac';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.roundRect(infoX + 16, infoY + infoH - 70, infoW - 32, 50, 12);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = isOverflow ? '#991b1b' : '#166534';
-            ctx.font = '800 16px Inter';
-            ctx.fillText(isOverflow ? 'PRELIJEVANJE U TIJEKU' : 'SIGURAN REŽIM RADA', infoX + 28, infoY + infoH - 39);
-        }
-        [nS, h0S].forEach(s => s.oninput = update); update();
-    })();
-    </script>
+    const isOverflow = n > nCrit;
+    ctx.fillStyle = isOverflow ? "#fee2e2" : "#dcfce7";
+    ctx.strokeStyle = isOverflow ? "#fca5a5" : "#86efac";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(infoX + 16, infoY + infoH - 70, infoW - 32, 50, 12);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = isOverflow ? "#991b1b" : "#166534";
+    ctx.font = "800 16px Inter";
+    ctx.fillText(isOverflow ? "PRELIJEVANJE U TIJEKU" : "SIGURAN REŽIM RADA", infoX + 28, infoY + infoH - 39);
+  }
+  [nS, h0S].forEach((s) => (s.oninput = update));
+  update();
+})();
+</script>
 </div>
 ```
 
@@ -934,90 +962,116 @@ Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike
     </div>
     
     <script>
-    (function() {
-        const canvas = document.getElementById('z35-heatmap-canvas'); const ctx = canvas.getContext('2d');
-        const aS = document.getElementById('z35-a-slider'); const nS = document.getElementById('z35-n-slider');
-        function update() {
-            const a = parseFloat(aS.value); const n = parseFloat(nS.value);
-            const w = n * Math.PI / 30; const rho = 740; const R = 0.5; const H = 2.0; const g = 9.81;
-            const dpv = rho * (g + a) * H; const dpr = (rho * w*w * R*R) / 2;
-            const hero = document.getElementById('z35-hero-card');
-            const total = (dpv + dpr) / 1000;
-            const chi = dpr / dpv;
-            document.getElementById('z35-v-a').innerText = `${a.toFixed(1)} m/s²`;
-            document.getElementById('z35-v-n').innerText = `${n.toFixed(0)} o/min`;
-            document.getElementById('z35-res-geff').innerText = (g + a).toFixed(1);
-            document.getElementById('z35-res-w').innerText = w.toFixed(1);
-            document.getElementById('z35-res-dpv').innerText = (dpv / 1000).toFixed(1) + " kPa";
-            document.getElementById('z35-res-dpr').innerText = (dpr / 1000).toFixed(1) + " kPa";
+(function () {
+  const canvas = document.getElementById("z35-heatmap-canvas");
+  const ctx = canvas.getContext("2d");
+  const aS = document.getElementById("z35-a-slider");
+  const nS = document.getElementById("z35-n-slider");
+  function update() {
+    const a = parseFloat(aS.value);
+    const n = parseFloat(nS.value);
+    const w = (n * Math.PI) / 30;
+    const rho = 740;
+    const R = 0.5;
+    const H = 2.0;
+    const g = 9.81;
+    const dpv = rho * (g + a) * H;
+    const dpr = (rho * w * w * R * R) / 2;
+    const hero = document.getElementById("z35-hero-card");
+    const total = (dpv + dpr) / 1000;
+    const chi = dpr / dpv;
+    document.getElementById("z35-v-a").innerText = `${a.toFixed(1)} m/s²`;
+    document.getElementById("z35-v-n").innerText = `${n.toFixed(0)} o/min`;
+    document.getElementById("z35-res-geff").innerText = (g + a).toFixed(1);
+    document.getElementById("z35-res-w").innerText = w.toFixed(1);
+    document.getElementById("z35-res-dpv").innerText = (dpv / 1000).toFixed(1) + " kPa";
+    document.getElementById("z35-res-dpr").innerText = (dpr / 1000).toFixed(1) + " kPa";
 
-            ['z35-logic-v', 'z35-logic-balance', 'z35-logic-r'].forEach((id) => {
-                document.getElementById(id).classList.remove('mf1v4-on');
-            });
+    ["z35-logic-v", "z35-logic-balance", "z35-logic-r"].forEach((id) => {
+      document.getElementById(id).classList.remove("mf1v4-on");
+    });
 
-            document.getElementById('z35-hero-title').innerText = `χ = ${chi.toFixed(2)}`;
-            if (chi < 1) {
-                hero.className = 'mf1v4-hero';
-                document.getElementById('z35-hero-sub').innerText = `Δp_v je ${ (1 / Math.max(chi, 1e-9)).toFixed(2)}× veći od Δp_r`;
-                document.getElementById('z35-logic-v').classList.add('mf1v4-on');
-            } else if (chi > 1) {
-                hero.className = 'mf1v4-hero hero-orange';
-                document.getElementById('z35-hero-sub').innerText = `Δp_r je ${chi.toFixed(2)}× veći od Δp_v`;
-                document.getElementById('z35-logic-r').classList.add('mf1v4-on');
-            } else {
-                hero.className = 'mf1v4-hero hero-green';
-                document.getElementById('z35-hero-sub').innerText = 'Δp_r = Δp_v';
-                document.getElementById('z35-logic-balance').classList.add('mf1v4-on');
-            }
+    document.getElementById("z35-hero-title").innerText = `χ = ${chi.toFixed(2)}`;
+    if (chi < 1) {
+      hero.className = "mf1v4-hero";
+      document.getElementById("z35-hero-sub").innerText =
+        chi === 0 ? "Nema radijalnog porasta tlaka (ω = 0)." : `Δp_v je ${(1 / chi).toFixed(2)}× veći od Δp_r`;
+      document.getElementById("z35-logic-v").classList.add("mf1v4-on");
+    } else if (chi > 1) {
+      hero.className = "mf1v4-hero hero-orange";
+      document.getElementById("z35-hero-sub").innerText = `Δp_r je ${chi.toFixed(2)}× veći od Δp_v`;
+      document.getElementById("z35-logic-r").classList.add("mf1v4-on");
+    } else {
+      hero.className = "mf1v4-hero hero-green";
+      document.getElementById("z35-hero-sub").innerText = "Δp_r = Δp_v";
+      document.getElementById("z35-logic-balance").classList.add("mf1v4-on");
+    }
 
-            document.getElementById('z35-explainer').innerText = `Uz konvenciju a_z pozitivno prema gore, g_eff = g+a_z = ${(g + a).toFixed(1)} m/s². Zato je Δp_v = ${(dpv / 1000).toFixed(1)} kPa, a pri ω = ${w.toFixed(1)} rad/s je Δp_r = ${(dpr / 1000).toFixed(1)} kPa. Omjer χ = ${chi.toFixed(2)} uspoređuje ih bez proizvoljnih pragova; ukupni porast na točki koja uključuje oba smjera iznosi ${total.toFixed(1)} kPa.`;
-            draw(w, a, g, H, R, rho);
-        }
-        function draw(w, a, g, H, R, rho) {
-            const W = parseInt(canvas.getAttribute('width'), 10) || 960;
-            const Hc = parseInt(canvas.getAttribute('height'), 10) || 620;
-            ctx.clearRect(0, 0, W, Hc);
-            const dw = Math.min(W * 0.48, Hc * 0.62);
-            const dh = dw;
-            const ox = 70;
-            const oy = 92;
-            const step = Math.max(8, Math.round(dw / 38));
-            for(let r_px = 0; r_px <= dw; r_px += step) {
-                for(let z_px = 0; z_px <= dh; z_px += step) {
-                    const r_real = (r_px / dw) * R; const z_real = (z_px / dh) * H;
-                    const p_rel = rho * (g + a) * z_real + (rho * w*w * r_real*r_real) / 2;
-                    const hue = Math.max(0, 240 - (p_rel / 50000) * 240);
-                    ctx.fillStyle = `hsla(${hue}, 100%, 50%, 0.8)`; ctx.fillRect(ox + r_px, oy + z_px, step, step);
-                }
-            }
-            ctx.strokeStyle = "#2d3748"; ctx.lineWidth = 3; ctx.strokeRect(ox, oy, dw, dh);
-            const infoX = ox + dw + 52;
-            ctx.fillStyle = "#0f172a"; ctx.font = "bold 14px Inter";
-            ctx.fillText('os rotacije', ox + 6, oy - 18);
-            ctx.fillText('stijenka spremnika', ox + dw - 132, oy - 18);
-            ctx.fillText('veći tlak: dublje i dalje od osi', infoX, oy + 8);
-            ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(infoX + 18, oy + 54); ctx.lineTo(infoX + 18, oy + 220); ctx.stroke();
-            ctx.fillStyle = "#2563eb"; ctx.fillText('vertikalni doprinos Δp_v', infoX + 38, oy + 142);
-            ctx.strokeStyle = "#ef4444"; ctx.beginPath(); ctx.moveTo(infoX + 18, oy + 278); ctx.lineTo(infoX + 196, oy + 278); ctx.stroke();
-            ctx.fillStyle = "#ef4444"; ctx.fillText('radijalni doprinos Δp_r', infoX + 38, oy + 270);
-            const legendY = oy + dh + 42;
-            const legendW = 240;
-            const legend = ctx.createLinearGradient(ox, legendY, ox + legendW, legendY);
-            legend.addColorStop(0, '#2563eb');
-            legend.addColorStop(0.5, '#22c55e');
-            legend.addColorStop(1, '#f59e0b');
-            ctx.fillStyle = legend;
-            ctx.fillRect(ox, legendY, legendW, 16);
-            ctx.strokeStyle = '#94a3b8';
-            ctx.strokeRect(ox, legendY, legendW, 16);
-            ctx.fillStyle = '#475569';
-            ctx.font = '12px Inter';
-            ctx.fillText('niži tlak', ox, legendY + 36);
-            ctx.fillText('viši tlak', ox + legendW - 54, legendY + 36);
-        }
-        [aS, nS].forEach(s => s.oninput = update); update();
-    })();
-    </script>
+    document.getElementById("z35-explainer").innerText =
+      `Uz konvenciju a_z pozitivno prema gore, g_eff = g+a_z = ${(g + a).toFixed(1)} m/s². Zato je Δp_v = ${(dpv / 1000).toFixed(1)} kPa, a pri ω = ${w.toFixed(1)} rad/s je Δp_r = ${(dpr / 1000).toFixed(1)} kPa. Omjer χ = ${chi.toFixed(2)} uspoređuje ih bez proizvoljnih pragova; ukupni porast na točki koja uključuje oba smjera iznosi ${total.toFixed(1)} kPa.`;
+    draw(w, a, g, H, R, rho);
+  }
+  function draw(w, a, g, H, R, rho) {
+    const W = parseInt(canvas.getAttribute("width"), 10) || 960;
+    const Hc = parseInt(canvas.getAttribute("height"), 10) || 620;
+    ctx.clearRect(0, 0, W, Hc);
+    const dw = Math.min(W * 0.48, Hc * 0.62);
+    const dh = dw;
+    const ox = 70;
+    const oy = 92;
+    const step = Math.max(8, Math.round(dw / 38));
+    for (let r_px = 0; r_px < dw; r_px += step) {
+      for (let z_px = 0; z_px < dh; z_px += step) {
+        const r_real = (r_px / dw) * R;
+        const z_real = (z_px / dh) * H;
+        const p_rel = rho * (g + a) * z_real + (rho * w * w * r_real * r_real) / 2;
+        const f=p_rel/(rho*(g+a)*H+rho*w*w*R*R/2||1);
+        ctx.fillStyle = `rgb(${Math.round(230-208*f)},${Math.round(244-135*f)},${Math.round(252-83*f)})`;
+        ctx.fillRect(ox + r_px, oy + z_px, Math.min(step,dw-r_px), Math.min(step,dh-z_px));
+      }
+    }
+    ctx.strokeStyle = "#2d3748";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(ox, oy, dw, dh);
+    const infoX = ox + dw + 52;
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 14px Inter";
+    ctx.fillText("os rotacije", ox + 6, oy - 18);
+    ctx.fillText("stijenka spremnika", ox + dw - 132, oy - 18);
+    ctx.fillText("veći tlak: dublje i dalje od osi", infoX, oy + 8);
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(infoX + 18, oy + 54);
+    ctx.lineTo(infoX + 18, oy + 220);
+    ctx.stroke();
+    ctx.fillStyle = "#2563eb";
+    ctx.fillText("vertikalni doprinos Δp_v", infoX + 38, oy + 142);
+    ctx.strokeStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.moveTo(infoX + 18, oy + 278);
+    ctx.lineTo(infoX + 196, oy + 278);
+    ctx.stroke();
+    ctx.fillStyle = "#ef4444";
+    ctx.fillText("radijalni doprinos Δp_r", infoX + 38, oy + 270);
+    const legendY = oy + dh + 42;
+    const legendW = 240;
+    const legend = ctx.createLinearGradient(ox, legendY, ox + legendW, legendY);
+    legend.addColorStop(0, "#e6f4fc");
+    legend.addColorStop(1, "#166da9");
+    ctx.fillStyle = legend;
+    ctx.fillRect(ox, legendY, legendW, 16);
+    ctx.strokeStyle = "#94a3b8";
+    ctx.strokeRect(ox, legendY, legendW, 16);
+    ctx.fillStyle = "#475569";
+    ctx.font = "12px Inter";
+    ctx.fillText("0 kPa", ox, legendY + 36);
+    ctx.fillText(((rho*(g+a)*H+rho*w*w*R*R/2)/1000).toFixed(1)+" kPa", ox + legendW - 54, legendY + 36);
+  }
+  [aS, nS].forEach((s) => (s.oninput = update));
+  update();
+})();
+</script>
 </div>
 ```
 
@@ -1028,7 +1082,7 @@ Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike
 
 ### Dodatni primjer Z34 — Kolica na kosini {.unnumbered}
 
-Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba $\alpha$. Potrebno je odrediti geometriju slobodne površine te izračunati tlak u karakterističnim točkama.
+Lokalna os $x$ usmjerena je uz kosinu nagiba $\alpha$, a os $z$ okomito od nje. Predznačeno ubrzanje kolica $a_x$ pozitivno je uz kosinu. Potrebno je odrediti geometriju slobodne površine te izračunati tlak u karakterističnim točkama.
 
 <div class="zadano-grid">
 <div class="zadano-row">
@@ -1041,8 +1095,8 @@ Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba 
 </div>
 </div>
 <div class="rjesenje-label">Rješenje</div>
-1. $f_{ix} = g \sin\alpha - a_x$, $f_{iz} = g \cos\alpha$
-2. $\tan\theta = \frac{g \sin\alpha - a_x}{g \cos\alpha}$
+1. $f_{ix} = -g \sin\alpha - a_x$, $f_{iz} = g \cos\alpha$
+2. $\tan\theta = \frac{-g \sin\alpha - a_x}{g \cos\alpha}$
 3. $p_{mE} = \rho f_{iz} (h_0 + \Delta h_E)$
 
 <hr class="widget-sep">
@@ -1052,7 +1106,7 @@ Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba 
 <!-- WIDGET P1: Dinamika na kosini -->
 <div class="mf1-lab" id="p1-advanced-widget" style="max-width: 980px;">
     <div class="mf1v4-kicker">Z34 laboratorij kosine</div>
-    <h4>Na kosini nije presudan sam kut, nego bočni član g sinα − aₓ</h4>
+    <h4>Na kosini nije presudan sam kut, nego bočni član −g sinα − aₓ</h4>
     <p>Predznak uzdužne komponente određuje smjer nagiba slobodne površine. Tekućina ne reagira na kosinu izravno, nego na odnos projekcije težine i translacijskog ubrzanja kolica.</p>
 
     <div class="mf1v4-stage">
@@ -1092,106 +1146,127 @@ Kolica s tekućinom gibaju se konstantnim ubrzanjem $\vec{a}$ niz kosinu nagiba 
         <div class="mf1v4-logic">
             <div class="mf1v4-logic-hd">Odnos fizikalnih doprinosa</div>
             <div id="p1-logic-gravity" class="mf1v4-branch tone-blue">
-                <strong>IF g sinα &gt; aₓ</strong>
+                <strong>IF −g sinα − aₓ &gt; 0</strong>
                 <div>Projekcija težine niz kosinu nadvlada ubrzanje pa bočni član ostaje pozitivan.</div>
             </div>
             <div id="p1-logic-balance" class="mf1v4-branch tone-green">
-                <strong>IF g sinα ≈ aₓ</strong>
+                <strong>IF −g sinα − aₓ ≈ 0</strong>
                 <div>Bočni član gotovo nestaje i slobodna površina postaje gotovo vodoravna u spremniku.</div>
             </div>
             <div id="p1-logic-accel" class="mf1v4-branch tone-orange">
-                <strong>IF g sinα &lt; aₓ</strong>
+                <strong>IF −g sinα − aₓ &lt; 0</strong>
                 <div>Ubrzanje kolica nadvlada projekciju težine i mijenja smjer nagiba slobodne površine.</div>
             </div>
         </div>
     </div>
     
     <script>
-    (function() {
-        const canvas = document.getElementById('p1-main-canvas'); const ctx = canvas.getContext('2d');
-        const alphaS = document.getElementById('p1-alpha'); const axS = document.getElementById('p1-ax');
+(function () {
+  const canvas = document.getElementById("p1-main-canvas");
+  const ctx = canvas.getContext("2d");
+  const alphaS = document.getElementById("p1-alpha");
+  const axS = document.getElementById("p1-ax");
 
-        function update() {
-            const alpha_deg = parseFloat(alphaS.value); const alpha = alpha_deg * Math.PI / 180;
-            const ax = parseFloat(axS.value); const g = 9.81; const rho = 1000;
-            const L = 1.0; const h0 = 0.5;
+  function update() {
+    const alpha_deg = parseFloat(alphaS.value);
+    const alpha = (alpha_deg * Math.PI) / 180;
+    const ax = parseFloat(axS.value);
+    const g = 9.81;
+    const rho = 1000;
+    const L = 1.0;
+    const h0 = 0.5;
 
-            document.getElementById('p1-v-alpha').innerText = `${alpha_deg}°`;
-            document.getElementById('p1-v-ax').innerText = `${ax.toFixed(1)} m/s²`;
+    document.getElementById("p1-v-alpha").innerText = `${alpha_deg}°`;
+    document.getElementById("p1-v-ax").innerText = `${ax.toFixed(1)} m/s²`;
 
-            const fix = g * Math.sin(alpha) - ax; const fiz = g * Math.cos(alpha);
-            const theta = Math.atan2(fix, fiz);
-            const deltaHE = Math.tan(theta) * (L / 4);
-            const localDepthE = Math.max(0, h0 + deltaHE);
-            const pE = Math.abs(rho * fiz * localDepthE);
-            const hero = document.getElementById('p1-hero-card');
-            document.getElementById('p1-res-fix').innerText = fix.toFixed(2);
-            document.getElementById('p1-res-fiz').innerText = fiz.toFixed(2);
-            document.getElementById('p1-res-depth').innerText = `${localDepthE.toFixed(3)} m`;
-            document.getElementById('p1-m4').innerText = Math.round(pE) + " Pa";
+    const fix = -g * Math.sin(alpha) - ax;
+    const fiz = g * Math.cos(alpha);
+    const theta = Math.atan2(fix, fiz);
+    const fluid=MF1.openTank(L,h0,-fix*9.81/fiz,1.5);
+    const localDepthE = fluid.height(.75*L);
+    const pE = Math.abs(rho * fiz * localDepthE);
+    const hero = document.getElementById("p1-hero-card");
+    document.getElementById("p1-res-fix").innerText = fix.toFixed(2);
+    document.getElementById("p1-res-fiz").innerText = fiz.toFixed(2);
+    document.getElementById("p1-res-depth").innerText = `${localDepthE.toFixed(3)} m`;
+    document.getElementById("p1-m4").innerText = Math.round(pE) + " Pa";
 
-            ['p1-logic-gravity', 'p1-logic-balance', 'p1-logic-accel'].forEach((id) => {
-                document.getElementById(id).classList.remove('mf1v4-on');
-            });
+    ["p1-logic-gravity", "p1-logic-balance", "p1-logic-accel"].forEach((id) => {
+      document.getElementById(id).classList.remove("mf1v4-on");
+    });
 
-            document.getElementById('p1-hero-title').innerText = `θ = ${(theta * 180 / Math.PI).toFixed(1)}°`;
-            if (Math.abs(fix) < 0.2) {
-                hero.className = 'mf1v4-hero hero-green';
-                document.getElementById('p1-hero-sub').innerText = 'bočni član gotovo nestaje';
-                document.getElementById('p1-logic-balance').classList.add('mf1v4-on');
-            } else if (fix > 0) {
-                hero.className = 'mf1v4-hero';
-                document.getElementById('p1-hero-sub').innerText = 'projekcija težine još vodi problem';
-                document.getElementById('p1-logic-gravity').classList.add('mf1v4-on');
-            } else {
-                hero.className = 'mf1v4-hero hero-orange';
-                document.getElementById('p1-hero-sub').innerText = 'ubrzanje kolica nadvlada projekciju težine';
-                document.getElementById('p1-logic-accel').classList.add('mf1v4-on');
-            }
+    document.getElementById("p1-hero-title").innerText = `θ = ${((theta * 180) / Math.PI).toFixed(1)}°`;
+    if (Math.abs(fix) < 0.2) {
+      hero.className = "mf1v4-hero hero-green";
+      document.getElementById("p1-hero-sub").innerText = "bočni član gotovo nestaje";
+      document.getElementById("p1-logic-balance").classList.add("mf1v4-on");
+    } else if (fix > 0) {
+      hero.className = "mf1v4-hero";
+      document.getElementById("p1-hero-sub").innerText = "efektivna bočna sila usmjerena je uz kosinu";
+      document.getElementById("p1-logic-gravity").classList.add("mf1v4-on");
+    } else {
+      hero.className = "mf1v4-hero hero-orange";
+      document.getElementById("p1-hero-sub").innerText = "efektivna bočna sila usmjerena je niz kosinu";
+      document.getElementById("p1-logic-accel").classList.add("mf1v4-on");
+    }
 
-            document.getElementById('p1-explainer').innerText = `Redoslijed čitanja je: prvo izračunaš f_ix = g sinα - aₓ i f_iz = g cosα, tek zatim iz njihovog omjera čitaš nagib. Ovdje dobivaš f_ix = ${fix.toFixed(2)} m/s², f_iz = ${fiz.toFixed(2)} m/s², lokalnu dubinu u E od ${localDepthE.toFixed(3)} m i tlak ${Math.round(pE)} Pa.`;
+    document.getElementById("p1-explainer").innerText =
+      `Redoslijed čitanja je: prvo izračunaš f_ix = −g sinα − aₓ i f_iz = g cosα, tek zatim iz njihovog omjera čitaš nagib. Ovdje dobivaš f_ix = ${fix.toFixed(2)} m/s², f_iz = ${fiz.toFixed(2)} m/s², lokalnu dubinu u E od ${localDepthE.toFixed(3)} m i tlak ${Math.round(pE)} Pa.`;
 
-            draw(alpha, theta, L, h0, fix, fiz);
-        }
+    draw(alpha, theta, L, h0, fix, fiz);
+  }
 
-        function draw(alpha, theta, L, h0, fix, fiz) {
-            const W = parseInt(canvas.getAttribute('width'), 10) || 960;
-            const H = parseInt(canvas.getAttribute('height'), 10) || 520;
-            ctx.clearRect(0, 0, W, H);
-            const scale = Math.min(320, W * 0.32); const ox = W * 0.34, oy = H * 0.80;
-            ctx.strokeStyle = "#cbd5e0"; ctx.beginPath(); 
-            ctx.moveTo(50, oy + 225 * Math.tan(alpha)); ctx.lineTo(500, oy - 225 * Math.tan(alpha)); ctx.stroke();
+  function draw(alpha, theta, L, h0, fix, fiz) {
+    const W = parseInt(canvas.getAttribute("width"), 10) || 960;
+    const H = parseInt(canvas.getAttribute("height"), 10) || 520;
+    ctx.clearRect(0, 0, W, H);
+    const scale = Math.min(205, (H-150)/(1.5*Math.cos(alpha)+.5*Math.sin(alpha)));
+    const ox = W * 0.34,
+      oy = H * 0.8;
+    ctx.strokeStyle = "#cbd5e0";
+    ctx.beginPath();
+    ctx.moveTo(50, oy + 225 * Math.tan(alpha));
+    ctx.lineTo(500, oy - 225 * Math.tan(alpha));
+    ctx.stroke();
 
-            ctx.save(); ctx.translate(ox, oy); ctx.rotate(-alpha);
-            const w_px = L * scale; const h_px = h0 * scale * 1.5;
-            ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
-            ctx.fillRect(-w_px/2, -h_px, w_px, h_px); ctx.strokeRect(-w_px/2, -h_px, w_px, h_px);
+    ctx.save();
+    ctx.translate(ox, oy);
+    ctx.rotate(-alpha);
+    const w_px = L * scale;
+    const h_px = 1.5 * scale;
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 3;
+    ctx.fillRect(-w_px / 2, -h_px, w_px, h_px);
+    ctx.strokeRect(-w_px / 2, -h_px, w_px, h_px);
 
-            ctx.save(); ctx.beginPath(); ctx.rect(-w_px/2, -h_px, w_px, h_px); ctx.clip();
-            ctx.translate(0, -h0 * scale); ctx.rotate(-theta);
-            ctx.fillStyle = "rgba(56, 189, 248, 0.5)"; ctx.fillRect(-w_px, 0, w_px*2, h_px*2);
-            ctx.strokeStyle = "#0284c7"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-w_px, 0); ctx.lineTo(w_px, 0); ctx.stroke();
-            ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 11px Inter";
-            ctx.fillText('slobodna površina', 18, -10);
-            ctx.restore();
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(-w_px / 2, -h_px, w_px, h_px);
+    ctx.clip();
+    const liquid=MF1.openTank(L,h0,-fix*9.81/fiz,1.5);
+    ctx.fillStyle='#bae6fd';ctx.beginPath();ctx.moveTo(-w_px/2,0);for(let i=0;i<=100;i++){const x=L*i/100;ctx.lineTo((x-L/2)*scale,-liquid.height(x)*scale)}ctx.lineTo(w_px/2,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#0284c7';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<=100;i++){const x=L*i/100,y=-liquid.height(x)*scale;if(i===0)ctx.moveTo((x-L/2)*scale,y);else ctx.lineTo((x-L/2)*scale,y)}ctx.stroke();
+    ctx.restore();
 
-            ctx.fillStyle = "#ef4444";
-            ctx.beginPath(); ctx.arc(w_px/4, -Math.max(0, h0 + Math.tan(theta) * (L/4)) * scale, 5, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#0f172a";
-            ctx.fillText('E', w_px/4 + 10, -Math.max(0, h0 + Math.tan(theta) * (L/4)) * scale + 4);
-            ctx.restore();
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.arc(w_px / 4, 0, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText("E", w_px / 4 + 10, -8);
+    ctx.restore();
 
-            const infoX = W * 0.67;
-            ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 14px Inter";
-            ctx.fillText(`f_ix = ${fix.toFixed(2)} m/s²`, infoX, 92);
-            ctx.fillText(`f_iz = ${fiz.toFixed(2)} m/s²`, infoX, 122);
-            ctx.fillText(`θ = ${(theta * 180 / Math.PI).toFixed(1)}°`, infoX, 152);
-        }
-        [alphaS, axS].forEach(s => s.oninput = update); update();
-    })();
-    </script>
+    const infoX = W * 0.67;
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 14px Inter";
+    ctx.fillText(`f_ix = ${fix.toFixed(2)} m/s²`, infoX, 92);
+    ctx.fillText(`f_iz = ${fiz.toFixed(2)} m/s²`, infoX, 122);
+    ctx.fillText(`θ = ${((theta * 180) / Math.PI).toFixed(1)}°`, infoX, 152);
+  }
+  [alphaS, axS].forEach((s) => (s.oninput = update));
+  update();
+})();
+</script>
 </div>
 ```
 
@@ -1276,61 +1351,99 @@ $$\rho_f (gh - \frac{\omega^2 R_1^2}{2}) = \rho_v (gh - \frac{\omega^2 R_2^2}{2}
     </div>
     
     <script>
-    (function() {
-        const sideCanvas = document.getElementById('z36-side-canvas'); const sCtx = sideCanvas.getContext('2d');
-        const nS = document.getElementById('z36-n-slider');
-        const hS = document.getElementById('z36-h-slider');
-        function update() {
-            const n = parseFloat(nS.value); const w = n * Math.PI / 30; const g = 9.81; const r1 = 0.05, r2 = 0.15, h = parseFloat(hS.value);
-            const rho_v = 1000; const leftTerm = g*h - (w*w*r1*r1)/2; const rightTerm = g*h - (w*w*r2*r2)/2;
-            const rho_f = rho_v * rightTerm / leftTerm;
-            const hero = document.getElementById('z36-hero-card');
-            document.getElementById('z36-v-n').innerText = `${n} o/min`;
-            document.getElementById('z36-v-h').innerText = `${h.toFixed(3)} m`;
-            document.getElementById('z36-res-w').innerText = `${w.toFixed(2)} rad/s`;
-            document.getElementById('z36-res-h').innerText = `${h.toFixed(3)} m`;
-            document.getElementById('z36-term-left').innerText = leftTerm.toFixed(3);
-            document.getElementById('z36-term-right').innerText = rightTerm.toFixed(3);
-            document.getElementById('z36-res-rho').innerText = `${Math.round(Math.abs(rho_f))} kg/m³`;
+(function () {
+  const sideCanvas = document.getElementById("z36-side-canvas");
+  const sCtx = sideCanvas.getContext("2d");
+  const nS = document.getElementById("z36-n-slider");
+  const hS = document.getElementById("z36-h-slider");
+  function update() {
+    const n = parseFloat(nS.value);
+    const w = (n * Math.PI) / 30;
+    const g = 9.81;
+    const r1 = 0.05,
+      r2 = 0.15,
+      h = parseFloat(hS.value);
+    const rho_v = 1000;
+    const leftTerm = g * h - (w * w * r1 * r1) / 2;
+    const rightTerm = g * h - (w * w * r2 * r2) / 2;
+    const valid=Math.abs(leftTerm)>1e-8 && rightTerm/leftTerm>0;
+    const rho_f = valid?(rho_v * rightTerm) / leftTerm:NaN;
+    const hero = document.getElementById("z36-hero-card");
+    document.getElementById("z36-v-n").innerText = `${n} o/min`;
+    document.getElementById("z36-v-h").innerText = `${h.toFixed(3)} m`;
+    document.getElementById("z36-res-w").innerText = `${w.toFixed(2)} rad/s`;
+    document.getElementById("z36-res-h").innerText = `${h.toFixed(3)} m`;
+    document.getElementById("z36-term-left").innerText = leftTerm.toFixed(3);
+    document.getElementById("z36-term-right").innerText = rightTerm.toFixed(3);
+    document.getElementById("z36-res-rho").innerText = valid ? `${Math.round(rho_f)} kg/m³` : "nema fizikalnog rješenja";
 
-            ['z36-logic-singular', 'z36-logic-heavy', 'z36-logic-light'].forEach((id) => {
-                document.getElementById(id).classList.remove('mf1v4-on');
-            });
+    ["z36-logic-singular", "z36-logic-heavy", "z36-logic-light"].forEach((id) => {
+      document.getElementById(id).classList.remove("mf1v4-on");
+    });
 
-            if (Math.abs(leftTerm) < 0.08) {
-                hero.className = 'mf1v4-hero hero-red';
-                document.getElementById('z36-hero-sub').innerText = 'lijevi nazivnik je blizu nule pa je model vrlo osjetljiv';
-                document.getElementById('z36-logic-singular').classList.add('mf1v4-on');
-            } else if (rho_f > rho_v * 1.03) {
-                hero.className = 'mf1v4-hero hero-orange';
-                document.getElementById('z36-hero-sub').innerText = 'nepoznati fluid ispada gušći od vode';
-                document.getElementById('z36-logic-heavy').classList.add('mf1v4-on');
-            } else {
-                hero.className = 'mf1v4-hero hero-green';
-                document.getElementById('z36-hero-sub').innerText = 'nepoznati fluid je lakši ili sličan vodi';
-                document.getElementById('z36-logic-light').classList.add('mf1v4-on');
-            }
+    if (!valid || Math.abs(leftTerm) < 0.08) {
+      hero.className = "mf1v4-hero hero-red";
+      document.getElementById("z36-hero-sub").innerText = "Nedopušten omjer članova ili nazivnik blizu nule; ne uzima se apsolutna vrijednost gustoće.";
+      document.getElementById("z36-logic-singular").classList.add("mf1v4-on");
+    } else if (rho_f > rho_v * 1.03) {
+      hero.className = "mf1v4-hero hero-orange";
+      document.getElementById("z36-hero-sub").innerText = "nepoznati fluid ispada gušći od vode";
+      document.getElementById("z36-logic-heavy").classList.add("mf1v4-on");
+    } else {
+      hero.className = "mf1v4-hero hero-green";
+      document.getElementById("z36-hero-sub").innerText = "nepoznati fluid je lakši ili sličan vodi";
+      document.getElementById("z36-logic-light").classList.add("mf1v4-on");
+    }
 
-            document.getElementById('z36-explainer').innerText = `Vrijednost zadatka je u čitanju omjera članova: pri n = ${n.toFixed(0)} o/min i h = ${h.toFixed(3)} m dobivaš lijevi član ${leftTerm.toFixed(3)} i desni član ${rightTerm.toFixed(3)}. Tek njihov omjer s poznatom gustoćom vode daje približno ${Math.round(Math.abs(rho_f))} kg/m³ za nepoznati fluid.`;
-            draw(r1, r2, h, w);
-        }
-        function draw(r1, r2, h, w) {
-            const W = parseInt(sideCanvas.getAttribute('width'), 10) || 960;
-            const H = parseInt(sideCanvas.getAttribute('height'), 10) || 420;
-            sCtx.clearRect(0, 0, W, H); const scx = W * 0.24, base = H * 0.76, sScale = 1800;
-            sCtx.strokeStyle = "#cbd5e0"; sCtx.setLineDash([5, 5]); sCtx.beginPath(); sCtx.moveTo(scx, 20); sCtx.lineTo(scx, 200); sCtx.stroke(); sCtx.setLineDash([]);
-            sCtx.strokeStyle = "#f1f5f9"; sCtx.lineWidth = 16; sCtx.beginPath(); sCtx.moveTo(scx-r1*sScale, 40); sCtx.lineTo(scx-r1*sScale, base); sCtx.lineTo(scx+r2*sScale, base); sCtx.lineTo(scx+r2*sScale, 40); sCtx.stroke();
-            sCtx.strokeStyle = "#48bb78"; sCtx.beginPath(); sCtx.moveTo(scx-r1*sScale, base-h*sScale); sCtx.lineTo(scx-r1*sScale, base); sCtx.lineTo(scx, base); sCtx.stroke();
-            sCtx.strokeStyle = "#3182ce"; sCtx.beginPath(); sCtx.moveTo(scx, base); sCtx.lineTo(scx+r2*sScale, base); sCtx.lineTo(scx+r2*sScale, base-h*sScale); sCtx.stroke();
-            sCtx.fillStyle = "#0f172a"; sCtx.font = "bold 14px Inter";
-            sCtx.fillText(`R₁ = ${r1.toFixed(2)} m`, scx-r1*sScale-50, 32);
-            sCtx.fillText(`R₂ = ${r2.toFixed(2)} m`, scx+r2*sScale-16, 32);
-            sCtx.fillText(`ω = ${w.toFixed(2)} rad/s`, W * 0.60, 72);
-            sCtx.fillText('veći radijus -> jači centrifugalni član', W * 0.60, 102);
-        }
-        [nS, hS].forEach((slider) => slider.oninput = update); update();
-    })();
-    </script>
+    document.getElementById("z36-explainer").innerText =
+      `Vrijednost zadatka je u čitanju omjera članova: pri n = ${n.toFixed(0)} o/min i h = ${h.toFixed(3)} m dobivaš lijevi član ${leftTerm.toFixed(3)} i desni član ${rightTerm.toFixed(3)}. Tek njihov omjer s poznatom gustoćom vode daje približno ${valid?Math.round(rho_f):"— (nedopušteno stanje)"} kg/m³ za nepoznati fluid.`;
+    draw(r1, r2, h, w);
+  }
+  function draw(r1, r2, h, w) {
+    const W = parseInt(sideCanvas.getAttribute("width"), 10) || 960;
+    const H = parseInt(sideCanvas.getAttribute("height"), 10) || 420;
+    sCtx.clearRect(0, 0, W, H);
+    const scx = W * 0.24,
+      base = H * 0.76,
+      sScale = 1800;
+    sCtx.strokeStyle = "#cbd5e0";
+    sCtx.setLineDash([5, 5]);
+    sCtx.beginPath();
+    sCtx.moveTo(scx, 20);
+    sCtx.lineTo(scx, 200);
+    sCtx.stroke();
+    sCtx.setLineDash([]);
+    sCtx.strokeStyle = "#f1f5f9";
+    sCtx.lineWidth = 16;
+    sCtx.beginPath();
+    sCtx.moveTo(scx - r1 * sScale, 40);
+    sCtx.lineTo(scx - r1 * sScale, base);
+    sCtx.lineTo(scx + r2 * sScale, base);
+    sCtx.lineTo(scx + r2 * sScale, 40);
+    sCtx.stroke();
+    sCtx.strokeStyle = "#48bb78";
+    sCtx.beginPath();
+    sCtx.moveTo(scx - r1 * sScale, base - h * sScale);
+    sCtx.lineTo(scx - r1 * sScale, base);
+    sCtx.lineTo(scx, base);
+    sCtx.stroke();
+    sCtx.strokeStyle = "#3182ce";
+    sCtx.beginPath();
+    sCtx.moveTo(scx, base);
+    sCtx.lineTo(scx + r2 * sScale, base);
+    sCtx.lineTo(scx + r2 * sScale, base - h * sScale);
+    sCtx.stroke();
+    sCtx.fillStyle = "#0f172a";
+    sCtx.font = "bold 14px Inter";
+    sCtx.fillText(`R₁ = ${r1.toFixed(2)} m`, scx - r1 * sScale - 50, 32);
+    sCtx.fillText(`R₂ = ${r2.toFixed(2)} m`, scx + r2 * sScale - 16, 32);
+    sCtx.fillText(`ω = ${w.toFixed(2)} rad/s`, W * 0.6, 72);
+    sCtx.fillText("veći radijus -> jači centrifugalni član", W * 0.6, 102);
+  }
+  [nS, hS].forEach((slider) => (slider.oninput = update));
+  update();
+})();
+</script>
 </div>
 ```
 
@@ -1352,7 +1465,7 @@ Prstenasti cilindar rotira kutnom brzinom $\omega$. Odrediti uvjet za suho dno.
 </div>
 <div class="rjesenje-label">Rješenje</div>
 1. Mokro dno: $h_c = h_0 - \frac{\omega^2 R^2}{4g} > 0$
-2. Suho dno: $r_{suho} = \sqrt{\frac{-2g h_c}{\omega^2}}$ pri čemu je $h_c < 0$.
+2. Suho dno: koeficijent parabole $c<0$ nije fizička visina vode. Za očuvani volumen bez prelijevanja $c=\sqrt{2kR^2h_0}-kR^2$, $k=\omega^2/(2g)$; tada $r_{suho}=\sqrt{-c/k}$. Fizička dubina je $h(r)=\max(0,c+kr^2)$. Pri prelijevanju dodatno vrijedi $c+kR^2\le H$.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
@@ -1383,14 +1496,14 @@ Prstenasti cilindar rotira kutnom brzinom $\omega$. Odrediti uvjet za suho dno.
             <small>Režim dna</small>
             <strong id="p2-hero-title">mokro dno</strong>
             <div class="mf1v4-hero-sub" id="p2-hero-sub">središnja visina je još pozitivna</div>
-            <div class="mf1v4-hero-formula">h_c = h₀ − ω²R² / 4g</div>
+            <div class="mf1v4-hero-formula">h(r) = max(0, c + ω²r² / 2g)</div>
         </div>
     </div>
 
     <div class="mf1v4-bottom">
         <div>
             <div class="mf1v4-minis">
-                <div class="mf1v4-mini"><small>Središnja visina h_c</small><strong id="p2-res-hc">--- m</strong></div>
+                <div class="mf1v4-mini"><small>Koeficijent parabole c</small><strong id="p2-res-hc">--- m</strong></div>
                 <div class="mf1v4-mini"><small>Suhi radijus</small><strong id="p2-res-rdry">0.000 m</strong></div>
                 <div class="mf1v4-mini"><small>Rubna visina z(R)</small><strong id="p2-res-zrim">0.000 m</strong></div>
                 <div class="mf1v4-mini"><small>Početni nivo h₀</small><strong id="p2-res-h0">0.290 m</strong></div>
@@ -1416,72 +1529,87 @@ Prstenasti cilindar rotira kutnom brzinom $\omega$. Odrediti uvjet za suho dno.
     </div>
     
     <script>
-    (function() {
-        const canvas = document.getElementById('p2-ring-canvas'); const ctx = canvas.getContext('2d');
-        const wS = document.getElementById('p2-w-slider');
-        const h0S = document.getElementById('p2-h0-slider');
-        function update() {
-            const w = parseFloat(wS.value); const R = 0.2; const h0 = parseFloat(h0S.value); const H = 0.58; const g = 9.81;
-            const hc = h0 - (w*w * R*R)/(4*g);
-            const rDry = hc < 0 && w > 0 ? Math.sqrt((-2 * g * hc) / (w * w)) : 0;
-            const zRim = h0 + (w*w * R*R)/(4*g);
-            const hero = document.getElementById('p2-hero-card');
-            document.getElementById('p2-v-w').innerText = `${w.toFixed(1)} rad/s`;
-            document.getElementById('p2-v-h0').innerText = `${h0.toFixed(3)} m`;
-            document.getElementById('p2-res-hc').innerText = hc.toFixed(3) + " m";
-            document.getElementById('p2-res-rdry').innerText = `${Math.min(rDry, R).toFixed(3)} m`;
-            document.getElementById('p2-res-zrim').innerText = `${zRim.toFixed(3)} m`;
-            document.getElementById('p2-res-h0').innerText = `${h0.toFixed(3)} m`;
+(function () {
+  const canvas = document.getElementById("p2-ring-canvas");
+  const ctx = canvas.getContext("2d");
+  const wS = document.getElementById("p2-w-slider");
+  const h0S = document.getElementById("p2-h0-slider");
+  function update() {
+    const w = parseFloat(wS.value);
+    const R = 0.2;
+    const h0 = parseFloat(h0S.value);
+    const H = 0.58;
+    const g = 9.81;
+    const liquid=MF1.rotatingTank(R,h0,w,H),hc=liquid.c,rDry=liquid.dry,zRim=liquid.edge;
+    const hero = document.getElementById("p2-hero-card");
+    document.getElementById("p2-v-w").innerText = `${w.toFixed(1)} rad/s`;
+    document.getElementById("p2-v-h0").innerText = `${h0.toFixed(3)} m`;
+    document.getElementById("p2-res-hc").innerText = liquid.center.toFixed(3) + " m";
+    document.getElementById("p2-res-rdry").innerText = `${Math.min(rDry, R).toFixed(3)} m`;
+    document.getElementById("p2-res-zrim").innerText = `${zRim.toFixed(3)} m`;
+    document.getElementById("p2-res-h0").innerText = `${h0.toFixed(3)} m`;
 
-            ['p2-logic-wet', 'p2-logic-critical', 'p2-logic-dry'].forEach((id) => {
-                document.getElementById(id).classList.remove('mf1v4-on');
-            });
+    ["p2-logic-wet", "p2-logic-critical", "p2-logic-dry"].forEach((id) => {
+      document.getElementById(id).classList.remove("mf1v4-on");
+    });
 
-            if (Math.abs(hc) <= 0.01) {
-                hero.className = 'mf1v4-hero hero-orange';
-                document.getElementById('p2-hero-title').innerText = 'granični režim';
-                document.getElementById('p2-hero-sub').innerText = 'središte je upravo na prijelazu prema suhom dnu';
-                document.getElementById('p2-logic-critical').classList.add('mf1v4-on');
-            } else if (hc < 0) {
-                hero.className = 'mf1v4-hero hero-red';
-                document.getElementById('p2-hero-title').innerText = 'suho središte';
-                document.getElementById('p2-hero-sub').innerText = `suhi radijus doseže ${Math.min(rDry, R).toFixed(3)} m`;
-                document.getElementById('p2-logic-dry').classList.add('mf1v4-on');
-            } else {
-                hero.className = 'mf1v4-hero hero-green';
-                document.getElementById('p2-hero-title').innerText = 'mokro dno';
-                document.getElementById('p2-hero-sub').innerText = 'središnja visina je još pozitivna';
-                document.getElementById('p2-logic-wet').classList.add('mf1v4-on');
-            }
+    if (Math.abs(hc) <= 0.01) {
+      hero.className = "mf1v4-hero hero-orange";
+      document.getElementById("p2-hero-title").innerText = "granični režim";
+      document.getElementById("p2-hero-sub").innerText = "središte je upravo na prijelazu prema suhom dnu";
+      document.getElementById("p2-logic-critical").classList.add("mf1v4-on");
+    } else if (hc < 0) {
+      hero.className = "mf1v4-hero hero-red";
+      document.getElementById("p2-hero-title").innerText = "suho središte";
+      document.getElementById("p2-hero-sub").innerText = `suhi radijus doseže ${Math.min(rDry, R).toFixed(3)} m`;
+      document.getElementById("p2-logic-dry").classList.add("mf1v4-on");
+    } else {
+      hero.className = "mf1v4-hero hero-green";
+      document.getElementById("p2-hero-title").innerText = "mokro dno";
+      document.getElementById("p2-hero-sub").innerText = "središnja visina je još pozitivna";
+      document.getElementById("p2-logic-wet").classList.add("mf1v4-on");
+    }
 
-            document.getElementById('p2-explainer').innerText = `Granica zadatka prolazi kroz h_c = 0. Ovdje pri ω = ${w.toFixed(1)} rad/s i h₀ = ${h0.toFixed(3)} m dobivaš h_c = ${hc.toFixed(3)} m i rubnu visinu ${zRim.toFixed(3)} m. ${hc < 0 ? `To znači da sredina dna više nije u kontaktu s tekućinom, a suhi dio doseže do ${Math.min(rDry, R).toFixed(3)} m.` : 'To znači da je središte još pokriveno i cijelo dno ostaje mokro.'}`;
-            draw(w, hc, R, H, rDry);
-        }
-        function draw(w, hc, R, H, rDry) {
-            const W = parseInt(canvas.getAttribute('width'), 10) || 960;
-            const Hc = parseInt(canvas.getAttribute('height'), 10) || 620;
-            const scale = Math.min((W * 0.56) / (2 * R), (Hc * 0.66) / H);
-            ctx.clearRect(0,0,W,Hc); const cx = W * 0.35, base = Hc * 0.82;
-            ctx.strokeStyle = "#475569"; ctx.lineWidth = 4; ctx.strokeRect(cx - R*scale, base - H*scale, 2*R*scale, H*scale);
-            ctx.fillStyle = "rgba(56, 189, 248, 0.4)"; ctx.beginPath();
-            ctx.moveTo(cx - R*scale, base - Math.max(0, hc + (w*w*R*R)/(2*9.81))*scale);
-            for(let x = -R*scale; x <= R*scale; x += 5) {
-                let r = Math.abs(x/scale); let z = hc + (w*w*r*r)/(2*9.81);
-                ctx.lineTo(cx + x, base - Math.max(0, z)*scale);
-            }
-            ctx.lineTo(cx + R*scale, base); ctx.lineTo(cx - R*scale, base); ctx.fill();
-            if (hc < 0) {
-                ctx.fillStyle = "rgba(249, 115, 22, 0.28)";
-                ctx.fillRect(cx - Math.min(rDry, R) * scale, base - 2, 2 * Math.min(rDry, R) * scale, 8);
-            }
-            const infoX = W * 0.68;
-            ctx.fillStyle = "#0f172a"; ctx.font = "bold 14px Inter";
-            ctx.fillText('paraboloid slobodne površine', infoX, 74);
-            if (hc < 0) ctx.fillText('suho dno u središtu', infoX, 106);
-        }
-        [wS, h0S].forEach((slider) => slider.oninput = update); update();
-    })();
-    </script>
+    document.getElementById("p2-explainer").innerText =
+      `Granica zadatka prolazi kroz h_c = 0. Ovdje pri ω = ${w.toFixed(1)} rad/s i h₀ = ${h0.toFixed(3)} m dobivaš h_c = ${hc.toFixed(3)} m i rubnu visinu ${zRim.toFixed(3)} m. ${hc < 0 ? `To znači da sredina dna više nije u kontaktu s tekućinom, a suhi dio doseže do ${Math.min(rDry, R).toFixed(3)} m.` : "To znači da je središte još pokriveno i cijelo dno ostaje mokro."}`;
+    document.getElementById("p2-explainer").innerText += liquid.spilled>1e-10?" Rub je dosegnuo H; volumen se smanjuje za izlivenih "+(liquid.spilled*1000).toFixed(2)+" L.":" Integral 2π∫h(r)r dr čuva početni volumen, uključujući suho središte.";
+    draw(w, hc, R, H, rDry);
+  }
+  function draw(w, hc, R, H, rDry) {
+    const W = parseInt(canvas.getAttribute("width"), 10) || 960;
+    const Hc = parseInt(canvas.getAttribute("height"), 10) || 620;
+    const scale = Math.min((W * 0.56) / (2 * R), (Hc * 0.66) / H);
+    ctx.clearRect(0, 0, W, Hc);
+    const cx = W * 0.35,
+      base = Hc * 0.82;
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(cx - R * scale, base - H * scale, 2 * R * scale, H * scale);
+    ctx.fillStyle = "rgba(56, 189, 248, 0.4)";
+    ctx.beginPath();
+    ctx.moveTo(cx - R * scale, base - Math.max(0, hc + (w * w * R * R) / (2 * 9.81)) * scale);
+    for (let x = -R * scale; x <= R * scale; x += 5) {
+      let r = Math.abs(x / scale);
+      let z = hc + (w * w * r * r) / (2 * 9.81);
+      ctx.lineTo(cx + x, base - Math.max(0, z) * scale);
+    }
+    ctx.lineTo(cx + R * scale, base);
+    ctx.lineTo(cx - R * scale, base);
+    ctx.fill();
+    if (hc < 0) {
+      ctx.fillStyle = "rgba(249, 115, 22, 0.28)";
+      ctx.fillRect(cx - Math.min(rDry, R) * scale, base - 2, 2 * Math.min(rDry, R) * scale, 8);
+    }
+    const infoX = W * 0.68;
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 14px Inter";
+    ctx.fillText("paraboloid slobodne površine", infoX, 74);
+    if (hc < 0) ctx.fillText("suho dno u središtu", infoX, 106);
+  }
+  [wS, h0S].forEach((slider) => (slider.oninput = update));
+  update();
+})();
+</script>
 </div>
 ```
 
@@ -1576,97 +1704,123 @@ Kada je cilindrična posuda nagnuta u odnosu na vertikalu, relativno mirovanje j
 </div>
 
 <script>
-(function() {
-    const vCanvas = document.getElementById('p3-vector-canvas'); const sCanvas = document.getElementById('p3-surface-canvas');
-    const vCtx = vCanvas.getContext('2d'); const sCtx = sCanvas.getContext('2d');
-    const alphaS = document.getElementById('p3-alpha-slider');
-    const omegaS = document.getElementById('p3-omega-slider');
+(function () {
+  const vCanvas = document.getElementById("p3-vector-canvas");
+  const sCanvas = document.getElementById("p3-surface-canvas");
+  const vCtx = vCanvas.getContext("2d");
+  const sCtx = sCanvas.getContext("2d");
+  const alphaS = document.getElementById("p3-alpha-slider");
+  const omegaS = document.getElementById("p3-omega-slider");
 
-    function drawArrow(ctx, x1, y1, x2, y2, color, label) {
-        const headlen = 10;
-        const dx = x2 - x1; const dy = y2 - y1; const angle = Math.atan2(dy, dx);
-        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-        ctx.closePath(); ctx.fill();
-        ctx.font = 'bold 12px Inter'; ctx.fillText(label, x2 + 8, y2);
+  function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+    const headlen = 10;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const angle = Math.atan2(dy, dx);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.font = "bold 12px Inter";
+    ctx.fillText(label, x2 + 8, y2);
+  }
+
+  function update() {
+    const alphaDeg = parseFloat(alphaS.value);
+    const alpha = (alphaDeg * Math.PI) / 180;
+    const omega = parseFloat(omegaS.value);
+    const g = 9.81;
+    const r = 0.25;
+    const a = g / Math.tan(alpha);
+    const fz = g / Math.sin(alpha);
+    const hPrime = (omega * omega * r * r) / (2 * fz);
+    const hero = document.getElementById("p3-hero-card");
+
+    document.getElementById("p3-alpha-val").innerText = alphaDeg.toFixed(0);
+    document.getElementById("p3-omega-val").innerText = omega.toFixed(1);
+    document.getElementById("p3-res-a").innerText = `${a.toFixed(1)} m/s²`;
+    document.getElementById("p3-res-fz").innerText = `${fz.toFixed(1)} m/s²`;
+    document.getElementById("p3-res-h").innerText = `${hPrime.toFixed(3)} m`;
+    document.getElementById("p3-res-w").innerText = `${omega.toFixed(1)} rad/s`;
+
+    ["p3-logic-small", "p3-logic-mid", "p3-logic-steep"].forEach((id) => {
+      document.getElementById(id).classList.remove("mf1v4-on");
+    });
+
+    document.getElementById("p3-hero-title").innerText = `h' = ${hPrime.toFixed(3)} m`;
+    if (alphaDeg < 25) {
+      hero.className = "mf1v4-hero hero-orange";
+      document.getElementById("p3-hero-sub").innerText = `traženo ubrzanje a = ${a.toFixed(1)} m/s² brzo raste`;
+      document.getElementById("p3-logic-small").classList.add("mf1v4-on");
+    } else if (alphaDeg > 55) {
+      hero.className = "mf1v4-hero";
+      document.getElementById("p3-hero-sub").innerText = "traženo translacijsko ubrzanje postaje manje";
+      document.getElementById("p3-logic-steep").classList.add("mf1v4-on");
+    } else {
+      hero.className = "mf1v4-hero hero-green";
+      document.getElementById("p3-hero-sub").innerText = "dobivaš najčitljiviji kompromis između oba koraka";
+      document.getElementById("p3-logic-mid").classList.add("mf1v4-on");
     }
 
-    function update() {
-        const alphaDeg = parseFloat(alphaS.value); const alpha = alphaDeg * Math.PI / 180;
-        const omega = parseFloat(omegaS.value); const g = 9.81; const r = 0.25;
-        const a = g / Math.tan(alpha); const fz = g / Math.sin(alpha); const hPrime = (omega * omega * r * r) / (2 * fz);
-        const hero = document.getElementById('p3-hero-card');
+    document.getElementById("p3-explainer").innerText =
+      `Proračun se odvija u dva odvojena koraka. Za kut ${alphaDeg.toFixed(0)}° translacijsko ubrzanje ${a.toFixed(1)} m/s² usmjerava efektivnu gravitaciju uzduž osi spremnika. U tako određenom polju, uz f′_z = ${fz.toFixed(1)} m/s², rotacija s ω = ${omega.toFixed(1)} rad/s daje dodatni porast h′ = ${hPrime.toFixed(3)} m.`;
 
-        document.getElementById('p3-alpha-val').innerText = alphaDeg.toFixed(0);
-        document.getElementById('p3-omega-val').innerText = omega.toFixed(1);
-        document.getElementById('p3-res-a').innerText = `${a.toFixed(1)} m/s²`;
-        document.getElementById('p3-res-fz').innerText = `${fz.toFixed(1)} m/s²`;
-        document.getElementById('p3-res-h').innerText = `${hPrime.toFixed(3)} m`;
-        document.getElementById('p3-res-w').innerText = `${omega.toFixed(1)} rad/s`;
-
-        ['p3-logic-small', 'p3-logic-mid', 'p3-logic-steep'].forEach((id) => {
-            document.getElementById(id).classList.remove('mf1v4-on');
-        });
-
-        document.getElementById('p3-hero-title').innerText = `h' = ${hPrime.toFixed(3)} m`;
-        if (alphaDeg < 25) {
-            hero.className = 'mf1v4-hero hero-orange';
-            document.getElementById('p3-hero-sub').innerText = `traženo ubrzanje a = ${a.toFixed(1)} m/s² brzo raste`;
-            document.getElementById('p3-logic-small').classList.add('mf1v4-on');
-        } else if (alphaDeg > 55) {
-            hero.className = 'mf1v4-hero';
-            document.getElementById('p3-hero-sub').innerText = 'traženo translacijsko ubrzanje postaje manje';
-            document.getElementById('p3-logic-steep').classList.add('mf1v4-on');
-        } else {
-            hero.className = 'mf1v4-hero hero-green';
-            document.getElementById('p3-hero-sub').innerText = 'dobivaš najčitljiviji kompromis između oba koraka';
-            document.getElementById('p3-logic-mid').classList.add('mf1v4-on');
-        }
-
-        document.getElementById('p3-explainer').innerText = `Proračun se odvija u dva odvojena koraka. Za kut ${alphaDeg.toFixed(0)}° translacijsko ubrzanje ${a.toFixed(1)} m/s² usmjerava efektivnu gravitaciju uzduž osi spremnika. U tako određenom polju, uz f′_z = ${fz.toFixed(1)} m/s², rotacija s ω = ${omega.toFixed(1)} rad/s daje dodatni porast h′ = ${hPrime.toFixed(3)} m.`;
-
-        const VW = parseInt(vCanvas.getAttribute('width'), 10) || 520;
-        const VH = parseInt(vCanvas.getAttribute('height'), 10) || 420;
-        const SW = parseInt(sCanvas.getAttribute('width'), 10) || 520;
-        const SH = parseInt(sCanvas.getAttribute('height'), 10) || 420;
-        vCtx.clearRect(0,0,VW,VH); sCtx.clearRect(0,0,SW,SH);
-        vCtx.strokeStyle = '#94a3b8'; vCtx.lineWidth = 2;
-        vCtx.beginPath(); vCtx.moveTo(VW * 0.16, VH * 0.84); vCtx.lineTo(VW * 0.82, VH * 0.24); vCtx.stroke();
-        vCtx.fillStyle = '#0f172a'; vCtx.font = 'bold 14px Inter'; vCtx.fillText('os spremnika', VW * 0.62, VH * 0.22);
-        drawArrow(vCtx, VW * 0.24, VH * 0.16, VW * 0.24, VH * 0.58, '#2563eb', 'g');
-        drawArrow(vCtx, VW * 0.24, VH * 0.16, VW * 0.56, VH * 0.16, '#ef4444', 'a');
-        drawArrow(vCtx, VW * 0.24, VH * 0.16, VW * 0.52, VH * 0.52, '#0f766e', "f'_z");
-        vCtx.fillStyle = '#334155'; vCtx.fillText(`α = ${alphaDeg.toFixed(0)}°`, VW * 0.58, VH * 0.74);
-
-        const tankX = SW * 0.12;
-        const tankY = SH * 0.18;
-        const tankW = SW * 0.64;
-        const tankH = SH * 0.62;
-        sCtx.strokeStyle = '#475569'; sCtx.lineWidth = 3; sCtx.strokeRect(tankX, tankY, tankW, tankH);
-        sCtx.fillStyle = 'rgba(56, 189, 248, 0.42)'; sCtx.beginPath();
-        sCtx.moveTo(tankX, tankY + tankH * 0.64);
-        for (let x = 0; x <= tankW; x += 4) {
-            const rr = (x / tankW) * r;
-            const z = hPrime * Math.pow(rr / r, 2);
-            sCtx.lineTo(tankX + x, tankY + tankH * 0.64 - z * 820);
-        }
-        sCtx.lineTo(tankX + tankW, tankY + tankH); sCtx.lineTo(tankX, tankY + tankH); sCtx.fill();
-        sCtx.strokeStyle = '#0284c7'; sCtx.lineWidth = 4; sCtx.beginPath();
-        for (let x = 0; x <= tankW; x += 4) {
-            const rr = (x / tankW) * r;
-            const z = hPrime * Math.pow(rr / r, 2);
-            if (x === 0) sCtx.moveTo(tankX + x, tankY + tankH * 0.64 - z * 820);
-            else sCtx.lineTo(tankX + x, tankY + tankH * 0.64 - z * 820);
-        }
-        sCtx.stroke();
-        sCtx.fillStyle = '#0f172a'; sCtx.font = 'bold 14px Inter';
-        sCtx.fillText('parabolični porast zbog rotacije', tankX + 18, 54);
+    const VW = parseInt(vCanvas.getAttribute("width"), 10) || 520;
+    const VH = parseInt(vCanvas.getAttribute("height"), 10) || 420;
+    const SW = parseInt(sCanvas.getAttribute("width"), 10) || 520;
+    const SH = parseInt(sCanvas.getAttribute("height"), 10) || 420;
+    vCtx.clearRect(0, 0, VW, VH);
+    sCtx.clearRect(0, 0, SW, SH);
+    const ox=VW*.72,oy=VH*.2,sc=Math.min(VW*.5/a,VH*.48/g);
+    MF1.arrow(vCtx,ox,oy,0,g*sc,'#176da9','g');
+    MF1.arrow(vCtx,ox,oy,-a*sc,0,'#b93645','−a');
+    MF1.arrow(vCtx,ox,oy,-a*sc,g*sc,'#0f766e',"g_eff");
+    vCtx.strokeStyle='#94a3b8';vCtx.setLineDash([5,4]);vCtx.beginPath();vCtx.moveTo(ox,oy);vCtx.lineTo(ox-a*sc*1.25,oy+g*sc*1.25);vCtx.stroke();vCtx.setLineDash([]);
+    vCtx.fillStyle='#40596b';vCtx.font='14px system-ui';vCtx.fillText('Os ∥ g_eff; α = '+alphaDeg.toFixed(0)+'°',35,VH-30);
+    const tankX = SW * 0.12;
+    const tankY = SH * 0.18;
+    const tankW = SW * 0.64;
+    const tankH = SH * 0.62;
+    const verticalScale=Math.min(820,tankH*.55/Math.max(hPrime,1e-8));
+    sCtx.strokeStyle = "#475569";
+    sCtx.lineWidth = 3;
+    sCtx.strokeRect(tankX, tankY, tankW, tankH);
+    sCtx.fillStyle = "rgba(56, 189, 248, 0.42)";
+    sCtx.beginPath();
+    sCtx.moveTo(tankX, tankY + tankH * 0.64);
+    for (let x = 0; x <= tankW; x += 4) {
+      const rr = (x / tankW) * r;
+      const z = hPrime * Math.pow(rr / r, 2);
+      sCtx.lineTo(tankX + x, tankY + tankH * 0.64 - z * verticalScale);
     }
-    [alphaS, omegaS].forEach(s => s.oninput = update);
-    update();
+    sCtx.lineTo(tankX + tankW, tankY + tankH);
+    sCtx.lineTo(tankX, tankY + tankH);
+    sCtx.fill();
+    sCtx.strokeStyle = "#0284c7";
+    sCtx.lineWidth = 4;
+    sCtx.beginPath();
+    for (let x = 0; x <= tankW; x += 4) {
+      const rr = (x / tankW) * r;
+      const z = hPrime * Math.pow(rr / r, 2);
+      if (x === 0) sCtx.moveTo(tankX + x, tankY + tankH * 0.64 - z * verticalScale);
+      else sCtx.lineTo(tankX + x, tankY + tankH * 0.64 - z * verticalScale);
+    }
+    sCtx.stroke();
+    sCtx.fillStyle = "#0f172a";
+    sCtx.font = "bold 14px Inter";
+    sCtx.fillText("Presjek r ≥ 0: z(r) − z(0); prilagođena skala", tankX + 18, 54);
+  }
+  [alphaS, omegaS].forEach((s) => (s.oninput = update));
+  update();
 })();
 </script>
 ```
@@ -1740,82 +1894,69 @@ Kada je cilindrična posuda nagnuta u odnosu na vertikalu, relativno mirovanje j
     </div>
 </div>
 <script>
-(function() {
-    const axS = document.getElementById('comp-ax-slider');
-    const wS = document.getElementById('comp-w-slider');
+(function () {
+  const axS = document.getElementById("comp-ax-slider");
+  const wS = document.getElementById("comp-w-slider");
 
-    function drawTank(ctx, mode, ax, w) {
-        const W = parseInt(ctx.canvas.getAttribute('width'), 10) || 360;
-        const H = parseInt(ctx.canvas.getAttribute('height'), 10) || 260;
-        ctx.clearRect(0, 0, W, H);
-        const left = W * 0.12;
-        const top = H * 0.16;
-        const tankW = W * 0.70;
-        const tankH = H * 0.62;
-        ctx.strokeStyle = '#334155'; ctx.lineWidth = 3; ctx.strokeRect(left, top, tankW, tankH);
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.38)';
-        ctx.beginPath();
-        if (mode === 'rest') {
-            ctx.moveTo(left, top + tankH * 0.42); ctx.lineTo(left + tankW, top + tankH * 0.42);
-        } else if (mode === 'acc') {
-            const tilt = ax * 5.5;
-            ctx.moveTo(left, top + tankH * 0.42 - tilt / 2); ctx.lineTo(left + tankW, top + tankH * 0.42 + tilt / 2);
-        } else {
-            for (let x = 0; x <= tankW; x += 4) {
-                const r = x / tankW;
-                const z = (w * w * 0.16 * r * r) / (2 * 9.81);
-                const y = top + tankH * 0.60 - z * 120;
-                if (x === 0) ctx.moveTo(left + x, y);
-                else ctx.lineTo(left + x, y);
-            }
-        }
-        ctx.lineTo(left + tankW, top + tankH); ctx.lineTo(left, top + tankH); ctx.fill();
-        ctx.strokeStyle = mode === 'acc' ? '#ef4444' : (mode === 'rot' ? '#2563eb' : '#0284c7');
-        ctx.lineWidth = 4; ctx.stroke();
+  function drawTank(ctx,mode,ax,w){
+ const W=+ctx.canvas.getAttribute('width'),H=+ctx.canvas.getAttribute('height');ctx.clearRect(0,0,W,H);
+ const R=.2,L=2*R,height=.6,initial=.25,sc=Math.min(W*.68/L,H*.65/height),left=W*.16,bottom=H*.82;
+ const liquid=mode==='rot'?MF1.rotatingTank(R,initial,w,height):MF1.openTank(L,initial,mode==='acc'?ax:0,height);
+ ctx.strokeStyle='#40596b';ctx.lineWidth=3;ctx.strokeRect(left,bottom-height*sc,L*sc,height*sc);
+ ctx.beginPath();ctx.moveTo(left,bottom);for(let i=0;i<=100;i++){const x=L*i/100,z=mode==='rot'?liquid.height(Math.abs(x-R)):liquid.height(x);ctx.lineTo(left+x*sc,bottom-z*sc)}ctx.lineTo(left+L*sc,bottom);ctx.closePath();ctx.fillStyle='#dff2f8';ctx.fill();ctx.strokeStyle='#176da9';ctx.stroke();
+ ctx.fillStyle='#40596b';ctx.font='12px system-ui';ctx.fillText('L = 0,4 m; H = 0,6 m; h₀ = 0,25 m',10,H-9);
+}
+
+  function draw() {
+    const c1 = document.getElementById("comp-c1");
+    if (!c1) return;
+    const c2 = document.getElementById("comp-c2");
+    const c3 = document.getElementById("comp-c3");
+    const ctx1 = c1.getContext("2d");
+    const ctx2 = c2.getContext("2d");
+    const ctx3 = c3.getContext("2d");
+    const ax = parseFloat(axS.value);
+    const w = parseFloat(wS.value);
+    const hero = document.getElementById("comp-hero-card");
+    document.getElementById("comp-ax-val").innerText = ax.toFixed(1);
+    document.getElementById("comp-w-val").innerText = w.toFixed(1);
+    drawTank(ctx1, "rest", ax, w);
+    drawTank(ctx2, "acc", ax, w);
+    drawTank(ctx3, "rot", ax, w);
+
+    ["comp-logic-rest", "comp-logic-acc", "comp-logic-rot", "comp-logic-combo"].forEach((id) => {
+      document.getElementById(id).classList.remove("mf1v4-on");
+    });
+
+    if (ax < 0.2 && w < 0.2) {
+      hero.className = "mf1v4-hero hero-green";
+      document.getElementById("comp-hero-title").innerText = "čista hidrostatika";
+      document.getElementById("comp-hero-sub").innerText = "nema dodatnih neinercijalnih doprinosa";
+      document.getElementById("comp-logic-rest").classList.add("mf1v4-on");
+    } else if (w < 0.2) {
+      hero.className = "mf1v4-hero";
+      document.getElementById("comp-hero-title").innerText = "mijenja se samo nagib";
+      document.getElementById("comp-hero-sub").innerText =
+        "translacija zadržava oblik ravnine, ali mijenja njezin smjer";
+      document.getElementById("comp-logic-acc").classList.add("mf1v4-on");
+    } else if (ax < 0.2) {
+      hero.className = "mf1v4-hero hero-orange";
+      document.getElementById("comp-hero-title").innerText = "pojavljuje se paraboloid";
+      document.getElementById("comp-hero-sub").innerText = "rotacija mijenja sam oblik slobodne površine";
+      document.getElementById("comp-logic-rot").classList.add("mf1v4-on");
+    } else {
+      hero.className = "mf1v4-hero hero-red";
+      document.getElementById("comp-hero-title").innerText = "oba mehanizma su uključena";
+      document.getElementById("comp-hero-sub").innerText =
+        "na stvarnom kombiniranom problemu nagib i zakrivljenost dolaze zajedno";
+      document.getElementById("comp-logic-combo").classList.add("mf1v4-on");
     }
 
-    function draw() {
-        const c1 = document.getElementById('comp-c1'); if(!c1) return;
-        const c2 = document.getElementById('comp-c2'); const c3 = document.getElementById('comp-c3');
-        const ctx1 = c1.getContext('2d'); const ctx2 = c2.getContext('2d'); const ctx3 = c3.getContext('2d');
-        const ax = parseFloat(axS.value); const w = parseFloat(wS.value);
-        const hero = document.getElementById('comp-hero-card');
-        document.getElementById('comp-ax-val').innerText = ax.toFixed(1);
-        document.getElementById('comp-w-val').innerText = w.toFixed(1);
-        drawTank(ctx1, 'rest', ax, w);
-        drawTank(ctx2, 'acc', ax, w);
-        drawTank(ctx3, 'rot', ax, w);
-
-        ['comp-logic-rest', 'comp-logic-acc', 'comp-logic-rot', 'comp-logic-combo'].forEach((id) => {
-            document.getElementById(id).classList.remove('mf1v4-on');
-        });
-
-        if (ax < 0.2 && w < 0.2) {
-            hero.className = 'mf1v4-hero hero-green';
-            document.getElementById('comp-hero-title').innerText = 'čista hidrostatika';
-            document.getElementById('comp-hero-sub').innerText = 'nema dodatnih neinercijalnih doprinosa';
-            document.getElementById('comp-logic-rest').classList.add('mf1v4-on');
-        } else if (w < 0.2) {
-            hero.className = 'mf1v4-hero';
-            document.getElementById('comp-hero-title').innerText = 'mijenja se samo nagib';
-            document.getElementById('comp-hero-sub').innerText = 'translacija zadržava oblik ravnine, ali mijenja njezin smjer';
-            document.getElementById('comp-logic-acc').classList.add('mf1v4-on');
-        } else if (ax < 0.2) {
-            hero.className = 'mf1v4-hero hero-orange';
-            document.getElementById('comp-hero-title').innerText = 'pojavljuje se paraboloid';
-            document.getElementById('comp-hero-sub').innerText = 'rotacija mijenja sam oblik slobodne površine';
-            document.getElementById('comp-logic-rot').classList.add('mf1v4-on');
-        } else {
-            hero.className = 'mf1v4-hero hero-red';
-            document.getElementById('comp-hero-title').innerText = 'oba mehanizma su uključena';
-            document.getElementById('comp-hero-sub').innerText = 'na stvarnom kombiniranom problemu nagib i zakrivljenost dolaze zajedno';
-            document.getElementById('comp-logic-combo').classList.add('mf1v4-on');
-        }
-
-        document.getElementById('comp-explainer').innerText = `Završna poanta poglavlja je razlika u uzroku, a ne samo u slici. U mirovanju djeluje samo gravitacija i površina ostaje ravna. Kod translacijskog ubrzanja aₓ = ${ax.toFixed(1)} m/s² površina je i dalje ravnina, ali se naginje tako da bude okomita na rezultantnu silu. Kod rotacije s ω = ${w.toFixed(1)} rad/s oblik se kvalitativno mijenja u paraboloid jer centrifugalni doprinos raste s radijusom.`;
-    }
-    [axS, wS].forEach(s => s.oninput = draw);
-    draw();
+    document.getElementById("comp-explainer").innerText =
+      `Završna poanta poglavlja je razlika u uzroku, a ne samo u slici. U mirovanju djeluje samo gravitacija i površina ostaje ravna. Kod translacijskog ubrzanja aₓ = ${ax.toFixed(1)} m/s² površina je i dalje ravnina, ali se naginje tako da bude okomita na rezultantnu silu. Kod rotacije s ω = ${w.toFixed(1)} rad/s oblik se kvalitativno mijenja u paraboloid jer centrifugalni doprinos raste s radijusom.`;
+  }
+  [axS, wS].forEach((s) => (s.oninput = draw));
+  draw();
 })();
 </script>
 ```

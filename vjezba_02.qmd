@@ -316,218 +316,239 @@ Preko zakrivljene granice vrijedi $\Delta p=\sigma(1/R_1+1/R_2)$. Za kap tekući
     </div>
 
     <script>
-    (function() {
-        const canvas = document.getElementById('visc-canvas');
-        const ctx = canvas.getContext('2d');
-        const vSl = document.getElementById('v-slider');
-        const muSl = document.getElementById('mu-slider');
-        const hSl = document.getElementById('h-slider');
-        const caption = document.getElementById('visc-scene-caption');
+(function () {
+  const canvas = document.getElementById("visc-canvas");
+  const ctx = canvas.getContext("2d");
+  const vSl = document.getElementById("v-slider");
+  const muSl = document.getElementById("mu-slider");
+  const hSl = document.getElementById("h-slider");
+  const caption = document.getElementById("visc-scene-caption");
 
-        const particles = Array.from({ length: 120 }, () => ({
-            x: Math.random(),
-            y: Math.random(),
-            size: 1.5 + Math.random() * 1.8
-        }));
-        let model = null;
-        let lastChanged = 'initial';
+  const particles = Array.from({ length: 120 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    size: 1.5 + Math.random() * 1.8,
+  }));
+  let model = null;
+  let lastChanged = "initial";
 
-        function roundRect(context, x, y, w, h, r, fill, stroke) {
-            context.beginPath();
-            context.moveTo(x + r, y);
-            context.arcTo(x + w, y, x + w, y + h, r);
-            context.arcTo(x + w, y + h, x, y + h, r);
-            context.arcTo(x, y + h, x, y, r);
-            context.arcTo(x, y, x + w, y, r);
-            context.closePath();
-            if (fill) context.fill();
-            if (stroke) context.stroke();
-        }
+  function roundRect(context, x, y, w, h, r, fill, stroke) {
+    context.beginPath();
+    context.moveTo(x + r, y);
+    context.arcTo(x + w, y, x + w, y + h, r);
+    context.arcTo(x + w, y + h, x, y + h, r);
+    context.arcTo(x, y + h, x, y, r);
+    context.arcTo(x, y, x + w, y, r);
+    context.closePath();
+    if (fill) context.fill();
+    if (stroke) context.stroke();
+  }
 
-        function drawArrow(x1, y1, x2, y2, color, width, label) {
-            const headlen = 9;
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = width;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x2, y2);
-            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-            ctx.closePath();
-            ctx.fill();
-            if (label) {
-                ctx.font = 'bold 12px Inter';
-                ctx.fillText(label, x2 + 8, y2 - 6);
-            }
-        }
+  function drawArrow(x1, y1, x2, y2, color, width, label) {
+    const headlen = 9;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    if (label) {
+      ctx.font = "bold 12px Inter";
+      ctx.fillText(label, x2 + 8, y2 - 6);
+    }
+  }
 
-        function update() {
-            const v = parseFloat(vSl.value);
-            const mu = parseFloat(muSl.value);
-            const deltaMm = parseFloat(hSl.value);
-            const deltaM = deltaMm / 1000;
-            const gapPx = deltaMm * 5.2;
-            const gradient = v / deltaM;
-            const tau = mu * gradient;
-            const testArea = 0.060;
-            const effectiveRadius = 0.10;
-            const shearForce = tau * testArea;
-            const equivalentMoment = shearForce * effectiveRadius;
+  function update() {
+    const v = parseFloat(vSl.value);
+    const mu = parseFloat(muSl.value);
+    const deltaMm = parseFloat(hSl.value);
+    const deltaM = deltaMm / 1000;
+    const gapPx = deltaMm * 5.2;
+    const gradient = v / deltaM;
+    const tau = mu * gradient;
+    const testArea = 0.06;
+    const effectiveRadius = 0.1;
+    const shearForce = tau * testArea;
+    const equivalentMoment = shearForce * effectiveRadius;
 
-            document.getElementById('v-val').textContent = v.toFixed(1);
-            document.getElementById('mu-val').textContent = mu.toFixed(2);
-            document.getElementById('h-slider-val').textContent = deltaMm.toFixed(0);
-            document.getElementById('grad-out').textContent = gradient.toFixed(0);
-            document.getElementById('tau-out').textContent = tau.toFixed(1);
-            document.getElementById('visc-formula-live').textContent = `${mu.toFixed(2)} · ${gradient.toFixed(0)} = ${tau.toFixed(1)} Pa`;
+    document.getElementById("v-val").textContent = v.toFixed(1);
+    document.getElementById("mu-val").textContent = mu.toFixed(2);
+    document.getElementById("h-slider-val").textContent = deltaMm.toFixed(0);
+    document.getElementById("grad-out").textContent = gradient.toFixed(0);
+    document.getElementById("tau-out").textContent = tau.toFixed(1);
+    document.getElementById("visc-formula-live").textContent =
+      `${mu.toFixed(2)} · ${gradient.toFixed(0)} = ${tau.toFixed(1)} Pa`;
 
-            document.getElementById('visc-dominant').textContent = 'τ ∝ μU/δ';
-            document.getElementById('visc-global-out').innerHTML = `<strong>Lokalno → globalno.</strong> Na ispitnoj ploči A = ${testArea.toFixed(3)} m² vrijedi F<sub>τ</sub> = τA = ${shearForce.toFixed(2)} N. Ako ta sila djeluje na kraku r = ${effectiveRadius.toFixed(2)} m, njezin bi doprinos momentu bio M = rF<sub>τ</sub> = ${equivalentMoment.toFixed(2)} N·m.`;
+    document.getElementById("visc-dominant").textContent = "τ ∝ μU/δ";
+    document.getElementById("visc-global-out").innerHTML =
+      `<strong>Lokalno → globalno.</strong> Na ispitnoj ploči A = ${testArea.toFixed(3)} m² vrijedi F<sub>τ</sub> = τA = ${shearForce.toFixed(2)} N. Ako ta sila djeluje na kraku r = ${effectiveRadius.toFixed(2)} m, njezin bi doprinos momentu bio M = rF<sub>τ</sub> = ${equivalentMoment.toFixed(2)} N·m.`;
 
-            const changeMessage = lastChanged === 'speed'
-                ? 'Gornja ploča sada se giba brže: ista zračnost mora ostvariti veću promjenu brzine, pa rastu gradijent i naprezanje.'
-                : lastChanged === 'gap'
-                    ? 'Razmak ploča se promijenio: ista promjena brzine sada se raspodjeljuje kroz drugačiju debljinu sloja, pa se mijenja nagib profila.'
-                    : lastChanged === 'viscosity'
-                        ? 'Geometrija i krajnje brzine ostale su iste, pa je profil nepromijenjen; viskozniji fluid ipak za isti nagib razvija veće naprezanje.'
-                        : 'Najprije odredi kinematiku U/δ, zatim materijalni odgovor μ(U/δ), a potom silu na stvarnoj površini.';
-            document.getElementById('visc-explainer').textContent = `${changeMessage} Pri U = ${v.toFixed(1)} m/s i δ = ${deltaMm.toFixed(0)} mm gradijent iznosi ${gradient.toFixed(0)} s⁻¹, a za μ = ${mu.toFixed(2)} Pa·s dobiva se τ = ${tau.toFixed(1)} Pa.`;
+    const changeMessage =
+      lastChanged === "speed"
+        ? "Promjena brzine ploče mijenja gradijent U/δ i naprezanje μU/δ u istom omjeru."
+        : lastChanged === "gap"
+          ? "Razmak ploča se promijenio: ista promjena brzine sada se raspodjeljuje kroz drugačiju debljinu sloja, pa se mijenja nagib profila."
+          : lastChanged === "viscosity"
+            ? "Geometrija i krajnje brzine ostale su iste, pa je profil nepromijenjen; viskozniji fluid ipak za isti nagib razvija veće naprezanje."
+            : "Najprije odredi kinematiku U/δ, zatim materijalni odgovor μ(U/δ), a potom silu na stvarnoj površini.";
+    document.getElementById("visc-explainer").textContent =
+      `${changeMessage} Pri U = ${v.toFixed(1)} m/s i δ = ${deltaMm.toFixed(0)} mm gradijent iznosi ${gradient.toFixed(0)} s⁻¹, a za μ = ${mu.toFixed(2)} Pa·s dobiva se τ = ${tau.toFixed(1)} Pa.`;
 
-            caption.innerHTML = `Lijevi prikaz pokazuje slojeve fluida između ploča, a desni njihov linearni profil brzine. Čestice služe kao tragači u relativnoj skali. Smanjenjem zračnosti <strong>δ</strong> ista se promjena brzine ostvaruje na manjoj udaljenosti, pa raste <strong>dv/dy</strong>.`;
+    caption.innerHTML = `Lijevi prikaz pokazuje slojeve fluida između ploča, a desni njihov linearni profil brzine. Čestice su tragači: prikazana vodoravna dionica predstavlja 5 m. Zračnost je uvećana zasebnom skalom. Smanjenjem zračnosti <strong>δ</strong> ista se promjena brzine ostvaruje na manjoj udaljenosti, pa raste <strong>dv/dy</strong>.`;
 
-            model = { v, mu, gapPx, gradient, tau };
-            draw(model, false);
-        }
+    model = { v, mu, gapPx, gradient, tau };
+    draw(model, false);
+  }
 
-        function draw(current, advanceParticles) {
-            const { v, mu, gapPx, gradient, tau } = current;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function draw(current, advanceParticles) {
+    const { v, mu, gapPx, gradient, tau } = current;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const chamberLeft = 80;
-            const chamberWidth = 520;
-            const chamberRight = chamberLeft + chamberWidth;
-            const centerY = 196;
-            const topY = centerY - gapPx / 2;
-            const botY = centerY + gapPx / 2;
+    const chamberLeft = 80;
+    const chamberWidth = 520;
+    const chamberRight = chamberLeft + chamberWidth;
+    const centerY = 196;
+    const topY = centerY - gapPx / 2;
+    const botY = centerY + gapPx / 2;
 
-            const fluidGrad = ctx.createLinearGradient(0, topY, 0, botY);
-            fluidGrad.addColorStop(0, `rgba(125, 211, 252, ${0.16 + mu * 0.16})`);
-            fluidGrad.addColorStop(0.5, `rgba(59, 130, 246, ${0.10 + mu * 0.22})`);
-            fluidGrad.addColorStop(1, `rgba(125, 211, 252, ${0.16 + mu * 0.16})`);
-            ctx.fillStyle = fluidGrad;
-            ctx.fillRect(chamberLeft, topY, chamberWidth, gapPx);
+    const fluidGrad = ctx.createLinearGradient(0, topY, 0, botY);
+    fluidGrad.addColorStop(0, `rgba(125, 211, 252, ${0.16 + mu * 0.16})`);
+    fluidGrad.addColorStop(0.5, `rgba(59, 130, 246, ${0.1 + mu * 0.22})`);
+    fluidGrad.addColorStop(1, `rgba(125, 211, 252, ${0.16 + mu * 0.16})`);
+    ctx.fillStyle = fluidGrad;
+    ctx.fillRect(chamberLeft, topY, chamberWidth, gapPx);
 
-            ctx.fillStyle = '#0f172a';
-            roundRect(ctx, chamberLeft, topY - 14, chamberWidth, 14, 5, true, false);
-            ctx.fillStyle = '#64748b';
-            roundRect(ctx, chamberLeft, botY, chamberWidth, 14, 5, true, false);
+    ctx.fillStyle = "#0f172a";
+    roundRect(ctx, chamberLeft, topY - 14, chamberWidth, 14, 5, true, false);
+    ctx.fillStyle = "#64748b";
+    roundRect(ctx, chamberLeft, botY, chamberWidth, 14, 5, true, false);
 
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText(`gornja ploča: v = ${v.toFixed(1)} m/s`, chamberLeft + 8, topY - 24);
-            ctx.fillStyle = '#475569';
-            ctx.fillText('donja ploča: v = 0', chamberLeft + 8, botY + 32);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText(`gornja ploča: v = ${v.toFixed(1)} m/s`, chamberLeft + 8, topY - 24);
+    ctx.fillStyle = "#475569";
+    ctx.fillText("donja ploča: v = 0", chamberLeft + 8, botY + 32);
 
-            particles.forEach((particle) => {
-                const localRatio = 1 - particle.y;
-                const localSpeed = v * localRatio;
-                if (advanceParticles) particle.x += (localSpeed / Math.max(v, 0.001)) * 0.013;
-                if (particle.x > 1.03) particle.x = -0.03;
-                const px = chamberLeft + particle.x * chamberWidth;
-                const py = topY + particle.y * gapPx;
-                ctx.fillStyle = `rgba(3, 105, 161, ${0.22 + localRatio * 0.55})`;
-                ctx.beginPath();
-                ctx.arc(px, py, particle.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
+    particles.forEach((particle) => {
+      const localRatio = 1 - particle.y;
+      const localSpeed = v * localRatio;
+      if (advanceParticles) particle.x = (particle.x + localSpeed * advanceParticles / 5) % 1;
+      if (particle.x > 1.03) particle.x = -0.03;
+      const px = chamberLeft + particle.x * chamberWidth;
+      const py = topY + particle.y * gapPx;
+      ctx.fillStyle = `rgba(3, 105, 161, ${0.22 + localRatio * 0.55})`;
+      ctx.beginPath();
+      ctx.arc(px, py, particle.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
 
-            for (let i = 0; i <= 6; i++) {
-                const ratio = i / 6;
-                const y = botY - ratio * gapPx;
-                const arrowLength = 16 + ratio * v * 44;
-                drawArrow(chamberLeft + 16, y, chamberLeft + 16 + arrowLength, y, `rgba(37, 99, 235, ${0.35 + ratio * 0.65})`, 2, i === 6 ? 'vmax' : '');
-            }
+    for (let i = 0; i <= 6; i++) {
+      const ratio = i / 6;
+      const y = botY - ratio * gapPx;
+      const arrowLength = ratio * v * 44;
+      if (arrowLength < .1) continue;
+      drawArrow(
+        chamberLeft + 16,
+        y,
+        chamberLeft + 16 + arrowLength,
+        y,
+        `rgba(37, 99, 235, ${0.35 + ratio * 0.65})`,
+        2,
+        i === 6 ? "vmax" : "",
+      );
+    }
 
-            ctx.strokeStyle = '#fb923c';
-            ctx.lineWidth = 2.5;
-            ctx.setLineDash([7, 5]);
-            ctx.beginPath();
-            ctx.moveTo(chamberRight + 28, botY + 2);
-            ctx.lineTo(chamberRight + 28, topY - 2);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.fillStyle = '#c2410c';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText('δ', chamberRight + 36, centerY + 4);
+    ctx.strokeStyle = "#fb923c";
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([7, 5]);
+    ctx.beginPath();
+    ctx.moveTo(chamberRight + 28, botY + 2);
+    ctx.lineTo(chamberRight + 28, topY - 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#c2410c";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText("δ", chamberRight + 36, centerY + 4);
 
-            const profileX = 700;
-            const profileW = 130;
-            ctx.fillStyle = '#f8fafc';
-            roundRect(ctx, 660, 54, 190, 220, 16, true, false);
-            ctx.fillStyle = '#64748b';
-            ctx.font = '700 12px Inter';
-            ctx.fillText('Profil brzine', 676, 76);
-            ctx.font = '11px Inter';
-            ctx.fillText(`dv/dy = ${gradient.toFixed(0)} s⁻¹`, 676, 96);
+    const profileX = 700;
+    const profileW = 130;
+    ctx.fillStyle = "#f8fafc";
+    roundRect(ctx, 660, 54, 190, 220, 16, true, false);
+    ctx.fillStyle = "#64748b";
+    ctx.font = "700 12px Inter";
+    ctx.fillText("Profil brzine", 676, 76);
+    ctx.font = "11px Inter";
+    ctx.fillText(`dv/dy = ${gradient.toFixed(0)} s⁻¹`, 676, 96);
 
-            ctx.strokeStyle = '#1d4ed8';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            for (let i = 0; i <= 24; i++) {
-                const ratio = i / 24;
-                const y = botY - ratio * gapPx;
-                const x = profileX + ratio * Math.min(profileW, v * 18 + 30);
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
+    ctx.strokeStyle = "#1d4ed8";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let i = 0; i <= 24; i++) {
+      const ratio = i / 24;
+      const y = botY - ratio * gapPx;
+      const x = profileX + ratio * v * 24;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
 
-            const stressBarX = 860;
-            const stressTop = 70;
-            const stressHeight = 170;
-            const stressRatio = Math.min(tau / 140, 1);
-            ctx.fillStyle = '#fee2e2';
-            ctx.fillRect(stressBarX, stressTop, 18, stressHeight);
-            ctx.fillStyle = '#dc2626';
-            ctx.fillRect(stressBarX, stressTop + (1 - stressRatio) * stressHeight, 18, stressRatio * stressHeight);
-            ctx.strokeStyle = '#fecaca';
-            ctx.strokeRect(stressBarX, stressTop, 18, stressHeight);
-            ctx.fillStyle = '#7f1d1d';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText('τ', stressBarX - 2, stressTop - 8);
-            ctx.fillText(`${tau.toFixed(1)} Pa`, stressBarX - 38, stressTop + stressHeight + 18);
+    const stressBarX = 860;
+    const stressTop = 70;
+    const stressHeight = 170;
+    const stressRatio = Math.min(tau / 140, 1);
+    ctx.fillStyle = "#fee2e2";
+    ctx.fillRect(stressBarX, stressTop, 18, stressHeight);
+    ctx.fillStyle = "#dc2626";
+    ctx.fillRect(stressBarX, stressTop + (1 - stressRatio) * stressHeight, 18, stressRatio * stressHeight);
+    ctx.strokeStyle = "#fecaca";
+    ctx.strokeRect(stressBarX, stressTop, 18, stressHeight);
+    ctx.fillStyle = "#7f1d1d";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText("τ", stressBarX - 2, stressTop - 8);
+    ctx.fillText(`${tau.toFixed(1)} Pa`, stressBarX - 38, stressTop + stressHeight + 18);
+  }
 
-        }
+  function animate(dt) { if (model) draw(model, dt); }
 
-        function animate() {
-            if (model) draw(model, true);
-            requestAnimationFrame(animate);
-        }
-
-        vSl.addEventListener('input', () => { lastChanged = 'speed'; update(); });
-        function syncMuPresets() {
-            document.querySelectorAll('#widget-visc-basics [data-visc-mu]').forEach(button => {
-                button.setAttribute('aria-pressed', String(Math.abs(+button.dataset.viscMu - +muSl.value) < 0.001));
-            });
-        }
-        document.querySelectorAll('#widget-visc-basics [data-visc-mu]').forEach(button => button.addEventListener('click', () => {
-            muSl.value = button.dataset.viscMu;
-            muSl.dispatchEvent(new Event('input', { bubbles:true }));
-        }));
-        muSl.addEventListener('input', () => { lastChanged = 'viscosity'; syncMuPresets(); update(); });
-        hSl.addEventListener('input', () => { lastChanged = 'gap'; update(); });
-        syncMuPresets();
-        update();
-        animate();
-    })();
-    </script>
+  vSl.addEventListener("input", () => {
+    lastChanged = "speed";
+    update();
+  });
+  function syncMuPresets() {
+    document.querySelectorAll("#widget-visc-basics [data-visc-mu]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(Math.abs(+button.dataset.viscMu - +muSl.value) < 0.001));
+    });
+  }
+  document.querySelectorAll("#widget-visc-basics [data-visc-mu]").forEach((button) =>
+    button.addEventListener("click", () => {
+      muSl.value = button.dataset.viscMu;
+      muSl.dispatchEvent(new Event("input", { bubbles: true }));
+    }),
+  );
+  muSl.addEventListener("input", () => {
+    lastChanged = "viscosity";
+    syncMuPresets();
+    update();
+  });
+  hSl.addEventListener("input", () => {
+    lastChanged = "gap";
+    update();
+  });
+  syncMuPresets();
+  update();
+  MF1.motion(document.getElementById("widget-visc-basics"), animate, {reset:()=>particles.forEach((p,i)=>p.x=(i*.618)%1)});
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Što je gornja ploča brža ili je razmak među pločama manji, to je gradijent brzine strmiji. Veća viskoznost zatim taj gradijent pretvara u veće smično naprezanje.
@@ -686,211 +707,210 @@ $$T = \int_a^{a+b} \frac{2\pi \mu \omega \tan^3\alpha}{\delta \cos\alpha} y^3 dy
     <div class="z10-explainer" id="z10-v7-explainer"></div>
 
     <script>
-    (function() {
-        const cSide = document.getElementById('canvas-z10-v7-side');
-        const cTop = document.getElementById('canvas-z10-v7-top');
-        if (!cSide || !cTop) return;
-        const ctxSide = cSide.getContext('2d');
-        const ctxTop = cTop.getContext('2d');
+(function () {
+  const cSide = document.getElementById("canvas-z10-v7-side");
+  const cTop = document.getElementById("canvas-z10-v7-top");
+  if (!cSide || !cTop) return;
+  const ctxSide = cSide.getContext("2d");
+  const ctxTop = cTop.getContext("2d");
 
-        const slA = document.getElementById('z10-v7-slider-a');
-        const slB = document.getElementById('z10-v7-slider-b');
-        const slAlpha = document.getElementById('z10-v7-slider-alpha');
-        const slY = document.getElementById('z10-v7-slider-y');
-        let phase = 0;
+  const slA = document.getElementById("z10-v7-slider-a");
+  const slB = document.getElementById("z10-v7-slider-b");
+  const slAlpha = document.getElementById("z10-v7-slider-alpha");
+  const slY = document.getElementById("z10-v7-slider-y");
+  let phase = 0;
 
-        function drawArrow(ctx, x1, y1, x2, y2, color, label) {
-            const headlen = 9;
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x2, y2);
-            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-            ctx.closePath();
-            ctx.fill();
-            if (label) {
-                ctx.font = 'bold 12px Inter';
-                ctx.fillText(label, x2 + 8, y2 - 6);
-            }
-        }
+  function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+    const headlen = 9;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    if (label) {
+      ctx.font = "bold 12px Inter";
+      ctx.fillText(label, x2 + 8, y2 - 6);
+    }
+  }
 
-        function update() {
-            const a = parseFloat(slA.value);
-            const b = parseFloat(slB.value);
-            const alphaDeg = parseFloat(slAlpha.value);
-            const alpha = alphaDeg * Math.PI / 180;
-            const mu = 0.1;
-            const omega = 200;
-            const delta = 0.0012;
+  function update() {
+    const a = parseFloat(slA.value);
+    const b = parseFloat(slB.value);
+    const alphaDeg = parseFloat(slAlpha.value);
+    const alpha = (alphaDeg * Math.PI) / 180;
+    const mu = 0.1;
+    const omega = 200;
+    const delta = 0.0012;
 
-            slY.min = a;
-            slY.max = a + b;
-            let y = parseFloat(slY.value);
-            if (y < a) y = a;
-            if (y > a + b) y = a + b;
+    slY.min = a;
+    slY.max = a + b;
+    let y = parseFloat(slY.value);
+    if (y < a) y = a;
+    if (y > a + b) y = a + b;
 
-            const rMm = y * Math.tan(alpha);
-            const rM = rMm / 1000;
-            const localV = omega * rM;
-            const localTau = mu * localV / delta;
-            const aM = a / 1000;
-            const bM = b / 1000;
-            const totalMoment = (Math.PI * mu * omega * Math.pow(Math.tan(alpha), 3) * (Math.pow(aM + bM, 4) - Math.pow(aM, 4))) / (2 * delta * Math.cos(alpha));
+    const rMm = y * Math.tan(alpha);
+    const rM = rMm / 1000;
+    const localV = omega * rM;
+    const localTau = (mu * localV) / delta;
+    const aM = a / 1000;
+    const bM = b / 1000;
+    const totalMoment =
+      (Math.PI * mu * omega * Math.pow(Math.tan(alpha), 3) * (Math.pow(aM + bM, 4) - Math.pow(aM, 4))) /
+      (2 * delta * Math.cos(alpha));
 
-            document.getElementById('z10-v7-val-a').textContent = a.toFixed(0);
-            document.getElementById('z10-v7-val-b').textContent = b.toFixed(0);
-            document.getElementById('z10-v7-val-alpha').textContent = alphaDeg.toFixed(0);
-            document.getElementById('z10-v7-val-y').textContent = y.toFixed(0);
-            document.getElementById('z10-v7-res-t').textContent = totalMoment.toFixed(3);
-            document.getElementById('z10-v7-res-r').textContent = rMm.toFixed(1);
-            document.getElementById('z10-v7-res-v').textContent = localV.toFixed(2);
-            document.getElementById('z10-v7-res-tau').textContent = localTau.toFixed(0);
-            document.getElementById('z10-v7-explainer').textContent = `Na presjeku y = ${y.toFixed(0)} mm radijus naraste na ${rMm.toFixed(1)} mm, pa rub te zone putuje brzinom ${localV.toFixed(2)} m/s. Zato ondje smično naprezanje raste na ${localTau.toFixed(0)} Pa. Kako moment dodatno množi silu s radijusom, gornje i šire zone krnjeg stošca doprinose ukupnom momentu nesrazmjerno više od donjih.`;
+    document.getElementById("z10-v7-val-a").textContent = a.toFixed(0);
+    document.getElementById("z10-v7-val-b").textContent = b.toFixed(0);
+    document.getElementById("z10-v7-val-alpha").textContent = alphaDeg.toFixed(0);
+    document.getElementById("z10-v7-val-y").textContent = y.toFixed(0);
+    document.getElementById("z10-v7-res-t").textContent = totalMoment.toFixed(3);
+    document.getElementById("z10-v7-res-r").textContent = rMm.toFixed(1);
+    document.getElementById("z10-v7-res-v").textContent = localV.toFixed(2);
+    document.getElementById("z10-v7-res-tau").textContent = localTau.toFixed(0);
+    document.getElementById("z10-v7-explainer").textContent =
+      `Na presjeku y = ${y.toFixed(0)} mm radijus naraste na ${rMm.toFixed(1)} mm, pa rub te zone putuje brzinom ${localV.toFixed(2)} m/s. Zato ondje smično naprezanje raste na ${localTau.toFixed(0)} Pa. Kako moment dodatno množi silu s radijusom, gornje i šire zone krnjeg stošca doprinose ukupnom momentu nesrazmjerno više od donjih.`;
 
-            drawSide(a, b, alpha, y, rMm);
-            drawTop(rMm, localV, localTau);
-        }
+    drawSide(a, b, alpha, y, rMm);
+    drawTop(rMm, localV, localTau);
+  }
 
-        function drawSide(a, b, alpha, yProbe, rMm) {
-            phase += 0.04;
-            ctxSide.clearRect(0, 0, cSide.width, cSide.height);
-            ctxSide.fillStyle = '#ffffff';
-            ctxSide.fillRect(0, 0, cSide.width, cSide.height);
+  function drawSide(a, b, alpha, yProbe, rMm) {
+    // Stationary geometry: no decorative oscillation.
+    ctxSide.clearRect(0, 0, cSide.width, cSide.height);
+    ctxSide.fillStyle = "#ffffff";
+    ctxSide.fillRect(0, 0, cSide.width, cSide.height);
 
-            const cx = 250;
-            const baseLine = 248;
-            const scale = 0.68;
-            const r1 = a * Math.tan(alpha) * scale;
-            const r2 = (a + b) * Math.tan(alpha) * scale;
-            const y1 = baseLine - a * scale;
-            const y2 = baseLine - (a + b) * scale;
-            const probeY = baseLine - yProbe * scale;
-            const rProbe = yProbe * Math.tan(alpha) * scale;
+    const cx = 250;
+    const baseLine = 248;
+    const scale = Math.min(190 / (a+b), 180 / ((a+b)*Math.tan(alpha)));
+    const r1 = a * Math.tan(alpha) * scale;
+    const r2 = (a + b) * Math.tan(alpha) * scale;
+    const y1 = baseLine - a * scale;
+    const y2 = baseLine - (a + b) * scale;
+    const probeY = baseLine - yProbe * scale;
+    const rProbe = yProbe * Math.tan(alpha) * scale;
 
-            const bodyGrad = ctxSide.createLinearGradient(0, y2, 0, y1);
-            bodyGrad.addColorStop(0, 'rgba(96,165,250,0.22)');
-            bodyGrad.addColorStop(1, 'rgba(59,130,246,0.08)');
-            ctxSide.fillStyle = bodyGrad;
-            ctxSide.beginPath();
-            ctxSide.moveTo(cx - r1, y1);
-            ctxSide.lineTo(cx + r1, y1);
-            ctxSide.lineTo(cx + r2, y2);
-            ctxSide.lineTo(cx - r2, y2);
-            ctxSide.closePath();
-            ctxSide.fill();
-            ctxSide.strokeStyle = '#1e293b';
-            ctxSide.lineWidth = 2.2;
-            ctxSide.stroke();
+    const bodyGrad = ctxSide.createLinearGradient(0, y2, 0, y1);
+    bodyGrad.addColorStop(0, "rgba(96,165,250,0.22)");
+    bodyGrad.addColorStop(1, "rgba(59,130,246,0.08)");
+    ctxSide.fillStyle = bodyGrad;
+    ctxSide.beginPath();
+    ctxSide.moveTo(cx - r1, y1);
+    ctxSide.lineTo(cx + r1, y1);
+    ctxSide.lineTo(cx + r2, y2);
+    ctxSide.lineTo(cx - r2, y2);
+    ctxSide.closePath();
+    ctxSide.fill();
+    ctxSide.strokeStyle = "#1e293b";
+    ctxSide.lineWidth = 2.2;
+    ctxSide.stroke();
 
-            ctxSide.fillStyle = 'rgba(239, 68, 68, 0.12)';
-            ctxSide.fillRect(cx - rProbe, probeY - 10, rProbe * 2, 20);
-            ctxSide.strokeStyle = '#ef4444';
-            ctxSide.lineWidth = 3;
-            ctxSide.beginPath();
-            ctxSide.moveTo(cx - rProbe, probeY);
-            ctxSide.lineTo(cx + rProbe, probeY);
-            ctxSide.stroke();
+    ctxSide.fillStyle = "rgba(239, 68, 68, 0.12)";
+    ctxSide.fillRect(cx - rProbe, probeY - 10, rProbe * 2, 20);
+    ctxSide.strokeStyle = "#ef4444";
+    ctxSide.lineWidth = 3;
+    ctxSide.beginPath();
+    ctxSide.moveTo(cx - rProbe, probeY);
+    ctxSide.lineTo(cx + rProbe, probeY);
+    ctxSide.stroke();
 
-            drawArrow(ctxSide, cx + rProbe + 18, probeY, cx + rProbe + 70 + Math.sin(phase) * 6, probeY, '#c2410c', 'v(y)');
+    ctxSide.fillStyle="#176da9"; ctxSide.font="20px system-ui"; ctxSide.fillText("⊗",cx+rProbe-8,probeY+6); ctxSide.font="12px system-ui"; ctxSide.fillText("v: u ravninu u označenoj točki",30,276);
 
-            ctxSide.setLineDash([7, 5]);
-            ctxSide.strokeStyle = '#94a3b8';
-            ctxSide.beginPath();
-            ctxSide.moveTo(cx, baseLine + 4);
-            ctxSide.lineTo(cx, y2 - 18);
-            ctxSide.stroke();
-            ctxSide.setLineDash([]);
+    ctxSide.setLineDash([7, 5]);
+    ctxSide.strokeStyle = "#94a3b8";
+    ctxSide.beginPath();
+    ctxSide.moveTo(cx, baseLine + 4);
+    ctxSide.lineTo(cx, y2 - 18);
+    ctxSide.stroke();
+    ctxSide.setLineDash([]);
 
-            ctxSide.fillStyle = '#334155';
-            ctxSide.font = '12px Inter';
-            ctxSide.fillText(`r(y) = ${rMm.toFixed(1)} mm`, cx + rProbe + 18, probeY + 22);
-            ctxSide.fillText(`a = ${a.toFixed(0)} mm`, 34, y1 + 4);
-            ctxSide.fillText(`a + b = ${(a + b).toFixed(0)} mm`, 34, y2 + 4);
-            ctxSide.fillText('dM raste kao y³: širi gornji dio daje najveći doprinos', 24, 30);
-        }
+    ctxSide.fillStyle = "#334155";
+    ctxSide.font = "12px Inter";
+    ctxSide.fillText(`r(y) = ${rMm.toFixed(1)} mm`, 310, 276);
+    ctxSide.fillText(`a = ${a.toFixed(0)} mm`, 34, y1 + 18);
+    ctxSide.fillText(`a + b = ${(a + b).toFixed(0)} mm`, 34, y2 - 12);
+    ctxSide.fillText("dM raste kao y³: širi gornji dio daje najveći doprinos", 24, 30);
+  }
 
-        function drawTop(rMm, localV, localTau) {
-            ctxTop.clearRect(0, 0, cTop.width, cTop.height);
-            ctxTop.fillStyle = '#ffffff';
-            ctxTop.fillRect(0, 0, cTop.width, cTop.height);
+  function drawTop(rMm, localV, localTau) {
+    ctxTop.clearRect(0, 0, cTop.width, cTop.height);
+    ctxTop.fillStyle = "#ffffff";
+    ctxTop.fillRect(0, 0, cTop.width, cTop.height);
 
-            const cx = 210;
-            const cy = 142;
-            const rPx = Math.min(90, rMm * 0.7);
-            const gapPx = 28;
-            const stressRatio = Math.min(localTau / 2500, 1);
+    const cx = 210;
+    const cy = 142;
+    const rPx = Math.min(90, rMm * 0.7);
+    const gapPx = 28;
+    const stressRatio = Math.min(localTau / 2500, 1);
 
-            ctxTop.beginPath();
-            ctxTop.arc(cx, cy, rPx + gapPx, 0, Math.PI * 2);
-            ctxTop.strokeStyle = '#cbd5e1';
-            ctxTop.lineWidth = 2;
-            ctxTop.stroke();
+    ctxTop.beginPath();
+    ctxTop.arc(cx, cy, rPx + gapPx, 0, Math.PI * 2);
+    ctxTop.strokeStyle = "#cbd5e1";
+    ctxTop.lineWidth = 2;
+    ctxTop.stroke();
 
-            ctxTop.beginPath();
-            ctxTop.arc(cx, cy, rPx, 0, Math.PI * 2);
-            ctxTop.fillStyle = '#334155';
-            ctxTop.fill();
+    ctxTop.beginPath();
+    ctxTop.arc(cx, cy, rPx, 0, Math.PI * 2);
+    ctxTop.fillStyle = "#334155";
+    ctxTop.fill();
 
-            for (let i = 0; i < 10; i++) {
-                const angle = (i / 10) * Math.PI * 2 + phase;
-                const radial = rPx + gapPx * 0.55;
-                const x1 = cx + Math.cos(angle) * radial;
-                const y1 = cy + Math.sin(angle) * radial;
-                const tangentLength = 18 + stressRatio * 20;
-                const x2 = x1 - Math.sin(angle) * tangentLength;
-                const y2 = y1 + Math.cos(angle) * tangentLength;
-                drawArrow(ctxTop, x1, y1, x2, y2, '#2563eb', '');
-            }
+    for (let i = 0; i < 10; i++) {
+      const angle = (i / 10) * Math.PI * 2;
+      const radial = rPx;
+      const x1 = cx + Math.cos(angle) * radial;
+      const y1 = cy + Math.sin(angle) * radial;
+      const tangentLength = 18 + stressRatio * 20;
+      const x2 = x1 + Math.sin(angle) * tangentLength;
+      const y2 = y1 - Math.cos(angle) * tangentLength;
+      drawArrow(ctxTop, x1, y1, x2, y2, "#2563eb", "");
+    }
 
-            ctx.strokeStyle = '#f97316';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(cx, cy - rPx);
-            ctx.lineTo(cx, cy - rPx - gapPx);
-            ctx.stroke();
-            ctx.fillStyle = '#c2410c';
-            ctx.font = '11px Inter';
-            ctx.fillText('δ (uvećano)', cx + 8, cy - rPx - gapPx / 2);
+    ctxTop.strokeStyle = "#f97316";
+    ctxTop.lineWidth = 2.5;
+    ctxTop.beginPath();
+    ctxTop.moveTo(cx, cy - rPx);
+    ctxTop.lineTo(cx, cy - rPx - gapPx);
+    ctxTop.stroke();
+    ctxTop.fillStyle = "#c2410c";
+    ctxTop.font = "11px Inter";
+    ctxTop.fillText("δ (uvećano)", cx + 8, cy - rPx - gapPx / 2);
 
-            ctxTop.fillStyle = '#0f172a';
-            ctxTop.font = 'bold 12px Inter';
-            ctxTop.fillText(`v = ${localV.toFixed(2)} m/s`, 24, 36);
-            ctxTop.fillText(`τ = ${localTau.toFixed(0)} Pa`, 24, 56);
-            ctxTop.fillStyle = '#64748b';
-            ctxTop.font = '11px Inter';
-            ctxTop.fillText('tangencijalne strelice: lokalni smični otpor ulja', 24, 78);
+    ctxTop.fillStyle = "#0f172a";
+    ctxTop.font = "bold 12px Inter";
+    ctxTop.fillText(`v = ${localV.toFixed(2)} m/s`, 24, 36);
+    ctxTop.fillText(`τ = ${localTau.toFixed(0)} Pa`, 24, 56);
+    ctxTop.fillStyle = "#64748b";
+    ctxTop.font = "11px Inter";
+    ctxTop.fillText("otpor na rotor: suprotno vrtnji ↻", 24, 78);
 
-            const barX = 360;
-            const barTop = 50;
-            const barHeight = 160;
-            ctxTop.fillStyle = '#fee2e2';
-            ctxTop.fillRect(barX, barTop, 22, barHeight);
-            ctxTop.fillStyle = '#dc2626';
-            ctxTop.fillRect(barX, barTop + (1 - stressRatio) * barHeight, 22, stressRatio * barHeight);
-            ctxTop.strokeStyle = '#fecaca';
-            ctxTop.strokeRect(barX, barTop, 22, barHeight);
-            ctxTop.fillStyle = '#7f1d1d';
-            ctxTop.font = 'bold 11px Inter';
-            ctxTop.fillText('lokalni τ', barX - 10, barTop - 10);
+    const barX = 360;
+    const barTop = 50;
+    const barHeight = 160;
+    ctxTop.fillStyle = "#fee2e2";
+    ctxTop.fillRect(barX, barTop, 22, barHeight);
+    ctxTop.fillStyle = "#dc2626";
+    ctxTop.fillRect(barX, barTop + (1 - stressRatio) * barHeight, 22, stressRatio * barHeight);
+    ctxTop.strokeStyle = "#fecaca";
+    ctxTop.strokeRect(barX, barTop, 22, barHeight);
+    ctxTop.fillStyle = "#7f1d1d";
+    ctxTop.font = "bold 11px Inter";
+    ctxTop.fillText("lokalni τ", barX - 10, barTop - 10);
+  }
 
-        }
+  function animate() { update(); }
 
-        function animate() {
-            update();
-            requestAnimationFrame(animate);
-        }
-
-        [slA, slB, slAlpha, slY].forEach((slider) => slider.addEventListener('input', update));
-        animate();
-    })();
-    </script>
+  [slA, slB, slAlpha, slY].forEach((slider) => slider.addEventListener("input", update));
+  animate();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Okretni moment ovisi o četvrtoj potenciji polumjera ($y \tan \alpha$), što znači da gornji širi dijelovi stošca doprinose momentu znatno više nego donji uži dijelovi.
@@ -988,168 +1008,178 @@ Krnji stožac rotira konstantnom kutnom brzinom od $200 \, \text{rad/s}$ unutar 
     <div class="z11-explainer" id="z11-explainer"></div>
 
     <script>
-    (function() {
-        const canvas = document.getElementById('canvas-v8-sys');
-        const ctx = canvas.getContext('2d');
-        const wS = document.getElementById('w-slider-v8');
-        const tS = document.getElementById('t-slider-v8');
-        const state = { omega: 200, temp: 20, mu: 0.1, basePower: 68.7, shellPower: 211.9, totalPower: 280.6, drop: 0, phase: 0 };
+(function () {
+  const canvas = document.getElementById("canvas-v8-sys");
+  const ctx = canvas.getContext("2d");
+  const wS = document.getElementById("w-slider-v8");
+  const tS = document.getElementById("t-slider-v8");
+  const state = {
+    omega: 200,
+    temp: 20,
+    mu: 0.1,
+    basePower: 68.7,
+    shellPower: 211.9,
+    totalPower: 280.6,
+    drop: 0,
+    phase: 0,
+  };
 
-        const D = 0.12;
-        const d = 0.04;
-        const L = 0.12;
-        const delta = 0.0012;
-        const alpha = Math.atan((D - d) / (2 * L));
-        const mu20 = 0.1;
-        const kVisc = Math.log(0.0078 / 0.1) / 60;
-        const baselinePower20 = totalPowerFor(mu20, 200).total;
+  const D = 0.12;
+  const d = 0.04;
+  const L = 0.12;
+  const delta = 0.0012;
+  const alpha = Math.atan((D - d) / (2 * L));
+  const mu20 = 0.1;
+  const kVisc = Math.log(0.0078 / 0.1) / 60;
+  const baselinePower20 = totalPowerFor(mu20, 200).total;
 
-        function viscosityAt(temp) {
-            return mu20 * Math.exp(kVisc * (temp - 20));
-        }
+  function viscosityAt(temp) {
+    return mu20 * Math.exp(kVisc * (temp - 20));
+  }
 
-        function totalPowerFor(mu, omega) {
-            const basePower = (Math.PI * mu * omega * omega * (Math.pow(D, 4) + Math.pow(d, 4))) / (32 * delta);
-            const shellPower = (Math.PI * mu * omega * omega * (Math.pow(D, 4) - Math.pow(d, 4))) / (32 * delta * Math.sin(alpha));
-            return { basePower, shellPower, total: basePower + shellPower };
-        }
+  function totalPowerFor(mu, omega) {
+    const basePower = (Math.PI * mu * omega * omega * (Math.pow(D, 4) + Math.pow(d, 4))) / (32 * delta);
+    const shellPower =
+      (Math.PI * mu * omega * omega * (Math.pow(D, 4) - Math.pow(d, 4))) / (32 * delta * Math.sin(alpha));
+    return { basePower, shellPower, total: basePower + shellPower };
+  }
 
-        function update() {
-            state.omega = parseFloat(wS.value);
-            state.temp = parseFloat(tS.value);
-            state.mu = viscosityAt(state.temp);
+  function update() {
+    state.omega = parseFloat(wS.value);
+    state.temp = parseFloat(tS.value);
+    state.mu = viscosityAt(state.temp);
 
-            const powers = totalPowerFor(state.mu, state.omega);
-            state.basePower = powers.basePower;
-            state.shellPower = powers.shellPower;
-            state.totalPower = powers.total;
+    const powers = totalPowerFor(state.mu, state.omega);
+    state.basePower = powers.basePower;
+    state.shellPower = powers.shellPower;
+    state.totalPower = powers.total;
 
-            const baselineAtCurrentOmega = totalPowerFor(mu20, state.omega).total;
-            state.drop = baselineAtCurrentOmega > 0 ? (1 - state.totalPower / baselineAtCurrentOmega) * 100 : 0;
+    const baselineAtCurrentOmega = totalPowerFor(mu20, state.omega).total;
+    state.drop = baselineAtCurrentOmega > 0 ? (1 - state.totalPower / baselineAtCurrentOmega) * 100 : 0;
 
-            document.getElementById('w-val-v8').textContent = state.omega.toFixed(0);
-            document.getElementById('t-val-v8').textContent = state.temp.toFixed(0);
-            document.getElementById('p-res-v8').textContent = state.totalPower.toFixed(1);
-            document.getElementById('z11-res-mu').textContent = state.mu.toFixed(4);
-            document.getElementById('z11-res-base').textContent = state.basePower.toFixed(1);
-            document.getElementById('z11-res-shell').textContent = state.shellPower.toFixed(1);
-            document.getElementById('z11-res-drop').textContent = Math.max(0, state.drop).toFixed(1);
-            document.getElementById('z11-explainer').textContent = `U interpolacijskom rasponu 20–80 °C, pri T = ${state.temp.toFixed(0)} °C dobiva se μ = ${state.mu.toFixed(4)} Pa·s. Pri ω = ${state.omega.toFixed(0)} rad/s baze traže ${state.basePower.toFixed(1)} W, plašt ${state.shellPower.toFixed(1)} W, a ukupno je ${state.totalPower.toFixed(1)} W. Oba doprinosa mijenjaju se linearno s μ.`;
-        }
+    document.getElementById("w-val-v8").textContent = state.omega.toFixed(0);
+    document.getElementById("t-val-v8").textContent = state.temp.toFixed(0);
+    document.getElementById("p-res-v8").textContent = state.totalPower.toFixed(1);
+    document.getElementById("z11-res-mu").textContent = state.mu.toFixed(4);
+    document.getElementById("z11-res-base").textContent = state.basePower.toFixed(1);
+    document.getElementById("z11-res-shell").textContent = state.shellPower.toFixed(1);
+    document.getElementById("z11-res-drop").textContent = Math.max(0, state.drop).toFixed(1);
+    document.getElementById("z11-explainer").textContent =
+      `U interpolacijskom rasponu 20–80 °C, pri T = ${state.temp.toFixed(0)} °C dobiva se μ = ${state.mu.toFixed(4)} Pa·s. Pri ω = ${state.omega.toFixed(0)} rad/s baze traže ${state.basePower.toFixed(1)} W, plašt ${state.shellPower.toFixed(1)} W, a ukupno je ${state.totalPower.toFixed(1)} W. Oba doprinosa mijenjaju se linearno s μ.`;
+  }
 
-        function drawArrow(x1, y1, x2, y2, color) {
-            const headlen = 9;
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x2, y2);
-            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-            ctx.closePath();
-            ctx.fill();
-        }
+  function drawArrow(x1, y1, x2, y2, color) {
+    const headlen = 9;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+  }
 
-        function animate() {
-            state.phase += 0.04 + state.omega / 10000;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function animate() {
+    state.phase += 0.04 + state.omega / 10000;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const coneCx = 260;
-            const coneCy = 165;
-            const bottomHalf = 62;
-            const topHalf = 22;
-            const coneHeight = 150;
-            const oilColor = 'rgba(59,130,246,0.18)';
+    const coneCx = 260;
+    const coneCy = 165;
+    const bottomHalf = 62;
+    const topHalf = 22;
+    const coneHeight = 150;
+    const oilColor = "rgba(59,130,246,0.18)";
 
-            ctx.fillStyle = oilColor;
-            ctx.fillRect(70, 60, 420, 210);
-            ctx.strokeStyle = '#cbd5e1';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(70, 60, 420, 210);
+    ctx.fillStyle = oilColor;
+    ctx.fillRect(70, 60, 420, 210);
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(70, 60, 420, 210);
 
-            const coneGrad = ctx.createLinearGradient(0, coneCy - coneHeight / 2, 0, coneCy + coneHeight / 2);
-            coneGrad.addColorStop(0, '#475569');
-            coneGrad.addColorStop(1, '#0f172a');
-            ctx.fillStyle = coneGrad;
-            ctx.beginPath();
-            ctx.moveTo(coneCx - topHalf, coneCy - coneHeight / 2);
-            ctx.lineTo(coneCx + topHalf, coneCy - coneHeight / 2);
-            ctx.lineTo(coneCx + bottomHalf, coneCy + coneHeight / 2);
-            ctx.lineTo(coneCx - bottomHalf, coneCy + coneHeight / 2);
-            ctx.closePath();
-            ctx.fill();
+    const coneGrad = ctx.createLinearGradient(0, coneCy - coneHeight / 2, 0, coneCy + coneHeight / 2);
+    coneGrad.addColorStop(0, "#475569");
+    coneGrad.addColorStop(1, "#0f172a");
+    ctx.fillStyle = coneGrad;
+    ctx.beginPath();
+    ctx.moveTo(coneCx - topHalf, coneCy - coneHeight / 2);
+    ctx.lineTo(coneCx + topHalf, coneCy - coneHeight / 2);
+    ctx.lineTo(coneCx + bottomHalf, coneCy + coneHeight / 2);
+    ctx.lineTo(coneCx - bottomHalf, coneCy + coneHeight / 2);
+    ctx.closePath();
+    ctx.fill();
 
-            for (let i = 0; i < 8; i++) {
-                const level = i / 7;
-                const y = coneCy + coneHeight / 2 - level * coneHeight;
-                const halfWidth = bottomHalf - (bottomHalf - topHalf) * level;
-                const arrowLen = 26 + state.omega / 18 * (0.5 + level * 0.5);
-                drawArrow(coneCx + halfWidth + 10, y, coneCx + halfWidth + 10 + arrowLen, y, '#2563eb');
-            }
+    // At the right silhouette azimuthal velocity points into the section;
+    // viscous traction on the rotor points out of the section.
+    for(let i=1;i<=5;i++){
+      const level=i/6,y=coneCy+coneHeight/2-level*coneHeight;
+      const halfWidth=bottomHalf-(bottomHalf-topHalf)*level;
+      ctx.fillStyle="#b93645";ctx.font="19px system-ui";
+      ctx.fillText("⊙",coneCx+halfWidth-8,y+6);
+    }
+    ctx.fillStyle = "#334155";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText(`ω = ${state.omega.toFixed(0)} rad/s`, 82, 82);
+    ctx.fillText(`μ(T) = ${state.mu.toFixed(4)} Pa s`, 82, 102);
+    ctx.fillText("⊙ otpor na rotor iz ravnine; v je ⊗", 82, 122);
 
-            ctx.fillStyle = '#334155';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText(`ω = ${state.omega.toFixed(0)} rad/s`, 82, 82);
-            ctx.fillText(`μ(T) = ${state.mu.toFixed(4)} Pa s`, 82, 102);
-            ctx.fillText('plave strelice: smični otpor ulja', 82, 122);
+    const barBaseRatio = Math.min(state.basePower / Math.max(state.totalPower, 1), 1);
+    const barShellRatio = Math.min(state.shellPower / Math.max(state.totalPower, 1), 1);
+    const barX = 610;
+    const barY = 84;
+    const barW = 54;
+    const barH = 170;
 
-            const barBaseRatio = Math.min(state.basePower / Math.max(state.totalPower, 1), 1);
-            const barShellRatio = Math.min(state.shellPower / Math.max(state.totalPower, 1), 1);
-            const barX = 610;
-            const barY = 84;
-            const barW = 54;
-            const barH = 170;
+    ctx.fillStyle = "#e2e8f0";
+    ctx.fillRect(barX, barY, barW, barH);
+    ctx.fillRect(barX + 90, barY, barW, barH);
 
-            ctx.fillStyle = '#e2e8f0';
-            ctx.fillRect(barX, barY, barW, barH);
-            ctx.fillRect(barX + 90, barY, barW, barH);
+    ctx.fillStyle = "#16a34a";
+    ctx.fillRect(barX, barY + (1 - barBaseRatio) * barH, barW, barBaseRatio * barH);
+    ctx.fillStyle = "#2563eb";
+    ctx.fillRect(barX + 90, barY + (1 - barShellRatio) * barH, barW, barShellRatio * barH);
 
-            ctx.fillStyle = '#16a34a';
-            ctx.fillRect(barX, barY + (1 - barBaseRatio) * barH, barW, barBaseRatio * barH);
-            ctx.fillStyle = '#2563eb';
-            ctx.fillRect(barX + 90, barY + (1 - barShellRatio) * barH, barW, barShellRatio * barH);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText("Baze", barX + 6, barY - 10);
+    ctx.fillText("Plašt", barX + 92, barY - 10);
+    ctx.font = "11px Inter";
+    ctx.fillText(`${state.basePower.toFixed(1)} W`, barX - 6, barY + barH + 18);
+    ctx.fillText(`${state.shellPower.toFixed(1)} W`, barX + 80, barY + barH + 18);
 
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText('Baze', barX + 6, barY - 10);
-            ctx.fillText('Plašt', barX + 92, barY - 10);
-            ctx.font = '11px Inter';
-            ctx.fillText(`${state.basePower.toFixed(1)} W`, barX - 6, barY + barH + 18);
-            ctx.fillText(`${state.shellPower.toFixed(1)} W`, barX + 80, barY + barH + 18);
+    const gaugeX = 760;
+    const gaugeY = 150;
+    const radius = 54;
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.arc(gaugeX, gaugeY, radius, Math.PI, 2 * Math.PI);
+    ctx.stroke();
+    const powerRatio = Math.min(state.totalPower / Math.max(baselinePower20 * 6, 1), 1);
+    ctx.strokeStyle = "#dc2626";
+    ctx.beginPath();
+    ctx.arc(gaugeX, gaugeY, radius, Math.PI, Math.PI + powerRatio * Math.PI);
+    ctx.stroke();
+    const needleAngle = Math.PI + powerRatio * Math.PI;
+    drawArrow(gaugeX, gaugeY, gaugeX + Math.cos(needleAngle) * 42, gaugeY + Math.sin(needleAngle) * 42, "#7f1d1d");
+    ctx.fillStyle = "#7f1d1d";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText("P", gaugeX - 5, gaugeY + 6);
+  }
 
-            const gaugeX = 760;
-            const gaugeY = 150;
-            const radius = 54;
-            ctx.strokeStyle = '#cbd5e1';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.arc(gaugeX, gaugeY, radius, Math.PI, 2 * Math.PI);
-            ctx.stroke();
-            const powerRatio = Math.min(state.totalPower / Math.max(baselinePower20 * 6, 1), 1);
-            ctx.strokeStyle = '#dc2626';
-            ctx.beginPath();
-            ctx.arc(gaugeX, gaugeY, radius, Math.PI, Math.PI + powerRatio * Math.PI);
-            ctx.stroke();
-            const needleAngle = Math.PI + powerRatio * Math.PI;
-            drawArrow(gaugeX, gaugeY, gaugeX + Math.cos(needleAngle) * 42, gaugeY + Math.sin(needleAngle) * 42, '#7f1d1d');
-            ctx.fillStyle = '#7f1d1d';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText('P', gaugeX - 5, gaugeY + 6);
-
-        }
-
-        [wS, tS].forEach((slider) => slider.addEventListener('input', update));
-        update();
-        animate();
-    })();
-    </script>
+  [wS, tS].forEach((slider) => slider.addEventListener("input", () => {update();animate();}));
+  update();
+  animate();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 U ovome interpolacijskom modelu viskoznost ulja opada s porastom temperature, pa se smanjuje i snaga potrebna za rotaciju. Taj je odnos važan pri analizi podmazanih strojnih sustava.
@@ -1385,51 +1415,58 @@ Najprije promatramo ravnotežu na stupcu u jednoj kapilari. Površinska sila dje
     })();
     </script>
     <script>
-    (() => {
-        const root = document.getElementById('widget-z12-vdual-fixed');
-        const svg = root?.querySelector('#z12-vector');
-        const slider = root?.querySelector('#r-slider-z12-dual');
-        if (!root || !svg || !slider) return;
-        let conceptTheta = 30;
-        const fmt = (n, d = 1) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits: d, maximumFractionDigits: d });
-        function renderVector() {
-            const rMm = +slider.value;
-            const g = 9.81;
-            const hWaterMm = 1000 * 2 * 0.0662 / (983.7 * g * rMm / 1000);
-            const hMercuryMm = 1000 * 2 * 0.47 * Math.cos(130 * Math.PI / 180) / (13480 * g * rMm / 1000);
-            const baseY = 300;
-            const tubeHalf = 16 + 28 * rMm / 1.5;
-            const waterShift = Math.min(128, Math.abs(hWaterMm) * 2.15);
-            const mercuryShift = Math.min(92, Math.abs(hMercuryMm) * 2.15);
-            const waterY = baseY - waterShift;
-            const mercuryY = baseY + mercuryShift;
-            const theta = conceptTheta * Math.PI / 180;
-            const contactX = 405, contactY = 220, length = 68;
-            const endX = contactX + Math.sin(theta) * length;
-            const endY = contactY - Math.cos(theta) * length;
-            const arcX = contactX + Math.sin(theta) * 31;
-            const arcY = contactY - Math.cos(theta) * 31;
-            const verticalEnd = contactY - Math.cos(theta) * length;
-            const relation = conceptTheta < 90 ? 'cos θ > 0 → uspon' : conceptTheta > 90 ? 'cos θ < 0 → depresija' : 'cos θ = 0 → nema kapilarnog pomaka';
-            svg.innerHTML = `
+(() => {
+  const root = document.getElementById("widget-z12-vdual-fixed");
+  const svg = root?.querySelector("#z12-vector");
+  const slider = root?.querySelector("#r-slider-z12-dual");
+  if (!root || !svg || !slider) return;
+  let conceptTheta = 30;
+  const fmt = (n, d = 1) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
+  function renderVector() {
+    const rMm = +slider.value;
+    const g = 9.81;
+    const hWaterMm = (1000 * 2 * 0.0662) / ((983.7 * g * rMm) / 1000);
+    const hMercuryMm = (1000 * 2 * 0.47 * Math.cos((130 * Math.PI) / 180)) / ((13480 * g * rMm) / 1000);
+    const baseY = 300;
+    const tubeHalf = 30 * rMm;
+    const waterShift = Math.abs(hWaterMm) * .9;
+    const mercuryShift = Math.abs(hMercuryMm) * .9;
+    const waterY = baseY - waterShift;
+    const mercuryY = baseY + mercuryShift;
+    const theta = (conceptTheta * Math.PI) / 180;
+    const contactX = 405,
+      contactY = 220,
+      length = 68;
+    const endX = contactX + Math.sin(theta) * length;
+    const endY = contactY - Math.cos(theta) * length;
+    const arcX = contactX + Math.sin(theta) * 31;
+    const arcY = contactY - Math.cos(theta) * 31;
+    const verticalEnd = contactY - Math.cos(theta) * length;
+    const relation =
+      conceptTheta < 90
+        ? "cos θ > 0 → uspon"
+        : conceptTheta > 90
+          ? "cos θ < 0 → depresija"
+          : "cos θ = 0 → nema kapilarnog pomaka";
+    svg.innerHTML = `
               <defs>
-                <marker id="z12-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
-                <marker id="z12-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
-                <marker id="z12-arr-gray" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#6b7280"/></marker>
+                <marker id="z12-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
+                <marker id="z12-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
+                <marker id="z12-arr-gray" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#6b7280"/></marker>
               </defs>
               <rect width="900" height="440" fill="#fff"/>
               <rect x="42" y="${baseY}" width="292" height="112" rx="10" fill="#dbeafe"/>
-              <path d="M${190-tubeHalf} 108V390M${190+tubeHalf} 108V390" stroke="#64748b" stroke-width="5"/>
-              <path d="M${190-tubeHalf} ${waterY}Q190 ${waterY+18} ${190+tubeHalf} ${waterY}V390H${190-tubeHalf}Z" fill="#60a5fa" opacity=".78"/>
-              <path d="M${190-tubeHalf} ${waterY}Q190 ${waterY+18} ${190+tubeHalf} ${waterY}" fill="none" stroke="#1d4ed8" stroke-width="4"/>
+              <path d="M${190 - tubeHalf} 108V390M${190 + tubeHalf} 108V390" stroke="#64748b" stroke-width="5"/>
+              <path d="M${190 - tubeHalf} ${waterY}Q190 ${waterY + 18} ${190 + tubeHalf} ${waterY}V390H${190 - tubeHalf}Z" fill="#60a5fa" opacity=".78"/>
+              <path d="M${190 - tubeHalf} ${waterY}Q190 ${waterY + 18} ${190 + tubeHalf} ${waterY}" fill="none" stroke="#1d4ed8" stroke-width="4"/>
               <path d="M145 ${baseY}V${waterY}" stroke="#2563eb" stroke-width="3" marker-end="url(#z12-arr-blue)"/>
               <text x="75" y="76" fill="#1d4ed8" font-size="19" font-weight="800">VODA · θ = 0°</text>
-              <text x="135" y="${(baseY+waterY)/2}" text-anchor="end" fill="#1d4ed8" font-size="16" font-weight="800">h = +${fmt(hWaterMm)} mm</text>
+              <text x="135" y="${(baseY + waterY) / 2}" text-anchor="end" fill="#1d4ed8" font-size="16" font-weight="800">h = +${fmt(hWaterMm)} mm</text>
               <text x="80" y="414" fill="#475569" font-size="14">konkavan meniskus</text>
               <rect x="566" y="${baseY}" width="292" height="112" rx="10" fill="#e5e7eb"/>
-              <path d="M${710-tubeHalf} 108V390M${710+tubeHalf} 108V390" stroke="#64748b" stroke-width="5"/>
-              <path d="M${710-tubeHalf} ${mercuryY}Q710 ${mercuryY-18} ${710+tubeHalf} ${mercuryY}V390H${710-tubeHalf}Z" fill="#9ca3af" opacity=".9"/>
-              <path d="M${710-tubeHalf} ${mercuryY}Q710 ${mercuryY-18} ${710+tubeHalf} ${mercuryY}" fill="none" stroke="#4b5563" stroke-width="4"/>
+              <path d="M${710 - tubeHalf} 108V390M${710 + tubeHalf} 108V390" stroke="#64748b" stroke-width="5"/>
+              <path d="M${710 - tubeHalf} ${mercuryY}Q710 ${mercuryY - 18} ${710 + tubeHalf} ${mercuryY}V390H${710 - tubeHalf}Z" fill="#9ca3af" opacity=".9"/>
+              <path d="M${710 - tubeHalf} ${mercuryY}Q710 ${mercuryY - 18} ${710 + tubeHalf} ${mercuryY}" fill="none" stroke="#4b5563" stroke-width="4"/>
               <path d="M790 ${baseY}V${mercuryY}" stroke="#6b7280" stroke-width="3" marker-end="url(#z12-arr-gray)"/>
               <text x="610" y="76" fill="#4b5563" font-size="19" font-weight="800">ŽIVA · θ = 130°</text>
               <text x="800" y="370" text-anchor="middle" fill="#4b5563" font-size="16" font-weight="800">h = ${fmt(hMercuryMm)} mm</text>
@@ -1439,23 +1476,27 @@ Najprije promatramo ravnotežu na stupcu u jednoj kapilari. Površinska sila dje
               <path d="M${contactX} 158V278" stroke="#64748b" stroke-width="7"/>
               <circle cx="${contactX}" cy="${contactY}" r="5" fill="#0f172a"/>
               <path d="M${contactX} ${contactY}L${endX} ${endY}" stroke="#0f9b8e" stroke-width="6" marker-end="url(#z12-arr-teal)"/>
-              <text x="${endX+8}" y="${endY-5}" fill="#0f766e" font-size="17" font-weight="800">σ</text>
-              <path d="M${contactX} ${contactY-31}A31 31 0 0 1 ${arcX} ${arcY}" fill="none" stroke="#ea580c" stroke-width="3"/>
-              <text x="${contactX+34}" y="${contactY-13}" fill="#c2410c" font-size="17" font-weight="800">θ = ${conceptTheta}°</text>
-              <path d="M535 ${contactY}V${verticalEnd}" stroke="#2563eb" stroke-width="5" marker-end="url(#z12-arr-blue)"/>
-              <text x="545" y="${(contactY+verticalEnd)/2}" fill="#1d4ed8" font-size="14" font-weight="800">σ cos θ</text>
+              <text x="${endX + 8}" y="${endY - 5}" fill="#0f766e" font-size="17" font-weight="800">σ</text>
+              <path d="M${contactX} ${contactY - 31}A31 31 0 0 1 ${arcX} ${arcY}" fill="none" stroke="#ea580c" stroke-width="3"/>
+              <text x="${contactX + 34}" y="${contactY - 13}" fill="#c2410c" font-size="17" font-weight="800">θ = ${conceptTheta}°</text>
+              <path d="M535 ${contactY}V${verticalEnd}" stroke="#2563eb" stroke-width="5" ${Math.abs(Math.cos(theta))>1e-8?'marker-end="url(#z12-arr-blue)"':''}/>
+              <text x="545" y="${(contactY + verticalEnd) / 2}" fill="#1d4ed8" font-size="14" font-weight="800">σ cos θ</text>
               <text x="450" y="300" text-anchor="middle" fill="#334155" font-size="15" font-weight="800">${relation}</text>
               <text x="450" y="430" text-anchor="middle" fill="#64748b" font-size="13">promjer i vertikalni pomak prikazani su u uvećanoj, odvojenoj skali</text>`;
-        }
-        root.querySelectorAll('[data-z12-theta]').forEach(button => button.addEventListener('click', () => {
-            conceptTheta = +button.dataset.z12Theta;
-            root.querySelectorAll('[data-z12-theta]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-            renderVector();
-        }));
-        slider.addEventListener('input', renderVector);
-        renderVector();
-    })();
-    </script>
+  }
+  root.querySelectorAll("[data-z12-theta]").forEach((button) =>
+    button.addEventListener("click", () => {
+      conceptTheta = +button.dataset.z12Theta;
+      root
+        .querySelectorAll("[data-z12-theta]")
+        .forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+      renderVector();
+    }),
+  );
+  slider.addEventListener("input", renderVector);
+  renderVector();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Voda se uspinje u kapilari zbog jače adhezije (privlačenje staklu), dok se živa spušta (depresija) zbog jače kohezije (privlačenje samoj sebi).
@@ -1676,60 +1717,46 @@ Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\s
     })();
     </script>
     <script>
-    (() => {
-        const root = document.getElementById('widget-z13-advanced');
-        const svg = root?.querySelector('#z13-vector');
-        const dSlider = root?.querySelector('#yl-slider-d');
-        const sigmaSlider = root?.querySelector('#yl-slider-sig');
-        if (!root || !svg || !dSlider || !sigmaSlider) return;
-        const fmt = (n, d = 0) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits:d, maximumFractionDigits:d });
+(() => {
+  const root = document.getElementById("widget-z13-advanced");
+  const svg = root?.querySelector("#z13-vector");
+  const dSlider = root?.querySelector("#yl-slider-d");
+  const sigmaSlider = root?.querySelector("#yl-slider-sig");
+  if (!root || !svg || !dSlider || !sigmaSlider) return;
+  const fmt = (n, d = 0) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
 
-        function inwardArrows(cx, cy, radius, length) {
-            return Array.from({ length:8 }, (_, index) => {
-                if (index === 2) return '';
-                const angle = index * Math.PI / 4;
-                const x1 = cx + Math.cos(angle) * (radius + length);
-                const y1 = cy + Math.sin(angle) * (radius + length);
-                const x2 = cx + Math.cos(angle) * (radius + 5);
-                const y2 = cy + Math.sin(angle) * (radius + 5);
-                return `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#0f9b8e" stroke-width="4" marker-end="url(#z13-arr-teal)"/>`;
-            }).join('');
-        }
+  function inwardArrows(cx,cy,radius,length){return Array.from({length:8},(_,i)=>{const a=i*Math.PI/4;return MF1.svgArrow(cx+radius*Math.cos(a),cy+radius*Math.sin(a),-length*Math.cos(a),-length*Math.sin(a),'#0f9b8e','',2.5)}).join('')}
 
-        function pressureArrows(cx, cy, radius, length) {
-            return [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2].map(angle => {
-                const x1 = cx + Math.cos(angle) * 10;
-                const y1 = cy + Math.sin(angle) * 10;
-                const x2 = cx + Math.cos(angle) * Math.min(radius - 10, length);
-                const y2 = cy + Math.sin(angle) * Math.min(radius - 10, length);
-                return `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#7c3aed" stroke-width="4" marker-end="url(#z13-arr-violet)"/>`;
-            }).join('');
-        }
+  function pressureArrows(cx,cy,radius,length){return [0,Math.PI/2,Math.PI,3*Math.PI/2].map(a=>MF1.svgArrow(cx+radius*Math.cos(a),cy+radius*Math.sin(a),length*Math.cos(a),length*Math.sin(a),'#7c3aed','',2.5)).join('')}
 
-        function renderVector() {
-            const Dmm = +dSlider.value;
-            const sigma = +sigmaSlider.value;
-            const dpD = 4 * sigma / (Dmm / 1000);
-            const dp2D = dpD / 2;
-            const cx1 = 220, cx2 = 680, cy = 250, r1 = 54, r2 = 104;
-            svg.innerHTML = `
+  function renderVector() {
+    const Dmm = +dSlider.value;
+    const sigma = +sigmaSlider.value;
+    const dpD = (4 * sigma) / (Dmm / 1000);
+    const dp2D = dpD / 2;
+    const cx1 = 220,
+      cx2 = 680,
+      cy = 250,
+      r1 = 28 + Dmm * 12,
+      r2 = 2*r1;
+    svg.innerHTML = `
               <defs>
                 <radialGradient id="z13-drop-small" cx="35%" cy="28%"><stop offset="0" stop-color="#dbeafe"/><stop offset=".58" stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></radialGradient>
                 <radialGradient id="z13-drop-large" cx="35%" cy="28%"><stop offset="0" stop-color="#e0f2fe"/><stop offset=".58" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0284c7"/></radialGradient>
-                <marker id="z13-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
-                <marker id="z13-arr-violet" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#7c3aed"/></marker>
-                <marker id="z13-arr-dark" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#334155"/></marker>
+                <marker id="z13-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
+                <marker id="z13-arr-violet" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#7c3aed"/></marker>
+                <marker id="z13-arr-dark" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#334155"/></marker>
               </defs>
               <rect width="900" height="430" fill="#fff"/>
               <text x="450" y="32" text-anchor="middle" fill="#0f172a" font-size="20" font-weight="800">ISTA TEKUĆINA I σ · PROMIJENJENA JE SAMO ZAKRIVLJENOST</text>
               <circle cx="${cx1}" cy="${cy}" r="${r1}" fill="url(#z13-drop-small)" stroke="#1d4ed8" stroke-width="4"/>
               <circle cx="${cx2}" cy="${cy}" r="${r2}" fill="url(#z13-drop-large)" stroke="#0369a1" stroke-width="4"/>
-              ${inwardArrows(cx1, cy, r1, 44)}
-              ${inwardArrows(cx2, cy, r2, 34)}
-              ${pressureArrows(cx1, cy, r1, 42)}
-              ${pressureArrows(cx2, cy, r2, 42)}
-              <path d="M${cx1-r1} 326H${cx1+r1}" stroke="#334155" stroke-width="3" marker-start="url(#z13-arr-dark)" marker-end="url(#z13-arr-dark)"/>
-              <path d="M${cx2-r2} 366H${cx2+r2}" stroke="#334155" stroke-width="3" marker-start="url(#z13-arr-dark)" marker-end="url(#z13-arr-dark)"/>
+              ${inwardArrows(cx1, cy, r1, 35)}
+              ${inwardArrows(cx2, cy, r2, 17.5)}
+              ${pressureArrows(cx1, cy, r1, 35)}
+              ${pressureArrows(cx2, cy, r2, 17.5)}
+              <path d="M${cx1 - r1} 326H${cx1 + r1}" stroke="#334155" stroke-width="3" marker-start="url(#z13-arr-dark)" marker-end="url(#z13-arr-dark)"/>
+              <path d="M${cx2 - r2} 366H${cx2 + r2}" stroke="#334155" stroke-width="3" marker-start="url(#z13-arr-dark)" marker-end="url(#z13-arr-dark)"/>
               <text x="${cx1}" y="352" text-anchor="middle" fill="#334155" font-size="17" font-weight="800">D = ${fmt(Dmm, 2)} mm</text>
               <text x="${cx2}" y="396" text-anchor="middle" fill="#334155" font-size="17" font-weight="800">2D = ${fmt(2 * Dmm, 2)} mm</text>
               <rect x="105" y="50" width="230" height="44" rx="12" fill="#eef2ff" stroke="#c4b5fd"/>
@@ -1743,18 +1770,22 @@ Ovdje je riječ o **kapi tekućine u plinu**, pa vrijedi $\Delta p=2\sigma/R=4\s
               <text x="435" y="251" fill="#5b21b6" font-size="12" font-weight="750">Δp prema van</text>
               <path d="M392 273H424" stroke="#0f9b8e" stroke-width="5" marker-end="url(#z13-arr-teal)"/>
               <text x="435" y="278" fill="#0f766e" font-size="12" font-weight="750">rezultanta σ</text>
-              <text x="450" y="420" text-anchor="middle" fill="#64748b" font-size="12">Strelice prikazuju smjerove djelovanja na zakrivljeni element površine.</text>`;
-        }
+              <text x="450" y="420" text-anchor="middle" fill="#64748b" font-size="12">Na jednakim elementima: Δp prema van; rezultanta tangencijalnih sila σ prema unutra. Skala se prilagođava.</text>`;
+  }
 
-        root.querySelectorAll('[data-z13-d]').forEach(button => button.addEventListener('click', () => {
-            dSlider.value = button.dataset.z13D;
-            dSlider.dispatchEvent(new Event('input', { bubbles:true }));
-            root.querySelectorAll('[data-z13-d]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-        }));
-        [dSlider, sigmaSlider].forEach(input => input.addEventListener('input', renderVector));
-        renderVector();
-    })();
-    </script>
+  root.querySelectorAll("[data-z13-d]").forEach((button) =>
+    button.addEventListener("click", () => {
+      dSlider.value = button.dataset.z13D;
+      dSlider.dispatchEvent(new Event("input", { bubbles: true }));
+      root
+        .querySelectorAll("[data-z13-d]")
+        .forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+    }),
+  );
+  [dSlider, sigmaSlider].forEach((input) => input.addEventListener("input", renderVector));
+  renderVector();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Smanjenjem promjera kapi raste zakrivljenost slobodne površine, a time i unutarnji nadtlak određen Young–Laplaceovim zakonom.
@@ -1770,7 +1801,7 @@ Staklena cijev uronjena je u živu kao što je prikazano na slici. Temperatura i
 <div class="zadano-grid">
 <div class="zadano-row">
 <span class="label">Zadano</span>
-<span class="zadano-text">$\sigma_{Hg}$ = $0,514 \, \text{N/m}$, $d_o, d_i$ = $35; 25 \, \text{mm}$, $\theta_{Hg}$ = $50^\circ$ (vidljivo)</span>
+<span class="zadano-text">$\sigma_{Hg}$ = $0,514 \, \text{N/m}$, $d_o, d_i$ = $35; 25 \, \text{mm}$, $\varphi_{Hg}$ = $50^\circ$ (kut kroz plin; kontaktni kut kroz živu je $130^\circ$)</span>
 </div>
 <div class="zadano-row">
 <span class="label">Odrediti</span>
@@ -1779,7 +1810,7 @@ Staklena cijev uronjena je u živu kao što je prikazano na slici. Temperatura i
 </div>
 <div class="rjesenje-label">Rješenje</div>
 
-$$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cdot \pi \cdot (0,035 + 0,025) \cdot 0,642 = \mathbf{0,0623 \, \text{N}}$$
+$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cdot \pi \cdot (0,035 + 0,025) \cdot 0,642 = \mathbf{0,0623 \, \text{N}}$
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
@@ -1824,14 +1855,14 @@ $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cd
             <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Bilanca</div>
             <div>ukupni rub: <strong>π(d₀ + dᵢ)</strong></div>
             <div>napetost djeluje tangencijalno uz menisk</div>
-            <div><strong>F<sub>σ,z</sub> = σπ(d₀+dᵢ)cos θ</strong></div>
+            <div><strong>F<sub>σ,z</sub> = σπ(d₀+dᵢ)cos φ</strong></div>
         </div>
     </div>
 
     <div class="z14-presets" role="group" aria-label="Provjera predznaka vertikalne projekcije">
-        <button type="button" data-z14-theta="50" aria-pressed="true">θ = 50° · Fσ,z &gt; 0</button>
-        <button type="button" data-z14-theta="90" aria-pressed="false">θ = 90° · Fσ,z = 0</button>
-        <button type="button" data-z14-theta="130" aria-pressed="false">θ = 130° · Fσ,z &lt; 0</button>
+        <button type="button" data-z14-theta="50" aria-pressed="true">φ = 50° · Fσ,z &gt; 0</button>
+        <button type="button" data-z14-theta="90" aria-pressed="false">φ = 90° · Fσ,z = 0</button>
+        <button type="button" data-z14-theta="130" aria-pressed="false">φ = 130° · Fσ,z &lt; 0</button>
     </div>
 
     <div class="z14-scene">
@@ -1845,212 +1876,243 @@ $$F_\sigma = \sigma \cdot \pi \cdot (d_o + d_i) \cdot \cos(50^\circ) = 0,514 \cd
             <input type="range" id="z14-slider-do" min="30" max="60" value="35" style="accent-color:#2563eb;">
         </div>
         <div class="z14-control">
-            <label>Kut kvašenja θ: <span id="z14-val-theta" style="color:#c2410c;">50</span>°</label>
+            <label>Kut kvašenja φ: <span id="z14-val-theta" style="color:#c2410c;">50</span>°</label>
             <input type="range" id="z14-slider-theta" min="0" max="180" value="50" style="accent-color:#c2410c;">
         </div>
     </div>
 
     <div class="z14-metrics">
         <div class="z14-metric"><small>Ukupni perimetar dodira</small><strong style="color:#1d4ed8;"><span id="z14-res-perim">188.5</span> mm</strong></div>
-        <div class="z14-metric"><small>cos θ</small><strong style="color:#c2410c;"><span id="z14-res-cos">0.64</span></strong></div>
+        <div class="z14-metric"><small>cos φ</small><strong style="color:#c2410c;"><span id="z14-res-cos">0.64</span></strong></div>
         <div class="z14-metric"><small>Vertikalna projekcija Fσ,z</small><strong style="color:#0f766e;"><span id="z14-res-fz">0.0623</span> N</strong></div>
     </div>
 
     <div class="z14-explainer" id="z14-explainer"></div>
 
     <script>
-    (function() {
-        const canvas = document.getElementById('canvas-z14-v2');
-        const ctx = canvas.getContext('2d');
-        const slDo = document.getElementById('z14-slider-do');
-        const slTh = document.getElementById('z14-slider-theta');
-        let phase = 0;
+(function () {
+  const canvas = document.getElementById("canvas-z14-v2");
+  const ctx = canvas.getContext("2d");
+  const slDo = document.getElementById("z14-slider-do");
+  const slTh = document.getElementById("z14-slider-theta");
+  let phase = 0;
 
-        function drawArrow(x1, y1, x2, y2, color) {
-            const headlen = 8;
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x2, y2);
-            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-            ctx.closePath();
-            ctx.fill();
-        }
+  function drawArrow(x1, y1, x2, y2, color) {
+    const headlen = 8;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+  }
 
-        function update() {
-            const doMm = parseFloat(slDo.value);
-            const diMm = 25;
-            const thetaDeg = parseFloat(slTh.value);
-            const cosTheta = Math.cos(thetaDeg * Math.PI / 180);
-            const perimeterMm = Math.PI * (doMm + diMm);
-            const force = 0.514 * perimeterMm / 1000 * cosTheta;
+  function update() {
+    const doMm = parseFloat(slDo.value);
+    const diMm = 25;
+    const thetaDeg = parseFloat(slTh.value);
+    const cosTheta = Math.cos((thetaDeg * Math.PI) / 180);
+    const perimeterMm = Math.PI * (doMm + diMm);
+    const force = ((0.514 * perimeterMm) / 1000) * cosTheta;
 
-            document.getElementById('z14-val-do').textContent = doMm.toFixed(0);
-            document.getElementById('z14-val-theta').textContent = thetaDeg.toFixed(0);
-            document.getElementById('z14-res-perim').textContent = perimeterMm.toFixed(1);
-            document.getElementById('z14-res-cos').textContent = cosTheta.toFixed(2);
-            document.getElementById('z14-res-fz').textContent = force.toFixed(4);
-            const direction = force >= 0 ? 'pozitivan smjer odabrane vertikalne osi' : 'suprotan smjer odabrane vertikalne osi';
-            document.getElementById('z14-explainer').textContent = `Za d₀ = ${doMm.toFixed(0)} mm ukupni dodirni perimetar iznosi ${perimeterMm.toFixed(1)} mm. Površinska napetost djeluje tangencijalno uz menisk na unutarnjem i vanjskom rubu; vertikalno ostaje projekcija s cos θ = ${cosTheta.toFixed(2)}. Fσ,z = ${force.toFixed(4)} N, što znači ${direction}.`;
+    document.getElementById("z14-val-do").textContent = doMm.toFixed(0);
+    document.getElementById("z14-val-theta").textContent = thetaDeg.toFixed(0);
+    document.getElementById("z14-res-perim").textContent = perimeterMm.toFixed(1);
+    document.getElementById("z14-res-cos").textContent = cosTheta.toFixed(2);
+    document.getElementById("z14-res-fz").textContent = force.toFixed(4);
+    const direction = force >= 0 ? "pozitivan smjer odabrane vertikalne osi" : "suprotan smjer odabrane vertikalne osi";
+    document.getElementById("z14-explainer").textContent =
+      `Za d₀ = ${doMm.toFixed(0)} mm ukupni dodirni perimetar iznosi ${perimeterMm.toFixed(1)} mm. Površinska napetost djeluje tangencijalno uz menisk na unutarnjem i vanjskom rubu; vertikalno ostaje projekcija s cos φ = ${cosTheta.toFixed(2)}. Fσ,z = ${force.toFixed(4)} N, što znači ${direction}.`;
 
-            draw(doMm, thetaDeg, cosTheta, force);
-        }
+    draw(doMm, thetaDeg, cosTheta, force);
+  }
 
-        function draw(doMm, thetaDeg, cosTheta, force) {
-            phase += 0.04;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function draw(doMm, thetaDeg, cosTheta, force) {
+    phase += 0.04;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const left = 320;
-            const top = 40;
-            const tubeOuter = 150 + (doMm - 35) * 2;
-            const tubeInner = 100;
-            const liquidY = 235;
-            const centerX = left + tubeOuter / 2;
-            const theta = thetaDeg * Math.PI / 180;
-            const meniscusRise = Math.cos(theta) * 18;
+    const left = 320;
+    const top = 40;
+    const tubeOuter = 150 + (doMm - 35) * 2;
+    const tubeInner = 100;
+    const liquidY = 235;
+    const centerX = left + tubeOuter / 2;
+    const theta = (thetaDeg * Math.PI) / 180;
+    const meniscusRise = Math.cos(theta) * 18;
 
-            ctx.fillStyle = '#e2e8f0';
-            ctx.fillRect(0, liquidY, canvas.width, canvas.height - liquidY);
-            ctx.fillStyle = '#9ca3af';
-            ctx.fillRect(left, top, tubeOuter, 220);
-            ctx.clearRect(left + (tubeOuter - tubeInner) / 2, top, tubeInner, 220);
-            ctx.fillStyle = 'rgba(100,116,139,0.28)';
-            ctx.beginPath();
-            ctx.moveTo(left + (tubeOuter - tubeInner) / 2, liquidY);
-            ctx.quadraticCurveTo(centerX, liquidY - meniscusRise - Math.sin(phase) * 1.2, left + (tubeOuter + tubeInner) / 2, liquidY);
-            ctx.lineTo(left + (tubeOuter + tubeInner) / 2, canvas.height);
-            ctx.lineTo(left + (tubeOuter - tubeInner) / 2, canvas.height);
-            ctx.closePath();
-            ctx.fill();
+    ctx.fillStyle = "#e2e8f0";
+    ctx.fillRect(0, liquidY, canvas.width, canvas.height - liquidY);
+    ctx.fillStyle = "#9ca3af";
+    ctx.fillRect(left, top, tubeOuter, 220);
+    ctx.clearRect(left + (tubeOuter - tubeInner) / 2, top, tubeInner, 220);
+    ctx.fillStyle = "rgba(100,116,139,0.28)";
+    ctx.beginPath();
+    ctx.moveTo(left + (tubeOuter - tubeInner) / 2, liquidY);
+    ctx.quadraticCurveTo(
+      centerX,
+      liquidY - meniscusRise - Math.sin(phase) * 1.2,
+      left + (tubeOuter + tubeInner) / 2,
+      liquidY,
+    );
+    ctx.lineTo(left + (tubeOuter + tubeInner) / 2, canvas.height);
+    ctx.lineTo(left + (tubeOuter - tubeInner) / 2, canvas.height);
+    ctx.closePath();
+    ctx.fill();
 
-            const edgeLeft = left + (tubeOuter - tubeInner) / 2;
-            const edgeRight = left + (tubeOuter + tubeInner) / 2;
-            const tangLen = 42;
-            const tangentAngleLeft = -theta;
-            const tangentAngleRight = Math.PI + theta;
-            drawArrow(edgeLeft, liquidY, edgeLeft + Math.cos(tangentAngleLeft) * tangLen, liquidY + Math.sin(tangentAngleLeft) * tangLen, '#0f9b8e');
-            drawArrow(edgeRight, liquidY, edgeRight + Math.cos(tangentAngleRight) * tangLen, liquidY + Math.sin(tangentAngleRight) * tangLen, '#0f9b8e');
-            drawArrow(centerX, 140, centerX, force >= 0 ? 90 - Math.abs(cosTheta) * 35 : 190 + Math.abs(cosTheta) * 35, '#16a34a');
+    const edgeLeft = left + (tubeOuter - tubeInner) / 2;
+    const edgeRight = left + (tubeOuter + tubeInner) / 2;
+    const tangLen = 42;
+    const tangentAngleLeft = -theta;
+    const tangentAngleRight = Math.PI + theta;
+    drawArrow(
+      edgeLeft,
+      liquidY,
+      edgeLeft + Math.cos(tangentAngleLeft) * tangLen,
+      liquidY + Math.sin(tangentAngleLeft) * tangLen,
+      "#0f9b8e",
+    );
+    drawArrow(
+      edgeRight,
+      liquidY,
+      edgeRight + Math.cos(tangentAngleRight) * tangLen,
+      liquidY + Math.sin(tangentAngleRight) * tangLen,
+      "#0f9b8e",
+    );
+    drawArrow(
+      centerX,
+      140,
+      centerX,
+      force >= 0 ? 90 - Math.abs(cosTheta) * 35 : 190 + Math.abs(cosTheta) * 35,
+      "#16a34a",
+    );
 
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText(`θ = ${thetaDeg.toFixed(0)}°`, edgeRight + 36, liquidY - 16);
-            ctx.fillText(`Fσ,z = ${force.toFixed(4)} N`, centerX + 26, 102);
-            ctx.fillText('unutarnji + vanjski perimetar', 78, 64);
-            ctx.fillStyle = '#64748b';
-            ctx.font = '11px Inter';
-            ctx.fillText('tirkizne strelice: tangencijalna sila površinske napetosti', 78, 84);
-            ctx.fillText('zelena strelica: projekcija na vertikalnu os', 78, 102);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText(`φ = ${thetaDeg.toFixed(0)}°`, edgeRight + 36, liquidY - 16);
+    ctx.fillText(`Fσ,z = ${force.toFixed(4)} N`, centerX + 26, 102);
+    ctx.fillText("unutarnji + vanjski perimetar", 78, 64);
+    ctx.fillStyle = "#64748b";
+    ctx.font = "11px Inter";
+    ctx.fillText("tirkizne strelice: tangencijalna sila površinske napetosti", 78, 84);
+    ctx.fillText("zelena strelica: projekcija na vertikalnu os", 78, 102);
 
-            const barX = 720;
-            const barY = 70;
-            const barH = 170;
-            const ratio = Math.min(Math.abs(cosTheta), 1);
-            ctx.fillStyle = '#fff7ed';
-            ctx.fillRect(barX, barY, 22, barH);
-            ctx.fillStyle = '#f97316';
-            ctx.fillRect(barX, barY + (1 - ratio) * barH, 22, ratio * barH);
-            ctx.strokeStyle = '#fdba74';
-            ctx.strokeRect(barX, barY, 22, barH);
-            ctx.fillStyle = '#9a3412';
-            ctx.font = 'bold 11px Inter';
-            ctx.fillText('|cos θ|', barX - 12, barY - 10);
+    const barX = 720;
+    const barY = 70;
+    const barH = 170;
+    const ratio = Math.min(Math.abs(cosTheta), 1);
+    ctx.fillStyle = "#fff7ed";
+    ctx.fillRect(barX, barY, 22, barH);
+    ctx.fillStyle = "#f97316";
+    ctx.fillRect(barX, barY + (1 - ratio) * barH, 22, ratio * barH);
+    ctx.strokeStyle = "#fdba74";
+    ctx.strokeRect(barX, barY, 22, barH);
+    ctx.fillStyle = "#9a3412";
+    ctx.font = "bold 11px Inter";
+    ctx.fillText("|cos φ|", barX - 12, barY - 10);
+  }
 
-        }
-
-        slDo.addEventListener('input', update);
-        slTh.addEventListener('input', update);
-        update();
-    })();
-    </script>
+  slDo.addEventListener("input", update);
+  slTh.addEventListener("input", update);
+  update();
+})();
+</script>
     <script>
-    (() => {
-        const root = document.getElementById('widget-z14-advanced');
-        const svg = root?.querySelector('#z14-vector');
-        const doSlider = root?.querySelector('#z14-slider-do');
-        const thetaSlider = root?.querySelector('#z14-slider-theta');
-        if (!root || !svg || !doSlider || !thetaSlider) return;
-        const fmt = (n, d) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits:d, maximumFractionDigits:d });
+(() => {
+  const root = document.getElementById("widget-z14-advanced");
+  const svg = root?.querySelector("#z14-vector");
+  const doSlider = root?.querySelector("#z14-slider-do");
+  const thetaSlider = root?.querySelector("#z14-slider-theta");
+  if (!root || !svg || !doSlider || !thetaSlider) return;
+  const fmt = (n, d) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
 
-        function renderVector() {
-            const doMm = +doSlider.value;
-            const diMm = 25;
-            const thetaDeg = +thetaSlider.value;
-            const theta = thetaDeg * Math.PI / 180;
-            const cosTheta = Math.cos(theta);
-            const perimeter = Math.PI * (doMm + diMm);
-            const force = 0.514 * perimeter / 1000 * cosTheta;
-            const outerR = 1.7 * doMm;
-            const innerR = 1.7 * diMm;
-            const contactX = 630, contactY = 213, length = 92;
-            const endX = contactX + Math.sin(theta) * length;
-            const endY = contactY - Math.cos(theta) * length;
-            const arcR = 43;
-            const arcX = contactX + Math.sin(theta) * arcR;
-            const arcY = contactY - Math.cos(theta) * arcR;
-            const projectionY = contactY - cosTheta * length;
-            const relation = Math.abs(cosTheta) < 0.001
-                ? 'cos θ = 0 → nema vertikalne projekcije'
-                : cosTheta > 0
-                    ? 'cos θ > 0 → projekcija je prema +z'
-                    : 'cos θ < 0 → projekcija je prema −z';
-            const projection = Math.abs(cosTheta) < 0.001
-                ? `<circle cx="800" cy="${contactY}" r="6" fill="#2563eb"/><text x="818" y="${contactY+5}" fill="#1d4ed8" font-size="15" font-weight="800">Fσ,z = 0</text>`
-                : `<path d="M800 ${contactY}V${projectionY}" stroke="#2563eb" stroke-width="6" marker-end="url(#z14-arr-blue)"/><text x="812" y="${(contactY+projectionY)/2}" fill="#1d4ed8" font-size="15" font-weight="800">Fσ,z</text>`;
-            const signForce = (force >= 0 ? '+' : '') + fmt(force, 4);
+  function renderVector() {
+    const doMm = +doSlider.value;
+    const diMm = 25;
+    const thetaDeg = +thetaSlider.value;
+    const theta = (thetaDeg * Math.PI) / 180;
+    const cosTheta = Math.cos(theta);
+    const perimeter = Math.PI * (doMm + diMm);
+    const force = ((0.514 * perimeter) / 1000) * cosTheta;
+    const outerR = 1.7 * doMm;
+    const innerR = 1.7 * diMm;
+    const contactX = 630,
+      contactY = 213,
+      length = 92;
+    const endX = contactX + Math.sin(theta) * length;
+    const endY = contactY - Math.cos(theta) * length;
+    const arcR = 43;
+    const arcX = contactX + Math.sin(theta) * arcR;
+    const arcY = contactY - Math.cos(theta) * arcR;
+    const projectionY = contactY - cosTheta * length;
+    const relation =
+      Math.abs(cosTheta) < 0.001
+        ? "cos φ = 0 → nema vertikalne projekcije"
+        : cosTheta > 0
+          ? "cos φ > 0 → projekcija je prema +z"
+          : "cos φ < 0 → projekcija je prema −z";
+    const projection =
+      Math.abs(cosTheta) < 0.001
+        ? `<circle cx="800" cy="${contactY}" r="6" fill="#2563eb"/><text x="818" y="${contactY + 5}" fill="#1d4ed8" font-size="15" font-weight="800">Fσ,z = 0</text>`
+        : `<path d="M800 ${contactY}V${projectionY}" stroke="#2563eb" stroke-width="6" marker-end="url(#z14-arr-blue)"/><text x="812" y="${(contactY + projectionY) / 2}" fill="#1d4ed8" font-size="15" font-weight="800">Fσ,z</text>`;
+    const signForce = (force >= 0 ? "+" : "") + fmt(force, 4);
 
-            svg.innerHTML = `
+    svg.innerHTML = `
               <defs>
-                <marker id="z14-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
-                <marker id="z14-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
+                <marker id="z14-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
+                <marker id="z14-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
               </defs>
               <rect width="900" height="380" fill="#fff"/>
               <text x="175" y="34" text-anchor="middle" fill="#0f172a" font-size="19" font-weight="800">POGLED ODOZGO</text>
               <text x="675" y="34" text-anchor="middle" fill="#0f172a" font-size="19" font-weight="800">LOKALNA GEOMETRIJA KONTAKTA</text>
               <circle cx="175" cy="184" r="${outerR}" fill="#e2e8f0" stroke="#0f9b8e" stroke-width="7"/>
               <circle cx="175" cy="184" r="${innerR}" fill="#fff" stroke="#0f9b8e" stroke-width="7"/>
-              <path d="M175 ${184-outerR}V${184-innerR}" stroke="#334155" stroke-width="2"/>
+              <path d="M175 ${184 - outerR}V${184 - innerR}" stroke="#334155" stroke-width="2"/>
               <text x="292" y="134" fill="#0f766e" font-size="15" font-weight="800">vanjski rub: πd₀</text>
-              <path d="M${175+outerR*.72} ${184-outerR*.72}L284 130" stroke="#64748b" stroke-width="2"/>
+              <path d="M${175 + outerR * 0.72} ${184 - outerR * 0.72}L284 130" stroke="#64748b" stroke-width="2"/>
               <text x="292" y="162" fill="#0f766e" font-size="15" font-weight="800">unutarnji rub: πdᵢ</text>
-              <path d="M${175+innerR*.72} ${184-innerR*.72}L284 158" stroke="#64748b" stroke-width="2"/>
+              <path d="M${175 + innerR * 0.72} ${184 - innerR * 0.72}L284 158" stroke="#64748b" stroke-width="2"/>
               <rect x="55" y="298" width="335" height="54" rx="13" fill="#ecfdf5" stroke="#99f6e4"/>
               <text x="222" y="321" text-anchor="middle" fill="#115e59" font-size="16" font-weight="800">Lkontakt = π(d₀ + dᵢ)</text>
               <text x="222" y="343" text-anchor="middle" fill="#334155" font-size="15">= ${fmt(perimeter, 1)} mm</text>
               <rect x="520" y="72" width="330" height="218" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
               <path d="M${contactX} 105V270" stroke="#64748b" stroke-width="10"/>
-              <path d="M${contactX-92} ${contactY+58}Q${contactX-42} ${contactY+42*cosTheta} ${contactX} ${contactY}Q${contactX+50} ${contactY-22*cosTheta} 748 ${contactY+58}" fill="none" stroke="#64748b" stroke-width="4"/>
+              <path d="M${contactX} ${contactY}C${contactX+30*Math.sin(theta)} ${contactY-30*cosTheta} ${contactX+85} ${contactY-60*cosTheta} ${contactX+120} ${contactY-60*cosTheta}" fill="none" stroke="#64748b" stroke-width="4"/>
               <path d="M${contactX} ${contactY}L${endX} ${endY}" stroke="#0f9b8e" stroke-width="7" marker-end="url(#z14-arr-teal)"/>
-              <text x="${endX-6}" y="${endY-12}" fill="#0f766e" font-size="17" font-weight="800">σ</text>
-              <path d="M${contactX} ${contactY-arcR}A${arcR} ${arcR} 0 0 1 ${arcX} ${arcY}" fill="none" stroke="#ea580c" stroke-width="4"/>
-              <text x="670" y="145" fill="#c2410c" font-size="17" font-weight="800">θ = ${thetaDeg}°</text>
+              <text x="${endX - 6}" y="${endY - 12}" fill="#0f766e" font-size="17" font-weight="800">σ</text>
+              <path d="M${contactX} ${contactY - arcR}A${arcR} ${arcR} 0 0 1 ${arcX} ${arcY}" fill="none" stroke="#ea580c" stroke-width="4"/>
+              <text x="670" y="145" fill="#c2410c" font-size="17" font-weight="800">φ = ${thetaDeg}°</text>
               <path d="M800 98V275" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5"/>
               <text x="812" y="96" fill="#64748b" font-size="14" font-weight="800">+z</text>
               ${projection}
               <rect x="485" y="306" width="380" height="54" rx="13" fill="#eff6ff" stroke="#bfdbfe"/>
-              <text x="675" y="329" text-anchor="middle" fill="#1e3a8a" font-size="16" font-weight="800">Fσ,z = σ Lkontakt cos θ = ${signForce} N</text>
+              <text x="675" y="329" text-anchor="middle" fill="#1e3a8a" font-size="16" font-weight="800">Fσ,z = σ Lkontakt cos φ = ${signForce} N</text>
               <text x="675" y="350" text-anchor="middle" fill="#334155" font-size="14">${relation}</text>
-              <text x="450" y="373" text-anchor="middle" fill="#64748b" font-size="12">Prikazane su stvarne veze veličina; promjeri i lokalni detalj namjerno su u različitim uvećanjima.</text>`;
-        }
+              <text x="450" y="373" text-anchor="middle" fill="#64748b" font-size="12">φ je kut kroz plin; kontaktni kut kroz tekućinu θ = 180° − φ. Prikazana je sila na staklo.</text>`;
+  }
 
-        root.querySelectorAll('[data-z14-theta]').forEach(button => button.addEventListener('click', () => {
-            thetaSlider.value = button.dataset.z14Theta;
-            thetaSlider.dispatchEvent(new Event('input', { bubbles:true }));
-            root.querySelectorAll('[data-z14-theta]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-        }));
-        [doSlider, thetaSlider].forEach(input => input.addEventListener('input', renderVector));
-        renderVector();
-    })();
-    </script>
+  root.querySelectorAll("[data-z14-theta]").forEach((button) =>
+    button.addEventListener("click", () => {
+      thetaSlider.value = button.dataset.z14Theta;
+      thetaSlider.dispatchEvent(new Event("input", { bubbles: true }));
+      root
+        .querySelectorAll("[data-z14-theta]")
+        .forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+    }),
+  );
+  [doSlider, thetaSlider].forEach((input) => input.addEventListener("input", renderVector));
+  renderVector();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Sila površinske napetosti djeluje po cijelom perimetru dodira (unutarnjem i vanjskom bridu cijevi). Ukupna vertikalna komponenta ovisi o kosinusu kuta kvašenja.
@@ -2278,69 +2340,70 @@ Ova procjena uzima maksimalnu vertikalnu komponentu površinske napetosti po obo
     })();
     </script>
     <script>
-    (() => {
-        const root = document.getElementById('widget-z15-vfinal');
-        const svg = root?.querySelector('#z15-vector');
-        const dSlider = root?.querySelector('#d-slider-z15');
-        const materialSelect = root?.querySelector('#mat-select-z15');
-        if (!root || !svg || !dSlider || !materialSelect) return;
-        const fmt = (n, d) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits:d, maximumFractionDigits:d });
+(() => {
+  const root = document.getElementById("widget-z15-vfinal");
+  const svg = root?.querySelector("#z15-vector");
+  const dSlider = root?.querySelector("#d-slider-z15");
+  const materialSelect = root?.querySelector("#mat-select-z15");
+  if (!root || !svg || !dSlider || !materialSelect) return;
+  const fmt = (n, d) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
 
-        function renderVector() {
-            const dMm = +dSlider.value;
-            const rho = +materialSelect.value;
-            const material = rho === 7800 ? 'čelik' : 'aluminij';
-            const d = dMm / 1000;
-            const sigma = 0.073;
-            const g = 9.81;
-            const Fg = rho * Math.PI * Math.pow(d, 3) * g / 6;
-            const Fs = Math.PI * d * sigma;
-            const floats = Fg <= Fs;
-            const ratio = Fg / Fs;
-            const cx = 344;
-            const r = 52 + (dMm - 0.5) / 5.5 * 28;
-            const cy = floats ? 174 + Math.min(28, ratio * 23) : 221;
-            const contactY = cy + r * 0.60;
-            const contactDX = r * 0.80;
-            const leftX = cx - contactDX;
-            const rightX = cx + contactDX;
-            const surfaceY = 244;
-            const forceScale = Math.min(74, 38 + ratio * 28);
-            const statusText = floats ? 'Fσ,z,max ≥ G' : 'G > Fσ,z,max';
-            const statusColor = floats ? '#166534' : '#b91c1c';
-            const statusFill = floats ? '#f0fdf4' : '#fff1f2';
-            const contactLine = floats ? '#f59e0b' : '#ef4444';
+  function renderVector() {
+    const dMm = +dSlider.value;
+    const rho = +materialSelect.value;
+    const material = rho === 7800 ? "čelik" : "aluminij";
+    const d = dMm / 1000;
+    const sigma = 0.073;
+    const g = 9.81;
+    const Fg = (rho * Math.PI * Math.pow(d, 3) * g) / 6;
+    const Fs = Math.PI * d * sigma;
+    const floats = Fg <= Fs;
+    const ratio = Fg / Fs;
+    const cx = 344;
+    const r = 13*dMm;
+    const cy = 230;
+    const contactY = cy;
+    const contactDX = r;
+    const leftX = cx - contactDX;
+    const rightX = cx + contactDX;
+    const lift=Math.min(1,ratio),tx=68*Math.sqrt(1-lift*lift),ty=68*lift;
+    const surfaceY = cy - ty;
+    const forceScale = 60*ratio/Math.max(1,ratio),liftScale=60*Math.min(1,ratio)/Math.max(1,ratio);
+    const statusText = floats ? "Fσ,z,max ≥ G" : "G > Fσ,z,max";
+    const statusColor = floats ? "#166534" : "#b91c1c";
+    const statusFill = floats ? "#f0fdf4" : "#fff1f2";
+    const contactLine = floats ? "#f59e0b" : "#ef4444";
 
-            svg.innerHTML = `
+    svg.innerHTML = `
               <defs>
                 <radialGradient id="z15-ball" cx="34%" cy="28%"><stop offset="0" stop-color="#f8fafc"/><stop offset=".3" stop-color="#cbd5e1"/><stop offset="1" stop-color="#475569"/></radialGradient>
                 <linearGradient id="z15-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bae6fd" stop-opacity=".8"/><stop offset="1" stop-color="#38bdf8" stop-opacity=".42"/></linearGradient>
-                <marker id="z15-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
-                <marker id="z15-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
-                <marker id="z15-arr-red" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#dc2626"/></marker>
+                <marker id="z15-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
+                <marker id="z15-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
+                <marker id="z15-arr-red" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#dc2626"/></marker>
               </defs>
               <rect width="900" height="390" fill="#fff"/>
               <text x="340" y="30" text-anchor="middle" fill="#0f172a" font-size="19" font-weight="800">DIJAGRAM SILA I DEFORMIRANA SLOBODNA POVRŠINA</text>
-              <path d="M0 ${surfaceY}C120 ${surfaceY} 190 ${surfaceY} ${leftX} ${contactY}L${rightX} ${contactY}C500 ${surfaceY} 585 ${surfaceY} 650 ${surfaceY}V390H0Z" fill="url(#z15-water)"/>
-              <path d="M0 ${surfaceY}C120 ${surfaceY} 190 ${surfaceY} ${leftX} ${contactY}" fill="none" stroke="#0284c7" stroke-width="5"/>
-              <path d="M${rightX} ${contactY}C500 ${surfaceY} 585 ${surfaceY} 650 ${surfaceY}" fill="none" stroke="#0284c7" stroke-width="5"/>
+              <path d="M0 ${surfaceY}C120 ${surfaceY} ${leftX-tx} ${contactY-ty} ${leftX} ${contactY}L${rightX} ${contactY}C${rightX+tx} ${contactY-ty} 585 ${surfaceY} 650 ${surfaceY}V390H0Z" fill="url(#z15-water)"/>
+              <path d="M0 ${surfaceY}C120 ${surfaceY} ${leftX-tx} ${contactY-ty} ${leftX} ${contactY}" fill="none" stroke="#0284c7" stroke-width="5"/>
+              <path d="M${rightX} ${contactY}C${rightX+tx} ${contactY-ty} 585 ${surfaceY} 650 ${surfaceY}" fill="none" stroke="#0284c7" stroke-width="5"/>
               <path d="M18 ${surfaceY}H635" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="8 7"/>
-              <text x="28" y="${surfaceY-12}" fill="#0369a1" font-size="14">neporemećena razina vode</text>
+              <text x="28" y="${surfaceY - 12}" fill="#0369a1" font-size="14">neporemećena razina vode</text>
               <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#z15-ball)" stroke="#334155" stroke-width="4"/>
               <circle cx="${leftX}" cy="${contactY}" r="7" fill="${contactLine}" stroke="#fff" stroke-width="3"/>
               <circle cx="${rightX}" cy="${contactY}" r="7" fill="${contactLine}" stroke="#fff" stroke-width="3"/>
-              <path d="M${leftX} ${contactY}L${leftX-68} ${contactY-58}" stroke="#0f9b8e" stroke-width="7" marker-end="url(#z15-arr-teal)"/>
-              <path d="M${rightX} ${contactY}L${rightX+68} ${contactY-58}" stroke="#0f9b8e" stroke-width="7" marker-end="url(#z15-arr-teal)"/>
-              <path d="M${leftX} ${contactY}V${contactY-58}" stroke="#2563eb" stroke-width="4" stroke-dasharray="6 5" marker-end="url(#z15-arr-blue)"/>
-              <path d="M${rightX} ${contactY}V${contactY-58}" stroke="#2563eb" stroke-width="4" stroke-dasharray="6 5" marker-end="url(#z15-arr-blue)"/>
-              <text x="${leftX-78}" y="${contactY-67}" fill="#0f766e" font-size="16" font-weight="800">σ · tangenta</text>
-              <text x="${rightX+28}" y="${contactY-67}" fill="#1d4ed8" font-size="15" font-weight="800">vertikalne projekcije</text>
-              <path d="M${cx} ${cy}V${cy+forceScale}" stroke="#dc2626" stroke-width="7" marker-end="url(#z15-arr-red)"/>
-              <text x="${cx+14}" y="${cy+forceScale*.62}" fill="#b91c1c" font-size="18" font-weight="800">G</text>
-              <path d="M${cx} ${cy-r-12}V${cy-r-74}" stroke="#2563eb" stroke-width="7" marker-end="url(#z15-arr-blue)"/>
-              <text x="${cx+14}" y="${cy-r-50}" fill="#1d4ed8" font-size="17" font-weight="800">Fσ,z,max</text>
+              <path d="M${leftX} ${contactY}L${leftX-tx} ${contactY-ty}" stroke="#0f9b8e" stroke-width="7" marker-end="url(#z15-arr-teal)"/>
+              <path d="M${rightX} ${contactY}L${rightX+tx} ${contactY-ty}" stroke="#0f9b8e" stroke-width="7" marker-end="url(#z15-arr-teal)"/>
+              <path d="M${leftX} ${contactY}V${contactY-ty}" stroke="#2563eb" stroke-width="4" stroke-dasharray="6 5" marker-end="url(#z15-arr-blue)"/>
+              <path d="M${rightX} ${contactY}V${contactY-ty}" stroke="#2563eb" stroke-width="4" stroke-dasharray="6 5" marker-end="url(#z15-arr-blue)"/>
+              <text x="${leftX - 78}" y="${contactY - 67}" fill="#0f766e" font-size="16" font-weight="800">σ · tangenta</text>
+              <text x="${rightX + 28}" y="${contactY - 67}" fill="#1d4ed8" font-size="15" font-weight="800">vertikalne projekcije</text>
+              <path d="M${cx} ${cy}V${cy + forceScale}" stroke="#dc2626" stroke-width="7" marker-end="url(#z15-arr-red)"/>
+              <text x="${cx + 14}" y="${cy + forceScale * 0.62}" fill="#b91c1c" font-size="18" font-weight="800">G</text>
+              <path d="M${cx} ${cy - r - 12}V${cy-r-12-liftScale}" stroke="#2563eb" stroke-width="7" marker-end="url(#z15-arr-blue)"/>
+              <text x="${cx + 14}" y="${cy - r - 50}" fill="#1d4ed8" font-size="17" font-weight="800">Fσ,z</text>
               <text x="344" y="354" text-anchor="middle" fill="#9a3412" font-size="14" font-weight="800">narančaste točke: presjek kontaktne linije opsega πd</text>
-              <text x="344" y="374" text-anchor="middle" fill="#64748b" font-size="13">uzgon FU zanemaren je samo u ovoj procjeni graničnog promjera</text>
+              <text x="344" y="374" text-anchor="middle" fill="#64748b" font-size="13">Shema gornje granice; stvarno uranjanje traži kontaktni kut i uzgon.</text>
               <rect x="665" y="52" width="215" height="286" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
               <text x="772" y="82" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="800">BILANCA MODELA</text>
               <text x="690" y="116" fill="#475569" font-size="15">materijal</text>
@@ -2355,19 +2418,25 @@ Ova procjena uzima maksimalnu vertikalnu komponentu površinske napetosti po obo
               <text x="690" y="260" fill="#475569" font-size="15">G/Fσ,z,max</text>
               <text x="854" y="260" text-anchor="end" fill="${statusColor}" font-size="17" font-weight="800">${fmt(ratio, 2)}</text>
               <rect x="683" y="279" width="179" height="43" rx="10" fill="${statusFill}" stroke="${statusColor}"/>
-              <text x="772" y="297" text-anchor="middle" fill="${statusColor}" font-size="12" font-weight="800">${floats ? 'RAVNOTEŽA MOGUĆA' : 'SILA NIJE DOVOLJNA'}</text>
+              <text x="772" y="297" text-anchor="middle" fill="${statusColor}" font-size="12" font-weight="800">${floats ? "NUŽAN UVJET" : "GRANICA PREKORAČENA"}</text>
               <text x="772" y="314" text-anchor="middle" fill="${statusColor}" font-size="11">${statusText}</text>`;
-        }
+  }
 
-        root.querySelectorAll('[data-z15-d]').forEach(button => button.addEventListener('click', () => {
-            dSlider.value = button.dataset.z15D;
-            dSlider.dispatchEvent(new Event('input', { bubbles:true }));
-            root.querySelectorAll('[data-z15-d]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-        }));
-        [dSlider, materialSelect].forEach(input => input.addEventListener(input === materialSelect ? 'change' : 'input', renderVector));
-        renderVector();
-    })();
-    </script>
+  root.querySelectorAll("[data-z15-d]").forEach((button) =>
+    button.addEventListener("click", () => {
+      dSlider.value = button.dataset.z15D;
+      dSlider.dispatchEvent(new Event("input", { bubbles: true }));
+      root
+        .querySelectorAll("[data-z15-d]")
+        .forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+    }),
+  );
+  [dSlider, materialSelect].forEach((input) =>
+    input.addEventListener(input === materialSelect ? "change" : "input", renderVector),
+  );
+  renderVector();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Kuglica pluta iako je gušća od vode jer sila površinske napetosti (koja djeluje duž opsega) nadjačava njezinu težinu.
@@ -2456,108 +2525,110 @@ $$h = \frac{2\sigma}{\rho g R} = \frac{2 \cdot 0,0712}{996 \cdot 9,81 \cdot 0,00
     <div class="z16-explainer" id="z16-explainer"></div>
 
     <script>
-    (function() {
-        const canvas = document.getElementById('canvas-z16-v2');
-        const ctx = canvas.getContext('2d');
-        const slDc = document.getElementById('z16-slider-dc');
-        const HreadMm = 170;
-        let phase = 0;
+(function () {
+  const canvas = document.getElementById("canvas-z16-v2");
+  const ctx = canvas.getContext("2d");
+  const slDc = document.getElementById("z16-slider-dc");
+  const HreadMm = 170;
+  let phase = 0;
 
-        function update() {
-            const dcMm = parseFloat(slDc.value);
-            const sigma = 0.0712;
-            const rho = 996;
-            const g = 9.81;
-            const radius = (dcMm / 1000) / 2;
-            const hErrorM = (2 * sigma) / (rho * g * radius);
-            const hErrorMm = hErrorM * 1000;
-            const trueHeightMm = HreadMm - hErrorMm;
+  function update() {
+    const dcMm = parseFloat(slDc.value);
+    const sigma = 0.0712;
+    const rho = 996;
+    const g = 9.81;
+    const radius = dcMm / 1000 / 2;
+    const hErrorM = (2 * sigma) / (rho * g * radius);
+    const hErrorMm = hErrorM * 1000;
+    const trueHeightMm = HreadMm - hErrorMm;
 
-            document.getElementById('z16-val-dc').textContent = dcMm.toFixed(1);
-            document.getElementById('z16-res-h').textContent = hErrorMm.toFixed(1);
-            document.getElementById('z16-res-read').textContent = HreadMm.toFixed(0);
-            document.getElementById('z16-res-true').textContent = trueHeightMm.toFixed(1);
-            document.getElementById('z16-explainer').textContent = `Kod promjera ${dcMm.toFixed(1)} mm kapilarni uspon doda još ${hErrorMm.toFixed(1)} mm na očitanje. Ako instrument pokaže 170 mm, stvarna hidrostatska visina nije 170 mm nego ${trueHeightMm.toFixed(1)} mm. Kako cijev postaje šira, kapilarna greška brzo pada.`;
+    document.getElementById("z16-val-dc").textContent = dcMm.toFixed(1);
+    document.getElementById("z16-res-h").textContent = hErrorMm.toFixed(1);
+    document.getElementById("z16-res-read").textContent = HreadMm.toFixed(0);
+    document.getElementById("z16-res-true").textContent = trueHeightMm.toFixed(1);
+    document.getElementById("z16-explainer").textContent =
+      `Kod promjera ${dcMm.toFixed(1)} mm kapilarni uspon doda još ${hErrorMm.toFixed(1)} mm na očitanje. Ako instrument pokaže 170 mm, stvarna hidrostatska visina nije 170 mm nego ${trueHeightMm.toFixed(1)} mm. Kako cijev postaje šira, kapilarna greška brzo pada.`;
 
-            draw(dcMm, hErrorMm, trueHeightMm);
-        }
+    draw(dcMm, hErrorMm, trueHeightMm);
+  }
 
-        function draw(dcMm, hErrorMm, trueHeightMm) {
-            phase += 0.04;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function draw(dcMm, hErrorMm, trueHeightMm) {
+    phase += 0.04;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const tankLeft = 80;
-            const tankTop = 70;
-            const tankW = 220;
-            const tankH = 210;
-            const baseY = tankTop + tankH;
-            const pxPerMm = 1.0;
-            const readY = baseY - 170 * pxPerMm;
-            const trueY = baseY - trueHeightMm * pxPerMm;
-            const tubeX = 520;
-            const tubeW = Math.max(14, 32 - dcMm * 2);
+    const tankLeft = 80;
+    const tankTop = 70;
+    const tankW = 220;
+    const tankH = 210;
+    const baseY = tankTop + tankH;
+    const pxPerMm = 1.0;
+    const readY = baseY - 170 * pxPerMm;
+    const trueY = baseY - trueHeightMm * pxPerMm;
+    const tubeX = 520;
+    const tubeW = dcMm * 6;
 
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(tankLeft, tankTop, tankW, tankH);
-            ctx.fillStyle = 'rgba(37,99,235,0.12)';
-            ctx.fillRect(tankLeft, trueY, tankW, baseY - trueY);
-            ctx.fillStyle = 'rgba(37,99,235,0.2)';
-            ctx.fillRect(tubeX, readY - Math.sin(phase) * 1.2, tubeW, baseY - (readY - Math.sin(phase) * 1.2));
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 2;
+    ctx.beginPath();ctx.moveTo(tankLeft,tankTop);ctx.lineTo(tankLeft,baseY);ctx.lineTo(tankLeft+tankW,baseY);ctx.lineTo(tankLeft+tankW,tankTop);ctx.stroke();
+    ctx.fillStyle = "rgba(37,99,235,0.12)";
+    ctx.fillRect(tankLeft, trueY, tankW, baseY - trueY);
+    ctx.fillStyle = "rgba(37,99,235,0.2)";
+    ctx.fillRect(tubeX, readY, tubeW, baseY - (readY));
 
-            ctx.strokeStyle = '#475569';
-            ctx.strokeRect(tubeX, 50, tubeW, 240);
-            ctx.setLineDash([6, 5]);
-            ctx.strokeStyle = '#16a34a';
-            ctx.beginPath();
-            ctx.moveTo(40, trueY);
-            ctx.lineTo(860, trueY);
-            ctx.stroke();
-            ctx.strokeStyle = '#f97316';
-            ctx.beginPath();
-            ctx.moveTo(40, readY);
-            ctx.lineTo(860, readY);
-            ctx.stroke();
-            ctx.setLineDash([]);
+    ctx.strokeStyle = "#475569";
+    ctx.beginPath();ctx.moveTo(tubeX,50);ctx.lineTo(tubeX,baseY-10);ctx.lineTo(tankLeft+tankW,baseY-10);ctx.moveTo(tankLeft+tankW,baseY);ctx.lineTo(tubeX+tubeW,baseY);ctx.lineTo(tubeX+tubeW,50);ctx.stroke();
+    ctx.fillStyle='#d3e3fd';ctx.fillRect(tankLeft+tankW-2,baseY-8,tubeX-tankLeft-tankW+4,6);
+    ctx.font='12px system-ui';ctx.fillStyle='#64748b';ctx.fillText('Spojene posude; visine u istoj skali, promjer cjevčice uvećan.',60,325);
+    ctx.setLineDash([6, 5]);
+    ctx.strokeStyle = "#16a34a";
+    ctx.beginPath();
+    ctx.moveTo(40, trueY);
+    ctx.lineTo(860, trueY);
+    ctx.stroke();
+    ctx.strokeStyle = "#f97316";
+    ctx.beginPath();
+    ctx.moveTo(40, readY);
+    ctx.lineTo(860, readY);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText(`očitano H = 170 mm`, 600, readY - 8);
-            ctx.fillText(`stvarno H₀ = ${trueHeightMm.toFixed(1)} mm`, 600, trueY - 8);
-            ctx.fillStyle = '#64748b';
-            ctx.fillText('narančasta: očitana razina u uskoj cijevi', 60, 38);
-            ctx.fillText('zelena: stvarna hidrostatska razina', 60, 56);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText(`očitano H = 170 mm`, 600, readY - 24);
+    ctx.fillText(`stvarno H₀ = ${trueHeightMm.toFixed(1)} mm`, 600, trueY + 18);
+    ctx.fillStyle = "#64748b";
+    ctx.fillText("narančasta: očitana razina u uskoj cijevi", 60, 38);
+    ctx.fillText("zelena: stvarna hidrostatska razina", 60, 56);
 
-            ctx.strokeStyle = '#2563eb';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(tubeX + tubeW + 40, trueY);
-            ctx.lineTo(tubeX + tubeW + 40, readY);
-            ctx.stroke();
-            ctx.fillStyle = '#2563eb';
-            ctx.fillText(`h = ${hErrorMm.toFixed(1)} mm`, tubeX + tubeW + 50, (trueY + readY) / 2);
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(tubeX + tubeW + 40, trueY);
+    ctx.lineTo(tubeX + tubeW + 40, readY);
+    ctx.stroke();
+    ctx.fillStyle = "#2563eb";
+    ctx.fillText(`h = ${hErrorMm.toFixed(1)} mm`, 600, 280);
 
-            const barX = 770;
-            const barY = 80;
-            const barH = 160;
-            const errorRatio = Math.min(hErrorMm / 40, 1);
-            ctx.fillStyle = '#dbeafe';
-            ctx.fillRect(barX, barY, 24, barH);
-            ctx.fillStyle = '#2563eb';
-            ctx.fillRect(barX, barY + (1 - errorRatio) * barH, 24, errorRatio * barH);
-            ctx.strokeStyle = '#93c5fd';
-            ctx.strokeRect(barX, barY, 24, barH);
-            ctx.fillStyle = '#1d4ed8';
-            ctx.fillText('greška', barX - 8, barY - 10);
+    const barX = 770;
+    const barY = 80;
+    const barH = 160;
+    const errorRatio = Math.min(hErrorMm / 40, 1);
+    ctx.fillStyle = "#dbeafe";
+    ctx.fillRect(barX, barY, 24, barH);
+    ctx.fillStyle = "#2563eb";
+    ctx.fillRect(barX, barY + (1 - errorRatio) * barH, 24, errorRatio * barH);
+    ctx.strokeStyle = "#93c5fd";
+    ctx.strokeRect(barX, barY, 24, barH);
+    ctx.fillStyle = "#1d4ed8";
+    ctx.fillText("greška", barX - 8, barY - 10);
+  }
 
-        }
-
-        slDc.addEventListener('input', update);
-        update();
-    })();
-    </script>
+  slDc.addEventListener("input", update);
+  update();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 U uskim manometarskim cijevima kapilarni porast mijenja očitanu visinsku razliku. Taj se doprinos mora uzeti u obzir pri određivanju tlaka.
@@ -2664,79 +2735,81 @@ $$h = \frac{2 \cdot 0,073 \cdot \cos 15^\circ}{998,2 \cdot 9,81 \cdot 0,0000025}
     <div class="z18-explainer" id="z18-explainer"></div>
 
     <script>
-    (function() {
-        const canvas = document.getElementById('canvas-z18-tree');
-        const ctx = canvas.getContext('2d');
-        const slD = document.getElementById('z18-slider-d');
+(function () {
+  const canvas = document.getElementById("canvas-z18-tree");
+  const ctx = canvas.getContext("2d");
+  const slD = document.getElementById("z18-slider-d");
 
-        function update() {
-            const dUm = parseFloat(slD.value);
-            const d = dUm / 1_000_000;
-            const hCap = (4 * 0.073 * Math.cos(15 * Math.PI / 180)) / (998.2 * 9.81 * d);
-            const radiusUm = dUm / 2;
-            const dom = hCap > 5 ? 'kapilarni uspon je vrlo velik' : hCap > 2 ? 'kapilarnost je značajna' : 'sam uspon je ograničen';
+  function update() {
+    const dUm = parseFloat(slD.value);
+    const d = dUm / 1_000_000;
+    const hCap = (4 * 0.073 * Math.cos((15 * Math.PI) / 180)) / (998.2 * 9.81 * d);
+    const radiusUm = dUm / 2;
+    const dom =
+      hCap > 5 ? "kapilarni uspon je vrlo velik" : hCap > 2 ? "kapilarnost je značajna" : "sam uspon je ograničen";
 
-            document.getElementById('z18-val-d').textContent = dUm.toFixed(0);
-            document.getElementById('z18-res-maxh').textContent = hCap.toFixed(2);
-            document.getElementById('z18-res-r').textContent = radiusUm.toFixed(0);
-            document.getElementById('z18-res-dom').textContent = dom;
-            document.getElementById('z18-explainer').textContent = `Kad ksilem ima promjer ${dUm.toFixed(0)} μm, idealizirani kapilarni model daje uspon do oko ${hCap.toFixed(2)} m. Smanjenjem promjera raste zakrivljenost meniska i kapilarni tlak, pa sitnije cjevčice mogu podići vodu više. Za visoka stabla to nije cijelo objašnjenje: važan je i transpiracijski vlak u kohezijsko-naponskom mehanizmu.`;
+    document.getElementById("z18-val-d").textContent = dUm.toFixed(0);
+    document.getElementById("z18-res-maxh").textContent = hCap.toFixed(2);
+    document.getElementById("z18-res-r").textContent = radiusUm.toFixed(0);
+    document.getElementById("z18-res-dom").textContent = dom;
+    document.getElementById("z18-explainer").textContent =
+      `Kad ksilem ima promjer ${dUm.toFixed(0)} μm, idealizirani kapilarni model daje uspon do oko ${hCap.toFixed(2)} m. Smanjenjem promjera raste zakrivljenost meniska i kapilarni tlak, pa sitnije cjevčice mogu podići vodu više. Za visoka stabla to nije cijelo objašnjenje: važan je i transpiracijski vlak u kohezijsko-naponskom mehanizmu.`;
 
-            draw(dUm, hCap);
-        }
+    draw(dUm, hCap);
+  }
 
-        function draw(dUm, hCap) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function draw(dUm, hCap) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const trunkX = 220;
-            const trunkW = 90;
-            const groundY = 300;
-            const treeMaxPx = 240;
-            const capHeightPx = Math.min(treeMaxPx, hCap * 36);
+    const trunkX = 220;
+    const trunkW = 90;
+    const groundY = 300;
+    const treeMaxPx = 240;
+    const capHeightPx = hCap * Math.min(36,treeMaxPx/hCap);
 
-            ctx.fillStyle = '#16a34a';
-            ctx.beginPath();
-            ctx.arc(trunkX + trunkW / 2, 110, 86, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#78350f';
-            ctx.fillRect(trunkX, groundY - treeMaxPx, trunkW, treeMaxPx);
-            ctx.fillStyle = '#d1fae5';
-            ctx.fillRect(trunkX + trunkW / 2 - 10, groundY - capHeightPx, 20, capHeightPx);
+    ctx.fillStyle = "#16a34a";
+    ctx.beginPath();
+    ctx.arc(trunkX + trunkW / 2, 110, 86, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#78350f";
+    ctx.fillRect(trunkX, groundY - treeMaxPx, trunkW, treeMaxPx);
+    ctx.fillStyle = "#d1fae5";
+    ctx.fillRect(trunkX + trunkW / 2 - 10, groundY - capHeightPx, 20, capHeightPx);
 
-            ctx.strokeStyle = '#94a3b8';
-            ctx.setLineDash([6, 5]);
-            ctx.beginPath();
-            ctx.moveTo(110, groundY - capHeightPx);
-            ctx.lineTo(820, groundY - capHeightPx);
-            ctx.stroke();
-            ctx.setLineDash([]);
+    ctx.strokeStyle = "#94a3b8";
+    ctx.setLineDash([6, 5]);
+    ctx.beginPath();
+    ctx.moveTo(110, groundY - capHeightPx);
+    ctx.lineTo(820, groundY - capHeightPx);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText(`kapilarni doseg: ${hCap.toFixed(2)} m`, 110, groundY - capHeightPx - 10);
-            ctx.fillText(`promjer ksilema: ${dUm.toFixed(0)} μm`, 110, 46);
-            ctx.fillStyle = '#64748b';
-            ctx.fillText('svjetliji stupac prikazuje koliko visoko kapilarnost sama može podići vodu', 110, 66);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 12px Inter";
+    ctx.fillText(`kapilarni doseg: ${hCap.toFixed(2)} m`, 110, groundY - capHeightPx - 10);
+    ctx.fillText(`promjer ksilema: ${dUm.toFixed(0)} μm`, 110, 46);
+    ctx.fillStyle = "#64748b";
+    ctx.fillText("Stupac: kapilarna ravnoteža. Vertikalna skala prilagođena prikazu.", 110, 66);
 
-            const tubeX = 620;
-            const tubeY = 70;
-            const tubeH = 230;
-            const tubeW = Math.max(16, 70 - dUm * 0.5);
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(tubeX, tubeY, tubeW, tubeH);
-            ctx.fillStyle = 'rgba(37,99,235,0.18)';
-            ctx.fillRect(tubeX + 1, tubeY + tubeH - Math.min(tubeH, hCap * 34), tubeW - 2, Math.min(tubeH, hCap * 34));
-            ctx.fillStyle = '#2563eb';
-            ctx.fillText('model jedne ksilemske cjevčice', 560, 328);
-        }
+    const tubeX = 620;
+    const tubeY = 70;
+    const tubeH = 230;
+    const tubeW = dUm * .8;
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(tubeX, tubeY, tubeW, tubeH);
+    ctx.fillStyle = "rgba(37,99,235,0.18)";
+    ctx.fillRect(tubeX + 1, tubeY + tubeH - Math.min(tubeH, hCap * 34), tubeW - 2, Math.min(tubeH, hCap * 34));
+    ctx.fillStyle = "#2563eb";
+    ctx.fillText("model jedne ksilemske cjevčice", 560, 328);
+  }
 
-        slD.addEventListener('input', update);
-        update();
-    })();
-    </script>
+  slD.addEventListener("input", update);
+  update();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Kapilarnost je dovoljna za podizanje vode u niskom bilju. Za visoka stabla (npr. sekvoje), priroda koristi dodatni mehanizam transpiracijskog vlaka.
@@ -2838,134 +2911,137 @@ $$\mathbf{\bar{\rho}_u = 0,911}$$
     <div class="z19-explainer" id="z19-explainer"></div>
 
     <script>
-    (function() {
-        const cTank = document.getElementById('canvas-z19-tank');
-        const cGraph = document.getElementById('canvas-z19-graph');
-        const ctxT = cTank.getContext('2d');
-        const ctxG = cGraph.getContext('2d');
-        const slRu = document.getElementById('z19-slider-ru');
-        const slHu = document.getElementById('z19-slider-hu');
-        const slPr = document.getElementById('z19-slider-probe');
+(function () {
+  const cTank = document.getElementById("canvas-z19-tank");
+  const cGraph = document.getElementById("canvas-z19-graph");
+  const ctxT = cTank.getContext("2d");
+  const ctxG = cGraph.getContext("2d");
+  const slRu = document.getElementById("z19-slider-ru");
+  const slHu = document.getElementById("z19-slider-hu");
+  const slPr = document.getElementById("z19-slider-probe");
 
-        function update() {
-            const ru = parseFloat(slRu.value);
-            const hu = parseFloat(slHu.value);
-            const hSae = 1.5;
-            const hWater = 2.5;
-            const hHg = 0.4;
-            const patm = 101.03;
-            const g = 9.81;
-            const layers = [
-                { name: 'SAE 30', h: hSae, r: 0.89, color: '#f97316' },
-                { name: 'Maslinovo', h: hu, r: ru, color: '#eab308' },
-                { name: 'Voda', h: hWater, r: 1.0, color: '#3b82f6' },
-                { name: 'Živa', h: hHg, r: 13.6, color: '#64748b' }
-            ];
+  function update() {
+    const ru = parseFloat(slRu.value);
+    const hu = parseFloat(slHu.value);
+    const hSae = 1.5;
+    const hWater = 2.5;
+    const hHg = 0.4;
+    const patm = 101.03;
+    const g = 9.81;
+    const layers = [
+      { name: "SAE 30", h: hSae, r: 0.89, color: "#f97316" },
+      { name: "Maslinovo", h: hu, r: ru, color: "#eab308" },
+      { name: "Voda", h: hWater, r: 1.0, color: "#3b82f6" },
+      { name: "Živa", h: hHg, r: 13.6, color: "#64748b" },
+    ];
 
-            const totalH = layers.reduce((sum, layer) => sum + layer.h, 0);
-            slPr.max = totalH.toFixed(1);
-            const probeZ = Math.min(parseFloat(slPr.value), totalH);
+    const stable=layers.every((l,i)=>i===0||l.r>=layers[i-1].r);
+    const totalH = layers.reduce((sum, layer) => sum + layer.h, 0);
+    slPr.max = totalH.toFixed(1);
+    const probeZ = Math.min(parseFloat(slPr.value), totalH);
 
-            let currentP = patm;
-            let currentZ = 0;
-            for (const layer of layers) {
-                if (probeZ > currentZ) {
-                    const depth = Math.min(layer.h, probeZ - currentZ);
-                    currentP += (layer.r * 1000 * g * depth) / 1000;
-                }
-                currentZ += layer.h;
-            }
+    let currentP = patm;
+    let currentZ = 0;
+    for (const layer of layers) {
+      if (probeZ > currentZ) {
+        const depth = Math.min(layer.h, probeZ - currentZ);
+        currentP += (layer.r * 1000 * g * depth) / 1000;
+      }
+      currentZ += layer.h;
+    }
 
-            const oliveContribution = (ru * 1000 * g * hu) / 1000;
-            const hgContribution = (13.6 * 1000 * g * hHg) / 1000;
-            document.getElementById('z19-val-ru').textContent = ru.toFixed(2);
-            document.getElementById('z19-val-hu').textContent = hu.toFixed(1);
-            document.getElementById('z19-val-probe').textContent = probeZ.toFixed(1);
-            document.getElementById('z19-res-p').textContent = currentP.toFixed(2);
-            document.getElementById('z19-res-olive').textContent = oliveContribution.toFixed(1);
-            document.getElementById('z19-res-hg').textContent = hgContribution.toFixed(1);
-        document.getElementById('z19-explainer').textContent = `Na dubini z = ${probeZ.toFixed(1)} m apsolutni tlak iznosi ${currentP.toFixed(2)} kPa. Svaki sloj daje vlastiti linearni segment grafa, s nagibom određenim gustoćom. Živa zato daje najveći porast tlaka po jedinici visine, dok lakši slojevi daju manje nagibe.`;
+    const oliveContribution = (ru * 1000 * g * hu) / 1000;
+    const hgContribution = (13.6 * 1000 * g * hHg) / 1000;
+    document.getElementById("z19-val-ru").textContent = ru.toFixed(2);
+    document.getElementById("z19-val-hu").textContent = hu.toFixed(1);
+    document.getElementById("z19-val-probe").textContent = probeZ.toFixed(1);
+    document.getElementById("z19-res-p").textContent = currentP.toFixed(2);
+    document.getElementById("z19-res-olive").textContent = oliveContribution.toFixed(1);
+    document.getElementById("z19-res-hg").textContent = hgContribution.toFixed(1);
+    document.getElementById("z19-explainer").textContent =
+      `Na dubini z = ${probeZ.toFixed(1)} m apsolutni tlak iznosi ${currentP.toFixed(2)} kPa. Svaki sloj daje vlastiti linearni segment grafa, s nagibom određenim gustoćom. Živa zato daje najveći porast tlaka po jedinici visine, dok lakši slojevi daju manje nagibe.`;
 
-            draw(layers, probeZ, currentP, totalH, patm);
-        }
+    if(!stable)document.getElementById('z19-explainer').textContent+=' Zadani redoslijed gustoća je nestabilan: ovo je trenutačni hidrostatski račun prije preraspodjele slojeva, a ne stabilna ravnoteža.';
+    draw(layers, probeZ, currentP, totalH, patm);
+  }
 
-        function draw(layers, probeZ, probeP, totalH, patm) {
-            const scaleY = 400 / totalH;
-            ctxT.clearRect(0, 0, cTank.width, cTank.height);
-            ctxT.fillStyle = '#ffffff';
-            ctxT.fillRect(0, 0, cTank.width, cTank.height);
-            let y = 20;
-            layers.forEach((layer) => {
-                const layerH = layer.h * scaleY;
-                ctxT.fillStyle = layer.color;
-                ctxT.globalAlpha = 0.82;
-                ctxT.fillRect(60, y, 200, layerH);
-                ctxT.globalAlpha = 1;
-                ctxT.fillStyle = '#ffffff';
-                ctxT.font = 'bold 12px Inter';
-                ctxT.fillText(layer.name, 80, y + layerH / 2 + 4);
-                y += layerH;
-            });
-            ctxT.strokeStyle = '#0f172a';
-            ctxT.lineWidth = 2;
-            ctxT.strokeRect(60, 20, 200, totalH * scaleY);
-            const py = 20 + probeZ * scaleY;
-            ctxT.strokeStyle = '#ef4444';
-            ctxT.lineWidth = 3;
-            ctxT.beginPath();
-            ctxT.moveTo(30, py);
-            ctxT.lineTo(290, py);
-            ctxT.stroke();
-            ctxT.fillStyle = '#ef4444';
-            ctxT.fillText(`z = ${probeZ.toFixed(1)} m`, 182, py - 8);
+  function draw(layers, probeZ, probeP, totalH, patm) {
+    const scaleY = 400 / totalH;
+    ctxT.clearRect(0, 0, cTank.width, cTank.height);
+    ctxT.fillStyle = "#ffffff";
+    ctxT.fillRect(0, 0, cTank.width, cTank.height);
+    let y = 20;
+    layers.forEach((layer) => {
+      const layerH = layer.h * scaleY;
+      ctxT.fillStyle = layer.color;
+      ctxT.globalAlpha = 0.82;
+      ctxT.fillRect(60, y, 200, layerH);
+      ctxT.globalAlpha = 1;
+      ctxT.fillStyle = "#ffffff";
+      ctxT.font = "bold 12px Inter";
+      ctxT.fillText(layer.name, 80, y + layerH / 2 + 4);
+      y += layerH;
+    });
+    ctxT.strokeStyle = "#0f172a";
+    ctxT.lineWidth = 2;
+    ctxT.strokeRect(60, 20, 200, totalH * scaleY);
+    const py = 20 + probeZ * scaleY;
+    ctxT.strokeStyle = "#ef4444";
+    ctxT.lineWidth = 3;
+    ctxT.beginPath();
+    ctxT.moveTo(30, py);
+    ctxT.lineTo(290, py);
+    ctxT.stroke();
+    ctxT.fillStyle = "#ef4444";
+    ctxT.fillText(`z = ${probeZ.toFixed(1)} m`, 182, py - 8);
 
-            ctxG.clearRect(0, 0, cGraph.width, cGraph.height);
-            ctxG.fillStyle = '#ffffff';
-            ctxG.fillRect(0, 0, cGraph.width, cGraph.height);
-            const padX = 58;
-            const padY = 24;
-            const maxP = 230;
-            const scaleX = (cGraph.width - padX - 24) / (maxP - patm);
-            ctxG.strokeStyle = '#cbd5e1';
-            ctxG.beginPath();
-            ctxG.moveTo(padX, padY);
-            ctxG.lineTo(padX, padY + totalH * scaleY);
-            ctxG.lineTo(cGraph.width - 20, padY + totalH * scaleY);
-            ctxG.stroke();
+    ctxG.clearRect(0, 0, cGraph.width, cGraph.height);
+    ctxG.fillStyle = "#ffffff";
+    ctxG.fillRect(0, 0, cGraph.width, cGraph.height);
+    const padX = 58;
+    const padY = 24;
+    const maxP = patm + layers.reduce((p,l)=>p+l.r*9.81*l.h,0) * 1.08;
+    const scaleX = (cGraph.width - padX - 24) / (maxP - patm);
+    ctxG.strokeStyle = "#cbd5e1";
+    ctxG.beginPath();
+    ctxG.moveTo(padX, padY);
+    ctxG.lineTo(padX, padY + totalH * scaleY);
+    ctxG.lineTo(cGraph.width - 20, padY + totalH * scaleY);
+    ctxG.stroke();
 
-            let curZ = 0;
-            let curP = patm;
-            ctxG.lineWidth = 4;
-            ctxG.beginPath();
-            ctxG.moveTo(padX, padY);
-            layers.forEach((layer) => {
-                const nextZ = curZ + layer.h;
-                const nextP = curP + (layer.r * 1000 * 9.81 * layer.h) / 1000;
-                ctxG.strokeStyle = layer.color;
-                ctxG.lineTo(padX + (nextP - patm) * scaleX, padY + nextZ * scaleY);
-                ctxG.stroke();
-                ctxG.beginPath();
-                ctxG.moveTo(padX + (nextP - patm) * scaleX, padY + nextZ * scaleY);
-                curZ = nextZ;
-                curP = nextP;
-            });
-            const gx = padX + (probeP - patm) * scaleX;
-            const gy = padY + probeZ * scaleY;
-            ctxG.fillStyle = '#ef4444';
-            ctxG.beginPath();
-            ctxG.arc(gx, gy, 5, 0, Math.PI * 2);
-            ctxG.fill();
-            ctxG.fillStyle = '#0f172a';
-            ctxG.font = 'bold 12px Inter';
-            ctxG.fillText('p(z)', padX + 8, 18);
-        }
+    let curZ = 0;
+    let curP = patm;
+    ctxG.lineWidth = 4;
+    ctxG.beginPath();
+    ctxG.moveTo(padX, padY);
+    layers.forEach((layer) => {
+      const nextZ = curZ + layer.h;
+      const nextP = curP + (layer.r * 1000 * 9.81 * layer.h) / 1000;
+      ctxG.strokeStyle = layer.color;
+      ctxG.lineTo(padX + (nextP - patm) * scaleX, padY + nextZ * scaleY);
+      ctxG.stroke();
+      ctxG.beginPath();
+      ctxG.moveTo(padX + (nextP - patm) * scaleX, padY + nextZ * scaleY);
+      curZ = nextZ;
+      curP = nextP;
+    });
+    const gx = padX + (probeP - patm) * scaleX;
+    const gy = padY + probeZ * scaleY;
+    ctxG.fillStyle = "#ef4444";
+    ctxG.beginPath();
+    ctxG.arc(gx, gy, 5, 0, Math.PI * 2);
+    ctxG.fill();
+    ctxG.fillStyle = "#0f172a";
+    ctxG.font = "bold 12px Inter";
+    ctxG.fillText("p(z)", padX + 8, 18);
+  }
 
-        slRu.addEventListener('input', update);
-        slHu.addEventListener('input', update);
-        slPr.addEventListener('input', update);
-        update();
-    })();
-    </script>
+  slRu.addEventListener("input", update);
+  slHu.addEventListener("input", update);
+  slPr.addEventListener("input", update);
+  update();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Hidrostatski tlak u višeslojnim sustavima računa se kao suma doprinosa svakog pojedinog sloja. Nagib linije na grafu p(z) direktno je proporcionalan gustoći fluida u tom sloju.
@@ -3085,137 +3161,78 @@ $$h_{i3} = \frac{24000}{1020 \cdot 9,81} = \mathbf{2,4 \text{ m}}$$
     <div class="z20-explainer" id="z20-explainer"></div>
 
     <script>
-    (function() {
-        const canvas = document.getElementById('canvas-z20-iv');
-        const ctx = canvas.getContext('2d');
-        const slH = document.getElementById('z20-slider-h');
-        const slBp = document.getElementById('z20-slider-bp');
-        const bInf = document.getElementById('z20-bar-inf');
-        const bBld = document.getElementById('z20-bar-bld');
-        const stEl = document.getElementById('z20-status');
-        let phase = 0;
+(function () {
+  const canvas = document.getElementById("canvas-z20-iv");
+  const ctx = canvas.getContext("2d");
+  const slH = document.getElementById("z20-slider-h");
+  const slBp = document.getElementById("z20-slider-bp");
+  const bInf = document.getElementById("z20-bar-inf");
+  const bBld = document.getElementById("z20-bar-bld");
+  const stEl = document.getElementById("z20-status");
+  let phase = 0;
 
-        function update() {
-            const h = parseFloat(slH.value);
-            const bpMmhg = parseFloat(slBp.value);
-            const rho = 1020;
-            const g = 9.81;
-            const pInf = (rho * g * h) / 1000;
-            const pBld = (bpMmhg * 133.322) / 1000;
-            const diff = pInf - pBld;
-            const hEq = (pBld * 1000) / (rho * g);
+  function update() {
+    const h = parseFloat(slH.value);
+    const bpMmhg = parseFloat(slBp.value);
+    const rho = 1020;
+    const g = 9.81;
+    const pInf = (rho * g * h) / 1000;
+    const pBld = (bpMmhg * 133.322) / 1000;
+    const diff = pInf - pBld;
+    const hEq = (pBld * 1000) / (rho * g);
 
-            document.getElementById('z20-val-h').textContent = h.toFixed(2);
-            document.getElementById('z20-val-bp').textContent = bpMmhg.toFixed(0);
-            document.getElementById('z20-calc-pi').textContent = `${pInf.toFixed(1)} kPa`;
-            document.getElementById('z20-calc-pb').textContent = `${pBld.toFixed(1)} kPa`;
-            document.getElementById('z20-res-diff').textContent = diff.toFixed(1);
-            document.getElementById('z20-res-heq').textContent = hEq.toFixed(2);
+    document.getElementById("z20-val-h").textContent = h.toFixed(2);
+    document.getElementById("z20-val-bp").textContent = bpMmhg.toFixed(0);
+    document.getElementById("z20-calc-pi").textContent = `${pInf.toFixed(1)} kPa`;
+    document.getElementById("z20-calc-pb").textContent = `${pBld.toFixed(1)} kPa`;
+    document.getElementById("z20-res-diff").textContent = diff.toFixed(1);
+    document.getElementById("z20-res-heq").textContent = hEq.toFixed(2);
 
-            bInf.style.height = `${Math.min(92, Math.max(12, (pInf / 32) * 100))}%`;
-            bBld.style.height = `${Math.min(92, Math.max(12, (pBld / 32) * 100))}%`;
+    bInf.style.height = `${Math.min(92, Math.max(12, (pInf / 32) * 100))}%`;
+    bBld.style.height = `${Math.min(92, Math.max(12, (pBld / 32) * 100))}%`;
 
-            if (diff > 2) {
-                stEl.textContent = 'SIGURAN PROTOK';
-                stEl.style.background = '#dcfce7';
-                stEl.style.color = '#166534';
-            } else if (diff > 0) {
-                stEl.textContent = 'PROTOK JE GRANIČAN';
-                stEl.style.background = '#fef3c7';
-                stEl.style.color = '#92400e';
-            } else {
-                stEl.textContent = 'RIZIK POVRATA KRVI';
-                stEl.style.background = '#fee2e2';
-                stEl.style.color = '#991b1b';
-            }
+    if (diff > 2) {
+      stEl.textContent = "POZITIVNA RAZLIKA TLAKA";
+      stEl.style.background = "#dcfce7";
+      stEl.style.color = "#166534";
+    } else if (diff > 0) {
+      stEl.textContent = "POZITIVNA RAZLIKA TLAKA";
+      stEl.style.background = "#fef3c7";
+      stEl.style.color = "#92400e";
+    } else {
+      stEl.textContent = Math.abs(diff)<1e-9 ? "RAVNOTEŽA TLAKOVA" : "OBRNUT TLAČNI GRADIJENT";
+      stEl.style.background = "#fee2e2";
+      stEl.style.color = "#991b1b";
+    }
 
-            document.getElementById('z20-explainer').textContent = `Za visinu vrećice ${h.toFixed(2)} m tlak infuzije iznosi ${pInf.toFixed(1)} kPa, a krvni tlak ${pBld.toFixed(1)} kPa. Razlika je ${diff.toFixed(1)} kPa. Ravnoteža nastupa oko ${hEq.toFixed(2)} m: ispod te visine infuzija ne može pouzdano tjerati tekućinu u venu.`;
-            draw(h, pInf, pBld, diff);
-        }
+    document.getElementById("z20-explainer").textContent =
+      `Za visinu vrećice ${h.toFixed(2)} m tlak infuzije iznosi ${pInf.toFixed(1)} kPa, a krvni tlak ${pBld.toFixed(1)} kPa. Razlika je ${diff.toFixed(1)} kPa. Ravnoteža nastupa oko ${hEq.toFixed(2)} m: ispod te visine infuzija ne može pouzdano tjerati tekućinu u venu.`;
+    draw(h, pInf, pBld, diff);
+  }
 
-        function draw(h, pInf, pBld, diff) {
-            phase += 0.04;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function draw(h,pInf,pBld,diff){
+    ctx.clearRect(0,0,760,340);ctx.fillStyle='#fff';ctx.fillRect(0,0,760,340);
+    const veinY=285,bagX=165,surface=veinY-h*65,bagY=surface-24,x=bagX+34;
+    ctx.fillStyle='#e2e8f0';ctx.fillRect(60,veinY-12,630,25);
+    ctx.strokeStyle='#64748b';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(x,surface+36);ctx.lineTo(x,veinY);ctx.lineTo(580,veinY);ctx.stroke();
+    ctx.strokeStyle='#7dd3fc';ctx.lineWidth=7;ctx.stroke();
+    ctx.fillStyle='#e0f2fe';ctx.fillRect(bagX,surface,68,36);ctx.strokeStyle='#40596b';ctx.lineWidth=2;ctx.strokeRect(bagX,bagY,68,60);
+    ctx.strokeStyle='#176da9';ctx.beginPath();ctx.moveTo(bagX,surface);ctx.lineTo(bagX+68,surface);ctx.stroke();
+    ctx.setLineDash([5,4]);ctx.strokeStyle='#94a3b8';ctx.beginPath();ctx.moveTo(70,surface);ctx.lineTo(340,surface);ctx.moveTo(310,surface);ctx.lineTo(310,veinY);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#40596b';ctx.font='14px system-ui';ctx.fillText('h = '+h.toFixed(2)+' m',320,(surface+veinY)/2);ctx.fillText('p_inf = '+pInf.toFixed(1)+' kPa',410,85);ctx.fillText('p_vena = '+pBld.toFixed(1)+' kPa',410,108);
+    if(Math.abs(diff)>1e-9)MF1.arrow(ctx,430,veinY,Math.sign(diff)*75,0,diff>0?'#176da9':'#b93645');
+    ctx.fillText('Smjer prema predznaku Δp; protok zahtijeva model otpora cjevčice.',50,325);
+  }
 
-            const armY = 258;
-            const bagX = 180;
-            const bagY = 250 - h * 78;
-            ctx.fillStyle = '#fde68a';
-            ctx.fillRect(70, armY, 600, 52);
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText('vena pacijenta', 560, 248);
+  function animate() {
+    update();
+  }
 
-            ctx.strokeStyle = '#cbd5e1';
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.moveTo(bagX + 34, bagY + 80);
-            ctx.lineTo(bagX + 34, armY + 26);
-            ctx.lineTo(540, armY + 26);
-            ctx.stroke();
-
-            ctx.fillStyle = '#f8fafc';
-            ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 2;
-            ctx.fillRect(bagX, bagY, 68, 82);
-            ctx.strokeRect(bagX, bagY, 68, 82);
-            ctx.fillStyle = 'rgba(59,130,246,0.22)';
-            ctx.fillRect(bagX + 4, bagY + 34, 60, 44);
-            ctx.fillStyle = '#0f172a';
-            ctx.fillText(`h = ${h.toFixed(2)} m`, bagX - 8, bagY - 12);
-
-            ctx.strokeStyle = '#94a3b8';
-            ctx.setLineDash([6, 5]);
-            ctx.beginPath();
-            ctx.moveTo(40, bagY + 80);
-            ctx.lineTo(700, bagY + 80);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            ctx.fillStyle = '#2563eb';
-            ctx.fillText(`p_inf = ${pInf.toFixed(1)} kPa`, 88, 44);
-            ctx.fillStyle = '#dc2626';
-            ctx.fillText(`p_krv = ${pBld.toFixed(1)} kPa`, 88, 64);
-
-            if (diff > 0) {
-                for (let i = 0; i < 7; i += 1) {
-                    const travel = (phase * 55 + i * 72) % 430;
-                    ctx.fillStyle = '#2563eb';
-                    ctx.beginPath();
-                    ctx.arc(bagX + 34 + Math.min(travel, 0), bagY + 80 + Math.max(0, Math.min(1, travel / 1)) * 0, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                for (let i = 0; i < 7; i += 1) {
-                    const t = (phase * 48 + i * 58) % 420;
-                    const x = bagX + 34 + Math.min(0, 0);
-                    const y = bagY + 80 + Math.min(t, armY + 26 - (bagY + 80));
-                    const x2 = 540 - Math.max(0, 420 - t);
-                    const px = t < armY + 26 - (bagY + 80) ? bagX + 34 : x2;
-                    const py = t < armY + 26 - (bagY + 80) ? y : armY + 26;
-                    ctx.beginPath();
-                    ctx.arc(px, py, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.fillText('tok ide prema veni', 430, 90);
-            } else {
-                const rise = 30 + Math.sin(phase * 2) * 8;
-                ctx.fillStyle = '#ef4444';
-                ctx.fillRect(538, armY + 26 - rise, 5, rise);
-                ctx.fillText('krv se može vraćati u cjevčicu', 392, 90);
-            }
-        }
-
-        function animate() {
-            update();
-        }
-
-        slH.addEventListener('input', update);
-        slBp.addEventListener('input', update);
-        animate();
-    })();
-    </script>
+  slH.addEventListener("input", update);
+  slBp.addEventListener("input", update);
+  animate();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Da bi infuzija tekla u venu, hidrostatski tlak stupca tekućine mora biti veći od krvnog tlaka u toj točki. U suprotnom, krv će krenuti prema gore u cjevčicu infuzije.
@@ -3315,109 +3332,55 @@ $$\Delta p_{err} = 78443,2 - 78419,6 = 23,6 \text{ Pa} \approx \mathbf{0,03\%}$$
     <div class="z21-explainer" id="z21-explainer"></div>
 
     <script>
-    (function() {
-        const cTank = document.getElementById('canvas-z21-tank');
-        const cGraph = document.getElementById('canvas-z21-graph');
-        const ctxT = cTank.getContext('2d');
-        const ctxG = cGraph.getContext('2d');
-        const slHz = document.getElementById('z21-slider-hz');
-        const slHv = document.getElementById('z21-slider-hv');
+(function () {
+  const cTank = document.getElementById("canvas-z21-tank");
+  const cGraph = document.getElementById("canvas-z21-graph");
+  const ctxT = cTank.getContext("2d");
+  const ctxG = cGraph.getContext("2d");
+  const slHz = document.getElementById("z21-slider-hz");
+  const slHv = document.getElementById("z21-slider-hv");
 
-        function update() {
-            const hz = parseFloat(slHz.value);
-            const hv = parseFloat(slHv.value);
-            const pA = 98.0;
-            const rhoz = 1.2041;
-            const rhov = 998;
-            const g = 9.81;
-            const dpz = rhoz * g * hz;
-            const dpv = rhov * g * hv;
-            const pBExact = pA + dpz / 1000 - dpv / 1000;
-            const pBApprox = pA - dpv / 1000;
-            const err = Math.abs((pBExact - pBApprox) / pBExact) * 100;
+  function update() {
+    const hz = parseFloat(slHz.value);
+    const hv = parseFloat(slHv.value);
+    const pA = 98.0;
+    const rhoz = 1.2041;
+    const rhov = 998;
+    const g = 9.81;
+    const dpz = rhoz * g * hz;
+    const dpv = rhov * g * hv;
+    const pBExact = pA + dpz / 1000 - dpv / 1000;
+    const pBApprox = pA - dpv / 1000;
+    const err = Math.abs((pBExact - pBApprox) / pBExact) * 100;
 
-            document.getElementById('z21-val-hz').textContent = hz.toFixed(1);
-            document.getElementById('z21-val-hv').textContent = hv.toFixed(1);
-            document.getElementById('z21-res-pb').textContent = pBExact.toFixed(2);
-            document.getElementById('z21-res-pb0').textContent = pBApprox.toFixed(2);
-            document.getElementById('z21-res-dpz').textContent = Math.round(dpz).toString();
-            document.getElementById('z21-res-err').textContent = err.toFixed(3);
-            document.getElementById('z21-explainer').textContent = `Za zračni stupac ${hz.toFixed(1)} m doprinos zraka iznosi samo ${Math.round(dpz)} Pa, dok vodeni stupac ${hv.toFixed(1)} m mijenja tlak za ${(dpv / 1000).toFixed(2)} kPa. Zato je točan tlak u B ${pBExact.toFixed(2)} kPa, a zanemarivanje zraka daje samo malu relativnu pogrešku od ${err.toFixed(3)} %.`;
+    document.getElementById("z21-val-hz").textContent = hz.toFixed(1);
+    document.getElementById("z21-val-hv").textContent = hv.toFixed(1);
+    document.getElementById("z21-res-pb").textContent = pBExact.toFixed(2);
+    document.getElementById("z21-res-pb0").textContent = pBApprox.toFixed(2);
+    document.getElementById("z21-res-dpz").textContent = Math.round(dpz).toString();
+    document.getElementById("z21-res-err").textContent = err.toFixed(3);
+    document.getElementById("z21-explainer").textContent =
+      `Za zračni stupac ${hz.toFixed(1)} m doprinos zraka iznosi samo ${Math.round(dpz)} Pa, dok vodeni stupac ${hv.toFixed(1)} m mijenja tlak za ${(dpv / 1000).toFixed(2)} kPa. Zato je točan tlak u B ${pBExact.toFixed(2)} kPa, a zanemarivanje zraka daje samo malu relativnu pogrešku od ${err.toFixed(3)} %.`;
 
-            draw(hz, hv, dpz, dpv, pA, pBExact, pBApprox);
-        }
+    draw(hz, hv, dpz, dpv, pA, pBExact, pBApprox);
+  }
 
-        function draw(hz, hv, dpz, dpv, pA, pBExact, pBApprox) {
-            const totalH = hz + hv;
-            const scaleY = 300 / totalH;
-            ctxT.clearRect(0, 0, cTank.width, cTank.height);
-            ctxT.fillStyle = '#ffffff';
-            ctxT.fillRect(0, 0, cTank.width, cTank.height);
-            ctxT.fillStyle = '#f1f5f9';
-            ctxT.fillRect(70, 30, 180, hz * scaleY);
-            ctxT.fillStyle = 'rgba(59,130,246,0.65)';
-            ctxT.fillRect(70, 30 + hz * scaleY, 180, hv * scaleY);
-            ctxT.strokeStyle = '#0f172a';
-            ctxT.lineWidth = 2;
-            ctxT.strokeRect(70, 30, 180, totalH * scaleY);
-            ctxT.fillStyle = '#475569';
-            ctxT.font = 'bold 12px Inter';
-            ctxT.fillText('zrak: mali porast tlaka', 90, 48);
-            ctxT.fillStyle = '#1d4ed8';
-            ctxT.fillText('voda: veliki pad/rast po visini', 90, 30 + hz * scaleY + 24);
-            ctxT.fillStyle = '#0f172a';
-            ctxT.fillText('A', 46, 48);
-            ctxT.fillText('B', 46, 30 + totalH * scaleY - 8);
+  function draw(hz,hv,dpz,dpv,pA,pBExact,pBApprox){
+    const c=ctxT; c.clearRect(0,0,320,360); const sc=230/Math.max(hz,hv),base=300,yA=base-hz*sc,yB=base-hv*sc;
+    c.strokeStyle='#94a3b8';c.lineWidth=18;c.beginPath();c.moveTo(70,yA);c.lineTo(70,base);c.lineTo(235,base);c.lineTo(235,yB);c.stroke();
+    c.strokeStyle='#dbe7ee';c.lineWidth=12;c.beginPath();c.moveTo(70,yA);c.lineTo(70,base);c.lineTo(150,base);c.stroke();c.strokeStyle='#60a5fa';c.beginPath();c.moveTo(150,base);c.lineTo(235,base);c.lineTo(235,yB);c.stroke();
+    c.fillStyle='#17324b';c.font='13px system-ui';c.fillText('A: '+pA.toFixed(2)+' kPa',15,yA-20);c.fillText('B: '+pBExact.toFixed(2)+' kPa',145,yB-20);c.fillText('zrak ↓ h_z',15,(yA+base)/2);c.fillText('voda ↑ h_v',190,(yB+base)/2);c.fillText('Hod tlaka: dolje +ρgΔh; gore −ρgΔh',12,340);
+    const d=ctxG;d.clearRect(0,0,520,360);const pts=[pA,pA+dpz/1000,pBExact],lo=Math.min(...pts),hi=Math.max(...pts),Y=p=>280-(p-lo)/(hi-lo||1)*210;
+    d.strokeStyle='#cbd5e1';d.beginPath();d.moveTo(50,40);d.lineTo(50,280);d.lineTo(470,280);d.stroke();
+    for(let i=0;i<2;i++){d.strokeStyle=i?'#176da9':'#64748b';d.lineWidth=3;d.beginPath();d.moveTo(70+i*180,Y(pts[i]));d.lineTo(250+i*180,Y(pts[i+1]));d.stroke()}
+    d.fillStyle='#40596b';d.font='13px system-ui';d.fillText('Tlak [kPa] podijeljen po koracima hoda',55,25);['A','sučelje','B'].forEach((t,i)=>{d.fillText(t,65+i*180,307);d.fillText(pts[i].toFixed(3),65+i*180,Y(pts[i])-9)});
+  }
 
-            ctxG.clearRect(0, 0, cGraph.width, cGraph.height);
-            ctxG.fillStyle = '#ffffff';
-            ctxG.fillRect(0, 0, cGraph.width, cGraph.height);
-            const originX = 60;
-            const originY = 30;
-            const width = 400;
-            const minP = Math.min(pBExact, pBApprox) - 5;
-            const maxP = pA + 2;
-            const scaleX = width / (maxP - minP);
-            ctxG.strokeStyle = '#cbd5e1';
-            ctxG.beginPath();
-            ctxG.moveTo(originX, originY);
-            ctxG.lineTo(originX, originY + totalH * scaleY);
-            ctxG.lineTo(originX + width, originY + totalH * scaleY);
-            ctxG.stroke();
-            const xA = originX + (pA - minP) * scaleX;
-            const xAir = originX + (pA + dpz / 1000 - minP) * scaleX;
-            const xB = originX + (pBExact - minP) * scaleX;
-            const yAir = originY + hz * scaleY;
-            const yB = originY + totalH * scaleY;
-            ctxG.strokeStyle = '#64748b';
-            ctxG.lineWidth = 3;
-            ctxG.beginPath();
-            ctxG.moveTo(xA, originY);
-            ctxG.lineTo(xAir, yAir);
-            ctxG.stroke();
-            ctxG.strokeStyle = '#2563eb';
-            ctxG.lineWidth = 4;
-            ctxG.beginPath();
-            ctxG.moveTo(xAir, yAir);
-            ctxG.lineTo(xB, yB);
-            ctxG.stroke();
-            ctxG.strokeStyle = '#ef4444';
-            ctxG.setLineDash([6, 5]);
-            ctxG.beginPath();
-            ctxG.moveTo(xA, originY);
-            ctxG.lineTo(originX + (pBApprox - minP) * scaleX, yB);
-            ctxG.stroke();
-            ctxG.setLineDash([]);
-            ctxG.fillStyle = '#0f172a';
-            ctxG.fillText('točno s težinom zraka', xAir + 10, yAir - 8);
-            ctxG.fillText('isprekidano: bez zraka', originX + (pBApprox - minP) * scaleX + 10, yB - 12);
-        }
-
-        slHz.addEventListener('input', update);
-        slHv.addEventListener('input', update);
-        update();
-    })();
-    </script>
+  slHz.addEventListener("input", update);
+  slHv.addEventListener("input", update);
+  update();
+})();
+</script>
 </div>
 
 <div class="widget-container mf1-lab" id="widget-air-extremes" style="max-width: 980px; margin: 2rem auto; padding: 22px; border: 1px solid #bfdbfe; background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%); border-radius: 22px; box-shadow: 0 18px 42px rgba(59, 130, 246, 0.08);">
@@ -3590,104 +3553,59 @@ $$p_1 = p_{m1} + p_{atm} = 58723 + 85600 = \mathbf{144,3 \text{ kPa}}$$
     <div class="z22-explainer" id="z22-explainer"></div>
 
     <script>
-    (function() {
-        const canvas = document.getElementById('canvas-z22-v2');
-        const ctx = canvas.getContext('2d');
-        const slAlt = document.getElementById('z22-slider-alt');
-        const slH3 = document.getElementById('z22-slider-h3');
-        const env = document.getElementById('z22-env');
-        const clouds = document.getElementById('z22-clouds');
+(function () {
+  const canvas = document.getElementById("canvas-z22-v2");
+  const ctx = canvas.getContext("2d");
+  const slAlt = document.getElementById("z22-slider-alt");
+  const slH3 = document.getElementById("z22-slider-h3");
+  const env = document.getElementById("z22-env");
+  const clouds = document.getElementById("z22-clouds");
 
-        function update() {
-            const alt = parseFloat(slAlt.value);
-            const h3Mm = parseFloat(slH3.value);
-            const h3 = h3Mm / 1000;
-            const patm = 101.325 * Math.exp(-alt / 8000);
-            const rhoV = 1000;
-            const rhoU = 850;
-            const rhoHg = 13600;
-            const g = 9.81;
-            const h1 = 0.1;
-            const h2 = 0.2;
-            const pm1 = (rhoHg * g * h3 - rhoU * g * h2 - rhoV * g * h1) / 1000;
-            const pabs = patm + pm1;
+  function update() {
+    const alt = parseFloat(slAlt.value);
+    const h3Mm = parseFloat(slH3.value);
+    const h3 = h3Mm / 1000;
+    const patm = 101.325 * Math.exp(-alt / 8000);
+    const rhoV = 1000;
+    const rhoU = 850;
+    const rhoHg = 13600;
+    const g = 9.81;
+    const h1 = 0.1;
+    const h2 = 0.2;
+    const pm1 = (rhoHg * g * h3 - rhoU * g * h2 - rhoV * g * h1) / 1000;
+    const pabs = patm + pm1;
 
-            document.getElementById('z22-val-alt').textContent = alt.toFixed(0);
-            document.getElementById('z22-disp-alt').textContent = alt.toFixed(0);
-            document.getElementById('z22-val-h3').textContent = h3Mm.toFixed(0);
-            document.getElementById('z22-res-patm').textContent = patm.toFixed(1);
-            document.getElementById('z22-res-pm1').textContent = pm1.toFixed(1);
-            document.getElementById('z22-res-pabs').textContent = pabs.toFixed(1);
-            document.getElementById('z22-explainer').textContent = `Na nadmorskoj visini ${alt.toFixed(0)} m atmosferski tlak pada na ${patm.toFixed(1)} kPa. Međutim, pretlak zraka u spremniku ostaje ${pm1.toFixed(1)} kPa jer ga određuje višefluidni stupac manometra. Zato apsolutni tlak spremnika postaje ${pabs.toFixed(1)} kPa.`;
+    document.getElementById("z22-val-alt").textContent = alt.toFixed(0);
+    document.getElementById("z22-disp-alt").textContent = alt.toFixed(0);
+    document.getElementById("z22-val-h3").textContent = h3Mm.toFixed(0);
+    document.getElementById("z22-res-patm").textContent = patm.toFixed(1);
+    document.getElementById("z22-res-pm1").textContent = pm1.toFixed(1);
+    document.getElementById("z22-res-pabs").textContent = pabs.toFixed(1);
+    document.getElementById("z22-explainer").textContent =
+      `Na nadmorskoj visini ${alt.toFixed(0)} m atmosferski tlak pada na ${patm.toFixed(1)} kPa. Međutim, pretlak zraka u spremniku ostaje ${pm1.toFixed(1)} kPa jer ga određuje višefluidni stupac manometra. Zato apsolutni tlak spremnika postaje ${pabs.toFixed(1)} kPa.`;
 
-            const brightness = Math.max(70, 92 - alt / 120);
-            env.style.background = `linear-gradient(180deg, hsl(210, 80%, ${brightness}%) 0%, hsl(212, 80%, ${Math.max(62, brightness - 12)}%) 100%)`;
-            clouds.style.top = `${28 + alt / 160}px`;
-            draw(h1, h2, h3, alt);
-        }
+    const brightness = Math.max(70, 92 - alt / 120);
+    env.style.background = `linear-gradient(180deg, hsl(210, 80%, ${brightness}%) 0%, hsl(212, 80%, ${Math.max(62, brightness - 12)}%) 100%)`;
+    clouds.style.top = `${28 + alt / 160}px`;
+    draw(h1, h2, h3, alt);
+  }
 
-        function draw(h1, h2, h3, alt) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const cx = 140;
-            const cy = 180;
-            const scale = 190;
+  function draw(h1,h2,h3,alt){
+ ctx.clearRect(0,0,540,360);ctx.fillStyle='#fff';ctx.fillRect(0,0,540,360);
+ const scale=210/(h1+h2+h3+.2),yl=270,yr=yl-h3*scale,yOil=yl-h2*scale,yWater=yOil-h1*scale;
+ const path=(points,color,width=12)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()};
+ path([[150,yWater],[220,yWater],[220,305],[365,305],[365,40]],'#64748b',18);
+ path([[150,yWater],[220,yWater],[220,yOil]],'#60a5fa');path([[220,yOil],[220,yl]],'#fbbf24');path([[220,yl],[220,305],[365,305],[365,yr]],'#94a3b8');path([[365,yr],[365,40]],'#fff',12);
+ ctx.fillStyle='#17324b';ctx.font='13px system-ui';ctx.fillText('p_spremnik',35,yWater);ctx.fillText('p_atm',385,40);ctx.fillText('voda: h₁',110,(yWater+yOil)/2+20);ctx.fillText('ulje: h₂',120,(yOil+yl)/2);ctx.fillText('živa: h₃',380,(yr+yl)/2);
+ ctx.setLineDash([5,4]);path([[245,yl],[410,yl]],'#94a3b8',1.5);path([[365,yr],[410,yr]],'#94a3b8',1.5);ctx.setLineDash([]);
+ ctx.fillText('Sve visine su vertikalne razlike razina.',60,345);
+}
 
-            ctx.fillStyle = '#f8fafc';
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(cx, cy, 62, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 12px Inter';
-            ctx.fillText('zrak u spremniku', cx - 42, cy + 4);
-
-            const tx = cx + 62;
-            const ty = cy;
-            const path = [
-                { x: tx, y: ty },
-                { x: tx + 46, y: ty },
-                { x: tx + 46, y: ty + 128 },
-                { x: tx + 144, y: ty + 128 },
-                { x: tx + 144, y: ty - 112 }
-            ];
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 16;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(path[0].x, path[0].y);
-            path.forEach((point) => ctx.lineTo(point.x, point.y));
-            ctx.stroke();
-
-            function drawInner(x1, y1, x2, y2, color, label) {
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 10;
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.stroke();
-                ctx.fillStyle = color;
-                ctx.fillText(label, (x1 + x2) / 2 + 10, (y1 + y2) / 2);
-            }
-
-            drawInner(tx, ty, tx + 46, ty, '#3b82f6', 'voda h1');
-            drawInner(tx + 46, ty, tx + 46, ty + h2 * scale, '#f97316', 'ulje h2');
-            drawInner(tx + 144, ty + 128, tx + 144, ty + 128 - h3 * scale, '#64748b', 'živa h3');
-
-            ctx.fillStyle = '#475569';
-            ctx.fillText(`manometar čita isti pretlak bez obzira na planinu`, 230, 42);
-            ctx.fillText(`ali p_atm pada kako raste altituda (${alt.toFixed(0)} m)`, 230, 60);
-        }
-
-        slAlt.addEventListener('input', update);
-        slH3.addEventListener('input', update);
-        update();
-    })();
-    </script>
+  slAlt.addEventListener("input", update);
+  slH3.addEventListener("input", update);
+  update();
+})();
+</script>
 </div>
 <div class="fizikalni-uvid">
 Barometarski (atmosferski) tlak opada s nadmorskom visinom. To znači da će manometar koji mjeri pretlak, pri istom apsolutnom tlaku u spremniku, pokazivati veći otklon na planini nego na razini mora.

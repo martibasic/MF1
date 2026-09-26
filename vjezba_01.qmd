@@ -46,188 +46,45 @@ Derivacija $du/dy$ nije samo simbol: ona je lokalni nagib profila brzine, odnosn
 
 
 ```{=html}
-<div class="mf1-lab" id="v1-intro-widget" style="max-width: 980px; margin: 2rem auto; font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); border: 1px solid #dbe7f3; border-radius: 22px; padding: 24px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);">
-    <div style="display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 18px;">
-        <div>
-            <div style="font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 6px;">Konceptualni laboratorij</div>
-            <h4 style="margin: 0; color: #0f172a; font-size: 1.45rem;">Pascalov tlak i Newtonovo smično naprezanje</h4>
-            <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 620px;">Promjenom ulaznih veličina uspoređuju se prijenos tlaka u hidrauličkom sustavu te profil brzine i smično naprezanje između ploča.</p>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <button type="button" id="btn-pascal" aria-pressed="true" aria-controls="v1-pascal-panel" style="padding: 10px 16px; border-radius: 999px; border: none; cursor: pointer; background: #2563eb; color: white; font-weight: 700; transition: 0.2s;">Pascalov zakon</button>
-            <button type="button" id="btn-newton" aria-pressed="false" aria-controls="v1-newton-panel" style="padding: 10px 16px; border-radius: 999px; border: none; cursor: pointer; background: #e2e8f0; color: #475569; font-weight: 700; transition: 0.2s;">Newtonov zakon</button>
-        </div>
-    </div>
-
-    <div style="display: flex; flex-direction: column; gap: 18px;">
-        <div style="position: relative; width: 100%; max-width: 520px; margin: 0 auto; background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 72%); border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
-            <canvas id="v1-intro-canvas" width="520" height="360" style="display: block; width: 100%; height: auto;"></canvas>
-            <div id="v1-scene-caption" style="position: absolute; left: 16px; right: 16px; bottom: 14px; background: rgba(255,255,255,0.92); border: 1px solid #dbeafe; border-radius: 12px; padding: 10px 12px; color: #334155; font-size: 0.8rem; line-height: 1.45;"></div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
-            <div id="v1-pascal-panel" style="display: flex; flex-direction: column; gap: 14px;">
-                <div style="padding: 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 16px;">
-                    <div style="font-size: 0.75rem; color: #1d4ed8; text-transform: uppercase; font-weight: 800; margin-bottom: 10px;">Ulazi sustava</div>
-                    <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Ulazna sila F₁: <span id="v1-pascal-force-val" style="color: #2563eb;">120</span> N</label>
-                    <input id="v1-pascal-force" type="range" min="40" max="240" step="10" value="120" style="width: 100%; margin-bottom: 12px; accent-color: #2563eb;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: -6px; margin-bottom: 10px;"><span>min 40 N</span><span>max 240 N</span></div>
-
-                    <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Omjer površina A₂ / A₁: <span id="v1-pascal-ratio-val" style="color: #2563eb;">4.0</span></label>
-                    <input id="v1-pascal-ratio" type="range" min="1.5" max="8" step="0.1" value="4" style="width: 100%; accent-color: #2563eb;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 4px;"><span>min 1.5</span><span>max 8.0</span></div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div style="padding: 14px; background: #ffffff; border: 1px solid #dbeafe; border-radius: 14px;">
-                        <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">Tlak u ulju</div>
-                        <div style="font-size: 1.45rem; font-weight: 800; color: #1d4ed8;"><span id="v1-pascal-pressure">1.00</span> MPa</div>
-                    </div>
-                    <div style="padding: 14px; background: #ffffff; border: 1px solid #dbeafe; border-radius: 14px;">
-                        <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">Izlazna sila F₂</div>
-                        <div style="font-size: 1.45rem; font-weight: 800; color: #0f766e;"><span id="v1-pascal-output">480</span> N</div>
-                    </div>
-                </div>
-
-                <div style="padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; color: #334155;">
-                    <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Fizikalno tumačenje</div>
-                    <p id="v1-pascal-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.5;"></p>
-                </div>
-            </div>
-
-            <div id="v1-newton-panel" style="display: none; flex-direction: column; gap: 14px;">
-                <p style="margin: 0; color: #475569; font-size: 0.9rem; line-height: 1.5;">U ovom uvodnom prikazu zračnost δ je fiksna; njezin se utjecaj detaljno istražuje u Vježbi 2.</p>
-                <div style="padding: 16px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 16px;">
-                    <div style="font-size: 0.75rem; color: #c2410c; text-transform: uppercase; font-weight: 800; margin-bottom: 10px;">Ulazi sustava</div>
-                    <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Brzina gornje ploče: <span id="v1-newton-speed-val" style="color: #ea580c;">1.20</span> m/s</label>
-                    <input id="v1-newton-speed" type="range" min="0.2" max="2.4" step="0.1" value="1.2" style="width: 100%; margin-bottom: 12px; accent-color: #ea580c;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: -6px; margin-bottom: 10px;"><span>min 0.2 m/s</span><span>max 2.4 m/s</span></div>
-
-                    <label style="display: block; font-size: 0.86rem; color: #334155; font-weight: 700; margin-bottom: 6px;">Dinamička viskoznost μ: <span id="v1-newton-mu-val" style="color: #ea580c;">0.35</span> Pa·s</label>
-                    <input id="v1-newton-mu" type="range" min="0.05" max="1.2" step="0.05" value="0.35" style="width: 100%; accent-color: #ea580c;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 4px;"><span>min 0.05 Pa·s</span><span>max 1.20 Pa·s</span></div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div style="padding: 14px; background: #ffffff; border: 1px solid #fed7aa; border-radius: 14px;">
-                        <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">Gradijent brzine dv/dy</div>
-                        <div style="font-size: 1.35rem; font-weight: 800; color: #c2410c;"><span id="v1-newton-gradient">48.0</span> s⁻¹</div>
-                    </div>
-                    <div style="padding: 14px; background: #ffffff; border: 1px solid #fed7aa; border-radius: 14px;">
-                        <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">Smično naprezanje τ</div>
-                        <div style="font-size: 1.35rem; font-weight: 800; color: #9a3412;"><span id="v1-newton-tau">16.8</span> Pa</div>
-                    </div>
-                </div>
-
-                <div style="padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; color: #334155;">
-                    <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Fizikalno tumačenje</div>
-                    <p id="v1-newton-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.5;"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-````
-```{=html}
-<script>
-(() => {
-  const $ = (id) => document.getElementById(id);
-  const canvas = $('v1-intro-canvas');
-  const ctx = canvas?.getContext('2d');
-  const controls = {
-    force: $('v1-pascal-force'), ratio: $('v1-pascal-ratio'),
-    speed: $('v1-newton-speed'), mu: $('v1-newton-mu')
-  };
-  if (!ctx || Object.values(controls).some((element) => !element)) return;
-
-  let tab = 'pascal';
-  const area1 = 12 / 10000;
-  const gap = 0.025;
-  const setText = (id, value) => { const element = $(id); if (element) element.textContent = value; };
-
-  function values() {
-    const force = Number(controls.force.value);
-    const ratio = Number(controls.ratio.value);
-    const speed = Number(controls.speed.value);
-    const mu = Number(controls.mu.value);
-    return { force, ratio, speed, mu, pressure: force / area1, output: force * ratio, gradient: speed / gap, tau: mu * speed / gap };
-  }
-
-  function update() {
-    const v = values();
-    setText('v1-pascal-force-val', v.force.toFixed(0));
-    setText('v1-pascal-ratio-val', v.ratio.toFixed(1));
-    setText('v1-pascal-pressure', (v.pressure / 1e6).toFixed(2));
-    setText('v1-pascal-output', v.output.toFixed(0));
-    setText('v1-newton-speed-val', v.speed.toFixed(2));
-    setText('v1-newton-mu-val', v.mu.toFixed(2));
-    setText('v1-newton-gradient', v.gradient.toFixed(1));
-    setText('v1-newton-tau', v.tau.toFixed(1));
-    $('v1-pascal-explainer').textContent = `Tlak je jednak u cijelom zatvorenom ulju. S omjerom površina ${v.ratio.toFixed(1)} izlazna sila iznosi ${v.output.toFixed(0)} N.`;
-    $('v1-newton-explainer').textContent = `Za μ = ${v.mu.toFixed(2)} Pa·s i gradijent ${v.gradient.toFixed(1)} s⁻¹ smično naprezanje iznosi ${v.tau.toFixed(1)} Pa.`;
-    $('v1-scene-caption').innerHTML = tab === 'pascal'
-      ? 'Tlak se prenosi jednak u svim smjerovima; veća površina daje veću silu <strong>F₂</strong>.'
-      : 'Brzina raste od nepomične donje do pomične gornje ploče; <strong>τ = μ·dv/dy</strong>.';
-    if (tab === 'pascal') drawPascal(v); else drawNewton(v);
-  }
-
-  function arrow(x1, y1, x2, y2, color, label = '') {
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-    ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - 10 * Math.cos(angle - .5), y2 - 10 * Math.sin(angle - .5)); ctx.lineTo(x2 - 10 * Math.cos(angle + .5), y2 - 10 * Math.sin(angle + .5)); ctx.closePath(); ctx.fill();
-    if (label) { ctx.font = '700 13px Inter, sans-serif'; ctx.fillText(label, x2 + 8, y2 - 7); }
-  }
-
-  function drawPascal(v) {
-    ctx.fillStyle = '#f8fbff'; ctx.fillRect(0, 0, 520, 360);
-    const pulse = 12, left = 94, right = 382, base = 300, top = 112, rw = 52 + v.ratio * 11;
-    ctx.fillStyle = 'rgba(37,99,235,.30)'; ctx.beginPath();
-    ctx.moveTo(left - 26, top + 62); ctx.lineTo(left - 26, base); ctx.lineTo(right + rw / 2, base); ctx.lineTo(right + rw / 2, top + 34); ctx.lineTo(right - rw / 2, top + 34); ctx.lineTo(right - rw / 2, 242); ctx.lineTo(left + 26, 242); ctx.lineTo(left + 26, top + 62); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3; ctx.stroke();
-    ctx.fillStyle = '#334155'; ctx.fillRect(left - 22, top + 76 + pulse, 44, 14); ctx.fillRect(right - rw / 2 + 4, top + 46 - pulse / v.ratio, rw - 8, 14);
-    arrow(left, top + 10, left, top + 68 + pulse, '#2563eb', 'F₁'); arrow(right, top + 64, right, top - 6, '#0f766e', 'F₂');
-    ctx.fillStyle = '#0f172a'; ctx.font = '700 14px Inter, sans-serif'; ctx.fillText(`p = ${(v.pressure / 1e6).toFixed(2)} MPa`, 20, 30); ctx.fillText(`F₂ = ${v.output.toFixed(0)} N`, 330, 72);
-    ctx.font = '13px Inter, sans-serif'; ctx.fillStyle = '#475569'; ctx.fillText('A₁ = 12 cm²', 48, 332); ctx.fillText(`A₂ = ${(12 * v.ratio).toFixed(0)} cm²`, 340, 332);
-  }
-
-  function drawNewton(v) {
-    ctx.fillStyle = '#fffaf5'; ctx.fillRect(0, 0, 520, 360);
-    const x = 65, y = 85, w = 315, h = 190;
-    ctx.fillStyle = 'rgba(251,146,60,.22)'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#1f2937'; ctx.fillRect(x, y - 19, w, 17); ctx.fillStyle = '#475569'; ctx.fillRect(x, y + h, w, 15);
-    for (let i = 0; i <= 6; i++) { const t = i / 6, yy = y + h - t * h, length = 28 + t * v.speed * 70; arrow(x + 25, yy, x + 25 + length, yy, `hsl(${205 - t * 42},78%,48%)`, i === 6 ? 'v' : ''); }
-    const ratio = Math.min(v.tau / 55, 1); ctx.fillStyle = '#fee2e2'; ctx.fillRect(435, 92, 42, 180); ctx.fillStyle = '#dc2626'; ctx.fillRect(435, 92 + (1 - ratio) * 180, 42, ratio * 180);
-    ctx.fillStyle = '#7f1d1d'; ctx.font = '700 14px Inter, sans-serif'; ctx.fillText('τ', 449, 80); ctx.fillText(`${v.tau.toFixed(1)} Pa`, 423, 294); ctx.fillStyle = '#9a3412'; ctx.font = '13px Inter, sans-serif'; ctx.fillText(`dv/dy = ${v.gradient.toFixed(1)} s⁻¹`, 208, 52); ctx.fillText(`μ = ${v.mu.toFixed(2)} Pa·s`, 208, 72);
-  }
-
-  function setTab(next) {
-    tab = next; $('v1-pascal-panel').style.display = next === 'pascal' ? 'flex' : 'none'; $('v1-newton-panel').style.display = next === 'newton' ? 'flex' : 'none';
-    $('btn-pascal').style.background = next === 'pascal' ? '#2563eb' : '#e2e8f0'; $('btn-pascal').style.color = next === 'pascal' ? '#fff' : '#475569'; $('btn-pascal').setAttribute('aria-pressed', String(next === 'pascal'));
-    $('btn-newton').style.background = next === 'newton' ? '#ea580c' : '#e2e8f0'; $('btn-newton').style.color = next === 'newton' ? '#fff' : '#475569'; $('btn-newton').setAttribute('aria-pressed', String(next === 'newton')); update();
-  }
-  $('btn-pascal').addEventListener('click', () => setTab('pascal')); $('btn-newton').addEventListener('click', () => setTab('newton'));
-  Object.values(controls).forEach((control) => control.addEventListener('input', update)); setTab('pascal');
-})();
-</script>
-```
-```{=html}
 <div id="v1-load-lab" class="v1x-lab" aria-label="Konceptualni laboratorij: kako fluid reagira na opterećenje"></div>
 <style>
 #v1-intro-widget{display:none}.v1x-lab{max-width:980px;margin:1.5rem auto 2rem;font-family:Inter,system-ui,sans-serif;color:#17324b}.v1x-lab *{box-sizing:border-box}.v1x-shell{display:grid;gap:13px;padding:20px;border:1px solid #cbdde8;border-radius:20px;background:linear-gradient(180deg,#f8fcfe,#fff);box-shadow:0 12px 32px rgba(23,50,77,.08)}.v1x-head h4{margin:0;color:#0f2942;font-size:clamp(1.28rem,2.3vw,1.7rem)}.v1x-head p{max-width:70ch;margin:.35rem 0 0;color:#4b6171;line-height:1.5}.v1x-kicker{margin-bottom:3px;color:#64748b;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.v1x-tabs,.v1x-presets{display:flex;flex-wrap:wrap;gap:8px}.v1x-lab button{border:1px solid #bcd2df;border-radius:9px;background:#fff;color:#234863;padding:.5rem .72rem;font:750 .88rem Inter,system-ui,sans-serif;cursor:pointer}.v1x-lab button[aria-pressed=true]{border-color:#126987;background:#126987;color:#fff}.v1x-scene{overflow:hidden;border:1px solid #cbdde8;border-radius:14px;background:#fff}.v1x-scene svg{display:block;width:100%;height:auto;min-height:300px}.v1x-bar{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,.7fr);gap:10px}.v1x-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.v1x-control{min-width:0;padding:10px 11px;border:1px solid #dbe7ef;border-radius:11px;background:#fff}.v1x-control label{display:flex;justify-content:space-between;gap:6px;margin-bottom:7px;color:#475569;font-size:.82rem;font-weight:750}.v1x-control output{color:#126987;font-family:ui-monospace,Consolas,monospace;font-weight:800;white-space:nowrap}.v1x-control input{width:100%;accent-color:#1976b9}.v1x-primary{display:grid;align-content:center;padding:11px 14px;border:1.5px solid #238a55;border-left:5px solid #238a55;border-radius:12px;background:#f0f9f4}.v1x-primary small{color:#34765a;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.v1x-primary strong{margin-top:3px;color:#125d36;font-family:ui-monospace,Consolas,monospace;font-size:clamp(1.1rem,2.2vw,1.45rem)}.v1x-locator,.v1x-note,.v1x-equation{padding:.78rem .92rem;border:1px solid #dbe7ef;border-radius:11px;background:#fff;color:#40596b;font-size:.91rem;line-height:1.55}.v1x-locator strong,.v1x-note strong{color:#17617f}.v1x-equation{font-family:"Cambria Math",Cambria,serif;background:#f8fcfe}@media(max-width:700px){.v1x-lab{margin-inline:.2rem}.v1x-shell{padding:14px}.v1x-bar{grid-template-columns:1fr}.v1x-controls{grid-template-columns:1fr}.v1x-tabs button,.v1x-presets button{flex:1 1 100%}.v1x-scene svg{min-height:240px}}
 </style>
 <script>
 (() => {
-  const root=document.getElementById('v1-load-lab'); if(!root||root.dataset.ready)return; root.dataset.ready='1';
-  root.innerHTML='<div class="v1x-shell"><header class="v1x-head"><div class="v1x-kicker">Konceptualni laboratorij</div><h4>Kako fluid reagira na opterećenje?</h4><p>Normalno opterećenje daje tlak, promjena tlaka može malo promijeniti volumen, a tangencijalno opterećenje uz gradijent brzine daje viskozno smično naprezanje.</p></header><div class="v1x-tabs" role="group" aria-label="Fizikalni slučaj"><button type="button" data-mode="pressure" aria-pressed="true">Tlak i hidraulika</button><button type="button" data-mode="compression" aria-pressed="false">Stlačivost</button><button type="button" data-mode="viscosity" aria-pressed="false">Viskoznost</button></div><div class="v1x-presets"><button type="button" data-preset="source" aria-pressed="false">Izvorna postavka</button></div><div class="v1x-scene"><svg id="v1x-scene" viewBox="0 0 900 340" role="img" aria-label="Fizikalna scena odabranog slučaja"></svg></div><div class="v1x-bar"><div class="v1x-controls" id="v1x-controls"></div><div class="v1x-primary"><small id="v1x-primary-label"></small><strong id="v1x-primary"></strong></div></div><div class="v1x-locator" id="v1x-locator"></div><div class="v1x-equation" id="v1x-equation"></div><div class="v1x-note" id="v1x-note"></div></div>';
-  const q=s=>root.querySelector(s), fmt=(n,d=2)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});
-  let mode='pressure', state={force:120,ratio:4,dp:1,K:200,U:1.2,mu:.35,delta:.025};
-  const configs={pressure:[['force','Ulazna sila F₁',40,240,10,'N',0],['ratio','Omjer A₂/A₁',1.5,8,.1,'',1]],compression:[['dp','Porast tlaka Δp',.1,20,.1,'MPa',1],['K','Modul stlačivosti K',50,2000,10,'MPa',0]],viscosity:[['U','Brzina gornje ploče U',.2,2.4,.1,'m/s',1],['mu','Dinamička viskoznost μ',.05,1.2,.05,'Pa·s',2],['delta','Razmak ploča δ',.005,.05,.001,'m',3]]};
-  function scenePressure(){const p=state.force/(12e-4), f2=state.force*state.ratio, w2=Math.min(210,55+state.ratio*19); return `<defs><marker id="v1xa" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#dc2626"/></marker></defs><path d="M105 266V142H250V266H650V142H${650+w2}V266" fill="#dff2f8" stroke="#315b72" stroke-width="6"/><rect x="142" y="126" width="72" height="17" rx="5" fill="#94a3b8"/><rect x="635" y="126" width="${w2}" height="17" rx="5" fill="#94a3b8"/><path d="M178 55V116" stroke="#dc2626" stroke-width="6" marker-end="url(#v1xa)"/><path d="M${635+w2/2} 118V52" stroke="#dc2626" stroke-width="6" marker-end="url(#v1xa)"/><text x="144" y="46" fill="#b91c1c" font-size="20" font-weight="800">F₁ = ${fmt(state.force,0)} N</text><text x="${610+w2/2}" y="45" text-anchor="middle" fill="#b91c1c" font-size="20" font-weight="800">F₂ = ${fmt(f2,0)} N</text><text x="330" y="245" fill="#176da9" font-size="19" font-weight="800">p = ${fmt(p/1e6,2)} MPa</text><text x="445" y="302" text-anchor="middle" fill="#526c7d" font-size="17">isti tlak, različite površine; velik klip ima manji pomak</text>`}
-  function sceneCompression(){const x=state.dp/state.K,V2=1000*Math.exp(-x),r=Math.min(.28,(1-V2/1000)*11),h=160-r*190; return `<defs><marker id="v1xa" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#dc2626"/></marker></defs><path d="M290 65H570V275H290Z" fill="#dff2f8" stroke="#315b72" stroke-width="5"/><rect x="275" y="${65+h}" width="310" height="22" rx="7" fill="#94a3b8"/><path d="M430 25V${57+h}" stroke="#dc2626" stroke-width="6" marker-end="url(#v1xa)"/><path d="M330 248V${86+h}M365 248V${86+h}M400 248V${86+h}M435 248V${86+h}M470 248V${86+h}M505 248V${86+h}" stroke="#7dd3fc" stroke-width="9"/><text x="430" y="49" text-anchor="middle" fill="#b91c1c" font-size="20" font-weight="800">Δp = ${fmt(state.dp,1)} MPa</text><text x="612" y="${100+h/2}" fill="#176da9" font-size="20" font-weight="800">V₂ = ${fmt(V2,1)} cm³</text><text x="450" y="310" text-anchor="middle" fill="#526c7d" font-size="17">promjena volumena je na skici grafički uvećana radi čitljivosti</text>`}
-  function sceneViscosity(){let arrows='';for(let i=0;i<=6;i++){const t=i/6,y=258-t*160,len=28+t*230;arrows+=`<path d="M150 ${y}H${150+len}" stroke="#1976b9" stroke-width="5" marker-end="url(#v1xb)"/>`}return `<defs><marker id="v1xb" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#1976b9"/></marker></defs><rect x="115" y="75" width="500" height="18" fill="#475569"/><rect x="115" y="258" width="500" height="18" fill="#334155"/><rect x="115" y="93" width="500" height="165" fill="#ffedd5"/><path d="M125 62H${125+state.U*130}" stroke="#dc2626" stroke-width="6" marker-end="url(#v1xb)"/><text x="140" y="45" fill="#b91c1c" font-size="20" font-weight="800">U</text>${arrows}<path d="M690 93V258" stroke="#64748b" stroke-width="3"/><text x="704" y="180" fill="#475569" font-size="18">δ = ${fmt(state.delta*1000,0)} mm</text><text x="420" y="315" text-anchor="middle" fill="#526c7d" font-size="17">brzina raste linearno: lokalni nagib je du/dy = U/δ</text>`}
-  function render(){const c=q('#v1x-controls');c.innerHTML='';configs[mode].forEach(([key,label,min,max,step,unit,d])=>{const box=document.createElement('div');box.className='v1x-control';box.innerHTML=`<label for="v1x-${key}"><span>${label}</span><output>${fmt(state[key],d)}${unit?' '+unit:''}</output></label><input id="v1x-${key}" type="range" min="${min}" max="${max}" step="${step}" value="${state[key]}">`;box.querySelector('input').addEventListener('input',e=>{state[key]=+e.target.value;render()});c.append(box)});q('#v1x-scene').innerHTML=mode==='pressure'?scenePressure():mode==='compression'?sceneCompression():sceneViscosity();if(mode==='pressure'){const p=state.force/(12e-4),f2=state.force*state.ratio;q('#v1x-primary-label').textContent='Glavni rezultat · izlazna sila';q('#v1x-primary').textContent='F₂ = '+fmt(f2,0)+' N';q('#v1x-locator').innerHTML=`<strong>Odnos sile i pomaka.</strong> F₂/F₁ = A₂/A₁ = ${fmt(state.ratio,1)}, dok je s₂/s₁ = ${fmt(1/state.ratio,3)}.`;q('#v1x-equation').textContent='p = F₁/A₁; F₂ = pA₂; A₁s₁ = A₂s₂.';q('#v1x-note').innerHTML='<strong>Fizikalno tumačenje.</strong> Veća površina drugog klipa ne povećava tlak; isti tlak djeluje na veću površinu i zato daje veću silu.'}else if(mode==='compression'){const x=state.dp/state.K,V2=1000*Math.exp(-x),rel=1-V2/1000;q('#v1x-primary-label').textContent='Glavni rezultat · relativna kompresija';q('#v1x-primary').textContent='ΔV/V = −'+fmt(rel*100,3)+' %';q('#v1x-locator').innerHTML=`<strong>Trenutačno stanje.</strong> V₁ = 1000,0 cm³ → V₂ = ${fmt(V2,2)} cm³; veliki K ograničava promjenu volumena.`;q('#v1x-equation').textContent='K = −dp/(dV/V); za konstantan K: V₂/V₁ = exp(−Δp/K). Za malu promjenu vrijedi ΔV/V ≈ −Δp/K.';q('#v1x-note').innerHTML='<strong>Fizikalno tumačenje.</strong> Tlak raste, volumen pada, pa minus u lokalnoj definiciji daje pozitivan K. Točna eksponencijalna veza ovdje je važna pri većem Δp/K.'}else{const g=state.U/state.delta,tau=state.mu*g;q('#v1x-primary-label').textContent='Glavni rezultat · smično naprezanje';q('#v1x-primary').textContent='τ = '+fmt(tau,2)+' Pa';q('#v1x-locator').innerHTML=`<strong>Profil i otpor nisu ista stvar.</strong> du/dy = ${fmt(g,1)} s⁻¹; pri istim U i δ promjena μ ne mijenja profil, ali mijenja τ.`;q('#v1x-equation').textContent='u(y) = Uy/δ; du/dy = U/δ; τ = μU/δ.';q('#v1x-note').innerHTML='<strong>Fizikalno tumačenje.</strong> Tanje međuslojno područje ili veća relativna brzina povećavaju lokalni nagib profila, a veća μ za isti nagib zahtijeva veće smično naprezanje.'}}
-  root.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;root.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render()}));root.querySelector('[data-preset]').addEventListener('click',()=>{state={force:120,ratio:4,dp:1,K:200,U:1.2,mu:.35,delta:.025};render()});render();
+  const root=document.getElementById('v1-load-lab'); if(!root)return;
+  root.innerHTML=`<div class="v1x-shell"><header class="v1x-head"><div class="v1x-kicker">Konceptualni laboratorij</div><h4>Kako fluid reagira na opterećenje?</h4><p>Promijeni opterećenje, izmjeri odgovor i poveži ga s jednadžbom.</p></header><div class="v1x-tabs" role="group" aria-label="Fizikalni slučaj"><button type="button" data-mode="pressure" aria-pressed="true">Tlak i hidraulika</button><button type="button" data-mode="compression" aria-pressed="false">Stlačivost</button><button type="button" data-mode="viscosity" aria-pressed="false">Viskoznost</button></div><div class="v1x-scene"><svg id="v1x-scene" viewBox="0 0 900 360" role="img" aria-label="Fizikalna scena odabranog slučaja"></svg></div><div class="v1x-bar"><div class="v1x-controls" id="v1x-controls"></div><div class="v1x-primary"><small id="v1x-primary-label"></small><strong id="v1x-primary"></strong></div></div><div class="v1x-equation" id="v1x-equation"></div><div class="v1x-note" id="v1x-note"></div><div class="v1x-presets"><button type="button" data-reset>Početne vrijednosti</button></div></div>`;
+  const q=s=>root.querySelector(s),fmt=(n,d=2)=>n.toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),arrow=MF1.svgArrow;
+  const defaults={force:120,ratio:4,dp:1,K:200,U:1.2,mu:.35,delta:.025};let state={...defaults},mode='pressure';
+  const configs={pressure:[['force','Ulazna sila F₁',0,240,10,'N',0],['ratio','Omjer A₂/A₁',1,8,.1,'',1]],compression:[['dp','Porast tlaka Δp',0,20,.1,'MPa',1],['K','Konstantan modul K',50,2000,10,'MPa',0]],viscosity:[['U','Brzina ploče U',-2.4,2.4,.1,'m/s',1],['mu','Viskoznost μ',.05,1.2,.05,'Pa·s',2],['delta','Razmak δ',.005,.05,.001,'m',3]]};
+  const text=(x,y,s,c='#40596b',size=18)=>`<text x="${x}" y="${y}" fill="${c}" font-size="${size}">${s}</text>`;
+  function controls(){q('#v1x-controls').innerHTML=configs[mode].map(([k,label,min,max,step,unit,d])=>`<div class="v1x-control"><label for="v1x-${k}"><span>${label}</span><output data-out="${k}"></output></label><input id="v1x-${k}" data-key="${k}" type="range" min="${min}" max="${max}" step="${step}" value="${state[k]}"></div>`).join('');q('#v1x-controls').querySelectorAll('input').forEach(i=>i.oninput=()=>{state[i.dataset.key]=+i.value;render()})}
+  function render(){
+    configs[mode].forEach(([k,l,a,b,c,u,d])=>q(`[data-out="${k}"]`).textContent=fmt(state[k],d)+' '+u);
+    let scene='',result='',label='',eq='',note='';
+    if(mode==='pressure'){
+      const A1=.0012,p=state.force/A1,F2=state.force*state.ratio,w1=70,w2=w1*Math.sqrt(state.ratio),L=175,R=675,top=182,base=286;
+      scene=`<path d="M${L-w1/2} ${top}V${base}H${R+w2/2}V${top}H${R-w2/2}V238H${L+w1/2}V${top}Z" fill="#dff2f8" stroke="#315b72" stroke-width="4"/><rect x="${L-w1/2}" y="${top-14}" width="${w1}" height="14" fill="#64748b"/><rect x="${R-w2/2}" y="${top-14}" width="${w2}" height="14" fill="#64748b"/>`;
+      scene+=arrow(L,top-14,0,state.force*.075,'#b93645')+arrow(R,top,0,-F2*.075,'#b93645');
+      scene+=text(65,55,`F₁ = ${fmt(state.force,0)} N`,'#b93645')+text(565,30,`F₂ = ${fmt(F2,0)} N`,'#b93645')+text(65,322,'A₁ = 12 cm²')+text(560,322,`A₂ = ${fmt(12*state.ratio,1)} cm²`)+text(323,267,`p = ${fmt(p/1000,1)} kPa`,'#176da9');
+      label='Izlazna sila';result=`F₂ = ${fmt(F2,0)} N`;eq=`p = F₁/A₁; F₂ = pA₂; A₁s₁ = A₂s₂ → s₂/s₁ = ${fmt(1/state.ratio,3)}.`;
+      note='Klipovi su na istoj visini. Prikazan je dodatni tlak zbog opterećenja; težine klipova i hidrostatska korekcija zanemarene su. Širine kružnih klipova prate √A, a obje sile imaju istu skalu. Veća sila znači manji pomak.';
+    }else if(mode==='compression'){
+      const ratio=Math.exp(-state.dp/state.K),V=1000*ratio,top=280-180*ratio;
+      scene=`<path d="M285 65V280H575V65" fill="none" stroke="#315b72" stroke-width="5"/><rect x="288" y="${top}" width="284" height="${280-top}" fill="#dff2f8"/><rect x="285" y="${top-14}" width="290" height="14" fill="#64748b"/><path d="M265 100H595" stroke="#94a3b8" stroke-dasharray="6 5"/>`+arrow(430,top-14,0,state.dp*3,'#b93645')+text(320,45,`Δp = ${fmt(state.dp,1)} MPa`,'#b93645')+text(610,190,`V₂ = ${fmt(V,1)} cm³`,'#176da9')+text(165,330,'Isprekidano: početni položaj. Visina fluida proporcionalna je volumenu.',undefined,16);
+      label='Relativna promjena volumena';result=`ΔV/V₁ = ${fmt((ratio-1)*100,3)} %`;eq='K = −V dp/dV; za konstantan K: V₂ = V₁ exp(−Δp/K).';note='Masa ostaje ista. Veći tlak spušta klip i smanjuje volumen; veći K smanjuje pomak. Pri Δp = 0 klip je na početnoj razini, V₁ = 1000 cm³.';
+    }else{
+      const h=state.delta*3600,bottom=274,top=bottom-h,gradient=state.U/state.delta,tau=state.mu*gradient;
+      scene=`<rect x="100" y="${top}" width="570" height="${h}" fill="#e0f2fe"/><rect x="100" y="${top-14}" width="570" height="14" fill="#64748b"/><rect x="100" y="274" width="570" height="14" fill="#334155"/>`;
+      for(let i=1;i<=6;i++){const t=i/6;scene+=arrow(365,bottom-t*h,t*state.U*85,0,'#176da9','',2.5)}
+      scene+=arrow(365,top-25,state.U*85,0,'#176da9')+text(105,top-32,`U = ${fmt(state.U,1)} m/s`,'#176da9',16)+text(110,315,'u(0) = 0; u(δ) = U',undefined,17)+text(700,(top+bottom)/2,`δ = ${fmt(state.delta*1000,0)} mm`,undefined,16);
+      scene+=`<path d="M365 ${bottom}L${365+state.U*85} ${top}" stroke="#176da9" stroke-dasharray="5 5" fill="none"/>`;
+      label='Potpisano smično naprezanje';result=`τ = ${fmt(tau,2)} Pa`;eq=`u(y) = Uy/δ; du/dy = ${fmt(gradient,1)} s⁻¹; τ = μU/δ.`;note='Brzinske strelice imaju zajedničku stalnu skalu. Na nepomičnoj stijenci brzina je nula. Promjena predznaka U okreće tok; μ mijenja naprezanje, a pri zadanom U i δ ne mijenja profil. Fluid na gornju ploču djeluje suprotno njezinu gibanju.';
+    }
+    q('#v1x-scene').innerHTML=scene;q('#v1x-primary-label').textContent=label;q('#v1x-primary').textContent=result;q('#v1x-equation').textContent=eq;q('#v1x-note').textContent=note;
+  }
+  root.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;root.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));controls();render()});
+  q('[data-reset]').onclick=()=>{state={...defaults};controls();render()};controls();render();
 })();
 </script>
 ```
@@ -269,7 +126,7 @@ Klip je promjera $d_k = 1$ m.
 <div class="rjesenje-label">Rješenje</div>
 
 1. **Površina klipa:** $A_k = \pi d_k^2/4 = \pi \cdot 1^2/4 = 0{,}785\ \text{m}^2$
-2. **Tlak pod klipom** (manometar mjeri na visini $h$ iznad dna, pa se dodaje hidrostatski stupac):
+2. **Tlak pod klipom** (manometar mjeri na visini $h$ iznad donje plohe klipa, pa se dodaje hidrostatski stupac):
 $$p_k = p_m + \rho g h = 70\,000 + 860 \cdot 9{,}81 \cdot 1 = 78\,437\ \text{Pa}$$
 3. **Težina klipa:**
 $$G = p_k \cdot A_k = 78\,437 \cdot 0{,}785 = 61\,603\ \text{N}$$
@@ -454,108 +311,24 @@ Manometar ne očitava direktno tlak pod klipom. On očitava tlak na svojoj visin
 </div>
 
 <script>
-(function() {
-    function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    const rhoS = document.getElementById('z2-rho');
-    if (!rhoS) return;
-    const hS = document.getElementById('z2-h');
-    const extraS = document.getElementById('z2-extra');
-    const pistonEl = document.getElementById('z2-piston');
-    const weightEl = document.getElementById('z2-weight');
-    const weightTextEl = document.getElementById('z2-weight-text');
-    const rodEl = document.getElementById('z2-rod');
-    const needleEl = document.getElementById('z2-needle');
-    const pipeEl = document.getElementById('z2-pipe');
-    const portEl = document.getElementById('z2-port');
-    const gaugeGroupEl = document.getElementById('z2-gauge-group');
-    const hGuideEl = document.getElementById('z2-h-guide');
-    const hGuideTopEl = document.getElementById('z2-h-guide-top');
-    const hGuideBottomEl = document.getElementById('z2-h-guide-bottom');
-    const hLabelEl = document.getElementById('z2-h-label');
-    const oilStop1 = document.getElementById('z2-oil-stop1');
-    const oilStop2 = document.getElementById('z2-oil-stop2');
-
-    function setText(id, value) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = value;
-    }
-
-    function getValues() {
-        const rho = parseFloat(rhoS.value);
-        const h = parseFloat(hS.value);
-        const extraLoad = parseFloat(extraS.value) * 1000;
-        const Ak = Math.PI / 4;
-        const g = 9.81;
-        const baseG = 61603;
-        const currentG = baseG + extraLoad;
-        const pistonPressure = currentG / Ak / 1000;
-        const hydroDrop = rho * g * h / 1000;
-        const pm = pistonPressure - hydroDrop;
-
-        return { rho, h, extraLoad, Ak, g, currentG, pistonPressure, hydroDrop, pm };
-    }
-
-    function update() {
-        const values = getValues();
-
-        setText('z2-v-rho', values.rho.toFixed(0));
-        setText('z2-v-h', values.h.toFixed(1));
-        setText('z2-v-extra', (values.extraLoad / 1000).toFixed(0));
-        setText('z2-res-piston', values.pistonPressure.toFixed(1));
-        setText('z2-res-hydro', values.hydroDrop.toFixed(1));
-        setText('z2-res-pm', values.pm.toFixed(1));
-        setText('z2-res-pm-top', values.pm.toFixed(1));
-        setText('z2-res-g', (values.currentG / 1000).toFixed(1));
-        setText('z2-hero-piston', values.pistonPressure.toFixed(1));
-        setText('z2-hero-hydro', values.hydroDrop.toFixed(1));
-        setText('z2-hero-pm', values.pm.toFixed(1));
-        setText('z2-stage-pk', values.pistonPressure.toFixed(1));
-        setText('z2-stage-drop', values.hydroDrop.toFixed(1));
-        setText('z2-stage-pm', values.pm.toFixed(1));
-        setText('z2-eq-vals', `${values.pm.toFixed(1)} kPa = ${values.pistonPressure.toFixed(1)} kPa - ${values.hydroDrop.toFixed(1)} kPa`);
-        setText('z2-explainer', `Klip trenutačno stvara ${values.pistonPressure.toFixed(1)} kPa na dnu cilindra, ali se do manometra izgubi ${values.hydroDrop.toFixed(1)} kPa zbog penjanja kroz stupac ulja visine ${values.h.toFixed(1)} m. Zato instrument pokazuje ${values.pm.toFixed(1)} kPa, a ne puni tlak pod klipom.`);
-
-        const pRatio = Math.min(values.pistonPressure / 190, 1);
-        const hRatio = Math.min(values.hydroDrop / 30, 1);
-        const mRatio = Math.min(values.pm / 180, 1);
-        document.getElementById('z2-bar-p').style.width = `${(pRatio * 100).toFixed(1)}%`;
-        document.getElementById('z2-bar-h').style.width = `${(hRatio * 100).toFixed(1)}%`;
-        document.getElementById('z2-bar-m').style.width = `${(mRatio * 100).toFixed(1)}%`;
-
-        const pistonDrop = Math.min((values.currentG / 1000) * 0.08, 14);
-        pistonEl.setAttribute('y', (92 + pistonDrop).toFixed(1));
-        weightEl.setAttribute('y', (12 + pistonDrop).toFixed(1));
-        weightTextEl.setAttribute('y', (37 + pistonDrop).toFixed(1));
-        rodEl.setAttribute('y1', (52 + pistonDrop).toFixed(1));
-        rodEl.setAttribute('y2', (92 + pistonDrop).toFixed(1));
-        weightTextEl.textContent = `${(values.currentG / 1000).toFixed(1)} kN`;
-
-        const tapY = 344 - values.h * 62;
-        portEl.setAttribute('cy', tapY.toFixed(1));
-        pipeEl.setAttribute('d', `M308 ${tapY.toFixed(1)} L506 ${tapY.toFixed(1)}`);
-        hGuideEl.setAttribute('d', `M350 344 L350 ${tapY.toFixed(1)}`);
-        hGuideTopEl.setAttribute('y1', tapY.toFixed(1));
-        hGuideTopEl.setAttribute('y2', tapY.toFixed(1));
-        hGuideBottomEl.setAttribute('y1', '344');
-        hGuideBottomEl.setAttribute('y2', '344');
-        hLabelEl.setAttribute('y', ((344 + tapY) / 2 + 5).toFixed(1));
-        hLabelEl.textContent = `h = ${values.h.toFixed(1)} m`;
-        gaugeGroupEl.setAttribute('transform', `translate(0 ${(tapY - 282).toFixed(1)})`);
-
-        const angle = -125 + clamp(values.pm, 0, 180) / 180 * 250;
-        needleEl.setAttribute('transform', `rotate(${angle.toFixed(2)} 584 282)`);
-
-        const cTop = 0.20 + (values.rho - 700) / 300 * 0.24;
-        const cBot = 0.40 + (values.rho - 700) / 300 * 0.26;
-        oilStop1.setAttribute('stop-opacity', cTop.toFixed(3));
-        oilStop2.setAttribute('stop-opacity', cBot.toFixed(3));
-    }
-
-    [rhoS, hS, extraS].forEach((slider) => slider.addEventListener('input', update));
-    update();
+(() => {
+  const $=id=>document.getElementById(id),svg=$('z2-svg');
+  const inputs=['z2-rho','z2-h','z2-extra'].map($),set=(id,s)=>{if($(id))$(id).textContent=s};
+  function update(){
+    const [rho,h,extra]=inputs.map(i=>+i.value),A=Math.PI/4,baseG=(70000+860*9.81)*A,G=baseG+extra*1000,pk=G/A/1000,drop=rho*9.81*h/1000,pm=pk-drop;
+    for(const [id,val]of Object.entries({'z2-v-rho':rho.toFixed(0),'z2-v-h':h.toFixed(1),'z2-v-extra':extra.toFixed(0),'z2-res-g':(G/1000).toFixed(1),'z2-res-piston':pk.toFixed(1),'z2-hero-piston':pk.toFixed(1),'z2-res-hydro':drop.toFixed(1),'z2-hero-hydro':drop.toFixed(1),'z2-res-pm':pm.toFixed(1),'z2-hero-pm':pm.toFixed(1)}))set(id,val);
+    set('z2-eq-vals',`${pm.toFixed(1)} kPa = ${pk.toFixed(1)} kPa − ${drop.toFixed(1)} kPa`);
+    set('z2-explainer',`Mjerno mjesto je ${h.toFixed(1)} m iznad donje plohe klipa. Pri penjanju kroz mirujuće ulje tlak pada za ρgh = ${drop.toFixed(1)} kPa. Zato pₘ = pₖ − ρgh = ${pm.toFixed(1)} kPa. To je hidrostatska razlika, a ne gubitak energije. Klip je u ravnoteži; promjena sile ne određuje njegov pomak u ovom nestlačivom modelu.`);
+    for(const [k,v]of [['p',pk],['h',drop],['m',pm]])$('z2-bar-'+k).style.width=100*v/190+'%';
+    const yp=210,yt=yp-h*36,len=G*.00042,angle=(-135+pm/190*270)*Math.PI/180;
+    const text=(x,y,s,c='#40596b')=>`<text x="${x}" y="${y}" font-size="16" fill="${c}">${s}</text>`;
+    svg.innerHTML=`<path d="M130 178V340H310V178" fill="none" stroke="#40596b" stroke-width="4"/><rect x="132" y="${yp}" width="176" height="128" fill="#e0f2fe"/><path d="M310 315H420V${yt}H560" stroke="#64748b" stroke-width="17" fill="none" stroke-linejoin="round"/><path d="M310 315H420V${yt}H560" stroke="#7dd3fc" stroke-width="11" fill="none" stroke-linejoin="round"/><rect x="130" y="192" width="180" height="18" fill="#64748b"/><rect x="175" y="160" width="90" height="32" rx="4" fill="#334155"/>`;
+    svg.innerHTML+=MF1.svgArrow(215,178,0,len,'#b93645')+MF1.svgArrow(225,yp,0,-len,'#176da9')+text(130,120,`G = ${(G/1000).toFixed(1)} kN`,'#b93645')+text(242,242,'pₖA = G','#176da9');
+    svg.innerHTML+=`<path d="M323 ${yp}H490M430 ${yt}H490M476 ${yt}V${yp}" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>`+text(486,(yt+yp)/2+7,`h = ${h.toFixed(1)} m`);
+    svg.innerHTML+=`<circle cx="620" cy="${yt}" r="58" fill="#fff" stroke="#94a3b8" stroke-width="3"/><circle cx="620" cy="${yt}" r="4" fill="#17324b"/>`+MF1.svgArrow(620,yt,40*Math.sin(angle),-40*Math.cos(angle),'#176da9')+text(572,yt+84,`pₘ = ${pm.toFixed(1)} kPa`,'#176da9');
+    svg.innerHTML+=text(125,382,`pₖ = ${pk.toFixed(1)} kPa`)+text(405,382,`ρgh = ${drop.toFixed(1)} kPa`)+text(92,424,'Visinska referenca: ploha klipa. Shema cjevčice; nema strujanja.');
+  }
+  inputs.forEach(i=>i.addEventListener('input',update));update();
 })();
 </script>
 ````
@@ -597,7 +370,7 @@ Tlak je porastao za $1\ \mathrm{MPa}$, a volumen se smanjio za samo $0{,}5\%$. U
         <div>
             <div style="font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 6px;">Zadatak 2 · laboratorij stlačivosti</div>
             <h4 style="margin: 0; color: #0f172a; font-size: 1.42rem;">Isti tlak, potpuno drugačiji odgovor tekućine i plina</h4>
-            <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 620px;">Prikaz uspoređuje promjenu volumena vode i plina pri istom porastu tlaka. Volumenski modul tako izravno opisuje otpor tvari prema promjeni volumena.</p>
+            <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 620px;">Prikaz uspoređuje vodu (konstantan K = 2000 MPa) i izotermni idealni plin pri istom porastu apsolutnog tlaka. Za vodu V/V₁ = exp(−Δp/K), a za plin V/V₁ = p₁/p. Volumenski modul tako izravno opisuje otpor tvari prema promjeni volumena.</p>
         </div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 18px; align-items: stretch;">
@@ -653,8 +426,8 @@ Tlak je porastao za $1\ \mathrm{MPa}$, a volumen se smanjio za samo $0{,}5\%$. U
                 <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; color:#64748b; margin-bottom:8px;">Usporedba volumenskog modula K</div>
                 <div style="font-size:0.8rem; color:#1d4ed8; margin-bottom:3px;">Voda ~ 2000 MPa</div>
                 <div style="height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-bottom:8px;"><div style="height:100%; width:100%; background:linear-gradient(90deg,#60a5fa,#1d4ed8);"></div></div>
-                <div style="font-size:0.8rem; color:#b91c1c; margin-bottom:3px;">Zrak ~ 0.1 MPa</div>
-                <div style="height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden;"><div style="height:100%; width:6%; background:linear-gradient(90deg,#fca5a5,#ef4444);"></div></div>
+                <div style="font-size:0.8rem; color:#b91c1c; margin-bottom:3px;">Idealni plin pri stalnoj temperaturi: K = p (ovdje 1–10 MPa)</div>
+                <div style="height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden;"><div id="z4-k-gas" style="height:100%; width:0.05%; background:#ef4444;"></div></div>
             </div>
         </div>
     </div>
@@ -665,245 +438,276 @@ Volumenski modul određuje promjenu volumena pri promjeni tlaka. Zato je pomak k
 </div>
 
 <script>
-(function() {
-    const z4c = document.getElementById('z4-canvas');
-    if (!z4c) return;
-    const z4ctx = z4c.getContext('2d');
-    const z4pS = document.getElementById('z4-p');
-    const Z4_BASE_W = 720;
-    const Z4_BASE_H = 420;
+(function () {
+  const z4c = document.getElementById("z4-canvas");
+  if (!z4c) return;
+  const z4ctx = z4c.getContext("2d");
+  const z4pS = document.getElementById("z4-p");
+  const Z4_BASE_W = 720;
+  const Z4_BASE_H = 420;
 
-    let z4Ratio = 1;
-    let z4ScaleX = 1;
-    let z4ScaleY = 1;
-    let z4State = { p: 1, liquidCompression: 0, gasCompression: 0 };
+  let z4Ratio = 1;
+  let z4ScaleX = 1;
+  let z4ScaleY = 1;
+  let z4State = { p: 1, liquidCompression: 0, gasCompression: 0 };
 
-    function createParticles(count, xMin, xMax, yMin, yMax, speed) {
-        return Array.from({ length: count }, () => ({
-            x: xMin + Math.random() * (xMax - xMin),
-            y: yMin + Math.random() * (yMax - yMin),
-            vx: (Math.random() - 0.5) * speed,
-            vy: (Math.random() - 0.5) * speed
-        }));
+  function createParticles(count, xMin, xMax, yMin, yMax, speed) {
+    return Array.from({ length: count }, (_, i) => ({
+      u: ((i*317+127)%997)/997, v: ((i*179+73)%991)/991,
+      x: xMin + Math.random() * (xMax - xMin),
+      y: yMin + Math.random() * (yMax - yMin),
+      vx: (Math.random() - 0.5) * speed,
+      vy: (Math.random() - 0.5) * speed,
+    }));
+  }
+
+  const liquidParticles = createParticles(86, 72, 280, 132, 316, 0.65);
+  const gasParticles = createParticles(50, 438, 648, 114, 320, 3.2);
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function traceRoundedRect(x, y, w, h, r) {
+    const rr = Math.min(r, w / 2, h / 2);
+    z4ctx.beginPath();
+    z4ctx.moveTo(x + rr, y);
+    z4ctx.arcTo(x + w, y, x + w, y + h, rr);
+    z4ctx.arcTo(x + w, y + h, x, y + h, rr);
+    z4ctx.arcTo(x, y + h, x, y, rr);
+    z4ctx.arcTo(x, y, x + w, y, rr);
+    z4ctx.closePath();
+  }
+
+  function resizeZ4Canvas() {
+    const rect = z4c.getBoundingClientRect();
+    const displayWidth = Math.max(Math.round(rect.width) || Z4_BASE_W, 320);
+    const displayHeight = Math.max(Math.round(rect.height) || Z4_BASE_H, 260);
+    z4Ratio = Math.min(window.devicePixelRatio || 1, 2);
+
+    const pixelWidth = Math.max(1, Math.round(displayWidth * z4Ratio));
+    const pixelHeight = Math.max(1, Math.round(displayHeight * z4Ratio));
+
+    if (z4c.width !== pixelWidth || z4c.height !== pixelHeight) {
+      z4c.width = pixelWidth;
+      z4c.height = pixelHeight;
     }
 
-    const liquidParticles = createParticles(86, 72, 280, 132, 316, 0.65);
-    const gasParticles = createParticles(50, 438, 648, 114, 320, 3.2);
+    z4ScaleX = displayWidth / Z4_BASE_W;
+    z4ScaleY = displayHeight / Z4_BASE_H;
+    z4ctx.setTransform(z4ScaleX * z4Ratio, 0, 0, z4ScaleY * z4Ratio, 0, 0);
+    z4ctx.imageSmoothingEnabled = true;
+    z4ctx.lineCap = "round";
+    z4ctx.lineJoin = "round";
+  }
 
-    function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
-    }
+  function syncZ4State() {
+    const p = parseFloat(z4pS.value);
+    document.getElementById("z4-v-p").textContent = p.toFixed(1);
+    document.getElementById("z4-v-p-side").textContent = p.toFixed(1);
+    document.getElementById("z4-dp").textContent = (p - 1).toFixed(1);
 
-    function traceRoundedRect(x, y, w, h, r) {
-        const rr = Math.min(r, w / 2, h / 2);
-        z4ctx.beginPath();
-        z4ctx.moveTo(x + rr, y);
-        z4ctx.arcTo(x + w, y, x + w, y + h, rr);
-        z4ctx.arcTo(x + w, y + h, x, y + h, rr);
-        z4ctx.arcTo(x, y + h, x, y, rr);
-        z4ctx.arcTo(x, y, x + w, y, rr);
-        z4ctx.closePath();
-    }
+    document.getElementById("z4-k-gas").style.width = `${100*p/2000}%`;
+    const dP = Math.max(p - 1, 0);
+    const liquidCompression = -Math.expm1(-dP / 2000) * 100;
+    const gasCompression = Math.min((1 - 1 / Math.max(p, 1)) * 100, 90);
+    const liquidVolume = 1000 * (1 - liquidCompression / 100);
+    const gasVolume = 1000 * (1 - gasCompression / 100);
 
-    function resizeZ4Canvas() {
-        const rect = z4c.getBoundingClientRect();
-        const displayWidth = Math.max(Math.round(rect.width) || Z4_BASE_W, 320);
-        const displayHeight = Math.max(Math.round(rect.height) || Z4_BASE_H, 260);
-        z4Ratio = Math.min(window.devicePixelRatio || 1, 2);
+    document.getElementById("z4-bar-liquid").style.width = `${liquidCompression}%`;
+    document.getElementById("z4-val-liquid").textContent = `${liquidCompression.toFixed(2)}%`;
+    document.getElementById("z4-bar-gas").style.width = `${gasCompression.toFixed(1)}%`;
+    document.getElementById("z4-val-gas").textContent = `${gasCompression.toFixed(1)}%`;
+    document.getElementById("z4-vol-liquid").textContent = liquidVolume.toFixed(1);
+    document.getElementById("z4-vol-gas").textContent = gasVolume.toFixed(1);
+    document.getElementById("z4-explainer").textContent =
+      `Na ${p.toFixed(0)} MPa voda izgubi tek ${liquidCompression.toFixed(2)}% volumena, pa njezin klip gotovo da se ne pomakne. Plin pri istom opterećenju izgubi oko ${gasCompression.toFixed(1)}% volumena, zato se ondje vidi veliko skupljanje i mnogo veća promjena rasporeda čestica.`;
 
-        const pixelWidth = Math.max(1, Math.round(displayWidth * z4Ratio));
-        const pixelHeight = Math.max(1, Math.round(displayHeight * z4Ratio));
+    z4State = { p, liquidCompression, gasCompression };
+  }
 
-        if (z4c.width !== pixelWidth || z4c.height !== pixelHeight) {
-            z4c.width = pixelWidth;
-            z4c.height = pixelHeight;
-        }
+  function drawZ4() {
+    resizeZ4Canvas();
+    z4ctx.setTransform(1, 0, 0, 1, 0, 0);
+    z4ctx.clearRect(0, 0, z4c.width, z4c.height);
+    z4ctx.setTransform(z4ScaleX * z4Ratio, 0, 0, z4ScaleY * z4Ratio, 0, 0);
 
-        z4ScaleX = displayWidth / Z4_BASE_W;
-        z4ScaleY = displayHeight / Z4_BASE_H;
-        z4ctx.setTransform(z4ScaleX * z4Ratio, 0, 0, z4ScaleY * z4Ratio, 0, 0);
-        z4ctx.imageSmoothingEnabled = true;
-        z4ctx.lineCap = 'round';
-        z4ctx.lineJoin = 'round';
-    }
+    const bg = z4ctx.createLinearGradient(0, 0, 0, Z4_BASE_H);
+    bg.addColorStop(0, "#ffffff");
+    bg.addColorStop(1, "#edf5ff");
+    z4ctx.fillStyle = bg;
+    z4ctx.fillRect(0, 0, Z4_BASE_W, Z4_BASE_H);
 
-    function syncZ4State() {
-        const p = parseFloat(z4pS.value);
-        document.getElementById('z4-v-p').textContent = p.toFixed(1);
-        document.getElementById('z4-v-p-side').textContent = p.toFixed(1);
-        document.getElementById('z4-dp').textContent = (p - 1).toFixed(1);
+    z4ctx.fillStyle = "rgba(148, 163, 184, 0.12)";
+    z4ctx.fillRect(350, 40, 2, 320);
 
-        const dP = Math.max(p - 1, 0);
-        const liquidCompression = Math.max(0, (dP / 2000) * 100);
-        const gasCompression = Math.min((1 - 1 / Math.max(p, 1)) * 100, 90);
-        const liquidVolume = 1000 * (1 - liquidCompression / 100);
-        const gasVolume = 1000 * (1 - gasCompression / 100);
+    const left = { x: 52, y: 86, w: 248, h: 250 };
+    const right = { x: 420, y: 86, w: 248, h: 250 };
+    const liqTop = left.y + left.h * z4State.liquidCompression / 100;
+    const gasTop = right.y + right.h * z4State.gasCompression / 100;
 
-        document.getElementById('z4-bar-liquid').style.width = `${Math.min(liquidCompression * 300, 100)}%`;
-        document.getElementById('z4-val-liquid').textContent = `${liquidCompression.toFixed(2)}%`;
-        document.getElementById('z4-bar-gas').style.width = `${gasCompression.toFixed(1)}%`;
-        document.getElementById('z4-val-gas').textContent = `${gasCompression.toFixed(1)}%`;
-        document.getElementById('z4-vol-liquid').textContent = liquidVolume.toFixed(1);
-        document.getElementById('z4-vol-gas').textContent = gasVolume.toFixed(1);
-        document.getElementById('z4-explainer').textContent = `Na ${p.toFixed(0)} MPa voda izgubi tek ${liquidCompression.toFixed(2)}% volumena, pa njezin klip gotovo da se ne pomakne. Plin pri istom opterećenju izgubi oko ${gasCompression.toFixed(1)}% volumena, zato se ondje vidi veliko skupljanje i mnogo veća promjena rasporeda čestica.`;
+    drawChamber(left, liqTop, "#93c5fd", "#2563eb", "#1d4ed8", "Tekućina", "velik K, mali ΔV");
+    drawChamber(right, gasTop, "#fda4af", "#ef4444", "#b91c1c", "Plin", "mali K, velik ΔV");
 
-        z4State = { p, liquidCompression, gasCompression };
-    }
+    drawParticles(liquidParticles, left, liqTop, "rgba(29, 78, 216, 0.88)", 4.2);
+    drawParticles(gasParticles, right, gasTop, "rgba(220, 38, 38, 0.82)", 4.2);
 
-    function drawZ4() {
-        resizeZ4Canvas();
-        z4ctx.setTransform(1, 0, 0, 1, 0, 0);
-        z4ctx.clearRect(0, 0, z4c.width, z4c.height);
-        z4ctx.setTransform(z4ScaleX * z4Ratio, 0, 0, z4ScaleY * z4Ratio, 0, 0);
+    drawPressureArrow(
+      left.x + left.w / 2,
+      liqTop - 10 - 5*z4State.p,
+      left.x + left.w / 2,
+      liqTop - 10,
+      "#2563eb",
+      `p = ${z4State.p.toFixed(1)} MPa`,
+    );
+    drawPressureArrow(
+      right.x + right.w / 2,
+      gasTop - 10 - 5*z4State.p,
+      right.x + right.w / 2,
+      gasTop - 10,
+      "#dc2626",
+      `p = ${z4State.p.toFixed(1)} MPa`,
+    );
 
-        const bg = z4ctx.createLinearGradient(0, 0, 0, Z4_BASE_H);
-        bg.addColorStop(0, '#ffffff');
-        bg.addColorStop(1, '#edf5ff');
-        z4ctx.fillStyle = bg;
-        z4ctx.fillRect(0, 0, Z4_BASE_W, Z4_BASE_H);
+    drawLabelPill(
+      left.x + 18,
+      left.y + 18,
+      `ΔV/V ≈ ${z4State.liquidCompression.toFixed(2)}%`,
+      "#dbeafe",
+      "#1d4ed8",
+      "#eff6ff",
+    );
+    drawLabelPill(
+      right.x + 18,
+      right.y + 18,
+      `ΔV/V ≈ ${z4State.gasCompression.toFixed(1)}%`,
+      "#fecaca",
+      "#b91c1c",
+      "#fff1f2",
+    );
+  }
 
-        z4ctx.fillStyle = 'rgba(148, 163, 184, 0.12)';
-        z4ctx.fillRect(350, 40, 2, 320);
+  function drawChamber(box, topY, fillTop, fillBottom, accent, title, subtitle) {
+    z4ctx.save();
+    traceRoundedRect(box.x, box.y, box.w, box.h, 22);
+    z4ctx.fillStyle = "#ffffff";
+    z4ctx.shadowColor = "rgba(15, 23, 42, 0.10)";
+    z4ctx.shadowBlur = 16;
+    z4ctx.fill();
+    z4ctx.shadowBlur = 0;
+    z4ctx.strokeStyle = "#cbd5e1";
+    z4ctx.lineWidth = 3.5;
+    z4ctx.stroke();
 
-        const left = { x: 52, y: 86, w: 248, h: 250 };
-        const right = { x: 420, y: 86, w: 248, h: 250 };
-        const liqTop = left.y + z4State.liquidCompression * 28;
-        const gasTop = right.y + z4State.gasCompression * 2.25;
+    z4ctx.save();
+    traceRoundedRect(box.x, box.y, box.w, box.h, 22);
+    z4ctx.clip();
+    const fluid = z4ctx.createLinearGradient(0, topY, 0, box.y + box.h);
+    fluid.addColorStop(0, fillTop);
+    fluid.addColorStop(1, fillBottom);
+    z4ctx.fillStyle = fluid;
+    z4ctx.fillRect(box.x, topY, box.w, box.y + box.h - topY);
+    z4ctx.fillStyle = "rgba(255, 255, 255, 0.22)";
+    z4ctx.fillRect(box.x + 10, topY + 8, box.w - 20, 10);
+    z4ctx.restore();
 
-        drawChamber(left, liqTop, '#93c5fd', '#2563eb', '#1d4ed8', 'Tekućina', 'velik K, mali ΔV');
-        drawChamber(right, gasTop, '#fda4af', '#ef4444', '#b91c1c', 'Plin', 'mali K, velik ΔV');
+    const pistonGrad = z4ctx.createLinearGradient(0, topY - 18, 0, topY);
+    pistonGrad.addColorStop(0, "#475569");
+    pistonGrad.addColorStop(1, "#1e293b");
+    z4ctx.fillStyle = pistonGrad;
+    traceRoundedRect(box.x - 6, topY - 18, box.w + 12, 18, 8);
+    z4ctx.fill();
+    z4ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
+    z4ctx.fillRect(box.x + 14, topY - 15, box.w - 28, 4);
 
-        drawParticles(liquidParticles, left, liqTop, 'rgba(29, 78, 216, 0.88)', 4.2);
-        drawParticles(gasParticles, right, gasTop, 'rgba(220, 38, 38, 0.82)', 4.2);
+    z4ctx.fillStyle = accent;
+    z4ctx.font = "700 18px Inter";
+    z4ctx.fillText(title, box.x + 12, box.y + box.h + 32);
+    z4ctx.font = "13px Inter";
+    z4ctx.fillStyle = "#64748b";
+    z4ctx.fillText(subtitle, box.x + 12, box.y + box.h + 54);
+    z4ctx.restore();
+  }
 
-        drawPressureArrow(left.x + left.w / 2, 26, left.x + left.w / 2, liqTop - 10, '#2563eb', `p = ${z4State.p.toFixed(1)} MPa`);
-        drawPressureArrow(right.x + right.w / 2, 26, right.x + right.w / 2, gasTop - 10, '#dc2626', `p = ${z4State.p.toFixed(1)} MPa`);
+  function drawParticles(particles, box, topY, fillStyle, radius) {
+    const xMin = box.x + 16;
+    const xMax = box.x + box.w - 16;
+    const margin = Math.min(10, (box.y + box.h - topY) / 4);
+        const yMin = topY + margin;
+    const yMax = box.y + box.h - margin;
 
-        drawLabelPill(left.x + 18, left.y + 18, `ΔV/V ≈ ${z4State.liquidCompression.toFixed(2)}%`, '#dbeafe', '#1d4ed8', '#eff6ff');
-        drawLabelPill(right.x + 18, right.y + 18, `ΔV/V ≈ ${z4State.gasCompression.toFixed(1)}%`, '#fecaca', '#b91c1c', '#fff1f2');
+    particles.forEach((pt) => {
+      // Fixed material markers follow the volume change without history-dependent clamping.
+      pt.x=xMin+pt.u*(xMax-xMin);pt.y=yMin+pt.v*(yMax-yMin);
 
-    }
+      if (pt.x < xMin || pt.x > xMax) {
+        pt.vx *= -1;
+        pt.x = clamp(pt.x, xMin, xMax);
+      }
+      if (pt.y < yMin || pt.y > yMax) {
+        pt.vy *= -1;
+        pt.y = clamp(pt.y, yMin, yMax);
+      }
 
-    function drawChamber(box, topY, fillTop, fillBottom, accent, title, subtitle) {
-        z4ctx.save();
-        traceRoundedRect(box.x, box.y, box.w, box.h, 22);
-        z4ctx.fillStyle = '#ffffff';
-        z4ctx.shadowColor = 'rgba(15, 23, 42, 0.10)';
-        z4ctx.shadowBlur = 16;
-        z4ctx.fill();
-        z4ctx.shadowBlur = 0;
-        z4ctx.strokeStyle = '#cbd5e1';
-        z4ctx.lineWidth = 3.5;
-        z4ctx.stroke();
+      z4ctx.fillStyle = fillStyle;
+      z4ctx.beginPath();
+      z4ctx.arc(pt.x, pt.y, Math.min(radius, margin / 2), 0, Math.PI * 2);
+      z4ctx.fill();
 
-        z4ctx.save();
-        traceRoundedRect(box.x, box.y, box.w, box.h, 22);
-        z4ctx.clip();
-        const fluid = z4ctx.createLinearGradient(0, topY, 0, box.y + box.h);
-        fluid.addColorStop(0, fillTop);
-        fluid.addColorStop(1, fillBottom);
-        z4ctx.fillStyle = fluid;
-        z4ctx.fillRect(box.x, topY, box.w, box.y + box.h - topY);
-        z4ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
-        z4ctx.fillRect(box.x + 10, topY + 8, box.w - 20, 10);
-        z4ctx.restore();
-
-        const pistonGrad = z4ctx.createLinearGradient(0, topY - 18, 0, topY);
-        pistonGrad.addColorStop(0, '#475569');
-        pistonGrad.addColorStop(1, '#1e293b');
-        z4ctx.fillStyle = pistonGrad;
-        traceRoundedRect(box.x - 6, topY - 18, box.w + 12, 18, 8);
-        z4ctx.fill();
-        z4ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
-        z4ctx.fillRect(box.x + 14, topY - 15, box.w - 28, 4);
-
-        z4ctx.fillStyle = accent;
-        z4ctx.font = '700 18px Inter';
-        z4ctx.fillText(title, box.x + 12, box.y + box.h + 32);
-        z4ctx.font = '13px Inter';
-        z4ctx.fillStyle = '#64748b';
-        z4ctx.fillText(subtitle, box.x + 12, box.y + box.h + 54);
-        z4ctx.restore();
-    }
-
-    function drawParticles(particles, box, topY, fillStyle, radius) {
-        const xMin = box.x + 16;
-        const xMax = box.x + box.w - 16;
-        const yMin = topY + 16;
-        const yMax = box.y + box.h - 16;
-
-        particles.forEach((pt) => {
-            pt.x += pt.vx;
-            pt.y += pt.vy;
-
-            if (pt.x < xMin || pt.x > xMax) {
-                pt.vx *= -1;
-                pt.x = clamp(pt.x, xMin, xMax);
-            }
-            if (pt.y < yMin || pt.y > yMax) {
-                pt.vy *= -1;
-                pt.y = clamp(pt.y, yMin, yMax);
-            }
-
-            z4ctx.fillStyle = fillStyle;
-            z4ctx.beginPath();
-            z4ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
-            z4ctx.fill();
-
-            z4ctx.fillStyle = 'rgba(255, 255, 255, 0.30)';
-            z4ctx.beginPath();
-            z4ctx.arc(pt.x - radius * 0.35, pt.y - radius * 0.35, radius * 0.34, 0, Math.PI * 2);
-            z4ctx.fill();
-        });
-    }
-
-    function drawPressureArrow(x1, y1, x2, y2, color, label) {
-        const headlen = 13;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        z4ctx.strokeStyle = color;
-        z4ctx.fillStyle = color;
-        z4ctx.lineWidth = 5;
-        z4ctx.beginPath();
-        z4ctx.moveTo(x1, y1);
-        z4ctx.lineTo(x2, y2);
-        z4ctx.stroke();
-        z4ctx.beginPath();
-        z4ctx.moveTo(x2, y2);
-        z4ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-        z4ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-        z4ctx.closePath();
-        z4ctx.fill();
-        drawLabelPill(x1 - 58, y1 - 16, label, color, '#ffffff', 'rgba(255,255,255,0.92)');
-    }
-
-    function drawLabelPill(x, y, text, borderColor, textColor, fillColor) {
-        z4ctx.save();
-        z4ctx.font = '700 13px Inter';
-        const textWidth = z4ctx.measureText(text).width;
-        const width = textWidth + 22;
-        traceRoundedRect(x, y, width, 24, 12);
-        z4ctx.fillStyle = fillColor;
-        z4ctx.strokeStyle = borderColor;
-        z4ctx.lineWidth = 1.6;
-        z4ctx.fill();
-        z4ctx.stroke();
-        z4ctx.fillStyle = textColor;
-        z4ctx.fillText(text, x + 11, y + 16.5);
-        z4ctx.restore();
-    }
-
-    z4pS.addEventListener('input', () => {
-        syncZ4State();
-        drawZ4();
+      z4ctx.fillStyle = "rgba(255, 255, 255, 0.30)";
+      z4ctx.beginPath();
+      z4ctx.arc(pt.x - radius * 0.35, pt.y - radius * 0.35, radius * 0.34, 0, Math.PI * 2);
+      z4ctx.fill();
     });
+  }
 
-    if (window.ResizeObserver) {
-        const z4ResizeObserver = new ResizeObserver(() => drawZ4());
-        z4ResizeObserver.observe(z4c);
-    }
+  function drawPressureArrow(x1, y1, x2, y2, color, label) {
+    const headlen = 13;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    z4ctx.strokeStyle = color;
+    z4ctx.fillStyle = color;
+    z4ctx.lineWidth = 5;
+    z4ctx.beginPath();
+    z4ctx.moveTo(x1, y1);
+    z4ctx.lineTo(x2, y2);
+    z4ctx.stroke();
+    z4ctx.beginPath();
+    z4ctx.moveTo(x2, y2);
+    z4ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+    z4ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+    z4ctx.closePath();
+    z4ctx.fill();
+    drawLabelPill(x1 - 58, y1 - 16, label, color, color, "rgba(255,255,255,0.92)");
+  }
 
+  function drawLabelPill(x, y, text, borderColor, textColor, fillColor) {
+    z4ctx.save();
+    z4ctx.font = "700 13px Inter";
+    const textWidth = z4ctx.measureText(text).width;
+    const width = textWidth + 22;
+    traceRoundedRect(x, y, width, 24, 12);
+    z4ctx.fillStyle = fillColor;
+    z4ctx.strokeStyle = borderColor;
+    z4ctx.lineWidth = 1.6;
+    z4ctx.fill();
+    z4ctx.stroke();
+    z4ctx.fillStyle = textColor;
+    z4ctx.fillText(text, x + 11, y + 16.5);
+    z4ctx.restore();
+  }
+
+  z4pS.addEventListener("input", () => {
     syncZ4State();
     drawZ4();
+  });
+
+  if (window.ResizeObserver) {
+    const z4ResizeObserver = new ResizeObserver(() => drawZ4());
+    z4ResizeObserver.observe(z4c);
+  }
+
+  syncZ4State();
+  drawZ4();
 })();
 </script>
 ````
@@ -989,123 +793,127 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
 </div>
 
 <script>
-(function() {
-    const z5dS = document.getElementById('z5-depth');
-    const z5sub = document.getElementById('z5-sub');
-    const z5line = document.getElementById('z5-depth-line');
-    const z5c = document.getElementById('z5-molecules');
-    const z5ctx = z5c.getContext('2d');
-    const z5chart = document.getElementById('z5-chart');
-    const z5chartCtx = z5chart.getContext('2d');
+(function () {
+  const z5dS = document.getElementById("z5-depth");
+  const z5sub = document.getElementById("z5-sub");
+  const z5line = document.getElementById("z5-depth-line");
+  const z5c = document.getElementById("z5-molecules");
+  const z5ctx = z5c.getContext("2d");
+  const z5chart = document.getElementById("z5-chart");
+  const z5chartCtx = z5chart.getContext("2d");
 
-    function updateZ5() {
-        const d = parseFloat(z5dS.value);
-        document.getElementById('z5-v-depth').innerText = d;
-        document.getElementById('z5-v-depth-val').innerText = d;
-        
-        const rho0 = 1025;
-        const g0 = 9.81;
-        const K = 2.34e9;
-        const p0 = 0.1e6;
-        const compression = (rho0 * g0 * d) / K;
-        const rho = rho0 / (1 - compression);
-        const p = (p0 - K * Math.log(1 - compression)) / 1e6;
-        const perc = ((rho/1025)-1)*100;
-        
-        document.getElementById('z5-res-p').innerText = p.toFixed(1);
-        document.getElementById('z5-res-rho').innerText = rho.toFixed(1);
-        document.getElementById('z5-res-perc').innerText = perc.toFixed(2);
+  function updateZ5() {
+    const d = parseFloat(z5dS.value);
+    document.getElementById("z5-v-depth").innerText = d;
+    document.getElementById("z5-v-depth-val").innerText = d;
 
-        const yPerc = (d / 10000) * 80 + 10;
-        z5sub.style.top = yPerc + "%";
-        z5line.style.top = yPerc + "%";
-        z5sub.innerText = d > 500 ? "podmornica" : "brod";
+    const rho0 = 1025;
+    const g0 = 9.81;
+    const K = 2.34e9;
+    const p0 = 0.1e6;
+    const compression = (rho0 * g0 * d) / K;
+    const rho = rho0 / (1 - compression);
+    const p = (p0 - K * Math.log(1 - compression)) / 1e6;
+    const perc = (rho / 1025 - 1) * 100;
 
-        const oceanTop = [56, 189, 248];
-        const oceanBottom = [8, 47, 73];
-        const tr = Math.min(d / 10000, 1);
-        const r = Math.round(oceanTop[0] + (oceanBottom[0] - oceanTop[0]) * tr);
-        const g = Math.round(oceanTop[1] + (oceanBottom[1] - oceanTop[1]) * tr);
-        const b = Math.round(oceanTop[2] + (oceanBottom[2] - oceanTop[2]) * tr);
-        document.getElementById('z5-ocean-bg').style.background = `linear-gradient(to bottom, rgb(${r},${g},${b}) 0%, #0369a1 50%, #082f49 100%)`;
+    document.getElementById("z5-res-p").innerText = p.toFixed(1);
+    document.getElementById("z5-res-rho").innerText = rho.toFixed(1);
+    document.getElementById("z5-res-perc").innerText = perc.toFixed(2);
 
-        const badge = document.getElementById('z5-perc-badge');
-        badge.style.color = perc < 1 ? '#166534' : (perc < 2 ? '#a16207' : '#b91c1c');
+    const yPerc = (d / 10000) * 80 + 10;
+    z5sub.style.top = yPerc + "%";
+    z5line.style.top = yPerc + "%";
+    z5sub.innerText = d > 500 ? "podmornica" : "brod";
 
-        // Draw molecular grid density
-        z5ctx.clearRect(0,0,400,350);
-        z5ctx.fillStyle = "rgba(56, 189, 248, 0.3)";
-        const step = Math.max(8, 20 - (perc * 2));
-        for(let x=0; x<400; x+=step) {
-            for(let y=0; y<350; y+=step) {
-                z5ctx.fillRect(x, y, 2, 2);
-            }
-        }
+    const oceanTop = [56, 189, 248];
+    const oceanBottom = [8, 47, 73];
+    const tr = Math.min(d / 10000, 1);
+    const r = Math.round(oceanTop[0] + (oceanBottom[0] - oceanTop[0]) * tr);
+    const g = Math.round(oceanTop[1] + (oceanBottom[1] - oceanTop[1]) * tr);
+    const b = Math.round(oceanTop[2] + (oceanBottom[2] - oceanTop[2]) * tr);
+    document.getElementById("z5-ocean-bg").style.background =
+      `linear-gradient(to bottom, rgb(${r},${g},${b}) 0%, #0369a1 50%, #082f49 100%)`;
 
-        drawChart(d);
+    const badge = document.getElementById("z5-perc-badge");
+    badge.style.color = perc < 1 ? "#166534" : perc < 2 ? "#a16207" : "#b91c1c";
+
+    // Draw molecular grid density
+    z5ctx.clearRect(0, 0, 400, 350);
+    z5ctx.fillStyle = "rgba(56, 189, 248, 0.3)";
+    const step = 20 / Math.sqrt(rho / rho0);
+    for (let x = 0; x < 400; x += step) {
+      for (let y = 0; y < 350; y += step) {
+        z5ctx.fillRect(x, y, 2, 2);
+      }
     }
 
-    function drawChart(currentDepth) {
-        const c = z5chartCtx;
-        const w = z5chart.width;
-        const h = z5chart.height;
-        c.clearRect(0, 0, w, h);
-        c.fillStyle = '#ffffff';
-        c.fillRect(0, 0, w, h);
+    drawChart(d);
+  }
 
-        const pArea = {l: 36, r: w - 28, t: 12, b: h - 26};
-        c.strokeStyle = '#cbd5e1';
-        c.beginPath();
-        c.moveTo(pArea.l, pArea.t);
-        c.lineTo(pArea.l, pArea.b);
-        c.lineTo(pArea.r, pArea.b);
-        c.stroke();
+  function drawChart(currentDepth) {
+    const c = z5chartCtx;
+    const w = z5chart.width;
+    const h = z5chart.height;
+    c.clearRect(0, 0, w, h);
+    c.fillStyle = "#ffffff";
+    c.fillRect(0, 0, w, h);
 
-        c.fillStyle = '#64748b';
-        c.font = '12px Inter';
-        c.fillText('Dubina (m)', 4, 13);
-        c.fillText('p (MPa)', pArea.r - 42, 13);
-        c.fillText('ρ (kg/m³)', pArea.r - 72, h - 7);
+    const pArea = { l: 36, r: w - 28, t: 12, b: h - 26 };
+    c.strokeStyle = "#cbd5e1";
+    c.beginPath();
+    c.moveTo(pArea.l, pArea.t);
+    c.lineTo(pArea.l, pArea.b);
+    c.lineTo(pArea.r, pArea.b);
+    c.stroke();
 
-        const dMax = 10000;
-        const dNow = Math.max(0, Math.min(currentDepth, dMax));
-        const n = Math.max(2, Math.floor(dNow / 200));
-        c.strokeStyle = '#1d4ed8';
-        c.lineWidth = 2;
-        c.beginPath();
-        for (let i = 0; i <= n; i++) {
-            const d = (i / n) * dNow;
-            const compression = (1025 * 9.81 * d) / 2.34e9;
-            const p = (0.1e6 - 2.34e9 * Math.log(1 - compression)) / 1e6;
-            const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
-            const y = pArea.b - (p / 105) * (pArea.b - pArea.t);
-            if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
-        }
-        c.stroke();
+    c.fillStyle = "#64748b";
+    c.font = "12px Inter";
+    c.fillText("p [0–105 MPa]", 4, 13);
+    c.fillText("Dubina [0–10000 m]", pArea.r - 145, h - 7);
+    c.fillText("ρ [1025–1070 kg/m³]", pArea.r - 135, 13);
 
-        c.strokeStyle = '#dc2626';
-        c.lineWidth = 2;
-        c.beginPath();
-        for (let i = 0; i <= n; i++) {
-            const d = (i / n) * dNow;
-            const compression = (1025 * 9.81 * d) / 2.34e9;
-            const rho = 1025 / (1 - compression);
-            const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
-            const y = pArea.b - ((rho - 1025) / 45) * (pArea.b - pArea.t);
-            if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
-        }
-        c.stroke();
-
-        const cx = pArea.l + (dNow / dMax) * (pArea.r - pArea.l);
-        c.strokeStyle = '#94a3b8';
-        c.setLineDash([4, 4]);
-        c.beginPath();
-        c.moveTo(cx, pArea.t);
-        c.lineTo(cx, pArea.b);
-        c.stroke();
-        c.setLineDash([]);
+    const dMax = 10000;
+    const dNow = Math.max(0, Math.min(currentDepth, dMax));
+    const n = Math.max(2, Math.floor(dNow / 200));
+    c.strokeStyle = "#1d4ed8";
+    c.lineWidth = 2;
+    c.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const d = (i / n) * dNow;
+      const compression = (1025 * 9.81 * d) / 2.34e9;
+      const p = (0.1e6 - 2.34e9 * Math.log(1 - compression)) / 1e6;
+      const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
+      const y = pArea.b - (p / 105) * (pArea.b - pArea.t);
+      if (i === 0) c.moveTo(x, y);
+      else c.lineTo(x, y);
     }
-    z5dS.oninput = updateZ5; updateZ5();
+    c.stroke();
+
+    c.strokeStyle = "#dc2626";
+    c.lineWidth = 2;
+    c.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const d = (i / n) * dNow;
+      const compression = (1025 * 9.81 * d) / 2.34e9;
+      const rho = 1025 / (1 - compression);
+      const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
+      const y = pArea.b - ((rho - 1025) / 45) * (pArea.b - pArea.t);
+      if (i === 0) c.moveTo(x, y);
+      else c.lineTo(x, y);
+    }
+    c.stroke();
+
+    const cx = pArea.l + (dNow / dMax) * (pArea.r - pArea.l);
+    c.strokeStyle = "#94a3b8";
+    c.setLineDash([4, 4]);
+    c.beginPath();
+    c.moveTo(cx, pArea.t);
+    c.lineTo(cx, pArea.b);
+    c.stroke();
+    c.setLineDash([]);
+  }
+  z5dS.oninput = updateZ5;
+  updateZ5();
 })();
 </script>
 ````
@@ -1232,333 +1040,346 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
 </div>
 
 <script>
-(function() {
-    const canvas = document.getElementById('z6-main-canvas');
-    const ctx = canvas.getContext('2d');
-    const muS = document.getElementById('z6-mu');
-    const betaS = document.getElementById('z6-beta');
-    const dS = document.getElementById('z6-d');
-    const lS = document.getElementById('z6-l');
-    const tooltip = document.getElementById('z6-inspect-tooltip');
+(function () {
+  const canvas = document.getElementById("z6-main-canvas");
+  const ctx = canvas.getContext("2d");
+  const muS = document.getElementById("z6-mu");
+  const betaS = document.getElementById("z6-beta");
+  const dS = document.getElementById("z6-d");
+  const lS = document.getElementById("z6-l");
+  const tooltip = document.getElementById("z6-inspect-tooltip");
 
-    let particles = Array.from({length: 70}, () => ({
-        x: Math.random(),
-        y: Math.random() * 2 - 1,
-        size: 1.8 + Math.random() * 1.6
-    }));
-    let mousePos = null;
-    let dragMode = false;
-    let probeYRatio = null;
+  let particles = Array.from({ length: 70 }, () => ({
+    x: Math.random(),
+    y: Math.random() * 2 - 1,
+    size: 1.8 + Math.random() * 1.6,
+  }));
+  let mousePos = null;
+  let dragMode = false;
+  let probeYRatio = null;
 
-    canvas.onmousemove = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        mousePos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        if (dragMode && probeYRatio !== null) {
-            probeYRatio = Math.max(0, Math.min(1, mousePos.y / rect.height));
-        }
-        draw();
+  canvas.onmousemove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mousePos = { x: (e.clientX - rect.left) * canvas.width / rect.width, y: (e.clientY - rect.top) * canvas.height / rect.height };
+    if (dragMode && probeYRatio !== null) {
+      probeYRatio = Math.max(0, Math.min(1, mousePos.y / canvas.height));
+    }
+    draw();
+  };
+  canvas.onmouseleave = () => {
+    mousePos = null;
+    tooltip.style.display = "none";
+    draw();
+  };
+  canvas.onmousedown = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    dragMode = true;
+    probeYRatio = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    draw();
+  };
+  window.addEventListener("mouseup", () => {
+    dragMode = false;
+  });
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function panel(ctx, x, y, w, h, title, accent) {
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#dbeafe";
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, x, y, w, h, 16, true, true);
+    ctx.fillStyle = accent;
+    ctx.font = "600 13px Inter";
+    ctx.fillText(title, x + 14, y + 24);
+  }
+
+  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  function drawArrow(ctx, x1, y1, x2, y2, color, width = 2) {
+ if(Math.hypot(x2-x1,y2-y1)<1e-9)return;
+    const headlen = 8;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.fill();
+  }
+
+  function draw() {
+    const mu = parseFloat(muS.value) / 1000;
+    const beta = parseFloat(betaS.value);
+    const d_mm = parseFloat(dS.value);
+    const L = parseFloat(lS.value);
+    const R = d_mm / 2;
+    const d_m = d_mm / 1000;
+    const tauWall = (beta * d_m) / 4;
+    const tauQuarter = (beta * d_m) / 8;
+    const v_max = (beta * d_m * d_m) / (16 * mu);
+    const F_tau = tauWall * Math.PI * d_m * L;
+
+    document.getElementById("z6-v-mu").innerText = (mu * 1000).toFixed(0);
+    document.getElementById("z6-v-beta").innerText = beta;
+    document.getElementById("z6-v-d").innerText = d_mm;
+    document.getElementById("z6-v-l").innerText = L.toFixed(1);
+    document.getElementById("z6-res-tau-wall").innerText = tauWall.toFixed(2);
+    document.getElementById("z6-res-tau-quarter").innerText = tauQuarter.toFixed(2);
+    document.getElementById("z6-res-force-wall").innerText = F_tau.toFixed(2);
+    document.getElementById("z6-res-vmax").innerText = v_max.toFixed(2);
+    document.getElementById("z6-res-tau-center").innerText = "0.00";
+    document.getElementById("z6-res-tau-quarter-tbl").innerText = tauQuarter.toFixed(2);
+    document.getElementById("z6-res-tau-wall-tbl").innerText = tauWall.toFixed(2);
+    document.getElementById("z6-res-vmax-tbl").innerText = v_max.toFixed(2);
+    document.getElementById("z6-res-force-wall-tbl").innerText = F_tau.toFixed(2);
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const left = { x: 24, y: 22, w: 318, h: 276 };
+    const right = { x: 366, y: 22, w: 410, h: 276 };
+    const channel = {
+      x: left.x + 26,
+      y: left.y + 46,
+      w: left.w - 52,
+      h: left.h - 88,
     };
-    canvas.onmouseleave = () => { mousePos = null; tooltip.style.display = 'none'; draw(); };
-    canvas.onmousedown = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        dragMode = true;
-        probeYRatio = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-        draw();
+    const cy = channel.y + channel.h / 2;
+    const drawR = Math.min(channel.h * 0.43, 92);
+    const topWall = cy - drawR;
+    const bottomWall = cy + drawR;
+    const chart = {
+      x: right.x + 54,
+      y: right.y + 34,
+      w: right.w - 88,
+      h: right.h - 68,
     };
-    window.addEventListener('mouseup', () => {
-        dragMode = false;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, "#f8fbff");
+    bgGrad.addColorStop(1, "#eef6ff");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    panel(ctx, left.x, left.y, left.w, left.h, "Cijev: normirani r/R i x/L", "#0f766e");
+    panel(ctx, right.x, right.y, right.w, right.h, "Profil brzine v(r)", "#1d4ed8");
+
+    // Left panel: channel
+    const fluidGrad = ctx.createLinearGradient(channel.x, topWall, channel.x, bottomWall);
+    fluidGrad.addColorStop(0, "rgba(191, 219, 254, 0.55)");
+    fluidGrad.addColorStop(0.5, "rgba(59, 130, 246, 0.18)");
+    fluidGrad.addColorStop(1, "rgba(191, 219, 254, 0.55)");
+    ctx.fillStyle = fluidGrad;
+    roundRect(ctx, channel.x, topWall, channel.w, bottomWall - topWall, 18, true, false);
+
+    ctx.fillStyle = "#334155";
+    ctx.fillRect(channel.x, topWall - 12, channel.w, 10);
+    ctx.fillRect(channel.x, bottomWall + 2, channel.w, 10);
+
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(channel.x, cy);
+    ctx.lineTo(channel.x + channel.w, cy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.font = "12px Inter";
+    ctx.fillStyle = "#475569";
+    ctx.fillText("os cijevi", channel.x + 6, cy - 8);
+    ctx.fillText("stijenka", channel.x + 6, topWall - 16);
+    ctx.fillText("stijenka", channel.x + 6, bottomWall + 28);
+
+    // Layer arrows
+    for (let i = 0; i <= 8; i++) {
+      const y = topWall + (i / 8) * (bottomWall - topWall);
+      const r_mm = ((y - cy) / drawR) * R;
+      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
+      const len = (v / Math.max(v_max, 1e-6)) * 120;
+      if (len < 0.1) continue;
+      const alpha = 0.2 + 0.55 * (v / Math.max(v_max, 1e-6));
+      drawArrow(ctx, channel.x + 18, y, channel.x + 18 + len, y, `rgba(37, 99, 235, ${alpha})`, 2.5);
+    }
+
+    // Particles
+    particles.forEach((p) => {
+      const r_mm = p.y * R;
+      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
+      const speedRatio = v / Math.max(v_max, 1e-6);
+      // Tracers are a static sample of the computed profile.
+      if (p.x > 1.05) p.x = -0.05;
+      const px = channel.x + p.x * channel.w;
+      const py = cy + p.y * drawR;
+      ctx.fillStyle = `rgba(14, 116, 144, ${0.25 + 0.6 * speedRatio})`;
+      ctx.beginPath();
+      ctx.arc(px, py, p.size, 0, Math.PI * 2);
+      ctx.fill();
     });
 
-    function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
+    // Small formula badge
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.strokeStyle = "#dbeafe";
+    roundRect(ctx, channel.x + channel.w - 150, topWall + 14, 136, 34, 10, true, true);
+    ctx.fillStyle = "#1e40af";
+    ctx.font = "600 12px Inter";
+    ctx.fillText("v(r) = vmax (1 - (r/R)^2)", channel.x + channel.w - 140, topWall + 36);
+
+    // Right panel: chart axes
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(chart.x, chart.y);
+    ctx.lineTo(chart.x, chart.y + chart.h);
+    ctx.lineTo(chart.x + chart.w, chart.y + chart.h);
+    ctx.stroke();
+
+    ctx.setLineDash([4, 6]);
+    for (let i = 0; i <= 4; i++) {
+      const gy = chart.y + (i / 4) * chart.h;
+      ctx.beginPath();
+      ctx.moveTo(chart.x, gy);
+      ctx.lineTo(chart.x + chart.w, gy);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    ctx.font = "11px Inter";
+    ctx.fillStyle = "#64748b";
+    ctx.fillText("+R", chart.x - 24, chart.y + 4);
+    ctx.fillText("0", chart.x - 16, chart.y + chart.h / 2 + 4);
+    ctx.fillText("-R", chart.x - 24, chart.y + chart.h);
+    ctx.fillText("r", chart.x - 10, chart.y - 8);
+    ctx.fillText("v", chart.x + chart.w + 8, chart.y + chart.h + 4);
+
+    // Profile fill and curve
+    ctx.beginPath();
+    ctx.moveTo(chart.x, chart.y);
+    for (let i = 0; i <= 120; i++) {
+      const t = i / 120;
+      const r_mm = R - 2 * R * t;
+      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
+      const px = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+      const py = chart.y + t * chart.h;
+      ctx.lineTo(px, py);
+    }
+    ctx.lineTo(chart.x, chart.y + chart.h);
+    ctx.closePath();
+    const chartFill = ctx.createLinearGradient(chart.x, chart.y, chart.x + chart.w, chart.y);
+    chartFill.addColorStop(0, "rgba(191, 219, 254, 0.15)");
+    chartFill.addColorStop(1, "rgba(59, 130, 246, 0.32)");
+    ctx.fillStyle = chartFill;
+    ctx.fill();
+
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let i = 0; i <= 120; i++) {
+      const t = i / 120;
+      const r_mm = R - 2 * R * t;
+      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
+      const px = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+      const py = chart.y + t * chart.h;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    // Centerline and wall stress bars
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.9)";
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(chart.x, chart.y + chart.h / 2);
+    ctx.lineTo(chart.x + chart.w, chart.y + chart.h / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    const stressBarW = clamp(16 + tauWall * 10, 16, 74);
+    ctx.fillStyle = "rgba(239, 68, 68, 0.18)";
+    ctx.fillRect(chart.x + chart.w - stressBarW, chart.y, stressBarW, 12);
+    ctx.fillRect(chart.x + chart.w - stressBarW, chart.y + chart.h - 12, stressBarW, 12);
+    ctx.fillStyle = "#b91c1c";
+    ctx.font = "600 11px Inter";
+    ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + 10);
+    ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + chart.h - 2);
+
+    // Interactive highlight by radial position
+    const probeY = probeYRatio === null ? (mousePos ? mousePos.y : null) : probeYRatio * h;
+    if (probeY !== null && probeY >= topWall && probeY <= bottomWall) {
+      const r_inspect_mm = ((cy - probeY) / drawR) * R;
+      const r_m = r_inspect_mm / 1000;
+      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - r_m ** 2));
+      const tau = Math.abs((beta * r_m) / 2);
+      const inspectYChart = chart.y + ((R - r_inspect_mm) / (2 * R)) * chart.h;
+      const inspectXChart = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+
+      tooltip.style.display = "block";
+      tooltip.style.left = (mousePos ? mousePos.x : chart.x) + 15 + "px";
+      tooltip.style.top = probeY + 15 + "px";
+      document.getElementById("z6-tt-r").innerText = r_inspect_mm.toFixed(1);
+      document.getElementById("z6-tt-v").innerText = v.toFixed(3);
+      document.getElementById("z6-tt-tau").innerText = tau.toFixed(2);
+
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.42)";
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(channel.x, probeY);
+      ctx.lineTo(chart.x + chart.w, probeY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.arc(channel.x + 14, probeY, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(inspectXChart, inspectYChart, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawArrow(
+        ctx,
+        channel.x + channel.w - 86,
+        probeY,
+        channel.x + channel.w - 86 - (tauWall===0?0:58*tau/tauWall),
+        probeY,
+        "#ef4444",
+        2.5,
+      );
+    } else {
+      tooltip.style.display = "none";
     }
 
-    function panel(ctx, x, y, w, h, title, accent) {
-        ctx.fillStyle = "#ffffff";
-        ctx.strokeStyle = "#dbeafe";
-        ctx.lineWidth = 1.5;
-        roundRect(ctx, x, y, w, h, 16, true, true);
-        ctx.fillStyle = accent;
-        ctx.font = "600 13px Inter";
-        ctx.fillText(title, x + 14, y + 24);
-    }
+    // Bottom legends
+    ctx.fillStyle = "#64748b";
+    ctx.font = "12px Inter";
+    ctx.fillText("sporije uz stijenku", channel.x, left.y + left.h - 18);
+    ctx.fillText("najbrže na osi", channel.x + channel.w - 92, left.y + left.h - 18);
+    ctx.fillText("parabola; strelice v/vmax", chart.x, right.y + right.h - 14);
+    ctx.fillText("τ na vanjskoj plohi jezgre: ←", chart.x + chart.w - 138, right.y + right.h - 14);
+  }
 
-    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.arcTo(x + w, y, x + w, y + h, r);
-        ctx.arcTo(x + w, y + h, x, y + h, r);
-        ctx.arcTo(x, y + h, x, y, r);
-        ctx.arcTo(x, y, x + w, y, r);
-        ctx.closePath();
-        if (fill) ctx.fill();
-        if (stroke) ctx.stroke();
-    }
-
-    function drawArrow(ctx, x1, y1, x2, y2, color, width = 2) {
-        const headlen = 8;
-        const angle = Math.atan2(y2-y1, x2-x1);
-        ctx.strokeStyle = color;
-        ctx.fillStyle = color;
-        ctx.lineWidth = width;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2-headlen*Math.cos(angle-Math.PI/6), y2-headlen*Math.sin(angle-Math.PI/6));
-        ctx.lineTo(x2-headlen*Math.cos(angle+Math.PI/6), y2-headlen*Math.sin(angle+Math.PI/6));
-        ctx.fill();
-    }
-
-    function draw() {
-        const mu = parseFloat(muS.value) / 1000;
-        const beta = parseFloat(betaS.value);
-        const d_mm = parseFloat(dS.value);
-        const L = parseFloat(lS.value);
-        const R = d_mm / 2;
-        const d_m = d_mm / 1000;
-        const tauWall = beta * d_m / 4;
-        const tauQuarter = beta * d_m / 8;
-        const v_max = (beta * d_m * d_m) / (16 * mu);
-        const F_tau = tauWall * Math.PI * d_m * L;
-
-        document.getElementById('z6-v-mu').innerText = (mu*1000).toFixed(0);
-        document.getElementById('z6-v-beta').innerText = beta;
-        document.getElementById('z6-v-d').innerText = d_mm;
-        document.getElementById('z6-v-l').innerText = L.toFixed(1);
-        document.getElementById('z6-res-tau-wall').innerText = tauWall.toFixed(2);
-        document.getElementById('z6-res-tau-quarter').innerText = tauQuarter.toFixed(2);
-        document.getElementById('z6-res-force-wall').innerText = F_tau.toFixed(2);
-        document.getElementById('z6-res-vmax').innerText = v_max.toFixed(2);
-        document.getElementById('z6-res-tau-center').innerText = '0.00';
-        document.getElementById('z6-res-tau-quarter-tbl').innerText = tauQuarter.toFixed(2);
-        document.getElementById('z6-res-tau-wall-tbl').innerText = tauWall.toFixed(2);
-        document.getElementById('z6-res-vmax-tbl').innerText = v_max.toFixed(2);
-        document.getElementById('z6-res-force-wall-tbl').innerText = F_tau.toFixed(2);
-
-        const w = canvas.width;
-        const h = canvas.height;
-        const left = { x: 24, y: 22, w: 318, h: 276 };
-        const right = { x: 366, y: 22, w: 410, h: 276 };
-        const channel = {
-            x: left.x + 26,
-            y: left.y + 46,
-            w: left.w - 52,
-            h: left.h - 88
-        };
-        const cy = channel.y + channel.h / 2;
-        const drawR = Math.min(channel.h * 0.43, 92);
-        const topWall = cy - drawR;
-        const bottomWall = cy + drawR;
-        const chart = {
-            x: right.x + 54,
-            y: right.y + 34,
-            w: right.w - 88,
-            h: right.h - 68
-        };
-
-        ctx.clearRect(0, 0, w, h);
-
-        const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-        bgGrad.addColorStop(0, "#f8fbff");
-        bgGrad.addColorStop(1, "#eef6ff");
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, w, h);
-
-        panel(ctx, left.x, left.y, left.w, left.h, "Tok u cijevi", "#0f766e");
-        panel(ctx, right.x, right.y, right.w, right.h, "Profil brzine v(r)", "#1d4ed8");
-
-        // Left panel: channel
-        const fluidGrad = ctx.createLinearGradient(channel.x, topWall, channel.x, bottomWall);
-        fluidGrad.addColorStop(0, "rgba(191, 219, 254, 0.55)");
-        fluidGrad.addColorStop(0.5, "rgba(59, 130, 246, 0.18)");
-        fluidGrad.addColorStop(1, "rgba(191, 219, 254, 0.55)");
-        ctx.fillStyle = fluidGrad;
-        roundRect(ctx, channel.x, topWall, channel.w, bottomWall - topWall, 18, true, false);
-
-        ctx.fillStyle = "#334155";
-        ctx.fillRect(channel.x, topWall - 12, channel.w, 10);
-        ctx.fillRect(channel.x, bottomWall + 2, channel.w, 10);
-
-        ctx.strokeStyle = "#94a3b8";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([6, 6]);
-        ctx.beginPath();
-        ctx.moveTo(channel.x, cy);
-        ctx.lineTo(channel.x + channel.w, cy);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.font = "12px Inter";
-        ctx.fillStyle = "#475569";
-        ctx.fillText("os cijevi", channel.x + 6, cy - 8);
-        ctx.fillText("stijenka", channel.x + 6, topWall - 16);
-        ctx.fillText("stijenka", channel.x + 6, bottomWall + 28);
-
-        // Layer arrows
-        for (let i = 0; i <= 8; i++) {
-            const y = topWall + (i / 8) * (bottomWall - topWall);
-            const r_mm = ((y - cy) / drawR) * R;
-            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - (r_mm/1000)**2));
-            const len = clamp((v / Math.max(v_max, 1e-6)) * 120, 8, 120);
-            const alpha = 0.2 + 0.55 * (v / Math.max(v_max, 1e-6));
-            drawArrow(ctx, channel.x + 18, y, channel.x + 18 + len, y, `rgba(37, 99, 235, ${alpha})`, 2.5);
-        }
-
-        // Particles
-        particles.forEach((p) => {
-            const r_mm = p.y * R;
-            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - (r_mm/1000)**2));
-            const speedRatio = v / Math.max(v_max, 1e-6);
-            p.x += 0.003 + speedRatio * 0.018;
-            if (p.x > 1.05) p.x = -0.05;
-            const px = channel.x + p.x * channel.w;
-            const py = cy + p.y * drawR;
-            ctx.fillStyle = `rgba(14, 116, 144, ${0.25 + 0.6 * speedRatio})`;
-            ctx.beginPath();
-            ctx.arc(px, py, p.size, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        // Small formula badge
-        ctx.fillStyle = "rgba(255,255,255,0.92)";
-        ctx.strokeStyle = "#dbeafe";
-        roundRect(ctx, channel.x + channel.w - 150, topWall + 14, 136, 34, 10, true, true);
-        ctx.fillStyle = "#1e40af";
-        ctx.font = "600 12px Inter";
-        ctx.fillText("v(r) = vmax (1 - (r/R)^2)", channel.x + channel.w - 140, topWall + 36);
-
-        // Right panel: chart axes
-        ctx.strokeStyle = "#94a3b8";
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(chart.x, chart.y);
-        ctx.lineTo(chart.x, chart.y + chart.h);
-        ctx.lineTo(chart.x + chart.w, chart.y + chart.h);
-        ctx.stroke();
-
-        ctx.setLineDash([4, 6]);
-        for (let i = 0; i <= 4; i++) {
-            const gy = chart.y + (i / 4) * chart.h;
-            ctx.beginPath();
-            ctx.moveTo(chart.x, gy);
-            ctx.lineTo(chart.x + chart.w, gy);
-            ctx.stroke();
-        }
-        ctx.setLineDash([]);
-
-        ctx.font = "11px Inter";
-        ctx.fillStyle = "#64748b";
-        ctx.fillText("+R", chart.x - 24, chart.y + 4);
-        ctx.fillText("0", chart.x - 16, chart.y + chart.h / 2 + 4);
-        ctx.fillText("-R", chart.x - 24, chart.y + chart.h);
-        ctx.fillText("r", chart.x - 10, chart.y - 8);
-        ctx.fillText("v", chart.x + chart.w + 8, chart.y + chart.h + 4);
-
-        // Profile fill and curve
-        ctx.beginPath();
-        ctx.moveTo(chart.x, chart.y);
-        for (let i = 0; i <= 120; i++) {
-            const t = i / 120;
-            const r_mm = R - 2 * R * t;
-            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - (r_mm/1000)**2));
-            const px = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
-            const py = chart.y + t * chart.h;
-            ctx.lineTo(px, py);
-        }
-        ctx.lineTo(chart.x, chart.y + chart.h);
-        ctx.closePath();
-        const chartFill = ctx.createLinearGradient(chart.x, chart.y, chart.x + chart.w, chart.y);
-        chartFill.addColorStop(0, "rgba(191, 219, 254, 0.15)");
-        chartFill.addColorStop(1, "rgba(59, 130, 246, 0.32)");
-        ctx.fillStyle = chartFill;
-        ctx.fill();
-
-        ctx.strokeStyle = "#2563eb";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        for (let i = 0; i <= 120; i++) {
-            const t = i / 120;
-            const r_mm = R - 2 * R * t;
-            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - (r_mm/1000)**2));
-            const px = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
-            const py = chart.y + t * chart.h;
-            if (i === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-
-        // Centerline and wall stress bars
-        ctx.strokeStyle = "rgba(148, 163, 184, 0.9)";
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(chart.x, chart.y + chart.h / 2);
-        ctx.lineTo(chart.x + chart.w, chart.y + chart.h / 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        const stressBarW = clamp(16 + tauWall * 10, 16, 74);
-        ctx.fillStyle = "rgba(239, 68, 68, 0.18)";
-        ctx.fillRect(chart.x + chart.w - stressBarW, chart.y, stressBarW, 12);
-        ctx.fillRect(chart.x + chart.w - stressBarW, chart.y + chart.h - 12, stressBarW, 12);
-        ctx.fillStyle = "#b91c1c";
-        ctx.font = "600 11px Inter";
-        ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + 10);
-        ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + chart.h - 2);
-
-        // Interactive highlight by radial position
-        const probeY = probeYRatio === null ? (mousePos ? mousePos.y : null) : (probeYRatio * h);
-        if (probeY !== null && probeY >= topWall && probeY <= bottomWall) {
-            const r_inspect_mm = ((probeY - cy) / drawR) * R;
-            const r_m = r_inspect_mm / 1000;
-            const v = Math.max(0, (beta / (4 * mu)) * ((d_mm/2000)**2 - r_m**2));
-            const tau = Math.abs(beta * r_m / 2);
-            const inspectYChart = chart.y + ((R - r_inspect_mm) / (2 * R)) * chart.h;
-            const inspectXChart = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
-
-            tooltip.style.display = 'block';
-            tooltip.style.left = ((mousePos ? mousePos.x : chart.x) + 15) + 'px';
-            tooltip.style.top = (probeY + 15) + 'px';
-            document.getElementById('z6-tt-r').innerText = r_inspect_mm.toFixed(1);
-            document.getElementById('z6-tt-v').innerText = v.toFixed(3);
-            document.getElementById('z6-tt-tau').innerText = tau.toFixed(2);
-
-            ctx.strokeStyle = "rgba(239, 68, 68, 0.42)";
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(channel.x, probeY);
-            ctx.lineTo(chart.x + chart.w, probeY);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            ctx.fillStyle = "#ef4444";
-            ctx.beginPath();
-            ctx.arc(channel.x + 14, probeY, 4.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(inspectXChart, inspectYChart, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            drawArrow(ctx, channel.x + channel.w - 86, probeY, channel.x + channel.w - 86 + Math.min(58, 14 + tau * 9), probeY, "#ef4444", 2.5);
-        } else {
-            tooltip.style.display = 'none';
-        }
-
-        // Bottom legends
-        ctx.fillStyle = "#64748b";
-        ctx.font = "12px Inter";
-        ctx.fillText("sporije uz stijenku", channel.x, left.y + left.h - 18);
-        ctx.fillText("najbrže na osi", channel.x + channel.w - 92, left.y + left.h - 18);
-        ctx.fillText("parabolični profil", chart.x, right.y + right.h - 14);
-        ctx.fillText("tau raste prema stijenci", chart.x + chart.w - 138, right.y + right.h - 14);
-
-    }
-
-    [muS, betaS, dS, lS].forEach((slider) => slider.addEventListener('input', draw));
-    window.addEventListener('resize', draw);
-    draw();
+  [muS, betaS, dS, lS].forEach((slider) => slider.addEventListener("input", draw));
+  window.addEventListener("resize", draw);
+  draw();
 })();
 </script>
 ````
@@ -1714,304 +1535,313 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
 </div>
 
 <script>
-(function() {
-    const z7c = document.getElementById('z7-canvas');
-    if (!z7c) return;
-    const z7ctx = z7c.getContext('2d');
-    const z7zc = document.getElementById('z7-zoom-canvas');
-    const z7zctx = z7zc.getContext('2d');
-    const z7aS = document.getElementById('z7-alpha');
-    const z7mS = document.getElementById('z7-mu');
-    const z7dS = document.getElementById('z7-delta');
+(function () {
+  const z7c = document.getElementById("z7-canvas");
+  if (!z7c) return;
+  const z7ctx = z7c.getContext("2d");
+  const z7zc = document.getElementById("z7-zoom-canvas");
+  const z7zctx = z7zc.getContext("2d");
+  const z7aS = document.getElementById("z7-alpha");
+  const z7mS = document.getElementById("z7-mu");
+  const z7dS = document.getElementById("z7-delta");
 
-    const z7BaseW = 760;
-    const z7BaseH = 420;
-    const z7ZoomW = 160;
-    const z7ZoomH = 90;
-    const blockWeight = 1100;
-    const blockSide = 0.25;
+  const z7BaseW = 760;
+  const z7BaseH = 420;
+  const z7ZoomW = 160;
+  const z7ZoomH = 90;
+  const blockWeight = 1100;
+  const blockSide = 0.25;
 
-    let z7State = null;
+  let z7State = null;
 
-    function setText(id, value) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = value;
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function prepareCanvas(canvas, ctx, logicalWidth, logicalHeight) {
+    const rect = canvas.getBoundingClientRect();
+    const displayWidth = Math.max(Math.round(rect.width) || logicalWidth, 80);
+    const displayHeight = Math.max(Math.round(rect.height) || logicalHeight, 40);
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const pixelWidth = Math.max(1, Math.round(displayWidth * ratio));
+    const pixelHeight = Math.max(1, Math.round(displayHeight * ratio));
+
+    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+      canvas.width = pixelWidth;
+      canvas.height = pixelHeight;
     }
 
-    function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
+    const scaleX = displayWidth / logicalWidth;
+    const scaleY = displayHeight / logicalHeight;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(scaleX * ratio, 0, 0, scaleY * ratio, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  }
+
+  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+    const headLength = 10;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headLength * Math.cos(angle - Math.PI / 6), y2 - headLength * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headLength * Math.cos(angle + Math.PI / 6), y2 - headLength * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+
+    if (label) {
+      ctx.font = "700 12px Inter";
+      ctx.fillText(label, x2 + (x2 >= x1 ? 8 : -34), y2 - 8);
+    }
+  }
+
+  function getValues() {
+    const alphaDeg = parseFloat(z7aS.value);
+    const alpha = (alphaDeg * Math.PI) / 180;
+    const muMilli = parseFloat(z7mS.value);
+    const mu = muMilli / 1000;
+    const deltaMicron = parseFloat(z7dS.value);
+    const delta = deltaMicron / 1e6;
+    const Ft = blockWeight * Math.sin(alpha);
+    const v = (Ft * delta) / (mu * blockSide * blockSide);
+    const Fv = mu * (v / delta) * blockSide * blockSide;
+    const tau = mu * (v / delta);
+
+    return { alphaDeg, alpha, muMilli, mu, deltaMicron, delta, Ft, v, Fv, tau };
+  }
+
+  function updateZ7State() {
+    z7State = getValues();
+
+    setText("z7-v-alpha", z7State.alphaDeg.toFixed(0));
+    setText("z7-v-mu", z7State.muMilli.toFixed(0));
+    setText("z7-v-delta", z7State.deltaMicron.toFixed(0));
+    setText("z7-stage-v", z7State.v.toFixed(2));
+    setText("z7-stage-delta", z7State.deltaMicron.toFixed(0));
+    setText("z7-res-v", z7State.v.toFixed(2));
+    setText("z7-res-fg", z7State.Ft.toFixed(1));
+    setText("z7-res-fv", z7State.Fv.toFixed(1));
+    setText("z7-res-tau", z7State.tau.toFixed(1));
+    setText("z7-balance-fg", z7State.Ft.toFixed(1));
+    setText("z7-balance-fv", z7State.Fv.toFixed(1));
+    setText("z7-stage-balance", "F_tang = F_v");
+    setText(
+      "z7-eq-vals",
+      `v_B = (${z7State.Ft.toFixed(1)} · ${z7State.deltaMicron.toFixed(0)}×10⁻⁶) / (${z7State.mu.toFixed(3)} · 0.25²) = ${z7State.v.toFixed(2)} m/s`,
+    );
+
+    const tauAbs = Math.abs(z7State.tau);
+    if (tauAbs >= 1000) {
+      setText("z7-res-tau", (z7State.tau / 1000).toFixed(2));
+      setText("z7-res-tau-unit", "kPa");
+    } else {
+      setText("z7-res-tau", z7State.tau.toFixed(1));
+      setText("z7-res-tau-unit", "Pa");
     }
 
-    function prepareCanvas(canvas, ctx, logicalWidth, logicalHeight) {
-        const rect = canvas.getBoundingClientRect();
-        const displayWidth = Math.max(Math.round(rect.width) || logicalWidth, 80);
-        const displayHeight = Math.max(Math.round(rect.height) || logicalHeight, 40);
-        const ratio = Math.min(window.devicePixelRatio || 1, 2);
-        const pixelWidth = Math.max(1, Math.round(displayWidth * ratio));
-        const pixelHeight = Math.max(1, Math.round(displayHeight * ratio));
+    const refForce = Math.max(z7State.Ft, z7State.Fv, 1);
+    document.getElementById("z7-bar-fg").style.width = `${((z7State.Ft / refForce) * 100).toFixed(1)}%`;
+    document.getElementById("z7-bar-fv").style.width = `${((z7State.Fv / refForce) * 100).toFixed(1)}%`;
 
-        if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-            canvas.width = pixelWidth;
-            canvas.height = pixelHeight;
-        }
+    let logicText = "Otpor filma i komponenta težine upravo se izjednačuju u umjerenom režimu gibanja.";
+    if (z7State.v > 40) {
+      logicText =
+        'Kosina je dovoljno pogonska ili je film dovoljno "mekan" da blok treba veliku brzinu kako bi razvio potreban viskozni otpor.';
+    } else if (z7State.v < 8) {
+      logicText =
+        "Viskoznost je relativno jaka ili je film vrlo tanak, pa se ravnoteža postiže već pri maloj brzini klizanja.";
+    }
+    setText("z7-logic-summary", logicText);
+    setText(
+      "z7-explainer",
+      `Komponenta težine niz kosinu sada iznosi ${z7State.Ft.toFixed(1)} N. U filmu debljine ${z7State.deltaMicron.toFixed(0)} μm mora se razviti jednako velik viskozni otpor, pa blok klizi stalnom brzinom ${z7State.v.toFixed(2)} m/s. Ako povećamo α ili δ, brzina raste; ako povećamo μ, potrebna brzina pada. ${logicText}`,
+    );
+    drawStage(z7State);
+    drawZoom(z7State);
+  }
 
-        const scaleX = displayWidth / logicalWidth;
-        const scaleY = displayHeight / logicalHeight;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.setTransform(scaleX * ratio, 0, 0, scaleY * ratio, 0, 0);
-        ctx.imageSmoothingEnabled = true;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+  function drawStage(values) {
+    prepareCanvas(z7c, z7ctx, z7BaseW, z7BaseH);
+
+    const bg = z7ctx.createLinearGradient(0, 0, 0, z7BaseH);
+    bg.addColorStop(0, "#ffffff");
+    bg.addColorStop(1, "#edf5ff");
+    z7ctx.fillStyle = bg;
+    z7ctx.fillRect(0, 0, z7BaseW, z7BaseH);
+
+    z7ctx.fillStyle = "rgba(148, 163, 184, 0.12)";
+    z7ctx.fillRect(530, 28, 2, 364);
+
+    const originX = 86;
+    const originY = 100;
+    const slopeLength = 330;
+    const blockW = 92;
+    const blockH = 58;
+    const filmGap = values.deltaMicron * 0.12;
+    const planeThickness = 18;
+
+    const blockAlong = 190;
+
+    z7ctx.save();
+    z7ctx.translate(originX, originY);
+    z7ctx.rotate(values.alpha);
+
+    const planeGrad = z7ctx.createLinearGradient(0, 0, 0, planeThickness + 12);
+    planeGrad.addColorStop(0, "#64748b");
+    planeGrad.addColorStop(1, "#334155");
+    z7ctx.fillStyle = planeGrad;
+    roundRect(z7ctx, -36, 0, slopeLength + 90, planeThickness, 9, true, false);
+
+    const oilGrad = z7ctx.createLinearGradient(0, -filmGap, 0, 0);
+    oilGrad.addColorStop(0, "rgba(59, 130, 246, 0.42)");
+    oilGrad.addColorStop(1, "rgba(191, 219, 254, 0.85)");
+    z7ctx.fillStyle = oilGrad;
+    roundRect(z7ctx, -24, -filmGap, slopeLength + 70, filmGap, 6, true, false);
+
+    z7ctx.strokeStyle = "rgba(255,255,255,0.55)";
+    z7ctx.lineWidth = 2;
+    for (let i = 0; i < 5; i++) {
+      const x = 26 + i * 88;
+      z7ctx.beginPath();
+      z7ctx.moveTo(x, -4);
+      z7ctx.lineTo(x + 42, -4);
+      z7ctx.stroke();
     }
 
-    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-        const rr = Math.min(r, w / 2, h / 2);
-        ctx.beginPath();
-        ctx.moveTo(x + rr, y);
-        ctx.arcTo(x + w, y, x + w, y + h, rr);
-        ctx.arcTo(x + w, y + h, x, y + h, rr);
-        ctx.arcTo(x, y + h, x, y, rr);
-        ctx.arcTo(x, y, x + w, y, rr);
-        ctx.closePath();
-        if (fill) ctx.fill();
-        if (stroke) ctx.stroke();
+    z7ctx.fillStyle = "rgba(15, 23, 42, 0.12)";
+    roundRect(z7ctx, blockAlong + 6, -blockH - filmGap + 8, blockW, blockH, 14, true, false);
+
+    const blockGrad = z7ctx.createLinearGradient(blockAlong, -blockH - filmGap, blockAlong, -filmGap);
+    blockGrad.addColorStop(0, "#64748b");
+    blockGrad.addColorStop(1, "#334155");
+    z7ctx.fillStyle = blockGrad;
+    roundRect(z7ctx, blockAlong, -blockH - filmGap, blockW, blockH, 14, true, false);
+    z7ctx.fillStyle = "rgba(255,255,255,0.18)";
+    roundRect(z7ctx, blockAlong + 10, -blockH - filmGap + 8, blockW - 20, 8, 4, true, false);
+
+    const centerX = blockAlong + blockW / 2;
+    const centerY = -blockH / 2 - filmGap;
+    MF1.arrow(z7ctx, centerX, centerY, values.Ft * .07, 0, "#b93645", "G sin α");
+    MF1.arrow(z7ctx, centerX, -filmGap, -values.Fv * .07, 0, "#2563eb", "F_v");
+    MF1.arrow(z7ctx,centerX-10,centerY-30,values.v*.7,0,"#16a34a","v_B");
+
+    z7ctx.strokeStyle = "#0f766e";
+    z7ctx.lineWidth = 2;
+    z7ctx.beginPath();
+    z7ctx.moveTo(blockAlong + blockW + 18, -filmGap);
+    z7ctx.lineTo(blockAlong + blockW + 18, 0);
+    z7ctx.stroke();
+    z7ctx.beginPath();
+    z7ctx.moveTo(blockAlong + blockW + 12, -filmGap);
+    z7ctx.lineTo(blockAlong + blockW + 24, -filmGap);
+    z7ctx.moveTo(blockAlong + blockW + 12, 0);
+    z7ctx.lineTo(blockAlong + blockW + 24, 0);
+    z7ctx.stroke();
+    z7ctx.fillStyle = "#0f766e";
+    z7ctx.font = "700 12px Inter";
+    z7ctx.fillText("δ", blockAlong + blockW + 28, -2);
+
+    z7ctx.restore();
+
+    z7ctx.strokeStyle = "#2563eb";
+    z7ctx.lineWidth = 3;
+    z7ctx.beginPath();
+    z7ctx.arc(originX, originY, 42, 0, values.alpha, false);
+    z7ctx.stroke();
+    z7ctx.fillStyle = "#1d4ed8";
+    z7ctx.font = "700 14px Inter";
+    z7ctx.fillText(`α = ${values.alphaDeg.toFixed(0)}°`, originX + 48, originY - 6);
+
+    z7ctx.fillStyle = "#475569";
+    z7ctx.font = "13px Inter";
+    z7ctx.fillText("Film ulja je nacrtan uvećano da bi se jasno vidio profil brzine i razmak δ.", 54, 382);
+  }
+
+  function drawZoom(values) {
+    prepareCanvas(z7zc, z7zctx, z7ZoomW, z7ZoomH);
+
+    const zoomBg = z7zctx.createLinearGradient(0, 0, 0, z7ZoomH);
+    zoomBg.addColorStop(0, "#f8fbff");
+    zoomBg.addColorStop(1, "#eef6ff");
+    z7zctx.fillStyle = zoomBg;
+    z7zctx.fillRect(0, 0, z7ZoomW, z7ZoomH);
+
+    z7zctx.fillStyle = "#1e293b";
+    z7zctx.fillRect(0, 10, z7ZoomW, 12);
+    z7zctx.fillRect(0, 68, z7ZoomW, 12);
+
+    const filmGrad = z7zctx.createLinearGradient(0, 22, 0, 68);
+    filmGrad.addColorStop(0, "rgba(191, 219, 254, 0.95)");
+    filmGrad.addColorStop(1, "rgba(59, 130, 246, 0.35)");
+    z7zctx.fillStyle = filmGrad;
+    z7zctx.fillRect(0, 22, z7ZoomW, 46);
+
+    const arrowScale = clamp(values.v / 12, 0.4, 6);
+    for (let i = 0; i < 5; i++) {
+      const t = i / 4;
+      const y = 68 - t * 46;
+      const len = t * 100;
+      z7zctx.strokeStyle = `rgba(37, 99, 235, ${0.35 + 0.14 * i})`;
+      z7zctx.lineWidth = 2.2;
+      z7zctx.beginPath();
+      z7zctx.moveTo(12, y);
+      z7zctx.lineTo(12 + Math.min(len, 116), y);
+      z7zctx.stroke();
+      MF1.arrow(z7zctx, 12, y, len, 0, "#176da9", "", 2);
     }
 
-    function drawArrow(ctx, x1, y1, x2, y2, color, label) {
-        const headLength = 10;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        ctx.strokeStyle = color;
-        ctx.fillStyle = color;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+    z7zctx.strokeStyle = "#0f766e";
+    z7zctx.lineWidth = 1.6;
+    z7zctx.beginPath();
+    z7zctx.moveTo(134, 22);
+    z7zctx.lineTo(134, 68);
+    z7zctx.stroke();
+    z7zctx.beginPath();
+    z7zctx.moveTo(128, 22);
+    z7zctx.lineTo(140, 22);
+    z7zctx.moveTo(128, 68);
+    z7zctx.lineTo(140, 68);
+    z7zctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headLength * Math.cos(angle - Math.PI / 6), y2 - headLength * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(x2 - headLength * Math.cos(angle + Math.PI / 6), y2 - headLength * Math.sin(angle + Math.PI / 6));
-        ctx.closePath();
-        ctx.fill();
+    z7zctx.fillStyle = "#0f766e";
+    z7zctx.font = "700 11px Inter";
+    z7zctx.fillText("δ", 144, 47);
+    z7zctx.fillStyle = "#475569";
+    z7zctx.font = "11px Inter";
+    z7zctx.fillText("v = 0", 102, 82);
+    z7zctx.fillText("v/vB = 1", 98, 18);
+  }
 
-        if (label) {
-            ctx.font = '700 12px Inter';
-            ctx.fillText(label, x2 + (x2 >= x1 ? 8 : -34), y2 - 8);
-        }
-    }
-
-    function getValues() {
-        const alphaDeg = parseFloat(z7aS.value);
-        const alpha = alphaDeg * Math.PI / 180;
-        const muMilli = parseFloat(z7mS.value);
-        const mu = muMilli / 1000;
-        const deltaMicron = parseFloat(z7dS.value);
-        const delta = deltaMicron / 1e6;
-        const Ft = blockWeight * Math.sin(alpha);
-        const v = (Ft * delta) / (mu * blockSide * blockSide);
-        const Fv = mu * (v / delta) * blockSide * blockSide;
-        const tau = mu * (v / delta);
-
-        return { alphaDeg, alpha, muMilli, mu, deltaMicron, delta, Ft, v, Fv, tau };
-    }
-
-    function updateZ7State() {
-        z7State = getValues();
-
-        setText('z7-v-alpha', z7State.alphaDeg.toFixed(0));
-        setText('z7-v-mu', z7State.muMilli.toFixed(0));
-        setText('z7-v-delta', z7State.deltaMicron.toFixed(0));
-        setText('z7-stage-v', z7State.v.toFixed(2));
-        setText('z7-stage-delta', z7State.deltaMicron.toFixed(0));
-        setText('z7-res-v', z7State.v.toFixed(2));
-        setText('z7-res-fg', z7State.Ft.toFixed(1));
-        setText('z7-res-fv', z7State.Fv.toFixed(1));
-        setText('z7-res-tau', z7State.tau.toFixed(1));
-        setText('z7-balance-fg', z7State.Ft.toFixed(1));
-        setText('z7-balance-fv', z7State.Fv.toFixed(1));
-        setText('z7-stage-balance', 'F_tang = F_v');
-        setText('z7-eq-vals', `v_B = (${z7State.Ft.toFixed(1)} · ${z7State.deltaMicron.toFixed(0)}×10⁻⁶) / (${z7State.mu.toFixed(3)} · 0.25²) = ${z7State.v.toFixed(2)} m/s`);
-
-        const tauAbs = Math.abs(z7State.tau);
-        if (tauAbs >= 1000) {
-            setText('z7-res-tau', (z7State.tau / 1000).toFixed(2));
-            setText('z7-res-tau-unit', 'kPa');
-        } else {
-            setText('z7-res-tau', z7State.tau.toFixed(1));
-            setText('z7-res-tau-unit', 'Pa');
-        }
-
-        const refForce = Math.max(z7State.Ft, z7State.Fv, 1);
-        document.getElementById('z7-bar-fg').style.width = `${(z7State.Ft / refForce * 100).toFixed(1)}%`;
-        document.getElementById('z7-bar-fv').style.width = `${(z7State.Fv / refForce * 100).toFixed(1)}%`;
-
-        let logicText = 'Otpor filma i komponenta težine upravo se izjednačuju u umjerenom režimu gibanja.';
-        if (z7State.v > 40) {
-            logicText = 'Kosina je dovoljno pogonska ili je film dovoljno "mekan" da blok treba veliku brzinu kako bi razvio potreban viskozni otpor.';
-        } else if (z7State.v < 8) {
-            logicText = 'Viskoznost je relativno jaka ili je film vrlo tanak, pa se ravnoteža postiže već pri maloj brzini klizanja.';
-        }
-        setText('z7-logic-summary', logicText);
-        setText('z7-explainer', `Komponenta težine niz kosinu sada iznosi ${z7State.Ft.toFixed(1)} N. U filmu debljine ${z7State.deltaMicron.toFixed(0)} μm mora se razviti jednako velik viskozni otpor, pa blok klizi stalnom brzinom ${z7State.v.toFixed(2)} m/s. Ako povećamo α ili δ, brzina raste; ako povećamo μ, potrebna brzina pada. ${logicText}`);
-        drawStage(z7State);
-        drawZoom(z7State);
-    }
-
-    function drawStage(values) {
-        prepareCanvas(z7c, z7ctx, z7BaseW, z7BaseH);
-
-        const bg = z7ctx.createLinearGradient(0, 0, 0, z7BaseH);
-        bg.addColorStop(0, '#ffffff');
-        bg.addColorStop(1, '#edf5ff');
-        z7ctx.fillStyle = bg;
-        z7ctx.fillRect(0, 0, z7BaseW, z7BaseH);
-
-        z7ctx.fillStyle = 'rgba(148, 163, 184, 0.12)';
-        z7ctx.fillRect(530, 28, 2, 364);
-
-        const originX = 86;
-        const originY = 112;
-        const slopeLength = 430;
-        const blockW = 92;
-        const blockH = 58;
-        const filmGap = 10;
-        const planeThickness = 18;
-
-        const blockAlong = 190;
-
-        z7ctx.save();
-        z7ctx.translate(originX, originY);
-        z7ctx.rotate(values.alpha);
-
-        const planeGrad = z7ctx.createLinearGradient(0, 0, 0, planeThickness + 12);
-        planeGrad.addColorStop(0, '#64748b');
-        planeGrad.addColorStop(1, '#334155');
-        z7ctx.fillStyle = planeGrad;
-        roundRect(z7ctx, -36, 0, slopeLength + 90, planeThickness, 9, true, false);
-
-        const oilGrad = z7ctx.createLinearGradient(0, -filmGap, 0, 0);
-        oilGrad.addColorStop(0, 'rgba(59, 130, 246, 0.42)');
-        oilGrad.addColorStop(1, 'rgba(191, 219, 254, 0.85)');
-        z7ctx.fillStyle = oilGrad;
-        roundRect(z7ctx, -24, -filmGap, slopeLength + 70, filmGap, 6, true, false);
-
-        z7ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-        z7ctx.lineWidth = 2;
-        for (let i = 0; i < 5; i++) {
-            const x = 26 + i * 88;
-            z7ctx.beginPath();
-            z7ctx.moveTo(x, -4);
-            z7ctx.lineTo(x + 42, -4);
-            z7ctx.stroke();
-        }
-
-        z7ctx.fillStyle = 'rgba(15, 23, 42, 0.12)';
-        roundRect(z7ctx, blockAlong + 6, -blockH - filmGap + 8, blockW, blockH, 14, true, false);
-
-        const blockGrad = z7ctx.createLinearGradient(blockAlong, -blockH - filmGap, blockAlong, -filmGap);
-        blockGrad.addColorStop(0, '#64748b');
-        blockGrad.addColorStop(1, '#334155');
-        z7ctx.fillStyle = blockGrad;
-        roundRect(z7ctx, blockAlong, -blockH - filmGap, blockW, blockH, 14, true, false);
-        z7ctx.fillStyle = 'rgba(255,255,255,0.18)';
-        roundRect(z7ctx, blockAlong + 10, -blockH - filmGap + 8, blockW - 20, 8, 4, true, false);
-
-        const centerX = blockAlong + blockW / 2;
-        const centerY = -blockH / 2 - filmGap;
-        drawArrow(z7ctx, centerX - 6, centerY + 16, centerX + 72, centerY + 16, '#ef4444', 'G sin α');
-        drawArrow(z7ctx, centerX + 6, centerY - 10, centerX - 72, centerY - 10, '#2563eb', 'F_v');
-        drawArrow(z7ctx, centerX - 10, centerY - 30, centerX + 70, centerY - 30, '#16a34a', 'v_B');
-
-        z7ctx.strokeStyle = '#0f766e';
-        z7ctx.lineWidth = 2;
-        z7ctx.beginPath();
-        z7ctx.moveTo(blockAlong + blockW + 18, -filmGap);
-        z7ctx.lineTo(blockAlong + blockW + 18, 0);
-        z7ctx.stroke();
-        z7ctx.beginPath();
-        z7ctx.moveTo(blockAlong + blockW + 12, -filmGap);
-        z7ctx.lineTo(blockAlong + blockW + 24, -filmGap);
-        z7ctx.moveTo(blockAlong + blockW + 12, 0);
-        z7ctx.lineTo(blockAlong + blockW + 24, 0);
-        z7ctx.stroke();
-        z7ctx.fillStyle = '#0f766e';
-        z7ctx.font = '700 12px Inter';
-        z7ctx.fillText('δ', blockAlong + blockW + 28, -2);
-
-        z7ctx.restore();
-
-        z7ctx.strokeStyle = '#2563eb';
-        z7ctx.lineWidth = 3;
-        z7ctx.beginPath();
-        z7ctx.arc(originX, originY, 42, 0, values.alpha, false);
-        z7ctx.stroke();
-        z7ctx.fillStyle = '#1d4ed8';
-        z7ctx.font = '700 14px Inter';
-        z7ctx.fillText(`α = ${values.alphaDeg.toFixed(0)}°`, originX + 48, originY - 6);
-
-        z7ctx.fillStyle = '#475569';
-        z7ctx.font = '13px Inter';
-        z7ctx.fillText('Film ulja je nacrtan uvećano da bi se jasno vidio profil brzine i razmak δ.', 54, 382);
-    }
-
-    function drawZoom(values) {
-        prepareCanvas(z7zc, z7zctx, z7ZoomW, z7ZoomH);
-
-        const zoomBg = z7zctx.createLinearGradient(0, 0, 0, z7ZoomH);
-        zoomBg.addColorStop(0, '#f8fbff');
-        zoomBg.addColorStop(1, '#eef6ff');
-        z7zctx.fillStyle = zoomBg;
-        z7zctx.fillRect(0, 0, z7ZoomW, z7ZoomH);
-
-        z7zctx.fillStyle = '#1e293b';
-        z7zctx.fillRect(0, 10, z7ZoomW, 12);
-        z7zctx.fillRect(0, 68, z7ZoomW, 12);
-
-        const filmGrad = z7zctx.createLinearGradient(0, 22, 0, 68);
-        filmGrad.addColorStop(0, 'rgba(191, 219, 254, 0.95)');
-        filmGrad.addColorStop(1, 'rgba(59, 130, 246, 0.35)');
-        z7zctx.fillStyle = filmGrad;
-        z7zctx.fillRect(0, 22, z7ZoomW, 46);
-
-        const arrowScale = clamp(values.v / 12, 0.4, 6);
-        for (let i = 0; i < 5; i++) {
-            const t = i / 4;
-            const y = 60 - t * 28;
-            const len = 16 + t * 18 * arrowScale;
-            z7zctx.strokeStyle = `rgba(37, 99, 235, ${0.35 + 0.14 * i})`;
-            z7zctx.lineWidth = 2.2;
-            z7zctx.beginPath();
-            z7zctx.moveTo(12, y);
-            z7zctx.lineTo(12 + Math.min(len, 116), y);
-            z7zctx.stroke();
-        }
-
-        z7zctx.strokeStyle = '#0f766e';
-        z7zctx.lineWidth = 1.6;
-        z7zctx.beginPath();
-        z7zctx.moveTo(134, 22);
-        z7zctx.lineTo(134, 68);
-        z7zctx.stroke();
-        z7zctx.beginPath();
-        z7zctx.moveTo(128, 22);
-        z7zctx.lineTo(140, 22);
-        z7zctx.moveTo(128, 68);
-        z7zctx.lineTo(140, 68);
-        z7zctx.stroke();
-
-        z7zctx.fillStyle = '#0f766e';
-        z7zctx.font = '700 11px Inter';
-        z7zctx.fillText('δ', 144, 47);
-        z7zctx.fillStyle = '#475569';
-        z7zctx.font = '11px Inter';
-        z7zctx.fillText('v = 0', 102, 82);
-        z7zctx.fillText('v_B', 118, 18);
-    }
-
-    [z7aS, z7mS, z7dS].forEach((slider) => slider.addEventListener('input', updateZ7State));
-    updateZ7State();
+  [z7aS, z7mS, z7dS].forEach((slider) => slider.addEventListener("input", updateZ7State));
+  updateZ7State();
 })();
 </script>
 ````

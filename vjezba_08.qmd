@@ -92,56 +92,609 @@ Nastavna nit ove vježbe polazi od opće bilance mase. Z70 primjenjuje stacionar
 </style>
 <div id="v8-explorer"><section class="v8x-shell" aria-label="Istraživač kontinuiteta"><header><div class="v8x-kicker">Interaktivni prikaz</div><h4>Kontinuitet — interaktivni istraživač strujanja</h4><p class="v8x-sub">Promijeni presjek ili protok i prati kako se brzina mora prilagoditi da bi bilanca mase ostala zadovoljena.</p></header><div class="v8x-modes" role="group" aria-label="Način rada"><button type="button" data-mode="same" aria-pressed="true">Jedan fluid</button><button type="button" data-mode="density" aria-pressed="false">Različite gustoće</button><button type="button" data-mode="tank" aria-pressed="false">Akumulacija</button></div><div class="v8x-scene"><svg id="v8x-scene" role="img" aria-labelledby="v8x-title v8x-desc" preserveAspectRatio="none"><title id="v8x-title">Stanje strujanja u kontrolnom volumenu</title><desc id="v8x-desc">Cijev ili spremnik s jasno označenim fizikalnim veličinama.</desc></svg></div><div class="v8x-cbar"><div id="v8x-controls" class="v8x-controls"></div><aside id="v8x-primary" class="v8x-primary" aria-live="polite"></aside></div><div id="v8x-presets" class="v8x-presets"></div><div id="v8x-actions" class="v8x-actions" hidden><button id="v8x-start" type="button">Pokreni</button><button id="v8x-pause" type="button">Pauza</button><button id="v8x-reset" type="button">Reset</button></div><div id="v8x-minis" class="v8x-minis" aria-live="polite"></div><div class="v8x-bottom"><section id="v8x-plot" class="v8x-plot"></section><aside id="v8x-physics" class="v8x-physics"></aside></div><div id="v8x-explain" class="v8x-explain" aria-live="polite"></div></section></div>
 <script>
-(()=>{const root=document.getElementById('v8-explorer');if(!root||root.dataset.ready)return;root.dataset.ready='1';const $=s=>root.querySelector(s),scene=$('#v8x-scene'),controls=$('#v8x-controls'),primary=$('#v8x-primary'),presets=$('#v8x-presets'),actions=$('#v8x-actions'),minis=$('#v8x-minis'),plot=$('#v8x-plot'),physics=$('#v8x-physics'),explain=$('#v8x-explain'),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const S={mode:'same',last:'d2',frame:performance.now(),raf:0,same:{d1:.16,d2:.08,q:.01},density:{d1:.12,d2:.12,q1:.01,rho1:600,rho2:1200},tank:{qin:.012,qout:.006,as:.3,h:.9,h0:.9,time:0,running:false},p:Array.from({length:18},(_,i)=>({x:25+i*52,l:[-.42,0,.42][i%3]}))},fmt=(n,d)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),A=d=>Math.PI*d*d/4,clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-const C={same:[['d1','Promjer ulaza D₁',60,200,1,'mm'],['d2','Promjer izlaza D₂',60,200,1,'mm'],['q','Volumenski protok Q',2,20,.5,'q']],density:[['d1','Promjer ulaza D₁',60,200,1,'mm'],['d2','Promjer izlaza D₂',60,200,1,'mm'],['q1','Ulazni protok Q₁',2,20,.5,'q'],['rho1','Gustoća ρ₁',500,1500,10,'rho'],['rho2','Gustoća ρ₂',500,1500,10,'rho']],tank:[['qin','Ulazni protok Qᵢₙ',0,20,.5,'q'],['qout','Izlazni protok Qₒᵤₜ',0,20,.5,'q'],['as','Površina spremnika Aₛ',.15,.8,.01,'a']]},P={same:[['equal','Jednaki presjeci',{d1:.12,d2:.12,q:.01}],['half','Suženje 2 : 1',{d1:.16,d2:.08,q:.01}],['diffuser','Difuzor 1 : 1,5',{d1:.10,d2:.15,q:.01}],['flow','Veći protok',{d1:.12,d2:.08,q:.02}]],density:[['equalrho','Jednake gustoće',{d1:.12,d2:.12,q1:.01,rho1:900,rho2:900}],['doublerho','ρ₂ = 2ρ₁',{d1:.12,d2:.12,q1:.01,rho1:600,rho2:1200}],['wide','Širi izlaz',{d1:.10,d2:.16,q1:.01,rho1:800,rho2:1200}]],tank:[['fill','Puni se',{qin:.012,qout:.006,as:.3}],['balance','Ravnoteža',{qin:.01,qout:.01,as:.3}],['drain','Prazni se',{qin:.006,qout:.012,as:.3}]]};
-function input(k,n){return k==='mm'||k==='q'?n/1000:n}function val(k,n){return k==='mm'||k==='q'?n*1000:n}function show(k,n){return k==='mm'?fmt(n*1000,0)+' mm':k==='q'?fmt(n*1000,1)+' L/s':k==='rho'?fmt(n,0)+' kg/m³':fmt(n,2)+' m²'}function model(){if(S.mode==='same'){let s=S.same,a1=A(s.d1),a2=A(s.d2),v1=s.q/a1,v2=s.q/a2;return{kind:'same',...s,a1,a2,v1,v2,dr:s.d2/s.d1,ar:a2/a1,r:v2/v1}}if(S.mode==='density'){let s=S.density,a1=A(s.d1),a2=A(s.d2),md=s.rho1*s.q1,v1=s.q1/a1,v2=md/(s.rho2*a2),q2=a2*v2;return{kind:'density',...s,a1,a2,md,v1,v2,q2,dr:s.d2/s.d1,ar:a2/a1,qr:q2/s.q1}}let s=S.tank,net=s.qin-s.qout;return{kind:'tank',...s,net,dh:net/s.as}}
-function controlsUI(){
-  const current=S[S.mode];
-  controls.innerHTML=C[S.mode].map(c=>'<div class="v8x-control"><label for="v8x-'+c[0]+'"><span>'+c[1]+'</span><output id="v8x-'+c[0]+'o">'+show(c[5],current[c[0]])+'</output></label><input id="v8x-'+c[0]+'" type="range" min="'+c[2]+'" max="'+c[3]+'" step="'+c[4]+'" value="'+val(c[5],current[c[0]])+'"></div>').join('');
-  C[S.mode].forEach(c=>{
-    $('#v8x-'+c[0]).addEventListener('input',event=>{
-      current[c[0]]=input(c[5],+event.target.value);
-      S.last=c[0];
-      if(S.mode==='tank'){S.tank.h0=S.tank.h;S.tank.time=0;}
-      sync();
+(() => {
+  const root = document.getElementById("v8-explorer");
+  if (!root || root.dataset.ready) return;
+  root.dataset.ready = "1";
+  const $ = (s) => root.querySelector(s),
+    scene = $("#v8x-scene"),
+    controls = $("#v8x-controls"),
+    primary = $("#v8x-primary"),
+    presets = $("#v8x-presets"),
+    actions = $("#v8x-actions"),
+    minis = $("#v8x-minis"),
+    plot = $("#v8x-plot"),
+    physics = $("#v8x-physics"),
+    explain = $("#v8x-explain"),
+    reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const S = {
+      mode: "same",
+      last: "d2",
+      frame: performance.now(),
+      raf: 0,
+      same: { d1: 0.16, d2: 0.08, q: 0.01 },
+      density: { d1: 0.12, d2: 0.12, q1: 0.01, rho1: 600, rho2: 1200 },
+      tank: { qin: 0.012, qout: 0.006, as: 0.3, h: 0.9, h0: 0.9, time: 0, running: false },
+      p: Array.from({ length: 18 }, (_, i) => ({ x: 25 + i * 52, l: [-0.42, 0, 0.42][i % 3] })),
+    },
+    fmt = (n, d) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d }),
+    A = (d) => (Math.PI * d * d) / 4,
+    clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const C = {
+      same: [
+        ["d1", "Promjer ulaza D₁", 60, 200, 1, "mm"],
+        ["d2", "Promjer izlaza D₂", 60, 200, 1, "mm"],
+        ["q", "Volumenski protok Q", 0, 20, 0.5, "q"],
+      ],
+      density: [
+        ["d1", "Promjer ulaza D₁", 60, 200, 1, "mm"],
+        ["d2", "Promjer izlaza D₂", 60, 200, 1, "mm"],
+        ["q1", "Ulazni protok Q₁", 0, 20, 0.5, "q"],
+        ["rho1", "Gustoća ρ₁", 500, 1500, 10, "rho"],
+        ["rho2", "Gustoća ρ₂", 500, 1500, 10, "rho"],
+      ],
+      tank: [
+        ["qin", "Ulazni protok Qᵢₙ", 0, 20, 0.5, "q"],
+        ["qout", "Izlazni protok Qₒᵤₜ", 0, 20, 0.5, "q"],
+        ["as", "Površina spremnika Aₛ", 0.15, 0.8, 0.01, "a"],
+      ],
+    },
+    P = {
+      same: [
+        ["equal", "Jednaki presjeci", { d1: 0.12, d2: 0.12, q: 0.01 }],
+        ["half", "Suženje 2 : 1", { d1: 0.16, d2: 0.08, q: 0.01 }],
+        ["diffuser", "Difuzor 1 : 1,5", { d1: 0.1, d2: 0.15, q: 0.01 }],
+        ["flow", "Veći protok", { d1: 0.12, d2: 0.08, q: 0.02 }],
+      ],
+      density: [
+        ["equalrho", "Jednake gustoće", { d1: 0.12, d2: 0.12, q1: 0.01, rho1: 900, rho2: 900 }],
+        ["doublerho", "ρ₂ = 2ρ₁", { d1: 0.12, d2: 0.12, q1: 0.01, rho1: 600, rho2: 1200 }],
+        ["wide", "Širi izlaz", { d1: 0.1, d2: 0.16, q1: 0.01, rho1: 800, rho2: 1200 }],
+      ],
+      tank: [
+        ["fill", "Puni se", { qin: 0.012, qout: 0.006, as: 0.3 }],
+        ["balance", "Ravnoteža", { qin: 0.01, qout: 0.01, as: 0.3 }],
+        ["drain", "Prazni se", { qin: 0.006, qout: 0.012, as: 0.3 }],
+      ],
+    };
+  function input(k, n) {
+    return k === "mm" || k === "q" ? n / 1000 : n;
+  }
+  function val(k, n) {
+    return k === "mm" || k === "q" ? n * 1000 : n;
+  }
+  function show(k, n) {
+    return k === "mm"
+      ? fmt(n * 1000, 0) + " mm"
+      : k === "q"
+        ? fmt(n * 1000, 1) + " L/s"
+        : k === "rho"
+          ? fmt(n, 0) + " kg/m³"
+          : fmt(n, 2) + " m²";
+  }
+  function model() {
+    if (S.mode === "same") {
+      let s = S.same,
+        a1 = A(s.d1),
+        a2 = A(s.d2),
+        v1 = s.q / a1,
+        v2 = s.q / a2;
+      return { kind: "same", ...s, a1, a2, v1, v2, dr: s.d2 / s.d1, ar: a2 / a1, r: a1 / a2 };
+    }
+    if (S.mode === "density") {
+      let s = S.density,
+        a1 = A(s.d1),
+        a2 = A(s.d2),
+        md = s.rho1 * s.q1,
+        v1 = s.q1 / a1,
+        v2 = md / (s.rho2 * a2),
+        q2 = a2 * v2;
+      return { kind: "density", ...s, a1, a2, md, v1, v2, q2, dr: s.d2 / s.d1, ar: a2 / a1, qr: s.rho1 / s.rho2 };
+    }
+    let s = S.tank,
+      net = s.qin - s.qout;
+    return { kind: "tank", ...s, net, dh: net / s.as };
+  }
+  function controlsUI() {
+    const current = S[S.mode];
+    controls.innerHTML = C[S.mode]
+      .map(
+        (c) =>
+          '<div class="v8x-control"><label for="v8x-' +
+          c[0] +
+          '"><span>' +
+          c[1] +
+          '</span><output id="v8x-' +
+          c[0] +
+          'o">' +
+          show(c[5], current[c[0]]) +
+          '</output></label><input id="v8x-' +
+          c[0] +
+          '" type="range" min="' +
+          c[2] +
+          '" max="' +
+          c[3] +
+          '" step="' +
+          c[4] +
+          '" value="' +
+          val(c[5], current[c[0]]) +
+          '"></div>',
+      )
+      .join("");
+    C[S.mode].forEach((c) => {
+      $("#v8x-" + c[0]).addEventListener("input", (event) => {
+        current[c[0]] = input(c[5], +event.target.value);
+        S.last = c[0];
+        if (S.mode === "tank") {
+          S.tank.h0 = S.tank.h;
+          S.tank.time = 0;
+        }
+        sync();
+      });
     });
-  });
-}
-function presetsUI(){
-  presets.innerHTML='<span class="v8x-presets-label">Brzi primjer:</span>'+P[S.mode].map(p=>'<button type="button" data-p="'+p[0]+'" aria-pressed="false">'+p[1]+'</button>').join('');
-  presets.querySelectorAll('[data-p]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      const preset=P[S.mode].find(p=>p[0]===button.dataset.p);
-      Object.assign(S[S.mode],preset[2]);
-      S.last=preset[0];
-      if(S.mode==='tank'){S.tank.h=S.tank.h0=.9;S.tank.time=0;S.tank.running=false;}
-      sync();
+  }
+  function presetsUI() {
+    presets.innerHTML =
+      '<span class="v8x-presets-label">Brzi primjer:</span>' +
+      P[S.mode]
+        .map((p) => '<button type="button" data-p="' + p[0] + '" aria-pressed="false">' + p[1] + "</button>")
+        .join("");
+    presets.querySelectorAll("[data-p]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const preset = P[S.mode].find((p) => p[0] === button.dataset.p);
+        Object.assign(S[S.mode], preset[2]);
+        S.last = preset[0];
+        if (S.mode === "tank") {
+          S.tank.h = S.tank.h0 = 0.9;
+          S.tank.time = 0;
+          S.tank.running = false;
+        }
+        sync();
+      });
     });
-  });
-}
-function syncInputs(){
-  const current=S[S.mode];
-  C[S.mode].forEach(c=>{
-    const inputEl=$('#v8x-'+c[0]),output=$('#v8x-'+c[0]+'o');
-    if(inputEl)inputEl.value=val(c[5],current[c[0]]);
-    if(output)output.value=show(c[5],current[c[0]]);
-  });
-  P[S.mode].forEach(p=>{
-    const button=presets.querySelector('[data-p="'+p[0]+'"]');
-    if(button)button.setAttribute('aria-pressed',String(Object.keys(p[2]).every(k=>Math.abs(current[k]-p[2][k])<1e-9)));
-  });
-}
-function defs(){return '<defs><marker id="ab" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="av" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#7154aa"/></marker><marker id="ag" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#238a55"/></marker></defs>'}function geom(m){let h1=42+210*m.d1/.2,h2=42+210*m.d2/.2;return{h1,h2,t1:225-h1/2,b1:225+h1/2,t2:225-h2/2,b2:225+h2/2,path:'M20 '+(225-h1/2)+'H310L610 '+(225-h2/2)+'H980V'+(225+h2/2)+'H610L310 '+(225+h1/2)+'H20Z'}}function place(m){let g=geom(m);S.p.forEach((p,i)=>{let q=scene.querySelector('[data-dot="'+i+'"]');if(!q)return;let x=p.x,r=x<=310?0:x>=610?1:(x-310)/300,h=x<=310?g.h1:x>=610?g.h2:g.h1+(g.h2-g.h1)*r;q.setAttribute('cx',x);q.setAttribute('cy',225+p.l*h*.42);q.setAttribute('fill',m.kind==='density'&&x>460?'#7154aa':'#177da2')})}function vel(x,m){return x<=310?m.v1:x>=610?m.v2:m.v1+(m.v2-m.v1)*(x-310)/300}
-function pipe(m){let g=geom(m),d=m.kind==='density',c=d?'#7154aa':'#1976b9',l=v=>28+38*clamp(v,0,5.2),l1=l(m.v1),l2=l(m.v2),lanes=[.25,.5,.75].map(k=>'<path d="M28 '+(g.t1+k*g.h1)+'H310L610 '+(g.t2+k*g.h2)+'H972" fill="none" stroke="#fff" stroke-width="2.2"/>').join('');scene.setAttribute('viewBox','0 0 1000 430');scene.setAttribute('aria-label','Cijev s kontrolnim volumenom, presjecima, površinama, vektorima brzine i tragačima toka.');scene.innerHTML=defs()+'<rect x="80" y="40" width="840" height="340" rx="20" fill="none" stroke="#738999" stroke-width="3" stroke-dasharray="10 7"/><path d="'+g.path+'" fill="#caeaf7" stroke="#315b72" stroke-width="5"/>'+(d?'<path d="M460 '+(g.t1+(g.t2-g.t1)*.55)+'L610 '+g.t2+'H980V'+g.b2+'H610L460 '+(g.b1+(g.b2-g.b1)*.55)+'Z" fill="#ebe4f5"/><path d="M460 110V340" stroke="#7154aa" stroke-width="2" stroke-dasharray="6 5"/>':'')+lanes+'<path d="M135 225H'+(135+l1)+'" stroke="#1976b9" stroke-width="7" marker-end="url(#ab)"/><path d="M650 225H'+(650+l2)+'" stroke="'+c+'" stroke-width="7" marker-end="url(#'+(d?'av':'ab')+')"/><path d="M180 '+(g.t1-8)+'V'+(g.b1+8)+'M800 '+(g.t2-8)+'V'+(g.b2+8)+'" stroke="#c8741f" stroke-width="3"/><g>'+S.p.map((p,i)=>'<circle data-dot="'+i+'" r="5.5" fill="#177da2"/>').join('')+'</g><text x="500" y="30" text-anchor="middle" fill="#405b6d" font-size="19" font-weight="700">isprekidano: kontrolni volumen</text><text x="180" y="'+(g.t1-50)+'" text-anchor="middle" fill="#405b6d" font-size="18" font-weight="700">A₁ = '+fmt(m.a1,4)+' m²</text><text x="800" y="'+(g.t2-50)+'" text-anchor="middle" fill="#405b6d" font-size="18" font-weight="700">A₂ = '+fmt(m.a2,4)+' m²</text><text x="110" y="'+(g.t1-18)+'" text-anchor="end" fill="#aa5b16" font-size="19" font-weight="800">D₁ = '+fmt(m.d1*1000,0)+' mm</text><text x="855" y="'+(g.t2-18)+'" fill="#aa5b16" font-size="19" font-weight="800">D₂ = '+fmt(m.d2*1000,0)+' mm</text><text x="'+(135+l1/2)+'" y="208" text-anchor="middle" fill="#145a8d" font-size="20" font-weight="800">v₁ = '+fmt(m.v1,2)+' m/s</text><text x="'+(650+l2/2)+'" y="208" text-anchor="middle" fill="'+c+'" font-size="20" font-weight="800">v₂ = '+fmt(m.v2,2)+' m/s</text><text x="500" y="412" text-anchor="middle" fill="#315b72" font-size="18" font-weight="700">'+(d?'ṁ₁ = ṁ₂, ali Q₁ i Q₂ ne moraju biti jednaki':'Q = A₁v₁ = A₂v₂; duljina strelice prati brzinu')+'</text>'+(d?'<text x="280" y="86" text-anchor="middle" fill="#1976b9" font-size="18" font-weight="800">ρ₁ = '+fmt(m.rho1,0)+' kg/m³</text><text x="690" y="86" text-anchor="middle" fill="#7154aa" font-size="18" font-weight="800">ρ₂ = '+fmt(m.rho2,0)+' kg/m³</text>':'');place(m)}
-function tank(m){let y=376-clamp(m.h,0,2)*145,sc=230;scene.setAttribute('viewBox','0 0 1000 430');scene.setAttribute('aria-label','Spremnik s ulazom, izlazom, razinom i promjenom razine.');scene.innerHTML=defs()+'<rect x="190" y="38" width="620" height="350" rx="20" fill="none" stroke="#738999" stroke-width="3" stroke-dasharray="10 7"/><path d="M365 84V350Q365 374 389 374H611Q635 374 635 350V84" fill="#fbfdff" stroke="#315b72" stroke-width="5"/><path d="M370 '+y+'H630V350Q630 369 611 369H389Q370 369 370 350Z" fill="#62bddf"/><path d="M370 '+y+'H630" stroke="#1976b9" stroke-width="5"/><path d="M80 185H'+(80+sc*m.qin/.02)+'" stroke="#1976b9" stroke-width="8" marker-end="url(#ab)"/><path d="M'+(920-sc*m.qout/.02)+' 285H920" stroke="#238a55" stroke-width="8" marker-end="url(#ag)"/><text x="160" y="164" text-anchor="middle" fill="#145a8d" font-size="20" font-weight="800">Qᵢₙ = '+fmt(m.qin*1000,1)+' L/s</text><text x="840" y="264" text-anchor="middle" fill="#19714d" font-size="20" font-weight="800">Qₒᵤₜ = '+fmt(m.qout*1000,1)+' L/s</text><text x="330" y="'+((y+369)/2)+'" text-anchor="end" fill="#aa5b16" font-size="20" font-weight="800">h = '+fmt(m.h,2)+' m</text><text x="500" y="66" text-anchor="middle" fill="#405b6d" font-size="19" font-weight="700">kontrolni volumen spremnika</text><text x="500" y="414" text-anchor="middle" fill="#315b72" font-size="19" font-weight="800">dh/dt = '+fmt(m.dh,4)+' m/s; t = '+fmt(m.time,1)+' s</text>'}
-function mini(l,v){return '<div class="v8x-mini"><small>'+l+'</small><strong>'+v+'</strong></div>'}function data(m){if(m.kind==='same')minis.innerHTML=mini('A₁',fmt(m.a1,4)+' m²')+mini('A₂',fmt(m.a2,4)+' m²')+mini('v₁',fmt(m.v1,2)+' m/s')+mini('v₂',fmt(m.v2,2)+' m/s')+mini('Q',fmt(m.q*1000,1)+' L/s');else if(m.kind==='density')minis.innerHTML=mini('ṁ',fmt(m.md,2)+' kg/s')+mini('Q₁',fmt(m.q1*1000,1)+' L/s')+mini('Q₂',fmt(m.q2*1000,1)+' L/s')+mini('v₁',fmt(m.v1,2)+' m/s')+mini('v₂',fmt(m.v2,2)+' m/s');else minis.innerHTML=mini('Qᵢₙ',fmt(m.qin*1000,1)+' L/s')+mini('Qₒᵤₜ',fmt(m.qout*1000,1)+' L/s')+mini('razlika',fmt(m.net*1000,1)+' L/s')+mini('h',fmt(m.h,2)+' m')+mini('t',fmt(m.time,1)+' s')}
-function primaryUI(m){if(m.kind==='same')primary.innerHTML='<small>glavni rezultat · odnos brzina</small><strong>v₂/v₁ = '+fmt(m.r,2)+'</strong><span>v₂ = '+fmt(m.r,2)+' × v₁</span>';else if(m.kind==='density')primary.innerHTML='<small>glavni rezultat · odnos protoka</small><strong>Q₂/Q₁ = '+fmt(m.qr,2)+'</strong><span>ṁ₁ = ṁ₂, ali Q₁ i Q₂ se mogu razlikovati</span>';else{let t=m.dh>1e-10?'razina raste':m.dh<-1e-10?'razina pada':'stacionarna razina';primary.innerHTML='<small>glavni rezultat · akumulacija</small><strong>dh/dt = '+fmt(m.dh,4)+' m/s</strong><span>'+t+'</span>'}}
-function bars(rows){let mx=Math.max(...rows.map(x=>x[1]),.001);return '<div class="v8x-bars">'+rows.map(x=>'<div class="v8x-bar"><span>'+x[0]+'</span><div class="v8x-track"><div class="v8x-fill '+(x[3]||'')+'" style="width:'+(100*x[1]/mx)+'%"></div></div><span>'+x[2]+'</span></div>').join('')+'</div>'}
-function plotUI(m){if(m.kind==='same'){let x0=58,x1=570,y0=205,y1=28,xn=.25,xx=3.4,ym=12.5,px=r=>x0+(r-xn)/(xx-xn)*(x1-x0),py=v=>y0-clamp(v,0,ym)/ym*(y0-y1),p=[];for(let r=xn;r<=xx;r+=.025)p.push((r===xn?'M':'L')+px(r).toFixed(1)+' '+py(1/(r*r)).toFixed(1));let x=px(m.dr),y=py(m.r),bx=clamp(x+12,78,405),by=clamp(y-39,30,150);plot.innerHTML='<h5>Matematički kompas — trenutačna točka</h5><svg viewBox="0 0 620 245" role="img" aria-label="Graf odnosa brzina prema odnosu promjera s trenutačnom točkom."><g stroke="#dce7ee">'+[.5,1,1.5,2,2.5,3].map(r=>'<path d="M'+px(r)+' '+y1+'V'+y0+'"/>').join('')+[2,4,6,8,10,12].map(v=>'<path d="M'+x0+' '+py(v)+'H'+x1+'"/>').join('')+'</g><path d="M'+x0+' '+y1+'V'+y0+'H'+x1+'" fill="none" stroke="#718394" stroke-width="1.5"/><path d="'+p.join('')+'" fill="none" stroke="#1976b9" stroke-width="3.5"/><path d="M'+x+' '+y0+'V'+y+'H'+x0+'" fill="none" stroke="#7790a0" stroke-dasharray="5 5"/><circle cx="'+x+'" cy="'+y+'" r="8" fill="#238a55" stroke="#fff" stroke-width="3"/><rect x="'+bx+'" y="'+by+'" width="150" height="35" rx="7" fill="#f0f9f4" stroke="#238a55"/><text x="'+(bx+8)+'" y="'+(by+14)+'" fill="#275941" font-size="12" font-weight="700">D₂/D₁ = '+fmt(m.dr,2)+'</text><text x="'+(bx+8)+'" y="'+(by+28)+'" fill="#125d36" font-size="12" font-weight="800">v₂/v₁ = '+fmt(m.r,2)+'</text><text x="315" y="239" text-anchor="middle" fill="#40596b" font-size="13" font-weight="700">odnos promjera D₂/D₁</text><text x="12" y="116" fill="#40596b" font-size="13" font-weight="700" transform="rotate(-90 12 116)">odnos brzina v₂/v₁</text></svg><p style="margin:.2rem .15rem 0;color:#526577;font-size:.82rem;line-height:1.45">Ovisnost je kvadratna jer površina kružnog presjeka ovisi o $D^2$.</p>';return}if(m.kind==='density'){plot.innerHTML='<h5>Trenutačni locator — gustoća i protok</h5>'+bars([['ρ₁',m.rho1,fmt(m.rho1,0)+' kg/m³'],['ρ₂',m.rho2,fmt(m.rho2,0)+' kg/m³','violet'],['Q₁',m.q1*1000,fmt(m.q1*1000,1)+' L/s'],['Q₂',m.q2*1000,fmt(m.q2*1000,1)+' L/s','violet']]);return}plot.innerHTML='<h5>Trenutačni locator — bilanca spremnika</h5>'+bars([['ulaz Qᵢₙ',m.qin,fmt(m.qin*1000,1)+' L/s'],['izlaz Qₒᵤₜ',m.qout,fmt(m.qout*1000,1)+' L/s','violet'],['razlika',Math.abs(m.net),fmt(m.net*1000,1)+' L/s',m.net>=0?'green':'violet']])}
-function step(on,t,b){return '<div class="v8x-step'+(on?' v8x-on':'')+'"><strong>'+t+'</strong>'+b+'</div>'}function physicsUI(m){if(m.kind==='same'){let g=['d1','d2','equal','half','diffuser'].includes(S.last),q=['q','flow'].includes(S.last),why=q?'Promijenjen je volumenski protok: obje se apsolutne brzine mijenjaju razmjerno s Q, ali njihov omjer ostaje geometrijski određen.':g?'Promijenjen je omjer presjeka. Kroz oba presjeka u stacionarnom toku prolazi isti Q, pa se brzina mora prilagoditi obrnuto površini.':'Isti volumenski protok prolazi kroz svaki presjek.';physics.innerHTML='<h5>Što trenutačno određuje rezultat?</h5>'+step(g,'1. Geometrija','D₂/D₁ = '+fmt(m.dr,2)+'; A₂/A₁ = '+fmt(m.ar,2)+'.')+step(q,'2. Kontinuitet','Q₁ = Q₂ = '+fmt(m.q*1000,1)+' L/s; obje brzine prate Q.')+step(g||q,'3. Posljedica','v₂/v₁ = A₁/A₂ = '+fmt(m.r,2)+'.');explain.innerHTML='<strong>Fizikalno tumačenje.</strong> '+why+' Sada je A₂ '+fmt(100*m.ar,0)+' % od A₁, zato kontinuitet zahtijeva v₂ = '+fmt(m.r,2)+' × v₁. Promjena presjeka ne daje sama po sebi tlak; za tlak i energiju potrebna je dodatna jednadžba.';return}if(m.kind==='density'){let why=S.last==='q1'?'Povećanjem Q₁ raste i maseni protok koji treba proći izlaznim presjekom.':S.last==='rho2'||S.last==='rho1'||S.last==='doublerho'?'Promjena gustoće mijenja koliko volumena nosi ista masa: gušći fluid za isti ṁ zauzima manji Q.':S.last==='d1'||S.last==='d2'?'Promjena presjeka mijenja lokalnu srednju brzinu, ali ne ukida uvjet da isti maseni protok mora prijeći kontrolnu površinu.':'Najprije se čuva masa, a tek zatim iz nje slijedi volumenski protok.';physics.innerHTML='<h5>Što trenutačno određuje rezultat?</h5>'+step(['rho1','rho2','doublerho'].includes(S.last),'1. Gustoća','ρ₂/ρ₁ = '+fmt(m.rho2/m.rho1,2)+'.')+step(['q1','rho1','rho2'].includes(S.last),'2. Masena bilanca','ṁ₁ = ṁ₂ = '+fmt(m.md,2)+' kg/s.')+step(true,'3. Posljedica','Q₂/Q₁ = '+fmt(m.qr,2)+'.');explain.innerHTML='<strong>Fizikalno tumačenje.</strong> '+why+' Trenutačno je ṁ₁ = ṁ₂ = '+fmt(m.md,2)+' kg/s, dok je Q₂/Q₁ = '+fmt(m.qr,2)+'. Zato se pri različitim gustoćama ne uspoređuju samo volumeni.';return}let direction=m.dh>1e-10?'Višak ulaznog volumena akumulira se, pa razina raste.':m.dh<-1e-10?'Ukupni izlaz veći je od ulaza, pa se volumen vode smanjuje i razina pada.':'Ulaz i izlaz jednaki su, pa nema akumulacije ni promjene razine.',why=S.last==='as'?'Promijenjena površina spremnika ne mijenja višak Q, ali isti višak raspoređuje na veću ili manju površinu pa mijenja dh/dt.':'Promijenjen je jedan od tokova u bilanci, pa se promijenio višak Qin − Qout.';physics.innerHTML='<h5>Što trenutačno određuje rezultat?</h5>'+step(['qin','qout','fill','balance','drain'].includes(S.last),'1. Bilanca protoka','Qᵢₙ − Qₒᵤₜ = '+fmt(m.net*1000,1)+' L/s.')+step(S.last==='as','2. Površina spremnika','Aₛ = '+fmt(m.as,2)+' m².')+step(true,'3. Posljedica','dh/dt = '+fmt(m.dh,4)+' m/s.');explain.innerHTML='<strong>Fizikalno tumačenje.</strong> '+why+' '+direction+' Gumbi prikazuju razvoj h(t) = h₀ + (Qᵢₙ − Qₒᵤₜ)t/Aₛ.'}
-function sync(m){m=m||model();syncInputs();if(m.kind==='tank')tank(m);else pipe(m);primaryUI(m);data(m);plotUI(m);physicsUI(m);actions.hidden=S.mode!=='tank';loop()}function mode(x){S.mode=x;S.tank.running=false;root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===x)));S.last=x==='same'?'d2':x==='density'?'rho2':'qin';controlsUI();presetsUI();sync()}function loop(){if(!S.raf&&(!reduced||S.mode==='tank'&&S.tank.running)){S.frame=performance.now();S.raf=requestAnimationFrame(tick)}}function tick(now){let dt=Math.min(.05,(now-S.frame)/1000);S.frame=now;if(S.mode==='tank'&&S.tank.running){let m=model(),t=S.tank;t.time+=dt*8;t.h=clamp(t.h0+m.dh*t.time,0,2);if(t.h===0||t.h===2)t.running=false;sync(model())}else if(S.mode!=='tank'&&!reduced){let m=model();S.p.forEach(p=>{p.x+=vel(p.x,m)*43*dt;if(p.x>974)p.x=26});place(m)}if(!reduced||S.mode==='tank'&&S.tank.running)S.raf=requestAnimationFrame(tick);else S.raf=0}
-root.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>mode(b.dataset.mode)));$('#v8x-start').addEventListener('click',()=>{if(S.mode==='tank'){S.tank.running=true;S.tank.h0=S.tank.h;S.tank.time=0;loop()}});$('#v8x-pause').addEventListener('click',()=>S.tank.running=false);$('#v8x-reset').addEventListener('click',()=>{S.tank.running=false;S.tank.h=S.tank.h0=.9;S.tank.time=0;sync()});controlsUI();presetsUI();sync()})();
+  }
+  function syncInputs() {
+    const current = S[S.mode];
+    C[S.mode].forEach((c) => {
+      const inputEl = $("#v8x-" + c[0]),
+        output = $("#v8x-" + c[0] + "o");
+      if (inputEl) inputEl.value = val(c[5], current[c[0]]);
+      if (output) output.value = show(c[5], current[c[0]]);
+    });
+    P[S.mode].forEach((p) => {
+      const button = presets.querySelector('[data-p="' + p[0] + '"]');
+      if (button)
+        button.setAttribute(
+          "aria-pressed",
+          String(Object.keys(p[2]).every((k) => Math.abs(current[k] - p[2][k]) < 1e-9)),
+        );
+    });
+  }
+  function defs() {
+    return '<defs><marker id="ab" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#1976b9"/></marker><marker id="av" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#7154aa"/></marker><marker id="ag" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#238a55"/></marker></defs>';
+  }
+  function geom(m) {
+    let h1 = (240 * m.d1) / 0.2,
+      h2 = (240 * m.d2) / 0.2;
+    return {
+      h1,
+      h2,
+      t1: 225 - h1 / 2,
+      b1: 225 + h1 / 2,
+      t2: 225 - h2 / 2,
+      b2: 225 + h2 / 2,
+      path:
+        "M20 " +
+        (225 - h1 / 2) +
+        "H310L610 " +
+        (225 - h2 / 2) +
+        "H980V" +
+        (225 + h2 / 2) +
+        "H610L310 " +
+        (225 + h1 / 2) +
+        "H20Z",
+    };
+  }
+  function place(m) {
+    let g = geom(m);
+    S.p.forEach((p, i) => {
+      let q = scene.querySelector('[data-dot="' + i + '"]');
+      if (!q) return;
+      let x = p.x,
+        r = x <= 310 ? 0 : x >= 610 ? 1 : (x - 310) / 300,
+        h = x <= 310 ? g.h1 : x >= 610 ? g.h2 : g.h1 + (g.h2 - g.h1) * r;
+      q.setAttribute("cx", x);
+      q.setAttribute("cy", 225 + p.l * h * 0.42);
+      q.setAttribute("fill", m.kind === "density" && x > 460 ? "#7154aa" : "#177da2");
+    });
+  }
+  function vel(x,m){const f=clamp((x-310)/300,0,1),diam=m.d1+(m.d2-m.d1)*f,rho=m.kind==='density'?m.rho1+(m.rho2-m.rho1)*f:1;return m.kind==='density'?m.md/(rho*A(diam)):m.q/A(diam);}
+  function pipe(m) {
+    let g = geom(m),
+      d = m.kind === "density",
+      c = d ? "#7154aa" : "#1976b9",
+      l = (v) => v*Math.min(38,220/Math.max(m.v1,m.v2,.001)),
+      l1 = l(m.v1),
+      l2 = l(m.v2),
+      lanes = [0.25, 0.5, 0.75]
+        .map(
+          (k) =>
+            '<path d="M28 ' +
+            (g.t1 + k * g.h1) +
+            "H310L610 " +
+            (g.t2 + k * g.h2) +
+            'H972" fill="none" stroke="#fff" stroke-width="2.2"/>',
+        )
+        .join("");
+    scene.setAttribute("viewBox", "0 0 1000 430");
+    scene.setAttribute(
+      "aria-label",
+      "Cijev s kontrolnim volumenom, presjecima, površinama, vektorima brzine i tragačima toka.",
+    );
+    scene.innerHTML =
+      defs() +
+      '<rect x="80" y="40" width="840" height="340" rx="20" fill="none" stroke="#738999" stroke-width="3" stroke-dasharray="10 7"/><path d="' +
+      g.path +
+      '" fill="#caeaf7" stroke="#315b72" stroke-width="5"/>' +
+      (d
+        ? '<path d="M460 ' +
+          (g.t1 + (g.t2 - g.t1) * 0.55) +
+          "L610 " +
+          g.t2 +
+          "H980V" +
+          g.b2 +
+          "H610L460 " +
+          (g.b1 + (g.b2 - g.b1) * 0.55) +
+          'Z" fill="#ebe4f5"/><path d="M460 110V340" stroke="#7154aa" stroke-width="2" stroke-dasharray="6 5"/>'
+        : "") +
+      lanes +
+      '<path d="M135 225H' +
+      (135 + l1) +
+      '" stroke="#1976b9" stroke-width="7" marker-end="url(#ab)"/><path d="M650 225H' +
+      (650 + l2) +
+      '" stroke="' +
+      c +
+      '" stroke-width="7" marker-end="url(#' +
+      (d ? "av" : "ab") +
+      ')"/><path d="M180 ' +
+      (g.t1 - 8) +
+      "V" +
+      (g.b1 + 8) +
+      "M800 " +
+      (g.t2 - 8) +
+      "V" +
+      (g.b2 + 8) +
+      '" stroke="#c8741f" stroke-width="3"/><g>' +
+      S.p.map((p, i) => '<circle data-dot="' + i + '" r="5.5" fill="#177da2"/>').join("") +
+      '</g><text x="500" y="30" text-anchor="middle" fill="#405b6d" font-size="19" font-weight="700">isprekidano: kontrolni volumen</text><text x="180" y="' +
+      (g.t1 - 50) +
+      '" text-anchor="middle" fill="#405b6d" font-size="18" font-weight="700">A₁ = ' +
+      fmt(m.a1, 4) +
+      ' m²</text><text x="800" y="' +
+      (g.t2 - 50) +
+      '" text-anchor="middle" fill="#405b6d" font-size="18" font-weight="700">A₂ = ' +
+      fmt(m.a2, 4) +
+      ' m²</text><text x="110" y="' +
+      (g.t1 - 18) +
+      '" text-anchor="start" fill="#aa5b16" font-size="19" font-weight="800">D₁ = ' +
+      fmt(m.d1 * 1000, 0) +
+      ' mm</text><text x="855" y="' +
+      (g.t2 - 18) +
+      '" fill="#aa5b16" font-size="19" font-weight="800">D₂ = ' +
+      fmt(m.d2 * 1000, 0) +
+      ' mm</text><text x="' +
+      (135 + l1 / 2) +
+      '" y="208" text-anchor="middle" fill="#145a8d" font-size="20" font-weight="800">v₁ = ' +
+      fmt(m.v1, 2) +
+      ' m/s</text><text x="' +
+      (650 + l2 / 2) +
+      '" y="208" text-anchor="middle" fill="' +
+      c +
+      '" font-size="20" font-weight="800">v₂ = ' +
+      fmt(m.v2, 2) +
+      ' m/s</text><text x="500" y="412" text-anchor="middle" fill="#315b72" font-size="18" font-weight="700">' +
+      (d ? "ṁ₁ = ṁ₂, ali Q₁ i Q₂ ne moraju biti jednaki" : "Q = A₁v₁ = A₂v₂; duljina strelice prati brzinu") +
+      "</text>" +
+      (d
+        ? '<text x="280" y="86" text-anchor="middle" fill="#1976b9" font-size="18" font-weight="800">ρ₁ = ' +
+          fmt(m.rho1, 0) +
+          ' kg/m³</text><text x="690" y="86" text-anchor="middle" fill="#7154aa" font-size="18" font-weight="800">ρ₂ = ' +
+          fmt(m.rho2, 0) +
+          " kg/m³</text>"
+        : "");
+    scene.querySelectorAll('path[marker-end]').forEach(el=>el.setAttribute('visibility',m.v1===0&&m.v2===0?'hidden':'visible'));
+    place(m);
+  }
+  function tank(m) {
+    let y = 376 - clamp(m.h, 0, 2) * 145,
+      sc = 230;
+    scene.setAttribute("viewBox", "0 0 1000 430");
+    scene.setAttribute("aria-label", "Spremnik s ulazom, izlazom, razinom i promjenom razine.");
+    scene.innerHTML =
+      defs() +
+      '<rect x="190" y="38" width="620" height="350" rx="20" fill="none" stroke="#738999" stroke-width="3" stroke-dasharray="10 7"/><path d="M365 84V350Q365 374 389 374H611Q635 374 635 350V84" fill="#fbfdff" stroke="#315b72" stroke-width="5"/><path d="M370 ' +
+      y +
+      'H630V350Q630 369 611 369H389Q370 369 370 350Z" fill="#62bddf"/><path d="M370 ' +
+      y +
+      'H630" stroke="#1976b9" stroke-width="5"/><path d="M80 185H' +
+      (80 + (sc * m.qin) / 0.02) +
+      '" stroke="#1976b9" stroke-width="8" marker-end="url(#ab)"/><path d="M' +
+      (920 - (sc * m.qout) / 0.02) +
+      ' 285H920" stroke="#238a55" stroke-width="8" marker-end="url(#ag)"/><text x="160" y="164" text-anchor="middle" fill="#145a8d" font-size="20" font-weight="800">Qᵢₙ = ' +
+      fmt(m.qin * 1000, 1) +
+      ' L/s</text><text x="840" y="264" text-anchor="middle" fill="#19714d" font-size="20" font-weight="800">Qₒᵤₜ = ' +
+      fmt(m.qout * 1000, 1) +
+      ' L/s</text><text x="330" y="' +
+      (y + 369) / 2 +
+      '" text-anchor="end" fill="#aa5b16" font-size="20" font-weight="800">h = ' +
+      fmt(m.h, 2) +
+      ' m</text><text x="500" y="66" text-anchor="middle" fill="#405b6d" font-size="19" font-weight="700">kontrolni volumen spremnika</text><text x="500" y="414" text-anchor="middle" fill="#315b72" font-size="19" font-weight="800">dh/dt = ' +
+      fmt(m.dh, 4) +
+      " m/s; t = " +
+      fmt(m.time, 1) +
+      " s</text>";
+  }
+  function mini(l, v) {
+    return '<div class="v8x-mini"><small>' + l + "</small><strong>" + v + "</strong></div>";
+  }
+  function data(m) {
+    if (m.kind === "same")
+      minis.innerHTML =
+        mini("A₁", fmt(m.a1, 4) + " m²") +
+        mini("A₂", fmt(m.a2, 4) + " m²") +
+        mini("v₁", fmt(m.v1, 2) + " m/s") +
+        mini("v₂", fmt(m.v2, 2) + " m/s") +
+        mini("Q", fmt(m.q * 1000, 1) + " L/s");
+    else if (m.kind === "density")
+      minis.innerHTML =
+        mini("ṁ", fmt(m.md, 2) + " kg/s") +
+        mini("Q₁", fmt(m.q1 * 1000, 1) + " L/s") +
+        mini("Q₂", fmt(m.q2 * 1000, 1) + " L/s") +
+        mini("v₁", fmt(m.v1, 2) + " m/s") +
+        mini("v₂", fmt(m.v2, 2) + " m/s");
+    else
+      minis.innerHTML =
+        mini("Qᵢₙ", fmt(m.qin * 1000, 1) + " L/s") +
+        mini("Qₒᵤₜ", fmt(m.qout * 1000, 1) + " L/s") +
+        mini("razlika", fmt(m.net * 1000, 1) + " L/s") +
+        mini("h", fmt(m.h, 2) + " m") +
+        mini("t", fmt(m.time, 1) + " s");
+  }
+  function primaryUI(m) {
+    if (m.kind === "same")
+      primary.innerHTML =
+        "<small>glavni rezultat · odnos brzina</small><strong>v₂/v₁ = " +
+        fmt(m.r, 2) +
+        "</strong><span>v₂ = " +
+        fmt(m.r, 2) +
+        " × v₁</span>";
+    else if (m.kind === "density")
+      primary.innerHTML =
+        "<small>glavni rezultat · odnos protoka</small><strong>Q₂/Q₁ = " +
+        fmt(m.qr, 2) +
+        "</strong><span>ṁ₁ = ṁ₂, ali Q₁ i Q₂ se mogu razlikovati</span>";
+    else {
+      let t = m.dh > 1e-10 ? "razina raste" : m.dh < -1e-10 ? "razina pada" : "stacionarna razina";
+      primary.innerHTML =
+        "<small>glavni rezultat · akumulacija</small><strong>dh/dt = " +
+        fmt(m.dh, 4) +
+        " m/s</strong><span>" +
+        t +
+        "</span>";
+    }
+  }
+  function bars(rows) {
+    let mx = Math.max(...rows.map((x) => x[1]), 0.001);
+    return (
+      '<div class="v8x-bars">' +
+      rows
+        .map(
+          (x) =>
+            '<div class="v8x-bar"><span>' +
+            x[0] +
+            '</span><div class="v8x-track"><div class="v8x-fill ' +
+            (x[3] || "") +
+            '" style="width:' +
+            (100 * x[1]) / mx +
+            '%"></div></div><span>' +
+            x[2] +
+            "</span></div>",
+        )
+        .join("") +
+      "</div>"
+    );
+  }
+  function plotUI(m) {
+    if (m.kind === "same") {
+      let x0 = 58,
+        x1 = 570,
+        y0 = 205,
+        y1 = 28,
+        xn = 0.25,
+        xx = 3.4,
+        ym = 12.5,
+        px = (r) => x0 + ((r - xn) / (xx - xn)) * (x1 - x0),
+        py = (v) => y0 - (clamp(v, 0, ym) / ym) * (y0 - y1),
+        p = [];
+      for (let r = xn; r <= xx; r += 0.025)
+        p.push((r === xn ? "M" : "L") + px(r).toFixed(1) + " " + py(1 / (r * r)).toFixed(1));
+      let x = px(m.dr),
+        y = py(m.r),
+        bx = clamp(x + 12, 78, 405),
+        by = clamp(y - 39, 30, 150);
+      plot.innerHTML =
+        '<h5>Matematički kompas — trenutačna točka</h5><svg viewBox="0 0 620 245" role="img" aria-label="Graf odnosa brzina prema odnosu promjera s trenutačnom točkom."><g stroke="#dce7ee">' +
+        [0.5, 1, 1.5, 2, 2.5, 3].map((r) => '<path d="M' + px(r) + " " + y1 + "V" + y0 + '"/>').join("") +
+        [2, 4, 6, 8, 10, 12].map((v) => '<path d="M' + x0 + " " + py(v) + "H" + x1 + '"/>').join("") +
+        '</g><path d="M' +
+        x0 +
+        " " +
+        y1 +
+        "V" +
+        y0 +
+        "H" +
+        x1 +
+        '" fill="none" stroke="#718394" stroke-width="1.5"/><path d="' +
+        p.join("") +
+        '" fill="none" stroke="#1976b9" stroke-width="3.5"/><path d="M' +
+        x +
+        " " +
+        y0 +
+        "V" +
+        y +
+        "H" +
+        x0 +
+        '" fill="none" stroke="#7790a0" stroke-dasharray="5 5"/><circle cx="' +
+        x +
+        '" cy="' +
+        y +
+        '" r="8" fill="#238a55" stroke="#fff" stroke-width="3"/><rect x="' +
+        bx +
+        '" y="' +
+        by +
+        '" width="150" height="35" rx="7" fill="#f0f9f4" stroke="#238a55"/><text x="' +
+        (bx + 8) +
+        '" y="' +
+        (by + 14) +
+        '" fill="#275941" font-size="12" font-weight="700">D₂/D₁ = ' +
+        fmt(m.dr, 2) +
+        '</text><text x="' +
+        (bx + 8) +
+        '" y="' +
+        (by + 28) +
+        '" fill="#125d36" font-size="12" font-weight="800">v₂/v₁ = ' +
+        fmt(m.r, 2) +
+        '</text><text x="315" y="239" text-anchor="middle" fill="#40596b" font-size="13" font-weight="700">odnos promjera D₂/D₁</text><text x="12" y="116" fill="#40596b" font-size="13" font-weight="700" transform="rotate(-90 12 116)">odnos brzina v₂/v₁</text></svg><p style="margin:.2rem .15rem 0;color:#526577;font-size:.82rem;line-height:1.45">Ovisnost je kvadratna jer površina kružnog presjeka ovisi o $D^2$.</p>';
+      return;
+    }
+    if (m.kind === "density") {
+      plot.innerHTML =
+        "<h5>Trenutačni locator — gustoća i protok</h5>" +
+        bars([
+          ["ρ₁", m.rho1, fmt(m.rho1, 0) + " kg/m³"],
+          ["ρ₂", m.rho2, fmt(m.rho2, 0) + " kg/m³", "violet"]])+bars([
+          ["Q₁", m.q1 * 1000, fmt(m.q1 * 1000, 1) + " L/s"],
+          ["Q₂", m.q2 * 1000, fmt(m.q2 * 1000, 1) + " L/s", "violet"],
+        ]);
+      return;
+    }
+    plot.innerHTML =
+      "<h5>Trenutačni locator — bilanca spremnika</h5>" +
+      bars([
+        ["ulaz Qᵢₙ", m.qin, fmt(m.qin * 1000, 1) + " L/s"],
+        ["izlaz Qₒᵤₜ", m.qout, fmt(m.qout * 1000, 1) + " L/s", "violet"],
+        ["razlika", Math.abs(m.net), fmt(m.net * 1000, 1) + " L/s", m.net >= 0 ? "green" : "violet"],
+      ]);
+  }
+  function step(on, t, b) {
+    return '<div class="v8x-step' + (on ? " v8x-on" : "") + '"><strong>' + t + "</strong>" + b + "</div>";
+  }
+  function physicsUI(m) {
+    if (m.kind === "same") {
+      let g = ["d1", "d2", "equal", "half", "diffuser"].includes(S.last),
+        q = ["q", "flow"].includes(S.last),
+        why = q
+          ? "Promijenjen je volumenski protok: obje se apsolutne brzine mijenjaju razmjerno s Q, ali njihov omjer ostaje geometrijski određen."
+          : g
+            ? "Promijenjen je omjer presjeka. Kroz oba presjeka u stacionarnom toku prolazi isti Q, pa se brzina mora prilagoditi obrnuto površini."
+            : "Isti volumenski protok prolazi kroz svaki presjek.";
+      physics.innerHTML =
+        "<h5>Što trenutačno određuje rezultat?</h5>" +
+        step(g, "1. Geometrija", "D₂/D₁ = " + fmt(m.dr, 2) + "; A₂/A₁ = " + fmt(m.ar, 2) + ".") +
+        step(q, "2. Kontinuitet", "Q₁ = Q₂ = " + fmt(m.q * 1000, 1) + " L/s; obje brzine prate Q.") +
+        step(g || q, "3. Posljedica", "v₂/v₁ = A₁/A₂ = " + fmt(m.r, 2) + ".");
+      explain.innerHTML =
+        "<strong>Fizikalno tumačenje.</strong> " +
+        why +
+        " Sada je A₂ " +
+        fmt(100 * m.ar, 0) +
+        " % od A₁, zato kontinuitet zahtijeva v₂ = " +
+        fmt(m.r, 2) +
+        " × v₁. Promjena presjeka ne daje sama po sebi tlak; za tlak i energiju potrebna je dodatna jednadžba.";
+      return;
+    }
+    if (m.kind === "density") {
+      let why =
+        S.last === "q1"
+          ? "Povećanjem Q₁ raste i maseni protok koji treba proći izlaznim presjekom."
+          : S.last === "rho2" || S.last === "rho1" || S.last === "doublerho"
+            ? "Promjena gustoće mijenja koliko volumena nosi ista masa: gušći fluid za isti ṁ zauzima manji Q."
+            : S.last === "d1" || S.last === "d2"
+              ? "Promjena presjeka mijenja lokalnu srednju brzinu, ali ne ukida uvjet da isti maseni protok mora prijeći kontrolnu površinu."
+              : "Najprije se čuva masa, a tek zatim iz nje slijedi volumenski protok.";
+      physics.innerHTML =
+        "<h5>Što trenutačno određuje rezultat?</h5>" +
+        step(["rho1", "rho2", "doublerho"].includes(S.last), "1. Gustoća", "ρ₂/ρ₁ = " + fmt(m.rho2 / m.rho1, 2) + ".") +
+        step(["q1", "rho1", "rho2"].includes(S.last), "2. Masena bilanca", "ṁ₁ = ṁ₂ = " + fmt(m.md, 2) + " kg/s.") +
+        step(true, "3. Posljedica", "Q₂/Q₁ = " + fmt(m.qr, 2) + ".");
+      explain.innerHTML =
+        "<strong>Fizikalno tumačenje.</strong> " +
+        why +
+        " Trenutačno je ṁ₁ = ṁ₂ = " +
+        fmt(m.md, 2) +
+        " kg/s, dok je Q₂/Q₁ = " +
+        fmt(m.qr, 2) +
+        ". Zato se pri različitim gustoćama ne uspoređuju samo volumeni.";
+      return;
+    }
+    let direction =
+        m.dh > 1e-10
+          ? "Višak ulaznog volumena akumulira se, pa razina raste."
+          : m.dh < -1e-10
+            ? "Ukupni izlaz veći je od ulaza, pa se volumen vode smanjuje i razina pada."
+            : "Ulaz i izlaz jednaki su, pa nema akumulacije ni promjene razine.",
+      why =
+        S.last === "as"
+          ? "Promijenjena površina spremnika ne mijenja višak Q, ali isti višak raspoređuje na veću ili manju površinu pa mijenja dh/dt."
+          : "Promijenjen je jedan od tokova u bilanci, pa se promijenio višak Qin − Qout.";
+    physics.innerHTML =
+      "<h5>Što trenutačno određuje rezultat?</h5>" +
+      step(
+        ["qin", "qout", "fill", "balance", "drain"].includes(S.last),
+        "1. Bilanca protoka",
+        "Qᵢₙ − Qₒᵤₜ = " + fmt(m.net * 1000, 1) + " L/s.",
+      ) +
+      step(S.last === "as", "2. Površina spremnika", "Aₛ = " + fmt(m.as, 2) + " m².") +
+      step(true, "3. Posljedica", "dh/dt = " + fmt(m.dh, 4) + " m/s.");
+    explain.innerHTML =
+      "<strong>Fizikalno tumačenje.</strong> " +
+      why +
+      " " +
+      direction +
+      " Gumbi prikazuju razvoj h(t) = h₀ + (Qᵢₙ − Qₒᵤₜ)t/Aₛ.";
+  }
+  function sync(m) {
+    m = m || model();
+    syncInputs();
+    if (m.kind === "tank") tank(m);
+    else pipe(m);
+    primaryUI(m);
+    data(m);
+    plotUI(m);
+    physicsUI(m);
+    actions.hidden = true;
+
+  }
+  function mode(x) {
+    S.mode = x;
+    animation.stop();S.tank.running = false;
+    root.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === x)));
+    S.last = x === "same" ? "d2" : x === "density" ? "rho2" : "qin";
+    controlsUI();
+    presetsUI();
+    sync();
+  }
+  function loop() {}
+  function tick() {}
+  root.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => mode(b.dataset.mode)));
+  const animation=MF1.motion(root,(dt)=>{
+    if(S.mode==='tank'){const t=S.tank,m=model(),limit=m.dh>0?2:0,remaining=Math.abs(m.dh)>1e-12?Math.max(0,(limit-t.h)/m.dh):Infinity,step=Math.min(dt,remaining);t.time+=step;t.h=clamp(t.h+m.dh*step,0,2);if(step<dt)animation.stop();sync();if(t.h===0||t.h===2)explain.innerHTML+='<br><strong>Dosegnuta granica spremnika; model stalnih tokova tu se zaustavlja.</strong>';}
+    else{const m=model();S.p.forEach(p=>{p.x+=vel(p.x,m)*43*dt;if(p.x>974)p.x=26;});place(m);}
+  },{reset:()=>{S.tank.h=S.tank.h0=.9;S.tank.time=0;S.p.forEach((p,i)=>p.x=25+i*52);sync();}});
+  controlsUI();
+  presetsUI();
+  sync();
+})();
 </script>
 ~~~
 
@@ -205,7 +758,61 @@ $$
   <div class="v8-equation" id="z70-eq"></div><div class="v8-note" id="z70-note"></div>
 </div>
 <script>
-(()=>{const r=document.getElementById('v8-z70');if(!r||r.dataset.ready)return;r.dataset.ready='1';const $=s=>r.querySelector(s),fmt=(n,d=2)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),A=d=>Math.PI*d*d/4;const ids=['d1','d2','v2','rho'];function draw(d1,d2,v1,v2){const s=$('#v8-z70-scene'),h1=80+d1/.28*80,h2=80+d2/.28*80,w1=Math.max(3,Math.min(10,v1/5)),w2=Math.max(3,Math.min(10,v2/5));s.innerHTML=`<defs><marker id="z70arr" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#167c9e"/></marker></defs><path d="M80 ${160-h1/2} L430 ${160-h1/2} L700 ${160-h2/2} L850 ${160-h2/2} L850 ${160+h2/2} L700 ${160+h2/2} L430 ${160+h1/2} L80 ${160+h1/2}Z" fill="#dff2f8" stroke="#315b72" stroke-width="4"/><path d="M145 160L350 160" stroke="#167c9e" stroke-width="${w1}" marker-end="url(#z70arr)"/><path d="M560 160L790 160" stroke="#167c9e" stroke-width="${w2}" marker-end="url(#z70arr)"/><text x="245" y="115" text-anchor="middle" fill="#123d5d" font-size="19" font-weight="700">A₁, v₁</text><text x="675" y="105" text-anchor="middle" fill="#123d5d" font-size="19" font-weight="700">A₂, v₂</text><text x="460" y="290" text-anchor="middle" fill="#4b6577" font-size="17">Kontrolni volumen: jedan ulaz i jedan izlaz</text>`}function update(){const d1=+$('#z70-d1').value,d2=+$('#z70-d2').value,v2=+$('#z70-v2').value,rho=+$('#z70-rho').value,a1=A(d1),a2=A(d2),q=a2*v2,v1=q/a1,ratio=a2/a1,m=rho*q;$('#z70-d1-o').textContent=fmt(d1,3)+' m';$('#z70-d2-o').textContent=fmt(d2,3)+' m';$('#z70-v2-o').textContent=fmt(v2,1)+' m/s';$('#z70-rho-o').textContent=fmt(rho,0)+' kg/m³';$('#z70-ratio').textContent=fmt(ratio,2);$('#z70-v1').textContent=fmt(v1,2)+' m/s';$('#z70-q').textContent=fmt(q,4)+' m³/s';$('#z70-m').textContent=fmt(m,2)+' kg/s';$('#z70-eq').innerHTML='<div class="v8-eq-title">Slijed proračuna</div>$Q=A_2v_2='+fmt(a2,4)+'·'+fmt(v2,1)+'='+fmt(q,4)+'\,\\mathrm{m^3/s}$; zatim $v_1=Q/A_1='+fmt(v1,2)+'\,\\mathrm{m/s}$ i $\\dot m=\\rho Q$.';const state=d2>d1?'Ovo je difuzor: A₂ je veća od A₁, pa isti Q može proći izlazom manjom srednjom brzinom; to nije „gubitak brzine”, nego zahtjev kontinuiteta.':d2<d1?'Ovo je suženje, odnosno sapnica: manji izlazni presjek zahtijeva veću srednju brzinu za isti Q.':'Presjeci su jednaki, pa isti Q zahtijeva jednake srednje brzine.';$('#z70-note').innerHTML='<strong>Fizikalno tumačenje.</strong><p>'+state+' Gustoća '+fmt(rho,0)+' kg/m³ ne mijenja $Q$, $v_1$ ni $v_2$ dok su geometrija i zadani $v_2$ isti; mijenja samo $\\dot m=\\rho Q$. Kontinuitet ne određuje tlak u difuzoru.</p>';draw(d1,d2,v1,v2)}ids.forEach(id=>$('#z70-'+id).addEventListener('input',update));update()})();
+(() => {
+  const r = document.getElementById("v8-z70");
+  if (!r || r.dataset.ready) return;
+  r.dataset.ready = "1";
+  const $ = (s) => r.querySelector(s),
+    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d }),
+    A = (d) => (Math.PI * d * d) / 4;
+  const ids = ["d1", "d2", "v2", "rho"];
+  function draw(d1,d2,v1,v2){const sc=200/Math.max(d1,d2),h1=d1*sc,h2=d2*sc,vs=210/Math.max(v1,v2,.001);$('#v8-z70-scene').innerHTML= '<path d="M80 '+(160-h1/2)+'H390L690 '+(160-h2/2)+'H860V'+(160+h2/2)+'H690L390 '+(160+h1/2)+'H80Z" fill="#dff2f8" stroke="#315b72" stroke-width="4"/>'+MF1.svgArrow(140,160,v1*vs,0,'#0284c7','v₁')+MF1.svgArrow(630,160,v2*vs,0,'#0284c7','v₂')+'<g fill="#334155" font-size="18"><text x="150" y="35">D₁ = '+d1.toFixed(3)+' m</text><text x="665" y="35">D₂ = '+d2.toFixed(3)+' m</text><text x="180" y="300">Promjeri i brzine: svaki sa svojom zajedničkom skalom</text></g>';}
+  function update() {
+    const d1 = +$("#z70-d1").value,
+      d2 = +$("#z70-d2").value,
+      v2 = +$("#z70-v2").value,
+      rho = +$("#z70-rho").value,
+      a1 = A(d1),
+      a2 = A(d2),
+      q = a2 * v2,
+      v1 = q / a1,
+      ratio = a2 / a1,
+      m = rho * q;
+    $("#z70-d1-o").textContent = fmt(d1, 3) + " m";
+    $("#z70-d2-o").textContent = fmt(d2, 3) + " m";
+    $("#z70-v2-o").textContent = fmt(v2, 1) + " m/s";
+    $("#z70-rho-o").textContent = fmt(rho, 0) + " kg/m³";
+    $("#z70-ratio").textContent = fmt(ratio, 2);
+    $("#z70-v1").textContent = fmt(v1, 2) + " m/s";
+    $("#z70-q").textContent = fmt(q, 4) + " m³/s";
+    $("#z70-m").textContent = fmt(m, 2) + " kg/s";
+    $("#z70-eq").innerHTML =
+      '<div class="v8-eq-title">Slijed proračuna</div>$Q=A_2v_2=' +
+      fmt(a2, 4) +
+      "·" +
+      fmt(v2, 1) +
+      "=" +
+      fmt(q, 4) +
+      "\,\\mathrm{m^3/s}$; zatim $v_1=Q/A_1=" +
+      fmt(v1, 2) +
+      "\,\\mathrm{m/s}$ i $\\dot m=\\rho Q$.";
+    const state =
+      d2 > d1
+        ? "Ovo je difuzor: A₂ je veća od A₁, pa isti Q može proći izlazom manjom srednjom brzinom; to nije „gubitak brzine”, nego zahtjev kontinuiteta."
+        : d2 < d1
+          ? "Ovo je suženje, odnosno sapnica: manji izlazni presjek zahtijeva veću srednju brzinu za isti Q."
+          : "Presjeci su jednaki, pa isti Q zahtijeva jednake srednje brzine.";
+    $("#z70-note").innerHTML =
+      "<strong>Fizikalno tumačenje.</strong><p>" +
+      state +
+      " Gustoća " +
+      fmt(rho, 0) +
+      " kg/m³ ne mijenja $Q$, $v_1$ ni $v_2$ dok su geometrija i zadani $v_2$ isti; mijenja samo $\\dot m=\\rho Q$. Kontinuitet ne određuje tlak u difuzoru.</p>";
+    draw(d1, d2, v1, v2);
+  }
+  ids.forEach((id) => $("#z70-" + id).addEventListener("input", update));
+  update();
+})();
 </script>
 ```
 
@@ -260,7 +867,55 @@ Dobivena gustoća mora biti između gustoća dvaju ulaza. Stvarno ponašanje vod
   <div class="v8-equation" id="z71-eq"></div><div class="v8-note" id="z71-note"></div>
 </div>
 <script>
-(()=>{const r=document.getElementById('v8-z71');if(!r||r.dataset.ready)return;r.dataset.ready='1';const $=s=>r.querySelector(s),fmt=(n,d=2)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),A=d=>Math.PI*d*d/4;function arrow(x1,y1,x2,y2,c,t){return `<defs><marker id="${t}" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="${c}"/></marker></defs><path d="M${x1} ${y1}L${x2} ${y2}" stroke="${c}" stroke-width="6" marker-end="url(#${t})"/><text x="${(x1+x2)/2}" y="${(y1+y2)/2-12}" text-anchor="middle" fill="${c}" font-size="18" font-weight="700">${t}</text>`}function update(){const qa=+$('#z71-qa').value,qb=+$('#z71-qb').value,dc=+$('#z71-dc').value,rb=+$('#z71-rb').value,ra=1000,ma=ra*qa,mb=rb*qb,qc=qa+qb,mc=ma+mb,rc=mc/qc,vc=qc/A(dc),wb=mb/mc,mix=`rgb(${Math.round(35+190*wb)},${Math.round(145+55*(1-wb))},${Math.round(215-95*wb)})`;$('#z71-qa-o').textContent=fmt(qa,3)+' m³/s';$('#z71-qb-o').textContent=fmt(qb,3)+' m³/s';$('#z71-dc-o').textContent=fmt(dc,2)+' m';$('#z71-rb-o').textContent=fmt(rb,0)+' kg/m³';$('#z71-qc').textContent=fmt(qc,3)+' m³/s';$('#z71-mc').textContent=fmt(mc,1)+' kg/s';$('#z71-rc').textContent=fmt(rc,1)+' kg/m³';$('#z71-vc').textContent=fmt(vc,2)+' m/s';$('#v8-z71-scene').innerHTML=`<defs><marker id="z71a" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z71b" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z71c" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="${mix}"/></marker></defs><rect x="320" y="72" width="270" height="210" rx="22" fill="#f8fcfe" stroke="#315b72" stroke-width="4"/><path d="M320 155L590 155L590 282L320 282Z" fill="${mix}" opacity=".72"/><path d="M50 125L305 150" stroke="#1687aa" stroke-width="7" marker-end="url(#z71a)"/><path d="M50 245L305 195" stroke="#d97706" stroke-width="7" marker-end="url(#z71b)"/><path d="M605 170L865 170" stroke="${mix}" stroke-width="8" marker-end="url(#z71c)"/><text x="160" y="103" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">voda: Qₐ, ρₐ</text><text x="165" y="285" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">ulje: Qᵦ, ρᵦ</text><text x="730" y="138" text-anchor="middle" fill="#315b72" font-size="18" font-weight="700">mješavina: Q꜀, ρ꜀</text><text x="455" y="50" text-anchor="middle" fill="#315b72" font-size="18" font-weight="700">Kontrolni volumen</text><text x="455" y="320" text-anchor="middle" fill="#4b6577" font-size="16">maseni udio ulja wᵦ = ${fmt(wb*100,1)} %</text>`;$('#z71-eq').innerHTML='<div class="v8-eq-title">Dvije povezane bilance</div>$\\dot m_C=\\rho_AQ_A+\\rho_BQ_B$; uz idealizaciju zadatka $Q_C=Q_A+Q_B$ i $\\rho_C=(\\rho_AQ_A+\\rho_BQ_B)/Q_C$.';$('#z71-note').innerHTML='<strong>Provjera i invarijanca.</strong><p>$\\rho_C$ je između '+fmt(Math.min(ra,rb),0)+' i '+fmt(Math.max(ra,rb),0)+' kg/m³. Ako se mijenja samo $\\rho_B$, a $Q_A$, $Q_B$ i $D_C$ ostanu isti, $v_C$ se ne mijenja; mijenjaju se $\\rho_C$ i $\\dot m_C$.</p>'}['qa','qb','dc','rb'].forEach(id=>$('#z71-'+id).addEventListener('input',update));update()})();
+(() => {
+  const r = document.getElementById("v8-z71");
+  if (!r || r.dataset.ready) return;
+  r.dataset.ready = "1";
+  const $ = (s) => r.querySelector(s),
+    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d }),
+    A = (d) => (Math.PI * d * d) / 4;
+  function arrow(x1, y1, x2, y2, c, t) {
+    return `<defs><marker id="${t}" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="${c}"/></marker></defs><path d="M${x1} ${y1}L${x2} ${y2}" stroke="${c}" stroke-width="6" marker-end="url(#${t})"/><text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 - 12}" text-anchor="middle" fill="${c}" font-size="18" font-weight="700">${t}</text>`;
+  }
+  function update() {
+    const qa = +$("#z71-qa").value,
+      qb = +$("#z71-qb").value,
+      dc = +$("#z71-dc").value,
+      rb = +$("#z71-rb").value,
+      ra = 1000,
+      ma = ra * qa,
+      mb = rb * qb,
+      qc = qa + qb,
+      mc = ma + mb,
+      rc = mc / qc,
+      vc = qc / A(dc),
+      wb = mb / mc,
+      mix = `rgb(${Math.round(35 + 190 * wb)},${Math.round(145 + 55 * (1 - wb))},${Math.round(215 - 95 * wb)})`;
+    $("#z71-qa-o").textContent = fmt(qa, 3) + " m³/s";
+    $("#z71-qb-o").textContent = fmt(qb, 3) + " m³/s";
+    $("#z71-dc-o").textContent = fmt(dc, 2) + " m";
+    $("#z71-rb-o").textContent = fmt(rb, 0) + " kg/m³";
+    $("#z71-qc").textContent = fmt(qc, 3) + " m³/s";
+    $("#z71-mc").textContent = fmt(mc, 1) + " kg/s";
+    $("#z71-rc").textContent = fmt(rc, 1) + " kg/m³";
+    $("#z71-vc").textContent = fmt(vc, 2) + " m/s";
+    $("#v8-z71-scene").innerHTML =
+      `<defs><marker id="z71a" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z71b" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z71c" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="${mix}"/></marker></defs><rect x="320" y="72" width="270" height="210" rx="22" fill="#f8fcfe" stroke="#315b72" stroke-width="4"/><path d="M320 155L590 155L590 282L320 282Z" fill="${mix}" opacity=".72"/><path d="M50 125L305 150" stroke="#1687aa" stroke-width="7" marker-end="url(#z71a)"/><path d="M50 245L305 195" stroke="#d97706" stroke-width="7" marker-end="url(#z71b)"/><path d="M605 170L865 170" stroke="${mix}" stroke-width="8" marker-end="url(#z71c)"/><text x="160" y="103" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">voda: Qₐ, ρₐ</text><text x="165" y="285" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">ulje: Qᵦ, ρᵦ</text><text x="730" y="138" text-anchor="middle" fill="#315b72" font-size="18" font-weight="700">mješavina: Q꜀, ρ꜀</text><text x="455" y="50" text-anchor="middle" fill="#315b72" font-size="18" font-weight="700">Kontrolni volumen</text><text x="455" y="320" text-anchor="middle" fill="#4b6577" font-size="16">maseni udio ulja wᵦ = ${fmt(wb * 100, 1)} %</text>`;
+    const svg=$('#v8-z71-scene'),vs=240/qc;
+    svg.querySelectorAll('path[marker-end]').forEach(n=>n.remove());
+    svg.insertAdjacentHTML('beforeend',MF1.svgArrow(310-qa*vs,125,qa*vs,0,'#0284c7')+MF1.svgArrow(310-qb*vs,235,qb*vs,0,'#d97706')+MF1.svgArrow(605,170,qc*vs,0,mix));
+    $('#z71-eq').innerHTML =
+      '<div class="v8-eq-title">Dvije povezane bilance</div>$\\dot m_C=\\rho_AQ_A+\\rho_BQ_B$; uz idealizaciju zadatka $Q_C=Q_A+Q_B$ i $\\rho_C=(\\rho_AQ_A+\\rho_BQ_B)/Q_C$.';
+    $("#z71-note").innerHTML =
+      "<strong>Provjera i invarijanca.</strong><p>$\\rho_C$ je između " +
+      fmt(Math.min(ra, rb), 0) +
+      " i " +
+      fmt(Math.max(ra, rb), 0) +
+      " kg/m³. Ako se mijenja samo $\\rho_B$, a $Q_A$, $Q_B$ i $D_C$ ostanu isti, $v_C$ se ne mijenja; mijenjaju se $\\rho_C$ i $\\dot m_C$.</p>";
+  }
+  ["qa", "qb", "dc", "rb"].forEach((id) => $("#z71-" + id).addEventListener("input", update));
+  update();
+})();
 </script>
 ```
 
@@ -309,7 +964,83 @@ $$
   <div class="v8-equation" id="z72-eq"></div><div class="v8-note" id="z72-note"></div>
 </div>
 <script>
-(()=>{const r=document.getElementById('v8-z72');if(!r||r.dataset.ready)return;r.dataset.ready='1';const $=s=>r.querySelector(s),fmt=(n,d=2)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),A=d=>Math.PI*d*d/4,g={a1:A(.075),a2:A(.05),a3:A(.06),a4:A(.05),as:A(.61)};function update(){const v1=+$('#z72-v1').value,v2=+$('#z72-v2').value,v3=+$('#z72-v3').value,qi=g.a1*v1,qo=g.a2*v2+g.a3*v3,net=qi-qo,dh=net/g.as,v4=Math.abs(net)/g.a4,up=net>1e-8,down=net<-1e-8,air=up?'zrak izlazi':down?'zrak ulazi':'zrak miruje',arr=up?`<path d="M505 98L505 34" stroke="#7c3aed" stroke-width="6" marker-end="url(#z72air)"/>`:down?`<path d="M505 34L505 98" stroke="#7c3aed" stroke-width="6" marker-end="url(#z72air)"/>`:`<path d="M490 62L520 62" stroke="#7c3aed" stroke-width="5"/>`;$('#z72-v1-o').textContent=fmt(v1,3)+' m/s';$('#z72-v2-o').textContent=fmt(v2,1)+' m/s';$('#z72-v3-o').textContent=fmt(v3,1)+' m/s';$('#z72-qi').textContent=fmt(qi,5)+' m³/s';$('#z72-qo').textContent=fmt(qo,5)+' m³/s';$('#z72-dh').textContent=fmt(dh,4)+' m/s';$('#z72-v4').textContent=fmt(v4,2)+' m/s';$('#v8-z72-scene').innerHTML=`<defs><marker id="z72w" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z72o" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z72air" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#7c3aed"/></marker></defs><rect x="300" y="42" width="410" height="268" rx="22" fill="none" stroke="#8299a9" stroke-dasharray="9 7" stroke-width="3"/><path d="M410 84L410 270Q410 295 435 295H575Q600 295 600 270V84" fill="#f9fcfe" stroke="#315b72" stroke-width="4"/><path d="M410 194H600V270Q600 295 575 295H435Q410 295 410 270Z" fill="#63bde0"/><path d="M410 194H600" stroke="#fff" stroke-width="4"/><path d="M65 175L400 175" stroke="#1687aa" stroke-width="7" marker-end="url(#z72w)"/><path d="M420 282L420 338" stroke="#d97706" stroke-width="7" marker-end="url(#z72o)"/><path d="M610 230L860 230" stroke="#d97706" stroke-width="7" marker-end="url(#z72o)"/>${arr}<text x="205" y="145" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">Q₁</text><text x="455" y="344" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₂</text><text x="738" y="198" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₃</text><text x="540" y="25" text-anchor="middle" fill="#6d28d9" font-size="18" font-weight="700">Q₄: ${air}</text><text x="505" y="180" text-anchor="middle" fill="#315b72" font-size="18">Aₛ</text><text x="505" y="326" text-anchor="middle" fill="#315b72" font-size="17">referentna razina; ${dh>=0?'↑':'↓'} dh/dt</text>`;$('#z72-eq').innerHTML='<div class="v8-eq-title">Bilanca vode i odzračnika</div>$A_s dh/dt=Q_1-Q_2-Q_3='+fmt(net,5)+'\,\\mathrm{m^3/s}$; zato $|v_4|=|Q_1-Q_2-Q_3|/A_4$.';$('#z72-note').innerHTML='<strong>Fizikalno tumačenje.</strong><p>Velika površina $A_s='+fmt(g.as,5)+'\,\\mathrm{m^2}$ pretvara neto protok u relativno malu brzinu razine. Mala površina odzračnika $A_4='+fmt(g.a4,5)+'\,\\mathrm{m^2}$ istu volumensku brzinu pretvara u veliku brzinu zraka. Trenutačno: '+air+'.</p>'}function preset(k){if(k==='base'){ $('#z72-v1').value=8.3;$('#z72-v2').value=.9;$('#z72-v3').value=3.6}else if(k==='balance'){$('#z72-v1').value=((g.a2*.9+g.a3*3.6)/g.a1).toFixed(3);$('#z72-v2').value=.9;$('#z72-v3').value=3.6}else{$('#z72-v1').value=2.0;$('#z72-v2').value=2.5;$('#z72-v3').value=5.0}r.querySelectorAll('[data-z72-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.z72Preset===k)));update()}['v1','v2','v3'].forEach(i=>$('#z72-'+i).addEventListener('input',()=>{r.querySelectorAll('[data-z72-preset]').forEach(b=>b.setAttribute('aria-pressed','false'));update()}));r.querySelectorAll('[data-z72-preset]').forEach(b=>b.addEventListener('click',()=>preset(b.dataset.z72Preset)));update()})();
+(() => {
+  const r = document.getElementById("v8-z72");
+  if (!r || r.dataset.ready) return;
+  r.dataset.ready = "1";
+  const $ = (s) => r.querySelector(s),
+    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d }),
+    A = (d) => (Math.PI * d * d) / 4,
+    g = { a1: A(0.075), a2: A(0.05), a3: A(0.06), a4: A(0.05), as: A(0.61) };
+  function update() {
+    const v1 = +$("#z72-v1").value,
+      v2 = +$("#z72-v2").value,
+      v3 = +$("#z72-v3").value,
+      qi = g.a1 * v1,
+      qo = g.a2 * v2 + g.a3 * v3,
+      net = qi - qo,
+      dh = net / g.as,
+      v4 = Math.abs(net) / g.a4,
+      up = net > 1e-8,
+      down = net < -1e-8,
+      air = up ? "zrak izlazi" : down ? "zrak ulazi" : "zrak miruje",
+      arr = up
+        ? `<path d="M505 98L505 34" stroke="#7c3aed" stroke-width="6" marker-end="url(#z72air)"/>`
+        : down
+          ? `<path d="M505 34L505 98" stroke="#7c3aed" stroke-width="6" marker-end="url(#z72air)"/>`
+          : `<path d="M490 62L520 62" stroke="#7c3aed" stroke-width="5"/>`;
+    $("#z72-v1-o").textContent = fmt(v1, 3) + " m/s";
+    $("#z72-v2-o").textContent = fmt(v2, 1) + " m/s";
+    $("#z72-v3-o").textContent = fmt(v3, 1) + " m/s";
+    $("#z72-qi").textContent = fmt(qi, 5) + " m³/s";
+    $("#z72-qo").textContent = fmt(qo, 5) + " m³/s";
+    $("#z72-dh").textContent = fmt(dh, 4) + " m/s";
+    $("#z72-v4").textContent = fmt(v4, 2) + " m/s";
+    $("#v8-z72-scene").innerHTML =
+      `<defs><marker id="z72w" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z72o" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z72air" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#7c3aed"/></marker></defs><rect x="300" y="42" width="410" height="268" rx="22" fill="none" stroke="#8299a9" stroke-dasharray="9 7" stroke-width="3"/><path d="M410 84L410 270Q410 295 435 295H575Q600 295 600 270V84" fill="#f9fcfe" stroke="#315b72" stroke-width="4"/><path d="M410 194H600V270Q600 295 575 295H435Q410 295 410 270Z" fill="#63bde0"/><path d="M410 194H600" stroke="#fff" stroke-width="4"/><path d="M65 175L400 175" stroke="#1687aa" stroke-width="7" marker-end="url(#z72w)"/><path d="M420 282L420 338" stroke="#d97706" stroke-width="7" marker-end="url(#z72o)"/><path d="M610 230L860 230" stroke="#d97706" stroke-width="7" marker-end="url(#z72o)"/>${arr}<text x="205" y="145" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">Q₁</text><text x="455" y="344" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₂</text><text x="738" y="198" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₃</text><text x="540" y="25" text-anchor="middle" fill="#6d28d9" font-size="18" font-weight="700">Q₄: ${air}</text><text x="505" y="180" text-anchor="middle" fill="#315b72" font-size="18">Aₛ</text><text x="505" y="326" text-anchor="middle" fill="#315b72" font-size="17">referentna razina; ${dh >= 0 ? "↑" : "↓"} dh/dt</text>`;
+    $("#z72-eq").innerHTML =
+      '<div class="v8-eq-title">Bilanca vode i odzračnika</div>$A_s dh/dt=Q_1-Q_2-Q_3=' +
+      fmt(net, 5) +
+      "\,\\mathrm{m^3/s}$; zato $|v_4|=|Q_1-Q_2-Q_3|/A_4$.";
+    $("#z72-note").innerHTML =
+      "<strong>Fizikalno tumačenje.</strong><p>Velika površina $A_s=" +
+      fmt(g.as, 5) +
+      "\,\\mathrm{m^2}$ pretvara neto protok u relativno malu brzinu razine. Mala površina odzračnika $A_4=" +
+      fmt(g.a4, 5) +
+      "\,\\mathrm{m^2}$ istu volumensku brzinu pretvara u veliku brzinu zraka. Trenutačno: " +
+      air +
+      ".</p>";
+  }
+  function preset(k) {
+    if (k === "base") {
+      $("#z72-v1").value = 8.3;
+      $("#z72-v2").value = 0.9;
+      $("#z72-v3").value = 3.6;
+    } else if (k === "balance") {
+      $("#z72-v1").value = String((g.a2 * 0.9 + g.a3 * 3.6) / g.a1);
+      $("#z72-v2").value = 0.9;
+      $("#z72-v3").value = 3.6;
+    } else {
+      $("#z72-v1").value = 2.0;
+      $("#z72-v2").value = 2.5;
+      $("#z72-v3").value = 5.0;
+    }
+    r.querySelectorAll("[data-z72-preset]").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.z72Preset === k)),
+    );
+    update();
+  }
+  ["v1", "v2", "v3"].forEach((i) =>
+    $("#z72-" + i).addEventListener("input", () => {
+      r.querySelectorAll("[data-z72-preset]").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      update();
+    }),
+  );
+  r.querySelectorAll("[data-z72-preset]").forEach((b) =>
+    b.addEventListener("click", () => preset(b.dataset.z72Preset)),
+  );
+  update();
+})();
 </script>
 ```
 
@@ -365,7 +1096,87 @@ Temperatura i atmosferski tlak mogu se koristiti za sekundarnu procjenu gustoće
   <div class="v8-equation" id="z73-eq"></div><div class="v8-note" id="z73-note"></div>
 </div>
 <script>
-(()=>{const r=document.getElementById('v8-z73');if(!r||r.dataset.ready)return;r.dataset.ready='1';const $=s=>r.querySelector(s),fmt=(n,d=2)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),A=d=>Math.PI*d*d/4,rw=998;function update(){const m1=+$('#z73-m1').value,m2=+$('#z73-m2').value,sg=+$('#z73-sg').value,d3=+$('#z73-d3').value,rb=sg*rw,q1=m1/rw,q2=m2/rb,qa=q1-q2,v=Math.abs(qa)/A(d3),out=qa>1e-8,inside=qa<-1e-8,dir=out?'zrak izlazi':inside?'zrak ulazi':'zrak miruje',arrow=out?'<path d="M510 102L510 35" stroke="#7c3aed" stroke-width="7" marker-end="url(#z73a)"/>':inside?'<path d="M510 35L510 102" stroke="#7c3aed" stroke-width="7" marker-end="url(#z73a)"/>':'<path d="M492 67L528 67" stroke="#7c3aed" stroke-width="6"/>';$('#z73-m1-o').textContent=fmt(m1,1)+' kg/s';$('#z73-m2-o').textContent=fmt(m2,1)+' kg/s';$('#z73-sg-o').textContent=fmt(sg,2);$('#z73-d3-o').textContent=fmt(d3*1000,0)+' mm';$('#z73-q1').textContent=fmt(q1,5)+' m³/s';$('#z73-q2').textContent=fmt(q2,5)+' m³/s';$('#z73-qa').textContent=fmt(qa,5)+' m³/s';$('#z73-v3').textContent=fmt(v,2)+' m/s';$('#v8-z73-scene').innerHTML=`<defs><marker id="z73w" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z73b" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z73a" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#7c3aed"/></marker></defs><rect x="300" y="43" width="420" height="268" rx="22" fill="none" stroke="#8299a9" stroke-dasharray="9 7" stroke-width="3"/><path d="M415 92L415 275Q415 298 438 298H582Q605 298 605 275V92" fill="#f9fcfe" stroke="#315b72" stroke-width="4"/><path d="M415 218H605V275Q605 298 582 298H438Q415 298 415 275Z" fill="#3096cb"/><path d="M415 175H605V218H415Z" fill="#d9952f"/><path d="M65 245L405 245" stroke="#1687aa" stroke-width="7" marker-end="url(#z73w)"/><path d="M405 193L70 193" stroke="#d97706" stroke-width="7" marker-end="url(#z73b)"/>${arrow}<text x="205" y="220" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">ṁ₁ → Q₁</text><text x="200" y="170" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">ṁ₂ → Q₂</text><text x="545" y="27" text-anchor="middle" fill="#6d28d9" font-size="18" font-weight="700">Qₐᵢᵣ: ${dir}</text><text x="510" y="202" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">benzin</text><text x="510" y="258" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">voda</text><text x="510" y="333" text-anchor="middle" fill="#315b72" font-size="17">kontrolni volumen tekućine</text>`;$('#z73-eq').innerHTML='<div class="v8-eq-title">Jedna dosljedna konvencija predznaka</div>$Q_{air}=Q_1-Q_2='+fmt(qa,5)+'\,\\mathrm{m^3/s}$, pri čemu je pozitivan predznak definiran kao izlazak zraka. $|v_3|=|Q_{air}|/A_3$.';$('#z73-note').innerHTML='<strong>Fizikalno tumačenje.</strong><p>Budući da su gustoće vode i benzina različite, tek se nakon pretvorbe $Q=\\dot m/\\rho$ može odrediti zauzeti volumen. Trenutačno '+dir+'. Gustoća benzina je '+fmt(rb,1)+' kg/m³.</p>'}function preset(k){if(k==='out'){$('#z73-m1').value=10.2;$('#z73-m2').value=5.3;$('#z73-sg').value=.69}else if(k==='in'){$('#z73-m1').value=7;$('#z73-m2').value=9;$('#z73-sg').value=.69}else{const m1=10.2,sg=.69;$('#z73-m1').value=m1;$('#z73-sg').value=sg;$('#z73-m2').value=(m1*sg).toFixed(3)}r.querySelectorAll('[data-z73-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.z73Preset===k)));update()}['m1','m2','sg','d3'].forEach(id=>$('#z73-'+id).addEventListener('input',()=>{r.querySelectorAll('[data-z73-preset]').forEach(b=>b.setAttribute('aria-pressed','false'));update()}));r.querySelectorAll('[data-z73-preset]').forEach(b=>b.addEventListener('click',()=>preset(b.dataset.z73Preset)));update()})();
+(() => {
+  const r = document.getElementById("v8-z73");
+  if (!r || r.dataset.ready) return;
+  r.dataset.ready = "1";
+  const $ = (s) => r.querySelector(s),
+    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d }),
+    A = (d) => (Math.PI * d * d) / 4,
+    rw = 998;
+  function update() {
+    const m1 = +$("#z73-m1").value,
+      m2 = +$("#z73-m2").value,
+      sg = +$("#z73-sg").value,
+      d3 = +$("#z73-d3").value,
+      rb = sg * rw,
+      q1 = m1 / rw,
+      q2 = m2 / rb,
+      qa = q1 - q2,
+      v = Math.abs(qa) / A(d3),
+      out = qa > 1e-8,
+      inside = qa < -1e-8,
+      dir = out ? "zrak izlazi" : inside ? "zrak ulazi" : "zrak miruje",
+      arrow = out
+        ? '<path d="M510 102L510 35" stroke="#7c3aed" stroke-width="7" marker-end="url(#z73a)"/>'
+        : inside
+          ? '<path d="M510 35L510 102" stroke="#7c3aed" stroke-width="7" marker-end="url(#z73a)"/>'
+          : '<path d="M492 67L528 67" stroke="#7c3aed" stroke-width="6"/>';
+    $("#z73-m1-o").textContent = fmt(m1, 1) + " kg/s";
+    $("#z73-m2-o").textContent = fmt(m2, 1) + " kg/s";
+    $("#z73-sg-o").textContent = fmt(sg, 2);
+    $("#z73-d3-o").textContent = fmt(d3 * 1000, 0) + " mm";
+    $("#z73-q1").textContent = fmt(q1, 5) + " m³/s";
+    $("#z73-q2").textContent = fmt(q2, 5) + " m³/s";
+    $("#z73-qa").textContent = fmt(qa, 5) + " m³/s";
+    $("#z73-v3").textContent = fmt(v, 2) + " m/s";
+    $("#v8-z73-scene").innerHTML =
+      `<defs><marker id="z73w" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z73b" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z73a" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#7c3aed"/></marker></defs><rect x="300" y="43" width="420" height="268" rx="22" fill="none" stroke="#8299a9" stroke-dasharray="9 7" stroke-width="3"/><path d="M415 92L415 275Q415 298 438 298H582Q605 298 605 275V92" fill="#f9fcfe" stroke="#315b72" stroke-width="4"/><path d="M415 218H605V275Q605 298 582 298H438Q415 298 415 275Z" fill="#3096cb"/><path d="M415 175H605V218H415Z" fill="#d9952f"/><path d="M65 245L405 245" stroke="#1687aa" stroke-width="7" marker-end="url(#z73w)"/><path d="M405 193L70 193" stroke="#d97706" stroke-width="7" marker-end="url(#z73b)"/>${arrow}<text x="205" y="220" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">ṁ₁ → Q₁</text><text x="200" y="170" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">ṁ₂ → Q₂</text><text x="545" y="27" text-anchor="middle" fill="#6d28d9" font-size="18" font-weight="700">Qₐᵢᵣ: ${dir}</text><text x="510" y="202" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">benzin</text><text x="510" y="258" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">voda</text><text x="510" y="333" text-anchor="middle" fill="#315b72" font-size="17">kontrolni volumen tekućine</text>`;
+    const svg=$('#v8-z73-scene'),vs=240/Math.max(q1,q2,1e-12);svg.querySelectorAll('path[marker-end]').forEach(n=>n.remove());
+    svg.insertAdjacentHTML('beforeend',MF1.svgArrow(405-q1*vs,245,q1*vs,0,'#0284c7')+MF1.svgArrow(405,193,-q2*vs,0,'#d97706')+MF1.svgArrow(510,100,0,-qa*vs,'#7c3aed'));
+    $('#z73-eq').innerHTML =
+      '<div class="v8-eq-title">Jedna dosljedna konvencija predznaka</div>$Q_{air}=Q_1-Q_2=' +
+      fmt(qa, 5) +
+      "\,\\mathrm{m^3/s}$, pri čemu je pozitivan predznak definiran kao izlazak zraka. $|v_3|=|Q_{air}|/A_3$.";
+    $("#z73-note").innerHTML =
+      "<strong>Fizikalno tumačenje.</strong><p>Budući da su gustoće vode i benzina različite, tek se nakon pretvorbe $Q=\\dot m/\\rho$ može odrediti zauzeti volumen. Trenutačno " +
+      dir +
+      ". Gustoća benzina je " +
+      fmt(rb, 1) +
+      " kg/m³.</p>";
+  }
+  function preset(k) {
+    if (k === "out") {
+      $("#z73-m1").value = 10.2;
+      $("#z73-m2").value = 5.3;
+      $("#z73-sg").value = 0.69;
+    } else if (k === "in") {
+      $("#z73-m1").value = 7;
+      $("#z73-m2").value = 9;
+      $("#z73-sg").value = 0.69;
+    } else {
+      const m1 = 10.2,
+        sg = 0.69;
+      $("#z73-m1").value = m1;
+      $("#z73-sg").value = sg;
+      $("#z73-m2").value = (m1 * sg).toFixed(3);
+    }
+    r.querySelectorAll("[data-z73-preset]").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.z73Preset === k)),
+    );
+    update();
+  }
+  ["m1", "m2", "sg", "d3"].forEach((id) =>
+    $("#z73-" + id).addEventListener("input", () => {
+      r.querySelectorAll("[data-z73-preset]").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      update();
+    }),
+  );
+  r.querySelectorAll("[data-z73-preset]").forEach((b) =>
+    b.addEventListener("click", () => preset(b.dataset.z73Preset)),
+  );
+  update();
+})();
 </script>
 ```
 
@@ -420,7 +1231,79 @@ $$
   <div class="v8-equation" id="z74-eq"></div><div class="v8-note" id="z74-note"></div>
 </div>
 <script>
-(()=>{const r=document.getElementById('v8-z74');if(!r||r.dataset.ready)return;r.dataset.ready='1';const $=s=>r.querySelector(s),fmt=(n,d=2)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),A=d=>Math.PI*d*d/4;function update(){const v1=+$('#z74-v1').value,vp=+$('#z74-vp').value,np=+$('#z74-np').value,dp=+$('#z74-dp').value,L=+$('#z74-l').value,d1=+$('#z74-d1').value,df=+$('#z74-df').value,a1=A(d1),ap=A(dp),aw=Math.PI*d1*L,N=np*aw,aopen=N*ap,phi=aopen/aw,qs=aopen*vp,q1=a1*v1,valid=qs<=q1+1e-10,q2=q1-qs,v2=valid?q2/a1:NaN,vf=valid?q2/A(df):NaN;[['v1',v1,'m/s',1],['vp',vp,'m/s',1],['np',np,'m⁻²',0],['dp',dp*1000,'mm',1],['l',L,'m',2],['d1',d1,'m',2],['df',df,'m',2]].forEach(([id,n,u,d])=>$('#z74-'+id+'-o').textContent=fmt(n,d)+' '+u);$('#z74-n').textContent=fmt(N,0);$('#z74-phi').textContent=fmt(phi*100,2)+' %';$('#z74-qs').textContent=fmt(qs,3)+' m³/s';$('#z74-v2').textContent=valid?fmt(v2,2)+' m/s':'—';$('#z74-vf').textContent=valid?fmt(vf,2)+' m/s':'—';const holes=Array.from({length:18},(_,i)=>{const x=355+(i%9)*27,y=i<9?91:244;return `<circle cx="${x}" cy="${y}" r="4" fill="#238a55"/><path d="M${x} ${y}L${x} ${i<9?55:280}" stroke="#238a55" stroke-width="3" marker-end="url(#z74s)"/>`}).join('');$('#v8-z74-scene').innerHTML=`<defs><marker id="z74m" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z74o" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z74s" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0 0L0 6L8 3z" fill="#238a55"/></marker></defs><rect x="90" y="120" width="720" height="120" rx="20" fill="#e8f6fa" stroke="#315b72" stroke-width="4"/><rect x="330" y="84" width="280" height="192" rx="12" fill="none" stroke="#238a55" stroke-width="3" stroke-dasharray="8 6"/>${holes}<path d="M45 180L305 180" stroke="#1687aa" stroke-width="8" marker-end="url(#z74m)"/><path d="M620 180L875 180" stroke="#d97706" stroke-width="8" marker-end="url(#z74o)"/><text x="175" y="150" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">Q₁</text><text x="465" y="72" text-anchor="middle" fill="#237a49" font-size="18" font-weight="700">Qₛ kroz perforacije</text><text x="750" y="150" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₂ → ventilator</text><text x="465" y="325" text-anchor="middle" fill="#315b72" font-size="17">kontrolni volumen: ispitna sekcija</text>`;$('#z74-eq').innerHTML='<div class="v8-eq-title">Zbrajanje lokalnih i glavnih tokova</div>$A_{open}=N_pA_p$, $Q_s=A_{open}v_p='+fmt(qs,3)+'\,\\mathrm{m^3/s}$ i $Q_1=Q_2+Q_s$.';if(valid){$('#z74-note').className='v8-note';$('#z74-note').innerHTML='<strong>Fizikalno tumačenje i provjera.</strong><p>$Q_1='+fmt(q1,3)+'\,\\mathrm{m^3/s}$, pa model daje dopušteni preostali tok $Q_2='+fmt(q2,3)+'\,\\mathrm{m^3/s}$. Ako su $v_p=0$ ili $n_p=0$, tada je $Q_s=0$ i zbog $D_1=D_2$ vrijedi $v_2=v_1$.</p>'}else{$('#z74-note').className='v8-alert';$('#z74-note').innerHTML='<strong>Zadana kombinacija nije kompatibilna s ovim stacionarnim modelom.</strong><p>Propisani bočni odsis veći je od volumena koji ulazi kroz presjek 1. Za zadane rubne uvjete nema fizički dopuštenog rješenja s protokom prema naprijed na presjeku 2; rezultat nije umjetno ograničen.</p>'}}['v1','vp','np','dp','l','d1','df'].forEach(id=>$('#z74-'+id).addEventListener('input',update));update()})();
+(() => {
+  const r = document.getElementById("v8-z74");
+  if (!r || r.dataset.ready) return;
+  r.dataset.ready = "1";
+  const $ = (s) => r.querySelector(s),
+    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d }),
+    A = (d) => (Math.PI * d * d) / 4;
+  function update() {
+    const v1 = +$("#z74-v1").value,
+      vp = +$("#z74-vp").value,
+      np = +$("#z74-np").value,
+      dp = +$("#z74-dp").value,
+      L = +$("#z74-l").value,
+      d1 = +$("#z74-d1").value,
+      df = +$("#z74-df").value,
+      a1 = A(d1),
+      ap = A(dp),
+      aw = Math.PI * d1 * L,
+      N = np * aw,
+      aopen = N * ap,
+      phi = aopen / aw,
+      qs = aopen * vp,
+      q1 = a1 * v1,
+      valid = qs <= q1 + 1e-10,
+      q2 = q1 - qs,
+      v2 = valid ? q2 / a1 : NaN,
+      vf = valid ? q2 / A(df) : NaN;
+    [
+      ["v1", v1, "m/s", 1],
+      ["vp", vp, "m/s", 1],
+      ["np", np, "m⁻²", 0],
+      ["dp", dp * 1000, "mm", 1],
+      ["l", L, "m", 2],
+      ["d1", d1, "m", 2],
+      ["df", df, "m", 2],
+    ].forEach(([id, n, u, d]) => ($("#z74-" + id + "-o").textContent = fmt(n, d) + " " + u));
+    $("#z74-n").textContent = fmt(N, 0);
+    $("#z74-phi").textContent = fmt(phi * 100, 2) + " %";
+    $("#z74-qs").textContent = fmt(qs, 3) + " m³/s";
+    $("#z74-v2").textContent = valid ? fmt(v2, 2) + " m/s" : "—";
+    $("#z74-vf").textContent = valid ? fmt(vf, 2) + " m/s" : "—";
+    const holes = Array.from({ length: 18 }, (_, i) => {
+      const x = 355 + (i % 9) * 27,
+        y = i < 9 ? 120 : 240;
+      return `<circle cx="${x}" cy="${y}" r="4" fill="#238a55"/><path d="M${x} ${y}L${x} ${i < 9 ? 55 : 280}" stroke="#238a55" stroke-width="3" marker-end="url(#z74s)"/>`;
+    }).join("");
+    $("#v8-z74-scene").innerHTML =
+      `<defs><marker id="z74m" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z74o" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z74s" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L8 3z" fill="#238a55"/></marker></defs><rect x="90" y="120" width="720" height="120" rx="20" fill="#e8f6fa" stroke="#315b72" stroke-width="4"/><rect x="330" y="84" width="280" height="192" rx="12" fill="none" stroke="#238a55" stroke-width="3" stroke-dasharray="8 6"/>${holes}<path d="M45 180L305 180" stroke="#1687aa" stroke-width="8" marker-end="url(#z74m)"/><path d="M620 180L875 180" stroke="#d97706" stroke-width="8" marker-end="url(#z74o)"/><text x="175" y="150" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">Q₁</text><text x="465" y="72" text-anchor="middle" fill="#237a49" font-size="18" font-weight="700">Qₛ kroz perforacije</text><text x="750" y="150" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₂ → ventilator</text><text x="465" y="325" text-anchor="middle" fill="#315b72" font-size="17">kontrolni volumen: ispitna sekcija</text>`;
+    const svg=$('#v8-z74-scene'),vs=235/Math.max(q1,qs,1e-12);svg.querySelectorAll('path[marker-end]').forEach(n=>n.remove());
+    svg.insertAdjacentHTML('beforeend',MF1.svgArrow(70,180,q1*vs,0,'#0284c7')+(valid?MF1.svgArrow(630,180,q2*vs,0,'#d97706'):''));
+    if(np>0&&vp>0)for(let i=0;i<18;i++){const x=355+(i%9)*27,y=i<9?120:240;svg.insertAdjacentHTML('beforeend',MF1.svgArrow(x,y,0,(i<9?-1:1)*vp*2,'#238a55','',2));}
+    svg.insertAdjacentHTML('beforeend','<text x="460" y="355" text-anchor="middle" font-size="15" fill="#475569">Provrti shematski; strelice Q u istoj skali</text>');
+    $('#z74-eq').innerHTML =
+      '<div class="v8-eq-title">Zbrajanje lokalnih i glavnih tokova</div>$A_{open}=N_pA_p$, $Q_s=A_{open}v_p=' +
+      fmt(qs, 3) +
+      "\,\\mathrm{m^3/s}$ i $Q_1=Q_2+Q_s$.";
+    if (valid) {
+      $("#z74-note").className = "v8-note";
+      $("#z74-note").innerHTML =
+        "<strong>Fizikalno tumačenje i provjera.</strong><p>$Q_1=" +
+        fmt(q1, 3) +
+        "\,\\mathrm{m^3/s}$, pa model daje dopušteni preostali tok $Q_2=" +
+        fmt(q2, 3) +
+        "\,\\mathrm{m^3/s}$. Ako su $v_p=0$ ili $n_p=0$, tada je $Q_s=0$ i zbog $D_1=D_2$ vrijedi $v_2=v_1$.</p>";
+    } else {
+      $("#z74-note").className = "v8-alert";
+      $("#z74-note").innerHTML =
+        "<strong>Zadana kombinacija nije kompatibilna s ovim stacionarnim modelom.</strong><p>Propisani bočni odsis veći je od volumena koji ulazi kroz presjek 1. Za zadane rubne uvjete nema fizički dopuštenog rješenja s protokom prema naprijed na presjeku 2; rezultat nije umjetno ograničen.</p>";
+    }
+  }
+  ["v1", "vp", "np", "dp", "l", "d1", "df"].forEach((id) => $("#z74-" + id).addEventListener("input", update));
+  update();
+})();
 </script>
 ```
 
@@ -469,7 +1352,82 @@ $v_3$ je zato površinski ponderirana srednja brzina ulaznih tokova. U presjeku 
   <div class="v8-equation" id="z75-eq"></div><div class="v8-note" id="z75-note"></div>
 </div>
 <script>
-(()=>{const r=document.getElementById('v8-z75');if(!r||r.dataset.ready)return;r.dataset.ready='1';const $=s=>r.querySelector(s),fmt=(n,d=2)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),A=d=>Math.PI*d*d/4;function update(){const v1=+$('#z75-v1').value,v2=+$('#z75-v2').value,d1=+$('#z75-d1').value,d2=+$('#z75-d2').value,valid=d1<d2,a1=A(d1),a2=A(d2),aa=a2-a1,f=a1/a2,q1=a1*v1,qa=aa*v2,v3=valid?(q1+qa)/a2:NaN;[['v1',v1,'m/s',1],['v2',v2,'m/s',1],['d1',d1,'m',3],['d2',d2,'m',3]].forEach(([id,n,u,d])=>$('#z75-'+id+'-o').textContent=fmt(n,d)+' '+u);$('#z75-f').textContent=valid?fmt(f,3):'—';$('#z75-q1').textContent=valid?fmt(q1,4)+' m³/s':'—';$('#z75-qa').textContent=valid?fmt(qa,4)+' m³/s':'—';$('#z75-v3').textContent=valid?fmt(v3,2)+' m/s':'—';const core=valid?Math.max(24,Math.min(85,180*Math.sqrt(f))):40,w1=Math.max(3,Math.min(10,v1/4)),w2=Math.max(3,Math.min(10,v2/2)),w3=valid?Math.max(3,Math.min(10,v3/2)):4;$('#v8-z75-scene').innerHTML=`<defs><marker id="z75c" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#167c9e"/></marker><marker id="z75r" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#4cc2d8"/></marker><marker id="z75o" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker></defs><rect x="70" y="110" width="250" height="140" rx="70" fill="#dff2f8" stroke="#315b72" stroke-width="4"/><rect x="70" y="${180-core/2}" width="250" height="${core}" rx="${core/2}" fill="#1687aa"/><path d="M110 180L285 180" stroke="#fff" stroke-width="${w1}" marker-end="url(#z75c)"/><path d="M110 137L285 137" stroke="#4cc2d8" stroke-width="${w2}" marker-end="url(#z75r)"/><path d="M110 223L285 223" stroke="#4cc2d8" stroke-width="${w2}" marker-end="url(#z75r)"/><path d="M370 110L555 145L555 215L370 250Z" fill="#edf8fb" stroke="#8299a9" stroke-width="3" stroke-dasharray="8 6"/><rect x="600" y="110" width="250" height="140" rx="70" fill="#e8f4f8" stroke="#315b72" stroke-width="4"/><path d="M635 180L815 180" stroke="#d97706" stroke-width="${w3}" marker-end="url(#z75o)"/><text x="195" y="83" text-anchor="middle" fill="#123d5d" font-size="18" font-weight="700">ulaz: jezgra $v₁$ + prsten $v₂$</text><text x="462" y="83" text-anchor="middle" fill="#526c7d" font-size="17">shematski prijelaz</text><text x="725" y="83" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">presjek 3: jednoliko $v₃$</text><text x="460" y="310" text-anchor="middle" fill="#315b72" font-size="17">kontinuitet određuje srednju brzinu, ne strukturu miješanja</text>`;$('#z75-eq').innerHTML='<div class="v8-eq-title">Površinski ponderirani prosjek</div>'+ (valid?'$v_3=f_Av_1+(1-f_A)v_2='+fmt(f,3)+'·'+fmt(v1,1)+' + '+fmt(1-f,3)+'·'+fmt(v2,1)+' = '+fmt(v3,2)+'\\,\\mathrm{m/s}$.':'$D_1$ mora biti manji od $D_2$ da bi postojao prstenasti ulazni presjek.');if(valid){const lo=Math.min(v1,v2),hi=Math.max(v1,v2),check=v3>=lo-1e-9&&v3<=hi+1e-9?'Provjera je zadovoljena:':'Provjera nije zadovoljena:';$('#z75-note').className='v8-note';$('#z75-note').innerHTML='<strong>Fizikalno tumačenje.</strong><p>'+check+' za istosmjerne pozitivne ulaze vrijedi '+fmt(lo,2)+' ≤ $v_3$ ≤ '+fmt(hi,2)+' m/s. Kada je $f_A$ malen, $v_3$ je bliže $v_2$; kada $f_A$ teži jedinici, $v_3$ teži $v_1$.</p>'}else{$('#z75-note').className='v8-alert';$('#z75-note').innerHTML='<strong>Geometrija nije dopuštena.</strong><p>Za koaksijalni tok mora vrijediti $D_1<D_2$. U suprotnom nema prstenastoga ulaznog presjeka.</p>'}}['v1','v2','d1','d2'].forEach(id=>$('#z75-'+id).addEventListener('input',update));update()})();
+(() => {
+  const r = document.getElementById("v8-z75");
+  if (!r || r.dataset.ready) return;
+  r.dataset.ready = "1";
+  const $ = (s) => r.querySelector(s),
+    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d }),
+    A = (d) => (Math.PI * d * d) / 4;
+  function update() {
+    const v1 = +$("#z75-v1").value,
+      v2 = +$("#z75-v2").value,
+      d1 = +$("#z75-d1").value,
+      d2 = +$("#z75-d2").value,
+      valid = d1 < d2,
+      a1 = A(d1),
+      a2 = A(d2),
+      aa = a2 - a1,
+      f = a1 / a2,
+      q1 = a1 * v1,
+      qa = aa * v2,
+      v3 = valid ? (q1 + qa) / a2 : NaN;
+    [
+      ["v1", v1, "m/s", 1],
+      ["v2", v2, "m/s", 1],
+      ["d1", d1, "m", 3],
+      ["d2", d2, "m", 3],
+    ].forEach(([id, n, u, d]) => ($("#z75-" + id + "-o").textContent = fmt(n, d) + " " + u));
+    $("#z75-f").textContent = valid ? fmt(f, 3) : "—";
+    $("#z75-q1").textContent = valid ? fmt(q1, 4) + " m³/s" : "—";
+    $("#z75-qa").textContent = valid ? fmt(qa, 4) + " m³/s" : "—";
+    $("#z75-v3").textContent = valid ? fmt(v3, 2) + " m/s" : "—";
+    const core = valid ? 140 * Math.sqrt(f) : 40,
+      w1 = Math.max(3, Math.min(10, v1 / 4)),
+      w2 = Math.max(3, Math.min(10, v2 / 2)),
+      w3 = valid ? Math.max(3, Math.min(10, v3 / 2)) : 4;
+    $("#v8-z75-scene").innerHTML =
+      `<defs><marker id="z75c" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#167c9e"/></marker><marker id="z75r" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#4cc2d8"/></marker><marker id="z75o" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker></defs><rect x="70" y="110" width="250" height="140" rx="70" fill="#dff2f8" stroke="#315b72" stroke-width="4"/><rect x="70" y="${180 - core / 2}" width="250" height="${core}" rx="${core / 2}" fill="#1687aa"/><path d="M110 180L285 180" stroke="#fff" stroke-width="${w1}" marker-end="url(#z75c)"/><path d="M110 137L285 137" stroke="#4cc2d8" stroke-width="${w2}" marker-end="url(#z75r)"/><path d="M110 223L285 223" stroke="#4cc2d8" stroke-width="${w2}" marker-end="url(#z75r)"/><path d="M370 110L555 145L555 215L370 250Z" fill="#edf8fb" stroke="#8299a9" stroke-width="3" stroke-dasharray="8 6"/><rect x="600" y="110" width="250" height="140" rx="70" fill="#e8f4f8" stroke="#315b72" stroke-width="4"/><path d="M635 180L815 180" stroke="#d97706" stroke-width="${w3}" marker-end="url(#z75o)"/><text x="195" y="83" text-anchor="middle" fill="#123d5d" font-size="18" font-weight="700">ulaz: jezgra $v₁$ + prsten $v₂$</text><text x="462" y="83" text-anchor="middle" fill="#526c7d" font-size="17">shematski prijelaz</text><text x="725" y="83" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">presjek 3: jednoliko $v₃$</text><text x="460" y="310" text-anchor="middle" fill="#315b72" font-size="17">kontinuitet određuje srednju brzinu, ne strukturu miješanja</text>`;
+    const svg=$('#v8-z75-scene');svg.querySelectorAll('path[marker-end]').forEach(n=>n.remove());
+    if(valid){const vs=170/Math.max(v1,v2,v3,1e-12),lane=(core+140)/4;svg.insertAdjacentHTML('beforeend',MF1.svgArrow(110,180,v1*vs,0,'#075985')+MF1.svgArrow(110,180-lane,v2*vs,0,'#0891b2')+MF1.svgArrow(110,180+lane,v2*vs,0,'#0891b2')+MF1.svgArrow(635,180,v3*vs,0,'#d97706'));}
+    svg.querySelectorAll('text').forEach(n=>n.textContent=n.textContent.split(String.fromCharCode(36)).join(''));
+    $('#z75-eq').innerHTML =
+      '<div class="v8-eq-title">Površinski ponderirani prosjek</div>' +
+      (valid
+        ? "$v_3=f_Av_1+(1-f_A)v_2=" +
+          fmt(f, 3) +
+          "·" +
+          fmt(v1, 1) +
+          " + " +
+          fmt(1 - f, 3) +
+          "·" +
+          fmt(v2, 1) +
+          " = " +
+          fmt(v3, 2) +
+          "\\,\\mathrm{m/s}$."
+        : "$D_1$ mora biti manji od $D_2$ da bi postojao prstenasti ulazni presjek.");
+    if (valid) {
+      const lo = Math.min(v1, v2),
+        hi = Math.max(v1, v2),
+        check = v3 >= lo - 1e-9 && v3 <= hi + 1e-9 ? "Provjera je zadovoljena:" : "Provjera nije zadovoljena:";
+      $("#z75-note").className = "v8-note";
+      $("#z75-note").innerHTML =
+        "<strong>Fizikalno tumačenje.</strong><p>" +
+        check +
+        " za istosmjerne pozitivne ulaze vrijedi " +
+        fmt(lo, 2) +
+        " ≤ $v_3$ ≤ " +
+        fmt(hi, 2) +
+        " m/s. Kada je $f_A$ malen, $v_3$ je bliže $v_2$; kada $f_A$ teži jedinici, $v_3$ teži $v_1$.</p>";
+    } else {
+      $("#z75-note").className = "v8-alert";
+      $("#z75-note").innerHTML =
+        "<strong>Geometrija nije dopuštena.</strong><p>Za koaksijalni tok mora vrijediti $D_1<D_2$. U suprotnom nema prstenastoga ulaznog presjeka.</p>";
+    }
+  }
+  ["v1", "v2", "d1", "d2"].forEach((id) => $("#z75-" + id).addEventListener("input", update));
+  update();
+})();
 </script>
 ```
 
@@ -499,134 +1457,352 @@ $v_3$ je zato površinski ponderirana srednja brzina ulaznih tokova. U presjeku 
 </style>
 <script>
 (() => {
-  const fmt = (n, d = 2) => Number(n).toLocaleString('hr-HR', { minimumFractionDigits: d, maximumFractionDigits: d });
-  const area = d => Math.PI * d * d / 4;
-  const value = id => +document.getElementById(id).value;
-  const text = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value; };
-  const html = (id, value) => { const node = document.getElementById(id); if (node) node.innerHTML = value; };
+  const fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const area = (d) => (Math.PI * d * d) / 4;
+  const value = (id) => +document.getElementById(id).value;
+  const text = (id, value) => {
+    const node = document.getElementById(id);
+    if (node) node.textContent = value;
+  };
+  const html = (id, value) => {
+    const node = document.getElementById(id);
+    if (node) node.innerHTML = value;
+  };
 
   function sourcePreset(rootId, label, settings) {
     const root = document.getElementById(rootId);
-    if (!root || root.querySelector('.v8-source-preset')) return;
-    const presets = document.createElement('div');
-    presets.className = 'v8-presets v8-source-preset';
-    presets.innerHTML = '<button type="button">' + label + '</button>';
-    presets.querySelector('button').addEventListener('click', () => {
+    if (!root || root.querySelector(".v8-source-preset")) return;
+    const presets = document.createElement("div");
+    presets.className = "v8-presets v8-source-preset";
+    presets.innerHTML = '<button type="button">' + label + "</button>";
+    presets.querySelector("button").addEventListener("click", () => {
       Object.entries(settings).forEach(([id, setting]) => {
         const input = document.getElementById(id);
         if (!input) return;
         input.value = setting;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
       });
     });
-    root.querySelector('.v8-scene').before(presets);
+    root.querySelector(".v8-scene").before(presets);
   }
 
   function z70() {
-    const d1 = value('z70-d1'), d2 = value('z70-d2');
-    const ratioD = d2 / d1, ratioA = ratioD * ratioD, ratioV = 1 / ratioA;
-    text('z70-ratio', 'v₂/v₁ = ' + fmt(ratioV, 2));
-    html('z70-locator', '<strong>Kontinuitet u difuzoru.</strong> D₂/D₁ = ' + fmt(ratioD, 2) + ', pa je A₂/A₁ = ' + fmt(ratioA, 2) + '. Za isti nestlačivi Q mora vrijediti v₂/v₁ = A₁/A₂ = ' + fmt(ratioV, 2) + ': veći presjek dopušta manju srednju brzinu, bez zaključka o tlaku.');
+    const d1 = value("z70-d1"),
+      d2 = value("z70-d2");
+    const ratioD = d2 / d1,
+      ratioA = ratioD * ratioD,
+      ratioV = 1 / ratioA;
+    text("z70-ratio", "v₂/v₁ = " + fmt(ratioV, 2));
+    html(
+      "z70-locator",
+      "<strong>Kontinuitet u difuzoru.</strong> D₂/D₁ = " +
+        fmt(ratioD, 2) +
+        ", pa je A₂/A₁ = " +
+        fmt(ratioA, 2) +
+        ". Za isti nestlačivi Q mora vrijediti v₂/v₁ = A₁/A₂ = " +
+        fmt(ratioV, 2) +
+        ": veći presjek dopušta manju srednju brzinu, bez zaključka o tlaku.",
+    );
   }
 
   function z71() {
-    const qa = value('z71-qa'), qb = value('z71-qb'), rb = value('z71-rb');
-    const ma = 1000 * qa, mb = rb * qb, mc = ma + mb, qc = qa + qb, water = ma / mc, oil = mb / mc, rho = mc / qc;
-    text('z71-rc', 'ρC = ' + fmt(rho, 1) + ' kg/m³');
-    const balance = document.getElementById('v8-z71').querySelector('.v8-balance');
-    balance.style.gridTemplateColumns = (water * 100) + 'fr ' + (oil * 100) + 'fr';
-    text('z71-water-share', 'voda · ' + fmt(water * 100, 1) + ' % mase');
-    text('z71-oil-share', 'ulje · ' + fmt(oil * 100, 1) + ' % mase');
-    html('z71-locator', '<strong>Masena bilanca prije svega.</strong> Q_C = Q_A + Q_B = ' + fmt(qc, 3) + ' m³/s vrijedi zbog idealizirane aditivnosti volumena, ali gustoća slijedi iz ρ_CQ_C = ρ_AQ_A + ρ_BQ_B. S udjelom vode od ' + fmt(water * 100, 1) + ' % ukupne mase, ρ_C = ' + fmt(rho, 1) + ' kg/m³ ostaje između gustoća vode i ulja; veći udio gušće vode približava mješavinu 1 000 kg/m³.');
+    const qa = value("z71-qa"),
+      qb = value("z71-qb"),
+      rb = value("z71-rb");
+    const ma = 1000 * qa,
+      mb = rb * qb,
+      mc = ma + mb,
+      qc = qa + qb,
+      water = ma / mc,
+      oil = mb / mc,
+      rho = mc / qc;
+    text("z71-rc", "ρC = " + fmt(rho, 1) + " kg/m³");
+    const balance = document.getElementById("v8-z71").querySelector(".v8-balance");
+    balance.style.gridTemplateColumns = water * 100 + "fr " + oil * 100 + "fr";
+    text("z71-water-share", "voda · " + fmt(water * 100, 1) + " % mase");
+    text("z71-oil-share", "ulje · " + fmt(oil * 100, 1) + " % mase");
+    html(
+      "z71-locator",
+      "<strong>Masena bilanca prije svega.</strong> Q_C = Q_A + Q_B = " +
+        fmt(qc, 3) +
+        " m³/s vrijedi zbog idealizirane aditivnosti volumena, ali gustoća slijedi iz ρ_CQ_C = ρ_AQ_A + ρ_BQ_B. S udjelom vode od " +
+        fmt(water * 100, 1) +
+        " % ukupne mase, ρ_C = " +
+        fmt(rho, 1) +
+        " kg/m³ ostaje između gustoća vode i ulja; veći udio gušće vode približava mješavinu 1 000 kg/m³.",
+    );
   }
 
-  const z72State = { h: 0.60, time: 0, dh: 0, last: 0, running: false, frame: 0 };
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const z72State = { h: 0.6, time: 0, dh: 0, last: 0, running: false, frame: 0 };
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   function z72Model() {
-    const a1 = area(.075), a2 = area(.05), a3 = area(.06), a4 = area(.05), as = area(.61);
-    const qi = a1 * value('z72-v1'), qo = a2 * value('z72-v2') + a3 * value('z72-v3'), net = qi - qo;
+    const a1 = area(0.075),
+      a2 = area(0.05),
+      a3 = area(0.06),
+      a4 = area(0.05),
+      as = area(0.61);
+    const qi = a1 * value("z72-v1"),
+      qo = a2 * value("z72-v2") + a3 * value("z72-v3"),
+      net = qi - qo;
     return { a4, as, qi, qo, net, dh: net / as, v4: Math.abs(net) / a4 };
   }
-  function advanceZ72(now) {
-    if (!z72State.running || !z72State.last) return;
-    const dt = Math.max(0, Math.min(.1, (now - z72State.last) / 1000));
-    z72State.h += z72State.dh * dt;
-    z72State.time += dt;
-    z72State.last = now;
-  }
+  function advanceZ72(now){if(!z72State.running)return;const dt=Math.max(0,Math.min(.1,(now-z72State.last)/1000)),v=z72State.dh,remaining=Math.abs(v)>1e-12?Math.max(0,((v>0?1.7:0)-z72State.h)/v):Infinity,step=Math.min(dt,remaining);z72State.h=MF1.clamp(z72State.h+v*step,0,1.7);z72State.time+=step;z72State.last=now;if(step<dt)z72State.running=false;}
   function z72Scene(model) {
-    const svg = document.getElementById('v8-z72-scene');
-    const y = 295 - z72State.h / 1.7 * 188, air = model.net > 1e-8 ? 'zrak izlazi' : model.net < -1e-8 ? 'zrak ulazi' : 'zrak miruje';
-    const rangeNote = z72State.h < 0 || z72State.h > 1.7 ? '<text x="505" y="350" text-anchor="middle" fill="#9a3412" font-size="15" font-weight="700">h je izvan nacrtanog raspona; proračun se ne ograničava</text>' : '';
-    const airArrow = model.net > 1e-8 ? '<path d="M505 98L505 34" stroke="#7154aa" stroke-width="6" marker-end="url(#z72air)"/>' : model.net < -1e-8 ? '<path d="M505 34L505 98" stroke="#7154aa" stroke-width="6" marker-end="url(#z72air)"/>' : '<path d="M490 62H520" stroke="#7154aa" stroke-width="5"/>';
-    svg.setAttribute('aria-label', 'Spremnik u vremenu t = ' + fmt(z72State.time, 1) + ' sekundi; razina vode h = ' + fmt(z72State.h, 3) + ' metra. ' + air + '.');
-    svg.innerHTML = '<defs><marker id="z72w" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z72o" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z72air" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#7154aa"/></marker></defs><rect x="300" y="42" width="410" height="268" rx="22" fill="none" stroke="#8299a9" stroke-dasharray="9 7" stroke-width="3"/><path d="M410 84V270Q410 295 435 295H575Q600 295 600 270V84" fill="#f9fcfe" stroke="#315b72" stroke-width="4"/><path d="M410 ' + y + 'H600V270Q600 295 575 295H435Q410 295 410 270Z" fill="#63bde0"/><path d="M410 ' + y + 'H600" stroke="#fff" stroke-width="4"/><path d="M65 175H400" stroke="#1687aa" stroke-width="7" marker-end="url(#z72w)"/><path d="M420 282V338" stroke="#d97706" stroke-width="7" marker-end="url(#z72o)"/><path d="M610 230H860" stroke="#d97706" stroke-width="7" marker-end="url(#z72o)"/>' + airArrow + '<text x="205" y="145" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">Q₁</text><text x="455" y="344" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₂</text><text x="738" y="198" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₃</text><text x="540" y="25" text-anchor="middle" fill="#5b3f91" font-size="18" font-weight="700">Q₄: ' + air + '</text><text x="505" y="180" text-anchor="middle" fill="#315b72" font-size="18">Aₛ</text><text x="505" y="326" text-anchor="middle" fill="#315b72" font-size="17">h(t) = ' + fmt(z72State.h, 3) + ' m; t = ' + fmt(z72State.time, 1) + ' s</text>' + rangeNote;
+    const svg = document.getElementById("v8-z72-scene");
+    const y = 295 - (z72State.h / 1.7) * 188,
+      air = model.net > 1e-8 ? "zrak izlazi" : model.net < -1e-8 ? "zrak ulazi" : "zrak miruje";
+    const rangeNote =
+      z72State.h <= 0 || z72State.h >= 1.7
+        ? '<text x="505" y="350" text-anchor="middle" fill="#9a3412" font-size="15" font-weight="700">Dosegnuta granica; zadani tokovi više ne mogu održavati ovaj režim</text>'
+        : "";
+    const airArrow =
+      model.net > 1e-8
+        ? '<path d="M505 98L505 34" stroke="#7154aa" stroke-width="6" marker-end="url(#z72air)"/>'
+        : model.net < -1e-8
+          ? '<path d="M505 34L505 98" stroke="#7154aa" stroke-width="6" marker-end="url(#z72air)"/>'
+          : '<path d="M490 62H520" stroke="#7154aa" stroke-width="5"/>';
+    svg.setAttribute(
+      "aria-label",
+      "Spremnik u vremenu t = " +
+        fmt(z72State.time, 1) +
+        " sekundi; razina vode h = " +
+        fmt(z72State.h, 3) +
+        " metra. " +
+        air +
+        ".",
+    );
+    svg.innerHTML =
+      '<defs><marker id="z72w" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#1687aa"/></marker><marker id="z72o" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#d97706"/></marker><marker id="z72air" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#7154aa"/></marker></defs><rect x="300" y="42" width="410" height="268" rx="22" fill="none" stroke="#8299a9" stroke-dasharray="9 7" stroke-width="3"/><path d="M410 84V270Q410 295 435 295H575Q600 295 600 270V84" fill="#f9fcfe" stroke="#315b72" stroke-width="4"/><path d="M410 ' +
+      y +
+      'H600V270Q600 295 575 295H435Q410 295 410 270Z" fill="#63bde0"/><path d="M410 ' +
+      y +
+      'H600" stroke="#fff" stroke-width="4"/><path d="M65 175H400" stroke="#1687aa" stroke-width="7" marker-end="url(#z72w)"/><path d="M420 282V338" stroke="#d97706" stroke-width="7" marker-end="url(#z72o)"/><path d="M610 230H860" stroke="#d97706" stroke-width="7" marker-end="url(#z72o)"/>' +
+      airArrow +
+      '<text x="205" y="145" text-anchor="middle" fill="#1687aa" font-size="18" font-weight="700">Q₁</text><text x="455" y="344" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₂</text><text x="738" y="198" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">Q₃</text><text x="540" y="25" text-anchor="middle" fill="#5b3f91" font-size="18" font-weight="700">Q₄: ' +
+      air +
+      '</text><text x="505" y="180" text-anchor="middle" fill="#315b72" font-size="18">Aₛ</text><text x="650" y="326" text-anchor="middle" fill="#315b72" font-size="17">h(t) = ' +
+      fmt(z72State.h, 3) +
+      " m; t = " +
+      fmt(z72State.time, 1) +
+      " s</text>" +
+      rangeNote;
+    const qs=[model.qi,area(.05)*value('z72-v2'),area(.06)*value('z72-v3')],vs=Math.min(260/Math.max(qs[0],qs[2],1e-12),60/Math.max(qs[1],1e-12),64/Math.max(Math.abs(model.net),1e-12));svg.querySelectorAll('path[marker-end]').forEach(n=>n.remove());svg.insertAdjacentHTML('beforeend',MF1.svgArrow(400-qs[0]*vs,175,qs[0]*vs,0,'#0284c7')+MF1.svgArrow(430,280,0,qs[1]*vs,'#d97706')+MF1.svgArrow(605,230,qs[2]*vs,0,'#d97706')+MF1.svgArrow(505,98,0,-model.net*vs,'#7c3aed'));
   }
+
   function z72Plot(model) {
-    const horizon = Math.max(10, z72State.time + 2), h0 = z72State.h - model.dh * z72State.time, hend = h0 + model.dh * horizon;
-    const low = Math.min(h0, hend, z72State.h) - .06, high = Math.max(h0, hend, z72State.h) + .06;
-    const x = t => 42 + t / horizon * 536, y = h => 143 - (h - low) / (high - low || 1) * 112;
-    html('z72-plot', '<h5>Razina u vremenu — točan linearni model</h5><svg viewBox="0 0 620 165" role="img" aria-label="Graf visine vode h u vremenu"><path d="M42 18V143H578" fill="none" stroke="#718394"/><path d="M42 ' + y(h0) + 'L578 ' + y(hend) + '" fill="none" stroke="#1976b9" stroke-width="3.5"/><path d="M' + x(z72State.time) + ' 143V' + y(z72State.h) + 'H42" fill="none" stroke="#78909c" stroke-dasharray="5 5"/><circle cx="' + x(z72State.time) + '" cy="' + y(z72State.h) + '" r="6" fill="#238a55" stroke="#fff" stroke-width="3"/><text x="42" y="158" fill="#40596b" font-size="12">0 s</text><text x="548" y="158" fill="#40596b" font-size="12">' + fmt(horizon, 1) + ' s</text><text x="50" y="' + Math.max(18, y(z72State.h) - 9) + '" fill="#125d36" font-size="12" font-weight="800">h = ' + fmt(z72State.h, 3) + ' m</text><text x="310" y="162" text-anchor="middle" fill="#40596b" font-size="12" font-weight="700">vrijeme t</text><text x="14" y="94" transform="rotate(-90 14 94)" fill="#40596b" font-size="12" font-weight="700">razina h</text></svg>');
+    const horizon = Math.max(10, z72State.time + 2),
+      h0 = z72State.h - model.dh * z72State.time,
+      hend = MF1.clamp(h0 + model.dh * horizon,0,1.7);
+    const low = Math.min(h0, hend, z72State.h) - 0.06,
+      high = Math.max(h0, hend, z72State.h) + 0.06;
+    const x = (t) => 42 + (t / horizon) * 536,
+      y = (h) => 143 - ((h - low) / (high - low || 1)) * 112;
+    html(
+      "z72-plot",
+      '<h5>Razina u vremenu — točan linearni model</h5><svg viewBox="0 0 620 165" role="img" aria-label="Graf visine vode h u vremenu"><path d="M42 18V143H578" fill="none" stroke="#718394"/><path d="M42 ' +
+        y(h0) +
+        "L"+x(Math.abs(model.dh)>1e-12?Math.min(horizon,Math.max(0,((model.dh>0?1.7:0)-h0)/model.dh)):horizon)+" " +
+        y(hend) +
+        '" fill="none" stroke="#1976b9" stroke-width="3.5"/><path d="M' +
+        x(z72State.time) +
+        " 143V" +
+        y(z72State.h) +
+        'H42" fill="none" stroke="#78909c" stroke-dasharray="5 5"/><circle cx="' +
+        x(z72State.time) +
+        '" cy="' +
+        y(z72State.h) +
+        '" r="6" fill="#238a55" stroke="#fff" stroke-width="3"/><text x="42" y="158" fill="#40596b" font-size="12">0 s</text><text x="548" y="158" fill="#40596b" font-size="12">' +
+        fmt(horizon, 1) +
+        ' s</text><text x="50" y="' +
+        Math.max(18, y(z72State.h) - 9) +
+        '" fill="#125d36" font-size="12" font-weight="800">h = ' +
+        fmt(z72State.h, 3) +
+        ' m</text><text x="310" y="162" text-anchor="middle" fill="#40596b" font-size="12" font-weight="700">vrijeme t</text><text x="14" y="94" transform="rotate(-90 14 94)" fill="#40596b" font-size="12" font-weight="700">razina h</text></svg>',
+    );
   }
   function syncZ72(now = performance.now()) {
     advanceZ72(now);
     const model = z72Model();
     z72State.dh = model.dh;
-    text('z72-dh', 'dh/dt = ' + fmt(model.dh, 4) + ' m/s');
-    const air = model.net > 1e-8 ? 'zrak izlazi jer rastuća voda istiskuje jednak volumen plina' : model.net < -1e-8 ? 'zrak ulazi jer padajuća voda oslobađa prostor u spremniku' : 'zrak miruje jer se zauzeti volumen vode ne mijenja';
-    html('z72-locator', '<strong>Akumulacija u spremniku.</strong> Q_in − Q_out = ' + fmt(model.net, 5) + ' m³/s, pa je h(t) = ' + fmt(z72State.h, 3) + ' m pri t = ' + fmt(z72State.time, 1) + ' s. ' + air + '; smjer strelice zraka slijedi stvarni predznak bilance.');
-    z72Scene(model); z72Plot(model);
+    text("z72-dh", "dh/dt = " + fmt(model.dh, 4) + " m/s");
+    const air =
+      model.net > 1e-8
+        ? "zrak izlazi jer rastuća voda istiskuje jednak volumen plina"
+        : model.net < -1e-8
+          ? "zrak ulazi jer padajuća voda oslobađa prostor u spremniku"
+          : "zrak miruje jer se zauzeti volumen vode ne mijenja";
+    html(
+      "z72-locator",
+      "<strong>Akumulacija u spremniku.</strong> Q_in − Q_out = " +
+        fmt(model.net, 5) +
+        " m³/s, pa je h(t) = " +
+        fmt(z72State.h, 3) +
+        " m pri t = " +
+        fmt(z72State.time, 1) +
+        " s. " +
+        air +
+        "; smjer strelice zraka slijedi stvarni predznak bilance.",
+    );
+    z72Scene(model);
+    z72Plot(model);
   }
   function tickZ72(now) {
     syncZ72(now);
     if (z72State.running) z72State.frame = requestAnimationFrame(tickZ72);
   }
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){z72State.running=false;cancelAnimationFrame(z72State.frame);}});
   function z73() {
-    const m1 = value('z73-m1'), m2 = value('z73-m2'), rho = value('z73-sg') * 998;
+    const m1 = value("z73-m1"),
+      m2 = value("z73-m2"),
+      rho = value("z73-sg") * 998;
     const qa = m1 / 998 - m2 / rho;
-    text('z73-qa', 'Qair = ' + fmt(qa, 5) + ' m³/s');
-    html('z73-locator', '<strong>Najprije masa, zatim volumen.</strong> Voda daje Q₁ = ṁ₁/ρ_v, a benzin Q₂ = ṁ₂/ρ_b; isti kilogram benzina zauzima više volumena jer je ρ_b = ' + fmt(rho, 1) + ' kg/m³ manja od gustoće vode. Q_air = ' + fmt(qa, 5) + ' m³/s, pri čemu pozitivan predznak znači da ' + (qa > 1e-8 ? 'zrak izlazi' : qa < -1e-8 ? 'zrak ulazi' : 'zrak miruje') + '.');
+    text("z73-qa", "Qair = " + fmt(qa, 5) + " m³/s");
+    html(
+      "z73-locator",
+      "<strong>Najprije masa, zatim volumen.</strong> Voda daje Q₁ = ṁ₁/ρ_v, a benzin Q₂ = ṁ₂/ρ_b; isti kilogram benzina zauzima više volumena jer je ρ_b = " +
+        fmt(rho, 1) +
+        " kg/m³ manja od gustoće vode. Q_air = " +
+        fmt(qa, 5) +
+        " m³/s, pri čemu pozitivan predznak znači da " +
+        (qa > 1e-8 ? "zrak izlazi" : qa < -1e-8 ? "zrak ulazi" : "zrak miruje") +
+        ".",
+    );
   }
   function z74() {
-    const v1 = value('z74-v1'), vp = value('z74-vp'), np = value('z74-np'), dp = value('z74-dp'), l = value('z74-l'), d1 = value('z74-d1'), df = value('z74-df');
-    const aw = Math.PI * d1 * l, n = np * aw, ap = area(dp), qs = n * ap * vp, q1 = area(d1) * v1, share = qs / q1, valid = qs <= q1 + 1e-10;
-    text('z74-share', valid ? 'Qs/Q₁ = ' + fmt(share, 3) : 'Qs/Q₁ = ' + fmt(share, 3) + ' · nije dopušteno');
-    const balance = document.getElementById('v8-z74').querySelector('.v8-balance');
+    const v1 = value("z74-v1"),
+      vp = value("z74-vp"),
+      np = value("z74-np"),
+      dp = value("z74-dp"),
+      l = value("z74-l"),
+      d1 = value("z74-d1"),
+      df = value("z74-df");
+    const aw = Math.PI * d1 * l,
+      n = np * aw,
+      ap = area(dp),
+      qs = n * ap * vp,
+      q1 = area(d1) * v1,
+      share = qs / q1,
+      valid = qs <= q1 + 1e-10;
+    text("z74-share", valid ? "Qs/Q₁ = " + fmt(share, 3) : "Qs/Q₁ = " + fmt(share, 3) + " · nije dopušteno");
+    const balance = document.getElementById("v8-z74").querySelector(".v8-balance");
     if (valid) {
-      balance.style.gridTemplateColumns = (share * 100) + 'fr ' + ((1 - share) * 100) + 'fr';
-      text('z74-exhaust-share', 'odsis Qs · ' + fmt(share * 100, 1) + ' %');
-      text('z74-through-share', 'preostali Q₂ · ' + fmt((1 - share) * 100, 1) + ' %');
-      html('z74-locator', '<strong>Mnogo malih izlaza.</strong> N = ' + fmt(n, 0) + ' provrta, svaki površine A_p = ' + fmt(ap * 1e6, 2) + ' mm², daju Q_s = N A_pv_p = ' + fmt(qs, 3) + ' m³/s. Budući da A_p raste s d_p², promjer provrta djeluje kvadratno na ukupni odsis; preostali Q₂ = ' + fmt(q1 - qs, 3) + ' m³/s ide ventilatoru.');
+      balance.style.gridTemplateColumns = share * 100 + "fr " + (1 - share) * 100 + "fr";
+      text("z74-exhaust-share", "odsis Qs · " + fmt(share * 100, 1) + " %");
+      text("z74-through-share", "preostali Q₂ · " + fmt((1 - share) * 100, 1) + " %");
+      html(
+        "z74-locator",
+        "<strong>Mnogo malih izlaza.</strong> N = " +
+          fmt(n, 0) +
+          " provrta, svaki površine A_p = " +
+          fmt(ap * 1e6, 2) +
+          " mm², daju Q_s = N A_pv_p = " +
+          fmt(qs, 3) +
+          " m³/s. Budući da A_p raste s d_p², promjer provrta djeluje kvadratno na ukupni odsis; preostali Q₂ = " +
+          fmt(q1 - qs, 3) +
+          " m³/s ide ventilatoru.",
+      );
     } else {
-      balance.style.gridTemplateColumns = '1fr';
-      text('z74-exhaust-share', 'Traženi odsis je veći od ulaznog toka'); text('z74-through-share', 'Nema stacionarnog rješenja s protokom naprijed');
-      html('z74-locator', '<strong>Nedopuštena kombinacija.</strong> Qs = ' + fmt(qs, 3) + ' m³/s > Q₁ = ' + fmt(q1, 3) + ' m³/s. Rezultat nije ograničen: model za te rubne uvjete nema rješenje.');
+      balance.style.gridTemplateColumns = "1fr";
+      text("z74-exhaust-share", "Traženi odsis je veći od ulaznog toka");
+      text("z74-through-share", "Nema stacionarnog rješenja s protokom naprijed");
+      html(
+        "z74-locator",
+        "<strong>Nedopuštena kombinacija.</strong> Qs = " +
+          fmt(qs, 3) +
+          " m³/s > Q₁ = " +
+          fmt(q1, 3) +
+          " m³/s. Rezultat nije ograničen: model za te rubne uvjete nema rješenje.",
+      );
     }
   }
   function z75() {
-    const v1 = value('z75-v1'), v2 = value('z75-v2'), d1 = value('z75-d1'), d2 = value('z75-d2'), valid = d1 < d2;
-    if (!valid) { text('z75-v3', '—'); html('z75-locator', '<strong>Geometrija nije dopuštena.</strong> Za prstenasti tok mora vrijediti D₁ < D₂.'); return; }
-    const f = d1 * d1 / (d2 * d2), v3 = f * v1 + (1 - f) * v2, balance = document.getElementById('v8-z75').querySelector('.v8-balance');
-    text('z75-v3', 'v₃ = ' + fmt(v3, 2) + ' m/s');
-    balance.style.gridTemplateColumns = (f * 100) + 'fr ' + ((1 - f) * 100) + 'fr';
-    text('z75-core-share', 'jezgra f · ' + fmt(f * 100, 1) + ' %'); text('z75-annular-share', 'prsten 1 − f · ' + fmt((1 - f) * 100, 1) + ' %');
-    html('z75-locator', '<strong>Ponderiranje površinom, ne aritmetička sredina.</strong> Jezgra zauzima f = A₁/A₂ = ' + fmt(f, 3) + ' ukupnog presjeka, pa njezin doprinos protoku nosi istu težinu u v₃ = fv₁ + (1−f)v₂. Zato je v₃ između ' + fmt(Math.min(v1, v2), 2) + ' i ' + fmt(Math.max(v1, v2), 2) + ' m/s te bliže brzini toka koji nosi veći dio volumenskog protoka.');
+    const v1 = value("z75-v1"),
+      v2 = value("z75-v2"),
+      d1 = value("z75-d1"),
+      d2 = value("z75-d2"),
+      valid = d1 < d2;
+    if (!valid) {
+      text("z75-v3", "—");
+      html("z75-locator", "<strong>Geometrija nije dopuštena.</strong> Za prstenasti tok mora vrijediti D₁ < D₂.");
+      return;
+    }
+    const f = (d1 * d1) / (d2 * d2),
+      v3 = f * v1 + (1 - f) * v2,
+      balance = document.getElementById("v8-z75").querySelector(".v8-balance");
+    text("z75-v3", "v₃ = " + fmt(v3, 2) + " m/s");
+    balance.style.gridTemplateColumns = f * 100 + "fr " + (1 - f) * 100 + "fr";
+    text("z75-core-share", "jezgra f · " + fmt(f * 100, 1) + " %");
+    text("z75-annular-share", "prsten 1 − f · " + fmt((1 - f) * 100, 1) + " %");
+    html(
+      "z75-locator",
+      "<strong>Ponderiranje površinom, ne aritmetička sredina.</strong> Jezgra zauzima f = A₁/A₂ = " +
+        fmt(f, 3) +
+        " ukupnog presjeka, pa njezin doprinos protoku nosi istu težinu u v₃ = fv₁ + (1−f)v₂. Zato je v₃ između " +
+        fmt(Math.min(v1, v2), 2) +
+        " i " +
+        fmt(Math.max(v1, v2), 2) +
+        " m/s te bliže brzini toka koji nosi veći dio ukupne površine.",
+    );
   }
-  function sync(id) { if (id === 'v8-z70') z70(); if (id === 'v8-z71') z71(); if (id === 'v8-z72') syncZ72(); if (id === 'v8-z73') z73(); if (id === 'v8-z74') z74(); if (id === 'v8-z75') z75(); }
+  function sync(id) {
+    if (id === "v8-z70") z70();
+    if (id === "v8-z71") z71();
+    if (id === "v8-z72") syncZ72();
+    if (id === "v8-z73") z73();
+    if (id === "v8-z74") z74();
+    if (id === "v8-z75") z75();
+  }
 
-  sourcePreset('v8-z70', 'Izvorni Z70', { 'z70-d1': .12, 'z70-d2': .18, 'z70-v2': 16, 'z70-rho': 998 });
-  sourcePreset('v8-z71', 'Izvorni Z71', { 'z71-qa': .15, 'z71-qb': .03, 'z71-dc': .30, 'z71-rb': 800 });
-  sourcePreset('v8-z74', 'Izvorni Z74', { 'z74-v1': 46, 'z74-vp': 10, 'z74-np': 800, 'z74-dp': .007, 'z74-l': 4, 'z74-d1': .9, 'z74-df': 2.4 });
-  sourcePreset('v8-z75', 'Izvorni Z75', { 'z75-v1': 26, 'z75-v2': 2.6, 'z75-d1': .10, 'z75-d2': .30 });
-  ['v8-z70', 'v8-z71', 'v8-z72', 'v8-z73', 'v8-z74', 'v8-z75'].forEach(sync);
-  document.addEventListener('input', event => { const root = event.target.closest?.('.v8-lab'); if (!root) return; if (root.id === 'v8-z72') { advanceZ72(performance.now()); z72State.time = 0; } sync(root.id); });
-  document.addEventListener('click', event => { const root = event.target.closest?.('.v8-lab'); if (root?.id === 'v8-z72' && event.target.matches('[data-z72-preset]')) { advanceZ72(performance.now()); z72State.time = 0; syncZ72(); } if (root?.id === 'v8-z73' && event.target.matches('[data-z73-preset]')) z73(); });
-  document.getElementById('z72-start').addEventListener('click', () => {
-    if (reducedMotion) { z72State.h += z72Model().dh; z72State.time += 1; syncZ72(); return; }
-    if (!z72State.running) { z72State.running = true; z72State.last = performance.now(); z72State.frame = requestAnimationFrame(tickZ72); }
+  sourcePreset("v8-z70", "Izvorni Z70", { "z70-d1": 0.12, "z70-d2": 0.18, "z70-v2": 16, "z70-rho": 998 });
+  sourcePreset("v8-z71", "Izvorni Z71", { "z71-qa": 0.15, "z71-qb": 0.03, "z71-dc": 0.3, "z71-rb": 800 });
+  sourcePreset("v8-z74", "Izvorni Z74", {
+    "z74-v1": 46,
+    "z74-vp": 10,
+    "z74-np": 800,
+    "z74-dp": 0.007,
+    "z74-l": 4,
+    "z74-d1": 0.9,
+    "z74-df": 2.4,
   });
-  document.getElementById('z72-pause').addEventListener('click', () => { advanceZ72(performance.now()); z72State.running = false; syncZ72(); });
-  document.getElementById('z72-reset').addEventListener('click', () => { z72State.running = false; z72State.h = .60; z72State.time = 0; z72State.last = 0; syncZ72(); });
+  sourcePreset("v8-z75", "Izvorni Z75", { "z75-v1": 26, "z75-v2": 2.6, "z75-d1": 0.1, "z75-d2": 0.3 });
+  ["v8-z70", "v8-z71", "v8-z72", "v8-z73", "v8-z74", "v8-z75"].forEach(sync);
+  document.addEventListener("input", (event) => {
+    const root = event.target.closest?.(".v8-lab");
+    if (!root) return;
+    if (root.id === "v8-z72") {
+      advanceZ72(performance.now());
+      z72State.time = 0;
+    }
+    sync(root.id);
+  });
+  document.addEventListener("click", (event) => {
+    const root = event.target.closest?.(".v8-lab");
+    if (root?.id === "v8-z72" && event.target.matches("[data-z72-preset]")) {
+      advanceZ72(performance.now());
+      z72State.time = 0;
+      syncZ72();
+    }
+    if (root?.id === "v8-z73" && event.target.matches("[data-z73-preset]")) z73();
+  });
+  document.getElementById("z72-start").addEventListener("click", () => {
+    if (!z72State.running) {
+      z72State.running = true;
+      z72State.last = performance.now();
+      z72State.frame = requestAnimationFrame(tickZ72);
+    }
+  });
+  document.getElementById("z72-pause").addEventListener("click", () => {
+    advanceZ72(performance.now());
+    z72State.running = false;
+    syncZ72();
+  });
+  document.getElementById("z72-reset").addEventListener("click", () => {
+    z72State.running = false;
+    z72State.h = 0.6;
+    z72State.time = 0;
+    z72State.last = 0;
+    syncZ72();
+  });
 })();
 </script>
 

@@ -85,165 +85,120 @@ Komponenta $F_H$ računa se na vertikalnoj projekciji zakrivljene plohe, a njezi
 
 <script>
 (() => {
-  const root = document.getElementById('widget-curved-pressure');
+  const root = document.getElementById("widget-curved-pressure");
   if (!root || root.dataset.ready) return;
-  root.dataset.ready = 'true';
+  root.dataset.ready = "true";
 
-  const canvas = root.querySelector('#cp-canvas');
-  const ctx = canvas.getContext('2d');
-  const hInput = root.querySelector('#cp-h');
-  const rInput = root.querySelector('#cp-r');
-  const buttons = [...root.querySelectorAll('[data-cp-step]')];
+  const canvas = root.querySelector("#cp-canvas");
+  const ctx = canvas.getContext("2d");
+  const hInput = root.querySelector("#cp-h");
+  const rInput = root.querySelector("#cp-r");
+  const buttons = [...root.querySelectorAll("[data-cp-step]")];
   const ui = {
-    h: root.querySelector('#cp-h-value'), r: root.querySelector('#cp-r-value'),
-    fh: root.querySelector('#cp-fh'), fv: root.querySelector('#cp-fv'),
-    fr: root.querySelector('#cp-fr'), theta: root.querySelector('#cp-theta'),
-    note: root.querySelector('#cp-note'), caption: root.querySelector('#cp-caption')
+    h: root.querySelector("#cp-h-value"),
+    r: root.querySelector("#cp-r-value"),
+    fh: root.querySelector("#cp-fh"),
+    fv: root.querySelector("#cp-fv"),
+    fr: root.querySelector("#cp-fr"),
+    theta: root.querySelector("#cp-theta"),
+    note: root.querySelector("#cp-note"),
+    caption: root.querySelector("#cp-caption"),
   };
-  const rho = 1000, g = 9.81, b = 1;
+  const rho = 1000,
+    g = 9.81,
+    b = 1;
   let step = 1;
 
-  const arrow = (x1, y1, x2, y2, color, width = 2.5, label = '') => {
-    const a = Math.atan2(y2 - y1, x2 - x1), head = 9;
+  const arrow = (x1, y1, x2, y2, color, width = 2.5, label = "") => {
+    const a = Math.atan2(y2 - y1, x2 - x1),
+      head = 9;
     ctx.save();
-    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x2, y2);
     ctx.lineTo(x2 - head * Math.cos(a - Math.PI / 6), y2 - head * Math.sin(a - Math.PI / 6));
     ctx.lineTo(x2 - head * Math.cos(a + Math.PI / 6), y2 - head * Math.sin(a + Math.PI / 6));
-    ctx.closePath(); ctx.fill();
+    ctx.closePath();
+    ctx.fill();
     if (label) {
-      ctx.font = '600 15px system-ui, sans-serif';
+      ctx.font = "600 15px system-ui, sans-serif";
       ctx.fillText(label, (x1 + x2) / 2 + 7, (y1 + y2) / 2 - 7);
     }
     ctx.restore();
   };
   const line = (x1, y1, x2, y2, color, dash = []) => {
-    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.setLineDash(dash);
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
   };
-  const label = (text, x, y, color = '#17324d', align = 'left') => {
-    ctx.save(); ctx.font = '600 14px system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align;
-    ctx.fillText(text, x, y); ctx.restore();
+  const label = (text, x, y, color = "#17324d", align = "left") => {
+    ctx.save();
+    ctx.font = "600 14px system-ui, sans-serif";
+    ctx.fillStyle = color;
+    ctx.textAlign = align;
+    ctx.fillText(text, x, y);
+    ctx.restore();
   };
-  const fmt = v => v.toLocaleString('hr-HR', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const fmt = (v) => v.toLocaleString("hr-HR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   function update() {
-    const h = +hInput.value, R = +rInput.value;
+    const h = +hInput.value,
+      R = +rInput.value;
     const Av = R * b;
     const zT = h + R / 2;
-    const V = (h * R + Math.PI * R * R / 4) * b;
-    const FH = rho * g * zT * Av / 1000;
-    const FV = rho * g * V / 1000;
+    const V = (h * R + (Math.PI * R * R) / 4) * b;
+    const FH = (rho * g * zT * Av) / 1000;
+    const FV = (rho * g * V) / 1000;
     const FR = Math.hypot(FH, FV);
-    const phiR = Math.atan2(FV, FH) * 180 / Math.PI;
-    const xV = (-h * R * (R / 2) - (Math.PI * R * R / 4) * (4 * R / (3 * Math.PI))) / (h * R + Math.PI * R * R / 4);
+    const phiR = (Math.atan2(FV, FH) * 180) / Math.PI;
+    const xV =
+      (-h * R * (R / 2) - ((Math.PI * R * R) / 4) * ((4 * R) / (3 * Math.PI))) / (h * R + (Math.PI * R * R) / 4);
 
-    ui.h.textContent = h.toFixed(2).replace('.', ',');
-    ui.r.textContent = R.toFixed(2).replace('.', ',');
-    ui.fh.textContent = fmt(FH) + ' kN/m';
-    ui.fv.textContent = fmt(FV) + ' kN/m ↑';
-    ui.fr.textContent = fmt(FR) + ' kN/m';
-    ui.theta.textContent = fmt(phiR) + '°';
+    ui.h.textContent = h.toFixed(2).replace(".", ",");
+    ui.r.textContent = R.toFixed(2).replace(".", ",");
+    ui.fh.textContent = fmt(FH) + " kN/m";
+    ui.fv.textContent = fmt(FV) + " kN/m ↑";
+    ui.fr.textContent = fmt(FR) + " kN/m";
+    ui.theta.textContent = fmt(phiR) + "°";
 
     const messages = {
-      1: 'Svaka strelica prikazuje tlak p = ρgz: na većoj dubini strelica je veća, a smjer joj je uvijek normala na plohu. Sve normale četvrtine cilindra prolaze kroz središte C.',
-      2: 'Vodoravna komponenta F<sub>H</sub> jednaka je sili na vertikalnu projekciju A<sub>v</sub> = Rb. Magnituda F<sub>V</sub> jednaka je težini stvarnog ili pomoćnog kontrolnog volumena; u ovom položaju djeluje prema gore.',
-      3: 'Komponente se geometrijski zbrajaju: F<sub>R</sub> = √(F<sub>H</sub>² + F<sub>V</sub>²). Za kružni luk pravac djelovanja prolazi kroz C jer svi lokalni tlakovi imaju radijalan smjer.'
+      1: "Svaka strelica prikazuje tlak p = ρgz: na većoj dubini strelica je veća, a smjer joj je uvijek normala na plohu. Sve normale četvrtine cilindra prolaze kroz središte C.",
+      2: "Vodoravna komponenta F<sub>H</sub> jednaka je sili na vertikalnu projekciju A<sub>v</sub> = Rb. Magnituda F<sub>V</sub> jednaka je težini stvarnog ili pomoćnog kontrolnog volumena; u ovom položaju djeluje prema gore.",
+      3: "Komponente se geometrijski zbrajaju: F<sub>R</sub> = √(F<sub>H</sub>² + F<sub>V</sub>²). Za kružni luk pravac djelovanja prolazi kroz C jer svi lokalni tlakovi imaju radijalan smjer.",
     };
     const captions = {
-      1: 'Korak 1 od 3: raspodjela tlaka i normale na zakrivljenu plohu.',
-      2: 'Korak 2 od 3: dvije komponente rezultantne hidrostatske sile.',
-      3: 'Korak 3 od 3: rezultanta je vektorski zbroj komponenti i prolazi kroz C.'
+      1: "Korak 1 od 3: raspodjela tlaka i normale na zakrivljenu plohu.",
+      2: "Korak 2 od 3: dvije komponente rezultantne hidrostatske sile.",
+      3: "Korak 3 od 3: rezultanta je vektorski zbroj komponenti i prolazi kroz C.",
     };
     ui.note.innerHTML = messages[step];
     ui.caption.textContent = captions[step];
-    draw({h, R, xV});
+    draw({h,R,FH,FV});
   }
 
-  function draw(model) {
-    const {h, R, xV} = model;
-    const W = 680, H = 460;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.scale(canvas.width / W, canvas.height / H);
-    const scale = Math.min(150, 290 / (h + R));
-    const xC = 465, ySurface = 62, yC = ySurface + h * scale;
-    const r = R * scale, xLeft = xC - r, yBottom = yC + r;
-    const xVpx = xC + xV * scale;
-    const zFH = h + R / 2 + R * R / (12 * (h + R / 2));
-    const yFH = ySurface + zFH * scale;
+  function draw(model){MF1.quarterScene(canvas,{...model,step});}
 
-    ctx.fillStyle = '#edf8fd'; ctx.fillRect(46, ySurface, xC - 46, yBottom - ySurface);
-    ctx.fillStyle = '#d5eff9'; ctx.fillRect(46, ySurface - 6, xC - 46, 6);
-    line(46, ySurface, xC + 25, ySurface, '#147b9a');
-    label('slobodna površina', 50, ySurface - 10, '#17647d');
-
-    ctx.save();
-    ctx.beginPath(); ctx.moveTo(xC, ySurface); ctx.lineTo(xLeft, ySurface);
-    ctx.arc(xC, yC, r, Math.PI, Math.PI / 2, true);
-    ctx.closePath(); ctx.fillStyle = '#73c0d9a8'; ctx.fill();
-    ctx.setLineDash([6, 5]); ctx.strokeStyle = '#286f8b'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
-
-    ctx.beginPath(); ctx.arc(xC, yC, r, Math.PI, Math.PI / 2, true);
-    ctx.strokeStyle = '#233d59'; ctx.lineWidth = 5; ctx.stroke();
-    label('zakrivljena ploha', xC + 24, yC + 60, '#233d59');
-
-    line(xC, ySurface, xC, yBottom + 15, '#5d7686', [5, 4]);
-    label('Aᵥ = Rb', xC + 8, (ySurface + yBottom) / 2, '#2b6079');
-
-    ctx.fillStyle = '#17324d'; ctx.beginPath(); ctx.arc(xC, yC, 4.5, 0, Math.PI * 2); ctx.fill();
-    label('C', xC + 9, yC - 9, '#17324d');
-
-    if (step === 1 || step === 3) {
-      for (let i = 0; i <= 5; i++) {
-        const a = Math.PI - i * Math.PI / 10;
-        const px = xC + r * Math.cos(a), py = yC + r * Math.sin(a);
-        const len = 18 + 27 * ((py - ySurface) / (yBottom - ySurface));
-        const nx = -Math.cos(a), ny = -Math.sin(a);
-        arrow(px - nx * len, py - ny * len, px, py, '#d26a37', 2);
-        if (i === 0 || i === 5) line(px, py, xC, yC, '#95a7b4', [3, 4]);
-      }
-      label('p = ρgz', 105, yBottom - 18, '#b64e25');
-      label('normalni tlakovi', 105, yBottom + 4, '#b64e25');
-    }
-
-    if (step >= 2) {
-      line(66, yFH, xC + 86, yFH, '#49697b', [4, 4]);
-      arrow(xC - 78, yFH, xC + 5, yFH, '#0b7898', 3, 'Fₕ');
-      line(xVpx, ySurface + 12, xVpx, yBottom + 35, '#49697b', [4, 4]);
-      arrow(xVpx, yC + 80, xVpx, yC - 13, '#198754', 3, 'Fᵥ');
-      label('z_FH', 72, yFH - 8, '#345567');
-      label('V iznad plohe', 112, ySurface + 26, '#176b85');
-    }
-
-    if (step === 3) {
-      const pX = xVpx, pY = yFH;
-      const dX = xC - pX, dY = yC - pY;
-      line(pX - .45 * dX, pY - .45 * dY, xC + .45 * dX, yC + .45 * dY, '#c73c42', [5, 4]);
-      arrow(pX, pY, xC, yC, '#c73c42', 4, 'Fᵣ');
-      ctx.save(); ctx.strokeStyle = '#c73c42'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(pX, pY, 25, -Math.PI / 2, Math.atan2(yC - pY, xC - pX)); ctx.stroke(); ctx.restore();
-      label('θ', pX + 28, pY - 10, '#a4232b');
-      label('pravac Fᵣ prolazi kroz C', 314, yBottom + 36, '#a4232b');
-    }
-
-    ctx.save(); ctx.strokeStyle = '#476577'; ctx.lineWidth = 1.1;
-    ctx.beginPath(); ctx.moveTo(xC + 44, ySurface); ctx.lineTo(xC + 44, yC); ctx.stroke();
-    ctx.fillStyle = '#476577'; ctx.font = '13px system-ui'; ctx.fillText('h₁', xC + 50, (ySurface + yC) / 2);
-    ctx.restore();
-    ctx.fillStyle = '#476577'; ctx.font = '13px system-ui'; ctx.fillText('R', xC - r / 2 - 8, yC + r / 2);
-    ctx.restore();
-  }
-
-  hInput.addEventListener('input', update);
-  rInput.addEventListener('input', update);
-  buttons.forEach(button => button.addEventListener('click', () => {
-    step = +button.dataset.cpStep;
-    buttons.forEach(b => b.setAttribute('aria-pressed', String(b === button)));
-    update();
-  }));
+  hInput.addEventListener("input", update);
+  rInput.addEventListener("input", update);
+  buttons.forEach((button) =>
+    button.addEventListener("click", () => {
+      step = +button.dataset.cpStep;
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+      update();
+    }),
+  );
   update();
 })();
 </script>
@@ -347,54 +302,120 @@ Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($
 </div>
 <script>
 (() => {
-  const root = document.getElementById('widget-49');
+  const root = document.getElementById("widget-49");
   if (!root || root.dataset.ready) return;
-  root.dataset.ready = 'true';
-  const canvas = root.querySelector('#z49-canvas'), ctx = canvas.getContext('2d');
-  const controls = { H: root.querySelector('#z49-h'), R: root.querySelector('#z49-r'), rho: root.querySelector('#z49-rho'), Gc: root.querySelector('#z49-gc') };
-  const ui = { H: root.querySelector('#z49-h-read'), R: root.querySelector('#z49-r-read'), rho: root.querySelector('#z49-rho-read'), Gc: root.querySelector('#z49-gc-read'), s: root.querySelector('#z49-s'), fh: root.querySelector('#z49-fh'), fv: root.querySelector('#z49-fv'), fr: root.querySelector('#z49-fr'), mw: root.querySelector('#z49-mw'), greq: root.querySelector('#z49-greq'), status: root.querySelector('#z49-status') };
-  const g = 9.81, b = 1, fmt = (v, n = 1) => v.toLocaleString('hr-HR', {minimumFractionDigits: n, maximumFractionDigits: n});
-  const line = (x1, y1, x2, y2, color, dash = [], width = 1.5) => { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore(); };
-  const text = (v, x, y, color = '#17324d', align = 'left', size = 14) => { ctx.save(); ctx.fillStyle = color; ctx.font = '600 ' + size + 'px system-ui, sans-serif'; ctx.textAlign = align; ctx.fillText(v, x, y); ctx.restore(); };
-  const arrow = (x1, y1, x2, y2, color, label = '', width = 3) => {
-    const a = Math.atan2(y2 - y1, x2 - x1), d = 9;
-    ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - d * Math.cos(a - Math.PI / 6), y2 - d * Math.sin(a - Math.PI / 6)); ctx.lineTo(x2 - d * Math.cos(a + Math.PI / 6), y2 - d * Math.sin(a + Math.PI / 6)); ctx.closePath(); ctx.fill();
-    if (label) { ctx.font = '700 15px system-ui, sans-serif'; ctx.fillText(label, (x1 + x2) / 2 + 6, (y1 + y2) / 2 - 7); } ctx.restore();
+  root.dataset.ready = "true";
+  const canvas = root.querySelector("#z49-canvas"),
+    ctx = canvas.getContext("2d");
+  const controls = {
+    H: root.querySelector("#z49-h"),
+    R: root.querySelector("#z49-r"),
+    rho: root.querySelector("#z49-rho"),
+    Gc: root.querySelector("#z49-gc"),
+  };
+  const ui = {
+    H: root.querySelector("#z49-h-read"),
+    R: root.querySelector("#z49-r-read"),
+    rho: root.querySelector("#z49-rho-read"),
+    Gc: root.querySelector("#z49-gc-read"),
+    s: root.querySelector("#z49-s"),
+    fh: root.querySelector("#z49-fh"),
+    fv: root.querySelector("#z49-fv"),
+    fr: root.querySelector("#z49-fr"),
+    mw: root.querySelector("#z49-mw"),
+    greq: root.querySelector("#z49-greq"),
+    status: root.querySelector("#z49-status"),
+  };
+  const g = 9.81,
+    b = 1,
+    fmt = (v, n = 1) => v.toLocaleString("hr-HR", { minimumFractionDigits: n, maximumFractionDigits: n });
+  const line = (x1, y1, x2, y2, color, dash = [], width = 1.5) => {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
+  };
+  const text = (v, x, y, color = "#17324d", align = "left", size = 14) => {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = "600 " + size + "px system-ui, sans-serif";
+    ctx.textAlign = align;
+    ctx.fillText(v, x, y);
+    ctx.restore();
+  };
+  const arrow = (x1, y1, x2, y2, color, label = "", width = 3) => {
+    const a = Math.atan2(y2 - y1, x2 - x1),
+      d = 9;
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - d * Math.cos(a - Math.PI / 6), y2 - d * Math.sin(a - Math.PI / 6));
+    ctx.lineTo(x2 - d * Math.cos(a + Math.PI / 6), y2 - d * Math.sin(a + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    if (label) {
+      ctx.font = "700 15px system-ui, sans-serif";
+      ctx.fillText(label, (x1 + x2) / 2 + 6, (y1 + y2) / 2 - 7);
+    }
+    ctx.restore();
   };
 
-  function draw(m) {
-    const top = 48, r = Math.max(72, Math.min(112, 67 + m.R * 50)), xA = 300;
-    const yA = top + 76 + Math.min(130, (m.s / Math.max(m.H, .1)) * 120), xC = xA + r, yBottom = yA + r;
-    const zT = m.s + m.R / 2, zCP = zT + m.R * m.R / (12 * zT), yP = top + (yBottom - top) * zCP / m.H, pX = xC - (yP - yA) / Math.tan(m.theta * Math.PI / 180);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save(); ctx.scale(canvas.width / 700, canvas.height / 430);
-    ctx.save(); ctx.beginPath(); ctx.moveTo(58, top); ctx.lineTo(xA, top); ctx.lineTo(xA, yA); ctx.arc(xC, yA, r, Math.PI, Math.PI / 2, true); ctx.lineTo(58, yBottom); ctx.closePath(); ctx.fillStyle = '#bde8f7'; ctx.fill(); ctx.restore();
-    line(58, top, xA, top, '#147b9a', [], 2.2); text('slobodna površina', 62, top - 10, '#17647d'); line(xA, top, xA, yA, '#5f7280', [], 4); line(58, yBottom, xC + r + 38, yBottom, '#5f7280', [], 4);
-    ctx.beginPath(); ctx.arc(xC, yA, r, 0, Math.PI * 2); ctx.fillStyle = '#e9eef2'; ctx.fill(); ctx.strokeStyle = '#42566a'; ctx.lineWidth = 2.2; ctx.stroke();
-    ctx.beginPath(); ctx.arc(xC, yA, r, Math.PI, Math.PI / 2, true); ctx.strokeStyle = '#17324d'; ctx.lineWidth = 5; ctx.stroke();
-    ctx.fillStyle = '#17324d'; ctx.beginPath(); ctx.arc(xA, yA, 5, 0, 2 * Math.PI); ctx.fill(); text('A', xA - 14, yA - 10); ctx.beginPath(); ctx.arc(xC, yA, 4, 0, 2 * Math.PI); ctx.fill(); text('C', xC + 9, yA - 10);
-    line(xA, yA, xC, yA, '#607889', [5, 4]); text('AC = R', (xA + xC) / 2, yA - 10, '#4d6678', 'center'); line(xA - 24, top, xA - 24, yA, '#607889', [5, 4]); text('s = H − R', xA - 32, (top + yA) / 2, '#4d6678', 'right', 12); line(xC + r + 25, top, xC + r + 25, yBottom, '#607889', [4, 4]); text('H', xC + r + 32, (top + yBottom) / 2, '#4d6678');
-    for (let i = 1; i <= 4; i++) { const a = Math.PI - i * Math.PI / 10, px = xC + r * Math.cos(a), py = yA + r * Math.sin(a), len = 18 + 7 * i, nx = -Math.cos(a), ny = -Math.sin(a); arrow(px - nx * len, py - ny * len, px, py, '#d26a37', '', 2); }
-    text('lokalni normalni tlakovi', 86, yBottom - 46, '#b64e25', 'left', 12);
-    line(100, yP, xC + r + 46, yP, '#648090', [4, 4]); arrow(pX - 82, yP, pX + 5, yP, '#0b7898', 'Fₕ'); line(pX, yA - 42, pX, yBottom + 28, '#648090', [4, 4]); arrow(pX, yP + 68, pX, yP - 7, '#198754', 'Fᵥ');
-    const dx = xC - pX, dy = yA - yP; line(pX - .42 * dx, yP - .42 * dy, xC + .42 * dx, yA + .42 * dy, '#c73c42', [5, 4], 1.6); arrow(pX, yP, xC, yA, '#c73c42', 'Fᵣ', 3.5); text('Fᵣ kroz C', xC + r + 48, yA + 18, '#a4232b', 'left', 12);
-    arrow(xC, yA + 10, xC, yA + 84, '#6e63bb', 'G_c');
-    ctx.save(); ctx.strokeStyle = '#6e63bb'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.arc(xA, yA, 42, Math.PI * 1.05, Math.PI * 1.72); ctx.stroke(); ctx.restore(); text('M_A', xA - 68, yA - 43, '#5d52a5', 'left', 12);
-    text('donji lijevi smočeni luk', 86, yBottom + 31, '#17324d', 'left', 12);
-    ctx.restore();
-  }
+  function draw(m){MF1.quarterScene(canvas,m);}
 
   function update() {
-    const H = +controls.H.value, R = +controls.R.value, rho = +controls.rho.value, Gc = +controls.Gc.value, s = H - R, Av = R * b, zT = s + R / 2;
-    const FH = rho * g * zT * Av / 1000, Fy = rho * g * H * Av / 1000, Wf = rho * g * (R * R - Math.PI * R * R / 4) * b / 1000, FV = Fy - Wf, FR = Math.hypot(FH, FV), theta = Math.atan2(FV, FH) * 180 / Math.PI, Mw = FV * R, difference = FV - Gc;
-    ui.H.textContent = H.toFixed(2).replace('.', ','); ui.R.textContent = R.toFixed(2).replace('.', ','); ui.rho.textContent = rho.toFixed(0); ui.Gc.textContent = fmt(Gc); ui.s.textContent = fmt(s, 2) + ' m'; ui.fh.textContent = fmt(FH) + ' kN/m'; ui.fv.textContent = fmt(FV) + ' kN/m ↑'; ui.fr.textContent = fmt(FR) + ' kN/m; ' + fmt(theta) + '°'; ui.mw.textContent = fmt(Mw) + ' kNm/m'; ui.greq.textContent = fmt(FV) + ' kN/m';
-    if (Math.abs(difference) < .06) ui.status.innerHTML = '<strong>Na pragu otvaranja.</strong> M<sub>voda,A</sub> = F<sub>V</sub>R i M<sub>G,A</sub> = G<sub>c</sub>R su jednaki.';
-    else if (difference > 0) ui.status.innerHTML = '<strong>Zaklopka se otvara.</strong> Moment vode veći je za ' + fmt(difference) + ' kN/m × R od momenta težine.';
-    else ui.status.innerHTML = '<strong>Zaklopka ostaje zatvorena.</strong> Težina treba biti manja za ' + fmt(-difference) + ' kN/m da bi se dosegnuo prag.';
-    draw({H, R, s, theta});
+    const H = +controls.H.value,
+      R = +controls.R.value,
+      rho = +controls.rho.value,
+      Gc = +controls.Gc.value,
+      s = H - R,
+      Av = R * b,
+      zT = s + R / 2;
+    const FH = (rho * g * zT * Av) / 1000,
+      Fy = (rho * g * H * Av) / 1000,
+      Wf = (rho * g * (R * R - (Math.PI * R * R) / 4) * b) / 1000,
+      FV = Fy - Wf,
+      FR = Math.hypot(FH, FV),
+      theta = (Math.atan2(FV, FH) * 180) / Math.PI,
+      Mw = FV * R,
+      difference = FV - Gc;
+    ui.H.textContent = H.toFixed(2).replace(".", ",");
+    ui.R.textContent = R.toFixed(2).replace(".", ",");
+    ui.rho.textContent = rho.toFixed(0);
+    ui.Gc.textContent = fmt(Gc);
+    ui.s.textContent = fmt(s, 2) + " m";
+    ui.fh.textContent = fmt(FH) + " kN/m";
+    ui.fv.textContent = fmt(FV) + " kN/m ↑";
+    ui.fr.textContent = fmt(FR) + " kN/m; " + fmt(theta) + "°";
+    ui.mw.textContent = fmt(Mw) + " kNm/m";
+    ui.greq.textContent = fmt(FV) + " kN/m";
+    if (Math.abs(difference) < 0.06)
+      ui.status.innerHTML =
+        "<strong>Na pragu otvaranja.</strong> M<sub>voda,A</sub> = F<sub>V</sub>R i M<sub>G,A</sub> = G<sub>c</sub>R su jednaki.";
+    else if (difference > 0)
+      ui.status.innerHTML =
+        "<strong>Zaklopka se otvara.</strong> Moment vode veći je za " +
+        fmt(difference) +
+        " kN/m × R od momenta težine.";
+    else
+      ui.status.innerHTML =
+        "<strong>Zaklopka ostaje zatvorena.</strong> Težina treba biti manja za " +
+        fmt(-difference) +
+        " kN/m da bi se dosegnuo prag.";
+    draw({h:s,R,FH,FV,G:Gc});
   }
-  Object.values(controls).forEach(input => input.addEventListener('input', update));
+  Object.values(controls).forEach((input) => input.addEventListener("input", update));
   update();
 })();
 </script>
@@ -424,7 +445,7 @@ Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\
     *   **Položaj ($z_{FH}$):** Koristi se formula za centar pritiska: $z_{FH} = z_{TAX} + \frac{I_G}{z_{TAX} \cdot A} = 3,09\text{ m}$, gdje je $I_G$ drugi moment projekcijske površine oko centroidalne osi paralelne slobodnoj površini.
 
 2.  **Vertikalna sila ($F_V$):**
-    *   Magnituda je jednaka težini kontrolnog volumena sastavljenog od pravokutnika ($h_1 \cdot R \cdot b$) i četvrtine kruga ($\frac{R^2 \pi}{4} \cdot b$). Za orijentaciju Z50, u kojoj je voda lijevo od plohe, komponenta je usmjerena prema gore; za zrcalni Z51 mijenja smjer prema dolje.
+    *   Magnituda je jednaka težini kontrolnog volumena sastavljenog od pravokutnika ($h_1 \cdot R \cdot b$) i četvrtine kruga ($\frac{R^2 \pi}{4} \cdot b$). Za orijentaciju Z50, u kojoj je voda lijevo od plohe, komponenta je usmjerena prema gore; za Z51 voda djeluje s druge strane iste plohe pa obje komponente mijenjaju smjer.
     *   $V = 7,587\text{ m}^3 \implies F_V = \rho \cdot g \cdot V = 74277,6\text{ N}$.
     *   **Položaj ($x_{FV}$):** Određuje se preko statičkog momenta volumena (zbroj momenata pojedinih dijelova kroz ukupni volumen).
     *   $x_{FV} = 0,584 \text{ m}$ od vertikalne osi koja prolazi kroz točku B.
@@ -489,45 +510,109 @@ Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\
 </div>
 <script>
 (() => {
-  const root = document.getElementById('widget-50-51');
+  const root = document.getElementById("widget-50-51");
   if (!root || root.dataset.ready) return;
-  root.dataset.ready = 'true';
-  const canvas = root.querySelector('#z50-canvas'), ctx = canvas.getContext('2d');
-  const inputs = { R: root.querySelector('#z50-r'), h: root.querySelector('#z50-h'), b: root.querySelector('#z50-b') };
-  const ui = { R: root.querySelector('#z50-r-read'), h: root.querySelector('#z50-h-read'), b: root.querySelector('#z50-b-read'), fh: root.querySelector('#z50-fh'), zfh: root.querySelector('#z50-zfh'), v: root.querySelector('#z50-v'), fv: root.querySelector('#z50-fv'), xfv: root.querySelector('#z50-xfv'), note: root.querySelector('#z50-note') };
-  const tabs = [...root.querySelectorAll('[data-z50-side]')], rho = 998, g = 9.81;
-  let side = 'left';
-  const fmt = (v, n = 1) => v.toLocaleString('hr-HR', {minimumFractionDigits: n, maximumFractionDigits: n});
-  const line = (x1,y1,x2,y2,c,d=[],w=1.5) => { ctx.save(); ctx.strokeStyle=c; ctx.lineWidth=w; ctx.setLineDash(d); ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.restore(); };
-  const label = (v,x,y,c='#17324d',align='left',size=14) => { ctx.save(); ctx.fillStyle=c; ctx.font='600 '+size+'px system-ui, sans-serif'; ctx.textAlign=align; ctx.fillText(v,x,y); ctx.restore(); };
-  const arrow = (x1,y1,x2,y2,c,t='',w=3) => { const a=Math.atan2(y2-y1,x2-x1),d=9; ctx.save(); ctx.strokeStyle=c; ctx.fillStyle=c; ctx.lineWidth=w; ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-d*Math.cos(a-Math.PI/6),y2-d*Math.sin(a-Math.PI/6));ctx.lineTo(x2-d*Math.cos(a+Math.PI/6),y2-d*Math.sin(a+Math.PI/6));ctx.closePath();ctx.fill();if(t){ctx.font='700 15px system-ui, sans-serif';ctx.fillText(t,(x1+x2)/2+6,(y1+y2)/2-7);}ctx.restore(); };
-
-  function draw(m) {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.save(); ctx.scale(canvas.width / 690, canvas.height / 420);
-    const W = 690, left = side === 'left', xC = left ? 470 : 220, yC = 230, r = 108, xB = left ? xC - r : xC + r, yB = yC + r, ySurface = 62, dir = left ? 1 : -1, vDir = left ? -1 : 1;
-    ctx.fillStyle = '#bde8f7'; ctx.fillRect(left ? 45 : xC, ySurface, left ? xC - 45 : W - xC - 45, yB - ySurface);
-    line(left ? 45 : xC, ySurface, left ? xC : W - 45, ySurface, '#147b9a', [], 2.2); label('slobodna površina', left ? 50 : W - 50, ySurface - 10, '#17647d', left ? 'left' : 'right');
-    ctx.save(); ctx.beginPath(); ctx.moveTo(xC,ySurface); ctx.lineTo(xB,ySurface); ctx.lineTo(xB,yC); ctx.arc(xC,yC,r,left ? Math.PI : 0,left ? Math.PI/2 : Math.PI/2,left); ctx.closePath(); ctx.fillStyle='#74c2d88a';ctx.fill();ctx.setLineDash([6,5]);ctx.strokeStyle='#286f8b';ctx.stroke();ctx.restore();
-    ctx.beginPath();ctx.arc(xC,yC,r,left?Math.PI:0,Math.PI/2,left);ctx.strokeStyle='#213e58';ctx.lineWidth=5;ctx.stroke();
-    line(xB,yC,xB,yB,'#607889',[5,4]);label('Aᵥ = Rb',xB+dir*7,(yC+yB)/2,'#436579',dir>0?'left':'right',12);
-    for(let i=1;i<=4;i++){const a=left?Math.PI-i*Math.PI/10:i*Math.PI/10,px=xC+r*Math.cos(a),py=yC+r*Math.sin(a),nx=-Math.cos(a),ny=-Math.sin(a),len=17+i*7;arrow(px-nx*len,py-ny*len,px,py,'#d26a37','',2);}
-    const yP=ySurface+(m.zfh/(m.h+m.R))*((yB-ySurface)), pX=xB+dir*(r*.43);
-    line(55,yP,635,yP,'#648090',[4,4]);arrow(pX-dir*68,yP,pX+dir*6,yP,'#0b7898','Fₕ');line(pX,ySurface+8,pX,yB+30,'#648090',[4,4]);arrow(pX,yP-vDir*58,pX,yP-vDir*6,'#198754','Fᵥ');
-    const endX=pX+dir*62,endY=yP+vDir*62;arrow(pX,yP,endX,endY,'#c73c42','Fᵣ',3.5);
-    label('z_FH',xB+dir*10,yP-9,'#496979',dir>0?'left':'right',12);label('x_FV od B',pX,yB+19,'#496979','center',12);
-    label(left?'Z50: voda lijevo':'Z51: voda desno',W/2,392,'#17324d','center',14);
+  root.dataset.ready = "true";
+  const canvas = root.querySelector("#z50-canvas"),
+    ctx = canvas.getContext("2d");
+  const inputs = { R: root.querySelector("#z50-r"), h: root.querySelector("#z50-h"), b: root.querySelector("#z50-b") };
+  const ui = {
+    R: root.querySelector("#z50-r-read"),
+    h: root.querySelector("#z50-h-read"),
+    b: root.querySelector("#z50-b-read"),
+    fh: root.querySelector("#z50-fh"),
+    zfh: root.querySelector("#z50-zfh"),
+    v: root.querySelector("#z50-v"),
+    fv: root.querySelector("#z50-fv"),
+    xfv: root.querySelector("#z50-xfv"),
+    note: root.querySelector("#z50-note"),
+  };
+  const tabs = [...root.querySelectorAll("[data-z50-side]")],
+    rho = 998,
+    g = 9.81;
+  let side = "left";
+  const fmt = (v, n = 1) => v.toLocaleString("hr-HR", { minimumFractionDigits: n, maximumFractionDigits: n });
+  const line = (x1, y1, x2, y2, c, d = [], w = 1.5) => {
+    ctx.save();
+    ctx.strokeStyle = c;
+    ctx.lineWidth = w;
+    ctx.setLineDash(d);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
     ctx.restore();
-  }
+  };
+  const label = (v, x, y, c = "#17324d", align = "left", size = 14) => {
+    ctx.save();
+    ctx.fillStyle = c;
+    ctx.font = "600 " + size + "px system-ui, sans-serif";
+    ctx.textAlign = align;
+    ctx.fillText(v, x, y);
+    ctx.restore();
+  };
+  const arrow = (x1, y1, x2, y2, c, t = "", w = 3) => {
+    const a = Math.atan2(y2 - y1, x2 - x1),
+      d = 9;
+    ctx.save();
+    ctx.strokeStyle = c;
+    ctx.fillStyle = c;
+    ctx.lineWidth = w;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - d * Math.cos(a - Math.PI / 6), y2 - d * Math.sin(a - Math.PI / 6));
+    ctx.lineTo(x2 - d * Math.cos(a + Math.PI / 6), y2 - d * Math.sin(a + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    if (t) {
+      ctx.font = "700 15px system-ui, sans-serif";
+      ctx.fillText(t, (x1 + x2) / 2 + 6, (y1 + y2) / 2 - 7);
+    }
+    ctx.restore();
+  };
+
+  function draw(m){MF1.quarterScene(canvas,m);}
 
   function update() {
-    const R=+inputs.R.value,h=+inputs.h.value,b=+inputs.b.value,zT=h+R/2,area=R*b,FH=rho*g*zT*area/1000,zfh=zT+R*R/(12*zT),V=(h*R+Math.PI*R*R/4)*b,FV=rho*g*V/1000,V1=h*R*b,V2=Math.PI*R*R*b/4,xfv=(V1*(R/2)+V2*(4*R/(3*Math.PI)))/V;
-    ui.R.textContent=R.toFixed(2).replace('.',',');ui.h.textContent=h.toFixed(2).replace('.',',');ui.b.textContent=b.toFixed(2).replace('.',',');ui.fh.textContent=fmt(FH)+' kN';ui.zfh.textContent=fmt(zfh,3)+' m';ui.v.textContent=fmt(V,3)+' m³';ui.fv.textContent=fmt(FV)+' kN '+(side==='left'?'↑':'↓');ui.xfv.textContent=fmt(xfv,3)+' m';
-    ui.note.innerHTML=side==='left'?'<strong>Z50:</strong> voda je lijevo od plohe; okomita komponenta usmjerena je <strong>prema gore</strong>. Obojeni dio prikazuje kontrolni volumen čija težina daje magnitudu F<sub>V</sub>.':'<strong>Z51:</strong> voda je desno od plohe; okomita komponenta usmjerena je <strong>prema dolje</strong>. Promijenjen položaj vode mijenja smjer F<sub>V</sub>, a postupak projekcije za F<sub>H</sub> ostaje isti.';
-    draw({R,h,zfh,xfv});
+    const R = +inputs.R.value,
+      h = +inputs.h.value,
+      b = +inputs.b.value,
+      zT = h + R / 2,
+      area = R * b,
+      FH = (rho * g * zT * area) / 1000,
+      zfh = zT + (R * R) / (12 * zT),
+      V = (h * R + (Math.PI * R * R) / 4) * b,
+      FV = (rho * g * V) / 1000,
+      V1 = h * R * b,
+      V2 = (Math.PI * R * R * b) / 4,
+      xfv = (V1 * (R / 2) + V2 * ((4 * R) / (3 * Math.PI))) / V;
+    ui.R.textContent = R.toFixed(2).replace(".", ",");
+    ui.h.textContent = h.toFixed(2).replace(".", ",");
+    ui.b.textContent = b.toFixed(2).replace(".", ",");
+    ui.fh.textContent = fmt(FH) + " kN";
+    ui.zfh.textContent = fmt(zfh, 3) + " m";
+    ui.v.textContent = fmt(V, 3) + " m³";
+    ui.fv.textContent = fmt(FV) + " kN " + (side === "left" ? "↑" : "↓");
+    ui.xfv.textContent = fmt(xfv, 3) + " m";
+    ui.note.innerHTML =
+      side === "left"
+        ? "<strong>Z50:</strong> voda je lijevo od plohe; okomita komponenta usmjerena je <strong>prema gore</strong>. Obojeni dio prikazuje kontrolni volumen čija težina daje magnitudu F<sub>V</sub>."
+        : "<strong>Z51:</strong> voda je desno od plohe; okomita komponenta usmjerena je <strong>prema dolje</strong>. Promijenjen položaj vode mijenja smjer F<sub>V</sub>, a postupak projekcije za F<sub>H</sub> ostaje isti.";
+    draw({R,h,FH,FV,inside:side!=="left"});
   }
-  tabs.forEach(btn=>btn.addEventListener('click',()=>{side=btn.dataset.z50Side;tabs.forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));update();}));
-  Object.values(inputs).forEach(input=>input.addEventListener('input',update)); update();
+  tabs.forEach((btn) =>
+    btn.addEventListener("click", () => {
+      side = btn.dataset.z50Side;
+      tabs.forEach((x) => x.setAttribute("aria-pressed", String(x === btn)));
+      update();
+    }),
+  );
+  Object.values(inputs).forEach((input) => input.addEventListener("input", update));
+  update();
 })();
 </script>
 ```
@@ -611,36 +696,90 @@ Cilindrični spremnik težine $G=79\,\mathrm{N}$ djelomično je potopljen. Potre
 </div>
 <script>
 (() => {
-  const root = document.getElementById('widget-55');
+  const root = document.getElementById("widget-55");
   if (!root || root.dataset.ready) return;
-  root.dataset.ready = 'true';
-  const canvas = root.querySelector('#z55-canvas'), ctx = canvas.getContext('2d');
-  const inputs = { G: root.querySelector('#z55-g'), D: root.querySelector('#z55-d'), h: root.querySelector('#z55-h'), rm: root.querySelector('#z55-rm') };
-  const ui = { G: root.querySelector('#z55-g-r'), D: root.querySelector('#z55-d-r'), h: root.querySelector('#z55-h-r'), rm: root.querySelector('#z55-rm-r'), p: root.querySelector('#z55-p'), h1: root.querySelector('#z55-h1'), pa: root.querySelector('#z55-pa'), f: root.querySelector('#z55-f'), note: root.querySelector('#z55-note') };
-  const fmt = (v,n=1) => v.toLocaleString('hr-HR',{minimumFractionDigits:n,maximumFractionDigits:n});
-  const arrow = (x1,y1,x2,y2,color,label='') => { const a=Math.atan2(y2-y1,x2-x1),d=9; ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-d*Math.cos(a-Math.PI/6),y2-d*Math.sin(a-Math.PI/6));ctx.lineTo(x2-d*Math.cos(a+Math.PI/6),y2-d*Math.sin(a+Math.PI/6));ctx.closePath();ctx.fill();if(label){ctx.font='700 14px system-ui';ctx.fillText(label,(x1+x2)/2+7,(y1+y2)/2-7)}ctx.restore(); };
-  function draw(m) {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.save();ctx.scale(canvas.width/620,canvas.height/390);
-    const waterY=235,xc=285,w=130,top=135,bottom=265;
-    ctx.fillStyle='#c6ecf8';ctx.fillRect(40,waterY,440,120);ctx.fillStyle='#147b9a';ctx.fillRect(40,waterY-2,440,3);
-    ctx.strokeStyle='#405d70';ctx.lineWidth=4;ctx.strokeRect(xc-w/2,top,w,130);
-    ctx.fillStyle='#fff';ctx.fillRect(xc-w/2+5,bottom-24,w-10,19);
-    ctx.fillStyle='#17324d';ctx.font='600 14px system-ui';ctx.fillText('zarobljeni zrak',xc-52,top+35);ctx.fillText('unutarnja razina',xc-58,bottom-31);ctx.fillText('vanjska razina',48,waterY-9);
-    ctx.strokeStyle='#405d70';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(480,150);ctx.lineTo(480,320);ctx.quadraticCurveTo(510,345,540,320);ctx.lineTo(540,175);ctx.stroke();
-    const manometerLevel=275-m.h1*240;ctx.fillStyle='#835f3d';ctx.fillRect(482,manometerLevel,56,320-manometerLevel);ctx.fillStyle='#17324d';ctx.fillText('manometar',470,140);ctx.fillText('h₁',548,(manometerLevel+275)/2);
-    arrow(xc,bottom-15,xc,bottom-72,'#198754','pₘA'); arrow(xc-34,top+42,xc-34,top+98,'#6e63bb','G');
-    arrow(xc+35,top-55,xc+35,top-8,m.F>=0?'#c73c42':'#198754','F');
-    ctx.strokeStyle='#607889';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(xc-w/2-25,waterY);ctx.lineTo(xc-w/2-25,bottom-15);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#17324d';ctx.fillText('h₂',xc-w/2-50,(waterY+bottom)/2);
+  root.dataset.ready = "true";
+  const canvas = root.querySelector("#z55-canvas"),
+    ctx = canvas.getContext("2d");
+  const inputs = {
+    G: root.querySelector("#z55-g"),
+    D: root.querySelector("#z55-d"),
+    h: root.querySelector("#z55-h"),
+    rm: root.querySelector("#z55-rm"),
+  };
+  const ui = {
+    G: root.querySelector("#z55-g-r"),
+    D: root.querySelector("#z55-d-r"),
+    h: root.querySelector("#z55-h-r"),
+    rm: root.querySelector("#z55-rm-r"),
+    p: root.querySelector("#z55-p"),
+    h1: root.querySelector("#z55-h1"),
+    pa: root.querySelector("#z55-pa"),
+    f: root.querySelector("#z55-f"),
+    note: root.querySelector("#z55-note"),
+  };
+  const fmt = (v, n = 1) => v.toLocaleString("hr-HR", { minimumFractionDigits: n, maximumFractionDigits: n });
+  const arrow = (x1, y1, x2, y2, color, label = "") => {
+    const a = Math.atan2(y2 - y1, x2 - x1),
+      d = 9;
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - d * Math.cos(a - Math.PI / 6), y2 - d * Math.sin(a - Math.PI / 6));
+    ctx.lineTo(x2 - d * Math.cos(a + Math.PI / 6), y2 - d * Math.sin(a + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    if (label) {
+      ctx.font = "700 14px system-ui";
+      ctx.fillText(label, (x1 + x2) / 2 + 7, (y1 + y2) / 2 - 7);
+    }
     ctx.restore();
-  }
+  };
+  function draw(m){
+ ctx.setTransform(canvas.width/620,0,0,canvas.height/390,0,0);ctx.clearRect(0,0,620,390);
+ const sc=Math.min(220,140/Math.max(m.h,.2)),sy=180,iy=sy+m.h*sc,xc=250,w=m.D*sc,top=80,bottom=iy+30;
+ ctx.fillStyle='#bae6fd';ctx.fillRect(35,sy,375,350-sy);ctx.fillStyle='#fff';ctx.fillRect(xc-w/2,top,w,iy-top);
+ ctx.strokeStyle='#334155';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(xc-w/2,bottom);ctx.lineTo(xc-w/2,top);ctx.lineTo(xc+w/2,top);ctx.lineTo(xc+w/2,bottom);ctx.stroke();
+ ctx.strokeStyle='#0284c7';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(35,sy);ctx.lineTo(xc-w/2,sy);ctx.moveTo(xc-w/2,iy);ctx.lineTo(xc+w/2,iy);ctx.moveTo(xc+w/2,sy);ctx.lineTo(410,sy);ctx.stroke();
+ const ml=260+m.h1*sc/2,mr=260-m.h1*sc/2;
+ ctx.strokeStyle='#64748b';ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(xc+w/2,top+15);ctx.lineTo(460,top+15);ctx.lineTo(460,325);ctx.lineTo(535,325);ctx.lineTo(535,110);ctx.stroke();
+ ctx.strokeStyle='#b08968';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(460,ml);ctx.lineTo(460,325);ctx.lineTo(535,325);ctx.lineTo(535,mr);ctx.stroke();
+ const vs=52/Math.max(m.pa,m.G,Math.abs(m.F));MF1.arrow(ctx,xc,top,0,-m.pa*vs,'#059669',3,'pₘ A');MF1.arrow(ctx,xc,top+35,0,m.G*vs,'#7c3aed',3,'G');MF1.arrow(ctx,xc+25,top,0,m.F*vs,'#dc2626',3,'F');
+ ctx.font='13px system-ui';ctx.fillStyle='#334155';ctx.fillText('zarobljeni zrak',xc-w/2-10,top+65);ctx.fillText('p_atm',515,90);ctx.fillText('h₁ = '+m.h1.toFixed(3)+' m',420,367);ctx.fillText('h₂ = '+m.h.toFixed(2)+' m',35,sy+30);ctx.fillText('Otvoreno dno; debljina stijenke zanemarena',35,385);ctx.setTransform(1,0,0,1,0,0);
+ }
   function update() {
-    const G=+inputs.G.value,D=+inputs.D.value,h=+inputs.h.value,rm=+inputs.rm.value,p=1000*9.81*h,h1=h/rm,A=Math.PI*D*D/4,pa=p*A,F=pa-G;
-    ui.G.textContent=G;ui.D.textContent=D.toFixed(2).replace('.',',');ui.h.textContent=h.toFixed(2).replace('.',',');ui.rm.textContent=rm.toFixed(2).replace('.',',');ui.p.textContent=fmt(p,0)+' Pa';ui.h1.textContent=fmt(h1,3)+' m';ui.pa.textContent=fmt(pa,1)+' N';ui.f.textContent=fmt(Math.abs(F),1)+' N '+(F>=0?'↓':'↑');
-    ui.note.innerHTML=F>=0?'<strong>Potrebna je sila prema dolje.</strong> Sila tlaka p<sub>m</sub>A<sub>c</sub> veća je od težine G.':'<strong>Težina nadmašuje silu tlaka.</strong> Za ravnotežu bi trebalo djelovati dodatnom silom prema gore.';
-    draw({h1,F});
+    const G = +inputs.G.value,
+      D = +inputs.D.value,
+      h = +inputs.h.value,
+      rm = +inputs.rm.value,
+      p = 1000 * 9.81 * h,
+      h1 = h / rm,
+      A = (Math.PI * D * D) / 4,
+      pa = p * A,
+      F = pa - G;
+    ui.G.textContent = G;
+    ui.D.textContent = D.toFixed(2).replace(".", ",");
+    ui.h.textContent = h.toFixed(2).replace(".", ",");
+    ui.rm.textContent = rm.toFixed(2).replace(".", ",");
+    ui.p.textContent = fmt(p, 0) + " Pa";
+    ui.h1.textContent = fmt(h1, 3) + " m";
+    ui.pa.textContent = fmt(pa, 1) + " N";
+    ui.f.textContent = fmt(Math.abs(F), 1) + " N " + (F >= 0 ? "↓" : "↑");
+    ui.note.innerHTML =
+      F >= 0
+        ? "<strong>Potrebna je sila prema dolje.</strong> Sila tlaka p<sub>m</sub>A<sub>c</sub> veća je od težine G."
+        : "<strong>Težina nadmašuje silu tlaka.</strong> Za ravnotežu bi trebalo djelovati dodatnom silom prema gore.";
+    draw({h1,F,h,D,G,pa});
   }
-  Object.values(inputs).forEach(input=>input.addEventListener('input',update));update();
+  Object.values(inputs).forEach((input) => input.addEventListener("input", update));
+  update();
 })();
 </script>
 ```
@@ -672,7 +811,7 @@ Potrebno je odrediti intenzitet i lokaciju horizontalne i vertikalne komponente 
 
 1.  **Horizontalna komponenta ($F_H$):**
     *   Vertikalna projekcija plohe je pravokutnik visine $R \cdot \sin(\alpha)$.
-    *   Dubina težišta projekcije (uz pretpostavku da je površina na razini točke B): $z_{TAX} = \frac{R \cdot \sin(60^\circ)}{2} = 2,598 \text{ m}$.
+    *   Dubina težišta projekcije (uz slobodnu površinu na razini točke A): $z_{TAX} = \frac{R \cdot \sin(60^\circ)}{2} = 2,598 \text{ m}$.
     *   **Iznos sile:** $F_H = \rho \cdot g \cdot z_{TAX} \cdot A_x = 998 \cdot 9,81 \cdot 2,598 \cdot (10 \cdot 6 \cdot \sin 60^\circ) = 1322 \text{ kN}$.
     *   **Položaj ($z_{FH}$):** Nalazi se na $1/3$ visine projekcije od dna: $z_{FH} = 1,732 \text{ m}$.
 
@@ -738,43 +877,183 @@ Potrebno je odrediti intenzitet i lokaciju horizontalne i vertikalne komponente 
 </div>
 <script>
 (() => {
-  const root = document.getElementById('widget-52');
+  const root = document.getElementById("widget-52");
   if (!root || root.dataset.ready) return;
-  root.dataset.ready = 'true';
-  const canvas=root.querySelector('#z52-canvas'),ctx=canvas.getContext('2d');
-  const inputs={R:root.querySelector('#z52-r'),b:root.querySelector('#z52-b'),rho:root.querySelector('#z52-rho')};
-  const ui={R:root.querySelector('#z52-r-read'),b:root.querySelector('#z52-b-read'),rho:root.querySelector('#z52-rho-read'),hp:root.querySelector('#z52-hp'),fh:root.querySelector('#z52-fh'),zfh:root.querySelector('#z52-zfh'),v:root.querySelector('#z52-v'),fv:root.querySelector('#z52-fv'),xfv:root.querySelector('#z52-xfv'),note:root.querySelector('#z52-note')};
-  const alpha=Math.PI/3,g=9.81,fmt=(v,n=1)=>v.toLocaleString('hr-HR',{minimumFractionDigits:n,maximumFractionDigits:n});
-  const line=(x1,y1,x2,y2,c,d=[],w=1.5)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=w;ctx.setLineDash(d);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();};
-  const label=(v,x,y,c='#17324d',a='left',s=14)=>{ctx.save();ctx.fillStyle=c;ctx.font='600 '+s+'px system-ui, sans-serif';ctx.textAlign=a;ctx.fillText(v,x,y);ctx.restore();};
-  const arrow=(x1,y1,x2,y2,c,t='',w=3)=>{const a=Math.atan2(y2-y1,x2-x1),d=9;ctx.save();ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-d*Math.cos(a-Math.PI/6),y2-d*Math.sin(a-Math.PI/6));ctx.lineTo(x2-d*Math.cos(a+Math.PI/6),y2-d*Math.sin(a+Math.PI/6));ctx.closePath();ctx.fill();if(t){ctx.font='700 15px system-ui, sans-serif';ctx.fillText(t,(x1+x2)/2+6,(y1+y2)/2-7);}ctx.restore();};
+  root.dataset.ready = "true";
+  const canvas = root.querySelector("#z52-canvas"),
+    ctx = canvas.getContext("2d");
+  const inputs = {
+    R: root.querySelector("#z52-r"),
+    b: root.querySelector("#z52-b"),
+    rho: root.querySelector("#z52-rho"),
+  };
+  const ui = {
+    R: root.querySelector("#z52-r-read"),
+    b: root.querySelector("#z52-b-read"),
+    rho: root.querySelector("#z52-rho-read"),
+    hp: root.querySelector("#z52-hp"),
+    fh: root.querySelector("#z52-fh"),
+    zfh: root.querySelector("#z52-zfh"),
+    v: root.querySelector("#z52-v"),
+    fv: root.querySelector("#z52-fv"),
+    xfv: root.querySelector("#z52-xfv"),
+    note: root.querySelector("#z52-note"),
+  };
+  const alpha = Math.PI / 3,
+    g = 9.81,
+    fmt = (v, n = 1) => v.toLocaleString("hr-HR", { minimumFractionDigits: n, maximumFractionDigits: n });
+  const line = (x1, y1, x2, y2, c, d = [], w = 1.5) => {
+    ctx.save();
+    ctx.strokeStyle = c;
+    ctx.lineWidth = w;
+    ctx.setLineDash(d);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
+  };
+  const label = (v, x, y, c = "#17324d", a = "left", s = 14) => {
+    ctx.save();
+    ctx.fillStyle = c;
+    ctx.font = "600 " + s + "px system-ui, sans-serif";
+    ctx.textAlign = a;
+    ctx.fillText(v, x, y);
+    ctx.restore();
+  };
+  const arrow = (x1, y1, x2, y2, c, t = "", w = 3) => {
+    const a = Math.atan2(y2 - y1, x2 - x1),
+      d = 9;
+    ctx.save();
+    ctx.strokeStyle = c;
+    ctx.fillStyle = c;
+    ctx.lineWidth = w;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - d * Math.cos(a - Math.PI / 6), y2 - d * Math.sin(a - Math.PI / 6));
+    ctx.lineTo(x2 - d * Math.cos(a + Math.PI / 6), y2 - d * Math.sin(a + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    if (t) {
+      ctx.font = "700 15px system-ui, sans-serif";
+      ctx.fillText(t, (x1 + x2) / 2 + 6, (y1 + y2) / 2 - 7);
+    }
+    ctx.restore();
+  };
 
   function draw(m) {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.save(); ctx.scale(canvas.width / 690, canvas.height / 440);
-    const scale=29,xO=485,yO=350,r=m.R*scale,xB=xO-r,yB=yO,xA=xO-r*Math.cos(alpha),yA=yO-r*Math.sin(alpha),xD=xB,yD=yA;
-    ctx.fillStyle='#dff2f9';ctx.fillRect(55,yA,xB-55,yB-yA);line(55,yA,xB,yA,'#147b9a',[],2.2);label('slobodna površina',60,yA-10,'#17647d');
-    ctx.save();ctx.beginPath();ctx.moveTo(xB,yB);ctx.lineTo(xD,yD);ctx.lineTo(xA,yA);ctx.closePath();ctx.fillStyle='#f5cf758a';ctx.fill();ctx.setLineDash([5,4]);ctx.strokeStyle='#9a6e08';ctx.stroke();ctx.restore();
-    ctx.save();ctx.beginPath();ctx.moveTo(xB,yB);ctx.arc(xO,yO,r,Math.PI,Math.PI+alpha,false);ctx.closePath();ctx.fillStyle='#fff';ctx.fill();ctx.setLineDash([4,3]);ctx.strokeStyle='#2f82a0';ctx.stroke();ctx.restore();
-    ctx.beginPath();ctx.arc(xO,yO,r,Math.PI,Math.PI+alpha,false);ctx.strokeStyle='#213e58';ctx.lineWidth=5;ctx.stroke();
-    line(xB,yA,xB,yB,'#607889',[5,4]);label('Aᵥ',xB-8,(yA+yB)/2,'#436579','right',12);
-    [['A',xA,yA],['B',xB,yB],['O',xO,yO],['D',xD,yD]].forEach(p=>{ctx.fillStyle='#17324d';ctx.beginPath();ctx.arc(p[1],p[2],3.5,0,2*Math.PI);ctx.fill();label(p[0],p[1]+(p[0]==='B'?-13:7),p[2]+(p[0]==='B'?15:-7));});
-    label('+ Aₜrokut',xB+42,yA+25,'#8b650b');label('− Aₒdsječak',xB+50,yB-16,'#176c8a');
-    const yP=yB-m.zfh*scale,pX=xB+m.xfv*scale;line(55,yP,620,yP,'#648090',[4,4]);arrow(xB-76,yP,xB-4,yP,'#0b7898','Fₕ');line(pX,yA-24,pX,yB+25,'#648090',[4,4]);arrow(pX,yP-7,pX,yP+66,'#198754','Fᵥ');
-    const frX=pX+70,frY=yP+60;arrow(pX,yP,frX,frY,'#c73c42','Fᵣ',3.5);label('z_FH',xB+8,yP-8,'#496979');label('x_FV',pX,yB+18,'#496979','center');
-    label('kontrolni volumen: trokut − odsječak',345,410,'#17324d','center',13);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.scale(canvas.width / 690, canvas.height / 440);
+    const scale = Math.min(29,290/(m.R*Math.sin(alpha))),
+      xO = 485,
+      yO = 350,
+      r = m.R * scale,
+      xB = xO - r,
+      yB = yO,
+      xA = xO - r * Math.cos(alpha),
+      yA = yO - r * Math.sin(alpha),
+      xD = xB,
+      yD = yA;
+    ctx.fillStyle = "#dff2f9";
+    ctx.fillRect(55, yA, xB - 55, yB - yA);
+    line(55, yA, xB, yA, "#147b9a", [], 2.2);
+    label("slobodna površina", 60, yA - 10, "#17647d");
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(xB, yB);
+    ctx.lineTo(xD, yD);
+    ctx.lineTo(xA, yA);
+    ctx.closePath();
+    ctx.fillStyle = "#f5cf758a";
+    ctx.fill();
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = "#9a6e08";
+    ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(xB, yB);
+    ctx.arc(xO, yO, r, Math.PI, Math.PI + alpha, false);
+    ctx.closePath();
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.setLineDash([4, 3]);
+    ctx.strokeStyle = "#2f82a0";
+    ctx.stroke();
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(xO, yO, r, Math.PI, Math.PI + alpha, false);
+    ctx.strokeStyle = "#213e58";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    line(xB, yA, xB, yB, "#607889", [5, 4]);
+    label("Aᵥ", xB - 8, (yA + yB) / 2, "#436579", "right", 12);
+    [
+      ["A", xA, yA],
+      ["B", xB, yB],
+      ["O", xO, yO],
+      ["D", xD, yD],
+    ].forEach((p) => {
+      ctx.fillStyle = "#17324d";
+      ctx.beginPath();
+      ctx.arc(p[1], p[2], 3.5, 0, 2 * Math.PI);
+      ctx.fill();
+      label(p[0], p[1] + (p[0] === "B" ? -13 : 7), p[2] + (p[0] === "B" ? 15 : -7));
+    });
+    label("+ Aₜrokut", xB + 42, yA + 25, "#8b650b");
+    label("− Aₒdsječak", xB + 50, yB - 16, "#176c8a");
+    const yP = yB - m.zfh * scale,
+      pX = xB + m.xfv * scale;
+    line(55, yP, 620, yP, "#648090", [4, 4]);
+    const vs=100/Math.max(m.FH,m.FV);arrow(pX,yP,pX+m.FH*vs,yP,"#0b7898","Fₕ");
+    line(pX, yA - 24, pX, yB + 25, "#648090", [4, 4]);
+    arrow(pX,yP,pX,yP+m.FV*vs,"#198754","Fᵥ");
+    const frX=pX+m.FH*vs,frY=yP+m.FV*vs;
+    arrow(pX, yP, frX, frY, "#c73c42", "Fᵣ", 3.5);
+    label("z_FH od dna", xB + 8, yP - 8, "#496979");
+    label("x_FV", pX, yB + 18, "#496979", "center");
+    label("kontrolni volumen: trokut − odsječak", 345, 410, "#17324d", "center", 13);
     ctx.restore();
   }
 
   function update() {
-    const R=+inputs.R.value,b=+inputs.b.value,rho=+inputs.rho.value,hp=R*Math.sin(alpha),zT=hp/2,areaProj=hp*b,FH=rho*g*zT*areaProj/1000,zfh=hp/3;
-    const aTri=.5*R*R*Math.sin(alpha)*(1-Math.cos(alpha)),aSeg=.5*R*R*(alpha-Math.sin(alpha)),area=aTri-aSeg,V=area*b,FV=rho*g*V/1000;
-    const xTri=R*(1-Math.cos(alpha))/3,d=4*R*Math.pow(Math.sin(alpha/2),3)/(3*(alpha-Math.sin(alpha))),xSeg=R-d*Math.cos(alpha/2),xfv=(aTri*xTri-aSeg*xSeg)/area;
-    ui.R.textContent=R.toFixed(1).replace('.',',');ui.b.textContent=b.toFixed(0);ui.rho.textContent=rho.toFixed(0);ui.hp.textContent=fmt(hp,3)+' m';ui.fh.textContent=fmt(FH)+' kN';ui.zfh.textContent=fmt(zfh,3)+' m';ui.v.textContent=fmt(area,3)+' m²; '+fmt(V,3)+' m³';ui.fv.textContent=fmt(FV)+' kN ↓';ui.xfv.textContent=fmt(xfv,3)+' m';
-    ui.note.innerHTML='<strong>Položaj F<sub>V</sub>:</strong> statički moment dobiva se istim oduzimanjem kao i površina: (A<sub>trokut</sub>x<sub>trokut</sub> − A<sub>odsječak</sub>x<sub>odsječak</sub>)/A<sub>ABC</sub>. Zato je x<sub>FV</sub> izveden iz prikazane geometrije, a nije zadana konstanta.';
-    draw({R,zfh,xfv});
+    const R = +inputs.R.value,
+      b = +inputs.b.value,
+      rho = +inputs.rho.value,
+      hp = R * Math.sin(alpha),
+      zT = hp / 2,
+      areaProj = hp * b,
+      FH = (rho * g * zT * areaProj) / 1000,
+      zfh = hp / 3;
+    const aTri = 0.5 * R * R * Math.sin(alpha) * (1 - Math.cos(alpha)),
+      aSeg = 0.5 * R * R * (alpha - Math.sin(alpha)),
+      area = aTri - aSeg,
+      V = area * b,
+      FV = (rho * g * V) / 1000;
+    const xTri = (R * (1 - Math.cos(alpha))) / 3,
+      d = (4 * R * Math.pow(Math.sin(alpha / 2), 3)) / (3 * (alpha - Math.sin(alpha))),
+      xSeg = R - d * Math.cos(alpha / 2),
+      xfv = (aTri * xTri - aSeg * xSeg) / area;
+    ui.R.textContent = R.toFixed(1).replace(".", ",");
+    ui.b.textContent = b.toFixed(0);
+    ui.rho.textContent = rho.toFixed(0);
+    ui.hp.textContent = fmt(hp, 3) + " m";
+    ui.fh.textContent = fmt(FH) + " kN";
+    ui.zfh.textContent = fmt(zfh, 3) + " m";
+    ui.v.textContent = fmt(area, 3) + " m²; " + fmt(V, 3) + " m³";
+    ui.fv.textContent = fmt(FV) + " kN ↓";
+    ui.xfv.textContent = fmt(xfv, 3) + " m";
+    ui.note.innerHTML =
+      "<strong>Položaj F<sub>V</sub>:</strong> statički moment dobiva se istim oduzimanjem kao i površina: (A<sub>trokut</sub>x<sub>trokut</sub> − A<sub>odsječak</sub>x<sub>odsječak</sub>)/A<sub>ABC</sub>. Zato je x<sub>FV</sub> izveden iz prikazane geometrije, a nije zadana konstanta.";
+    draw({R,zfh,xfv,FH,FV});
   }
-  Object.values(inputs).forEach(i=>i.addEventListener('input',update));update();
+  Object.values(inputs).forEach((i) => i.addEventListener("input", update));
+  update();
 })();
 </script>
 ```

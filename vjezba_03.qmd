@@ -2452,7 +2452,7 @@ Kada se plovno tijelo nagne, centar uzgona ($B$) pomiče se u smjeru nagiba. Sje
             <div style="padding: 15px; background: #f1f5f9; border-radius: 10px;">
                 <label style="display: block; font-weight: 600; margin-bottom: 8px;">Kut nagiba α: <span id="n1-v-alpha">15</span>°</label>
                 <input type="range" id="n1-alpha" min="-10" max="10" value="5" style="width: 100%; cursor: pointer;">
-                <label style="display: block; font-weight: 600; margin-top: 15px; margin-bottom: 8px;">Visina težišta (G):</label>
+                <label style="display: block; font-weight: 600; margin-top: 15px; margin-bottom: 8px;">Visina težišta KG: <span id="n1-v-g">60</span> mm</label>
                 <input type="range" id="n1-g" min="30" max="120" value="60" style="width: 100%; cursor: pointer;">
             </div>
             <div id="n1-status-box" style="padding: 15px; border-radius: 10px; border-left: 5px solid #48bb78; background: #f0fff4;">
@@ -2472,6 +2472,7 @@ Kada se plovno tijelo nagne, centar uzgona ($B$) pomiče se u smjeru nagiba. Sje
   function update() {
     const alpha = (parseFloat(alphaS.value) * Math.PI) / 180;
     const gH = parseFloat(gS.value);
+    document.getElementById("n1-v-g").textContent = gH.toFixed(0);
     document.getElementById("n1-v-alpha").innerText = parseFloat(alphaS.value).toFixed(0);
 
     const B = 140;
@@ -2776,8 +2777,8 @@ Ubrzani spremnici iz prethodnih zadataka prikazuju **stacionarno** stanje. Među
             <canvas id="n4-canvas" width="450" height="200" style="width: 100%; background: #f8fafc; border-radius: 12px; border: 1px solid #edf2f7;"></canvas>
         </div>
         <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; justify-content: center; gap: 15px;">
-            <button id="n4-start" style="padding: 15px; background: #ebf8ff; border: 2px solid #3182ce; color: #2b6cb0; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s;">Pokreni slobodno titranje</button>
-            <button id="n4-stop" style="padding: 15px; background: #fff5f5; border: 2px solid #e53e3e; color: #c53030; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s;">Pauza</button>
+            <label for="n4-time">Vrijeme t: <output id="n4-time-value" for="n4-time">0,00 s</output></label>
+            <input id="n4-time" type="range" min="0" max="25" step="0.01" value="0">
             <div style="padding: 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; font-size:0.82rem; color:#334155;">
                 Otklon površine na lijevoj stijenci: <strong id="n4-angle">0.0</strong> cm<br>
                 Režim: <strong id="n4-mode">miruje</strong>
@@ -2789,9 +2790,10 @@ Ubrzani spremnici iz prethodnih zadataka prikazuju **stacionarno** stanje. Među
 (()=>{
  const c=document.getElementById('n4-canvas'),ctx=c.getContext('2d'),root=c.parentElement;
  const L=2,h=.5,k=Math.PI/L,omega=Math.sqrt(9.81*k*Math.tanh(k*h)),A=.07;
- let t=0; function draw(dt){t+=dt;const amplitude=A*Math.exp(-.08*t)*Math.cos(omega*t);ctx.clearRect(0,0,450,200);ctx.strokeStyle='#40596b';ctx.lineWidth=3;ctx.strokeRect(70,35,310,140);ctx.beginPath();ctx.moveTo(70,175);for(let i=0;i<=100;i++){const x=L*i/100,eta=amplitude*Math.cos(k*x);ctx.lineTo(70+310*i/100,110-eta*130)}ctx.lineTo(380,175);ctx.closePath();ctx.fillStyle='#dff2f8';ctx.fill();ctx.strokeStyle='#176da9';ctx.stroke();ctx.fillStyle='#40596b';ctx.font='12px system-ui';ctx.fillText('η = A e⁻ᵞᵗ cos(πx/L) cos(ωt), ω²=gk tanh(kh)',20,20);document.getElementById('n4-angle').textContent=(100*amplitude).toFixed(1);document.getElementById('n4-mode').textContent='prvi mod slobodnog titranja';}
+ let t=0; function draw(dt){t=Math.min(25,t+dt);document.getElementById("n4-time").value=t;document.getElementById("n4-time-value").textContent=t.toLocaleString("hr-HR",{minimumFractionDigits:2,maximumFractionDigits:2})+" s";if(t>=25)anim.stop();const amplitude=A*Math.exp(-.08*t)*Math.cos(omega*t);ctx.clearRect(0,0,450,200);ctx.strokeStyle='#40596b';ctx.lineWidth=3;ctx.strokeRect(70,35,310,140);ctx.beginPath();ctx.moveTo(70,175);for(let i=0;i<=100;i++){const x=L*i/100,eta=amplitude*Math.cos(k*x);ctx.lineTo(70+310*i/100,110-eta*130)}ctx.lineTo(380,175);ctx.closePath();ctx.fillStyle='#dff2f8';ctx.fill();ctx.strokeStyle='#176da9';ctx.stroke();ctx.fillStyle='#40596b';ctx.font='12px system-ui';ctx.fillText('η = A e⁻ᵞᵗ cos(πx/L) cos(ωt), ω²=gk tanh(kh)',20,20);document.getElementById('n4-angle').textContent=(100*amplitude).toFixed(1);document.getElementById('n4-mode').textContent='prvi mod slobodnog titranja';}
  const anim=MF1.motion(root,draw,{reset:()=>t=0});
- document.getElementById('n4-start').onclick=()=>{anim.reset();root.querySelector('.mf1-motion button').click()};document.getElementById('n4-stop').onclick=()=>anim.stop();draw(0);
+ document.getElementById('n4-time').oninput=e=>{anim.stop();t=+e.target.value;draw(0)};
+ draw(0);
 })();
 </script>
 

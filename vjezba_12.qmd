@@ -54,9 +54,10 @@
         '<rect x="230" y="150" width="65" height="65" fill="#f8fafc" stroke="#64748b"/><rect x="230" y="'+(215-65*ratio)+'" width="65" height="'+65*ratio+'" fill="#38bdf8"/>'+
         '<path d="M405 167L438 155V210L405 199Z" fill="#94a3b8"/>'+MF1.svgArrow(438,183,s.ve*vs,0,'#0284c7','vₑ (rel.)')+MF1.svgArrow(200,183,-F*fs,0,'#dc2626','F')+MF1.svgArrow(310,100,-dv*(170/Math.max(dv,850)),0,'#2563eb','Δv')+
         '<text x="70" y="45">Δv = vₑ ln(m₀/mf); F = ṁvₑ; a(t) = F/m(t)</text><text x="70" y="295">a₀ = '+n(a,2)+' m/s²; af = '+n(F/mf,2)+' m/s²</text>'+
-        '<rect x="650" y="65" width="265" height="240" rx="12" fill="#f1f5f9"/><path d="M680 270V100M680 270H890" stroke="#64748b" fill="none"/>'+
+        '<rect data-panel="mass" x="650" y="65" width="265" height="240" rx="12" fill="#f1f5f9"/><path d="M680 270V100M680 270H890" stroke="#64748b" fill="none"/>'+
         '<path d="M690 120L880 '+(270-150*ratio)+'" fill="none" stroke="#0284c7" stroke-width="4"/><text x="670" y="90">m [kg]</text><text x="690" y="112">'+n(s.m,0)+'</text><text x="840" y="'+(295-150*ratio)+'">'+n(mf,0)+'</text><text x="682" y="293">0</text><text x="835" y="293">'+n(s.t,1)+' s</text>'+
-        '<text x="70" y="350">Stalan maseni protok i relativna brzina ispuha; masa opada linearno, ubrzanje raste.</text>';
+        '<text x="675" y="340">Masa opada linearno.</text>';
+        MF1.separateScene(g,'[data-panel="mass"]','25 10 690 315','630 45 315 320','Masa satelita tijekom kratkog impulsa');
 
       };
       rocket.querySelectorAll("input").forEach((i) =>
@@ -514,20 +515,22 @@ document.addEventListener("DOMContentLoaded", function () {
  const svg=scene(root,'pelton','Peltonov rotor: mlaz tangencijalan rotoru i zajednička skala brzinskih trokuta','0 0 960 470');
  let spokes='';for(let i=0;i<8;i++){const a=angle+i*Math.PI/4;spokes+='<path d="M420 235L'+(420+100*Math.cos(a))+' '+(235+100*Math.sin(a))+'" stroke="#94a3b8" stroke-width="4"/>';}
  const x=755,y=165,jw=24*Math.sqrt((q/v)/.2);let curve='';for(let i=0;i<=50;i++){const r=i/50;curve+=(i?'L':'M')+(680+230*r)+' '+(430-65*4*r*(1-r));}
- svg.innerHTML='<rect x="645" y="45" width="290" height="285" rx="12" fill="#f8fafc" stroke="#cbd5e1"/><circle cx="420" cy="235" r="110" fill="#f1f5f9" stroke="#475569" stroke-width="5"/>'+spokes+'<circle cx="420" cy="235" r="12" fill="#334155"/>'+
+ svg.innerHTML='<circle cx="420" cy="235" r="110" fill="#f1f5f9" stroke="#475569" stroke-width="5"/>'+spokes+'<circle cx="420" cy="235" r="12" fill="#334155"/>'+
  '<path d="M70 125H400" stroke="#38bdf8" stroke-width="'+jw+'"/><path d="M398 98Q442 122 415 146" fill="none" stroke="#475569" stroke-width="9"/>'+MF1.svgArrow(115,85,v*vs,0,C.v,'V₁')+MF1.svgArrow(420,125,u*vs,0,C.u,'U')+
  '<path d="M420 125V235" stroke="#94a3b8" stroke-dasharray="5 5"/>'+text(445,202,'r = 2 m',C.steel,15)+text(70,35,'Mlaz je tangencijalan: V₁ ⟂ radijus u dodiru.',C.ink,17)+text(70,385,'Trenutačni položaj lopatice u dodiru s mlazom.',C.steel,14)+text(70,412,'Stacionarni niz lopatica prima ṁ = ρQ.',C.steel,14)+
- text(665,75,'V = U + W (ista skala)',C.ink,16)+MF1.svgArrow(685,110,u*vs,0,C.u)+MF1.svgArrow(685+u*vs,110,w*vs,0,C.w)+MF1.svgArrow(685,145,v*vs,0,C.v)+text(815,115,'U + W₁',C.steel,13)+text(815,150,'V₁',C.v,14)+
+ '<rect data-panel="velocity" x="645" y="45" width="290" height="285" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>'+text(665,75,'V = U + W (ista skala)',C.ink,16)+MF1.svgArrow(685,110,u*vs,0,C.u)+MF1.svgArrow(685+u*vs,110,w*vs,0,C.w)+MF1.svgArrow(685,145,v*vs,0,C.v)+text(815,115,'U + W₁',C.steel,13)+text(815,150,'V₁',C.v,14)+
  MF1.svgArrow(x,235,u*vs,0,C.u)+MF1.svgArrow(x+u*vs,235,wx*vs,wy*vs,C.w)+MF1.svgArrow(x,235,(u+wx)*vs,wy*vs,C.v)+text(665,292,'U: zeleno; W₂: narančasto; V₂: plavo',C.steel,13)+text(665,315,'β = '+num(beta*180/Math.PI,0)+'°; Vθ₂ = '+num(u+wx,2)+' m/s',C.steel,13)+
  '<path d="M680 350V430H910" fill="none" stroke="#94a3b8"/><path d="'+curve+'" fill="none" stroke="#0284c7" stroke-width="3"/><circle cx="'+(680+230*ratio)+'" cy="'+(430-65*4*ratio*(1-ratio))+'" r="5" fill="#dc2626"/>'+text(680,345,'P/Pmax = 4(U/V₁)(1−U/V₁)',C.steel,13)+text(680,452,'0',C.steel,13)+text(786,452,'0,5',C.steel,13)+text(885,452,'1 U/V₁',C.steel,13);
+ MF1.separateScene(svg,'[data-panel="velocity"]','40 0 580 440','625 25 330 445','Brzinski trokuti Peltonove lopatice i krivulja snage');
 }
 ;
   const drawValve = function(){
- const root=document.querySelector('#v12-valve'),q=value(root,'q')/1000,p=value(root,'p')*1000,A=Math.PI*.02**2/4,v=q/A,md=998*q,I=1.03*md*v,G=5.8*9.81,rx=-p*A-I,rz=G-I,fs=105/Math.max(Math.hypot(rx,rz),p*A,G,1),vs=18;
+ const root=document.querySelector('#v12-valve'),q=value(root,'q')/1000,p=value(root,'p')*1000,A=Math.PI*.02**2/4,v=q/A,md=998*q,I=1.03*md*v,G=5.8*9.81,rx=-p*A-I,rz=G-I,fs=105/Math.max(Math.hypot(rx,rz),p*A,G,1),vs=90/Math.max(v,1);
  const svg=scene(root,'valve','Slavina s izlazom prema dolje: sila oslonca na sustav i suprotno opterećenje prirubnice','0 0 960 400');
  svg.innerHTML='<path d="M100 180H465Q510 180 510 225V280" fill="none" stroke="#64748b" stroke-width="52"/><path d="M100 180H465Q510 180 510 225V280" fill="none" stroke="#bae6fd" stroke-width="32"/><path d="M510 280V350" stroke="#38bdf8" stroke-width="25"/><rect x="215" y="138" width="25" height="84" fill="#cbd5e1" stroke="#334155" stroke-width="3"/>'+MF1.svgArrow(115,180,v*vs,0,C.v,'v₁')+MF1.svgArrow(510,260,0,v*vs,C.v,'v₂')+MF1.svgArrow(225,180,rx*fs,-rz*fs,C.f,'R oslonca')+MF1.svgArrow(330,180,0,G*fs,C.g,'G')+
  '<rect x="200" y="80" width="365" height="225" rx="12" fill="none" stroke="#94a3b8" stroke-dasharray="6 5"/>'+text(90,40,'p₁A + Rₓ = −βṁv; Rz − G = −βṁv',C.ink,17)+text(90,375,'Jednaki ulazni i izlazni presjek; izlazni manometarski tlak je nula.',C.steel,14)+
  '<rect x="650" y="90" width="280" height="245" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>'+text(670,120,'Opterećenje prirubnice = −R',C.ink,15)+MF1.svgArrow(780,220,-rx*fs,rz*fs,C.f)+text(665,315,'Fx='+num(-rx,1)+' N; Fz='+num(-rz,1)+' N',C.f,14);
+ MF1.separateScene(svg,'rect[x="650"]','5 15 650 385','630 70 325 285','Opterećenje prirubnice: sila suprotna reakciji oslonca');
 };
   const fixCantilever = function () {
     const root = document.querySelector("#v12-cantilever");
@@ -723,14 +726,16 @@ document.addEventListener("DOMContentLoaded", function () {
       '" stroke-width="2"/>' +
       text(clamp(posA, 626, 884), 280, "M_A = " + num(ma, 1) + " N m", C.m, 14, 800, "middle") +
       text(614, 322, "Pri L = L* markeri se ponište oko nule.", C.steel, 13, 600);
+    MF1.separateScene(svg,'rect[x="590"]','60 30 515 380','570 25 365 345','Bilanca momenata težine, mlaza i oslonca A');
   };
   const drawSprinkler = function(angle){
  const root=document.querySelector('#v12-sprinkler'),q=value(root,'q')/1000,n=value(root,'n'),r=value(root,'r'),omega=n*Math.PI/30,U=r*omega,W=q/(Math.PI*.01**2),V=U-W,R=r*140,vs=110/Math.max(U,W,Math.abs(V),1);
  const svg=scene(root,'sprinkler','Pogled odozgo: relativni izlaz nasproti vrtnji; Vθ = U − W','0 0 960 450');let arms='';
  for(let i=0;i<4;i++){const a=angle+i*Math.PI/2,x=295+R*Math.cos(a),y=215+R*Math.sin(a),tx=-Math.sin(a),ty=Math.cos(a);arms+='<path d="M295 215L'+x+' '+y+'" stroke="#64748b" stroke-width="16"/>'+MF1.svgArrow(x,y,-tx*W*vs,-ty*W*vs,C.w)+MF1.svgArrow(x,y,tx*U*vs,ty*U*vs,C.u);}
- svg.innerHTML='<circle cx="295" cy="215" r="'+R+'" fill="#f0f9ff" stroke="#cbd5e1" stroke-dasharray="5 5"/>'+arms+'<circle cx="295" cy="215" r="23" fill="#cbd5e1" stroke="#334155" stroke-width="3"/>'+text(60,35,'Narančasto: relativna brzina W; zeleno: brzina sapnice U.',C.ink,16)+
+ svg.innerHTML='<circle cx="295" cy="215" r="'+R+'" fill="#f0f9ff" stroke="#cbd5e1" stroke-dasharray="5 5"/>'+arms+'<circle cx="295" cy="215" r="23" fill="#cbd5e1" stroke="#334155" stroke-width="3"/>'+text(60,35,'Narančasto: relativna brzina W; zeleno: brzina sapnice U.',C.ink,16)+text(60,410,'Lokalne brzine u istom trenutku; nisu putanje čestica.',C.steel,14)+
  '<rect x="600" y="65" width="330" height="300" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>'+text(625,95,'TANGENCIJALNA BILANCA',C.ink,16)+text(625,120,'Pozitivno: smjer vrtnje.',C.steel,14)+
- MF1.svgArrow(765,175,U*vs,0,C.u)+MF1.svgArrow(765+U*vs,175,-W*vs,0,C.w)+MF1.svgArrow(765,245,V*vs,0,C.v)+text(625,285,'Vθ = '+num(U,2)+' − '+num(W,2)+' = '+num(V,2)+' m/s',C.v,14)+text(625,318,'M = −ṁrVθ; P = Mω',C.ink,16)+text(60,410,'Strelice su lokalne brzine u istom trenutku, a ne putanje izbačenih čestica.',C.steel,14);
+ MF1.svgArrow(765,175,U*vs,0,C.u)+MF1.svgArrow(765+U*vs,175,-W*vs,0,C.w)+MF1.svgArrow(765,245,V*vs,0,C.v)+text(625,285,'Vθ = '+num(U,2)+' − '+num(W,2)+' = '+num(V,2)+' m/s',C.v,14)+text(625,318,'M = −ṁrVθ; P = Mω',C.ink,16);
+ MF1.separateScene(svg,'rect[x="600"]','30 0 545 440','580 45 370 340','Tangencijalna bilanca brzina rasprskivača: Vθ = U − W');
 }
 ;
   const drawWind = function(){

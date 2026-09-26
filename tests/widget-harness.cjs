@@ -5,7 +5,7 @@ for(const family of ['Inter','Segoe UI','system-ui'])for(const font of ['segoeui
   const path='C:/Windows/Fonts/'+font;if(fs.existsSync(path))GlobalFonts.registerFromPath(path,family);
 }
 
-function load(n,{rendered=false,reduced=true}={}) {
+function load(n,{rendered=false,reduced=true,labs=true}={}) {
   const file = rendered?`_site/vjezba_${String(n).padStart(2,'0')}.html`:`vjezba_${String(n).padStart(2,'0')}.qmd`;
   const source = fs.readFileSync(file,'utf8');
   const html = source;
@@ -13,7 +13,7 @@ function load(n,{rendered=false,reduced=true}={}) {
   const vc = new VirtualConsole(); vc.on('jsdomError', e=>{if(e.type!=='css-parsing')errors.push(e.cause?.stack||e.message)});
   const dom = new JSDOM(html, {runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc});
   const w=dom.window;
-  for(const path of ['custom.css','assets/mf1-widgets.css']){const style=w.document.createElement('style');style.textContent=fs.readFileSync(path,'utf8');w.document.head.append(style);}
+  for(const path of ['custom.css','assets/mf1-widgets.css','assets/mf1-extra-labs.css','assets/mf1-layout.css']){if(!fs.existsSync(path))continue;const style=w.document.createElement('style');style.textContent=fs.readFileSync(path,'utf8');w.document.head.append(style);}
   const add=w.document.addEventListener.bind(w.document);
   w.document.addEventListener=(type,fn,options)=>add(type,fn,type==='DOMContentLoaded'?{once:true}:options);
   w.matchMedia=()=>({matches:reduced,addEventListener(){},removeEventListener(){},addListener(){}});
@@ -40,6 +40,8 @@ function load(n,{rendered=false,reduced=true}={}) {
     i++;if(script.src||(script.type&&!['text/javascript','application/javascript'].includes(script.type))||script.id==='quarto-html-after-body')continue;
     try{w.eval(script.textContent+`\n//# sourceURL=${file}-script-${i}`)}catch(e){errors.push(`${file} script ${i}: ${e.stack}`)}
   }
+  w.HTMLCanvasElement.prototype.toDataURL=function(){this.getContext('2d');return canvases.get(this).native.toDataURL('image/png');};
+  if(labs)for(const file of ['assets/mf1-extra-labs.js','assets/mf1-layout.js'])if(fs.existsSync(file))w.eval(fs.readFileSync(file,'utf8'));
   w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
   for(const el of w.document.querySelectorAll('[onclick],[oninput],[onchange]'))for(const key of ['onclick','oninput','onchange']){
     if(el.hasAttribute(key)&&!el[key])el[key]=w.Function('event',el.getAttribute(key));

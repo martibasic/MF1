@@ -128,6 +128,7 @@ Interaktivni prikaz povezuje dubinu i dimenzije plohe s raspodjelom tlaka, rezul
 <script>
 window.MF1V5 = window.MF1V5 || {};
 window.MF1V5.prepareCanvas = function(canvas, context, logicalWidth, logicalHeight) {
+  canvas.style.setProperty('aspect-ratio', logicalWidth + ' / ' + logicalHeight, 'important');
   const box = canvas.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const pixelWidth = Math.max(1, Math.round(box.width * dpr));
@@ -136,7 +137,8 @@ window.MF1V5.prepareCanvas = function(canvas, context, logicalWidth, logicalHeig
     canvas.width = pixelWidth;
     canvas.height = pixelHeight;
   }
-  context.setTransform(pixelWidth / logicalWidth, 0, 0, pixelHeight / logicalHeight, 0, 0);
+  const scale = Math.min(pixelWidth / logicalWidth, pixelHeight / logicalHeight);
+  context.setTransform(scale, 0, 0, scale, (pixelWidth-logicalWidth*scale)/2, (pixelHeight-logicalHeight*scale)/2);
 };
 </script>
 
@@ -1158,13 +1160,19 @@ Pretpostaviti da s obje strane zaklopke djeluje atmosferski tlak te se njegov ut
     ctx.fillStyle = "#15803d";
     ctx.fillText("F_min", tX - 66 * nx - 22, tY - 66 * ny + 4);
     ctx.fillStyle = "#475569";
-    ctx.fillText("G = mg", tX + 8, Math.min(382, tY + 49));
+    ctx.fillText("G", tX - 18, tY + 16);
+    ctx.fillStyle='#fff';ctx.fillRect(326,278,116,108);ctx.strokeStyle='#cbd5e1';ctx.strokeRect(326,278,116,108);
+    ctx.fillStyle='#475569';ctx.font='12px Inter';ctx.fillText('Uvećani smjer G',334,294);
+    MF1.arrow(ctx,382,307,0,42,'#475569');
+    ctx.fillText('G = 1,962 kN',342,368);
+    ctx.fillText('okomito dolje',345,382);
     ctx.fillStyle = "#334155";
     ctx.fillText("A", eX + 8, eY + 4);
     ctx.fillText("α", hX - 32 * Math.cos(alpha / 2), hY + 32 * Math.sin(alpha / 2));
   }
   function drawArrow(x1, y1, x2, y2, color, width) {
-    const head = 9;
+    const length=Math.hypot(x2-x1,y2-y1);if(length<.15)return;
+    const head = Math.min(9,length*.4);
     const angle = Math.atan2(y2 - y1, x2 - x1);
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
@@ -1486,7 +1494,7 @@ Sila je integral tlaka po površini: $F = \int p \, dA$. Ovaj widget vizualizira
     const FExact = (rho * g * bM * hM * hM) / 2;
     const zFExact = (2 * hM) / 3;
     document.getElementById("v5-int-p-results").innerHTML =
-      `Za svaku traku: <strong>ΔFᵢ = ρgzᵢbΔz</strong><br>F_N = ${(FN / 1000).toFixed(3)} kN; F = ${(FExact / 1000).toFixed(3)} kN<br>pogreška = ${((100 * (FN - FExact)) / FExact).toFixed(2)} %<br>z<sub>F,N</sub> = ${zFN.toFixed(3)} m; z<sub>F</sub> = ${zFExact.toFixed(3)} m`;
+      `Za svaku traku: <strong>ΔFᵢ = ρgzᵢbΔz</strong><br>F_N = ${(FN / 1000).toFixed(3)} kN; F = ${(FExact / 1000).toFixed(3)} kN<br>pogreška = ${((100 * (FN - FExact)) / FExact).toFixed(2)} %<br>z<sub>F,N</sub> = <span id="v5-int-p-zf">${zFN.toFixed(3)}</span> m; z<sub>F</sub> = ${zFExact.toFixed(3)} m`;
     ctx.fillStyle='#334155';ctx.font='12px system-ui';ctx.fillText('Pravokutnik: h = 3 m, b = 2 m, a = 0',40,25);ctx.fillText('p [kPa]: 0                 29,43',110,365);ctx.fillText('z [m] ↓',10,48);ctx.fillStyle = "#ef4444";
     ctx.beginPath();
     ctx.arc(ox + w / 2, oy + (zFExact / hM) * h, 7, 0, 7);

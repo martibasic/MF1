@@ -46,20 +46,48 @@
     if(typeof label==='number'){const stroke=label;label=typeof width==='string'?width:'';width=stroke;}
     const len = Math.hypot(dx, dy);
     if (!Number.isFinite(len) || len < 0.15) return;
-    const a = Math.atan2(dy, dx), head = Math.min(9, len * .4);
+    const a = Math.atan2(dy, dx), head = Math.min(11, len * .4);
     ctx.save(); ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = width;
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx, y + dy); ctx.stroke();
+    ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx, y + dy);
+    ctx.strokeStyle='#ffffff';ctx.lineWidth=width+2.5;ctx.stroke();
+    ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
     ctx.beginPath(); ctx.moveTo(x + dx, y + dy);
     ctx.lineTo(x + dx - head * Math.cos(a - .48), y + dy - head * Math.sin(a - .48));
     ctx.lineTo(x + dx - head * Math.cos(a + .48), y + dy - head * Math.sin(a + .48));
     ctx.closePath(); ctx.fill();
-    if (label) { ctx.font = '600 13px system-ui'; ctx.fillText(label, x + dx + 7, y + dy - 7); }
+    if (label) {
+      const diagonal=Math.abs(dx)>.2*len&&Math.abs(dy)>.2*len,left=dx < -Math.abs(dy)*.5;
+      const tx=diagonal?x+.68*dx-15*dy/len:x+dx+(left?-9:9),ty=diagonal?y+.68*dy+15*dx/len:y+dy-9;
+      ctx.font='600 14px system-ui';ctx.textAlign=diagonal?'center':left?'right':'left';
+      ctx.strokeStyle='#ffffff';ctx.lineWidth=4;ctx.strokeText(label,tx,ty);
+      ctx.fillText(label,tx,ty);
+    }
     ctx.restore();
   }
   function svgArrow(x,y,dx,dy,color,label='',width=3) {
-    const len=Math.hypot(dx,dy); if(len<.15)return '';
-    const ux=dx/len,uy=dy/len,h=Math.min(10,len*.4),ex=x+dx,ey=y+dy;
-    return `<g fill="${color}" stroke="${color}"><path d="M${x} ${y}L${ex} ${ey}" stroke-width="${width}" fill="none"/><path d="M${ex} ${ey}L${ex-h*ux+h*.45*uy} ${ey-h*uy-h*.45*ux}L${ex-h*ux-h*.45*uy} ${ey-h*uy+h*.45*ux}Z" stroke="none"/>${label?`<text x="${ex+8}" y="${ey-8}" stroke="none" font-size="16">${label}</text>`:''}</g>`;
+    const len=Math.hypot(dx,dy); if(!Number.isFinite(len)||len<.15)return '';
+    const ux=dx/len,uy=dy/len,h=Math.min(11,len*.4),ex=x+dx,ey=y+dy,left=dx < -Math.abs(dy)*.5;
+    const diagonal=Math.abs(ux)>.2&&Math.abs(uy)>.2;
+    const tx=diagonal?x+.68*dx-15*uy:ex+(left?-9:9),ty=diagonal?y+.68*dy+15*ux:ey-9;
+    return `<g class="mf1-vector" fill="${color}" stroke="${color}" stroke-linejoin="round"><path d="M${x} ${y}L${ex} ${ey}" stroke="#fff" stroke-width="${width+2.5}" fill="none"/><path d="M${x} ${y}L${ex} ${ey}" stroke-width="${width}" fill="none"/><path d="M${ex} ${ey}L${ex-h*ux+h*.45*uy} ${ey-h*uy-h*.45*ux}L${ex-h*ux-h*.45*uy} ${ey-h*uy+h*.45*ux}Z" stroke="none"/>${label?`<text x="${tx}" y="${ty}" text-anchor="${diagonal?'middle':left?'end':'start'}" stroke="#fff" stroke-width="3" paint-order="stroke" font-size="16" font-weight="650">${label}</text>`:''}</g>`;
+  }
+  // Split a composite scene at an explicit panel boundary. Each drawing gets
+  // its own undistorted full-width viewport while retaining live model updates.
+  function separateScene(svg,selector,mainBox,detailBox,label) {
+    const start=svg.querySelector(selector);if(!start)return;
+    let detail=svg.mf1Detail;
+    if(!detail){
+      detail=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      detail.setAttribute('role','img');detail.classList.add('mf1-companion','mf1-graphic','mf1-visual-branch');
+      svg.after(detail);svg.mf1Detail=detail;
+    }
+    const main=mainBox.split(/\s+/).map(Number),box=detailBox.split(/\s+/).map(Number);
+    // Equal logical widths keep type and vector weights consistent between panels.
+    if(box[2]<main[2]){box[0]-=(main[2]-box[2])/2;box[2]=main[2];}
+    svg.setAttribute('viewBox',mainBox);detail.setAttribute('viewBox',box.join(' '));
+    detail.setAttribute('aria-label',label);detail.replaceChildren();
+    for(let node=start;node;){const next=node.nextSibling;detail.append(node);node=next;}
   }
   // An explicit start: elapsed physical time, independent of display refresh rate.
   function motion(root, draw, { reset = () => {}, speed = 1 } = {}) {
@@ -89,7 +117,10 @@
   // components while retaining the geometry and the lines of action.
   function quarterScene(canvas,{h,R,FH,FV,inside=false,step=3,G=null}) {
     const ctx=canvas.getContext('2d'),W=700,H=430;
-    ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);ctx.clearRect(0,0,W,H);
+    // A circular arc and its normals need the same scale in both directions.
+    ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
+    const scale=Math.min(canvas.width/W,canvas.height/H);
+    ctx.setTransform(scale,0,0,scale,(canvas.width-W*scale)/2,(canvas.height-H*scale)/2);
     const s=Math.min(135,290/Math.max(h+R,G===null?0:2*R)),r=R*s,cx=445;
     const sy=45+(G===null?0:Math.max(0,R-h)*s),cy=sy+h*s,by=cy+r,lx=cx-r;
     const line=(x,y,xx,yy,color='#64748b',dash=[])=>{ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(xx,yy);ctx.stroke();ctx.setLineDash([])};
@@ -114,7 +145,7 @@
     }
     ctx.setTransform(1,0,0,1,0,0);
   }
-  const api={g,clamp,openTank,safeFill,actuatorDisk,rotatingTank,arrow,svgArrow,motion,quarterScene};
+  const api={g,clamp,openTank,safeFill,actuatorDisk,rotatingTank,arrow,svgArrow,separateScene,motion,quarterScene};
   if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()=>{
     const roots=document.querySelectorAll('.mf1-lab,.mf1v4-widget,.v8-lab,.v8x-shell,.v9-lab,.v9x-shell,.v10-lab,.v10x-shell,.v11x-shell,.v12x-shell,#z120-laminar-widget,#z122-diffuser-widget,#z123-budget-widget,#z124-parallel-widget');
     roots.forEach(root=>{

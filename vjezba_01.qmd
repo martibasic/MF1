@@ -56,7 +56,7 @@ Derivacija $du/dy$ nije samo simbol: ona je lokalni nagib profila brzine, odnosn
   root.innerHTML=`<div class="v1x-shell"><header class="v1x-head"><div class="v1x-kicker">Konceptualni laboratorij</div><h4>Kako fluid reagira na opterećenje?</h4><p>Promijeni opterećenje, izmjeri odgovor i poveži ga s jednadžbom.</p></header><div class="v1x-tabs" role="group" aria-label="Fizikalni slučaj"><button type="button" data-mode="pressure" aria-pressed="true">Tlak i hidraulika</button><button type="button" data-mode="compression" aria-pressed="false">Stlačivost</button><button type="button" data-mode="viscosity" aria-pressed="false">Viskoznost</button></div><div class="v1x-scene"><svg id="v1x-scene" viewBox="0 0 900 360" role="img" aria-label="Fizikalna scena odabranog slučaja"></svg></div><div class="v1x-bar"><div class="v1x-controls" id="v1x-controls"></div><div class="v1x-primary"><small id="v1x-primary-label"></small><strong id="v1x-primary"></strong></div></div><div class="v1x-equation" id="v1x-equation"></div><div class="v1x-note" id="v1x-note"></div><div class="v1x-presets"><button type="button" data-reset>Početne vrijednosti</button></div></div>`;
   const q=s=>root.querySelector(s),fmt=(n,d=2)=>n.toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),arrow=MF1.svgArrow;
   const defaults={force:120,ratio:4,dp:1,K:200,U:1.2,mu:.35,delta:.025};let state={...defaults},mode='pressure';
-  const configs={pressure:[['force','Ulazna sila F₁',0,240,10,'N',0],['ratio','Omjer A₂/A₁',1,8,.1,'',1]],compression:[['dp','Porast tlaka Δp',0,20,.1,'MPa',1],['K','Konstantan modul K',50,2000,10,'MPa',0]],viscosity:[['U','Brzina ploče U',-2.4,2.4,.1,'m/s',1],['mu','Viskoznost μ',.05,1.2,.05,'Pa·s',2],['delta','Razmak δ',.005,.05,.001,'m',3]]};
+  const configs={pressure:[['force','Ulazna sila F₁',0,240,10,'N',0],['ratio','Omjer A₂/A₁',1,8,.1,'',1]],compression:[['dp','Porast tlaka Δp',0,20,.1,'MPa',1],['K','Konstantan modul K',50,2000,10,'MPa',0]],viscosity:[['U','Brzina ploče U',-2.4,2.4,.1,'m/s',1],['mu','Viskoznost μ',.05,1.2,.05,'Pa·s',2]]};
   const text=(x,y,s,c='#40596b',size=18)=>`<text x="${x}" y="${y}" fill="${c}" font-size="${size}">${s}</text>`;
   function controls(){q('#v1x-controls').innerHTML=configs[mode].map(([k,label,min,max,step,unit,d])=>`<div class="v1x-control"><label for="v1x-${k}"><span>${label}</span><output data-out="${k}"></output></label><input id="v1x-${k}" data-key="${k}" type="range" min="${min}" max="${max}" step="${step}" value="${state[k]}"></div>`).join('');q('#v1x-controls').querySelectorAll('input').forEach(i=>i.oninput=()=>{state[i.dataset.key]=+i.value;render()})}
   function render(){
@@ -65,10 +65,11 @@ Derivacija $du/dy$ nije samo simbol: ona je lokalni nagib profila brzine, odnosn
     if(mode==='pressure'){
       const A1=.0012,p=state.force/A1,F2=state.force*state.ratio,w1=70,w2=w1*Math.sqrt(state.ratio),L=175,R=675,top=182,base=286;
       scene=`<path d="M${L-w1/2} ${top}V${base}H${R+w2/2}V${top}H${R-w2/2}V238H${L+w1/2}V${top}Z" fill="#dff2f8" stroke="#315b72" stroke-width="4"/><rect x="${L-w1/2}" y="${top-14}" width="${w1}" height="14" fill="#64748b"/><rect x="${R-w2/2}" y="${top-14}" width="${w2}" height="14" fill="#64748b"/>`;
-      scene+=arrow(L,top-14,0,state.force*.075,'#b93645')+arrow(R,top,0,-F2*.075,'#b93645');
+      const forceScale=110/Math.max(F2,240);
+      scene+=arrow(L,top-14-state.force*forceScale,0,state.force*forceScale,'#b93645')+arrow(R,top,0,-F2*forceScale,'#b93645');
       scene+=text(65,55,`F₁ = ${fmt(state.force,0)} N`,'#b93645')+text(565,30,`F₂ = ${fmt(F2,0)} N`,'#b93645')+text(65,322,'A₁ = 12 cm²')+text(560,322,`A₂ = ${fmt(12*state.ratio,1)} cm²`)+text(323,267,`p = ${fmt(p/1000,1)} kPa`,'#176da9');
       label='Izlazna sila';result=`F₂ = ${fmt(F2,0)} N`;eq=`p = F₁/A₁; F₂ = pA₂; A₁s₁ = A₂s₂ → s₂/s₁ = ${fmt(1/state.ratio,3)}.`;
-      note='Klipovi su na istoj visini. Prikazan je dodatni tlak zbog opterećenja; težine klipova i hidrostatska korekcija zanemarene su. Širine kružnih klipova prate √A, a obje sile imaju istu skalu. Veća sila znači manji pomak.';
+      note='Klipovi su na istoj visini. Prikazan je dodatni tlak zbog opterećenja; težine klipova i hidrostatska korekcija zanemarene su. Širine kružnih klipova prate √A, a obje sile imaju istu prilagođenu skalu. Veća sila znači manji pomak.';
     }else if(mode==='compression'){
       const ratio=Math.exp(-state.dp/state.K),V=1000*ratio,top=280-180*ratio;
       scene=`<path d="M285 65V280H575V65" fill="none" stroke="#315b72" stroke-width="5"/><rect x="288" y="${top}" width="284" height="${280-top}" fill="#dff2f8"/><rect x="285" y="${top-14}" width="290" height="14" fill="#64748b"/><path d="M265 100H595" stroke="#94a3b8" stroke-dasharray="6 5"/>`+arrow(430,top-14,0,state.dp*3,'#b93645')+text(320,45,`Δp = ${fmt(state.dp,1)} MPa`,'#b93645')+text(610,190,`V₂ = ${fmt(V,1)} cm³`,'#176da9')+text(165,330,'Isprekidano: početni položaj. Visina fluida proporcionalna je volumenu.',undefined,16);
@@ -137,173 +138,20 @@ Manometar daje **manometarski** tlak, $p_g=p_{abs}-p_{atm}$. Budući da se i van
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
 ````{=html}
-<div class="mf1-lab" id="z2-advanced-widget" style="max-width: 980px; margin: 20px auto; font-family: 'Inter', sans-serif; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
-    <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 18px;">
-        <div>
-            <div style="font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 6px;">Zadatak 1 · laboratorij tlaka</div>
-            <h4 style="margin: 0; color: #0f172a; font-size: 1.42rem;">Klip, stupac ulja i instrument: jedna scena, tri tlaka</h4>
-            <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 680px;">Prikaz razlikuje tlak pod klipom, hidrostatski pad kroz ulje i tlak koji manometar očitava na vlastitoj visini. Hidrostatski pad smanjuje tlak na mjernom mjestu u odnosu na tlak pod klipom.</p>
-        </div>
+<div class="mf1-lab" id="z2-advanced-widget">
+  <h4>Klip i manometar · tlak ovisi o visini mjerenja</h4>
+  <p class="widget-idea">Pomakni mjerno mjesto ili povećaj teret; manometar prati pₘ = G/A − ρgh.</p>
+  <div class="mf1-instrument-grid">
+    <svg id="z2-svg" viewBox="85 30 640 415" role="img" aria-label="Klip u ravnoteži i manometar na promjenjivoj visini"></svg>
+    <div class="mf1-instrument-panel">
+      <label class="mf1-field">Visina mjernog mjesta <b><span id="z2-v-h">1,0</span> m</b><input type="range" id="z2-h" min="0" max="3" step="0.1" value="1"></label>
+      <label class="mf1-field">Dodatni teret <b><span id="z2-v-extra">0</span> kN</b><input type="range" id="z2-extra" min="0" max="80" step="1" value="0"></label>
+      <div class="mf1-key-reading"><small>Očitanje manometra pₘ</small><strong><span id="z2-res-pm">70,0</span> kPa</strong></div>
+      <p id="z2-eq-vals" class="mf1-live-equation"></p>
+      <details class="mf1-parameters"><summary>Gustoća ulja</summary><label class="mf1-field">ρ = <b><span id="z2-v-rho">860</span> kg/m³</b><input type="range" id="z2-rho" min="700" max="1000" step="10" value="860"></label></details>
     </div>
-
-    <div style="position: relative; width: 100%; background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 74%); border: 1px solid #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 14px;">
-        <svg id="z2-svg" viewBox="0 0 760 460" style="display: block; width: 100%; height: auto; aspect-ratio: 760 / 460;">
-            <defs>
-                <linearGradient id="z2-bg-grad" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#ffffff"></stop>
-                    <stop offset="100%" stop-color="#edf5ff"></stop>
-                </linearGradient>
-                <linearGradient id="z2-oil-grad" x1="0" x2="0" y1="0" y2="1">
-                    <stop id="z2-oil-stop1" offset="0%" stop-color="#fde68a" stop-opacity="0.30"></stop>
-                    <stop id="z2-oil-stop2" offset="100%" stop-color="#f97316" stop-opacity="0.62"></stop>
-                </linearGradient>
-                <linearGradient id="z2-metal-grad" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#64748b"></stop>
-                    <stop offset="100%" stop-color="#334155"></stop>
-                </linearGradient>
-                <linearGradient id="z2-pipe-grad" x1="0" x2="1" y1="0" y2="0">
-                    <stop offset="0%" stop-color="#f59e0b"></stop>
-                    <stop offset="100%" stop-color="#ea580c"></stop>
-                </linearGradient>
-                <linearGradient id="z2-gauge-glow" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#ffffff"></stop>
-                    <stop offset="100%" stop-color="#eff6ff"></stop>
-                </linearGradient>
-            </defs>
-
-            <rect x="24" y="24" width="712" height="412" rx="30" fill="url(#z2-bg-grad)" stroke="#e2e8f0" stroke-width="2"></rect>
-
-            <rect x="118" y="96" width="190" height="248" rx="26" fill="#ffffff" stroke="#64748b" stroke-width="4"></rect>
-            <rect id="z2-oil" x="134" y="112" width="158" height="232" rx="18" fill="url(#z2-oil-grad)"></rect>
-            <rect x="152" y="124" width="26" height="204" rx="12" fill="rgba(255,255,255,0.22)"></rect>
-            <line id="z2-surface" x1="138" y1="128" x2="288" y2="128" stroke="rgba(255,255,255,0.42)" stroke-width="6" stroke-linecap="round"></line>
-
-            <line id="z2-force-arrow" x1="213" y1="8" x2="213" y2="24" stroke="#4338ca" stroke-width="8" stroke-linecap="round"></line>
-            <polygon points="213,42 195,18 231,18" fill="#4338ca"></polygon>
-            <text x="246" y="24" font-size="16" fill="#4338ca" font-weight="800">G</text>
-
-            <rect id="z2-weight" x="151" y="12" width="124" height="40" rx="12" fill="#0f172a"></rect>
-            <text id="z2-weight-text" x="213" y="37" font-size="17" text-anchor="middle" fill="#ffffff" font-weight="800">61.6 kN</text>
-            <line id="z2-rod" x1="213" y1="52" x2="213" y2="92" stroke="#475569" stroke-width="10" stroke-linecap="round"></line>
-            <rect id="z2-piston" x="112" y="92" width="202" height="18" rx="9" fill="url(#z2-metal-grad)" stroke="#1e293b" stroke-width="2.5"></rect>
-
-            <circle id="z2-port" cx="308" cy="282" r="9" fill="#f59e0b" stroke="#c2410c" stroke-width="4"></circle>
-            <path id="z2-pipe" d="M308 282 L506 282" fill="none" stroke="url(#z2-pipe-grad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"></path>
-
-            <path id="z2-h-guide" d="M350 344 L350 282" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="8 6"></path>
-            <line id="z2-h-guide-top" x1="340" y1="282" x2="360" y2="282" stroke="#94a3b8" stroke-width="3"></line>
-            <line id="z2-h-guide-bottom" x1="340" y1="344" x2="360" y2="344" stroke="#94a3b8" stroke-width="3"></line>
-            <text id="z2-h-label" x="368" y="315" font-size="15" fill="#475569" font-weight="700">h = 1.0 m</text>
-
-            <rect x="110" y="374" width="192" height="38" rx="14" fill="#eff6ff" stroke="#bfdbfe"></rect>
-            <text x="126" y="398" font-size="16" fill="#1d4ed8" font-weight="800">p_k = <tspan id="z2-stage-pk">78.4</tspan> kPa</text>
-
-            <rect x="338" y="78" width="186" height="38" rx="14" fill="#fff7ed" stroke="#fdba74"></rect>
-            <text x="354" y="102" font-size="16" fill="#c2410c" font-weight="800">rho g h = <tspan id="z2-stage-drop">8.4</tspan> kPa</text>
-
-            <g id="z2-gauge-group" transform="translate(0 0)">
-                <circle cx="584" cy="282" r="78" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"></circle>
-                <circle cx="584" cy="282" r="62" fill="url(#z2-gauge-glow)"></circle>
-
-                <line x1="524" y1="314" x2="542" y2="304" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"></line>
-                <line x1="538" y1="242" x2="554" y2="252" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"></line>
-                <line x1="584" y1="208" x2="584" y2="228" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"></line>
-                <line x1="630" y1="242" x2="614" y2="252" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"></line>
-                <line x1="644" y1="314" x2="626" y2="304" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"></line>
-
-                <text x="525" y="332" font-size="13" fill="#64748b">0</text>
-                <text x="575" y="202" font-size="13" fill="#64748b">90</text>
-                <text x="629" y="332" font-size="13" fill="#64748b">180</text>
-
-                <path d="M536 330 A74 74 0 0 0 632 330" fill="none" stroke="#dbeafe" stroke-width="8" stroke-linecap="round"></path>
-                <line id="z2-needle" x1="584" y1="282" x2="640" y2="264" stroke="#dc2626" stroke-width="6" stroke-linecap="round"></line>
-                <circle cx="584" cy="282" r="8" fill="#dc2626"></circle>
-                <text x="584" y="366" text-anchor="middle" font-size="15" fill="#334155" font-weight="700">manometar p_m</text>
-
-                <rect x="504" y="378" width="160" height="36" rx="14" fill="#ecfdf5" stroke="#86efac"></rect>
-                <text x="520" y="401" font-size="16" fill="#166534" font-weight="800">p_m = <tspan id="z2-stage-pm">70.0</tspan> kPa</text>
-            </g>
-
-                    <text x="48" y="48" font-size="14" fill="#64748b">Veće G povećava tlak pod klipom, a veće ρ i h smanjuju tlak na mjernom mjestu.</text>
-        </svg>
-
-        <div style="position: absolute; top: 14px; left: 14px; background: rgba(255,255,255,0.94); border: 1px solid #dbeafe; border-radius: 12px; padding: 8px 12px; font-size: 0.78rem; color: #334155;">
-            Manometar: <span id="z2-res-pm-top" style="font-weight: 800; color: #dc2626;">70.0</span> kPa
-        </div>
-        <div style="position: absolute; top: 14px; right: 14px; background: rgba(15,23,42,0.92); color: #e2e8f0; border-radius: 12px; padding: 9px 11px; font-size: 0.71rem; line-height: 1.4; max-width: 176px;">
-            <div style="font-weight: 800; color: #93c5fd; margin-bottom: 3px;">Jednadžba mjerenja</div>
-            <div><strong>pₘ = pₖ - ρgh</strong></div>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 12px;">
-        <div style="background: #ffffff; padding: 14px; border: 1px solid #dbeafe; border-radius: 16px;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Klizač 1</div>
-            <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Gustoća ulja ρ: <span id="z2-v-rho" style="color: #2563eb;">860</span> kg/m³</label>
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Gušće ulje povećava hidrostatski pad ρgh.</div>
-            <input type="range" id="z2-rho" min="700" max="1000" step="10" value="860" style="width: 100%; accent-color: #2563eb;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 3px;"><span>700</span><span>1000</span></div>
-        </div>
-
-        <div style="background: #ffffff; padding: 14px; border: 1px solid #ccfbf1; border-radius: 16px;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Klizač 2</div>
-            <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Visinska razlika h: <span id="z2-v-h" style="color: #0f766e;">1.0</span> m</label>
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Što je instrument više, to mu dođe manji tlak.</div>
-            <input type="range" id="z2-h" min="0" max="3" step="0.1" value="1.0" style="width: 100%; accent-color: #0f766e;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 3px;"><span>0.0</span><span>3.0</span></div>
-        </div>
-
-        <div style="background: #ffffff; padding: 14px; border: 1px solid #fed7aa; border-radius: 16px;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Klizač 3</div>
-            <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Dodatni teret: <span id="z2-v-extra" style="color: #ea580c;">0</span> kN</label>
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Veći teret povećava tlak pod klipom pₖ = G/A.</div>
-            <input type="range" id="z2-extra" min="0" max="80" step="10" value="0" style="width: 100%; accent-color: #ea580c;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 3px;"><span>0</span><span>80</span></div>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; margin-bottom: 12px;">
-        <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 14px; padding: 12px;">
-            <div style="font-size: 0.68rem; color: #4338ca; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Težina klipa</div>
-            <div style="font-size: 1.18rem; color: #3730a3; font-weight: 800;"><span id="z2-res-g">61.6</span> kN</div>
-        </div>
-        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 12px;">
-            <div style="font-size: 0.68rem; color: #1d4ed8; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Tlak pod klipom p_k</div>
-            <div style="font-size: 1.18rem; color: #1d4ed8; font-weight: 800;"><span id="z2-hero-piston">78.4</span> kPa</div>
-        </div>
-        <div style="background: #fff7ed; border: 1px solid #fdba74; border-radius: 14px; padding: 12px;">
-            <div style="font-size: 0.68rem; color: #c2410c; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Hidrostatski pad</div>
-            <div style="font-size: 1.18rem; color: #c2410c; font-weight: 800;"><span id="z2-hero-hydro">8.4</span> kPa</div>
-        </div>
-        <div style="background: #ecfdf5; border: 1px solid #86efac; border-radius: 14px; padding: 12px;">
-            <div style="font-size: 0.68rem; color: #166534; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Očitanje manometra</div>
-            <div style="font-size: 1.18rem; color: #166534; font-weight: 800;"><span id="z2-hero-pm">70.0</span> kPa</div>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 10px;">Bilanca tlaka</div>
-            <div style="font-size: 0.82rem; color: #1d4ed8; margin-bottom: 4px;">p_k = G/A = <span id="z2-res-piston">78.4</span> kPa</div>
-            <div style="height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 9px;"><div id="z2-bar-p" style="height: 100%; width: 0%; background: linear-gradient(90deg, #60a5fa, #2563eb);"></div></div>
-            <div style="font-size: 0.82rem; color: #c2410c; margin-bottom: 4px;">ρgh = <span id="z2-res-hydro">8.4</span> kPa</div>
-            <div style="height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 9px;"><div id="z2-bar-h" style="height: 100%; width: 0%; background: linear-gradient(90deg, #fbbf24, #ea580c);"></div></div>
-            <div style="font-size: 0.82rem; color: #166534; margin-bottom: 4px;">p_m = <span id="z2-res-pm">70.0</span> kPa</div>
-            <div style="height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden;"><div id="z2-bar-m" style="height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80, #16a34a);"></div></div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="background: #fff7ed; border: 1px solid #fdba74; border-radius: 16px; padding: 14px; color: #7c2d12;">
-                <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Numerička bilanca</div>
-                <div style="font-size: 0.88rem; font-weight: 700; line-height: 1.5;" id="z2-eq-vals">...</div>
-            </div>
-
-            <div style="padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; color: #334155;">
-                <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Fizikalno tumačenje</div>
-                <p id="z2-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.55;"></p>
-            </div>
-        </div>
-    </div>
+  </div>
+  <p id="z2-explainer" class="mf1-live-note"></p>
 </div>
 
 <div class="fizikalni-uvid">
@@ -318,15 +166,15 @@ Manometar ne očitava direktno tlak pod klipom. On očitava tlak na svojoj visin
     const [rho,h,extra]=inputs.map(i=>+i.value),A=Math.PI/4,baseG=(70000+860*9.81)*A,G=baseG+extra*1000,pk=G/A/1000,drop=rho*9.81*h/1000,pm=pk-drop;
     for(const [id,val]of Object.entries({'z2-v-rho':rho.toFixed(0),'z2-v-h':h.toFixed(1),'z2-v-extra':extra.toFixed(0),'z2-res-g':(G/1000).toFixed(1),'z2-res-piston':pk.toFixed(1),'z2-hero-piston':pk.toFixed(1),'z2-res-hydro':drop.toFixed(1),'z2-hero-hydro':drop.toFixed(1),'z2-res-pm':pm.toFixed(1),'z2-hero-pm':pm.toFixed(1)}))set(id,val);
     set('z2-eq-vals',`${pm.toFixed(1)} kPa = ${pk.toFixed(1)} kPa − ${drop.toFixed(1)} kPa`);
-    set('z2-explainer',`Mjerno mjesto je ${h.toFixed(1)} m iznad donje plohe klipa. Pri penjanju kroz mirujuće ulje tlak pada za ρgh = ${drop.toFixed(1)} kPa. Zato pₘ = pₖ − ρgh = ${pm.toFixed(1)} kPa. To je hidrostatska razlika, a ne gubitak energije. Klip je u ravnoteži; promjena sile ne određuje njegov pomak u ovom nestlačivom modelu.`);
-    for(const [k,v]of [['p',pk],['h',drop],['m',pm]])$('z2-bar-'+k).style.width=100*v/190+'%';
+    set('z2-explainer',`Mjerno mjesto je ${h.toFixed(1)} m iznad klipa: tlak je niži za ${drop.toFixed(1)} kPa. Klip ostaje u ravnoteži; hidrostatska razlika nije gubitak energije.`);
+
     const yp=210,yt=yp-h*36,len=G*.00042,angle=(-135+pm/190*270)*Math.PI/180;
     const text=(x,y,s,c='#40596b')=>`<text x="${x}" y="${y}" font-size="16" fill="${c}">${s}</text>`;
     svg.innerHTML=`<path d="M130 178V340H310V178" fill="none" stroke="#40596b" stroke-width="4"/><rect x="132" y="${yp}" width="176" height="128" fill="#e0f2fe"/><path d="M310 315H420V${yt}H560" stroke="#64748b" stroke-width="17" fill="none" stroke-linejoin="round"/><path d="M310 315H420V${yt}H560" stroke="#7dd3fc" stroke-width="11" fill="none" stroke-linejoin="round"/><rect x="130" y="192" width="180" height="18" fill="#64748b"/><rect x="175" y="160" width="90" height="32" rx="4" fill="#334155"/>`;
     svg.innerHTML+=MF1.svgArrow(215,178,0,len,'#b93645')+MF1.svgArrow(225,yp,0,-len,'#176da9')+text(130,120,`G = ${(G/1000).toFixed(1)} kN`,'#b93645')+text(242,242,'pₖA = G','#176da9');
     svg.innerHTML+=`<path d="M323 ${yp}H490M430 ${yt}H490M476 ${yt}V${yp}" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>`+text(486,(yt+yp)/2+7,`h = ${h.toFixed(1)} m`);
     svg.innerHTML+=`<circle cx="620" cy="${yt}" r="58" fill="#fff" stroke="#94a3b8" stroke-width="3"/><circle cx="620" cy="${yt}" r="4" fill="#17324b"/>`+MF1.svgArrow(620,yt,40*Math.sin(angle),-40*Math.cos(angle),'#176da9')+text(572,yt+84,`pₘ = ${pm.toFixed(1)} kPa`,'#176da9');
-    svg.innerHTML+=text(125,382,`pₖ = ${pk.toFixed(1)} kPa`)+text(405,382,`ρgh = ${drop.toFixed(1)} kPa`)+text(92,424,'Visinska referenca: ploha klipa. Shema cjevčice; nema strujanja.');
+    svg.innerHTML+=text(125,382,`pₖ = ${pk.toFixed(1)} kPa`)+text(405,382,`ρgh = ${drop.toFixed(1)} kPa`)+text(92,424,'Shema cjevčice · mirujuće ulje');
   }
   inputs.forEach(i=>i.addEventListener('input',update));update();
 })();
@@ -365,76 +213,17 @@ Tlak je porastao za $1\ \mathrm{MPa}$, a volumen se smanjio za samo $0{,}5\%$. U
 <div class="widget-label">Interaktivni prikaz</div>
 
 ````{=html}
-<div class="mf1-lab" id="z4-advanced-widget" style="max-width: 980px; margin: 20px auto; font-family: 'Inter', sans-serif; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
-    <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 18px;">
-        <div>
-            <div style="font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 6px;">Zadatak 2 · laboratorij stlačivosti</div>
-            <h4 style="margin: 0; color: #0f172a; font-size: 1.42rem;">Isti tlak, potpuno drugačiji odgovor tekućine i plina</h4>
-            <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 620px;">Prikaz uspoređuje vodu (konstantan K = 2000 MPa) i izotermni idealni plin pri istom porastu apsolutnog tlaka. Za vodu V/V₁ = exp(−Δp/K), a za plin V/V₁ = p₁/p. Volumenski modul tako izravno opisuje otpor tvari prema promjeni volumena.</p>
-        </div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 18px; align-items: stretch;">
-        <div style="position: relative; width: 100%; min-width: 0; background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 72%); border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
-            <canvas id="z4-canvas" width="720" height="420" style="display: block; width: 100%; height: auto; aspect-ratio: 720 / 420;"></canvas>
-            <div style="position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.92); border: 1px solid #dbeafe; border-radius: 12px; padding: 8px 12px; font-size: 0.78rem; color: #334155;">
-                Tlak: <span id="z4-v-p" style="font-weight: 800; color: #2563eb;">1</span> MPa
-            </div>
-            <div style="position: absolute; top: 12px; right: 12px; background: rgba(15,23,42,0.9); color: #e2e8f0; border-radius: 12px; padding: 10px 12px; font-size: 0.73rem; line-height: 1.45; max-width: 185px;">
-                <div style="font-weight: 800; color: #93c5fd; margin-bottom: 4px;">Tumačenje</div>
-                <div>Velik <strong>K</strong> znači da treba puno tlaka za malu promjenu volumena.</div>
-            </div>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; min-width: 0;">
-            <div style="background: #ffffff; padding: 14px; border: 1px solid #e2e8f0; border-radius: 16px;">
-                <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Tlak p: <span id="z4-v-p-side" style="color: #2563eb;">1.0</span> MPa</label>
-                <div style="font-size:0.78rem; color:#64748b; margin-bottom:6px;">Δp u odnosu na 1 MPa: <strong id="z4-dp" style="color:#1d4ed8;">0.0</strong> MPa</div>
-                <input type="range" id="z4-p" min="1" max="10" step="0.1" value="1" style="width: 100%; accent-color: #2563eb;">
-                <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#64748b;margin-top:3px;"><span>1 MPa</span><span>10 MPa</span></div>
-            </div>
-            
-            <div style="background: #ffffff; padding: 14px; border: 1px solid #e2e8f0; border-radius: 16px;">
-                <div style="font-size: 0.74rem; font-weight: 800; color: #64748b; margin-bottom: 10px; text-transform: uppercase;">Relativna promjena volumena</div>
-                <div style="display: grid; gap: 10px;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;"><span style="color: #2563eb;">Voda</span><strong id="z4-val-liquid" style="color: #1d4ed8;">0.04%</strong></div>
-                        <div style="height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden;"><div id="z4-bar-liquid" style="width: 0%; height: 100%; background: linear-gradient(90deg, #60a5fa, #2563eb);"></div></div>
-                    </div>
-                    <div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;"><span style="color: #dc2626;">Zrak</span><strong id="z4-val-gas" style="color: #b91c1c;">90%</strong></div>
-                        <div style="height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden;"><div id="z4-bar-gas" style="width: 0%; height: 100%; background: linear-gradient(90deg, #fca5a5, #ef4444);"></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
-                <div style="background: #eff6ff; padding: 14px; border: 1px solid #bfdbfe; border-radius: 14px;">
-                    <div style="font-size: 0.7rem; color: #1d4ed8; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Volumen vode</div>
-                    <div style="font-size: 1.2rem; font-weight: 800; color: #1d4ed8;"><span id="z4-vol-liquid">999.6</span> cm³</div>
-                </div>
-                <div style="background: #fff5f5; padding: 14px; border: 1px solid #fecaca; border-radius: 14px;">
-                    <div style="font-size: 0.7rem; color: #b91c1c; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Volumen zraka</div>
-                    <div style="font-size: 1.2rem; font-weight: 800; color: #b91c1c;"><span id="z4-vol-gas">100.0</span> cm³</div>
-                </div>
-            </div>
-
-            <div style="padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; color: #334155;">
-                <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Fizikalno tumačenje</div>
-                <p id="z4-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.55;"></p>
-            </div>
-
-            <div style="background:#ffffff; padding:12px 14px; border:1px solid #e2e8f0; border-radius:16px;">
-                <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; color:#64748b; margin-bottom:8px;">Usporedba volumenskog modula K</div>
-                <div style="font-size:0.8rem; color:#1d4ed8; margin-bottom:3px;">Voda ~ 2000 MPa</div>
-                <div style="height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-bottom:8px;"><div style="height:100%; width:100%; background:linear-gradient(90deg,#60a5fa,#1d4ed8);"></div></div>
-                <div style="font-size:0.8rem; color:#b91c1c; margin-bottom:3px;">Idealni plin pri stalnoj temperaturi: K = p (ovdje 1–10 MPa)</div>
-                <div style="height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden;"><div id="z4-k-gas" style="height:100%; width:0.05%; background:#ef4444;"></div></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="fizikalni-uvid">
-Volumenski modul određuje promjenu volumena pri promjeni tlaka. Zato je pomak klipa pri istoj promjeni tlaka kod tekućine znatno manji nego kod plina.
+<div class="mf1-lab" id="z4-advanced-widget">
+  <h4>Stlačivost · isti tlak, različita promjena volumena</h4>
+  <p class="widget-idea">Voda: K = 2000 MPa. Izotermni idealni plin: pV = konst. Početno V₁ = 1000 cm³, p₁ = 1 MPa.</p>
+  <canvas id="z4-canvas" width="720" height="420" style="display:block;width:100%;height:auto;aspect-ratio:720/420" aria-label="Jednako veliki početni volumeni vode i plina pod istim apsolutnim tlakom"></canvas>
+  <div class="mf1-compact-reading-bar">
+    <label class="mf1-field">Tlak p = <b><span id="z4-v-p-side">1,0</span> MPa</b><input type="range" id="z4-p" min="1" max="10" step="0.1" value="1"><small>Δp = <span id="z4-dp">0,0</span> MPa</small></label>
+    <div class="mf1-key-reading"><small>Volumen vode</small><strong><span id="z4-vol-liquid"></span> cm³</strong><small>Smanjenje <span id="z4-val-liquid"></span></small></div>
+    <div class="mf1-key-reading"><small>Volumen plina</small><strong><span id="z4-vol-gas"></span> cm³</strong><small>Smanjenje <span id="z4-val-gas"></span></small></div>
+  </div>
+  <p class="mf1-live-equation">Voda: V/V₁ = exp(−Δp/K) · plin: V/V₁ = p₁/p</p>
+  <p id="z4-explainer" class="mf1-live-note"></p>
 </div>
 
 <script>
@@ -503,25 +292,21 @@ Volumenski modul određuje promjenu volumena pri promjeni tlaka. Zato je pomak k
 
   function syncZ4State() {
     const p = parseFloat(z4pS.value);
-    document.getElementById("z4-v-p").textContent = p.toFixed(1);
     document.getElementById("z4-v-p-side").textContent = p.toFixed(1);
     document.getElementById("z4-dp").textContent = (p - 1).toFixed(1);
 
-    document.getElementById("z4-k-gas").style.width = `${100*p/2000}%`;
     const dP = Math.max(p - 1, 0);
     const liquidCompression = -Math.expm1(-dP / 2000) * 100;
     const gasCompression = Math.min((1 - 1 / Math.max(p, 1)) * 100, 90);
     const liquidVolume = 1000 * (1 - liquidCompression / 100);
     const gasVolume = 1000 * (1 - gasCompression / 100);
 
-    document.getElementById("z4-bar-liquid").style.width = `${liquidCompression}%`;
     document.getElementById("z4-val-liquid").textContent = `${liquidCompression.toFixed(2)}%`;
-    document.getElementById("z4-bar-gas").style.width = `${gasCompression.toFixed(1)}%`;
     document.getElementById("z4-val-gas").textContent = `${gasCompression.toFixed(1)}%`;
     document.getElementById("z4-vol-liquid").textContent = liquidVolume.toFixed(1);
     document.getElementById("z4-vol-gas").textContent = gasVolume.toFixed(1);
     document.getElementById("z4-explainer").textContent =
-      `Na ${p.toFixed(0)} MPa voda izgubi tek ${liquidCompression.toFixed(2)}% volumena, pa njezin klip gotovo da se ne pomakne. Plin pri istom opterećenju izgubi oko ${gasCompression.toFixed(1)}% volumena, zato se ondje vidi veliko skupljanje i mnogo veća promjena rasporeda čestica.`;
+      `Pri ${p.toFixed(1)} MPa voda izgubi ${liquidCompression.toFixed(2)} %, a plin ${gasCompression.toFixed(1)} % volumena. Velik modul K vode znači mali pomak klipa.`;
 
     z4State = { p, liquidCompression, gasCompression };
   }
@@ -858,7 +643,7 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
     c.fillStyle = "#ffffff";
     c.fillRect(0, 0, w, h);
 
-    const pArea = { l: 36, r: w - 28, t: 12, b: h - 26 };
+    const pArea = { l: 36, r: w - 28, t: 28, b: h - 30 };
     c.strokeStyle = "#cbd5e1";
     c.beginPath();
     c.moveTo(pArea.l, pArea.t);
@@ -866,20 +651,22 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
     c.lineTo(pArea.r, pArea.b);
     c.stroke();
 
-    c.fillStyle = "#64748b";
+    c.fillStyle = "#1d4ed8";
     c.font = "12px Inter";
     c.fillText("p [0–105 MPa]", 4, 13);
+    c.fillStyle = "#64748b";
     c.fillText("Dubina [0–10000 m]", pArea.r - 145, h - 7);
-    c.fillText("ρ [1025–1070 kg/m³]", pArea.r - 135, 13);
+    c.fillStyle = "#dc2626";
+    c.fillText("ρ [1025–1075 kg/m³]", pArea.r - 135, 13);
 
     const dMax = 10000;
     const dNow = Math.max(0, Math.min(currentDepth, dMax));
-    const n = Math.max(2, Math.floor(dNow / 200));
+    const n = 50;
     c.strokeStyle = "#1d4ed8";
     c.lineWidth = 2;
     c.beginPath();
     for (let i = 0; i <= n; i++) {
-      const d = (i / n) * dNow;
+      const d = (i / n) * dMax;
       const compression = (1025 * 9.81 * d) / 2.34e9;
       const p = (0.1e6 - 2.34e9 * Math.log(1 - compression)) / 1e6;
       const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
@@ -893,11 +680,11 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
     c.lineWidth = 2;
     c.beginPath();
     for (let i = 0; i <= n; i++) {
-      const d = (i / n) * dNow;
+      const d = (i / n) * dMax;
       const compression = (1025 * 9.81 * d) / 2.34e9;
       const rho = 1025 / (1 - compression);
       const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
-      const y = pArea.b - ((rho - 1025) / 45) * (pArea.b - pArea.t);
+      const y = pArea.b - ((rho - 1025) / 50) * (pArea.b - pArea.t);
       if (i === 0) c.moveTo(x, y);
       else c.lineTo(x, y);
     }
@@ -911,7 +698,16 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
     c.lineTo(cx, pArea.b);
     c.stroke();
     c.setLineDash([]);
+    const compression=(1025*9.81*dNow)/2.34e9;
+    const pointP=(0.1e6-2.34e9*Math.log(1-compression))/1e6,pointRho=1025/(1-compression);
+    for(const [value,color] of [[pointP/105,'#1d4ed8'],[(pointRho-1025)/50,'#dc2626']]){c.beginPath();c.arc(cx,pArea.b-value*(pArea.b-pArea.t),3.5,0,2*Math.PI);c.fillStyle=color;c.fill();}
+    z5chart.setAttribute('aria-valuenow',dNow);
+    z5chart.setAttribute('aria-valuetext',`${dNow} m; p = ${pointP.toFixed(1)} MPa; ρ = ${pointRho.toFixed(1)} kg/m³`);
   }
+  z5chart.tabIndex=0;z5chart.setAttribute('role','slider');z5chart.setAttribute('aria-label','Dubina sonde na grafu tlaka i gustoće');z5chart.setAttribute('aria-valuemin','0');z5chart.setAttribute('aria-valuemax','10000');
+  function setChartDepth(d){z5dS.value=Math.round(Math.max(0,Math.min(10000,d))/100)*100;z5dS.dispatchEvent(new Event('input',{bubbles:true}));}
+  z5chart.addEventListener('pointerdown',e=>{const box=z5chart.getBoundingClientRect(),x=(e.clientX-box.left)*z5chart.width/box.width;setChartDepth((x-36)/(z5chart.width-64)*10000);});
+  z5chart.addEventListener('keydown',e=>{const d=+z5dS.value,next={ArrowLeft:d-100,ArrowDown:d-100,ArrowRight:d+100,ArrowUp:d+100,Home:0,End:10000}[e.key];if(next!==undefined){e.preventDefault();setChartDepth(next);}});
   z5dS.oninput = updateZ5;
   updateZ5();
 })();
@@ -1109,7 +905,7 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
 
   function drawArrow(ctx, x1, y1, x2, y2, color, width = 2) {
  if(Math.hypot(x2-x1,y2-y1)<1e-9)return;
-    const headlen = 8;
+    const headlen = Math.min(8,Math.hypot(x2-x1,y2-y1)*.4);
     const angle = Math.atan2(y2 - y1, x2 - x1);
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
@@ -1136,6 +932,8 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
     const tauQuarter = (beta * d_m) / 8;
     const v_max = (beta * d_m * d_m) / (16 * mu);
     const F_tau = tauWall * Math.PI * d_m * L;
+    const refV=6.25, decade=10**Math.floor(Math.log10(Math.max(v_max,refV)));
+    const axisMax=[1,2,5,10].find(x=>x*decade>=Math.max(v_max,refV))*decade;
 
     document.getElementById("z6-v-mu").innerText = (mu * 1000).toFixed(0);
     document.getElementById("z6-v-beta").innerText = beta;
@@ -1215,7 +1013,7 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
       const y = topWall + (i / 8) * (bottomWall - topWall);
       const r_mm = ((y - cy) / drawR) * R;
       const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
-      const len = (v / Math.max(v_max, 1e-6)) * 120;
+      const len = (v / axisMax) * 120;
       if (len < 0.1) continue;
       const alpha = 0.2 + 0.55 * (v / Math.max(v_max, 1e-6));
       drawArrow(ctx, channel.x + 18, y, channel.x + 18 + len, y, `rgba(37, 99, 235, ${alpha})`, 2.5);
@@ -1269,7 +1067,9 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
     ctx.fillText("0", chart.x - 16, chart.y + chart.h / 2 + 4);
     ctx.fillText("-R", chart.x - 24, chart.y + chart.h);
     ctx.fillText("r", chart.x - 10, chart.y - 8);
-    ctx.fillText("v", chart.x + chart.w + 8, chart.y + chart.h + 4);
+    ctx.fillText("v [m/s]", chart.x + chart.w - 45, chart.y + chart.h + 30);
+    for(let i=0;i<=4;i++){const xx=chart.x+(chart.w-12)*i/4;ctx.fillText((axisMax*i/4).toLocaleString("hr-HR",{maximumFractionDigits:2}),xx-6,chart.y+chart.h+15);}
+    ctx.save();ctx.strokeStyle="#8398a6";ctx.setLineDash([5,4]);ctx.beginPath();for(let i=0;i<=80;i++){const rr=1-i/40,xx=chart.x+(refV*(1-rr*rr)/axisMax)*(chart.w-12),yy=chart.y+i/80*chart.h;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.stroke();ctx.restore();
 
     // Profile fill and curve
     ctx.beginPath();
@@ -1278,7 +1078,7 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
       const t = i / 120;
       const r_mm = R - 2 * R * t;
       const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
-      const px = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+      const px = chart.x + (v / axisMax) * (chart.w - 12);
       const py = chart.y + t * chart.h;
       ctx.lineTo(px, py);
     }
@@ -1297,7 +1097,7 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
       const t = i / 120;
       const r_mm = R - 2 * R * t;
       const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
-      const px = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+      const px = chart.x + (v / axisMax) * (chart.w - 12);
       const py = chart.y + t * chart.h;
       if (i === 0) ctx.moveTo(px, py);
       else ctx.lineTo(px, py);
@@ -1313,14 +1113,7 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
     ctx.stroke();
     ctx.setLineDash([]);
 
-    const stressBarW = clamp(16 + tauWall * 10, 16, 74);
-    ctx.fillStyle = "rgba(239, 68, 68, 0.18)";
-    ctx.fillRect(chart.x + chart.w - stressBarW, chart.y, stressBarW, 12);
-    ctx.fillRect(chart.x + chart.w - stressBarW, chart.y + chart.h - 12, stressBarW, 12);
-    ctx.fillStyle = "#b91c1c";
-    ctx.font = "600 11px Inter";
-    ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + 10);
-    ctx.fillText("visoko tau", chart.x + chart.w - stressBarW - 58, chart.y + chart.h - 2);
+    ctx.fillStyle="#b91c1c";ctx.font="600 12px Inter";ctx.fillText("|τw| = "+tauWall.toFixed(2)+" Pa",chart.x+chart.w-100,chart.y-12);
 
     // Interactive highlight by radial position
     const probeY = probeYRatio === null ? (mousePos ? mousePos.y : null) : probeYRatio * h;
@@ -1330,7 +1123,7 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
       const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - r_m ** 2));
       const tau = Math.abs((beta * r_m) / 2);
       const inspectYChart = chart.y + ((R - r_inspect_mm) / (2 * R)) * chart.h;
-      const inspectXChart = chart.x + (v / Math.max(v_max, 1e-6)) * (chart.w - 12);
+      const inspectXChart = chart.x + (v / axisMax) * (chart.w - 12);
 
       tooltip.style.display = "block";
       tooltip.style.left = (mousePos ? mousePos.x : chart.x) + 15 + "px";
@@ -1373,8 +1166,8 @@ Profil pokazuje da je intenzitet smičnog naprezanja $|\tau|$ najveći na stijen
     ctx.font = "12px Inter";
     ctx.fillText("sporije uz stijenku", channel.x, left.y + left.h - 18);
     ctx.fillText("najbrže na osi", channel.x + channel.w - 92, left.y + left.h - 18);
-    ctx.fillText("parabola; strelice v/vmax", chart.x, right.y + right.h - 14);
-    ctx.fillText("τ na vanjskoj plohi jezgre: ←", chart.x + chart.w - 138, right.y + right.h - 14);
+    ctx.fillText("Isprekidano: početnih 6,25 m/s", chart.x, right.y + right.h - 5);
+
   }
 
   [muS, betaS, dS, lS].forEach((slider) => slider.addEventListener("input", draw));
@@ -1419,119 +1212,25 @@ Riječ je o ustaljenoj, odnosno terminalnoj brzini: pri manjoj brzini viskozna s
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
 ````{=html}
-<div class="mf1-lab" id="z7-advanced-widget" style="max-width: 980px; margin: 20px auto; font-family: 'Inter', sans-serif; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
-    <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 18px;">
-        <div>
-            <div style="font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; font-weight: 800; margin-bottom: 6px;">Zadatak 5 · laboratorij viskoznog klizanja</div>
-            <h4 style="margin: 0; color: #0f172a; font-size: 1.42rem;">Blok na kosini: težina vuče nizbrdo, uljni film koči gibanje</h4>
-            <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 690px;">Prikaz povezuje komponentu težine niz kosinu, viskoznu silu otpora u tankom filmu ulja i brzinu pri kojoj se te sile izjednačuju. Uz gibanje bloka prikazan je i linearni profil brzine u uljnom filmu.</p>
-        </div>
-    </div>
-
-    <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: stretch; margin-bottom: 14px;">
-        <div style="position: relative; flex: 999 1 620px; min-width: 280px; width: 100%; background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 74%); border: 1px solid #e2e8f0; border-radius: 20px; overflow: hidden;">
-            <canvas id="z7-canvas" width="760" height="420" style="display: block; width: 100%; height: auto; aspect-ratio: 760 / 420;"></canvas>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 12px; flex: 1 1 220px; min-width: 220px;">
-            <div style="background: rgba(255,255,255,0.96); border: 1px solid #dbeafe; border-radius: 14px; padding: 10px 12px; font-size: 0.78rem; color: #334155;">
-                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Ustaljena brzina</div>
-                <div style="font-size: 1.25rem; font-weight: 800; color: #166534;"><span id="z7-stage-v">5.16</span> m/s</div>
-            </div>
-
-            <div style="background: rgba(15,23,42,0.94); color: #e2e8f0; border-radius: 14px; padding: 10px 12px; font-size: 0.72rem; line-height: 1.4;">
-                <div style="font-weight: 800; color: #93c5fd; margin-bottom: 3px;">Pri ustaljenju</div>
-                <div id="z7-stage-balance"><strong>F<sub>tang</sub> = F<sub>v</sub></strong></div>
-            </div>
-
-            <div style="background: rgba(255,255,255,0.96); border: 1px solid #dbeafe; border-radius: 14px; padding: 10px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);">
-                <div style="font-size: 0.69rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Profil u filmu ulja</div>
-                <canvas id="z7-zoom-canvas" width="160" height="90" style="display: block; width: 100%; height: auto; aspect-ratio: 160 / 90; background: #f8fbff; border: 1px solid #dbeafe; border-radius: 10px;"></canvas>
-                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 6px;">
-                    <span>v = 0</span>
-                    <span>δ = <span id="z7-stage-delta">6</span> μm</span>
-                    <span>v<sub>B</sub></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 12px;">
-        <div style="background: #ffffff; padding: 14px; border: 1px solid #dbeafe; border-radius: 16px;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Klizač 1</div>
-            <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Kut α: <span id="z7-v-alpha" style="color: #2563eb;">20</span>°</label>
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Veći kut pojačava komponentu težine niz kosinu: G sin α.</div>
-            <input type="range" id="z7-alpha" min="5" max="45" step="1" value="20" style="width: 100%; accent-color: #2563eb;">
-            <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#64748b;margin-top:3px;"><span>5°</span><span>45°</span></div>
-        </div>
-
-        <div style="background: #ffffff; padding: 14px; border: 1px solid #ccfbf1; border-radius: 16px;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Klizač 2</div>
-            <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Viskoznost μ: <span id="z7-v-mu" style="color: #0f766e;">7</span> mPa·s</label>
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Gušće ulje jače koči gibanje pa za ravnotežu treba manja brzina.</div>
-            <input type="range" id="z7-mu" min="1" max="50" step="1" value="7" style="width: 100%; accent-color: #0f766e;">
-            <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#64748b;margin-top:3px;"><span>1</span><span>50</span></div>
-        </div>
-
-        <div style="background: #ffffff; padding: 14px; border: 1px solid #fed7aa; border-radius: 16px;">
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Klizač 3</div>
-            <label style="display: block; font-weight: 700; color: #475569; margin-bottom: 6px;">Debljina filma δ: <span id="z7-v-delta" style="color: #ea580c;">6</span> μm</label>
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Deblji film smanjuje smični gradijent i dopušta veću ustaljenu brzinu.</div>
-            <input type="range" id="z7-delta" min="1" max="50" step="1" value="6" style="width: 100%; accent-color: #ea580c;">
-            <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#64748b;margin-top:3px;"><span>1 μm</span><span>50 μm</span></div>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; margin-bottom: 12px;">
-        <div style="background: #ecfdf5; border: 1px solid #86efac; border-radius: 14px; padding: 12px;">
-            <div style="font-size: 0.68rem; color: #166534; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Ustaljena brzina v<sub>B</sub></div>
-            <div style="font-size: 1.22rem; color: #166534; font-weight: 800;"><span id="z7-res-v">5.16</span> m/s</div>
-        </div>
-        <div style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 14px; padding: 12px;">
-            <div style="font-size: 0.68rem; color: #b91c1c; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Pogonska sila</div>
-            <div style="font-size: 1.22rem; color: #b91c1c; font-weight: 800;"><span id="z7-res-fg">376.2</span> N</div>
-        </div>
-        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 12px;">
-            <div style="font-size: 0.68rem; color: #1d4ed8; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Viskozni otpor</div>
-            <div style="font-size: 1.22rem; color: #1d4ed8; font-weight: 800;"><span id="z7-res-fv">376.2</span> N</div>
-        </div>
-        <div style="background: #fff7ed; border: 1px solid #fdba74; border-radius: 14px; padding: 12px;">
-            <div style="font-size: 0.68rem; color: #c2410c; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Smično naprezanje τ</div>
-            <div style="font-size: 1.22rem; color: #c2410c; font-weight: 800;"><span id="z7-res-tau">6.0</span> <span id="z7-res-tau-unit">Pa</span></div>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; align-items: start;">
-        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:14px;">
-            <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase; margin-bottom:8px;">Balans sila na kosini</div>
-            <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#b91c1c; margin-bottom:4px;"><span>F<sub>tang</sub> = G sin α</span><strong><span id="z7-balance-fg">376.2</span> N</strong></div>
-            <div style="height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden; margin:3px 0 10px;"><div id="z7-bar-fg" style="height:100%; width:100%; background:linear-gradient(90deg,#fca5a5,#ef4444);"></div></div>
-            <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#1d4ed8; margin-bottom:4px;"><span>F<sub>v</sub> = μ(v/δ)a²</span><strong><span id="z7-balance-fv">376.2</span> N</strong></div>
-            <div style="height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden;"><div id="z7-bar-fv" style="height:100%; width:100%; background:linear-gradient(90deg,#93c5fd,#2563eb);"></div></div>
-        </div>
-
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            <div style="background:#fff7ed; border:1px solid #fdba74; border-radius:16px; padding:14px; color:#7c2d12;">
-                <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:8px;">Numerička jednadžba</div>
-                <div id="z7-eq-vals" style="font-size:0.9rem; line-height:1.55; font-weight:700;">v<sub>B</sub> = 5.16 m/s</div>
-                <div style="font-size:0.8rem; line-height:1.55; margin-top:8px; color:#9a3412;">Za veću komponentu težine ili deblji film treba veća brzina da se razvije isti viskozni otpor. Za veću viskoznost dovoljna je manja brzina.</div>
-            </div>
-
-            <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:16px; padding:14px; color:#166534;">
-                <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:8px;">Režim gibanja</div>
-                <div id="z7-logic-summary" style="font-size:0.9rem; line-height:1.55; font-weight:700;">Otpor filma i komponenta težine upravo se izjednačuju.</div>
-            </div>
-
-            <div style="padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; color: #334155;">
-                <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Fizikalno tumačenje</div>
-                <p id="z7-explainer" style="margin: 0; font-size: 0.84rem; line-height: 1.6;"></p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="fizikalni-uvid">
-Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža otpor. Ravnoteža tih sila određuje konstantnu brzinu gibanja.
+<div class="mf1-lab" id="z7-advanced-widget">
+  <h4>Blok na kosini · viskoznost određuje ustaljenu brzinu</h4>
+  <p class="widget-idea">G = 1100 N · A = 0,25² m² · ravnoteža duž kosine: G sin α = Fᵥ</p>
+  <div class="mf1-incline-scene">
+    <canvas id="z7-canvas" width="760" height="420" style="display:block;width:100%;height:auto;aspect-ratio:760/420" aria-label="Blok na kosini i zatvoreni trokut sila pri ustaljenom klizanju"></canvas>
+    <canvas id="z7-zoom-canvas" width="760" height="260" aria-label="Uvećani profil brzine u tankom uljnom filmu"></canvas>
+  </div>
+  <div class="mf1-control-row">
+    <label class="mf1-field">Kut kosine α = <b><span id="z7-v-alpha">20</span>°</b><input type="range" id="z7-alpha" min="5" max="45" step="1" value="20"></label>
+    <label class="mf1-field">Viskoznost μ = <b><span id="z7-v-mu">7</span> mPa·s</b><input type="range" id="z7-mu" min="1" max="50" step="1" value="7"></label>
+    <details class="mf1-parameters"><summary>Debljina uljnog filma</summary><label class="mf1-field">δ = <b><span id="z7-v-delta">6</span> μm</b><input type="range" id="z7-delta" min="1" max="50" step="1" value="6"></label></details>
+  </div>
+  <div class="mf1-result-row">
+    <div><small>Ustaljena brzina</small><strong><span id="z7-res-v"></span> m/s</strong></div>
+    <div><small>G sin α = Fᵥ</small><strong><span id="z7-res-fg"></span> N</strong></div>
+    <div><small>Smično naprezanje</small><strong><span id="z7-res-tau"></span> <span id="z7-res-tau-unit">Pa</span></strong></div>
+  </div>
+  <p class="mf1-live-equation">v = G sin(α) δ / (μA) · τ = μv/δ</p>
+  <p id="z7-explainer" class="mf1-live-note"></p>
 </div>
 
 <script>
@@ -1547,8 +1246,8 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
 
   const z7BaseW = 760;
   const z7BaseH = 420;
-  const z7ZoomW = 160;
-  const z7ZoomH = 90;
+  const z7ZoomW = 760;
+  const z7ZoomH = 260;
   const blockWeight = 1100;
   const blockSide = 0.25;
 
@@ -1564,6 +1263,7 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
   }
 
   function prepareCanvas(canvas, ctx, logicalWidth, logicalHeight) {
+    canvas.style.setProperty('aspect-ratio', logicalWidth + ' / ' + logicalHeight, 'important');
     const rect = canvas.getBoundingClientRect();
     const displayWidth = Math.max(Math.round(rect.width) || logicalWidth, 80);
     const displayHeight = Math.max(Math.round(rect.height) || logicalHeight, 40);
@@ -1580,7 +1280,8 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
     const scaleY = displayHeight / logicalHeight;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.setTransform(scaleX * ratio, 0, 0, scaleY * ratio, 0, 0);
+    const scale=Math.min(scaleX,scaleY)*ratio;
+    ctx.setTransform(scale,0,0,scale,(pixelWidth-logicalWidth*scale)/2,(pixelHeight-logicalHeight*scale)/2);
     ctx.imageSmoothingEnabled = true;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -1644,19 +1345,9 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
     setText("z7-v-alpha", z7State.alphaDeg.toFixed(0));
     setText("z7-v-mu", z7State.muMilli.toFixed(0));
     setText("z7-v-delta", z7State.deltaMicron.toFixed(0));
-    setText("z7-stage-v", z7State.v.toFixed(2));
-    setText("z7-stage-delta", z7State.deltaMicron.toFixed(0));
     setText("z7-res-v", z7State.v.toFixed(2));
     setText("z7-res-fg", z7State.Ft.toFixed(1));
-    setText("z7-res-fv", z7State.Fv.toFixed(1));
     setText("z7-res-tau", z7State.tau.toFixed(1));
-    setText("z7-balance-fg", z7State.Ft.toFixed(1));
-    setText("z7-balance-fv", z7State.Fv.toFixed(1));
-    setText("z7-stage-balance", "F_tang = F_v");
-    setText(
-      "z7-eq-vals",
-      `v_B = (${z7State.Ft.toFixed(1)} · ${z7State.deltaMicron.toFixed(0)}×10⁻⁶) / (${z7State.mu.toFixed(3)} · 0.25²) = ${z7State.v.toFixed(2)} m/s`,
-    );
 
     const tauAbs = Math.abs(z7State.tau);
     if (tauAbs >= 1000) {
@@ -1667,22 +1358,9 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
       setText("z7-res-tau-unit", "Pa");
     }
 
-    const refForce = Math.max(z7State.Ft, z7State.Fv, 1);
-    document.getElementById("z7-bar-fg").style.width = `${((z7State.Ft / refForce) * 100).toFixed(1)}%`;
-    document.getElementById("z7-bar-fv").style.width = `${((z7State.Fv / refForce) * 100).toFixed(1)}%`;
-
-    let logicText = "Otpor filma i komponenta težine upravo se izjednačuju u umjerenom režimu gibanja.";
-    if (z7State.v > 40) {
-      logicText =
-        'Kosina je dovoljno pogonska ili je film dovoljno "mekan" da blok treba veliku brzinu kako bi razvio potreban viskozni otpor.';
-    } else if (z7State.v < 8) {
-      logicText =
-        "Viskoznost je relativno jaka ili je film vrlo tanak, pa se ravnoteža postiže već pri maloj brzini klizanja.";
-    }
-    setText("z7-logic-summary", logicText);
     setText(
       "z7-explainer",
-      `Komponenta težine niz kosinu sada iznosi ${z7State.Ft.toFixed(1)} N. U filmu debljine ${z7State.deltaMicron.toFixed(0)} μm mora se razviti jednako velik viskozni otpor, pa blok klizi stalnom brzinom ${z7State.v.toFixed(2)} m/s. Ako povećamo α ili δ, brzina raste; ako povećamo μ, potrebna brzina pada. ${logicText}`,
+      `Otpor od ${z7State.Ft.toFixed(1)} N uravnotežuje težinu duž kosine. Veći μ smanjuje ustaljenu brzinu; veći α ili δ je povećava.`,
     );
     drawStage(z7State);
     drawZoom(z7State);
@@ -1699,6 +1377,22 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
 
     z7ctx.fillStyle = "rgba(148, 163, 184, 0.12)";
     z7ctx.fillRect(530, 28, 2, 364);
+    // Head-to-tail force polygon: G + N + Fv = 0, one scale for all forces.
+    const fx=615,fy=113,forceScale=85/blockWeight;
+    const gx=fx,gy=fy+blockWeight*forceScale;
+    const normal=blockWeight*Math.cos(values.alpha);
+    const nx=gx+normal*Math.sin(values.alpha)*forceScale,ny=gy-normal*Math.cos(values.alpha)*forceScale;
+    z7ctx.font='600 16px Inter';z7ctx.fillStyle='#40596b';z7ctx.fillText('Ravnoteža sila',558,53);
+    MF1.arrow(z7ctx,fx,fy,0,gy-fy,'#b93645',3);
+    MF1.arrow(z7ctx,gx,gy,nx-gx,ny-gy,'#64748b',3);
+    MF1.arrow(z7ctx,nx,ny,fx-nx,fy-ny,'#176da9',3);
+    z7ctx.font='600 15px Inter';
+    z7ctx.fillStyle='#b93645';z7ctx.fillText('G',594,175);
+    z7ctx.fillStyle='#64748b';z7ctx.fillText('N',674,170);
+    z7ctx.fillStyle='#176da9';z7ctx.fillText('Fᵥ',625,94);
+    z7ctx.font='14px Inter';z7ctx.fillStyle='#526779';z7ctx.fillText('G + N + Fᵥ = 0',558,241);
+    z7ctx.fillText('ista skala sila',558,262);
+
 
     const originX = 86;
     const originY = 100;
@@ -1751,7 +1445,10 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
     const centerY = -blockH / 2 - filmGap;
     MF1.arrow(z7ctx, centerX, centerY, values.Ft * .07, 0, "#b93645", "G sin α");
     MF1.arrow(z7ctx, centerX, -filmGap, -values.Fv * .07, 0, "#2563eb", "F_v");
-    MF1.arrow(z7ctx,centerX-10,centerY-30,values.v*.7,0,"#16a34a","v_B");
+    const speedScale=75/Math.max(values.v,10);
+    MF1.arrow(z7ctx,centerX-10,centerY-30,values.v*speedScale,0,"#16a34a");
+    z7ctx.fillStyle='#147a55';z7ctx.font='600 13px Inter';
+    z7ctx.fillText('vB = '+values.v.toFixed(2)+' m/s',centerX-30,centerY-44);
 
     z7ctx.strokeStyle = "#0f766e";
     z7ctx.lineWidth = 2;
@@ -1782,62 +1479,28 @@ Sila teže vuče blok niz kosinu, dok viskozno trenje u tankom sloju ulja pruža
 
     z7ctx.fillStyle = "#475569";
     z7ctx.font = "13px Inter";
-    z7ctx.fillText("Film ulja je nacrtan uvećano da bi se jasno vidio profil brzine i razmak δ.", 54, 382);
+    z7ctx.fillText("Film je uvećan; vektor brzine ima prilagođeno mjerilo.", 54, 382);
   }
 
   function drawZoom(values) {
-    prepareCanvas(z7zc, z7zctx, z7ZoomW, z7ZoomH);
-
-    const zoomBg = z7zctx.createLinearGradient(0, 0, 0, z7ZoomH);
-    zoomBg.addColorStop(0, "#f8fbff");
-    zoomBg.addColorStop(1, "#eef6ff");
-    z7zctx.fillStyle = zoomBg;
-    z7zctx.fillRect(0, 0, z7ZoomW, z7ZoomH);
-
-    z7zctx.fillStyle = "#1e293b";
-    z7zctx.fillRect(0, 10, z7ZoomW, 12);
-    z7zctx.fillRect(0, 68, z7ZoomW, 12);
-
-    const filmGrad = z7zctx.createLinearGradient(0, 22, 0, 68);
-    filmGrad.addColorStop(0, "rgba(191, 219, 254, 0.95)");
-    filmGrad.addColorStop(1, "rgba(59, 130, 246, 0.35)");
-    z7zctx.fillStyle = filmGrad;
-    z7zctx.fillRect(0, 22, z7ZoomW, 46);
-
-    const arrowScale = clamp(values.v / 12, 0.4, 6);
-    for (let i = 0; i < 5; i++) {
-      const t = i / 4;
-      const y = 68 - t * 46;
-      const len = t * 100;
-      z7zctx.strokeStyle = `rgba(37, 99, 235, ${0.35 + 0.14 * i})`;
-      z7zctx.lineWidth = 2.2;
-      z7zctx.beginPath();
-      z7zctx.moveTo(12, y);
-      z7zctx.lineTo(12 + Math.min(len, 116), y);
-      z7zctx.stroke();
-      MF1.arrow(z7zctx, 12, y, len, 0, "#176da9", "", 2);
-    }
-
-    z7zctx.strokeStyle = "#0f766e";
-    z7zctx.lineWidth = 1.6;
-    z7zctx.beginPath();
-    z7zctx.moveTo(134, 22);
-    z7zctx.lineTo(134, 68);
-    z7zctx.stroke();
-    z7zctx.beginPath();
-    z7zctx.moveTo(128, 22);
-    z7zctx.lineTo(140, 22);
-    z7zctx.moveTo(128, 68);
-    z7zctx.lineTo(140, 68);
-    z7zctx.stroke();
-
-    z7zctx.fillStyle = "#0f766e";
-    z7zctx.font = "700 11px Inter";
-    z7zctx.fillText("δ", 144, 47);
-    z7zctx.fillStyle = "#475569";
-    z7zctx.font = "11px Inter";
-    z7zctx.fillText("v = 0", 102, 82);
-    z7zctx.fillText("v/vB = 1", 98, 18);
+    prepareCanvas(z7zc,z7zctx,z7ZoomW,z7ZoomH);
+    const c=z7zctx,left=85,right=660,top=72,bottom=187;
+    c.fillStyle='#f5faff';c.fillRect(0,0,z7ZoomW,z7ZoomH);
+    c.fillStyle='#163247';c.font='600 17px Inter';
+    c.fillText('Uvećani profil brzine u uljnom filmu',30,30);
+    const fluid=c.createLinearGradient(0,top,0,bottom);
+    fluid.addColorStop(0,'#b7e4f5');fluid.addColorStop(1,'#edf8fc');
+    c.fillStyle=fluid;c.fillRect(left,top,right-left,bottom-top);
+    c.fillStyle='#475569';c.fillRect(left,top-12,right-left,12);c.fillRect(left,bottom,right-left,12);
+    c.strokeStyle='#6a9db5';c.lineWidth=1.5;c.setLineDash([5,5]);
+    c.beginPath();c.moveTo(220,bottom);c.lineTo(440,top);c.stroke();c.setLineDash([]);
+    for(let i=1;i<=5;i++){const t=i/5;MF1.arrow(c,220,bottom-t*(bottom-top),220*t,0,'#087eab','',2.5);}
+    c.strokeStyle='#0f766e';c.lineWidth=2;c.beginPath();c.moveTo(595,top);c.lineTo(595,bottom);
+    c.moveTo(588,top);c.lineTo(602,top);c.moveTo(588,bottom);c.lineTo(602,bottom);c.stroke();
+    c.font='600 15px Inter';c.fillStyle='#0f766e';c.fillText('δ = '+values.deltaMicron.toFixed(0)+' μm',607,136);
+    c.fillStyle='#163247';c.fillText('blok: u = vB = '+values.v.toFixed(2)+' m/s',left,54);
+    c.font='15px Inter';c.fillText('nepomična stijenka: u = 0',left,222);
+    c.fillStyle='#52697a';c.fillText('u / vB = y / δ · prikaz uvećane debljine filma',left,245);
   }
 
   [z7aS, z7mS, z7dS].forEach((slider) => slider.addEventListener("input", updateZ7State));

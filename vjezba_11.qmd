@@ -225,15 +225,15 @@ Za koljeno najprije računamo $\vec R_{wall\to fluid}$. Sila fluida na koljeno j
     root.querySelector("#v11m-sec2-label").textContent = "A₂ = " + fmt(s.A2 * 1e4, 2) + " cm²";
   }
   function drawLocators(s) {
-    const O = pt(230, 220),
-      scale = 150 / Math.max(5, s.v1, s.v2),
+    const O = pt(245, 225),
+      scale = 180 / Math.max(1e-6, s.v1, s.v2),
       a = pt(O.x + scale * s.v1, O.y),
       b = pt(O.x + scale * s.v2x, O.y - scale * s.v2z);
     setPath("#v11m-loc-v1", "M" + O.x + " " + O.y + "L" + a.x + " " + a.y);
     setPath("#v11m-loc-v2", "M" + O.x + " " + O.y + "L" + b.x + " " + b.y);
     setPath("#v11m-loc-dv", "M" + a.x + " " + a.y + "L" + b.x + " " + b.y);
     root.querySelector("#v11m-loc-v1-label").setAttribute("x", (O.x + a.x) / 2);
-    root.querySelector("#v11m-loc-v1-label").setAttribute("y", O.y - 10);
+    root.querySelector("#v11m-loc-v1-label").setAttribute("y", O.y + 22);
     root.querySelector("#v11m-loc-v2-label").setAttribute("x", b.x + 6);
     root.querySelector("#v11m-loc-v2-label").setAttribute("y", b.y - 8);
     root.querySelector("#v11m-loc-dv-label").setAttribute("x", (a.x + b.x) / 2 + 6);
@@ -246,8 +246,8 @@ Za koljeno najprije računamo $\vec R_{wall\to fluid}$. Sila fluida na koljeno j
       " m/s; |Δv| = " +
       fmt(Math.hypot(s.dvx, s.dvz), 2) +
       " m/s.";
-    const F = pt(230, 215),
-      fs = 130 / Math.max(800, Math.abs(s.pA), Math.abs(s.rx), Math.abs(s.rz), Math.abs(s.dpx), Math.abs(s.dpz)),
+    const F = pt(245, 215),
+      fs = 175 / Math.max(1, Math.abs(s.pA), Math.abs(s.rx), Math.abs(s.rz), Math.abs(s.dpx), Math.abs(s.dpz)),
       P = pt(F.x + s.pA * fs, F.y),
       R = pt(P.x + s.rx * fs, P.y - s.rz * fs),
       M = pt(F.x + s.dpx * fs, F.y - s.dpz * fs);
@@ -255,8 +255,8 @@ Za koljeno najprije računamo $\vec R_{wall\to fluid}$. Sila fluida na koljeno j
     setPath("#v11m-force-r", "M" + P.x + " " + P.y + "L" + R.x + " " + R.y);
     setPath("#v11m-force-m", "M" + F.x + " " + F.y + "L" + M.x + " " + M.y);
     root.querySelector("#v11m-force-p-label").setAttribute("x", (F.x + P.x) / 2);
-    root.querySelector("#v11m-force-r-label").setAttribute("x", R.x + 5);
-    root.querySelector("#v11m-force-r-label").setAttribute("y", R.y - 6);
+    root.querySelector("#v11m-force-r-label").setAttribute("x", (P.x + R.x) / 2);
+    root.querySelector("#v11m-force-r-label").setAttribute("y", Math.min(P.y, R.y) - 18);
     root.querySelector("#v11m-force-m-label").setAttribute("x", M.x + 5);
     root.querySelector("#v11m-force-m-label").setAttribute("y", M.y + 16);
     root.querySelector("#v11m-force-values").textContent =
@@ -476,6 +476,7 @@ Za $h=0$ slijedi $T_{empty}=(D/d)^2\,2\sqrt{h_0}/(C_d\sqrt{2g})=127{,}71\ \mathr
  '<path d="M580 50V330H950" fill="none" stroke="#64748b" stroke-width="2"/><path d="'+curve+'" fill="none" stroke="#0284c7" stroke-width="3"/>'+
  '<circle cx="'+(580+355*s.t/s.T)+'" cy="'+(330-270*s.h/s.h0)+'" r="6" fill="#dc2626"/>'+
  '<text x="560" y="40">h/h₀</text><text x="940" y="360">t/T</text><text x="557" y="65">1</text><text x="557" y="335">0</text><text x="580" y="350">0</text><text x="933" y="350">1</text>';
+ MF1.separateScene(svg,'path[d="M580 50V330H950"]','65 15 480 385','535 15 445 365','Normirana razina vode h/h₀ tijekom pražnjenja t/T');
  }
   function why(s) {
     if (!previousState || lastChanged === "initial")
@@ -1017,6 +1018,7 @@ Slijedi $R_x=-2053\ \mathrm{N}$, $R_z=+144\ \mathrm{N}$ i $|\vec R|=2058\ \mathr
  '<text x="75" y="35">D='+fmt(s.dia,1)+' m; v diska='+fmt(s.vd,2)+' m/s</text><text x="75" y="375">ṁ = ρA v diska; P = F v diska; Cₚ = '+fmt(s.eta,4)+'</text>'+
  '<path d="M705 55V320H950" fill="none" stroke="#64748b" stroke-width="2"/><path d="'+curve+'" fill="none" stroke="#0284c7" stroke-width="3"/>'+
  '<circle cx="'+(705+245*s.vi/8)+'" cy="'+(320-250*s.pwind/pmax)+'" r="6" fill="#dc2626"/><text x="710" y="40">P vjetra [kW]</text><text x="880" y="350">v [m/s]</text><text x="697" y="340">0</text><text x="945" y="340">8</text><text x="690" y="65">'+fmt(pmax/1000,1)+'</text>';
+ MF1.separateScene(svg,'path[d="M705 55V320H950"]','40 10 625 385','665 15 320 355','Snaga vjetra raste s trećom potencijom uzvodne brzine');
 }
   function why(s) {
     if (!previousState || lastChanged === "initial")

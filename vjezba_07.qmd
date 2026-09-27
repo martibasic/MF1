@@ -2,7 +2,7 @@
 
 ## Fizikalni uvod: simetrija i uzgon {.unnumbered}
 
-Lokalna hidrostatska sila iznosi $d\vec F=-p\vec n\,dA$, pri čemu je $p=\rho gz$. Na simetričnom potpuno uronjenom tijelu horizontalni se doprinosi na istoj dubini poništavaju. Kako je tlak na donjim elementima veći nego na odgovarajućim gornjim elementima, vertikalni integral daje uzgon
+Lokalna hidrostatska sila iznosi $d\vec F=-p\vec n\,dA$, pri čemu je $p=p_{\mathrm{abs}}-p_0=\rho gz$ manometarski tlak u odnosu na tlak $p_0$ na slobodnoj površini. Na simetričnom potpuno uronjenom tijelu horizontalni se doprinosi na istoj dubini poništavaju. Kako je tlak na donjim elementima veći nego na odgovarajućim gornjim elementima, vertikalni integral daje uzgon
 
 $$ F_U=\rho gV_{\text{ist}}. $$
 
@@ -37,110 +37,87 @@ Zbog odabrane osi $F_z<0$ znači silu prema gore, pa je $F_U=|F_z|=\rho gV_{\tex
 <style>
 .v7{max-width:1050px;margin:1.4rem auto;font-family:system-ui,sans-serif;color:#17324d}.v7 *{box-sizing:border-box}.v7b{overflow:hidden;border:1px solid #bed1df;border-radius:16px;background:#fff;box-shadow:0 4px 18px #17324d12}.v7h{padding:1rem 1.2rem;background:#eaf6fb;border-bottom:1px solid #bed1df}.v7h h4{margin:0;color:#123b5b;font-size:1.16rem}.v7h p{margin:.3rem 0 0;font-size:.92rem}.v7s{padding:1rem;background:#f9fcfe}.v7 canvas{display:block;width:100%;max-width:920px;margin:auto;background:#fff;border:1px solid #c8d8e3;border-radius:10px}.v7c{max-width:920px;margin:.5rem auto 0;font-size:.86rem;color:#4b6577}.v7t,.v7p{display:flex;flex-wrap:wrap;gap:.45rem;padding:1rem 1rem 0}.v7 button{padding:.44rem .7rem;border:1px solid #7baabd;border-radius:7px;background:#fff;color:#124967;font:650 .9rem system-ui;cursor:pointer}.v7 button[aria-pressed=true]{background:#146b8a;color:#fff}.v7x{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:.8rem;padding:1rem;border-top:1px solid #d7e3ea}.v7x label{display:grid;gap:.25rem;font-size:.9rem;font-weight:650}.v7x input{width:100%;accent-color:#157a9b}.v7r{color:#0c5874}.v7o{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.5rem;margin:0 1rem;padding:.78rem;background:#f1f7fa;border-radius:9px;font-size:.9rem}.v7o div{display:grid;gap:.18rem}.v7e{margin:1rem;padding:.75rem .9rem;border:1px solid #d7e3ea;border-radius:9px;background:#fbfdfe;font-size:.88rem}.v7n{margin:0 1rem 1rem;padding:.72rem .82rem;border-left:4px solid #157a9b;background:#f0f8fb;font-size:.9rem}@media(min-width:1000px){.v7{width:min(1050px,calc(100vw - 270px));max-width:none}}@media(max-width:520px){.v7{width:calc(100vw - 30px);max-width:calc(100vw - 30px);margin-left:0}.v7x{grid-template-columns:1fr}}
 #widget-submerged-sym .v7h { order:-2!important; }
+#widget-submerged-sym .v7s { padding:12px; }
+#widget-submerged-sym #symc { display:block;width:100%;max-width:700px;height:auto;max-height:none;margin:auto;background:#fff; }
 #widget-submerged-sym .v7o { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
 #widget-submerged-sym .v7n { margin-top:12px; }
+#widget-submerged-sym .v7x label { display:flex;flex-wrap:wrap;align-items:baseline;gap:.3rem; }
+#widget-submerged-sym .v7x input { flex-basis:100%; }
 #widget-submerged-sym .v7-detail { margin:0 12px 12px; }
-#widget-submerged-sym .v7-detail>div { padding:0 14px 10px; font-size:.88rem; }
+#widget-submerged-sym .v7-detail>div { padding:0 14px 10px;font-size:.92rem; }
 </style>
-<div id="widget-submerged-sym" data-widget-role="intro" class="v7 mf1-lab"><div class="v7b"><div class="v7h"><h4>Od raspodjele tlaka do Arhimedova uzgona</h4><p>Povećaj dubinu centra: tlak raste, no raste li i uzgon? Prati tri koraka na istom cilindru.</p></div><div class="v7s"><canvas id="symc" width="920" height="565"></canvas><p class="v7c" id="symcap"></p></div><div class="v7t"><button data-k="1" aria-pressed="true">1. Lokalni tlak</button><button data-k="2" aria-pressed="false">2. Horizontalna simetrija</button><button data-k="3" aria-pressed="false">3. Vertikalni rezultat</button></div><div class="v7x"><label><span>Dubina centra z<sub>C</sub></span> <span class="v7r" id="symzr"></span><input id="symz" type="range" min="1.2" max="5" step=".1" value="2.5"></label></div><div class="v7o"><div><span>Vodoravno ΣF<sub>H</sub></span><strong>0,0 kN</strong></div><div><span>Uzgon F<sub>U</sub></span><strong id="symfu"></strong></div></div><p class="v7n" id="symn"></p><details class="mf1-parameters v7-detail"><summary>Geometrija i zapis integrala</summary><div><p>Cilindar u vodi: R = 1 m, b = 1 m. Dubina centra: <strong id="symzv"></strong>; istisnuti volumen: <strong id="symvol"></strong>.</p><p>p(z) = ρgz → dF<sub>H,L</sub> + dF<sub>H,D</sub> = 0 → F<sub>U</sub> = ρgπR²b.</p></div></details></div></div>
+<div id="widget-submerged-sym" data-widget-role="intro" class="v7 mf1-lab"><div class="v7b">
+<div class="v7h"><h4>Od raspodjele tlaka do Arhimedova uzgona</h4><p>Spusti isti cilindar dublje. Usporedi lokalne tlakove, zrcalne parove i integrirane sile na dvije polovice.</p></div>
+<div class="v7s"><svg id="symc" viewBox="0 0 700 650" role="img" aria-label="Potpuno uronjeni cilindar, lokalni manometarski tlak i sile dviju polovica"></svg><p class="v7c" id="symcap"></p></div>
+<div class="v7t"><button data-k="1" aria-pressed="true">1. Lokalni tlak</button><button data-k="2" aria-pressed="false">2. Horizontalna simetrija</button><button data-k="3" aria-pressed="false">3. Vertikalni rezultat</button></div>
+<div class="v7x"><label><span>Dubina centra z<sub>C</sub> =</span><output class="v7r" id="symzr"></output><input id="symz" type="range" min="1.2" max="5" step=".1" value="2.5" aria-label="Dubina centra cilindra u metrima"></label></div>
+<div class="v7o"><div><span>Vodoravno ΣF<sub>x</sub></span><strong>0,00 kN</strong></div><div><span>Uzgon F<sub>U</sub></span><strong id="symfu"></strong></div></div>
+<div class="v7n" id="symn"></div>
+<details class="mf1-parameters v7-detail"><summary>Geometrija i zapis integrala</summary><div><p>Voda: ρ = 1000 kg/m³; g = 9,81 m/s². Cilindar: R = 1 m, b = 1 m; V = πR²b = <strong id="symvol"></strong>. Dubina centra: <strong id="symzv"></strong>.</p><p>Za os +z prema dolje vrijedi dF<sub>z</sub> = −ρg(z<sub>C</sub> + R sin θ) sin θ bR dθ. Integral po gornjoj polovici (π ≤ θ ≤ 2π) daje silu prema dolje, a po donjoj (0 ≤ θ ≤ π) silu prema gore.</p><p>Jednolik dodatak tlaka Δp ne mijenja rezultantu: ΔF = −Δp ∮ n dA = 0. Na zakrivljenoj plohi sile treba integrirati; izraz (p<sub>dno</sub> − p<sub>vrh</sub>) puta površina ravne plohe nije zamjena za taj integral.</p></div></details>
+</div></div>
 <script>
 (() => {
-  let q = (id) => document.getElementById(id),
-    c = q("symc"),
-    x = c.getContext("2d"),
-    z = q("symz"),
-    k = 1,
-    fmt = (v) => v.toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-    A = (a, b, d, e, C, w = 3, t = "") => {
-      let g = Math.atan2(e - b, d - a),
-        h = 8;
-      x.strokeStyle = x.fillStyle = C;
-      x.lineWidth = w;
-      x.beginPath();
-      x.moveTo(a, b);
-      x.lineTo(d, e);
-      x.stroke();
-      x.beginPath();
-      x.moveTo(d, e);
-      x.lineTo(d - h * Math.cos(g - 0.5), e - h * Math.sin(g - 0.5));
-      x.lineTo(d - h * Math.cos(g + 0.5), e - h * Math.sin(g + 0.5));
-      x.fill();
-      if (t) {
-        x.font = "700 14px system-ui";
-        x.fillText(t, (a + d) / 2 + 6, (b + e) / 2 - 7);
-      }
-    };
-  function u() {
-    let Z = +z.value,
-      W = 700,
-      H = 430,
-      y = 48,
-      s = Math.min(88, 245 / (Z + 1)),
-      cx = 350,
-      cy = y + Z * s;
-    x.clearRect(0, 0, c.width, c.height);
-    x.save();
-    MF1.fitCanvas(c,x,W,H);
-    x.fillStyle = "#dff2f9";
-    x.fillRect(45, y, 610, H - y);
-    x.strokeStyle = "#147b9a";
-    x.beginPath();
-    x.moveTo(45, y);
-    x.lineTo(655, y);
-    x.stroke();
-    x.beginPath();
-    x.arc(cx, cy, s, 0, 7);
-    x.fillStyle = "#e9eef2";
-    x.fill();
-    x.strokeStyle = "#42566a";
-    x.lineWidth = 2;
-    x.stroke();
-    x.fillStyle = "#17324d";
-    x.font = "600 14px system-ui";
-    x.fillText("C", cx + 8, cy - 8);
-    let aa =
-      k === 3 ? [20, 60, 120, 160, 200, 240, 300, 340] : [15, 45, 75, 105, 135, 165, 195, 225, 255, 285, 315, 345];
-    aa.forEach((d) => {
-      let a = (d * Math.PI) / 180,
-        nx = Math.cos(a),
-        ny = Math.sin(a),
-        px = cx + s * nx,
-        py = cy + s * ny;
-      A(px + nx * (8 * (Z + ny)), py + ny * (8 * (Z + ny)), px, py, k === 2 ? "#0b7898" : "#1986a8", 2);
-    });
-    if (k === 2) {
-      x.fillStyle = "#0b7898";
-      x.fillText("dFₕ,L + dFₕ,D = 0", 470, 105);
+ const root=document.getElementById('widget-submerged-sym'),q=id=>document.getElementById(id),svg=q('symc'),depth=q('symz');
+ const rho=1000,g=9.81,R=1,b=1,scale=70,pressureScale=.6,forceScale=.6;
+ let step=1;
+ const fmt=(v,d=2)=>v.toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});
+ const line=(id,x1,y1,x2,y2,color='#8299aa',dash='')=>`<line ${id?`id="${id}"`:''} x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.3" ${dash?`stroke-dasharray="${dash}"`:''}/>`;
+ const text=(x,y,t,color='#17324d',anchor='start',weight=400)=>`<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" font-weight="${weight}">${t}</text>`;
+ const arrow=(id,x,y,dx,dy,color,width=3)=>`<g id="${id}">${MF1.svgArrow(x,y,dx,dy,color,'',width)}</g>`;
+ function update(){
+  const zC=+depth.value,pTop=9.81*(zC-R),pBottom=9.81*(zC+R),deltaP=pBottom-pTop,volume=Math.PI*R*R*b;
+  const forceDown=9.81*b*R*(2*zC-Math.PI*R/2),forceUp=9.81*b*R*(2*zC+Math.PI*R/2),force=forceUp-forceDown;
+  const pairDepth=zC+R/Math.sqrt(2),pairPressure=9.81*pairDepth,pairComponent=pairPressure/Math.sqrt(2);
+  const width=Math.max(300,Math.min(700,Math.round(svg.getBoundingClientRect().width||700))),height=650,cx=width/2+12,sy=72,cy=sy+zC*scale,r=R*scale;
+  svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
+  root.mf1Physics={zC,R,b,rho,g,pTop,pBottom,deltaP,volume,force,fx:0,forceDown,forceUp,pairDepth,pairPressure,pairComponent,step,geometry:{width,height,cx,cy,sy,r,scale,pressureScale,forceScale}};
+  let drawing=`<g font-family="system-ui,sans-serif" font-size="17">${text(12,22,'Voda · ρ = 1000 kg/m³','#17324d','start',650)}${text(12,46,'R = 1 m · b = 1 m · x →, z ↓','#475569')}`;
+  drawing+=`<rect x="45" y="${sy}" width="${width-57}" height="420" fill="#eef8fc"/>`+line('sym-surface',45,sy,width-12,sy,'#0284c7')+text(width-16,sy-8,'p* = 0','#0369a1','end');
+  drawing+=line('sym-depth-axis',38,sy,38,sy+420,'#64748b');
+  for(let i=0;i<=6;i++)drawing+=line('',33,sy+i*scale,43,sy+i*scale,'#64748b')+text(27,sy+i*scale+6,String(i),'#475569','end');
+  drawing+=text(52,sy+442,'z / m','#475569');
+  drawing+=line('sym-center-depth',43,cy,cx,cy,'#94a3b8','4 4');
+  drawing+=`<circle id="sym-cylinder" cx="${cx}" cy="${cy}" r="${r}" fill="#fff" stroke="#334155" stroke-width="2"/>`;
+  if(step===3){
+   drawing+=`<path id="sym-upper-half" d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="#b45309" stroke-width="3"/><path id="sym-lower-half" d="M ${cx+r} ${cy} A ${r} ${r} 0 0 1 ${cx-r} ${cy}" fill="none" stroke="#0369a1" stroke-width="3"/>`;
+   drawing+=arrow('sym-force-down',cx,cy-r,0,forceDown*forceScale,'#b45309')+arrow('sym-force-up',cx,cy+r,0,-forceUp*forceScale,'#0369a1')+arrow('sym-force-buoyancy',cx,cy,0,-force*forceScale,'#15803d',4);
+   drawing+=text(cx+14,cy-r+20,'F↓','#b45309')+text(cx+14,cy+r-10,'F↑','#0369a1')+text(cx+15,cy-13,'Fᵤ','#15803d','start',650);
+  }else{
+   for(let i=0;i<12;i++){
+    const theta=i*Math.PI/6,nx=Math.cos(theta),nz=Math.sin(theta),p=9.81*(zC+R*nz),x=cx+r*nx,y=cy+r*nz,highlight=step===1&&(i===3||i===9);
+    drawing+=`<g data-pressure="${p}" data-theta="${theta}" opacity="${step===2?.3:1}">${MF1.svgArrow(x,y,-nx*p*pressureScale,-nz*p*pressureScale,highlight?'#b45309':'#568cac','',highlight?3:2)}</g>`;
+   }
+   if(step===2){
+    const yy=cy+r/Math.sqrt(2);drawing+=line('sym-pair-depth',cx-r-12,yy,cx+r+12,yy,'#0e7490','4 4');
+    for(const [side,nx]of [['left',-1/Math.sqrt(2)],['right',1/Math.sqrt(2)]]){
+     const nz=1/Math.sqrt(2),x=cx+r*nx,y=yy,dx=-nx*pairPressure*pressureScale,dy=-nz*pairPressure*pressureScale;
+     drawing+=`<g id="sym-pair-${side}" data-nx="${nx}" data-nz="${nz}" data-pressure="${pairPressure}"><circle cx="${x}" cy="${y}" r="3.5" fill="#0e7490"/>${MF1.svgArrow(x,y,dx,dy,'#0e7490','',3)}${line('',x,y,x+dx,y,'#0e7490','2 2')}${line('',x+dx,y,x+dx,y+dy,'#15803d','2 2')}</g>`;
+     drawing+=text(x+(side==='left'?-12:12),y+20,side==='left'?'L':'D','#0e7490','middle',650);
     }
-    if (k === 3) A(cx, cy, cx, cy - 75, "#198754", 4, "Fᵤ");
-    x.restore();
-    q("symzr").textContent = fmt(Z) + " m";
-    q("symzv").textContent = fmt(Z) + " m";
-    q("symcap").textContent = [
-      "",
-      "Korak 1: lokalni tlak raste s dubinom.",
-      "Korak 2: vodoravni parovi se poništavaju.",
-      "Korak 3: ostaje uzgon prema gore.",
-    ][k];
-    q("symn").innerHTML = [
-      "",
-      "Svaka lokalna sila je normalna na plohu.",
-      "Na istoj dubini lijevi i desni doprinosi imaju jednak iznos i suprotan vodoravni smjer.",
-      "Cilindar je dublje pa su tlakovi veći, ali V<sub>ist</sub> i F<sub>U</sub> ostaju isti.",
-    ][k];
+   }else drawing+=text(cx+11,cy-r+22,'vrh','#b45309')+text(cx+11,cy+r+21,'dno','#b45309');
   }
-  z.oninput = u;
-  document.querySelectorAll("#widget-submerged-sym [data-k]").forEach(
-    (b) =>
-      (b.onclick = () => {
-        k = +b.dataset.k;
-        document
-          .querySelectorAll("#widget-submerged-sym [data-k]")
-          .forEach((a) => a.setAttribute("aria-pressed", a === b));
-        u();
-      }),
-  );
-  u();
+  drawing+=`<circle cx="${cx}" cy="${cy}" r="2.8" fill="#334155"/>`+text(cx-11,cy+6,'C','#334155','end');
+  drawing+=line('sym-radius',cx,cy,cx+r,cy,'#94a3b8','3 3');
+  if(step!==3)drawing+=text(cx+r/2,cy-8,'R','#64748b','middle');
+  if(step===3){drawing+=text(12,542,'Gornja polovica: '+fmt(forceDown)+' kN ↓','#b45309')+text(12,568,'Donja polovica: '+fmt(forceUp)+' kN ↑','#0369a1');}
+  else drawing+=text(12,542,'p*vrh = '+fmt(pTop)+' kPa','#b45309')+text(12,568,'p*dno = '+fmt(pBottom)+' kPa','#b45309');
+  drawing+=arrow('sym-pressure-scale',14,601,50*pressureScale,0,'#568cac',2)+text(54,607,'50 kPa · lokalni tlak','#475569');
+  drawing+=arrow('sym-force-scale',14,633,100*forceScale,0,'#15803d',3)+text(84,639,'100 kN · sila','#475569');
+  svg.innerHTML=drawing+'</g>';
+  q('symzr').textContent=fmt(zC)+' m';q('symzv').textContent=fmt(zC)+' m';q('symvol').textContent=fmt(volume)+' m³';q('symfu').textContent=fmt(force)+' kN ↑';
+  q('symcap').textContent=[null,
+   'Strelice prikazuju tlak, odnosno silu po jedinici površine, prema unutrašnjosti cilindra. Na dnu je tlak veći za '+fmt(deltaP)+' kPa. Promjena dubine ne mijenja polumjer ni mjerilo crteža.',
+   'L i D leže na istoj dubini i predstavljaju jednake plošne elemente dA. Vodoravne komponente se poništavaju; obje vertikalne komponente ovoga donjeg para djeluju prema gore i zbrajaju se.',
+   'F↓ i F↑ su integrirane sile cijelih polovica, a ne lokalni tlakovi. Djeluju na istoj osi simetrije. Obje rastu s dubinom, ali Fᵤ = F↑ − F↓ = '+fmt(force)+' kN ostaje isti.'
+  ][step];
+  MF1.decision(q('symn'),{title:'Koji se doprinosi poništavaju?',branches:[
+   {when:'Zrcalni par na istoj dubini, s jednakim dA',active:step===2,equation:'pL = pD; nx,L = −nx,D → dFx,L + dFx,D = 0',then:'Na z = '+fmt(pairDepth)+' m oba tlaka su '+fmt(pairPressure)+' kPa. Vodoravni doprinosi po dA su +'+fmt(pairComponent)+' i −'+fmt(pairComponent)+' kPa; vertikalni su oba −'+fmt(pairComponent)+' kPa i zbrajaju se.'},
+   {when:'Usporedi gornju i donju polovicu',active:step!==2,equation:'F↓ = ρgbR(2zC − πR/2); F↑ = ρgbR(2zC + πR/2)',then:fmt(forceUp)+' kN − '+fmt(forceDown)+' kN = '+fmt(force)+' kN prema gore. Razlika integrala je ρgπR²b; nije umnožak razlike krajnjih tlakova i proizvoljne površine.'}
+  ],summary:'Veća zC dodaje isti tlak Δp = ρgΔz na cijelu zatvorenu plohu. Taj dodatak daje −Δp ∮ n dA = 0, pa uzgon ne ovisi o dubini potpuno uronjenog cilindra.'});
+ }
+ depth.oninput=update;
+ root.querySelectorAll('[data-k]').forEach(button=>button.onclick=()=>{step=+button.dataset.k;root.querySelectorAll('[data-k]').forEach(b=>b.setAttribute('aria-pressed',b===button));update();});
+ new ResizeObserver(update).observe(svg);update();
 })();
 </script>
 ```
@@ -178,149 +155,141 @@ Numerički zbroj čuva predznake sila i dijeli integral na sjecištima sa slobod
 <div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="v7-widget-a-container" data-widget-role="application" class="v7 mf1-lab"><div class="v7b"><div class="v7h"><h4>Opći kružni luk</h4><p>Sada ukloni dio opterećene plohe: lijeva i desna polukružnica više nemaju vodoravno poništavanje. Vrati puni cilindar pa podigni centar kroz površinu i prati gubitak istisnutog volumena. Voda: ρ = 1000 kg/m³.</p></div><div class="v7s"><canvas id="ac" width="920" height="590" aria-label="Opći uronjeni kružni luk s lokalnim tlakovima i rezultantom"></canvas><p class="v7c">Tanka kružnica je referenca, a tamni luk opterećena ploha. F<sub>R</sub> prolazi kroz C.</p></div><div class="v7p"><button data-p="q">Donja četvrtina</button><button data-p="l">Lijeva polukružnica</button><button data-p="d">Desna polukružnica</button><button data-p="f">Puni cilindar</button></div><div class="v7x"><label>Početni kut α<sub>1</sub> <span class="v7r" id="a1r"></span><input id="a1" type="range" min="0" max="330" step="5" value="0"></label><label>Raspon Δα <span class="v7r" id="asr"></span><input id="as" type="range" min="30" max="360" step="5" value="90"></label><label>Dubina centra z<sub>C</sub> <span class="v7r" id="azr"></span><input id="az" type="range" min="-1.5" max="5" step=".1" value="3"></label><label>Polumjer R <span class="v7r" id="arr"></span><input id="ar" type="range" min=".5" max="1.5" step=".1" value="1"></label><label>Duljina b <span class="v7r" id="abr"></span><input id="ab" type="range" min=".5" max="3" step=".1" value="1"></label></div><div class="v7o"><div><span>F<sub>x</sub> (potpisano)</span><strong id="afx"></strong></div><div><span>F<sub>z</sub> (potpisano)</span><strong id="afz"></strong></div><div><span>F<sub>R</sub></span><strong id="afr"></strong></div><div><span>Broj elemenata N</span><strong id="an"></strong></div></div><div class="v7e" id="ae"></div><p class="v7n" id="anote"></p></div></div>
+<style>
+#v7-widget-a-container #ac{display:block;width:100%;height:auto;max-height:none;background:#fff;overflow:visible}
+#v7-widget-a-container #ac text{font:16px system-ui,sans-serif;fill:#17324d}
+#v7-widget-a-container .arc-exact{display:flex;flex-wrap:wrap;gap:.45rem;padding:0 1rem 1rem}
+#v7-widget-a-container .arc-check{margin:1rem}
+#v7-widget-a-container .arc-check>div{padding:.7rem;line-height:1.6}
+#v7-widget-a-container .v7o{grid-template-columns:repeat(3,minmax(0,1fr))}
+#v7-widget-a-container .v7n{margin-top:1rem}
+@media(max-width:520px){#v7-widget-a-container .v7o{grid-template-columns:1fr}}
+</style>
+<div id="v7-widget-a-container" data-widget-role="application" class="v7 mf1-lab">
+ <div class="v7b">
+  <div class="v7h"><h4>Opći kružni luk · mokri dio određuje silu</h4><p>Odaberi dio plohe i pomakni ga kroz slobodnu površinu. Voda opterećuje odabranu vanjsku stranu luka; s druge strane djeluje isti atmosferski tlak p₀.</p></div>
+  <div class="v7s"><svg id="ac" role="img" aria-label="Kružni luk, stvarni mokri intervali, radijalni tlak i vektorski zbroj sila"></svg><p class="v7c" id="ac-caption"></p></div>
+  <div class="v7p"><button data-p="q">Donja desna četvrtina</button><button data-p="l">Lijeva polukružnica</button><button data-p="d">Desna polukružnica</button><button data-p="f">Puni cilindar</button></div>
+  <div class="v7x">
+   <label for="a1"><span>Početni kut α<sub>1</sub></span> <span class="v7r" id="a1r"></span><input id="a1" type="range" min="0" max="330" step="5" value="0"></label>
+   <label for="as">Raspon Δα <span class="v7r" id="asr"></span><input id="as" type="range" min="30" max="360" step="5" value="90"></label>
+   <label for="az"><span>Dubina centra z<sub>C</sub></span> <span class="v7r" id="azr"></span><input id="az" type="range" min="-1.5" max="5" step="any" value="3"></label>
+   <label for="ar">Polumjer R <span class="v7r" id="arr"></span><input id="ar" type="range" min=".5" max="1.5" step=".1" value="1"></label>
+   <label for="ab">Duljina b <span class="v7r" id="abr"></span><input id="ab" type="range" min=".5" max="3" step=".1" value="1"></label>
+  </div>
+  <div class="arc-exact"><button type="button" id="arc-dry-contact">Prvi dodir vode</button><button type="button" id="arc-full-contact">Upravo cijeli mokri luk</button></div>
+  <div class="v7o" aria-live="polite"><div><span>F<sub>x</sub> (predznak prema +x)</span><strong id="afx"></strong></div><div><span>F<sub>z</sub> (predznak prema +z)</span><strong id="afz"></strong></div><div><span>Rezultanta F<sub>R</sub></span><strong id="afr"></strong></div></div>
+  <div class="v7n" id="anote"></div>
+  <details class="mf1-parameters arc-check"><summary>Provjera numeričkog zbroja</summary><div id="ae"></div><span id="an" hidden></span></details>
+ </div>
+</div>
 <script>
 (() => {
-  const root = document.getElementById("v7-widget-a-container");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "true";
+ const root=document.getElementById('v7-widget-a-container');if(!root||root.dataset.ready)return;root.dataset.ready='true';
+ const svg=root.querySelector('#ac'),get=id=>root.querySelector('#'+id),controls={a1:get('a1'),span:get('as'),zC:get('az'),R:get('ar'),b:get('ab')},presets=[...root.querySelectorAll('[data-p]')];
+ const radians=Math.PI/180,rho=1000,g=9.81,TAU=2*Math.PI,presetValues={q:[0,90],l:[90,180],d:[270,180],f:[0,360]};let lastWidth=0;
+ const fmt=(x,n=2)=>x.toLocaleString('hr-HR',{minimumFractionDigits:n,maximumFractionDigits:n});
+ const sig=x=>(x===0?0:x).toLocaleString('hr-HR',{maximumSignificantDigits:4});
+ const force=(v,signed=false)=>{const a=Math.abs(v),unit=a>=1?'kN':a>=.000001?'N':a>=.000000001?'mN':'µN',factor=unit==='kN'?1:unit==='N'?1000:unit==='mN'?1e6:1e9;return v===0?'0 N':(signed?(v>0?'+':'−'):'')+sig(a*factor)+' '+unit;};
+ const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const text=(x,y,v,attrs='')=>'<text x="'+x+'" y="'+y+'" '+attrs+'>'+esc(v).replace(/([A-Za-zαθΔ])_([A-Za-z0-9]+)/g,'$1<tspan baseline-shift="sub" font-size=".75em">$2</tspan>')+'</text>';
+ const line=(x1,y1,x2,y2,attrs='')=>'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" '+attrs+'/>';
+ function arrow(key,x,y,dx,dy,color,width=2.3,attrs=''){
+  const length=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),head=Math.min(7,length*.35),ex=x+dx,ey=y+dy;
+  return '<g data-arc-vector="'+key+'" data-x="'+x+'" data-y="'+y+'" data-dx="'+dx+'" data-dy="'+dy+'" '+attrs+' fill="'+color+'" stroke="'+color+'">'+line(x,y,ex,ey,'stroke-width="'+width+'"')+(length>1e-10?'<path d="M '+ex+' '+ey+' L '+(ex-head*Math.cos(angle-.5))+' '+(ey-head*Math.sin(angle-.5))+' L '+(ex-head*Math.cos(angle+.5))+' '+(ey-head*Math.sin(angle+.5))+' Z" stroke="none"/>':'')+'</g>';
+ }
+ function arcPath(cx,cy,r,start,end){
+  let d='M '+(cx+r*Math.cos(start))+' '+(cy+r*Math.sin(start)),a=start;
+  while(end-a>1e-13){const next=Math.min(end,a+Math.PI);d+=' A '+r+' '+r+' 0 0 1 '+(cx+r*Math.cos(next))+' '+(cy+r*Math.sin(next));a=next;}return d;
+ }
+ function model(){
+  const state=Object.fromEntries(Object.entries(controls).map(([k,v])=>[k,+v.value])),theta1=state.a1*radians,theta2=(state.a1+state.span)*radians;
+  const extrema=[Math.sin(theta1),Math.sin(theta2)];
+  for(let k=Math.floor(theta1/Math.PI)-1;k<=Math.ceil(theta2/Math.PI)+1;k++){const t=Math.PI/2+k*Math.PI;if(t>=theta1&&t<=theta2)extrema.push(Math.sin(t));}
+  const dryLevel=-state.R*Math.max(...extrema),fullLevel=-state.R*Math.min(...extrema),depthTolerance=64*Number.EPSILON*Math.max(1,state.R,Math.abs(state.zC));
+  const regime=state.zC<=dryLevel+depthTolerance?'dry':state.zC>=fullLevel-depthTolerance?'full':'partial';
+  const m=MF1.arcPressure({...state,start:theta1,span:state.span*radians}),bound=rho*g*state.b*state.R*(Math.abs(state.zC)+state.R)*state.span*radians,forceTolerance=64*Number.EPSILON*bound;
+  const fx=Math.abs(m.fx)<=forceTolerance?0:m.fx/1000,fz=Math.abs(m.fz)<=forceTolerance?0:m.fz/1000;
+  return {...state,theta1,theta2,dryLevel,fullLevel,regime,depthTolerance,N:m.elements,fxNumerical:m.numericalX/1000,fzNumerical:m.numericalZ/1000,fxAnalytical:regime==='dry'?0:fx,fzAnalytical:regime==='dry'?0:fz,FR:regime==='dry'?0:Math.hypot(fx,fz),error:m.force>forceTolerance?100*m.error/m.force:0,absoluteError:m.error,wetAngle:regime==='dry'?0:m.wetAngle,wetIntervals:regime==='dry'?[]:m.wetIntervals};
+ }
+ function draw(m){
+  const W=Math.max(300,Math.round(svg.getBoundingClientRect().width||900)),wide=W>=700;lastWidth=W;
+  const scale=wide?80:55,r=m.R*scale,maxR=1.5*scale,cx=wide?W*.29:W/2,cy=wide?245:235,rawSurface=cy-m.zC*scale,sy=Math.max(90,rawSurface),broken=rawSurface<90-1e-8;
+  const left=wide?35:16,right=wide?W*.55:W-16,bottom=cy+maxR+35,forceScale=wide?.20:.15,pressureScale=wide?.55:.35,px=wide?W*.78:W/2,py=wide?250:485,panelLeft=wide?W*.60:16,panelTop=wide?80:bottom+30,height=wide?470:600;
+  const blue='#117da7',red='#c43d3d',green='#268348',orange='#a36218',grey='#8d9fac';
+  let out=text(16,28,'Kut θ: od +x, u smjeru kazaljke')+text(16,54,'+x →, +z ↓ · p* = 0 na površini');
+  out+='<path d="M '+left+' '+sy+' H '+right+' V '+Math.max(sy,bottom)+' H '+left+' Z" fill="#e6f3f9"/>'+line(left,sy,right,sy,'data-free-surface="" stroke="'+blue+'" stroke-width="1.8"');
 
-  const canvas = root.querySelector("#ac");
-  const ctx = canvas.getContext("2d");
-  const byId = (id) => root.querySelector(`#${id}`);
-  const controls = { a1: byId("a1"), span: byId("as"), zC: byId("az"), R: byId("ar"), b: byId("ab") };
-  const presets = [...root.querySelectorAll("[data-p]")];
-  const radians = Math.PI / 180;
-  const rho = 1000,
-    g = 9.81,
-    epsilon = 0.2;
-  const format = (value, digits = 2) =>
-    value.toLocaleString("hr-HR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
-
-  function readState() {
-    return {a1:+controls.a1.value,span:+controls.span.value,zC:+controls.zC.value,R:+controls.R.value,b:+controls.b.value};
+  if(broken){
+   const y=109;out+='<path data-depth-break d="M '+left+' '+y+' l 12 7 l 12 -7 H '+(right-24)+' l 12 7 l 12 -7" fill="none" stroke="white" stroke-width="10"/><path d="M '+left+' '+y+' l 12 7 l 12 -7 H '+(right-24)+' l 12 7 l 12 -7" fill="none" stroke="'+grey+'" stroke-width="1.5"/>';
+   out+=text(right-3,82,'prekinuta dubina','text-anchor="end"');
   }
-  function calculateForces(state) {
-    const theta1=state.a1*radians,theta2=(state.a1+state.span)*radians;
-    const m=MF1.arcPressure({...state,start:theta1,span:state.span*radians});
-    return {...state,theta1,theta2,N:m.elements,fxNumerical:m.numericalX/1000,fzNumerical:m.numericalZ/1000,
-      fxAnalytical:m.fx/1000,fzAnalytical:m.fz/1000,FR:m.force/1000,error:m.force>1e-9?100*m.error/m.force:0,wetAngle:m.wetAngle};
+  out+='<circle data-reference-circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(m.span===360?'#fff':'none')+'" stroke="#b5c5ce" stroke-dasharray="4 5"/>';
+  out+=arrow('x-axis',cx,cy,maxR+20,0,grey,1);
+  out+=arrow('z-axis',cx,cy,0,maxR+20,grey,1);
+  out+='<path data-selected-arc d="'+arcPath(cx,cy,r,m.theta1,m.theta2)+'" fill="none" stroke="#a1afb8" stroke-width="5"/>';
+  for(const interval of m.wetIntervals){
+   out+='<path data-wet-interval data-start="'+interval.start+'" data-end="'+interval.end+'" d="'+arcPath(cx,cy,r,interval.start,interval.end)+'" fill="none" stroke="#173b54" stroke-width="5.2"/>';
+   const count=Math.max(1,Math.min(13,Math.ceil((interval.end-interval.start)*r/24)));
+   for(let i=0;i<count;i++){
+    const theta=interval.start+(i+.5)*(interval.end-interval.start)/count,depth=Math.max(0,m.zC+m.R*Math.sin(theta)),p=rho*g*depth/1000,x=cx+r*Math.cos(theta),y=cy+r*Math.sin(theta);
+    out+=arrow('pressure',x,y,-p*pressureScale*Math.cos(theta),-p*pressureScale*Math.sin(theta),blue,1.7,'data-theta="'+theta+'" data-pressure="'+p+'" data-interval-start="'+interval.start+'" data-interval-end="'+interval.end+'"');
+   }
   }
-
-  function arrow(x1, y1, x2, y2, color, width = 3, label = "") {
-    if(Math.hypot(x2-x1,y2-y1)<.1)return;const angle = Math.atan2(y2 - y1, x2 - x1),
-      head = 8;
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - head * Math.cos(angle - 0.5), y2 - head * Math.sin(angle - 0.5));
-    ctx.lineTo(x2 - head * Math.cos(angle + 0.5), y2 - head * Math.sin(angle + 0.5));
-    ctx.closePath();
-    ctx.fill();
-    if (label) {
-      ctx.font = "700 14px system-ui";
-      ctx.fillText(label, (x1 + x2) / 2 + 6, (y1 + y2) / 2 - 7);
-    }
+  const cuts=[];
+  if(Math.abs(m.zC)<=m.R+m.depthTolerance){
+   const a=Math.asin(Math.max(-1,Math.min(1,-m.zC/m.R)));
+   for(let k=-1;k<=3;k++)for(const t of [a+k*TAU,Math.PI-a+k*TAU])if(t>=m.theta1-1e-12&&t<=m.theta2+1e-12&&!cuts.some(v=>Math.abs(Math.sin((v-t)/2))<1e-10))cuts.push(t);
   }
-
-  function drawScene(model) {
-    const W=720,H=490,scale=Math.min(82,290/(Math.abs(model.zC)+2*model.R)),radius=model.R*scale;
-    const waterY=60+Math.max(0,model.R-model.zC)*scale,cx=355,cy=waterY+model.zC*scale;
-    MF1.fitCanvas(canvas,ctx,W,H);
-    const water=ctx.createLinearGradient(0,waterY,0,H);water.addColorStop(0,'#e4f5fc');water.addColorStop(1,'#8ecde5');
-    ctx.fillStyle=water;ctx.fillRect(45,waterY,630,Math.max(0,H-65-waterY));
-    ctx.strokeStyle='#1286ad';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(45,waterY);ctx.lineTo(675,waterY);ctx.stroke();
-    ctx.font='14px system-ui';ctx.fillStyle='#2d5970';ctx.fillText('slobodna površina · p = 0 (manometarski)',48,waterY-12);
-    ctx.setLineDash([4,4]);ctx.strokeStyle='#9aabb6';ctx.beginPath();ctx.arc(cx,cy,radius,0,2*Math.PI);ctx.stroke();ctx.setLineDash([]);
-    for(let i=0;i<180;i++){
-      const a=model.theta1+(model.theta2-model.theta1)*i/180,b=model.theta1+(model.theta2-model.theta1)*(i+1)/180;
-      ctx.strokeStyle=model.zC+model.R*Math.sin((a+b)/2)>0?'#17324d':'#a8b6c1';ctx.lineWidth=5;ctx.beginPath();ctx.arc(cx,cy,radius,a,b);ctx.stroke();
-    }
-    for(let i=0;i<15;i++){
-      const a=model.theta1+(i+.5)*(model.theta2-model.theta1)/15,depth=Math.max(0,model.zC+model.R*Math.sin(a));
-      const len=42*depth/Math.max(.01,model.zC+model.R),px=cx+radius*Math.cos(a),py=cy+radius*Math.sin(a);
-      MF1.arrow(ctx,px,py,-len*Math.cos(a),-len*Math.sin(a),'#087eab','',1.8);
-    }
-    ctx.fillStyle='#17324d';ctx.fillText('C',cx+8,cy-9);ctx.beginPath();ctx.arc(cx,cy,3,0,2*Math.PI);ctx.fill();
-    // Free vectors in a separate construction, all using one scale.
-    const ox=135,oy=415,vs=65/Math.max(Math.abs(model.fxAnalytical),Math.abs(model.fzAnalytical),.001),dx=model.fxAnalytical*vs,dy=model.fzAnalytical*vs;
-    MF1.arrow(ctx,ox,oy,dx,0,'#087eab','F_x');MF1.arrow(ctx,ox+dx,oy,0,dy,'#168361','F_z');MF1.arrow(ctx,ox,oy,dx,dy,'#c64442','F_R');
-    if(model.FR>1e-8){MF1.arrow(ctx,cx,cy,dx,dy,'#c64442','');}
-    ctx.fillStyle='#40596b';ctx.font='13px system-ui';ctx.fillText('Vektorski zbroj · +x →, +z ↓',240,410);
-    ctx.fillText('Mokri luk: '+MF1.number(model.wetAngle*180/Math.PI)+'° · suhi dio bez tlakovnog opterećenja',240,432);
-    ctx.fillText('Sile u zajedničkom mjerilu; lokalne strelice u mjerilu tlaka.',45,477);
-    ctx.setTransform(1,0,0,1,0,0);
+  for(const theta of cuts){const x=cx+r*Math.cos(theta),y=cy+r*Math.sin(theta);out+='<circle data-water-intersection data-theta="'+theta+'" cx="'+x+'" cy="'+y+'" r="3.5" fill="#fff" stroke="'+blue+'" stroke-width="1.8"/>';}
+  const ends=m.span===360?[[m.theta1,'A = B',-18]]:[[m.theta1,'A',-18],[m.theta2,'B',26]];
+  for(const [theta,label,dy]of ends){const x=cx+r*Math.cos(theta),y=cy+r*Math.sin(theta),shift=Math.cos(theta)*26,tx=x+shift,ty=y+Math.sin(theta)*26+5,anchor=Math.cos(theta)>.2?'start':Math.cos(theta)<-.2?'end':'middle';out+='<circle data-arc-end="'+label+'" data-theta="'+theta+'" cx="'+x+'" cy="'+y+'" r="3" fill="'+orange+'"/>'+line(x,y,tx,ty-5,'stroke="'+orange+'"')+text(tx,ty,label,'text-anchor="'+anchor+'" style="fill:'+orange+';paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round"');}
+  if(m.span<360){
+   const inner=r*.63,last=m.theta2,tipX=cx+inner*Math.cos(last),tipY=cy+inner*Math.sin(last),angle=last+Math.PI/2;
+   out+='<path data-angle-span d="'+arcPath(cx,cy,inner,m.theta1,m.theta2)+'" fill="none" stroke="'+orange+'" stroke-width="1.3"/><path d="M '+tipX+' '+tipY+' L '+(tipX-5*Math.cos(angle-.5))+' '+(tipY-5*Math.sin(angle-.5))+' L '+(tipX-5*Math.cos(angle+.5))+' '+(tipY-5*Math.sin(angle+.5))+' Z" fill="'+orange+'"/>';
   }
+  out+=arrow('scene-resultant',cx,cy,m.fxAnalytical*forceScale,m.fzAnalytical*forceScale,red,2.8);
+  out+='<circle data-arc-center cx="'+cx+'" cy="'+cy+'" r="3" fill="#17324d"/>'+text(cx-9,cy-10,'C','text-anchor="end"');
+  out+=text(panelLeft,panelTop,'Vektorski zbroj sila','font-weight="650"')+text(panelLeft,panelTop+27,'+x →, +z ↓');
+  out+=arrow('sum-x',px,py,m.fxAnalytical*forceScale,0,blue)+arrow('sum-z',px+m.fxAnalytical*forceScale,py,0,m.fzAnalytical*forceScale,green)+arrow('sum-resultant',px,py,m.fxAnalytical*forceScale,m.fzAnalytical*forceScale,red,2.8);
+  out+=text(px-9,py+20,'O','text-anchor="end"');
+  const keyY=wide?373:555;
+  out+=text(panelLeft,keyY,'F_x','style="fill:'+blue+'"')+text(panelLeft+53,keyY,'F_z','style="fill:'+green+'"')+text(panelLeft+106,keyY,'F_R','style="fill:'+red+'"');
+  out+=arrow('force-ruler',panelLeft,keyY+25,100*forceScale,0,'#526b7d',2)+text(panelLeft+100*forceScale+10,keyY+31,'100 kN');
+  const pKeyX=wide?left:W-126,pKeyY=wide?bottom+28:keyY+25;
+  out+=arrow('pressure-ruler',pKeyX,pKeyY,50*pressureScale,0,blue,1.7)+text(pKeyX+50*pressureScale+8,pKeyY+6,'50 kPa');
+  svg.setAttribute('viewBox','0 0 '+W+' '+height);svg.innerHTML=out;
+  m.geometry={width:W,height,wide,scale,radius:r,maxRadius:maxR,cx,cy,sy,rawSurface,broken,left,right,bottom,forceScale,pressureScale,polygonX:px,polygonY:py,intersections:cuts};
+ }
+ function update(){
+  const m=model();draw(m);
+  get('a1r').textContent=fmt(m.a1,0)+'°';get('asr').textContent=fmt(m.span,0)+'°';get('azr').textContent=sig(m.zC)+' m';get('arr').textContent=fmt(m.R)+' m';get('abr').textContent=fmt(m.b)+' m';
+  get('afx').textContent=force(m.fxAnalytical,true)+(m.fxAnalytical===0?'':m.fxAnalytical>0?' →':' ←');
+  get('afz').textContent=force(m.fzAnalytical,true)+(m.fzAnalytical===0?'':m.fzAnalytical>0?' ↓':' ↑');get('afr').textContent=force(m.FR);
+  get('an').textContent=m.N;get('ae').innerHTML='Integrira se samo mokri dio: F<sub>x</sub> = ∫ −ρgz(θ)bR cosθ dθ, F<sub>z</sub> = ∫ −ρgz(θ)bR sinθ dθ. Srednje pravokutno pravilo s '+m.N+' elemenata daje ('+force(m.fxNumerical,true)+', '+force(m.fzNumerical,true)+'). Zatvoreni izrazi daju ('+force(m.fxAnalytical,true)+', '+force(m.fzAnalytical,true)+'). Pogreška vektora: '+sig(m.absoluteError)+' N'+(m.FR>0?' ('+sig(m.error)+' %).':'.');
+  const closed=m.span===360,ratio=Math.max(-1,Math.min(1,m.zC/m.R)),volume=(m.zC<=-m.R?0:m.zC>=m.R?Math.PI*m.R*m.R:m.R*m.R*Math.acos(-ratio)+m.zC*Math.sqrt(Math.max(0,m.R*m.R-m.zC*m.zC)))*m.b;
+  get('ac-caption').innerHTML='A: α₁ = '+fmt(m.a1,0)+'°; B: α₂ = '+fmt(m.a1+m.span,0)+'°. Tamno: mokri luk; sivo: suhi. Mokri luk: '+sig(m.wetAngle/radians)+'°. '+(m.geometry.broken?'Dubina je prekinuta; tlak uvijek koristi stvarni z<sub>C</sub> = '+sig(m.zC)+' m. ':'')+'Mjerilo geometrije i oba mjerila strelica stalni su pri promjeni parametara. '+(closed?'Zatvoreni cilindar istiskuje volumen vode.':'Isprekidana kružnica je samo referenca; otvoreni luk ne omeđuje istisnuti volumen.');
+  presets.forEach(button=>{const p=presetValues[button.dataset.p];button.setAttribute('aria-pressed',String(m.a1===p[0]&&m.span===p[1]));});
+  root.mf1ArcState=m;root.mf1Physics={...m,displacedVolume:closed?volume:null,buoyancy:closed?rho*g*volume/1000:null,momentAboutC:0};
+  MF1.decision(get('anote'),{title:'Dubina centra → granice mokrog integrala',branches:[
+   {when:'zC ≤ zsuho = '+sig(m.dryLevel)+' m',active:m.regime==='dry',equation:'z(θ) ≤ 0 na cijelom luku → p* = 0 → FR = 0',then:'Odabrani luk još nema mokru površinu. U točnom prvom dodiru jedna je točka na površini, a sila je nula.'},
+   {when:'zsuho < zC < zpotpuno',active:m.regime==='partial',equation:'Integriraj samo intervale gdje zC + R sinθ > 0',then:'Mokro je '+sig(m.wetAngle/radians)+'° od '+fmt(m.span,0)+'°. Rezultanta iznosi '+force(m.FR)+'; i vrlo uzak mokri dio daje svoju stvarnu silu.'},
+   {when:'zC ≥ zpotpuno = '+sig(m.fullLevel)+' m',active:m.regime==='full',equation:'Cijeli luk: p*(θ) = ρg(zC + R sinθ)',then:'Cijeli odabrani luk nosi tlak; u točnom posljednjem dodiru tlak je nula samo u jednoj točki. Fx = '+force(m.fxAnalytical,true)+', Fz = '+force(m.fzAnalytical,true)+'.'}
+  ],summary:(closed?'Puni cilindar: Vist = '+sig(volume)+' m³; FU = ρgVist = '+force(rho*g*volume/1000)+' = −Fz. ':'Otvoreni luk: opterećenje jedne strane prema p₀, bez pretpostavke Arhimedova zakona. ')+'Normale su radijalne: MC = 0; za FR ≠ 0 pravac rezultante prolazi kroz C.'});
+ }
+ Object.values(controls).forEach(input=>input.addEventListener('input',update));
+ presets.forEach(button=>button.addEventListener('click',()=>{const p=presetValues[button.dataset.p];controls.a1.value=p[0];controls.span.value=p[1];update();}));
 
-  function renderOutputs(model) {
-    const signed = (value, positiveDirection, negativeDirection) =>
-      Math.abs(value)<1e-8 ? '0,0 kN' : `${value >= 0 ? "+" : "−"}${format(Math.abs(value), 1)} kN ${value >= 0 ? positiveDirection : negativeDirection}`;
-    byId("a1r").textContent = `${format(model.a1, 0)}°`;
-    byId("asr").textContent = `${format(model.span, 0)}°`;
-    byId("azr").textContent = `${format(model.zC)} m`;
-    byId("arr").textContent = `${format(model.R)} m`;
-    byId("abr").textContent = `${format(model.b)} m`;
-    byId("afx").textContent = signed(model.fxNumerical, "→", "←");
-    byId("afz").textContent = signed(model.fzNumerical, "↓", "↑");
-    byId("afr").textContent = `${format(model.FR, 1)} kN`;
-    byId("an").textContent = model.N.toLocaleString("hr-HR");
-    byId("ae").innerHTML =
-      `Numerički: F<sub>x</sub> = Σ[−ρgz(θ)bR cosθ Δθ], F<sub>z</sub> = Σ[−ρgz(θ)bR sinθ Δθ]. Analitički: F<sub>x</sub> = ${format(model.fxAnalytical)} kN, F<sub>z</sub> = ${format(model.fzAnalytical)} kN. Relativna pogreška numeričkog zbroja iznosi ${format(model.error, 3)} %.`;
-    byId("anote").innerHTML =
-      `Osi su +x udesno i +z prema dolje. p(θ) = ρg max(0, z<sub>C</sub> + R sinθ). Integral se dijeli na sjecištima s vodnom plohom; suhi dio ne doprinosi. Jednaki atmosferski tlakovi s obje strane se poništavaju. Pravac rezultante prolazi kroz C; F<sub>H</sub> = |F<sub>x</sub>|, F<sub>V</sub> = |F<sub>z</sub>|.`;
-  }
-
-  function update() {
-    const model = calculateForces(readState());
-    root.mf1ArcState=model;
-    drawScene(model);
-    renderOutputs(model);
-  }
-
-  const presetValues = { q: [0, 90], l: [90, 180], d: [270, 180], f: [0, 360] };
-  Object.values(controls).forEach((input) => input.addEventListener("input", update));
-  presets.forEach((button) => {
-    button.setAttribute("aria-pressed", "false");
-    button.addEventListener("click", () => {
-      const [a1, span] = presetValues[button.dataset.p];
-      controls.a1.value = a1;
-      controls.span.value = span;
-      presets.forEach((candidate) => candidate.setAttribute("aria-pressed", candidate === button ? "true" : "false"));
-      update();
-    });
-  });
-  update();
+ get('arc-dry-contact').addEventListener('click',()=>{controls.zC.value=root.mf1Physics.dryLevel;update();});
+ get('arc-full-contact').addEventListener('click',()=>{controls.zC.value=root.mf1Physics.fullLevel;update();});
+ const resize=()=>{if(Math.max(300,Math.round(svg.getBoundingClientRect().width||900))!==lastWidth)update();};window.addEventListener('resize',resize);if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(svg);update();
 })();
 </script>
 ```
 
 ```{=html}
 <script>
-/* Dodatne provjere i oznake: svaki izračun ostaje vezan uz trenutačne kontrole. */
-(()=>{
-  const root=document.getElementById('widget-submerged-sym');
-  const R=1,b=1,rho=1000,g=9.81,V=Math.PI*R*R*b,FU=rho*g*V/1000;
-  root.querySelector('#symvol').textContent=V.toLocaleString('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m³';
-  root.querySelector('#symfu').textContent=FU.toLocaleString('hr-HR',{minimumFractionDigits:1,maximumFractionDigits:1})+' kN';
-  const caption=root.querySelector('#symcap'),note=root.querySelector('#symn');
-  const explain=step=>{
-    const copy={
-      1:['1 · Tlak raste s dubinom: p = ρgz.','Svaka lokalna sila je okomita na plohu i usmjerena prema unutrašnjosti cilindra.'],
-      2:['2 · Na istoj dubini tlakovi su jednaki.','Parovi dFHL i dFHD imaju jednak iznos i suprotan vodoravni smjer, zato je ΣFH = 0.'],
-      3:['3 · Veći tlak odozdo stvara uzgon.','FU = ρgVist prolazi kroz C jer je C centar istisnutog volumena, odnosno centar uzgona homogenog cilindra.']
-    }[step];
-    caption.textContent=copy[0];note.innerHTML=copy[1];
-  };
-  root.querySelectorAll('[data-k]').forEach(button=>button.addEventListener('click',()=>explain(+button.dataset.k)));
-  explain(1);
-})();
-
+/* Sve oznake, rezultati i grane ažuriraju se zajedno u izvornom u(). */
 </script>
 ```
 

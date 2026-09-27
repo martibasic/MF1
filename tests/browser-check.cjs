@@ -21,6 +21,13 @@ async function connect(url){
   let port;for(let i=0;i<100;i++){const file=path.join(profile,'DevToolsActivePort');if(fs.existsSync(file)){port=Number(fs.readFileSync(file,'utf8').split('\n')[0]);break;}await sleep(100);}assert.ok(port,'Headless browser did not start');
   const pages=await(await fetch('http://127.0.0.1:'+port+'/json/list')).json();cdp=await connect(pages.find(p=>p.type==='page').webSocketDebuggerUrl);
   const evaluate=async expression=>{const r=await cdp('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value;};
+  async function capture(clip){
+   // A beyond-viewport crop can otherwise composite the sticky site header over
+   // the middle of a tall widget. Hide only site navigation while taking a shot.
+   await evaluate(`(()=>{const s=document.createElement('style');s.id='mf1-audit-capture';s.textContent='#quarto-header,.quarto-secondary-nav{visibility:hidden!important}';document.head.append(s);})()`);
+   try{return await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip});}
+   finally{await evaluate(`document.getElementById('mf1-audit-capture')?.remove()`);}
+  }
   await cdp('Page.enable');await cdp('Runtime.enable');
   const bootstrap=`window.__mf1Audit={roles:()=>Array.from(document.querySelectorAll('[data-widget-role]')),compact:role=>role.matches('.mf1-compact')?role:role.querySelector('.mf1-compact'),visible:el=>{if(!el?.getClientRects().length)return false;for(let p=el;p;p=p.parentElement)if(p.hidden||getComputedStyle(p).display==='none')return false;return true;},frames:()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))};`;
   async function navigate(n,width){
@@ -33,15 +40,25 @@ async function connect(url){
    assert.ok(ready,'V'+n+' edited widgets not mounted; render the current sources first');
    await evaluate(bootstrap+'__mf1Audit.frames()');
   }
-  async function layout(){return evaluate(`(()=>{const A=__mf1Audit;return {pageOverflow:document.documentElement.scrollWidth>innerWidth+2,roots:A.roles().map(role=>{const r=A.compact(role),b=r.getBoundingClientRect();return {id:role.id||role.dataset.widgetId||r.id,role:role.dataset.widgetRole,width:b.width,height:b.height,overflow:r.scrollWidth>r.clientWidth+2};})};})()`);}
+  async function layout(){return evaluate(`(()=>{const A=__mf1Audit;return {pageOverflow:document.documentElement.scrollWidth>innerWidth+2,roots:A.roles().map(role=>{const r=A.compact(role),b=r.getBoundingClientRect();return {id:role.id||role.dataset.widgetId||r.id,role:role.dataset.widgetRole,width:b.width,height:b.height,overflow:r.scrollWidth>r.clientWidth+2,nativeVector:!r.querySelector("canvas,svg image,svg foreignObject")};})};})()`);}
   async function captureIntro(n,width){
-   const targets=await evaluate(`(()=>{const A=__mf1Audit,r=A.compact(document.querySelector('[data-widget-role="intro"]'));r.scrollIntoView({block:'start'});const box=e=>{const b=e.getBoundingClientRect();return {x:b.x+scrollX,y:b.y+scrollY,width:b.width,height:Math.min(b.height,2600),scale:1};};const scene=Array.from(r.querySelectorAll('canvas,svg')).find(e=>!e.parentElement.closest('svg')&&!e.closest('mjx-container')&&A.visible(e));return {widget:box(r),scene:scene?box(scene):null};})()`);
+   const targets=await evaluate(`(()=>{const A=__mf1Audit,r=A.compact(document.querySelector('[data-widget-role="intro"]'));r.scrollIntoView({block:'start'});window.scrollBy(0,-80);const box=e=>{const b=e.getBoundingClientRect();return {x:b.x+scrollX,y:b.y+scrollY,width:b.width,height:Math.min(b.height,2600),scale:1};};const scene=Array.from(r.querySelectorAll('canvas,svg')).find(e=>!e.parentElement.closest('svg')&&!e.closest('mjx-container')&&A.visible(e));return {widget:box(r),scene:scene?box(scene):null};})()`);
    assert.ok(targets.scene,'V'+n+' visible intro scene');
    assert.ok(await evaluate(`(()=>{const A=__mf1Audit,r=A.compact(document.querySelector('[data-widget-role="intro"]')),title=r.querySelector('h3,h4'),scene=Array.from(r.querySelectorAll('canvas,svg')).find(e=>!e.parentElement.closest('svg')&&!e.closest('mjx-container')&&A.visible(e));return !title||title.getBoundingClientRect().top<scene.getBoundingClientRect().top;})()`),'V'+n+' title should precede the scene');
-   for(const [kind,clip]of Object.entries(targets)){assert.ok(clip.width>0&&clip.height>0);const shot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip});fs.writeFileSync(path.join(output,`v${n}-${width}-${kind}.png`),Buffer.from(shot.data,'base64'));}
+   for(const [kind,clip]of Object.entries(targets)){assert.ok(clip.width>0&&clip.height>0);const shot=await capture(clip);fs.writeFileSync(path.join(output,`v${n}-${width}-${kind}.png`),Buffer.from(shot.data,'base64'));}
+  }
+  async function captureApplications(n,width){
+   const count=await evaluate('__mf1Audit.roles().length');
+   for(let index=0;index<count;index++){
+    const target=await evaluate('(()=>{const A=__mf1Audit,role=A.roles()['+index+'],r=A.compact(role);r.scrollIntoView({block:"start"});window.scrollBy(0,-80);const box=e=>{const b=e.getBoundingClientRect();return {x:b.x+scrollX,y:b.y+scrollY,width:b.width,height:Math.min(b.height,2800),scale:1};};return {id:role.id||role.dataset.widgetId,widget:box(r),scenes:Array.from(r.querySelectorAll("canvas,svg")).filter(e=>!e.parentElement.closest("svg")&&!e.closest("mjx-container")&&A.visible(e)).map(box)};})()');
+    for(const [kind,clip]of [['widget',target.widget],...target.scenes.map((box,i)=>['scene-'+i,box])]){
+     const shot=await capture(clip);
+     fs.writeFileSync(path.join(output,'v'+n+'-'+target.id+'-'+width+'-'+kind+'.png'),Buffer.from(shot.data,'base64'));
+    }
+   }
   }
   async function modeAudit(){return evaluate(`(async()=>{const A=__mf1Audit,results=[];for(const role of A.roles()){const r=A.compact(role),id=role.id||role.dataset.widgetId||r.id;
-    const buttons=Array.from(r.querySelectorAll('button[data-mode],button[data-editorial-mode],button[data-v2nn],.v3-tab,button[data-shape],button[data-k],button[data-cp-side],button[data-cp-step],button[data-e-mode],button[data-s-mode],button[aria-controls],button[role="tab"]')).filter(b=>!b.closest('.mf1-view-tools,.mf1-motion,.mf1-compare-tray'));
+    const buttons=Array.from(r.querySelectorAll('button[data-mode],button[data-ocean-model],button[data-editorial-mode],button[data-p-view],button[data-v2nn],.v3-tab,button[data-shape],button[data-k],button[data-cp-side],button[data-cp-step],button[data-e-mode],button[data-s-mode],button[aria-controls],button[role="tab"]')).filter(b=>!b.closest('.mf1-view-tools,.mf1-motion,.mf1-compare-tray'));
     for(const b of buttons){if(!b.isConnected)continue;const pane=b.closest('[data-editorial-pane]');if(pane?.hidden)r.querySelector('[data-editorial-mode="'+pane.dataset.editorialPane+'"]')?.click();b.click();await A.frames();const invalid=Array.from(r.querySelectorAll('svg *')).flatMap(e=>Array.from(e.attributes).filter(a=>/\\b(?:NaN|Infinity|undefined)\\b/.test(a.value)).map(a=>a.name+'='+a.value));results.push({id,mode:b.textContent.trim(),visible:A.visible(b),overflow:r.scrollWidth>r.clientWidth+2,invalid});}
    }return results;})()`);}
   async function savedImages(){return evaluate(`(async()=>{const A=__mf1Audit,out=[];for(const role of A.roles()){const r=A.compact(role),id=role.id||role.dataset.widgetId||r.id;const save=Array.from(r.querySelectorAll('.mf1-view-tools button')).find(b=>b.textContent==='Zapamti A');if(!save){out.push({id,skipped:r.matches('#v13-moody-widget')});continue;}const menu=save.closest('details');if(menu)menu.open=true;save.click();const images=Array.from(r.querySelectorAll('.mf1-compare-tray img'));await Promise.all(images.map(i=>i.decode()));out.push({id,count:images.length,decoded:images.every(i=>i.complete&&i.naturalWidth>0)});r.querySelector('.mf1-compare-tray button').click();if(menu)menu.open=false;}return out;})()`);}
@@ -59,12 +76,12 @@ async function connect(url){
   for(let n=1;n<=13;n++){
    if(process.argv.length>2&&!process.argv.slice(2).map(Number).includes(n))continue;
    runtimeErrors.length=0;await navigate(n,1440);const desktop=await layout();
-   assert.ok(desktop.roots.length>=2&&desktop.roots.length<=3,'V'+n+' needs 2–3 edited widgets');assert.equal(desktop.roots.filter(r=>r.role==='intro').length,1,'V'+n+' exactly one intro');
-   assert.ok(!desktop.pageOverflow&&desktop.roots.every(r=>!r.overflow),'V'+n+' desktop overflow: '+JSON.stringify(desktop));
-   await captureIntro(n,1440);const saved=await savedImages();assert.ok(saved.every(s=>s.skipped||(s.count>0&&s.decoded)),'V'+n+' snapshot A images decode');
+   assert.deepEqual(desktop.roots.map(r=>r.id),require('./editorial-selection.json')[n-1],'V'+n+' reviewed experiment selection');assert.equal(desktop.roots.filter(r=>r.role==='intro').length,1,'V'+n+' exactly one intro');
+   assert.ok(!desktop.pageOverflow&&desktop.roots.every(r=>!r.overflow&&r.nativeVector),'V'+n+' desktop overflow: '+JSON.stringify(desktop));
+   await captureIntro(n,1440);await captureApplications(n,1440);const saved=await savedImages();assert.ok(saved.every(s=>s.skipped||(s.count>0&&s.decoded)),'V'+n+' snapshot A images decode');
    const desktopModes=await modeAudit();assert.ok(desktopModes.every(m=>!m.overflow&&!m.invalid.length),'V'+n+' desktop mode overflow or invalid geometry: '+JSON.stringify(desktopModes.filter(m=>m.overflow||m.invalid.length)));
-   await navigate(n,390);const mobile=await layout();assert.ok(!mobile.pageOverflow&&mobile.roots.every(r=>!r.overflow),'V'+n+' mobile overflow: '+JSON.stringify(mobile));
-   await captureIntro(n,390);const dialogs=await nativeDialogs(n);
+   await navigate(n,390);const mobile=await layout();assert.ok(!mobile.pageOverflow&&mobile.roots.every(r=>!r.overflow&&r.nativeVector),'V'+n+' mobile overflow: '+JSON.stringify(mobile));
+   await captureIntro(n,390);await captureApplications(n,390);const dialogs=await nativeDialogs(n);
    if(n===2){
     await evaluate(`(()=>{const input=document.getElementById('v-slider');input.mf1Limits.querySelector('.mf1-exact-button').click();const dialog=document.querySelector('dialog:modal');dialog.querySelector('input').value='1,2';dialog.querySelector('form').requestSubmit();})()`);
     assert.equal(await evaluate('document.getElementById("v-slider").value'),'1.2');assert.equal(await evaluate('Number(document.getElementById("tau-out").textContent.replace(",","."))'),12);

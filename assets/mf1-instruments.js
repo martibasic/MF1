@@ -3,6 +3,7 @@
   'use strict';
   let serial=0;
   const format=x=>Number(x).toLocaleString('hr-HR',{maximumFractionDigits:8});
+  const titleNode=root=>root.querySelector('h3,h4,h5,[role="heading"]')||root.querySelector(':scope > [class$="-copy"] > strong');
   function dialogShell(title) {
     const dialog=document.createElement('dialog');dialog.className='mf1-dialog';
     const head=document.createElement('header'),heading=document.createElement('h2'),close=document.createElement('button');
@@ -13,7 +14,7 @@
   }
   function enlarge(root,trigger) {
     if(root.closest('dialog'))return;
-    const marker=document.createComment('widget position'),title=root.querySelector('h3,h4,h5')?.textContent||'Fizikalni prikaz';
+    const marker=document.createComment('widget position'),title=titleNode(root)?.textContent||'Fizikalni prikaz';
     // Preserve the owning ID and delegated listeners of shell-based widgets.
     const owner=!root.id&&root.parentElement.id?root.parentElement:root;
     owner.before(marker);const dialog=dialogShell(title);dialog.classList.add('mf1-dialog-scene');dialog.append(owner);root.classList.add('mf1-enlarged');
@@ -91,7 +92,7 @@
         else{
           const copy=graphic.cloneNode(true),original=[graphic,...graphic.querySelectorAll('*')],cloned=[copy,...copy.querySelectorAll('*')];
           cloned.forEach((node,index)=>{const css=getComputedStyle(original[index]);for(const property of ['font-family','font-size','font-weight','fill','stroke','stroke-width','stroke-dasharray','opacity','fill-opacity','text-anchor','paint-order','stroke-linejoin']){const value=css.getPropertyValue(property);if(value)node.style.setProperty(property,value);}});
-          copy.setAttribute('xmlns','http://www.w3.org/2000/svg');src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(copy));
+          copy.setAttributeNS('http://www.w3.org/2000/xmlns/','xmlns','http://www.w3.org/2000/svg');src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(copy));
         }
         const img=document.createElement('img');img.src=src;img.alt='Stanje A: '+(graphic.getAttribute('aria-label')||'Fizikalni prikaz');images.push(img);
       });
@@ -108,7 +109,14 @@
     if(!root.mf1Enlarge){
       const bar=document.createElement('div'),button=document.createElement('button');bar.className='mf1-view-tools';
       button.type='button';button.textContent='Uvećaj prikaz ⤢';button.setAttribute('aria-haspopup','dialog');
-      button.onclick=()=>enlarge(root,button);bar.append(button);root.prepend(bar);root.mf1Enlarge=button;
+      button.onclick=()=>enlarge(root,button);bar.append(button);
+      const heading=titleNode(root);
+      if(heading){
+        let header=heading;
+        while(header.parentElement!==root&&!header.parentElement.querySelector('canvas,svg,input,select'))header=header.parentElement;
+        header.after(bar);
+      }else root.prepend(bar);
+      root.mf1Enlarge=button;
       if(!root.matches('#v13-moody-widget'))comparison(root,bar);
     }
   }

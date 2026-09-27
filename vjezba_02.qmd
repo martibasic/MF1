@@ -32,6 +32,170 @@ Vanjski dio rotora često dominira: s radijusom raste lokalna brzina $u=\omega r
 
 Newtonski fluid ima pravac $\tau=\mu\dot\gamma$, gdje je $\dot\gamma=|du/dy|$. Power-law model $\tau=K_c\dot\gamma^n$ opisuje dio nenewtonskih fluida. $K_c$ je **indeks konzistencije**, a ne volumenski modul $K$ iz Vježbe 1. Za $n=1$ dobiva se Newtonski oblik, za $n<1$ shear-thinning, a za $n>1$ shear-thickening. Prividna viskoznost $\mu_{app}=\tau/\dot\gamma=K_c\dot\gamma^{n-1}$ zato kod nenewtonskog fluida nije jedna stalna vrijednost.
 
+```{=html}
+<div class="widget-container mf1-lab" id="widget-visc-basics" data-widget-role="intro">
+<header class="mf1-editorial-head"><h4>Isti profil brzine, različit odgovor fluida</h4><p>Gibanje ploče određuje smicanje. Materijalni zakon zatim određuje naprezanje, silu i potrebnu snagu.</p></header>
+<div id="v2-nn-explorer" class="v2nn-tabs" role="group" aria-label="Konstitutivni zakon istog toka">
+<button type="button" data-v2nn="newton" aria-pressed="true">n = 1 · Newtonski</button><button type="button" data-v2nn="thin" aria-pressed="false">n &lt; 1 · razrjeđivanje</button><button type="button" data-v2nn="thick" aria-pressed="false">n &gt; 1 · zgušnjavanje</button>
+</div>
+<div class="scene">
+<svg id="visc-canvas" viewBox="0 0 900 380" role="img" aria-labelledby="visc-title visc-description">
+<title id="visc-title">Couetteov tok i materijalni zakon istog fluida</title><desc id="visc-description">Sedam slojeva prikazuje linearni profil između ploča. Sve tri reološke krivulje koriste iste osi; označena točka pripada prikazanom smicanju.</desc>
+<defs><linearGradient id="visc-fluid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e4f4fa"/><stop offset="1" stop-color="#b9dfed"/></linearGradient><clipPath id="visc-plot-clip"><rect id="visc-plot-bounds"/></clipPath></defs>
+<g id="visc-flow"></g><g id="v2nn-plot" aria-label="Tri materijalne krivulje na zajedničkim osima"></g>
+</svg>
+<p id="visc-scene-caption">Zračnost je shematski uvećana; strelice prikazuju u/U = y/δ. Sedam tragača polazi s iste okomite linije i nakon puta 5 m vraća se na početak.</p>
+</div>
+<div class="controls">
+<div class="control-card"><label for="v-slider">Brzina gornje ploče U: <output id="v-val" for="v-slider">1</output> m/s</label><input type="range" id="v-slider" min="0.1" max="5" value="1" step="0.1"></div>
+<div class="control-card"><label for="h-slider">Zračnost δ: <output id="h-slider-val" for="h-slider">10</output> mm</label><input type="range" id="h-slider" min="2" max="30" value="10" step="1"></div>
+<div class="control-card"><label for="mu-slider"><span>μ<sub>ref</sub> pri γ̇ = 100 s⁻¹:</span> <output id="mu-val" for="mu-slider">0,1</output> Pa·s</label><input type="range" id="mu-slider" min="0.01" max="1" value="0.1" step="0.01"></div>
+</div>
+<div class="v2-reading-line" aria-live="polite"><span>γ̇ = U/δ = <strong id="grad-out"></strong> s⁻¹</span><span>τ = <strong id="tau-out"></strong> Pa</span><span>F = <strong id="visc-force-out"></strong> N</span><span>P = <strong id="visc-power-out"></strong> W</span></div>
+<div class="v2-short-explanation" id="visc-explainer"></div>
+<details class="v2-model-details"><summary>Od naprezanja do rada i disipacije</summary>
+<p>Stacionaran, potpuno razvijen tok, bez gradijenta tlaka i bez klizanja na stijenkama. Iz dτ/dy = 0 i monotonog zakona (n &gt; 0) slijedi u(y) = Uy/δ za sva tri fluida. Temperatura i svojstva ostaju stalni.</p>
+<p id="visc-formula-live"></p><p id="visc-global-out"></p>
+<p>Na slici su sile ploča <strong>na fluid</strong>. Fluid na gornju ploču djeluje suprotno, −F; pogon održava U silom +F. Donja nepomična ploča ne obavlja rad.</p>
+<div class="visc-presets" role="group" aria-label="Promijeni samo referentnu viskoznost"><span>Isti U i δ:</span><button type="button" data-visc-mu="0.10" aria-pressed="true">μref = 0,10 Pa·s</button><button type="button" data-visc-mu="0.30" aria-pressed="false">μref = 0,30 Pa·s</button></div>
+</details>
+<style>
+#widget-visc-basics{max-width:980px;margin:0 auto;font-family:Inter,"Segoe UI",system-ui,sans-serif}
+#widget-visc-basics .v2nn-tabs,#widget-visc-basics .visc-presets{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.7rem 0}
+#widget-visc-basics .v2nn-tabs button,#widget-visc-basics .visc-presets button{padding:.55rem .8rem;border:1px solid #bdcfdb;border-radius:8px;background:#fff;color:#234863;font-weight:650}
+#widget-visc-basics button[aria-pressed=true]{background:#175c78;color:#fff;border-color:#175c78}
+#widget-visc-basics .scene{min-width:0;margin:.5rem 0 1rem}
+#widget-visc-basics #visc-canvas{display:block;width:100%;height:auto;overflow:visible}
+#widget-visc-basics #visc-canvas text{font-family:Inter,"Segoe UI",system-ui,sans-serif;font-size:16px;stroke:none;paint-order:normal;fill:#385466}
+#widget-visc-basics #visc-canvas .visc-panel-title{font-size:18px;font-weight:700;fill:#163247}
+#widget-visc-basics #visc-canvas .visc-active-label{font-weight:750;fill:#126987}
+#widget-visc-basics #visc-scene-caption{position:static;margin:.65rem 0 0;max-width:90ch;font-size:.83rem;line-height:1.5;color:#526b7a}
+#widget-visc-basics .controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:.8rem 0}
+#widget-visc-basics .control-card{min-width:0}
+#widget-visc-basics label{display:block;line-height:1.5}
+#widget-visc-basics label output{font-weight:750;color:#126987}
+#widget-visc-basics input[type=range]{width:100%}
+#widget-visc-basics .v2-reading-line{display:flex;flex-wrap:wrap;gap:.7rem 1.4rem;padding:.8rem 0;border-block:1px solid #dbe7ee;font-variant-numeric:tabular-nums;color:#385466}
+#widget-visc-basics .v2-reading-line strong{font-size:1.12rem;color:#126987}
+#widget-visc-basics .v2-short-explanation{margin:.8rem 0}
+#widget-visc-basics .v2-model-details{margin:.8rem 0;color:#40596b;line-height:1.6}
+#widget-visc-basics .v2-model-details summary{cursor:pointer;font-weight:700}
+#widget-visc-basics .v2-model-details p{margin:.7rem 0}
+@media(max-width:700px){#widget-visc-basics .controls{grid-template-columns:1fr}}
+</style>
+<script>
+(function () {
+  const root=document.getElementById('widget-visc-basics'),svg=document.getElementById('visc-canvas');
+  const flow=document.getElementById('visc-flow'),plot=document.getElementById('v2nn-plot');
+  const vSl=document.getElementById('v-slider'),muSl=document.getElementById('mu-slider'),hSl=document.getElementById('h-slider');
+  const exponents=[.58,1,1.45],format=n=>Number(n).toLocaleString('hr-HR',{maximumSignificantDigits:4});
+  const html=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const txt=(x,y,text,cls='',anchor='start')=>'<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'"'+(cls?' class="'+cls+'"':'')+'>'+html(text)+'</text>';
+  const line=(x1,y1,x2,y2,color,width=1,dash='')=>'<path d="M'+x1+' '+y1+'L'+x2+' '+y2+'" fill="none" stroke="'+color+'" stroke-width="'+width+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+  function arrow(x,y,dx,color,width=2){if(Math.abs(dx)<.01)return '';const sign=Math.sign(dx),end=x+dx,head=Math.min(7,Math.abs(dx)*.32);return line(x,y,end,y,color,width)+'<path d="M'+end+' '+y+'l'+(-sign*head)+' -3.5v7Z" fill="'+color+'"/>';}
+  let exponent=1,model,layoutWidth=0,tracerNodes=[],travel=Array(7).fill(0),elapsed=0,motion;
+  function calculate(){
+    const U=+vSl.value,mu=+muSl.value,delta=+hSl.value/1000,gradient=U/delta,K=mu*100**(1-exponent);
+    const tau=K*gradient**exponent,apparent=tau/gradient,tangent=exponent*apparent,area=.06,force=tau*area,power=force*U;
+    const xMax=1.45*gradient,yMax=1.1*Math.max(...exponents.map(n=>100*mu*(xMax/100)**n));
+    return {v:U,U,mu,delta,gradient,K,exponent,tau,apparent,tangent,area,force,power,dissipation:tau*gradient*area*delta,topTraction:tau,bottomTraction:-tau,xMax,yMax,pathLength:5,elapsed,tracerTravel:travel.slice()};
+  }
+  function draw(){
+    const actual=svg.getBoundingClientRect().width||svg.parentElement.getBoundingClientRect().width||900;
+    const W=Math.max(240,Math.round(actual)),mobile=W<740,pw=mobile?W:(W-24)/2;
+    const top=104,bottom=260,gap=bottom-top,flowH=370,plotY=mobile?flowH+20:0,H=mobile?plotY+368:370;
+    layoutWidth=W;svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.dataset.layout=mobile?'vertical':'horizontal';
+    flow.setAttribute('transform','translate(0 0)');plot.setAttribute('transform','translate('+(mobile?0:pw+24)+' '+plotY+')');
+    const left=22,right=pw-48,len=right-left,start=left+10,pathWidth=len-20;
+    model.gapPx=gap;model.tracerStart=start;model.tracerWidth=pathWidth;model.sceneWidth=W;model.sceneHeight=H;
+    let f=txt(left,28,'1 · Gibanje → smicanje','visc-panel-title');
+    f+=txt(left,50,'Gornja ploča: U = '+format(model.U)+' m/s');
+    f+=arrow(left,77,58,'#c05a2d',3)+txt(left+70,82,'+τ na fluid');
+    f+='<rect x="'+left+'" y="'+top+'" width="'+len+'" height="'+gap+'" fill="url(#visc-fluid)"/>';
+    f+='<rect x="'+left+'" y="'+(top-9)+'" width="'+len+'" height="9" rx="3" fill="#365467"/><rect x="'+left+'" y="'+bottom+'" width="'+len+'" height="9" rx="3" fill="#365467"/>';
+    f+=line(start,top,start,bottom,'#bd6c2e',1,'3 4');
+    let ends=[];
+    for(let i=0;i<7;i++){
+      const eta=i/6,y=bottom-eta*gap,dx=eta*.68*pathWidth;
+      f+='<g data-visc-velocity="'+i+'" data-ratio="'+eta+'" data-speed="'+(eta*model.U)+'">'+arrow(start,y,dx,'#197ba2',2)+'</g>';
+      ends.push((start+dx)+','+y);
+      f+='<circle data-visc-tracer="'+i+'" data-ratio="'+eta+'" cx="'+(start+(travel[i]%5)/5*pathWidth)+'" cy="'+y+'" r="4.5" fill="#bd6c2e" stroke="#fff" stroke-width="1.5"/>';
+    }
+    f+='<polyline points="'+ends.join(' ')+'" fill="none" stroke="#175c78" stroke-width="1.5" stroke-dasharray="4 4"/>';
+    f+=line(right+14,top,right+14,bottom,'#7b93a3',1.2)+line(right+9,top,right+19,top,'#7b93a3')+line(right+9,bottom,right+19,bottom,'#7b93a3');
+    f+='<text x="'+(right+34)+'" y="'+((top+bottom)/2)+'" text-anchor="middle" transform="rotate(-90 '+(right+34)+' '+((top+bottom)/2)+')">δ = '+format(model.delta*1000)+' mm</text>';
+    f+=arrow(left+58,286,-58,'#c05a2d',3)+txt(left+70,291,'−τ na fluid');
+    f+=txt(left,319,'Donja ploča: u = 0');
+    f+=line(start,340,start+pathWidth,340,'#91a7b4')+line(start,336,start,344,'#91a7b4')+line(start+pathWidth,336,start+pathWidth,344,'#91a7b4');
+    f+=txt(start,363,'x = 0')+txt(start+pathWidth,363,'5 m','','end')+txt(start+pathWidth/2,363,'trag','','middle');
+    flow.innerHTML=f;
+    tracerNodes=[...flow.querySelectorAll('[data-visc-tracer]')];
+    const L=62,R=pw-16,T=72,B=252,px=x=>L+(R-L)*x/model.xMax,py=y=>B-(B-T)*y/model.yMax;
+    const bounds=document.getElementById('visc-plot-bounds');for(const[k,v]of Object.entries({x:L,y:T,width:R-L,height:B-T}))bounds.setAttribute(k,v);
+    plot.dataset.xMax=model.xMax;plot.dataset.yMax=model.yMax;
+    let p=txt(12,28,'2 · Smicanje → τ','visc-panel-title');
+    p+=txt(12,50,'τ [Pa]');
+    for(const x of MF1.ticks(0,model.xMax,3)){p+=line(px(x),T,px(x),B,'#dfe8ee')+txt(px(x),B+24,format(x),'','middle');}
+    for(const y of MF1.ticks(0,model.yMax,3)){p+=line(L,py(y),R,py(y),'#dfe8ee')+txt(L-8,py(y)+5,format(y),'','end');}
+    p+=line(L,T,L,B,'#7190a3',1.3)+line(L,B,R,B,'#7190a3',1.3)+txt((L+R)/2,302,'γ̇ [s⁻¹]','','middle');
+    p+='<g clip-path="url(#visc-plot-clip)">';
+    for(const n of exponents.filter(n=>n!==exponent).concat([exponent])){
+      const active=n===exponent,path=[];
+      for(let i=0;i<=100;i++){const x=model.xMax*i/100,y=100*model.mu*(x/100)**n;path.push((i?'L':'M')+px(x)+' '+py(y));}
+      p+='<path data-visc-curve="'+n+'" data-active="'+active+'" d="'+path.join(' ')+'" fill="none" stroke="'+(active?'#126987':'#93a7b4')+'" stroke-width="'+(active?3.2:1.5)+'"'+(active?'':' stroke-dasharray="'+(n<1?'6 4':'2 4')+'"')+'/>';
+    }
+    if(exponent!==1){
+      p+='<path data-visc-secant="" d="M'+px(0)+' '+py(0)+'L'+px(model.xMax)+' '+py(model.apparent*model.xMax)+'" fill="none" stroke="#657987" stroke-dasharray="5 5" stroke-width="1.4"/>';
+      const dx=.13*model.xMax;
+      p+='<path data-visc-tangent="" d="M'+px(model.gradient-dx)+' '+py(model.tau-model.tangent*dx)+'L'+px(model.gradient+dx)+' '+py(model.tau+model.tangent*dx)+'" fill="none" stroke="#bd6c2e" stroke-width="2.2"/>';
+    }
+    p+=line(px(model.gradient),B,px(model.gradient),py(model.tau),'#197ba2',1,'3 4');
+    p+='</g><circle data-visc-working-point="" cx="'+px(model.gradient)+'" cy="'+py(model.tau)+'" r="5" fill="#126987" stroke="#fff" stroke-width="2"/>';
+    const labelX=[L,L+(R-L)/2,R];
+    exponents.forEach((n,i)=>{p+=txt(labelX[i],52,'n='+format(n),n===exponent?'visc-active-label':'',i===0?'start':i===1?'middle':'end');});
+    p+=txt(12,331,'μapp = '+format(model.apparent)+' Pa·s');
+    p+=txt(12,357,exponent===1?'Tangenta = sekanta = μref':'dτ/dγ̇ = '+format(model.tangent)+' Pa·s');
+    plot.innerHTML=p;
+  }
+  function update(){
+    model=calculate();root.mf1ProfessorState=model;
+    for(const[id,value]of Object.entries({'v-val':model.U,'mu-val':model.mu,'h-slider-val':model.delta*1000,'grad-out':model.gradient,'tau-out':model.tau,'visc-force-out':model.force,'visc-power-out':model.power}))document.getElementById(id).textContent=format(value);
+    document.getElementById('visc-formula-live').textContent='Kalibracija: μref = '+format(model.mu)+' Pa·s pri γ̇ref = 100 s⁻¹. K = μref · 100^(1−n) = '+format(model.K)+' Pa·sⁿ. Zato je τ = K(U/δ)ⁿ = '+format(model.tau)+' Pa; F = τA = '+format(model.force)+' N, A = 0,060 m².';
+    document.getElementById('visc-global-out').textContent='Pogon predaje P = FU = '+format(model.force)+' × '+format(model.U)+' = '+format(model.power)+' W. Disipacija u istom volumenu: ∫V τγ̇ dV = τ(U/δ)Aδ = '+format(model.dissipation)+' W. Rad se u stacionarnom toku pretvara u unutarnju energiju.';
+    const comparison=Math.abs(model.gradient-100)<1e-9?'Pri referentnih 100 s⁻¹ sva tri fluida imaju isto τ.':model.gradient<100?'Ispod 100 s⁻¹: τ(n<1) > τ(n=1) > τ(n>1).':'Iznad 100 s⁻¹: τ(n>1) > τ(n=1) > τ(n<1).';
+    const consequence='Sada τ = '+format(model.tau)+' Pa i P = '+format(model.power)+' W. ';
+    MF1.decision(document.getElementById('visc-explainer'),{title:'Ista kinematika → različit materijalni odgovor',branches:[
+      {when:'n < 1; ovdje n = 0,58',active:exponent<1,equation:'τ = Kγ̇⁰·⁵⁸; μapp = Kγ̇⁻⁰·⁴²',then:consequence+'τ i dalje raste sa smicanjem, dok μapp pada. Udvostručenje γ̇ množi τ s '+format(2**.58)+'.'},
+      {when:'n = 1',active:exponent===1,equation:'τ = μrefγ̇; tangenta = sekanta',then:consequence+'Udvostručenje γ̇ udvostručuje τ; μref ostaje stalna.'},
+      {when:'n > 1; ovdje n = 1,45',active:exponent>1,equation:'τ = Kγ̇¹·⁴⁵; μapp = Kγ̇⁰·⁴⁵',then:consequence+'τ i μapp rastu sa smicanjem. Udvostručenje γ̇ množi τ s '+format(2**1.45)+'.'}
+    ],summary:comparison+' Sve krivulje imaju iste osi i istu μref. Profil u(y) = Uy/δ jednak je za sva tri zakona.'});
+    root.querySelectorAll('[data-visc-mu]').forEach(b=>b.setAttribute('aria-pressed',String(Math.abs(+b.dataset.viscMu-model.mu)<1e-9)));
+    draw();
+  }
+  function animate(dt,time){
+    elapsed=time;model.elapsed=time;
+    for(let i=0;i<7;i++){travel[i]+=model.U*i/6*dt;tracerNodes[i].setAttribute('cx',model.tracerStart+(travel[i]%5)/5*model.tracerWidth);}
+    model.tracerTravel=travel.slice();
+    const clock=root.querySelector('.mf1-motion>span');if(clock)clock.textContent='t = '+format(time)+' s · trag dug 5 m';
+  }
+  [vSl,muSl,hSl].forEach(input=>input.addEventListener('input',update));
+  root.querySelectorAll('[data-v2nn]').forEach(button=>button.addEventListener('click',()=>{
+    exponent={newton:1,thin:.58,thick:1.45}[button.dataset.v2nn];
+    root.querySelectorAll('[data-v2nn]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));update();
+  }));
+  root.querySelectorAll('[data-visc-mu]').forEach(button=>button.addEventListener('click',()=>{muSl.value=button.dataset.viscMu;muSl.dispatchEvent(new Event('input',{bubbles:true}));}));
+  update();
+  motion=MF1.motion(root,animate,{reset:()=>{travel=Array(7).fill(0);elapsed=0;}});root.mf1ViscosityMotion=motion;
+  function resize(){const width=Math.max(240,Math.round(svg.getBoundingClientRect().width||svg.parentElement.getBoundingClientRect().width||900));if(width!==layoutWidth)draw();}
+  window.addEventListener('resize',resize);if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(svg.parentElement);
+})();
+</script>
+</div>
+<div class="fizikalni-uvid">
+Što je gornja ploča brža ili je razmak među pločama manji, to je gradijent brzine strmiji. Materijalni zakon zatim određuje naprezanje i snagu potrebnu za isto gibanje.
+</div>
+```
+
 ### II. Površinske pojave na granici fluida
 
 #### Površinska energija, kontaktna linija i kvašenje
@@ -98,726 +262,63 @@ Preko zakrivljene granice vrijedi $\Delta p=\sigma(1/R_1+1/R_2)$. Za kap tekući
 ```
 
 ```{=html}
-<div class="widget-container mf1-lab" id="widget-visc-basics" data-widget-role="intro"><header class="mf1-editorial-head"><h4>Dvije vrste sile: u fluidu i na njegovoj granici</h4><p>Usporedi sile koje nastaju zbog gibanja slojeva i zbog geometrije granice fluida.</p></header><div class="mf1-editorial-modes" role="group" aria-label="Fizikalna pojava"><button type="button" data-editorial-mode="0" aria-pressed="true" aria-controls="widget-visc-basics-mode-0">Viskozno smicanje</button><button type="button" data-editorial-mode="1" aria-pressed="false" aria-controls="widget-visc-basics-mode-1">Reologija</button><button type="button" data-editorial-mode="2" aria-pressed="false" aria-controls="widget-visc-basics-mode-2">Kapilarnost</button><button type="button" data-editorial-mode="3" aria-pressed="false" aria-controls="widget-visc-basics-mode-3">Zakrivljenost kapi</button></div><div data-editorial-pane="0" id="widget-visc-basics-mode-0">
-    <style>
-        #widget-visc-basics {
-            max-width: 980px;
-            margin: 0 auto;
-            font-family: 'Inter', system-ui, sans-serif;
-            border-radius: 20px;
-            padding: 24px;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-            border: 1px solid #dbe7f3;
-            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
-        }
-        #widget-visc-basics .widget-top {
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            margin-bottom: 18px;
-        }
-        #widget-visc-basics .widget-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 6px;
-        }
-        #widget-visc-basics .widget-title {
-            margin: 0;
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-        #widget-visc-basics .widget-subtitle {
-            margin: 8px 0 0 0;
-            color: #475569;
-            font-size: 0.92rem;
-            line-height: 1.55;
-            max-width: 620px;
-        }
-        #widget-visc-basics .scene {
-            position: relative;
-            background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 72%);
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
-            overflow: hidden;
-            margin-bottom: 18px;
-        }
-        #widget-visc-basics canvas {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        #widget-visc-basics .floating-caption {
-            position: absolute;
-            left: 16px;
-            right: 16px;
-            bottom: 14px;
-            background: rgba(255,255,255,0.92);
-            border: 1px solid #dbeafe;
-            border-radius: 12px;
-            padding: 10px 12px;
-            color: #334155;
-            font-size: 0.8rem;
-            line-height: 1.45;
-        }
-        #widget-visc-basics .formula-chip {
-            background: rgba(15,23,42,0.92);
-            color: #e2e8f0;
-            border-radius: 14px;
-            padding: 10px 14px;
-            font-size: 0.8rem;
-            line-height: 1.45;
-            min-width: 210px;
-        }
-        #widget-visc-basics .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 14px;
-            margin-bottom: 16px;
-        }
-        #widget-visc-basics .control-card,
-        #widget-visc-basics .metric-item,
-        #widget-visc-basics .explain-box {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-        }
-        #widget-visc-basics .control-card {
-            padding: 14px 16px;
-        }
-        #widget-visc-basics .control-card label {
-            display: block;
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: #334155;
-            margin-bottom: 8px;
-        }
-        #widget-visc-basics .control-card span {
-            color: #2563eb;
-        }
-        #widget-visc-basics input[type="range"] {
-            width: 100%;
-            accent-color: #2563eb;
-        }
-        #widget-visc-basics .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 12px;
-            margin-bottom: 14px;
-        }
-        #widget-visc-basics .metric-item {
-            padding: 14px;
-        }
-        #widget-visc-basics .metric-label {
-            display: block;
-            font-size: 0.7rem;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-        #widget-visc-basics .metric-value {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-        #widget-visc-basics .metric-blue .metric-value { color: #1d4ed8; }
-        #widget-visc-basics .metric-orange .metric-value { color: #c2410c; }
-        #widget-visc-basics .metric-cyan .metric-value { color: #0f766e; }
-        #widget-visc-basics .visc-chain { margin:0 0 14px; padding:12px 14px; border:1px solid #fed7aa; border-radius:14px; background:#fff7ed; color:#7c2d12; font-size:0.88rem; line-height:1.55; }
-        #widget-visc-basics .visc-chain strong { color:#9a3412; }
-        #widget-visc-basics .visc-presets { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:-2px 0 14px; color:#475569; font-size:.82rem; }
-        #widget-visc-basics .visc-presets button { border:1px solid #bcd2df; border-radius:9px; background:#fff; color:#234863; padding:.45rem .65rem; font-weight:750; cursor:pointer; }
-        #widget-visc-basics .visc-presets button[aria-pressed=true] { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
-        #widget-visc-basics .explain-box {
-            padding: 14px 16px;
-            background: #f8fafc;
-        }
-        #widget-visc-basics .explain-title {
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 6px;
-        }
-        #widget-visc-basics .explain-text {
-            margin: 0;
-            font-size: 0.84rem;
-            color: #334155;
-            line-height: 1.55;
-        }
-    </style>
-
-
-
-    <div class="scene">
-        <canvas id="visc-canvas" width="900" height="360"></canvas>
-        <div id="visc-scene-caption" class="floating-caption"></div>
-    </div>
-
-    <div class="controls">
-        <div class="control-card">
-            <label>Brzina gornje ploče v: <span id="v-val">1.0</span> m/s</label>
-            <input type="range" id="v-slider" min="0.1" max="5.0" value="1.0" step="0.1">
-        </div>
-        <div class="control-card">
-            <label>Dinamička viskoznost μ: <span id="mu-val">0.10</span> Pa·s</label>
-            <input type="range" id="mu-slider" min="0.01" max="1.0" value="0.1" step="0.01">
-        </div>
-        <div class="control-card">
-            <label>Zračnost δ: <span id="h-slider-val">10</span> mm</label>
-            <input type="range" id="h-slider" min="2" max="30" value="10" step="1">
-        </div>
-    </div><div class="v2-reading-line"><span>τ = μU/δ</span><strong><span id="tau-out">10.0</span> Pa</strong><span>du/dy = <span id="grad-out">100</span> s⁻¹</span></div><p class="v2-short-explanation" id="visc-explainer"></p><details class="v2-model-details"><summary>Provjera viskoznosti · od naprezanja do sile</summary><div class="visc-presets" role="group" aria-label="Provjera utjecaja samo viskoznosti">
-        <strong>Isti U i δ:</strong>
-        <button type="button" data-visc-mu="0.10" aria-pressed="true">μ = 0,10 Pa·s</button>
-        <button type="button" data-visc-mu="0.30" aria-pressed="false">μ = 0,30 Pa·s</button>
-    </div><div id="visc-formula-live" style="margin-top: 6px; color: #cbd5e1;"></div><div class="visc-chain" id="visc-global-out" aria-live="polite"></div></details>
-
-
-
-
-
-
-
-
-
-    <script>
-(function () {
-  const canvas = document.getElementById("visc-canvas");
-  const ctx = canvas.getContext("2d");
-  const vSl = document.getElementById("v-slider");
-  const muSl = document.getElementById("mu-slider");
-  const hSl = document.getElementById("h-slider");
-  const caption = document.getElementById("visc-scene-caption");
-
-  const particles = Array.from({ length: 120 }, () => ({
-    x: Math.random(),
-    y: Math.random(),
-    size: 1.5 + Math.random() * 1.8,
-  }));
-  let model = null;
-  let lastChanged = "initial";
-
-  function roundRect(context, x, y, w, h, r, fill, stroke) {
-    context.beginPath();
-    context.moveTo(x + r, y);
-    context.arcTo(x + w, y, x + w, y + h, r);
-    context.arcTo(x + w, y + h, x, y + h, r);
-    context.arcTo(x, y + h, x, y, r);
-    context.arcTo(x, y, x + w, y, r);
-    context.closePath();
-    if (fill) context.fill();
-    if (stroke) context.stroke();
-  }
-
-  function drawArrow(x1, y1, x2, y2, color, width, label) {
-    const headlen = 9;
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-    ctx.closePath();
-    ctx.fill();
-    if (label) {
-      ctx.font = "bold 12px Inter";
-      ctx.fillText(label, x2 + 8, y2 - 6);
-    }
-  }
-
-  function update() {
-    const v = parseFloat(vSl.value);
-    const mu = parseFloat(muSl.value);
-    const deltaMm = parseFloat(hSl.value);
-    const deltaM = deltaMm / 1000;
-    const gapPx = deltaMm * 5.2;
-    const gradient = v / deltaM;
-    const tau = mu * gradient;
-    const testArea = 0.06;
-    const effectiveRadius = 0.1;
-    const shearForce = tau * testArea;
-    const equivalentMoment = shearForce * effectiveRadius;
-
-    document.getElementById("v-val").textContent = v.toFixed(1);
-    document.getElementById("mu-val").textContent = mu.toFixed(2);
-    document.getElementById("h-slider-val").textContent = deltaMm.toFixed(0);
-    document.getElementById("grad-out").textContent = gradient.toFixed(0);
-    document.getElementById("tau-out").textContent = tau.toFixed(1);
-    document.getElementById("visc-formula-live").textContent =
-      `${mu.toFixed(2)} · ${gradient.toFixed(0)} = ${tau.toFixed(1)} Pa`;
-
-    document.getElementById("visc-global-out").innerHTML =
-      `<strong>Lokalno → globalno.</strong> Na ispitnoj ploči A = ${testArea.toFixed(3)} m² vrijedi F<sub>τ</sub> = τA = ${shearForce.toFixed(2)} N. Ako ta sila djeluje na kraku r = ${effectiveRadius.toFixed(2)} m, njezin bi doprinos momentu bio M = rF<sub>τ</sub> = ${equivalentMoment.toFixed(2)} N·m.`;
-
-    const changeMessage =
-      lastChanged === "speed"
-        ? "Promjena brzine ploče mijenja gradijent U/δ i naprezanje μU/δ u istom omjeru."
-        : lastChanged === "gap"
-          ? "Razmak ploča se promijenio: ista promjena brzine sada se raspodjeljuje kroz drugačiju debljinu sloja, pa se mijenja nagib profila."
-          : lastChanged === "viscosity"
-            ? "Geometrija i krajnje brzine ostale su iste, pa je profil nepromijenjen; viskozniji fluid ipak za isti nagib razvija veće naprezanje."
-            : "Najprije odredi kinematiku U/δ, zatim materijalni odgovor μ(U/δ), a potom silu na stvarnoj površini.";
-    document.getElementById("visc-explainer").textContent =
-      changeMessage;
-
-    caption.textContent = "Profil u(y): narančasta crta je ploča y = δ. Zračnost je uvećana; vodoravna dionica tragača predstavlja 5 m.";
-
-    model = { v, mu, gapPx, gradient, tau };
-    draw(model, false);
-  }
-
-  function draw(current, advanceParticles) {
-    const { v, mu, gapPx, gradient, tau } = current;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const chamberLeft = 80;
-    const chamberWidth = 520;
-    const chamberRight = chamberLeft + chamberWidth;
-    const centerY = 196;
-    const topY = centerY - gapPx / 2;
-    const botY = centerY + gapPx / 2;
-
-    const fluidGrad = ctx.createLinearGradient(0, topY, 0, botY);
-    fluidGrad.addColorStop(0, `rgba(125, 211, 252, ${0.16 + mu * 0.16})`);
-    fluidGrad.addColorStop(0.5, `rgba(59, 130, 246, ${0.1 + mu * 0.22})`);
-    fluidGrad.addColorStop(1, `rgba(125, 211, 252, ${0.16 + mu * 0.16})`);
-    ctx.fillStyle = fluidGrad;
-    ctx.fillRect(chamberLeft, topY, chamberWidth, gapPx);
-
-    ctx.fillStyle = "#0f172a";
-    roundRect(ctx, chamberLeft, topY - 14, chamberWidth, 14, 5, true, false);
-    ctx.fillStyle = "#64748b";
-    roundRect(ctx, chamberLeft, botY, chamberWidth, 14, 5, true, false);
-
-    ctx.fillStyle = "#0f172a";
-    ctx.font = "bold 15px Inter";
-    ctx.fillText(`gornja ploča: v = ${v.toFixed(1)} m/s`, chamberLeft + 8, topY - 24);
-    ctx.fillStyle = "#475569";
-    ctx.fillText("donja ploča: v = 0", chamberLeft + 8, botY + 32);
-
-    particles.forEach((particle) => {
-      const localRatio = 1 - particle.y;
-      const localSpeed = v * localRatio;
-      if (advanceParticles) particle.x = (particle.x + localSpeed * advanceParticles / 5) % 1;
-      if (particle.x > 1.03) particle.x = -0.03;
-      const px = chamberLeft + particle.x * chamberWidth;
-      const py = topY + particle.y * gapPx;
-      ctx.fillStyle = `rgba(3, 105, 161, ${0.22 + localRatio * 0.55})`;
-      ctx.beginPath();
-      ctx.arc(px, py, particle.size, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    for (let i = 0; i <= 6; i++) {
-      const ratio = i / 6;
-      const y = botY - ratio * gapPx;
-      const arrowLength = ratio * v * 44;
-      if (arrowLength < .1) continue;
-      drawArrow(
-        chamberLeft + 16,
-        y,
-        chamberLeft + 16 + arrowLength,
-        y,
-        `rgba(37, 99, 235, ${0.35 + ratio * 0.65})`,
-        2,
-        i === 6 ? "vmax" : "",
-      );
-    }
-
-    ctx.strokeStyle = "#fb923c";
-    ctx.lineWidth = 2.5;
-    ctx.setLineDash([7, 5]);
-    ctx.beginPath();
-    ctx.moveTo(chamberRight + 28, botY + 2);
-    ctx.lineTo(chamberRight + 28, topY - 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = "#c2410c";
-    ctx.font = "bold 12px Inter";
-    ctx.fillText("δ", chamberRight + 36, centerY + 4);
-
-    ctx.fillStyle='#f8fafc';roundRect(ctx,650,50,235,270,14,true,false);
-    const axes=MF1.canvasAxes(ctx,{left:690,top:92,width:165,height:165,x:[0,5],y:[0,30],xlabel:'u [m/s]',ylabel:'y [mm]'});
-    ctx.strokeStyle='#1d4ed8';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(axes.px(0),axes.py(0));ctx.lineTo(axes.px(v),axes.py(gapPx/5.2));ctx.stroke();
-    ctx.fillStyle='#1d4ed8';ctx.beginPath();ctx.arc(axes.px(v),axes.py(gapPx/5.2),4,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='#ea580c';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(axes.px(0),axes.py(gapPx/5.2));ctx.lineTo(axes.px(5),axes.py(gapPx/5.2));ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#475569';ctx.font='13px Inter';ctx.fillText('točka: (U, δ) · iste osi',674,309);
-  }
-
-  function animate(dt) { if (model) draw(model, dt); }
-
-  vSl.addEventListener("input", () => {
-    lastChanged = "speed";
-    update();
-  });
-  function syncMuPresets() {
-    document.querySelectorAll("#widget-visc-basics [data-visc-mu]").forEach((button) => {
-      button.setAttribute("aria-pressed", String(Math.abs(+button.dataset.viscMu - +muSl.value) < 0.001));
-    });
-  }
-  document.querySelectorAll("#widget-visc-basics [data-visc-mu]").forEach((button) =>
-    button.addEventListener("click", () => {
-      muSl.value = button.dataset.viscMu;
-      muSl.dispatchEvent(new Event("input", { bubbles: true }));
-    }),
-  );
-  muSl.addEventListener("input", () => {
-    lastChanged = "viscosity";
-    syncMuPresets();
-    update();
-  });
-  hSl.addEventListener("input", () => {
-    lastChanged = "gap";
-    update();
-  });
-  syncMuPresets();
-  update();
-  document.getElementById("widget-visc-basics").mf1ViscosityMotion = MF1.motion(document.getElementById("widget-visc-basics-mode-0"), animate, {reset:()=>particles.forEach((p,i)=>p.x=(i*.618)%1)});
-})();
-</script>
-</div><div data-editorial-pane="1" id="widget-visc-basics-mode-1" hidden=""><div class="" id="v2-nn-explorer" style="margin: 0px; padding: 0px; box-shadow: none; max-width: none; border: 0px;">
-<style>
-#v2-nn-explorer{max-width:980px;margin:1.3rem auto;padding:20px;border:1px solid #dbe7ef;border-radius:18px;background:linear-gradient(180deg,#fbfdff,#fff);font-family:Inter,system-ui,sans-serif;color:#17324b}#v2-nn-explorer h4{margin:0;font-size:1.2rem}#v2-nn-explorer p{margin:.35rem 0 0;max-width:66ch;color:#4b6171;line-height:1.5}#v2-nn-explorer .v2nn-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0 10px}#v2-nn-explorer button{border:1px solid #bcd2df;border-radius:9px;background:#fff;color:#234863;padding:.45rem .65rem;font-weight:750;cursor:pointer}#v2-nn-explorer button[aria-pressed=true]{background:#126987;border-color:#126987;color:#fff}#v2-nn-explorer .v2nn-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.38fr);gap:14px;align-items:stretch}#v2-nn-explorer svg{width:100%;height:auto;display:block;border:1px solid #dbe7ef;border-radius:12px;background:#fff}#v2-nn-explorer .v2nn-side{display:grid;align-content:center;gap:10px;padding:13px;border:1px solid #dbe7ef;border-radius:12px;background:#f8fcfe}#v2-nn-explorer label{font-weight:750;font-size:.88rem;color:#40596b}#v2-nn-explorer input{width:100%;accent-color:#126987}#v2-nn-explorer strong{color:#126987;font-family:ui-monospace,Consolas,monospace;font-size:1.16rem}#v2-nn-explorer .v2nn-note{font-size:.87rem;line-height:1.52;color:#40596b}@media(max-width:680px){#v2-nn-explorer{padding:14px;margin-inline:.2rem}#v2-nn-explorer .v2nn-grid{grid-template-columns:1fr}}
-</style>
-<p>Usporedi naprezanje pri istoj brzini smicanja.</p>
-<div class="v2nn-tabs" role="group" aria-label="Model fluida"><button type="button" data-v2nn="newton" aria-pressed="true">Newtonski</button><button type="button" data-v2nn="thin" aria-pressed="false">Shear-thinning</button><button type="button" data-v2nn="thick" aria-pressed="false">Shear-thickening</button></div>
-<div class="v2nn-grid"><svg id="v2nn-plot" viewBox="0 0 620 280" role="img" aria-label="Graf smičnog naprezanja prema brzini smicanja"></svg><div class="v2nn-side"><label for="v2nn-rate"><span class="mf1-control-caption">Brzina smicanja <span class="math inline">\(\dot\gamma\)</span>: </span><output id="v2nn-rate-value">60</output> s⁻¹</label><input id="v2nn-rate" type="range" min="1" max="120" step="1" value="60"><small>Trenutačni odgovor</small><strong id="v2nn-primary">τ = 6,00 Pa</strong><div class="v2nn-note" id="v2nn-note"></div></div></div>
-</div>
+<div class="mf1-lab" id="widget-z12-vdual-fixed" data-widget-role="application">
+  <h4>Jedan meniskus povezuje silu, razinu i tlak</h4>
+  <p>Promijeni kontaktni kut: isti cos θ određuje smjer površinske sile, kapilarni pomak i Laplaceov skok tlaka.</p>
+  <svg id="z12-vector" viewBox="0 0 760 390" font-family="Inter, Segoe UI, system-ui, sans-serif" role="img" aria-label="Kapilarna razina prema spremniku i izotropno uvećani kontaktni kut"></svg>
+  <div class="z12-controls">
+    <label><span>Polumjer r: <output id="r-val-z12-dual">0,30</output> mm</span><input id="r-slider-z12-dual" type="range" min="0.1" max="1.5" step="0.05" value="0.3"></label>
+    <label><span>Kontaktni kut θ: <output id="z12-theta-value">0</output>°</span><input id="z12-theta" type="range" min="0" max="180" step="1" value="0"></label>
+    <label>Tekućina<select id="z12-fluid"><option value="water">Voda · ρ = 983,7 kg/m³; σ = 0,0662 N/m</option><option value="mercury">Živa · ρ = 13480 kg/m³; σ = 0,47 N/m</option></select></label>
+  </div>
+  <div class="z12-presets" role="group" aria-label="Fizičke grane kvašenja"><button type="button" data-z12-theta="0">Potpuno kvašenje</button><button type="button" data-z12-theta="90">Ravna granica</button><button type="button" data-z12-theta="130">Nekvašenje</button></div>
+  <p id="z12-readings" class="z12-readings" aria-live="polite"></p>
+  <p id="z12-balance" class="z12-balance"></p>
+  <div id="z12-explainer"></div>
+  <p id="z12-model-note" class="z12-model-note"></p>
+  <details><summary>Usporedba s izvornim zadatkom i pretpostavke</summary><p>Za zadane materijale: voda pri θ = 0° daje <strong id="hv-res-z12"></strong> mm, a živa pri θ = 130° <strong id="hhg-res-z12"></strong> mm. Ostali kutovi predstavljaju promjenu kvašenja stijenke.</p><p>Jurinova visina h ≈ 2σ cos θ/(ρgr) predstavlja kapilarni pomak uz zanemaren volumen meniskusa. U glavnoj sceni sonda i oznaka h zato pripadaju istoj reprezentativnoj razini; uvećani detalj prikazuje kut i zakrivljenost, a ne drugu skalu visine h. Za mali Bo = ρgr²/σ meniskus približno čini sfernu kapu s R = r/|cos θ|. Kružni detalj koristi jednako mjerilo po objema osima. Zanemareni su gravitacijsko izobličenje meniskusa, histereza kontaktnog kuta i promjena tlaka plina.</p><p>Δp = p<sub>plin</sub> − p<sub>tekućina</sub> = ρgh. Na meniskus djeluju vertikalna površinska sila F<sub>σ,z</sub> = 2πrσ cos θ i suprotna tlačna sila F<sub>p,z</sub> = −Δpπr². Njihov zbroj u modelu iznosi nula i za uspon i za depresiju; negativan h ne označuje negativnu težinu.</p></details>
+<style>#widget-z12-vdual-fixed{max-width:980px;margin:1.5rem auto;padding:20px;border:1px solid #cbdde8;border-radius:18px;background:#fbfdff}#widget-z12-vdual-fixed svg{display:block;width:100%;height:auto}#widget-z12-vdual-fixed .z12-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}#widget-z12-vdual-fixed label{display:grid;gap:7px;font-weight:700}#widget-z12-vdual-fixed label>span:first-child{display:block;white-space:normal}#widget-z12-vdual-fixed input,#widget-z12-vdual-fixed select{width:100%;max-width:100%}#widget-z12-vdual-fixed .z12-presets{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}#widget-z12-vdual-fixed button{padding:.5rem .7rem;border:1px solid #93b1c2;border-radius:8px;background:#fff;color:#17324b}#widget-z12-vdual-fixed button[aria-pressed=true]{background:#126987;color:#fff}#widget-z12-vdual-fixed .z12-readings{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin:.7rem 0;color:#164863;font-size:1.05rem;font-variant-numeric:tabular-nums}#widget-z12-vdual-fixed .z12-balance{font-size:.9rem;font-variant-numeric:tabular-nums;color:#31566c}#widget-z12-vdual-fixed .z12-model-note{font-size:.85rem;color:#526777;line-height:1.5}@media(max-width:700px){#widget-z12-vdual-fixed .z12-controls{grid-template-columns:1fr}}</style>
 <script>
 (() => {
- const root=document.getElementById('v2-nn-explorer'),rate=root.querySelector('#v2nn-rate');
- const models={newton:{n:1,K:.10,label:'Newtonski: stalna viskoznost.'},thin:{n:.58,K:.32,label:'Pseudoplastični: prividna viskoznost opada.'},thick:{n:1.45,K:.012,label:'Dilatantni: prividna viskoznost raste.'}};
- let kind='newton';
+ const root=document.getElementById('widget-z12-vdual-fixed'),q=s=>root.querySelector(s),rSlider=q('#r-slider-z12-dual'),tSlider=q('#z12-theta'),fluid=q('#z12-fluid'),svg=q('#z12-vector'),fmt=v=>MF1.number(v),arrow=MF1.svgArrow;
+ const signed=v=>v===0?'0':(v>0?'+':'−')+fmt(Math.abs(v));
+ let sceneWidth=0;
  function render(){
-  const m=models[kind],r=+rate.value,state=MF1.powerLaw(r,m.K,m.n);
-  MF1.renderPlot(root.querySelector('#v2nn-plot'),{x:[0,120],y:[0,14],title:'Potencijski zakon: τ = K γ̇ⁿ',xlabel:'brzina smicanja γ̇ [s⁻¹]',ylabel:'smično naprezanje τ [Pa]',curves:[{fn:x=>.1*x,color:'#8e9faf',dash:'6 5'},{fn:x=>MF1.powerLaw(x,m.K,m.n).stress}],points:[{x:r,y:state.stress}],note:'Puna linija: odabrani model · isprekidano: μ = 0,10 Pa·s · iste osi za sve modele'});
-  root.querySelector('#v2nn-rate-value').textContent=MF1.number(r);
-  root.querySelector('#v2nn-primary').textContent='τ = '+MF1.number(state.stress)+' Pa';
-  root.querySelector('#v2nn-note').textContent=m.label+' K = '+MF1.number(m.K)+' Pa·sⁿ; n = '+MF1.number(m.n)+'. μₐ = τ/γ̇ = '+MF1.number(state.apparent)+' Pa·s. Potencijski zakon vrijedi u promatranom rasponu smicanja.';
+  const rMm=+rSlider.value,r=rMm/1000,theta=+tSlider.value,angle=theta*Math.PI/180,cos=theta===90?0:Math.cos(angle),sin=theta===0||theta===180?0:Math.sin(angle),rho=fluid.value==='water'?983.7:13480,sigma=fluid.value==='water'?.0662:.47;
+  const jump=2*sigma*cos/r,h=jump/(rho*9.81),force=2*Math.PI*r*sigma*cos,column=rho*9.81*Math.PI*r*r*h,pressureForce=jump===0?0:-jump*Math.PI*r*r,bond=rho*9.81*r*r/sigma;
+  sceneWidth=svg.getBoundingClientRect().width||760;
+  const compact=sceneWidth<620,sy=196,scale=.82,my=sy-h*1000*scale,cx=185,color=fluid.value==='water'?'#087eab':'#64748b';
+  const half=80,contactY=175,centerX=180,left=centerX-half,right=centerX+half,sag=half*cos/(1+sin),radius=cos===0?null:half/Math.abs(cos);
+  root.mf1ProfessorState={r,theta,rho,sigma,cos,h,jump,force,column,bond,pressureForce,residual:force+pressureForce,scene:{compact,datumY:sy,levelY:my,pxPerMm:scale,half,sag,radius,contactY,centerY:contactY+sag}};
+  q('#r-val-z12-dual').textContent=fmt(rMm);q('#z12-theta-value').textContent=theta;
+  q('#hv-res-z12').textContent=fmt(2*.0662/(983.7*9.81*r)*1000);q('#hhg-res-z12').textContent=fmt(2*.47*Math.cos(130*Math.PI/180)/(13480*9.81*r)*1000);
+  root.querySelectorAll('[data-z12-theta]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.z12Theta===theta)));
+  const t=(x,y,text,c='#40596b',size=18,anchor='start')=>`<text x="${x}" y="${y}" fill="${c}" font-size="${size}" text-anchor="${anchor}">${text}</text>`;
+  let columnScene=t(18,26,'Razina prema spremniku','#17324b',20)+t(18,54,'z [mm]');
+  columnScene+=`<rect x="96" y="${sy}" width="246" height="${330-sy}" fill="#dceef6"/><path d="M62 65V330M62 ${sy}H342" fill="none" stroke="#809aaa" stroke-width="1.5"/><path d="M172 64V330M198 64V330" stroke="#334155" stroke-width="3"/><rect x="173.5" y="64" width="23" height="266" fill="#fff"/><rect x="173.5" y="${my}" width="23" height="${330-my}" fill="${color}" opacity=".48"/><path id="z12-level" d="M173.5 ${my}H196.5" stroke="${color}" stroke-width="3"/><path d="M62 ${my}H222" stroke="#b93645" stroke-width="1.5" stroke-dasharray="4 4"/><circle id="z12-pressure-probe" cx="${cx}" cy="${my}" r="5" fill="#b93645"/>`;
+  for(const z of [-150,-75,0,75,150]){const y=sy-z*scale;columnScene+=`<path d="M57 ${y}H67" stroke="#809aaa"/>`+t(51,y+6,z>0?'+'+z:String(z),'#526777',18,'end');}
+  columnScene+=`<path id="z12-height-bracket" d="M116 ${sy}H128M122 ${sy}V${my}M116 ${my}H128" stroke="#b93645" stroke-width="2" fill="none"/>`+t(108,(my+sy)/2-8,'h','#b93645',20,'end')+t(225,sy-10,'p* = 0','#526777')+t(18,356,'h: reprezentativna Jurinova razina')+t(18,381,'Širina cijevi ovdje je shematska.');
+  const meniscus=cos===0?`M${left} ${contactY}H${right}`:`M${left} ${contactY}A${radius} ${radius} 0 0 ${cos>0?0:1} ${right} ${contactY}`;
+  let detail=t(18,26,'Kontaktni kut · uvećano','#17324b',20)+t(centerX,64,'plin','#526777',18,'middle');
+  detail+=`<path d="${meniscus}V306H${left}Z" fill="${color}" opacity=".18"/><path d="M${left} 78V306M${right} 78V306" stroke="#334155" stroke-width="3"/><path id="z12-meniscus" d="${meniscus}" fill="none" stroke="${color}" stroke-width="3"/>`;
+  detail+=`<g id="z12-force-left">${arrow(left,contactY,-58*sin,-58*cos,'#0f766e','',3)}</g><g id="z12-force-right">${arrow(right,contactY,58*sin,-58*cos,'#0f766e','',3)}</g>`+t(left-58*sin-16,contactY-58*cos-8,'σ','#0f766e',20)+t(right+58*sin+8,contactY-58*cos-8,'σ','#0f766e',20);
+  if(theta>0)detail+=`<path id="z12-angle" d="M${right} ${contactY+32}A32 32 0 0 1 ${right-32*sin} ${contactY+32*cos}" fill="none" stroke="#a45a16" stroke-width="2"/>`;
+  detail+=t(centerX,292,'tekućina',color,18,'middle')+t(18,336,`θ = ${theta}° · kut kroz tekućinu`,'#a45a16')+t(18,364,'Strelice σ: samo smjer sile.')+t(18,388,'Isto mjerilo po x i z.');
+  svg.setAttribute('viewBox',compact?'0 0 360 800':'0 0 760 400');
+  svg.innerHTML=`<g id="z12-column-panel">${columnScene}</g><g id="z12-contact-panel" transform="translate(${compact?0:400} ${compact?400:0})">${detail}</g>`;
+  svg.setAttribute('aria-label',`Kapilarni model: h približno ${fmt(h*1000)} mm, tlak tekućine prema plinu ${fmt(-jump)} Pa. Kontaktni kut ${theta} stupnjeva; izotropno uvećani meniskus.`);
+  q('#z12-readings').innerHTML=`<strong>h ≈ ${signed(h*1000)} mm</strong><strong>p* ≈ ${signed(-jump)} Pa</strong>`;
+  q('#z12-balance').textContent=`Meniskus: Fσ,z + Fp,z = (${signed(force*1000)}) + (${signed(pressureForce*1000)}) mN = 0. Tlačna sila Fp,z = −Δpπr².`;
+  q('#z12-model-note').textContent=`Bo = ρgr²/σ = ${fmt(bond)}. Sferni meniskus je aproksimacija za Bo ≪ 1; gravitacijsko izobličenje meniskusa nije uključeno.`;
+  MF1.decision?.(q('#z12-explainer'),{title:'Kontaktni kut bira smjer sile i kapilarne razine',branches:[{when:'θ < 90°',active:theta<90,equation:'cos θ > 0 → Fσ,z > 0 → h > 0',then:'Uspon: površinska sila djeluje gore, tlačna dolje. Tlak tekućine prema plinu: '+signed(-jump)+' Pa.'},{when:'θ = 90°',active:theta===90,equation:'cos θ = 0 → Δp = h = 0',then:'Meniskus je ravan. Površinska napetost ostaje horizontalna; obje vertikalne rezultante iznose 0 N.'},{when:'θ > 90°',active:theta>90,equation:'cos θ < 0 → Fσ,z < 0 → h < 0',then:'Depresija: površinska sila djeluje dolje, tlačna gore. Tlak tekućine prema plinu: '+signed(-jump)+' Pa.'}],summary:'Δp = p_plin − p_tekućina = ρgh; p* = p_tekućina − p_plin. Rezultanta površinske sile dobiva se zbrajanjem po cijelom opsegu 2πr.'});
  }
- root.querySelectorAll('[data-v2nn]').forEach(button=>button.addEventListener('click',()=>{kind=button.dataset.v2nn;root.querySelectorAll('[data-v2nn]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();}));
- rate.addEventListener('input',render);render();
+ [rSlider,tSlider].forEach(i=>i.addEventListener('input',render));fluid.addEventListener('change',()=>{tSlider.value=fluid.value==='water'?0:130;render();});root.querySelectorAll('[data-z12-theta]').forEach(b=>b.onclick=()=>{tSlider.value=b.dataset.z12Theta;render();});render();
+ window.addEventListener('resize',render);
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>{if(Math.abs(svg.getBoundingClientRect().width-sceneWidth)>.5)render();}).observe(svg);
 })();
 </script>
-</div><div data-editorial-pane="2" id="widget-visc-basics-mode-2" hidden=""><!-- ZADATAK 12: Usporedna kapilarnost -->
-<div class="" id="widget-z12-vdual-fixed" style="margin: 0px; padding: 0px; box-shadow: none; max-width: none; border: 0px;">
-    <style>
-        #widget-z12-vdual-fixed .z12-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
-        #widget-z12-vdual-fixed .z12-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
-        #widget-z12-vdual-fixed .z12-title { margin:0; font-size:1.42rem; color:#0f172a; }
-        #widget-z12-vdual-fixed .z12-sub { margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px; }
-        #widget-z12-vdual-fixed .z12-note { background:rgba(15,23,42,0.92); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px; }
-        #widget-z12-vdual-fixed .z12-scene { position:relative; background:radial-gradient(circle at top, #ffffff 0%, #f8fafc 72%); border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; margin-bottom:16px; }
-        #widget-z12-vdual-fixed #z12-vector { display:block; width:100%; height:auto; }
-        #widget-z12-vdual-fixed .z12-presets { display:flex; gap:8px; flex-wrap:wrap; margin:-4px 0 14px; }
-        #widget-z12-vdual-fixed .z12-presets button { border:1px solid #bcd2df; border-radius:9px; background:#fff; color:#234863; padding:.45rem .65rem; font-weight:750; cursor:pointer; }
-        #widget-z12-vdual-fixed .z12-presets button[aria-pressed=true] { background:#0f766e; border-color:#0f766e; color:#fff; }
-        #widget-z12-vdual-fixed .z12-controls { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; }
-        #widget-z12-vdual-fixed .z12-control, #widget-z12-vdual-fixed .z12-metric, #widget-z12-vdual-fixed .z12-explainer { background:#fff; border:1px solid #e2e8f0; border-radius:14px; }
-        #widget-z12-vdual-fixed .z12-control { padding:14px 16px; }
-        #widget-z12-vdual-fixed .z12-control label { display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:8px; }
-        #widget-z12-vdual-fixed .z12-control input { width:100%; }
-        #widget-z12-vdual-fixed .z12-metrics { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:14px; }
-        #widget-z12-vdual-fixed .z12-metric { padding:14px; }
-        #widget-z12-vdual-fixed .z12-metric small { display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px; }
-        #widget-z12-vdual-fixed .z12-metric strong { font-size:1.18rem; font-weight:800; }
-        #widget-z12-vdual-fixed .z12-explainer { padding:14px 16px; background:#f8fafc; font-size:0.84rem; color:#334155; line-height:1.55; }
-        #widget-z12-vdual-fixed .z12-label { display:none; }
-        @media (max-width:640px) {
-            #widget-z12-vdual-fixed .z12-scene { overflow-x:auto; }
-            #widget-z12-vdual-fixed #z12-vector { width:720px; max-width:none; }
-        }
-    </style>
-
-
-
-
-
-    <div class="z12-scene">
-        <svg id="z12-vector" viewBox="0 0 900 440" role="img" aria-label="Vektorski prikaz kapilarnog uspona, depresije i projekcije površinske napetosti"></svg>
-    </div>
-
-    <div class="z12-controls">
-        <div class="z12-control">
-            <label>Polumjer kapilare R: <span id="r-val-z12-dual" style="color:#2563eb;">0.30</span> mm</label>
-            <input type="range" id="r-slider-z12-dual" min="0.1" max="1.5" step="0.05" value="0.3" style="accent-color:#2563eb;">
-        </div>
-    <div class="z12-presets" role="group" aria-label="Provjera utjecaja kuta kvašenja">
-        <strong style="align-self:center;color:#475569;font-size:.82rem;">Kut kontakta:</strong>
-        <button type="button" data-z12-theta="30" aria-pressed="true">θ &lt; 90° · uspon</button>
-        <button type="button" data-z12-theta="90" aria-pressed="false">θ = 90° · bez pomaka</button>
-        <button type="button" data-z12-theta="130" aria-pressed="false">θ &gt; 90° · depresija</button>
-    </div></div>
-
-    <div class="z12-metrics">
-        <div class="z12-metric"><small>Voda h_v</small><strong style="color:#1d4ed8;"><span id="hv-res-z12">45.7</span> mm</strong></div>
-        <div class="z12-metric"><small>Živa h_Hg</small><strong style="color:#6b7280;"><span id="hhg-res-z12">-15.2</span> mm</strong></div>
-
-
-    </div><p class="v2-short-explanation">h = 2σ cos θ / (ρgr). Prepolovi polumjer i usporedi oba pomaka.</p>
-
-
-
-
-    <script>
-(() => {
-  const initialize = () => {
-(() => {
-  const root = document.getElementById("widget-z12-vdual-fixed");
-  const svg = root?.querySelector("#z12-vector");
-  const slider = root?.querySelector("#r-slider-z12-dual");
-  if (!root || !svg || !slider) return;
-  let conceptTheta = 30;
-  const fmt = (n, d = 1) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function renderVector() {
-    const rMm = +slider.value;
-    const g = 9.81;
-    const hWaterMm = (1000 * 2 * 0.0662) / ((983.7 * g * rMm) / 1000);
-    const hMercuryMm = (1000 * 2 * 0.47 * Math.cos((130 * Math.PI) / 180)) / ((13480 * g * rMm) / 1000);
-    root.querySelector('#r-val-z12-dual').textContent=fmt(rMm,2);
-    root.querySelector('#hv-res-z12').textContent=fmt(hWaterMm);
-    root.querySelector('#hhg-res-z12').textContent=fmt(hMercuryMm);
-    root.querySelector('#z12-res-cosw').textContent='1,00';
-    root.querySelector('#z12-res-coshg').textContent=fmt(Math.cos(130*Math.PI/180),2);
-    root.querySelector('#z12-explainer').textContent='Pri polumjeru '+fmt(rMm,2)+' mm voda raste za '+fmt(hWaterMm)+' mm, a živa se spušta za '+fmt(Math.abs(hMercuryMm))+' mm. Udvostručenje polumjera prepolavlja oba pomaka. Središnja konstrukcija zasebno objašnjava predznak vertikalne komponente σ cos θ.';
-    const baseY = 300;
-    const tubeHalf = 30 * rMm;
-    const waterShift = Math.abs(hWaterMm) * .9;
-    const mercuryShift = Math.abs(hMercuryMm) * .9;
-    const waterY = baseY - waterShift;
-    const mercuryY = baseY + mercuryShift;
-    const theta = (conceptTheta * Math.PI) / 180;
-    const contactX = 405,
-      contactY = 220,
-      length = 68;
-    const endX = contactX + Math.sin(theta) * length;
-    const endY = contactY - Math.cos(theta) * length;
-    const arcX = contactX + Math.sin(theta) * 31;
-    const arcY = contactY - Math.cos(theta) * 31;
-    const verticalEnd = contactY - Math.cos(theta) * length;
-    const relation =
-      conceptTheta < 90
-        ? "cos θ > 0 → uspon"
-        : conceptTheta > 90
-          ? "cos θ < 0 → depresija"
-          : "cos θ = 0 → nema kapilarnog pomaka";
-    svg.innerHTML = `
-              <defs>
-                <marker id="z12-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
-                <marker id="z12-arr-blue" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
-                <marker id="z12-arr-gray" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#6b7280"/></marker>
-              </defs>
-              <rect width="900" height="440" fill="#fff"/>
-              <rect x="42" y="${baseY}" width="292" height="112" rx="10" fill="#dbeafe"/>
-              <path d="M${190 - tubeHalf} 108V390M${190 + tubeHalf} 108V390" stroke="#64748b" stroke-width="5"/>
-              <path d="M${190 - tubeHalf} ${waterY}Q190 ${waterY + 18} ${190 + tubeHalf} ${waterY}V390H${190 - tubeHalf}Z" fill="#60a5fa" opacity=".78"/>
-              <path d="M${190 - tubeHalf} ${waterY}Q190 ${waterY + 18} ${190 + tubeHalf} ${waterY}" fill="none" stroke="#1d4ed8" stroke-width="4"/>
-              <path d="M145 ${baseY}V${waterY}" stroke="#2563eb" stroke-width="3" marker-end="url(#z12-arr-blue)"/>
-              <text x="75" y="76" fill="#1d4ed8" font-size="19" font-weight="800">VODA · θ = 0°</text>
-              <text x="135" y="${(baseY + waterY) / 2}" text-anchor="end" fill="#1d4ed8" font-size="16" font-weight="800">h = +${fmt(hWaterMm)} mm</text>
-              <text x="80" y="414" fill="#475569" font-size="14">konkavan meniskus</text>
-              <rect x="566" y="${baseY}" width="292" height="112" rx="10" fill="#e5e7eb"/>
-              <path d="M${710 - tubeHalf} 108V390M${710 + tubeHalf} 108V390" stroke="#64748b" stroke-width="5"/>
-              <path d="M${710 - tubeHalf} ${mercuryY}Q710 ${mercuryY - 18} ${710 + tubeHalf} ${mercuryY}V390H${710 - tubeHalf}Z" fill="#9ca3af" opacity=".9"/>
-              <path d="M${710 - tubeHalf} ${mercuryY}Q710 ${mercuryY - 18} ${710 + tubeHalf} ${mercuryY}" fill="none" stroke="#4b5563" stroke-width="4"/>
-              <path d="M790 ${baseY}V${mercuryY}" stroke="#6b7280" stroke-width="3" marker-end="url(#z12-arr-gray)"/>
-              <text x="610" y="76" fill="#4b5563" font-size="19" font-weight="800">ŽIVA · θ = 130°</text>
-              <text x="800" y="370" text-anchor="middle" fill="#4b5563" font-size="16" font-weight="800">h = ${fmt(hMercuryMm)} mm</text>
-              <text x="608" y="414" fill="#475569" font-size="14">konveksan meniskus</text>
-              <rect x="325" y="104" width="250" height="218" rx="16" fill="#f8fafc" stroke="#cbd5e1"/>
-              <text x="450" y="130" text-anchor="middle" fill="#334155" font-size="15" font-weight="800">LOKALNA GEOMETRIJA KONTAKTA</text>
-              <path d="M${contactX} 158V278" stroke="#64748b" stroke-width="7"/>
-              <circle cx="${contactX}" cy="${contactY}" r="5" fill="#0f172a"/>
-              <path d="M${contactX} ${contactY}L${endX} ${endY}" stroke="#0f9b8e" stroke-width="6" marker-end="url(#z12-arr-teal)"/>
-              <text x="${endX + 8}" y="${endY - 5}" fill="#0f766e" font-size="17" font-weight="800">σ</text>
-              <path d="M${contactX} ${contactY - 31}A31 31 0 0 1 ${arcX} ${arcY}" fill="none" stroke="#ea580c" stroke-width="3"/>
-              <text x="${contactX + 34}" y="${contactY - 13}" fill="#c2410c" font-size="17" font-weight="800">θ = ${conceptTheta}°</text>
-              <path d="M535 ${contactY}V${verticalEnd}" stroke="#2563eb" stroke-width="5" ${Math.abs(Math.cos(theta))>1e-8?'marker-end="url(#z12-arr-blue)"':''}/>
-              <text x="545" y="${(contactY + verticalEnd) / 2}" fill="#1d4ed8" font-size="14" font-weight="800">σ cos θ</text>
-              <text x="450" y="300" text-anchor="middle" fill="#334155" font-size="15" font-weight="800">${relation}</text>
-              <text x="450" y="430" text-anchor="middle" fill="#64748b" font-size="13">promjer i vertikalni pomak prikazani su u uvećanoj, odvojenoj skali</text>`;
-  }
-  root.querySelectorAll("[data-z12-theta]").forEach((button) =>
-    button.addEventListener("click", () => {
-      conceptTheta = +button.dataset.z12Theta;
-      root
-        .querySelectorAll("[data-z12-theta]")
-        .forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
-      renderVector();
-    }),
-  );
-  slider.addEventListener("input", renderVector);
-  renderVector();
-})();
-  };
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, {once:true});
-  else initialize();
-})();
-</script>
-<details class="v2-model-details"><summary>Zašto voda raste, a živa se spušta?</summary><div class="z12-metric"><small>cos θ za vodu</small><strong style="color:#0f766e;">+<span id="z12-res-cosw">1.00</span></strong></div><div class="z12-metric"><small>cos θ za živu</small><strong style="color:#b91c1c;"><span id="z12-res-coshg">-0.64</span></strong></div><div class="z12-explainer" id="z12-explainer"></div></details></div>
-</div><div data-editorial-pane="3" id="widget-visc-basics-mode-3" hidden=""><!-- ZADATAK 13: Young-Laplace -->
-<div class="" id="widget-z13-advanced" style="margin: 0px; padding: 0px; box-shadow: none; max-width: none; border: 0px;">
-    <style>
-        #widget-z13-advanced .z13-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
-        #widget-z13-advanced .z13-kicker { font-size:0.74rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
-        #widget-z13-advanced .z13-title { margin:0; color:#0f172a; font-size:1.42rem; }
-        #widget-z13-advanced .z13-sub { margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px; }
-        #widget-z13-advanced .z13-note { background:rgba(15,23,42,0.92); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px; }
-        #widget-z13-advanced .z13-scene { position:relative; background:#f8fafc; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; margin-bottom:16px; }
-        #widget-z13-advanced #z13-vector { display:block; width:100%; height:auto; }
-        #widget-z13-advanced .z13-presets { display:flex; gap:8px; flex-wrap:wrap; margin:-4px 0 14px; }
-        #widget-z13-advanced .z13-presets button { border:1px solid #bcd2df; border-radius:9px; background:#fff; color:#234863; padding:.45rem .65rem; font-weight:750; cursor:pointer; }
-        #widget-z13-advanced .z13-presets button[aria-pressed=true] { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
-        #widget-z13-advanced .z13-controls { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; }
-        #widget-z13-advanced .z13-control, #widget-z13-advanced .z13-metric, #widget-z13-advanced .z13-explainer { background:#fff; border:1px solid #e2e8f0; border-radius:14px; }
-        #widget-z13-advanced .z13-control { padding:14px 16px; }
-        #widget-z13-advanced .z13-control label { display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:8px; }
-        #widget-z13-advanced .z13-control input { width:100%; }
-        #widget-z13-advanced .z13-metrics { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:14px; }
-        #widget-z13-advanced .z13-metric { padding:14px; }
-        #widget-z13-advanced .z13-metric small { display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px; }
-        #widget-z13-advanced .z13-metric strong { font-size:1.18rem; font-weight:800; }
-        #widget-z13-advanced .z13-explainer { padding:14px 16px; background:#f8fafc; font-size:0.84rem; color:#334155; line-height:1.55; }
-        @media (max-width:640px) {
-            #widget-z13-advanced .z13-scene { overflow-x:auto; }
-            #widget-z13-advanced #z13-vector { width:720px; max-width:none; }
-        }
-    </style>
-
-
-
-
-
-    <div class="z13-scene">
-        <svg id="z13-vector" viewBox="0 0 900 430" role="img" aria-label="Vektorska usporedba kapi promjera D i 2D te pripadnih nadtlakova"></svg>
-    </div>
-
-    <div class="z13-controls">
-        <div class="z13-control">
-            <label>Promjer kapi D: <span id="yl-val-d" style="color:#2563eb;">0.50</span> mm</label>
-            <input type="range" id="yl-slider-d" min="0.1" max="3.0" step="0.05" value="0.5" style="accent-color:#2563eb;">
-        </div>
-        <div class="z13-control">
-            <label>Površinska napetost σ: <span id="yl-val-sig" style="color:#0f766e;">0.073</span> N/m</label>
-            <input type="range" id="yl-slider-sig" min="0.010" max="0.100" step="0.001" value="0.073" style="accent-color:#0f766e;">
-        </div>
-    </div><div class="z13-presets" role="group" aria-label="Provjera utjecaja udvostručenja promjera">
-        <button type="button" data-z13-d="0.5" aria-pressed="true">Referentno: D = 0,50 mm</button>
-        <button type="button" data-z13-d="1" aria-pressed="false">Provjeri: D × 2</button>
-    </div>
-
-    <div class="z13-metrics">
-        <div class="z13-metric"><small>Unutarnji nadtlak · Δp = 4σ/D</small><strong style="color:#1d4ed8;"><span id="yl-res-dp">584</span> Pa</strong></div>
-
-
-    </div>
-
-
-
-
-    <script>
-(() => {
-  const initialize = () => {
-(() => {
-  const root = document.getElementById("widget-z13-advanced");
-  const svg = root?.querySelector("#z13-vector");
-  const dSlider = root?.querySelector("#yl-slider-d");
-  const sigmaSlider = root?.querySelector("#yl-slider-sig");
-  if (!root || !svg || !dSlider || !sigmaSlider) return;
-  const fmt = (n, d = 0) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-
-  function inwardArrows(cx,cy,radius,length){return Array.from({length:8},(_,i)=>{const a=i*Math.PI/4;return MF1.svgArrow(cx+radius*Math.cos(a),cy+radius*Math.sin(a),-length*Math.cos(a),-length*Math.sin(a),'#0f9b8e','',2.5)}).join('')}
-
-  function pressureArrows(cx,cy,radius,length){return [0,Math.PI/2,Math.PI,3*Math.PI/2].map(a=>MF1.svgArrow(cx+radius*Math.cos(a),cy+radius*Math.sin(a),length*Math.cos(a),length*Math.sin(a),'#7c3aed','',2.5)).join('')}
-
-  function renderVector() {
-    const Dmm = +dSlider.value;
-    const sigma = +sigmaSlider.value;
-    const dpD = (4 * sigma) / (Dmm / 1000);
-    const dp2D = dpD / 2;
-    root.querySelector('#yl-val-d').textContent=fmt(Dmm,2);
-    root.querySelector('#yl-val-sig').textContent=fmt(sigma,3);
-    root.querySelector('#yl-res-dp').textContent=fmt(dpD);
-    root.querySelector('#z13-res-r').textContent=fmt(Dmm/2,2);
-    root.querySelector('#z13-res-curv').textContent=fmt(1/Dmm,2);
-    root.querySelector('#z13-explainer').textContent='Kap ima jednu granicu tekućina–plin. Za D = '+fmt(Dmm,2)+' mm i σ = '+fmt(sigma,3)+' N/m razlika tlaka iznosi '+fmt(dpD)+' Pa. Dvostruko veća kap iste tekućine ima polovinu nadtlaka: '+fmt(dp2D)+' Pa.';
-    const cx1 = 220,
-      cx2 = 680,
-      cy = 250,
-      r1 = 28 + Dmm * 12,
-      r2 = 2*r1;
-    svg.innerHTML = `
-              <defs>
-                <radialGradient id="z13-drop-small" cx="35%" cy="28%"><stop offset="0" stop-color="#dbeafe"/><stop offset=".58" stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></radialGradient>
-                <radialGradient id="z13-drop-large" cx="35%" cy="28%"><stop offset="0" stop-color="#e0f2fe"/><stop offset=".58" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0284c7"/></radialGradient>
-                <marker id="z13-arr-teal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#0f9b8e"/></marker>
-                <marker id="z13-arr-violet" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#7c3aed"/></marker>
-                <marker id="z13-arr-dark" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3z" fill="#334155"/></marker>
-              </defs>
-              <rect width="900" height="430" fill="#fff"/>
-              <text x="450" y="32" text-anchor="middle" fill="#0f172a" font-size="20" font-weight="800">ISTA TEKUĆINA I σ · PROMIJENJENA JE SAMO ZAKRIVLJENOST</text>
-              <circle cx="${cx1}" cy="${cy}" r="${r1}" fill="url(#z13-drop-small)" stroke="#1d4ed8" stroke-width="4"/>
-              <circle cx="${cx2}" cy="${cy}" r="${r2}" fill="url(#z13-drop-large)" stroke="#0369a1" stroke-width="4"/>
-              ${inwardArrows(cx1, cy, r1, 35)}
-              ${inwardArrows(cx2, cy, r2, 17.5)}
-              ${pressureArrows(cx1, cy, r1, 35)}
-              ${pressureArrows(cx2, cy, r2, 17.5)}
-              <path d="M${cx1 - r1} 326H${cx1 + r1}" stroke="#334155" stroke-width="3" marker-start="url(#z13-arr-dark)" marker-end="url(#z13-arr-dark)"/>
-              <path d="M${cx2 - r2} 366H${cx2 + r2}" stroke="#334155" stroke-width="3" marker-start="url(#z13-arr-dark)" marker-end="url(#z13-arr-dark)"/>
-              <text x="${cx1}" y="352" text-anchor="middle" fill="#334155" font-size="17" font-weight="800">D = ${fmt(Dmm, 2)} mm</text>
-              <text x="${cx2}" y="396" text-anchor="middle" fill="#334155" font-size="17" font-weight="800">2D = ${fmt(2 * Dmm, 2)} mm</text>
-              <rect x="105" y="50" width="230" height="44" rx="12" fill="#eef2ff" stroke="#c4b5fd"/>
-              <text x="220" y="78" text-anchor="middle" fill="#5b21b6" font-size="18" font-weight="800">Δp(D) = ${fmt(dpD)} Pa</text>
-              <rect x="565" y="50" width="230" height="44" rx="12" fill="#eef2ff" stroke="#c4b5fd"/>
-              <text x="680" y="78" text-anchor="middle" fill="#5b21b6" font-size="18" font-weight="800">Δp(2D) = ${fmt(dp2D)} Pa</text>
-              <rect x="374" y="166" width="152" height="126" rx="14" fill="#f8fafc" stroke="#cbd5e1"/>
-              <text x="450" y="193" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="800">D × 2</text>
-              <text x="450" y="216" text-anchor="middle" fill="#1d4ed8" font-size="16" font-weight="800">Δp ÷ 2</text>
-              <path d="M392 246H424" stroke="#7c3aed" stroke-width="5" marker-end="url(#z13-arr-violet)"/>
-              <text x="435" y="251" fill="#5b21b6" font-size="12" font-weight="750">Δp prema van</text>
-              <path d="M392 273H424" stroke="#0f9b8e" stroke-width="5" marker-end="url(#z13-arr-teal)"/>
-              <text x="435" y="278" fill="#0f766e" font-size="12" font-weight="750">rezultanta σ</text>
-              <text x="450" y="420" text-anchor="middle" fill="#64748b" font-size="12">Na jednakim elementima: Δp prema van; rezultanta tangencijalnih sila σ prema unutra. Skala se prilagođava.</text>`;
-  }
-
-  root.querySelectorAll("[data-z13-d]").forEach((button) =>
-    button.addEventListener("click", () => {
-      dSlider.value = button.dataset.z13D;
-      dSlider.dispatchEvent(new Event("input", { bubbles: true }));
-      root
-        .querySelectorAll("[data-z13-d]")
-        .forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
-    }),
-  );
-  [dSlider, sigmaSlider].forEach((input) => input.addEventListener("input", renderVector));
-  renderVector();
-})();
-  };
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, {once:true});
-  else initialize();
-})();
-</script>
-<details class="v2-model-details"><summary>Zakrivljenost i pretpostavke modela</summary><div class="z13-metric"><small>Polumjer kapi</small><strong style="color:#c2410c;"><span id="z13-res-r">0.25</span> mm</strong></div><div class="z13-metric"><small>Obrnuti promjer 1/D</small><strong style="color:#b91c1c;"><span id="z13-res-curv">2.00</span> mm⁻¹</strong></div><div class="z13-explainer" id="z13-explainer"></div></details></div>
-
-</div><style>#widget-visc-basics [data-editorial-pane][hidden]{display:none!important}#widget-visc-basics .mf1-editorial-head{margin-bottom:1rem}#widget-visc-basics .mf1-editorial-head h4{font-size:1.4rem;margin:0 0 .4rem}#widget-visc-basics .mf1-editorial-head p{margin:0;max-width:72ch;line-height:1.55;color:#475569}#widget-visc-basics .mf1-editorial-modes{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}#widget-visc-basics .mf1-editorial-modes button{padding:.6rem .8rem;border:1px solid #bcd2df;border-radius:8px;background:#fff;color:#234863;font-weight:700;cursor:pointer}#widget-visc-basics .mf1-editorial-modes button[aria-pressed=true]{color:#fff;background:#126987;border-color:#126987}#widget-visc-basics .mf1-editorial-modes button:focus-visible{outline:3px solid #f59e0b;outline-offset:3px}</style><style>#widget-visc-basics .v2-reading-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem 1.4rem;padding:.8rem 1rem;background:#eef7fb;border-radius:10px;color:#164863;margin-bottom:.6rem}#widget-visc-basics .v2-reading-line strong{font-size:1.45rem;color:#126987}#widget-visc-basics .v2-short-explanation{margin:.5rem 0 .8rem;color:#40596b;line-height:1.5}#widget-visc-basics .v2-model-details{margin:.6rem 0;color:#40596b}#widget-visc-basics .v2-model-details summary{cursor:pointer;font-weight:700;padding:.6rem 0}#widget-visc-basics .v2-model-details[open]>:not(summary){margin-block:.6rem}#widget-visc-basics .z12-presets{margin:0;grid-column:1/-1}#widget-visc-basics #visc-formula-live{font-family:ui-monospace,monospace}</style></div>
-<div class="fizikalni-uvid">
-Što je gornja ploča brža ili je razmak među pločama manji, to je gradijent brzine strmiji. Veća viskoznost zatim taj gradijent pretvara u veće smično naprezanje.
 </div>
-<script>(() => {const root=document.getElementById('widget-visc-basics');root.querySelectorAll('[data-editorial-mode]').forEach(button=>button.addEventListener('click',()=>{const mode=button.dataset.editorialMode;if(mode!=='0')root.mf1ViscosityMotion?.stop();root.querySelectorAll('[data-editorial-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));root.querySelectorAll('[data-editorial-pane]').forEach(p=>p.hidden=p.dataset.editorialPane!==mode);window.dispatchEvent(new Event('resize'));}));})();</script>
+
 ```
 
 ```{=html}
@@ -867,293 +368,186 @@ $$T = \int_a^{a+b} \frac{2\pi \mu \omega \tan^3\alpha}{\delta \cos\alpha} y^3 dy
 
 ```{=html}
 <!-- GEOMETRIJSKI WIDGET ZA ZADATAK 10 -->
-<div class="widget-container mf1-lab" id="widget-z10-vfinal" data-widget-role="application" style="max-width: 980px; margin: 0 auto; padding: 22px; background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dbe7f3; border-radius: 22px; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);">
-    <style>
-        #widget-z10-vfinal .z10-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
-        #widget-z10-vfinal .z10-kicker { font-size:0.74rem; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; font-weight:800; margin-bottom:6px; }
-        #widget-z10-vfinal .z10-title { margin:0; font-size:1.42rem; color:#0f172a; }
-        #widget-z10-vfinal .z10-sub { margin:8px 0 0 0; color:#475569; font-size:0.92rem; line-height:1.55; max-width:620px; }
-        #widget-z10-vfinal .z10-note { background:rgba(15,23,42,0.92); color:#e2e8f0; border-radius:14px; padding:10px 14px; font-size:0.8rem; line-height:1.45; min-width:220px; }
-        #widget-z10-vfinal .z10-scenes { display:grid; grid-template-columns:1.2fr 1fr; gap:16px; margin-bottom:16px; }
-        @media (max-width: 860px) { #widget-z10-vfinal .z10-scenes { grid-template-columns:1fr; } }
-        #widget-z10-vfinal .z10-canvas-box { position:relative; background:#fff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; }
-        #widget-z10-vfinal canvas { display:block; width:100%; height:auto; }
-        #widget-z10-vfinal .z10-box-label { position:absolute; top:12px; left:14px; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; }
-        #widget-z10-vfinal .z10-controls { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; }
-        #widget-z10-vfinal .z10-control, #widget-z10-vfinal .z10-metric, #widget-z10-vfinal .z10-explainer { background:#fff; border:1px solid #e2e8f0; border-radius:14px; }
-        #widget-z10-vfinal .z10-control { padding:14px 16px; }
-        #widget-z10-vfinal .z10-control label { display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:8px; }
-        #widget-z10-vfinal .z10-control input { width:100%; }
-        #widget-z10-vfinal .z10-metrics { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:14px; }
-        #widget-z10-vfinal .z10-metric { padding:14px; }
-        #widget-z10-vfinal .z10-metric small { display:block; font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:6px; }
-        #widget-z10-vfinal .z10-metric strong { font-size:1.18rem; font-weight:800; }
-        #widget-z10-vfinal .z10-explainer { padding:14px 16px; background:#f8fafc; color:#334155; font-size:0.84rem; line-height:1.55; }
-    </style>
-
-    <div class="z10-head">
-        <div>
-            <div class="z10-kicker">Z10 laboratorij momenta</div>
-            <h4 class="z10-title">Lokalni radijus određuje lokalnu brzinu i lokalni doprinos momentu</h4>
-            <p class="z10-sub">Kod rotirajućeg krnjeg stošca radijus raste s visinom presjeka. U višim, širim zonama zato istodobno rastu tangencijalna brzina, smično naprezanje i poluga momenta.</p>
-        </div>
-        <div class="z10-note">
-            <div style="font-weight:800; color:#93c5fd; margin-bottom:4px;">Ovisnost veličina</div>
-            <div><strong>y</strong> određuje <strong>r = y tan α</strong></div>
-            <div><strong>r</strong> određuje <strong>u = ωr</strong></div>
-            <div><strong>u/δ</strong> daje <strong>τ = μωr/δ</strong></div>
-            <div><strong>dF = τdA</strong>, zatim <strong>dM = r dF</strong></div>
-            <div style="margin-top:5px;color:#bfdbfe;">Zračnost δ je na skici grafički uvećana.</div>
-        </div>
-    </div>
-
-    <div class="z10-scenes">
-        <div class="z10-canvas-box">
-            <span class="z10-box-label">Nacrt stošca i odabrani presjek</span>
-            <canvas id="canvas-z10-v7-side" width="560" height="280"></canvas>
-        </div>
-        <div class="z10-canvas-box">
-            <span class="z10-box-label">Presjek i smično djelovanje</span>
-            <canvas id="canvas-z10-v7-top" width="420" height="280"></canvas>
-        </div>
-    </div>
-
-    <div class="z10-controls">
-        <div class="z10-control">
-            <label>Visina baze a: <span id="z10-v7-val-a" style="color:#2563eb;">80</span> mm</label>
-            <input type="range" id="z10-v7-slider-a" min="20" max="150" value="80" style="accent-color:#2563eb;">
-        </div>
-        <div class="z10-control">
-            <label>Visina stošca b: <span id="z10-v7-val-b" style="color:#0f766e;">150</span> mm</label>
-            <input type="range" id="z10-v7-slider-b" min="50" max="250" value="150" style="accent-color:#0f766e;">
-        </div>
-        <div class="z10-control">
-            <label>Kut nagiba α: <span id="z10-v7-val-alpha" style="color:#c2410c;">30</span>°</label>
-            <input type="range" id="z10-v7-slider-alpha" min="5" max="60" value="30" style="accent-color:#c2410c;">
-        </div>
-        <div class="z10-control">
-            <label>Pozicija presjeka y: <span id="z10-v7-val-y" style="color:#dc2626;">150</span> mm</label>
-            <input type="range" id="z10-v7-slider-y" min="20" max="400" value="150" style="accent-color:#dc2626;">
-        </div>
-    </div>
-
-    <div class="z10-metrics">
-        <div class="z10-metric"><small>Ukupni moment</small><strong style="color:#1d4ed8;"><span id="z10-v7-res-t">0.000</span> Nm</strong></div>
-        <div class="z10-metric"><small>Lokalni radijus r(y)</small><strong style="color:#0f766e;"><span id="z10-v7-res-r">86.6</span> mm</strong></div>
-        <div class="z10-metric"><small>Tangencijalna brzina</small><strong style="color:#c2410c;"><span id="z10-v7-res-v">17.32</span> m/s</strong></div>
-        <div class="z10-metric"><small>Smično naprezanje τ(y)</small><strong style="color:#b91c1c;"><span id="z10-v7-res-tau">1443</span> Pa</strong></div>
-    </div>
-
-    <div class="z10-explainer" id="z10-v7-explainer"></div>
-
-    <script>
-(function () {
-  const cSide = document.getElementById("canvas-z10-v7-side");
-  const cTop = document.getElementById("canvas-z10-v7-top");
-  if (!cSide || !cTop) return;
-  const ctxSide = cSide.getContext("2d");
-  const ctxTop = cTop.getContext("2d");
-
-  const slA = document.getElementById("z10-v7-slider-a");
-  const slB = document.getElementById("z10-v7-slider-b");
-  const slAlpha = document.getElementById("z10-v7-slider-alpha");
-  const slY = document.getElementById("z10-v7-slider-y");
-  let phase = 0;
-
-  function drawArrow(ctx, x1, y1, x2, y2, color, label) {
-    const headlen = 9;
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-    ctx.closePath();
-    ctx.fill();
-    if (label) {
-      ctx.font = "bold 12px Inter";
-      ctx.fillText(label, x2 + 8, y2 - 6);
-    }
+<div class="widget-container mf1-lab" id="widget-z10-vfinal" data-widget-role="application" style="max-width:980px;margin:0 auto;padding:18px;background:#fff;border:1px solid #dbe7f3;border-radius:18px;">
+<style>
+#widget-z10-vfinal .z10-title{margin:0 0 8px;color:#12324a;font-size:1.3rem;}
+#widget-z10-vfinal .z10-sub{margin:0 0 12px;color:#475569;line-height:1.5;}
+#widget-z10-vfinal .z10-scene{overflow:hidden;border:1px solid #dbe7f3;border-radius:12px;background:#fff;margin-bottom:14px;}
+#widget-z10-vfinal .z10-scene>svg{display:block;width:100%;height:auto;max-height:none;touch-action:pan-y;}
+#widget-z10-vfinal .z10-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+#widget-z10-vfinal .z10-control{padding:10px 12px;border:1px solid #dbe7f3;border-radius:10px;background:#f8fafc;}
+#widget-z10-vfinal .z10-control label{display:block;font-weight:650;color:#334155;line-height:1.4;}
+#widget-z10-vfinal .z10-control input{width:100%;margin-top:10px;accent-color:#176da9;}
+#widget-z10-vfinal .z10-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+#widget-z10-vfinal .z10-metric{padding:12px;border:1px solid #dbe7f3;border-radius:10px;background:#f8fafc;}
+#widget-z10-vfinal .z10-metric small{display:block;color:#475569;line-height:1.4;}
+#widget-z10-vfinal .z10-metric strong{display:block;color:#12324a;font-size:1.15rem;margin:5px 0;}
+#widget-z10-vfinal .z10-reading{margin:10px 0;line-height:1.55;color:#334155;font-variant-numeric:tabular-nums;}
+#widget-z10-vfinal .z10-validity{padding:10px 12px;border-left:3px solid #80632e;background:#fffbef;color:#574522;line-height:1.5;margin:12px 0;}
+@media(max-width:600px){#widget-z10-vfinal{padding:10px!important;}#widget-z10-vfinal .z10-controls,#widget-z10-vfinal .z10-metrics{grid-template-columns:1fr;}}
+</style>
+<h4 class="z10-title">Od jednog prstena do momenta cijelog plašta</h4>
+<p class="z10-sub">Pomakni presjek <i>y</i>: crvena crta povezuje geometriju, lokalni doprinos i pogled odozgo. μ = 0,1 Pa·s, ω = +200 rad/s, normalna zračnost δ = 1,2 mm.</p>
+<div class="z10-scene"><canvas id="canvas-z10-v7-side" width="960" height="520" role="img" aria-label="Krnji stožac, raspodjela lokalnog doprinosa momentu i isti odabrani presjek odozgo"></canvas></div>
+<div class="z10-controls">
+  <div class="z10-control"><label for="z10-v7-slider-a">Od vrha O do donje baze: a = <span id="z10-v7-val-a">80</span> mm</label><input type="range" id="z10-v7-slider-a" min="20" max="150" value="80"></div>
+  <div class="z10-control"><label for="z10-v7-slider-b">Visina krnjeg stošca: b = <span id="z10-v7-val-b">150</span> mm</label><input type="range" id="z10-v7-slider-b" min="50" max="250" value="150"></div>
+  <div class="z10-control"><label for="z10-v7-slider-alpha">Kut prema osi: α = <span id="z10-v7-val-alpha">30</span>°</label><input type="range" id="z10-v7-slider-alpha" min="5" max="60" value="30"></div>
+  <div class="z10-control"><label for="z10-v7-slider-y">Odabrani presjek: y = <span id="z10-v7-val-y">150</span> mm</label><input type="range" id="z10-v7-slider-y" min="80" max="230" value="150"></div>
+</div>
+<p class="z10-reading">r = y tan α = <strong><span id="z10-v7-res-r">86,6</span> mm</strong> → u = ωr = <strong><span id="z10-v7-res-v">17,3</span> m/s</strong> → |τ| = μu/δ = <strong><span id="z10-v7-res-tau">1440</span> Pa</strong>.</p>
+<div class="z10-metrics">
+  <div class="z10-metric"><small>Pogonski moment cijelog plašta</small><strong>+<span id="z10-v7-res-t">16,0</span> N·m</strong><small id="z10-v7-power"></small></div>
+  <div class="z10-metric"><small>Moment prikupljen od a do y</small><strong><span id="z10-v7-cumulative">2,71</span> N·m</strong><small id="z10-v7-fraction"></small></div>
+</div>
+<p class="z10-reading" id="z10-v7-strip"></p>
+<div id="z10-v7-explainer"></div>
+<div class="z10-validity" id="z10-v7-validity"></div>
+<p class="z10-reading">Model pretpostavlja Newtonski fluid, nepomično kućište i linearni profil brzine kroz jednolik tanak film. Računaju se samo sile na plaštu; horizontalne baze i rubni učinci ovdje su izostavljeni.</p>
+<script>
+(() => {
+ function initRotor(){
+  const root=document.getElementById('widget-z10-vfinal');
+  const old=root?.querySelector('#canvas-z10-v7-side');
+  if(!old||old.localName!=='canvas')return;
+  const svg=MF1.vectorSurface(old),NS='http://www.w3.org/2000/svg';
+  const get=id=>root.querySelector('#z10-v7-'+id),slA=get('slider-a'),slB=get('slider-b'),slAlpha=get('slider-alpha'),slY=get('slider-y');
+  const fmt=(v,d=3)=>new Intl.NumberFormat('hr-HR',{maximumSignificantDigits:d,useGrouping:false}).format(v);
+  const put=(id,value)=>{get(id).textContent=value;};
+  const n=(name,attrs={},parent)=>{const el=document.createElementNS(NS,name);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,String(v));(parent||svg.querySelector('[data-vector-scene]')).append(el);return el;};
+  let state,scene,font;
+  function text(x,y,value,attrs={}){const el=n('text',{x,y,fill:'#334155','font-family':'system-ui, sans-serif','font-size':font,...attrs},scene);el.textContent=value;return el;}
+  function line(x1,y1,x2,y2,attrs={}){return n('line',{x1,y1,x2,y2,stroke:'#7e93a5','stroke-width':1.3,...attrs},scene);}
+  function path(d,attrs={}){return n('path',{d,fill:'none',stroke:'#334155','stroke-width':1.8,...attrs},scene);}
+  function arrow(x1,y1,x2,y2,color,attrs={}){
+   const g=n('g',attrs,scene),angle=Math.atan2(y2-y1,x2-x1),len=7;
+   n('line',{x1,y1,x2,y2,stroke:color,'stroke-width':2.3},g);
+   n('path',{d:`M ${x2} ${y2} L ${x2-len*Math.cos(angle-.45)} ${y2-len*Math.sin(angle-.45)} L ${x2-len*Math.cos(angle+.45)} ${y2-len*Math.sin(angle+.45)} Z`,fill:color},g);return g;
   }
-
-  function update() {
-    const a = parseFloat(slA.value);
-    const b = parseFloat(slB.value);
-    const alphaDeg = parseFloat(slAlpha.value);
-    const alpha = (alphaDeg * Math.PI) / 180;
-    const mu = 0.1;
-    const omega = 200;
-    const delta = 0.0012;
-
-    slY.min = a;
-    slY.max = a + b;
-    let y = parseFloat(slY.value);
-    if (y < a) y = a;
-    if (y > a + b) y = a + b;
-
-    const rMm = y * Math.tan(alpha);
-    const rM = rMm / 1000;
-    const localV = omega * rM;
-    const localTau = (mu * localV) / delta;
-    const aM = a / 1000;
-    const bM = b / 1000;
-    const totalMoment =
-      (Math.PI * mu * omega * Math.pow(Math.tan(alpha), 3) * (Math.pow(aM + bM, 4) - Math.pow(aM, 4))) /
-      (2 * delta * Math.cos(alpha));
-
-    document.getElementById("z10-v7-val-a").textContent = a.toFixed(0);
-    document.getElementById("z10-v7-val-b").textContent = b.toFixed(0);
-    document.getElementById("z10-v7-val-alpha").textContent = alphaDeg.toFixed(0);
-    document.getElementById("z10-v7-val-y").textContent = y.toFixed(0);
-    document.getElementById("z10-v7-res-t").textContent = totalMoment.toFixed(3);
-    document.getElementById("z10-v7-res-r").textContent = rMm.toFixed(1);
-    document.getElementById("z10-v7-res-v").textContent = localV.toFixed(2);
-    document.getElementById("z10-v7-res-tau").textContent = localTau.toFixed(0);
-    document.getElementById("z10-v7-explainer").textContent =
-      `Na presjeku y = ${y.toFixed(0)} mm radijus naraste na ${rMm.toFixed(1)} mm, pa rub te zone putuje brzinom ${localV.toFixed(2)} m/s. Zato ondje smično naprezanje raste na ${localTau.toFixed(0)} Pa. Kako moment dodatno množi silu s radijusom, gornje i šire zone krnjeg stošca doprinose ukupnom momentu nesrazmjerno više od donjih.`;
-
-    drawSide(a, b, alpha, y, rMm);
-    drawTop(rMm, localV, localTau);
+  function arcArrow(cx,cy,r,start,end,color,name){
+   const points=Array.from({length:41},(_,i)=>{const angle=start+(end-start)*i/40;return[cx+r*Math.cos(angle),cy+r*Math.sin(angle)];});
+   path(points.map((p,i)=>(i?'L':'M')+p.join(' ')).join(' '),{stroke:color,'stroke-width':2.6,'data-z10-direction':name});
+   const p=points[39],q=points[40];arrow(...p,...q,color,{'data-z10-arrowhead':name});
   }
-
-  function drawSide(a, b, alpha, yProbe, rMm) {
-    // Stationary geometry: no decorative oscillation.
-    ctxSide.clearRect(0, 0, cSide.width, cSide.height);
-    ctxSide.fillStyle = "#ffffff";
-    ctxSide.fillRect(0, 0, cSide.width, cSide.height);
-
-    const cx = 250;
-    const baseLine = 248;
-    const scale = Math.min(190 / (a+b), 180 / ((a+b)*Math.tan(alpha)));
-    const r1 = a * Math.tan(alpha) * scale;
-    const r2 = (a + b) * Math.tan(alpha) * scale;
-    const y1 = baseLine - a * scale;
-    const y2 = baseLine - (a + b) * scale;
-    const probeY = baseLine - yProbe * scale;
-    const rProbe = yProbe * Math.tan(alpha) * scale;
-
-    const bodyGrad = ctxSide.createLinearGradient(0, y2, 0, y1);
-    bodyGrad.addColorStop(0, "rgba(96,165,250,0.22)");
-    bodyGrad.addColorStop(1, "rgba(59,130,246,0.08)");
-    ctxSide.fillStyle = bodyGrad;
-    ctxSide.beginPath();
-    ctxSide.moveTo(cx - r1, y1);
-    ctxSide.lineTo(cx + r1, y1);
-    ctxSide.lineTo(cx + r2, y2);
-    ctxSide.lineTo(cx - r2, y2);
-    ctxSide.closePath();
-    ctxSide.fill();
-    ctxSide.strokeStyle = "#1e293b";
-    ctxSide.lineWidth = 2.2;
-    ctxSide.stroke();
-
-    ctxSide.fillStyle = "rgba(239, 68, 68, 0.12)";
-    ctxSide.fillRect(cx - rProbe, probeY - 10, rProbe * 2, 20);
-    ctxSide.strokeStyle = "#ef4444";
-    ctxSide.lineWidth = 3;
-    ctxSide.beginPath();
-    ctxSide.moveTo(cx - rProbe, probeY);
-    ctxSide.lineTo(cx + rProbe, probeY);
-    ctxSide.stroke();
-
-    ctxSide.fillStyle="#176da9"; ctxSide.font="20px system-ui"; ctxSide.fillText("⊗",cx+rProbe-8,probeY+6); ctxSide.font="12px system-ui"; ctxSide.fillText("v: u ravninu u označenoj točki",30,276);
-
-    ctxSide.setLineDash([7, 5]);
-    ctxSide.strokeStyle = "#94a3b8";
-    ctxSide.beginPath();
-    ctxSide.moveTo(cx, baseLine + 4);
-    ctxSide.lineTo(cx, y2 - 18);
-    ctxSide.stroke();
-    ctxSide.setLineDash([]);
-
-    ctxSide.fillStyle = "#334155";
-    ctxSide.font = "12px Inter";
-    ctxSide.fillText(`r(y) = ${rMm.toFixed(1)} mm`, 310, 276);
-    ctxSide.fillText(`a = ${a.toFixed(0)} mm`, 34, y1 + 18);
-    ctxSide.fillText(`a + b = ${(a + b).toFixed(0)} mm`, 34, y2 - 12);
-    ctxSide.fillText("dM raste kao y³: širi gornji dio daje najveći doprinos", 24, 30);
+  function dimension(x,y1,y2,label){
+   line(x,y1,x,y2,{stroke:'#6b7e8c','data-z10-dimension':label});line(x-4,y1,x+4,y1);line(x-4,y2,x+4,y2);
+   text(x-7,(y1+y2)/2+5,label,{'text-anchor':'end','font-style':'italic'});
   }
-
-  function drawTop(rMm, localV, localTau) {
-    ctxTop.clearRect(0, 0, cTop.width, cTop.height);
-    ctxTop.fillStyle = "#ffffff";
-    ctxTop.fillRect(0, 0, cTop.width, cTop.height);
-
-    const cx = 210;
-    const cy = 142;
-    const rPx = Math.min(90, rMm * 0.7);
-    const gapPx = 28;
-    const stressRatio = Math.min(localTau / 2500, 1);
-
-    ctxTop.beginPath();
-    ctxTop.arc(cx, cy, rPx + gapPx, 0, Math.PI * 2);
-    ctxTop.strokeStyle = "#cbd5e1";
-    ctxTop.lineWidth = 2;
-    ctxTop.stroke();
-
-    ctxTop.beginPath();
-    ctxTop.arc(cx, cy, rPx, 0, Math.PI * 2);
-    ctxTop.fillStyle = "#334155";
-    ctxTop.fill();
-
-    for (let i = 0; i < 10; i++) {
-      const angle = (i / 10) * Math.PI * 2;
-      const radial = rPx;
-      const x1 = cx + Math.cos(angle) * radial;
-      const y1 = cy + Math.sin(angle) * radial;
-      const tangentLength = 18 + stressRatio * 20;
-      const x2 = x1 + Math.sin(angle) * tangentLength;
-      const y2 = y1 - Math.cos(angle) * tangentLength;
-      drawArrow(ctxTop, x1, y1, x2, y2, "#2563eb", "");
-    }
-
-    ctxTop.strokeStyle = "#f97316";
-    ctxTop.lineWidth = 2.5;
-    ctxTop.beginPath();
-    ctxTop.moveTo(cx, cy - rPx);
-    ctxTop.lineTo(cx, cy - rPx - gapPx);
-    ctxTop.stroke();
-    ctxTop.fillStyle = "#c2410c";
-    ctxTop.font = "11px Inter";
-    ctxTop.fillText("δ (uvećano)", cx + 8, cy - rPx - gapPx / 2);
-
-    ctxTop.fillStyle = "#0f172a";
-    ctxTop.font = "bold 12px Inter";
-    ctxTop.fillText(`v = ${localV.toFixed(2)} m/s`, 24, 36);
-    ctxTop.fillText(`τ = ${localTau.toFixed(0)} Pa`, 24, 56);
-    ctxTop.fillStyle = "#64748b";
-    ctxTop.font = "11px Inter";
-    ctxTop.fillText("otpor na rotor: suprotno vrtnji ↻", 24, 78);
-
-    const barX = 360;
-    const barTop = 50;
-    const barHeight = 160;
-    ctxTop.fillStyle = "#fee2e2";
-    ctxTop.fillRect(barX, barTop, 22, barHeight);
-    ctxTop.fillStyle = "#dc2626";
-    ctxTop.fillRect(barX, barTop + (1 - stressRatio) * barHeight, 22, stressRatio * barHeight);
-    ctxTop.strokeStyle = "#fecaca";
-    ctxTop.strokeRect(barX, barTop, 22, barHeight);
-    ctxTop.fillStyle = "#7f1d1d";
-    ctxTop.font = "bold 11px Inter";
-    ctxTop.fillText("lokalni τ", barX - 10, barTop - 10);
+  function draw(){
+   const s=state,compact=(root.clientWidth||window.innerWidth)<680;
+   svg.width=compact?360:960;svg.height=compact?920:520;scene=svg.querySelector('[data-vector-scene]');font=compact?20:18;
+   const title=n('title',{},scene);title.textContent='Moment viskoznih sila na plaštu krnjeg stošca';
+   const desc=n('desc',{},scene);desc.textContent=`Odabrana visina ${fmt(s.y*1000)} mm. Plava vrtnja je suprotna kazaljci sata pri pogledu odozgo; crveni otpor fluida djeluje suprotno. Zasjenjena površina grafa daje ${fmt(s.cumulative)} N·m.`;
+   const H=s.a+s.b,R=H*Math.tan(s.alpha),gap=s.delta/Math.cos(s.alpha);
+   const cx=compact?117:205,oy=compact?335:375;
+   const scale=Math.min((compact?220:260)/H,(compact?72:142)/(R+gap));
+   const Y=y=>oy-y*scale,X=r=>cx+r*scale;
+   const top=Y(H),base=Y(s.a),probe=Y(s.y),gx=compact?225:440,gw=compact?103:180;
+   const qmax=s.C*H**3,power=10**Math.floor(Math.log10(qmax)),fraction=qmax/power;
+   const qaxis=(fraction<=1?1:fraction<=2?2:fraction<=5?5:10)*power,qFactor=qaxis>=1000?1000:1,qUnit=qFactor===1000?'kN·m/m':'N·m/m';
+   const Q=y=>gx+gw*(s.C*y**3)/qaxis;
+   text(compact?12:22,28,compact?'Presjek i lokalni doprinos':'Presjek kroz os rotora',{'font-weight':700,fill:'#12324a'});
+   if(!compact)text(gx,28,'Raspodjela momenta',{'font-weight':700,fill:'#12324a'});
+   text(gx,66,compact?`q [${qUnit}]`:`q = dM/dy [${qUnit}]`,{'font-size':18});
+   // One metric scale in both axial directions; dashed lines meet at the virtual apex O.
+   const body=`M ${X(-s.a*Math.tan(s.alpha))} ${base} L ${X(s.a*Math.tan(s.alpha))} ${base} L ${X(R)} ${top} L ${X(-R)} ${top} Z`;
+   path(body,{fill:'#e6f1f9',stroke:'#345970','stroke-width':2,'data-z10-body':''});
+   for(const sign of [-1,1]){
+    line(cx,oy,X(sign*s.a*Math.tan(s.alpha)),base,{'stroke-dasharray':'5 4',stroke:'#8da2b2'});
+    line(X(sign*(s.a*Math.tan(s.alpha)+gap)),base,X(sign*(R+gap)),top,{stroke:'#9cabb5','stroke-width':2,'data-z10-housing':sign});
+   }
+   arrow(cx,oy+7,cx,top-23,'#60788b',{'data-z10-axis':'y'});
+   text(cx+9,top-24,'+y',{'font-size':font});text(cx-9,oy+23,'O',{'font-weight':700});
+   n('circle',{cx,cy:oy,r:3,fill:'#334155'},scene);
+   dimension(compact?26:35,oy,base,'a');dimension(compact?47:60,base,top,'b');
+   const arcR=Math.min(compact?38:47,s.a*scale*.7),ax=cx+arcR*Math.sin(s.alpha),ay=oy-arcR*Math.cos(s.alpha);
+   path(`M ${cx} ${oy-arcR} A ${arcR} ${arcR} 0 0 1 ${ax} ${ay}`,{stroke:'#aa6527','data-z10-angle':s.alpha});
+   text(compact?265:cx+38,compact?393:oy+20,`α = ${fmt(s.alpha*180/Math.PI)}°`,{fill:'#91521b','font-size':compact?18:font});
+   // The selected finite strip is clipped to the true end faces; no exaggerated band height.
+   const strip=`M ${X(-s.lo*Math.tan(s.alpha))} ${Y(s.lo)} L ${X(s.lo*Math.tan(s.alpha))} ${Y(s.lo)} L ${X(s.hi*Math.tan(s.alpha))} ${Y(s.hi)} L ${X(-s.hi*Math.tan(s.alpha))} ${Y(s.hi)} Z`;
+   path(strip,{fill:'#d15042',stroke:'none','data-z10-strip':'','data-lo':s.lo,'data-hi':s.hi});
+   line(X(-s.r),probe,Q(s.y),probe,{stroke:'#bd4137','stroke-dasharray':'4 4','stroke-width':1.4,'data-z10-probe-level':''});
+   line(cx,probe,X(s.r),probe,{stroke:'#bd4137','stroke-width':2.6,'data-z10-radius':'side'});
+   n('circle',{cx:X(s.r),cy:probe,r:4,fill:'#bd4137','data-z10-probe':'side'},scene);
+   text(X(s.r)+8,probe+7,'⊗',{fill:'#176da9','font-size':23});
+   // Normal clearance is drawn at its physical size. A leader identifies the small dimension.
+   const ny=H-.3*s.b,nx=X(ny*Math.tan(s.alpha)),nyp=Y(ny),dx=s.delta*scale*Math.cos(s.alpha),dy=s.delta*scale*Math.sin(s.alpha);
+   line(nx,nyp,nx+dx,nyp+dy,{stroke:'#a16a25','stroke-width':2.3,'data-z10-normal-gap':''});
+   const gapLabelY=compact?62:91;
+   path(`M ${nx+dx/2} ${nyp+dy/2} L ${compact?207:377} ${gapLabelY+12} L ${compact?178:245} ${gapLabelY+12}`,{stroke:'#a16a25','stroke-width':1,'stroke-dasharray':'3 3'});
+   text(compact?12:22,gapLabelY,'δ = 1,2 mm ⟂ plaštu',{fill:'#80531c'});
+   text(compact?12:22,compact?393:422,`a = ${fmt(s.a*1000)}; b = ${fmt(s.b*1000)} mm`);
+   text(compact?12:22,compact?439:446,`r(y) = ${fmt(s.r*1000)} mm; u: ⊗`,{fill:'#176da9'});
+   if(!compact)text(22,495,'O je virtualni vrh; ⊗ znači u ravninu crteža.',{'font-size':17});
+   // Area to the left of q(y), integrated vertically from a to the probe, is the cumulative moment.
+   let shade=`M ${gx} ${base} L ${Q(s.a)} ${base}`;
+   for(let i=1;i<=80;i++){const y=s.a+(s.y-s.a)*i/80;shade+=` L ${Q(y)} ${Y(y)}`;}
+   shade+=` L ${gx} ${probe} Z`;
+   path(shade,{fill:'#9ddbcc','fill-opacity':.72,stroke:'none','data-z10-cumulative-area':'','data-moment':s.cumulative});
+   for(const q of [0,qaxis/2,qaxis]){
+    const xx=gx+gw*q/qaxis;line(xx,top,xx,base,{'stroke-dasharray':'3 4',stroke:'#dce5eb'});
+    text(xx,base+25,fmt(q/qFactor,2),{'text-anchor':'middle','font-size':compact?18:17});
+   }
+   line(gx,top,gx,base);line(gx,base,gx+gw+7,base);
+   path(Array.from({length:101},(_,i)=>{const y=s.a+s.b*i/100;return(i?'L':'M')+Q(y)+' '+Y(y);}).join(' '),{stroke:'#147c6b','stroke-width':2.6,'data-z10-density-curve':''});
+   n('circle',{cx:Q(s.y),cy:probe,r:4.5,fill:'#bd4137','data-z10-probe':'curve'},scene);
+   const gy=compact?472:422;
+   text(compact?12:gx,gy,`y = ${fmt(s.y*1000)} mm → q = ${fmt(s.dMdy/qFactor)}`,{fill:'#923b32','font-size':compact?19:17});
+   text(compact?12:gx,gy+27,compact?'Zeleno: moment od a do y.':'Zeleno: M(a → y).',{'font-size':compact?19:17,fill:'#146655'});
+   if(!compact)text(gx,gy+54,'q ∝ y³; M ∝ y⁴ − a⁴.',{'font-size':17});
+   // The top view has a separately stated magnification fixed by the entire geometry, never by the probe.
+   const tx=compact?180:796,ty=compact?684:239,topScale=(compact?91:91)/(R+gap),rp=s.r*topScale,outer=(s.r+gap)*topScale,ref=R*topScale;
+   text(compact?12:690,compact?542:28,'Isti presjek odozgo',{'font-weight':700,fill:'#12324a','font-size':compact?20:18});
+   text(compact?12:690,compact?573:74,'ω = +200 rad/s ↺',{fill:'#176da9'});
+   n('circle',{cx:tx,cy:ty,r:ref,fill:'none',stroke:'#97a9b5','stroke-width':1.2,'stroke-dasharray':'4 4','data-z10-reference-radius':''},scene);
+   n('circle',{cx:tx,cy:ty,r:outer,fill:'#fff',stroke:'#718796','stroke-width':1.3,'data-z10-casing-radius':''},scene);
+   n('circle',{cx:tx,cy:ty,r:rp,fill:'#d5e9f8',stroke:'#345970','stroke-width':1.6,'data-z10-radius':'top'},scene);
+   line(tx,ty,tx+rp,ty,{stroke:'#bd4137','stroke-width':2.3});n('circle',{cx:tx+rp,cy:ty,r:4,fill:'#bd4137','data-z10-probe':'top'},scene);
+   text(tx-11,ty+7,'⊙',{fill:'#176da9','font-size':23});text(tx+18,ty+35,'+y',{'font-size':font});
+   arcArrow(tx,ty,112,-.08*Math.PI,-.92*Math.PI,'#176da9','omega-ccw');
+   arcArrow(tx,ty,112,.08*Math.PI,.92*Math.PI,'#bd4137','fluid-drag-cw');
+   const rgx=tx-rp;
+   line(rgx,ty,tx-outer,ty,{stroke:'#a16a25','stroke-width':2.3,'data-z10-radial-gap':''});
+   const footer=compact?826:386;
+   text(compact?12:690,footer,'Fluid → rotor: −M ↻',{fill:'#a4372c'});
+   text(compact?12:690,footer+27,`Δr = δ/cos α = ${fmt(gap*1000)} mm`,{'font-size':compact?19:17,fill:'#80531c'});
+   text(compact?12:690,footer+53,`Crtkano: Rmax = ${fmt(R*1000)} mm`,{'font-size':compact?19:17});
+   text(compact?12:690,footer+77,`Mjerilo nacrta ×${fmt(topScale/scale,2)}`,{'font-size':compact?18:17});
+   Object.assign(s,{layout:compact?'stacked':'side',axialScale:scale,topScale,virtualX:cx,virtualY:oy,probeY:probe,curveProbeY:probe,topCenterX:tx,topCenterY:ty,qaxis,qFactor,qUnit,sideTop:top,sideBase:base,radialGap:gap,normalGapStart:{x:nx,y:nyp},normalGapEnd:{x:nx+dx,y:nyp+dy}});
   }
-
-  function animate() { update(); }
-
-  [slA, slB, slAlpha, slY].forEach((slider) => slider.addEventListener("input", update));
-  animate();
+  function update(){
+   const a=Number(slA.value)/1000,b=Number(slB.value)/1000,alpha=Number(slAlpha.value)*Math.PI/180;
+   slY.min=String(a*1000);slY.max=String((a+b)*1000);
+   const y=Math.max(a,Math.min(a+b,Number(slY.value)/1000));slY.value=String(y*1000);
+   const mu=.1,omega=200,delta=.0012,r=y*Math.tan(alpha),rmin=a*Math.tan(alpha),localV=omega*r,localTau=mu*localV/delta;
+   const C=2*Math.PI*mu*omega*Math.tan(alpha)**3/(delta*Math.cos(alpha));
+   const totalMoment=C*((a+b)**4-a**4)/4,cumulative=C*(y**4-a**4)/4,lo=Math.max(a,y-.0005),hi=Math.min(a+b,y+.0005),stripMoment=C*(hi**4-lo**4)/4;
+   state={a,b,y,r,alpha,mu,omega,delta,C,totalMoment,localTau,localV,stripMoment,stripWidth:hi-lo,lo,hi,cumulative,dMdy:C*y**3,rmin,thinFilmRatio:delta/rmin,driveMoment:totalMoment,fluidMoment:-totalMoment,power:totalMoment*omega};
+   root.mf1ProfessorState=state;
+   for(const[name,value]of [['a',a*1000],['b',b*1000],['alpha',Number(slAlpha.value)],['y',y*1000]])put('val-'+name,fmt(value,4));
+   put('res-r',fmt(r*1000));put('res-v',fmt(localV));put('res-tau',fmt(localTau));put('res-t',fmt(totalMoment,4));put('cumulative',fmt(cumulative,4));
+   put('power',`Fluid djeluje suprotno: −${fmt(totalMoment,4)} N·m. P = Mω = ${fmt(state.power,4)} W.`);
+   put('fraction',`${fmt(100*cumulative/totalMoment)} % ukupnog momenta; odgovara zelenoj površini grafa.`);
+   put('strip',`Odabrani konačni prsten: y ∈ [${fmt(lo*1000,5)}; ${fmt(hi*1000,5)}] mm, Δy = ${fmt((hi-lo)*1000)} mm → ΔM = ∫ q dy = ${fmt(stripMoment,4)} N·m. Na rubu se prsten skraćuje; q = dM/dy ostaje lokalna veličina u N·m/m.`);
+   const atBase=Math.abs(y-a)<1e-10,atTop=Math.abs(y-a-b)<1e-10;
+   MF1.decision(get('explainer'),{title:'Koliki dio plašta već doprinosi?',branches:[
+    {when:'y = a: donja baza',active:atBase,equation:'M(a → y) = 0; q(a) > 0',then:`Nema prikupljene visine, iako lokalni doprinos iznosi ${fmt(state.dMdy)} N·m/m. Rubni prsten ima Δy = ${fmt((hi-lo)*1000)} mm.`},
+    {when:'a < y < a + b: unutar plašta',active:!atBase&&!atTop,equation:'q = C y³; M(a → y) = C(y⁴ − a⁴)/4',then:`Do y = ${fmt(y*1000)} mm prikupljeno je ${fmt(cumulative,4)} N·m (${fmt(100*cumulative/totalMoment)} %). Pomak sonde ne mijenja moment cijelog plašta.`},
+    {when:'y = a + b: gornja baza',active:atTop,equation:'M(a → y) = Mplašta',then:`Obuhvaćen je cijeli plašt: ${fmt(totalMoment,4)} N·m. Rubni prsten ima samo ${fmt((hi-lo)*1000)} mm; njegov ΔM zato nije jednak punom prstenu neposredno ispod.`}
+   ],summary:'C = 2πμω tan³α/(δ cos α). Lokalni doprinos raste kubno; četvrta potencija nastaje integracijom.'});
+   put('validity',`Provjera pretpostavke: δ/rmin = δ/(a tan α) = ${fmt(state.thinFilmRatio,4)}. Za tanak film traži se δ/rmin ≪ 1. Kad je zračnost usporediva s najmanjim polumjerom, ovaj linearni tankoslojni model više nije pouzdana aproksimacija; prikaz i dalje računa njegov formalni izraz.`);
+   draw();
+  }
+  [slA,slB,slAlpha,slY].forEach(slider=>slider.addEventListener('input',update));
+  window.addEventListener('resize',update);if(typeof ResizeObserver!=='undefined')new ResizeObserver(update).observe(root);
+  update();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initRotor,{once:true});else initRotor();
 })();
 </script>
 </div>
 <div class="fizikalni-uvid">
-Okretni moment ovisi o četvrtoj potenciji polumjera (<span class="math inline">\(y \tan \alpha\)</span>), što znači da gornji širi dijelovi stošca doprinose momentu znatno više nego donji uži dijelovi.
+Lokalni doprinos po jedinici visine, <span class="math inline">\(dM/dy\)</span>, raste s trećom potencijom polumjera. Četvrta potencija pojavljuje se tek integracijom po visini: <span class="math inline">\(M(a\to y)\propto y^4-a^4\)</span>. Širi dijelovi zato daju veći doprinos momentu, a pomicanje sonde samo očitava koliko je momenta prikupljeno do odabrane visine.
 </div>
 ```
 

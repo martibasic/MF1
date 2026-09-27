@@ -4,9 +4,9 @@
  const roots='.mf1-lab,.v1x-shell,.v8-lab,.v8x-shell,.v9-widget,.v9x-shell,.v10-lab,.v10x-shell,.v11x-shell,.v12x-shell,#z120-laminar-widget,#z122-diffuser-widget,#z123-budget-widget,#z124-parallel-widget,#reynolds-widget,#v13-moody-widget';
  const secondary={
   'z2-advanced-widget':['z2-rho'],
-  'z6-advanced-widget':['z6-mu','z6-l'],
+  'z6-advanced-widget':['z6-l'],
   'z7-advanced-widget':['z7-delta'],
-  'widget-visc-basics':['h-slider'],
+  'widget-visc-basics':[],
   'widget-z10-vfinal':['z10-v7-slider-a','z10-v7-slider-b'],
   'widget-z19-advanced':['z19-slider-ru'],
   'widget-z24-advanced':['z24-v3-slider-h1','z24-v3-slider-rhov','z24-v3-slider-rhou','z24-v3-slider-rhom'],
@@ -19,14 +19,14 @@
   'widget-z27-advanced':['z27-slider-hg'],
   'widget-z28-advanced':['z28-rho0'],
   'v5-principle-explorer':['v5-p-b-slider','v5-p-rho-slider'],
-  'widget-49':['z49-rho','z49-gc'],
+  'widget-49':['z49-rho'],
   'widget-50-51':['z50-b'],
-  'widget-55':['z55-h','z55-rm'],
+  'widget-55':['z55-rm'],
   'widget-52':['z52-rho'],
   'v7-t1-container':['z1b','z1rho'],
-  'v7-widget-a-container':['az','ar','ab'],
+  'v7-widget-a-container':['ar','ab'],
   'v8-z70':['z70-d1','z70-rho'],
-  'v8-z71':['z71-dc','z71-rb'],
+  'v8-z71':['z71-rb'],
   'v8-z72':['z72-v2'],
   'v8-z73':['z73-sg','z73-d3'],
   'v8-z74':['z74-v1','z74-dp','z74-l','z74-d1','z74-df'],
@@ -34,21 +34,21 @@
   'v9-egl-source':['e-d1','e-h'],
   'v9-z77':['z77-r'],
   'v9-z79':['z79-a1','z79-rho'],
-  'v9-siphon':['s-l1','s-l2','s-d'],
-  'v10-loss-explorer':['v10x-l','v10x-lambda','v10x-zeta'],
+  'v9-siphon':['s-d'],
+  'v10-loss-explorer':['v10x-d','v10x-lambda'],
   'v10-z86-lab':['v10-z86-top'],
   'v10-z87-lab':['v10-z87-h2'],
   'v10-z91-lab':['v10-z91-h3','v10-z91-rhou'],
   'v10-z93-lab':['v10-z93-h'],
   'v10-z94-lab':['v10-z94-d1','v10-z94-h'],
-  'v11-momentum-lab':['v11m-ratio','v11m-p1'],
+  'v11-momentum-lab':['v11m-ratio'],
   'v11-z97-lab':['v11-z97-diameter','v11-z97-h0','v11-z97-cd'],
   'v11-z99-lab':['v11-z99-re','v11-z99-ze'],
-  'z124-parallel-widget':['z124-d1-slider']
+  'z124-parallel-widget':[]
  };
  const dataSecondary={
-  'v12-pelton':['q','b','k'], 'v12-rocket':['m','ve'],
-  'v12-cantilever':['l'], 'v12-sprinkler':['r'], 'v12-wind':['e']
+  'v12-pelton':['b','k'], 'v12-rocket':['m','ve'],
+  'v12-cantilever':['l'], 'v12-sprinkler':[], 'v12-wind':['e']
  };
  function group(root,inputs){
   const groups=new Map();
@@ -76,6 +76,9 @@
  function decorate(){
   document.querySelectorAll(roots).forEach(root=>{
    root.classList.add('mf1-compact');
+   // The reviewed Moody diagram owns its complete responsive presentation.
+   // Keep only the discovery marker used by the optional enlarge instrument.
+   if(root.id==='v13-moody-widget')return;
    // These are existing semantic groups, including the older inline layouts.
    root.querySelectorAll('div,section,aside,header,label').forEach(el=>{
     if(el.closest('svg'))return;
@@ -94,6 +97,7 @@
   const table=document.querySelector('#z6-advanced-widget table');
   if(table){const el=table.parentElement,details=document.createElement('details');details.className='mf1-parameters';details.innerHTML='<summary>Vrijednosti u karakterističnim točkama</summary>';el.before(details);details.append(el);}
   document.querySelectorAll(roots).forEach(root=>{
+   if(root.id==='v13-moody-widget')return;
    arrangeGraphics(root);
    root.querySelectorAll('input[type=range]').forEach(paintRange);
    root.addEventListener('input',event=>{if(event.target.matches('input[type=range]'))root.querySelectorAll('input[type=range]').forEach(paintRange);});
@@ -111,6 +115,7 @@
   input.style.setProperty('--mf1-progress',progress+'%');
  }
  function arrangeGraphics(root){
+  if(root.id==='v13-moody-widget')return;
   const graphics=[...root.querySelectorAll('canvas,svg')].filter(el=>
    !el.closest('mjx-container')&&!el.parentElement.closest('svg'));
   for(const graphic of graphics){
@@ -120,16 +125,23 @@
     if(heading)graphic.setAttribute('aria-label',heading.textContent.trim());
    }
    if(!graphic.hasAttribute('role'))graphic.setAttribute('role','img');
-   // Walk the actual scene ancestry, including older inline flex/grid layouts.
-   // Only branches containing a drawing span the full width; controls keep their grids.
+   // Full-width ancestry does not require turning every wrapper into a flexbox.
+   // Stack only actual multi-column rows, retaining headings and captions in place.
    for(let branch=graphic;branch!==root;branch=branch.parentElement){
     branch.classList.add('mf1-visual-branch');
     const parent=branch.parentElement;
     if(parent!==root){
-     parent.classList.add('mf1-visual-stack');
-     const siblings=[...parent.children].filter(el=>!['STYLE','SCRIPT'].includes(el.tagName));
-     if(siblings.some(el=>!el.contains(graphic)&&el.querySelector('input,select'))){
-      branch.classList.add('mf1-scene-first');
+     const siblings=[...parent.children].filter(el=>!['STYLE','SCRIPT'].includes(el.tagName)&&!['absolute','fixed'].includes(getComputedStyle(el).position));
+     const layout=getComputedStyle(parent);
+     const split=siblings.length>1&&(layout.display==='grid'||(layout.display==='flex'&&!layout.flexDirection.startsWith('column')));
+     if(split){
+      parent.classList.add('mf1-visual-stack');
+      // Move a drawing ahead of preceding controls only within that split;
+      // never lift it above a title or reorder a whole enclosing experiment.
+      const preceding=siblings.slice(0,siblings.indexOf(branch));
+      const controls=preceding.find(el=>el.querySelector('input,select'));
+      const heading=preceding.findLastIndex(el=>el.matches('h3,h4,h5,header')||el.querySelector('h3,h4,h5'));
+      if(controls&&!branch.querySelector('h3,h4,h5,input,select')&&preceding.indexOf(controls)>heading)parent.insertBefore(branch,controls);
      }
     }
    }

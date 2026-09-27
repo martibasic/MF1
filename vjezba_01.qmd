@@ -53,39 +53,71 @@ Derivacija $du/dy$ nije samo simbol: ona je lokalni nagib profila brzine, odnosn
 <script>
 (() => {
   const root=document.getElementById('v1-load-lab'); if(!root)return;
-  root.innerHTML=`<div class="v1x-shell"><header class="v1x-head"><div class="v1x-kicker">Konceptualni laboratorij</div><h4>Kako fluid reagira na opterećenje?</h4><p>Odaberi normalno ili tangencijalno opterećenje. Najprije predvidi što se mijenja, zatim poveži pomak klipa ili profil brzine s jednadžbom.</p></header><div class="v1x-tabs" role="group" aria-label="Fizikalni slučaj"><button type="button" data-mode="pressure" aria-pressed="true">Tlak i hidraulika</button><button type="button" data-mode="compression" aria-pressed="false">Stlačivost</button><button type="button" data-mode="viscosity" aria-pressed="false">Viskoznost</button></div><div class="v1x-scene"><svg id="v1x-scene" viewBox="0 0 900 360" role="img" aria-label="Fizikalna scena odabranog slučaja"></svg></div><div class="v1x-bar"><div class="v1x-controls" id="v1x-controls"></div><div class="v1x-primary"><small id="v1x-primary-label"></small><strong id="v1x-primary"></strong></div></div><div class="v1x-equation" id="v1x-equation"></div><div class="v1x-note" id="v1x-note"></div><div class="v1x-presets"><button type="button" data-reset>Početne vrijednosti</button></div></div>`;
+  root.innerHTML=`<div class="v1x-shell"><header class="v1x-head"><div class="v1x-kicker">Konceptualni laboratorij</div><h4>Kako fluid reagira na opterećenje?</h4><p>Odaberi normalno ili tangencijalno opterećenje. Najprije predvidi što se mijenja, zatim poveži pomak klipa ili profil brzine s jednadžbom.</p></header><div class="v1x-tabs" role="group" aria-label="Fizikalni slučaj"><button type="button" data-mode="pressure" aria-pressed="true">Tlak i hidraulika</button><button type="button" data-mode="compression" aria-pressed="false">Stlačivost</button><button type="button" data-mode="viscosity" aria-pressed="false">Viskoznost</button></div><div class="v1x-scene"><svg id="v1x-scene" viewBox="0 0 900 360" role="img" aria-label="Fizikalna scena odabranog slučaja"></svg></div><div class="v1x-bar"><div class="v1x-controls" id="v1x-controls"></div><div class="v1x-primary" role="status" aria-live="polite"><small id="v1x-primary-label"></small><strong id="v1x-primary"></strong></div></div><div class="v1x-equation" id="v1x-equation"></div><div class="v1x-note" id="v1x-note"></div><div class="v1x-presets"><button type="button" data-reset>Početne vrijednosti</button></div></div>`;
   const q=s=>root.querySelector(s),fmt=(n,d=2)=>n.toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),arrow=MF1.svgArrow;
   const defaults={force:120,ratio:4,dp:1,K:200,U:1.2,mu:.35,delta:.025};let state={...defaults},mode='pressure';
   const configs={pressure:[['force','Ulazna sila F₁',0,240,10,'N',0],['ratio','Omjer A₂/A₁',1,8,.1,'',1]],compression:[['dp','Porast tlaka Δp',0,20,.1,'MPa',1],['K','Konstantan modul K',50,2000,10,'MPa',0]],viscosity:[['U','Brzina ploče U',-2.4,2.4,.1,'m/s',1],['mu','Viskoznost μ',.05,1.2,.05,'Pa·s',2]]};
   const text=(x,y,s,c='#40596b',size=18)=>`<text x="${x}" y="${y}" fill="${c}" font-size="${size}">${s}</text>`;
+  function drawScene(m){
+    const narrow=(root.clientWidth||window.innerWidth)<620,W=narrow?360:900,font=20,svg=q('#v1x-scene'),ink='#40596b',blue='#176da9',red='#b93645',green='#0f766e';
+    const t=(x,y,s,c=ink,anchor='start')=>`<text x="${x}" y="${y}" fill="${c}" font-size="${font}" text-anchor="${anchor}">${s}</text>`,ln=(x1,y1,x2,y2,c=ink,dash='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="1.2"${dash?` stroke-dasharray="${dash}"`:''}/>`;
+    const vec=(name,x,y,dx,dy,c,width=3)=>`<g data-load-vector="${name}" data-dx="${dx}" data-dy="${dy}">${arrow(x,y,dx,dy,c,'',width)}</g>`;let out='',H;
+    if(m.mode==='pressure'){
+      H=narrow?625:455;const L=narrow?78:175,R=narrow?251:675,top=narrow?240:210,base=narrow?335:320,neck=narrow?292:265,w1=narrow?32:70,w2=w1*Math.sqrt(m.A2/m.A1),forceScale=narrow?.065:.085;
+      out+=t(18,31,'Jednak p*, različite sile',ink)+t(18,66,`F₁ = ${fmt(m.F1,0)} N`,red)+t(narrow?185:735,66,`F₂ = ${fmt(m.F2,0)} N`,red);
+      out+=`<path d="M${L-w1/2} ${top}V${base}H${R+w2/2}V${top}H${R-w2/2}V${neck}H${L+w1/2}V${top}Z" fill="#dff2f8" stroke="#315b72" stroke-width="3"/><rect data-load-piston="1" x="${L-w1/2}" y="${top-12}" width="${w1}" height="12" fill="#64748b"/><rect data-load-piston="2" x="${R-w2/2}" y="${top-12}" width="${w2}" height="12" fill="#64748b"/>`;
+      out+=vec('F1',L,top-12-m.F1*forceScale,0,m.F1*forceScale,red)+vec('F2',R,top,0,-m.F2*forceScale,red);
+      out+=t(narrow?18:335,narrow?371:296,`p* = ${fmt(m.p/1000,1)} kPa`,blue)+t(narrow?18:65,narrow?404:354,'A₁ = 12 cm²')+t(narrow?185:565,narrow?404:354,`A₂ = ${fmt(m.A2*1e4,1)} cm²`);
+      const workX=narrow?18:335,workY=narrow?485:99;out+=t(workX,workY,'Virtualni pomak i rad',ink)+t(workX,workY+33,`s₁ ↓ 10 mm; s₂ ↑ ${fmt(m.s2*1000,2)} mm`)+t(workX,workY+66,`F₁s₁ = F₂s₂ = ${fmt(m.work,2)} J`,green);
+      const keyY=narrow?442:397;out+=vec('force-key',18,keyY,1000*forceScale,0,red,2)+t(narrow?100:120,keyY+7,'1000 N · stalna skala');
+      out+=t(18,narrow?588:438,narrow?'Promjer klipa ∝ √A.':'Promjeri ∝ √A; razmak je shematski.');if(narrow)out+=t(18,616,'Razmak je shematski.');m.geometry={width:W,height:H,w1,w2,L,R,top,base,forceScale};
+    }else if(m.mode==='compression'){
+      H=narrow?590:470;const left=narrow?100:320,right=narrow?270:580,cx=(left+right)/2,base=360,h0=200,initialTop=base-h0,top=base-h0*m.V2/m.V1,pressureScale=4;
+      out+=t(18,31,`Δp = ${fmt(m.dp/1e6,1)} MPa`,red)+t(18,65,'Stalan presjek i masa');
+      out+=`<path d="M${left} 125V${base}H${right}V125" fill="none" stroke="#315b72" stroke-width="3"/><rect data-load-volume x="${left+2}" y="${top}" width="${right-left-4}" height="${base-top}" fill="#dff2f8"/><rect x="${left}" y="${top-12}" width="${right-left}" height="12" fill="#64748b"/>`+ln(left-12,initialTop,right+12,initialTop,'#8fa4b3','5 4')+vec('pressure',cx,top-12-m.dp/1e6*pressureScale,0,m.dp/1e6*pressureScale,red);
+      const ax=left-30;out+=ln(ax,initialTop,ax,base,'#8fa4b3')+t(ax-8,112,'V [cm³]',ink,narrow?'middle':'end');for(const V of [0,500,1000]){const y=base-h0*V/1000;out+=ln(ax-4,y,ax+4,y,'#8fa4b3')+t(ax-9,y+6,String(V),ink,'end');}
+      const tx=narrow?18:620,ty=narrow?401:191;out+=t(tx,ty,`V₂ = ${fmt(m.V2*1e6,1)} cm³`,blue)+t(tx,ty+34,`V₁ − V₂ = ${fmt((m.V1-m.V2)*1e6,2)} cm³`)+t(tx,ty+68,`ρ₂/ρ₁ = ${fmt(m.densityRatio,4)}`,blue);
+      const keyY=narrow?511:405;out+=vec('pressure-key',18,keyY,10*pressureScale,0,red,2)+t(72,keyY+7,'10 MPa · stalna skala');out+=t(18,narrow?567:449,'Crtkano: V₁ = 1000 cm³.');m.geometry={width:W,height:H,left,right,top,base,h0,pressureScale};
+    }else{
+      H=narrow?610:515;const left=narrow?40:120,right=narrow?320:680,x0=narrow?180:400,bottom=330,h=170,top=bottom-h,velocityScale=narrow?50:85,shearScale=60/115.2;
+      out+=t(18,31,'Couette: x →, y ↑')+t(18,66,`Gornja ploča: U = ${fmt(m.U,1)} m/s`,blue);
+      out+=`<rect x="${left}" y="${top}" width="${right-left}" height="${h}" fill="#e0f2fe"/><rect x="${left}" y="${top-12}" width="${right-left}" height="12" fill="#64748b"/><rect x="${left}" y="${bottom}" width="${right-left}" height="12" fill="#334155"/>`;
+      out+=vec('plate-U',x0,108,m.U*velocityScale,0,blue);for(let i=1;i<=6;i++){const fraction=i/6;out+=vec('profile-'+i,x0,bottom-fraction*h,fraction*m.U*velocityScale,0,blue,2.5);}
+      const py=bottom-h/2,px=x0+m.U*velocityScale/2;out+=`<path d="M${x0} ${bottom}L${x0+m.U*velocityScale} ${top}" stroke="${blue}" stroke-dasharray="5 5" fill="none"/><circle data-load-probe cx="${px}" cy="${py}" r="5" fill="${red}"/>`+ln(x0,py,px,py,red,'4 4');
+      out+=`<g data-traction="upper" data-value="${m.upperTraction}">${arrow(x0,top-6,m.upperTraction*shearScale,0,red,'',3)}</g><g data-traction="lower" data-value="${m.lowerTraction}">${arrow(x0,bottom+7,m.lowerTraction*shearScale,0,red,'',3)}</g>`;
+      out+=t(left-20,top+6,'δ',ink,'middle')+t(left-20,bottom+6,'0',ink,'middle');
+      out+=t(narrow?18:120,379,`δ = 25 mm; u(0) = 0`)+t(narrow?18:120,414,`P: y = 12,5 mm; u = ${fmt(m.u,2)} m/s`,red);
+      const sx=narrow?18:550,sy=narrow?455:379;out+=t(sx,sy,`Fluid → gornju: ${fmt(m.upperTraction,2)} Pa`,red)+t(sx,sy+34,`Fluid → donju: ${fmt(m.lowerTraction,2)} Pa`,red);
+      const ky=narrow?530:463;out+=vec('velocity-key',narrow?18:120,ky,velocityScale,0,blue,2)+t(narrow?84:218,ky+7,'1 m/s · brzina');const kx=narrow?18:550,ksy=narrow?574:463;out+=vec('shear-key',kx,ksy,50*shearScale,0,red,2)+t(kx+40,ksy+7,'50 Pa · naprezanje');m.geometry={width:W,height:H,left,right,x0,top,bottom,h,velocityScale,shearScale,probeX:px,probeY:py};
+    }
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.style.fontFamily='system-ui,sans-serif';return out;
+  }
+
   function controls(){q('#v1x-controls').innerHTML=configs[mode].map(([k,label,min,max,step,unit,d])=>`<div class="v1x-control"><label for="v1x-${k}"><span>${label}</span><output data-out="${k}"></output></label><input id="v1x-${k}" data-key="${k}" type="range" min="${min}" max="${max}" step="${step}" value="${state[k]}"></div>`).join('');q('#v1x-controls').querySelectorAll('input').forEach(i=>i.oninput=()=>{state[i.dataset.key]=+i.value;render()})}
   function render(){
     configs[mode].forEach(([k,l,a,b,c,u,d])=>q(`[data-out="${k}"]`).textContent=fmt(state[k],d)+' '+u);
-    let scene='',result='',label='',eq='',note='';
+    let scene='',result='',label='',eq='',note='',decision=[];let measured={mode};
     if(mode==='pressure'){
-      const A1=.0012,p=state.force/A1,F2=state.force*state.ratio,w1=70,w2=w1*Math.sqrt(state.ratio),L=175,R=675,top=182,base=286;
-      scene=`<path d="M${L-w1/2} ${top}V${base}H${R+w2/2}V${top}H${R-w2/2}V238H${L+w1/2}V${top}Z" fill="#dff2f8" stroke="#315b72" stroke-width="4"/><rect x="${L-w1/2}" y="${top-14}" width="${w1}" height="14" fill="#64748b"/><rect x="${R-w2/2}" y="${top-14}" width="${w2}" height="14" fill="#64748b"/>`;
-      const forceScale=110/Math.max(F2,240);
-      scene+=arrow(L,top-14-state.force*forceScale,0,state.force*forceScale,'#b93645')+arrow(R,top,0,-F2*forceScale,'#b93645');
-      scene+=text(65,55,`F₁ = ${fmt(state.force,0)} N`,'#b93645')+text(565,30,`F₂ = ${fmt(F2,0)} N`,'#b93645')+text(65,322,'A₁ = 12 cm²')+text(560,322,`A₂ = ${fmt(12*state.ratio,1)} cm²`)+text(323,267,`p = ${fmt(p/1000,1)} kPa`,'#176da9');
-      label='Izlazna sila';result=`F₂ = ${fmt(F2,0)} N`;eq=`p = F₁/A₁; F₂ = pA₂; A₁s₁ = A₂s₂ → s₂/s₁ = ${fmt(1/state.ratio,3)}.`;
-      note='Klipovi su na istoj visini. Prikazan je dodatni tlak zbog opterećenja; težine klipova i hidrostatska korekcija zanemarene su. Širine kružnih klipova prate √A, a obje sile imaju istu prilagođenu skalu. Veća sila znači manji pomak.';
+      const A1=.0012,p=state.force/A1,F2=state.force*state.ratio,s1=.01,s2=s1/state.ratio,work=state.force*s1;
+      measured={mode,A1,A2:A1*state.ratio,p,F1:state.force,F2,s1,s2,work};
+      decision=[{when:'F₁ = 0',active:state.force===0,equation:'p* = F₁/A₁ = 0',then:'Nema dodatne tlačne sile.'},{when:'F₁ > 0 i A₂ = A₁',active:state.force>0&&state.ratio===1,equation:'F₂ = F₁; s₂ = s₁',then:'Sila i pomak ostaju jednaki.'},{when:'F₁ > 0 i A₂ > A₁',active:state.force>0&&state.ratio>1,equation: 'F₂/F₁ = A₂/A₁ = '+fmt(state.ratio,1),then:'Sila raste, a pomak pada: rad ostaje '+fmt(work,2)+' J.'}];
+      label='Izlazna sila';result=`F₂ = ${fmt(F2,0)} N`;eq=`p* = p − patm = F₁/A₁; F₂ = p*A₂; A₁s₁ = A₂s₂ → s₂/s₁ = ${fmt(1/state.ratio,3)}.`;
+      note='Pretlak p* mjeri se u odnosu na okolinu. F₁ djeluje na ulazni klip, F₂ je sila fluida na izlazni klip. Mali virtualni pomaci ilustriraju očuvanje volumena i rada; nisu vremenska simulacija. Zanemarene su težine, trenje i razlika visina. Širine klipova prate √A; sile imaju zajedničko mjerilo.';
     }else if(mode==='compression'){
-      const ratio=Math.exp(-state.dp/state.K),V=1000*ratio,top=280-180*ratio;
-      scene=`<path d="M285 65V280H575V65" fill="none" stroke="#315b72" stroke-width="5"/><rect x="288" y="${top}" width="284" height="${280-top}" fill="#dff2f8"/><rect x="285" y="${top-14}" width="290" height="14" fill="#64748b"/><path d="M265 100H595" stroke="#94a3b8" stroke-dasharray="6 5"/>`+arrow(430,top-14-state.dp*3,0,state.dp*3,'#b93645')+text(320,45,`Δp = ${fmt(state.dp,1)} MPa`,'#b93645')+text(610,190,`V₂ = ${fmt(V,1)} cm³`,'#176da9')+text(165,330,'Isprekidano: početni položaj. Visina fluida proporcionalna je volumenu.',undefined,16);
+      const ratio=Math.exp(-state.dp/state.K),V=1000*ratio;
+      measured={mode,dp:state.dp*1e6,K:state.K*1e6,V1:.001,V2:V/1e6,densityRatio:1/ratio};
+      decision=[{when:'Δp = 0',active:state.dp===0,equation:'V₂ = V₁, ρ₂ = ρ₁',then:'Početno stanje; nema deformacije.'},{when:'Δp > 0, K > 0',active:state.dp>0,equation:'V₂/V₁ = exp(−Δp/K) = '+fmt(ratio,4),then:'Stlačivanje: volumen pada, gustoća raste; masa je stalna.'}];
       label='Relativna promjena volumena';result=`ΔV/V₁ = ${fmt((ratio-1)*100,3)} %`;eq='K = −V dp/dV; za konstantan K: V₂ = V₁ exp(−Δp/K).';note='Masa ostaje ista. Veći tlak spušta klip i smanjuje volumen; veći K smanjuje pomak. Pri Δp = 0 klip je na početnoj razini, V₁ = 1000 cm³.';
     }else{
-      const h=state.delta*3600,bottom=274,top=bottom-h,gradient=state.U/state.delta,tau=state.mu*gradient;
-      scene=`<rect x="100" y="${top}" width="570" height="${h}" fill="#e0f2fe"/><rect x="100" y="${top-14}" width="570" height="14" fill="#64748b"/><rect x="100" y="274" width="570" height="14" fill="#334155"/>`;
-      for(let i=1;i<=6;i++){const t=i/6;scene+=arrow(365,bottom-t*h,t*state.U*85,0,'#176da9','',2.5)}
-      scene+=arrow(365,top-25,state.U*85,0,'#176da9')+text(105,top-32,`U = ${fmt(state.U,1)} m/s`,'#176da9',16)+text(110,315,'u(0) = 0; u(δ) = U',undefined,17)+text(700,(top+bottom)/2,`δ = ${fmt(state.delta*1000,0)} mm`,undefined,16);
-      scene+=`<path d="M365 ${bottom}L${365+state.U*85} ${top}" stroke="#176da9" stroke-dasharray="5 5" fill="none"/>`;
-      label='Potpisano smično naprezanje';result=`τ = ${fmt(tau,2)} Pa`;eq=`u(y) = Uy/δ; du/dy = ${fmt(gradient,1)} s⁻¹; τ = μU/δ.`;note='Brzinske strelice imaju zajedničku stalnu skalu. Na nepomičnoj stijenci brzina je nula. Promjena predznaka U okreće tok; μ mijenja naprezanje, a pri zadanom U i δ ne mijenja profil. Fluid na gornju ploču djeluje suprotno njezinu gibanju.';
+      const gradient=state.U/state.delta,tau=state.mu*gradient;
+      measured={mode,U:state.U,mu:state.mu,delta:state.delta,y:state.delta/2,u:state.U/2,gradient,tau,upperTraction:-tau,lowerTraction:tau,dissipation:tau*state.U};
+      decision=[{when:'U < 0',active:state.U<0,equation:'du/dy < 0 → τ < 0',then:'Brzina i potpis naprezanja okreću smjer.'},{when:'U = 0',active:state.U===0,equation:'du/dy = 0 → τ = 0',then:'Bez relativnog gibanja nema viskoznog smicanja.'},{when:'U > 0',active:state.U>0,equation:'τ = μU/δ = '+fmt(tau,2)+' Pa',then:'Fluid vuče donju ploču i koči gornju; sile su suprotne.'}];
+      label='Potpisano smično naprezanje';result=`τ = ${fmt(tau,2)} Pa`;eq=`u(y) = Uy/δ; du/dy = ${fmt(gradient,1)} s⁻¹; τ = μU/δ. Disipacija po površini: τU = ${fmt(tau*state.U,2)} W/m² ≥ 0.`;note='Brzinske strelice imaju zajedničku stalnu skalu. Na nepomičnoj stijenci brzina je nula. Promjena predznaka U okreće tok; μ mijenja naprezanje, a pri zadanom U i δ ne mijenja profil. Fluid na gornju ploču djeluje suprotno njezinu gibanju.';
     }
-    q('#v1x-scene').innerHTML=scene;q('#v1x-primary-label').textContent=label;q('#v1x-primary').textContent=result;q('#v1x-equation').textContent=eq;q('#v1x-note').textContent=note;
+    scene=drawScene(measured);q('#v1x-scene').innerHTML=scene;q('#v1x-scene').setAttribute('aria-label',({pressure:'Hidraulička preša: ulazna i izlazna sila te idealni virtualni rad',compression:'Stlačivanje fluida pri stalnom modulu: promjena volumena i gustoće',viscosity:'Couetteov profil i suprotna djelovanja fluida na dvije ploče'})[mode]+'. '+result);q('#v1x-primary-label').textContent=label;q('#v1x-primary').textContent=result;q('#v1x-equation').textContent=eq;q('#v1x-note').textContent=note;root.mf1ProfessorState=measured;MF1.decision?.(q('#v1x-note'),{title:'Uvjet → odgovor fluida',branches:decision,summary:note});
   }
   root.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;root.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));controls();render()});
-  q('[data-reset]').onclick=()=>{state={...defaults};controls();render()};controls();render();
+  q('[data-reset]').onclick=()=>{state={...defaults};controls();render()};controls();render();window.addEventListener('resize',render);
 })();
 </script>
 ```
@@ -191,127 +223,75 @@ $$\rho_2=\rho_1\exp\left(\frac{\Delta p}{K}\right)=1025\exp\left(\frac{71{,}6\cd
 2. **Promjena gustoće:**
 $$\frac{\Delta\rho}{\rho_1}=\exp\left(\frac{\Delta p}{K}\right)-1=3{,}11\ \%.$$
 
-Linearna procjena $\Delta\rho/\rho_1\approx\Delta p/K$ ovdje daje $3{,}06\ \%$; bliska je, ali nije predstavljena kao egzaktan rezultat.
+Linearna procjena $\Delta\rho/\rho_1\approx\Delta p/K$ ovdje daje $3{,}06\ \%$; bliska je, ali nije predstavljena kao egzaktan rezultat. U ovom uvrštavanju mali površinski tlak zanemaren je u $\Delta p\approx p_h$. Widget ispod uključuje $p_0=0{,}1\ \mathrm{MPa}$ i računa tlak iz dubine.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div class="mf1-lab" id="z5-advanced-widget" data-widget-role="application" style="max-width: 900px; margin: 30px auto; font-family: 'Inter', sans-serif; padding: 25px; background: #f8fafc; border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1e293b; margin-top: 0; font-weight: 700;">Zadatak 3: Gustoća fluida na dubini oceana</h4>
-    <p class="widget-idea">Mijenjaš dubinu u samokonzistentnom hidrostatskom modelu s konstantnim volumenskim modulom K.</p>
-    <div class="widget-equation"><span class="math inline">\(\rho(z)=\frac{\rho_0}{1-\rho_0gz/K}\)</span>, <span class="math inline">\(\quad p(z)=p_0-K\ln\!\left(1-\rho_0gz/K\right)\)</span></div>
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <div style="flex: 1.5; min-width: 320px; position: relative; height: 350px; overflow: hidden; border: 1px solid #e2e8f0; background: #ffffff;">
-            <div id="z5-ocean-bg" style="width: 100%; height: 100%; background: linear-gradient(to bottom, #38bdf8 0%, #0369a1 50%, #082f49 100%); position: relative;">
-                <!-- Oznaka položaja promatranog plovila -->
-                <div id="z5-sub" style="position:absolute; left:50%; transform:translateX(-50%); top:10%; padding:0.14rem 0.38rem; border:1px solid rgba(255,255,255,0.75); border-radius:999px; background:rgba(15,23,42,0.45); color:#fff; font-size:0.8rem; font-weight:700; transition:top 0.5s ease-out;">brod</div>
-                <!-- Depth line -->
-                <div id="z5-depth-line" style="position: absolute; width: 100%; border-top: 1px dashed rgba(255,255,255,0.3); top: 10%; transition: top 0.5s;">
-                    <span style="position: absolute; right: 10px; top: -15px; font-size: 10px; color: #ffffff;"><span id="z5-v-depth-val">0</span> m</span>
-                </div>
-                <!-- Molecular grid (using canvas for performance) -->
-                <canvas id="z5-molecules" width="400" height="350" style="width: 100%; height: 100%; pointer-events: none;"></canvas>
-                <div style="position:absolute; left:10px; bottom:10px; max-width:250px; color:#ffffff; font-size:0.78rem; line-height:1.35; background:rgba(15,23,42,.48); border-radius:8px; padding:6px 8px;">Kvalitativni prikaz povećanja gustoće — nije molekularna skala.</div>
-            </div>
-        </div>
-
-        <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 15px;">
-            <div style="background: #ffffff; padding: 15px; border: 1px solid #e2e8f0;">
-                <label style="font-weight: 600; color: #1e293b;">Dubina: <span id="z5-v-depth">0</span> m</label>
-                <input type="range" id="z5-depth" min="0" max="10000" step="100" value="0" style="width: 100%; accent-color: #38bdf8;">
-                <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#64748b; margin-top:3px;"><span>0</span><span>10 000</span></div>
-            </div>
-
-            <div style="background: #eff6ff; padding: 15px; border: 1px solid #0369a1;">
-                <div style="font-size: 0.75rem; color: #0369a1; font-weight: 700; margin-bottom: 8px;">PARAMETRI NA DUBINI:</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
-                    <div style="color: #475569;">Tlak:</div><div style="font-weight: 700; color: #1e293b;"><span id="z5-res-p">0.1</span> MPa</div>
-                    <div style="color: #475569;">Gustoća:</div><div style="font-weight: 700; color: #1e293b;"><span id="z5-res-rho">1025</span> kg/m³</div>
-                    <div style="color: #475569;">Porast ρ:</div><div id="z5-perc-badge" style="font-weight: 700; color: #166534;"><span id="z5-res-perc">0.00</span> %</div>
-                </div>
-            </div>
-
-            <div style="background:#ffffff; padding:12px; border:1px solid #dbeafe; border-radius:10px;">
-                <div style="font-size:0.74rem; font-weight:800; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Graf: tlak i gustoća po dubini</div>
-                <svg id="z5-chart" viewBox="0 0 880 640" style="width:100%; height:auto; display:block;"></svg>
-            </div>
-        </div>
-    </div>
+<div class="mf1-lab" id="z5-advanced-widget" data-widget-role="application">
+  <header class="widget-top"><h4>Zadatak 3: Tlak i gustoća oceana</h4><p class="widget-idea">Na istoj dubini usporedi dva modela: kada gustoću smatraš stalnom i kada tlak stlačuje vodu. Oba grafa prate istu sondu.</p></header>
+  <div class="mf1-editorial-modes" role="group" aria-label="Hidrostatski model">
+    <button type="button" data-ocean-model="compressible" aria-pressed="true">Stlačivo: K = konst.</button>
+    <button type="button" data-ocean-model="incompressible" aria-pressed="false">Nestlačivo: ρ = konst.</button>
+  </div>
+  <div class="scene"><svg id="z5-chart" viewBox="0 0 900 470" role="slider" tabindex="0" aria-orientation="vertical" aria-label="Dubina zajedničke sonde tlaka i gustoće" aria-valuemin="0" aria-valuemax="10000"></svg></div>
+  <div class="mf1-field"><label for="z5-depth">Dubina h <output id="z5-v-depth">7000 m</output></label><input type="range" id="z5-depth" min="0" max="10000" step="100" value="7000"></div>
+  <div class="mf1-new-readings mf1-result-row" aria-live="polite">
+    <div><small>Apsolutni tlak p</small><strong><span id="z5-res-p"></span> MPa</strong></div>
+    <div><small>Gustoća ρ</small><strong><span id="z5-res-rho"></span> kg/m³</strong></div>
+    <div><small>Porast gustoće</small><strong><span id="z5-res-perc"></span> %</strong></div>
+  </div>
+  <div class="widget-equation"><span class="math inline">\(\rho(h)=\frac{\rho_0}{1-\rho_0gh/K}\)</span>, <span class="math inline">\(p(h)=p_0-K\ln(1-\rho_0gh/K)\)</span> za konstantan K. Klikni razinu na grafu ili koristi tipke ↑ i ↓.</div>
+  <div class="z5-decision"></div>
 </div>
-
-<div class="fizikalni-uvid">
-Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidljivo veća nego na površini uslijed modula stlačivosti.
-</div>
-
 <script>
-(function () {
-  const z5dS = document.getElementById("z5-depth");
-  const z5sub = document.getElementById("z5-sub");
-  const z5line = document.getElementById("z5-depth-line");
-  const z5c = document.getElementById("z5-molecules");
-  const z5ctx = z5c.getContext("2d");
-  const z5chart = document.getElementById("z5-chart");
-
-  function updateZ5() {
-    const d = parseFloat(z5dS.value);
-    document.getElementById("z5-v-depth").innerText = d;
-    document.getElementById("z5-v-depth-val").innerText = d;
-
-    const rho0 = 1025;
-    const state = MF1.ocean(d);
-    const rho = state.density;
-    const p = state.pressure / 1e6;
-    const perc = (rho / 1025 - 1) * 100;
-
-    document.getElementById("z5-res-p").innerText = p.toFixed(1);
-    document.getElementById("z5-res-rho").innerText = rho.toFixed(1);
-    document.getElementById("z5-res-perc").innerText = perc.toFixed(2);
-
-    const yPerc = (d / 10000) * 80 + 10;
-    z5sub.style.top = yPerc + "%";
-    z5line.style.top = yPerc + "%";
-    z5sub.innerText = d > 500 ? "podmornica" : "brod";
-
-    const oceanTop = [56, 189, 248];
-    const oceanBottom = [8, 47, 73];
-    const tr = Math.min(d / 10000, 1);
-    const r = Math.round(oceanTop[0] + (oceanBottom[0] - oceanTop[0]) * tr);
-    const g = Math.round(oceanTop[1] + (oceanBottom[1] - oceanTop[1]) * tr);
-    const b = Math.round(oceanTop[2] + (oceanBottom[2] - oceanTop[2]) * tr);
-    document.getElementById("z5-ocean-bg").style.background =
-      `linear-gradient(to bottom, rgb(${r},${g},${b}) 0%, #0369a1 50%, #082f49 100%)`;
-
-    const badge = document.getElementById("z5-perc-badge");
-    badge.style.color = perc < 1 ? "#166534" : perc < 2 ? "#a16207" : "#b91c1c";
-
-    // Draw molecular grid density
-    z5ctx.clearRect(0, 0, 400, 350);
-    z5ctx.fillStyle = "rgba(56, 189, 248, 0.3)";
-    const step = 20 / Math.sqrt(rho / rho0);
-    for (let x = 0; x < 400; x += step) {
-      for (let y = 0; y < 350; y += step) {
-        z5ctx.fillRect(x, y, 2, 2);
-      }
+(() => {
+  const root=document.getElementById('z5-advanced-widget'),slider=root.querySelector('#z5-depth'),chart=root.querySelector('#z5-chart');
+  const rho0=1025,p0=1e5,K=2.34e9,g=9.81;
+  let model='compressible';
+  const fmt=(v,d=2)=>Number(v).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const selected=h=>model==='compressible'?MF1.ocean(h):{pressure:p0+rho0*g*h,density:rho0};
+  let plot={width:900,left:100,pWidth:310,rhoLeft:535,rhoWidth:300,right:835,narrow:false};
+  const Y=h=>100+300*h/10000,XP=p=>plot.left+plot.pWidth*(p/1e6)/110,XR=rho=>plot.rhoLeft+plot.rhoWidth*(rho-1020)/60;
+  function draw(depth,state){
+    const narrow=window.matchMedia('(max-width:600px)').matches;
+    plot=narrow?{width:430,left:65,pWidth:140,rhoLeft:260,rhoWidth:140,right:400,narrow}: {width:900,left:100,pWidth:310,rhoLeft:535,rhoWidth:300,right:835,narrow};
+    chart.setAttribute('viewBox','0 0 '+plot.width+' 470');
+    const txt=(x,y,t,extra='')=>'<text x="'+x+'" y="'+y+'" font-size="17" fill="#38556a" '+extra+'>'+t+'</text>';
+    let body='<title>Tlak i gustoća na istoj dubini</title><desc>Dubina raste prema dolje; puna krivulja pripada odabranom modelu, isprekidana usporednom. Vodoravna crta povezuje istu dubinu u oba grafa.</desc><rect width="'+plot.width+'" height="470" fill="#fbfdff"/>';
+    body+=txt(plot.left,31,narrow?'p [MPa]':'Tlak p [MPa]','font-weight="700"')+txt(plot.rhoLeft,31,narrow?'ρ [kg/m³]':'Gustoća ρ [kg/m³]','font-weight="700"')+txt(22,273,'Dubina h [km]','transform="rotate(-90 22 273)"');
+    for(const h of [0,2000,4000,6000,8000,10000]){
+      body+='<path d="M'+plot.left+' '+Y(h)+'H'+(plot.left+plot.pWidth)+'M'+plot.rhoLeft+' '+Y(h)+'H'+plot.right+'" stroke="#dce7ed" stroke-dasharray="3 4"/>'+txt(plot.left-16,Y(h)+6,String(h/1000),'text-anchor="end"');
     }
-
-    drawChart(d);
+    for(const p of (narrow?[0,50,100]:[0,25,50,75,100]))body+='<path d="M'+XP(p*1e6)+' 100V400" stroke="#e3ebf0"/>'+txt(XP(p*1e6),78,String(p),'text-anchor="middle"');
+    for(const rho of (narrow?[1020,1050,1080]:[1020,1040,1060,1080]))body+='<path d="M'+XR(rho)+' 100V400" stroke="#e3ebf0"/>'+txt(XR(rho),78,String(rho),'text-anchor="middle"');
+    body+='<path d="M'+plot.left+' 100V400H'+(plot.left+plot.pWidth)+'M'+plot.rhoLeft+' 100V400H'+plot.right+'" fill="none" stroke="#8da2b0" stroke-width="1.5"/>';
+    for(const key of ['pressure','density'])for(const candidate of ['incompressible','compressible']){
+      let path='';for(let i=0;i<=160;i++){const h=i/160*10000,s=candidate==='compressible'?MF1.ocean(h):{pressure:p0+rho0*g*h,density:rho0};path+=(i?'L':'M')+(key==='pressure'?XP(s.pressure):XR(s.density))+' '+Y(h);}
+      const active=candidate===model;body+='<path data-curve="'+key+'-'+candidate+'" d="'+path+'" fill="none" stroke="'+(active?(key==='pressure'?'#6654a3':'#c95d12'):'#8c9fab')+'" stroke-width="'+(active?3:2)+'" '+(active?'':'stroke-dasharray="6 5"')+'/>';
+    }
+    body+='<g data-ocean-probe data-depth="'+depth+'" data-pressure="'+state.pressure+'" data-density="'+state.density+'"><path d="M'+plot.left+' '+Y(depth)+'H'+plot.right+'" stroke="#087f75" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="'+XP(state.pressure)+'" cy="'+Y(depth)+'" r="6" fill="#6654a3" stroke="#fff" stroke-width="2"/><circle cx="'+XR(state.density)+'" cy="'+Y(depth)+'" r="6" fill="#c95d12" stroke="#fff" stroke-width="2"/></g>';
+    body+=narrow?txt(plot.left,434,'Puna: odabrani model.')+txt(plot.left,459,'Isprekidano: usporedni model.'):txt(plot.left,439,'Puna linija: odabrani model. Isprekidano: usporedni model. Ista dubina u oba grafa.');
+    chart.innerHTML=body;chart.setAttribute('aria-valuenow',depth);chart.setAttribute('aria-valuetext',depth+' m; p = '+fmt(state.pressure/1e6,3)+' MPa; ρ = '+fmt(state.density,1)+' kg/m³');
   }
-
-  function drawChart(currentDepth) {
-    const state=MF1.ocean(currentDepth),x=currentDepth/1000;
-    const pressure=MF1.plot({height:320,x:[0,10],y:[0,110],title:'Tlak u stlačivoj vodi',xlabel:'dubina h [km]',ylabel:'apsolutni tlak p [MPa]',curves:[{fn:h=>MF1.ocean(h*1000).pressure/1e6}],points:[{x,y:state.pressure/1e6}],note:'p = p₀ − K ln(1 − ρ₀gh/K) · p₀ = 0,10 MPa'});
-    const density=MF1.plot({height:320,x:[0,10],y:[1025,1075],title:'Gustoća istog fluida',xlabel:'dubina h [km]',ylabel:'gustoća ρ [kg/m³]',curves:[{fn:h=>MF1.ocean(h*1000).density,color:'#bc5734'}],points:[{x,y:state.density}],note:'ρ = ρ₀/(1 − ρ₀gh/K) · K = 2,34 GPa, konstantan'});
-    z5chart.innerHTML='<g>'+pressure.replace('<svg ','<svg x="0" y="0" width="880" height="320" ')+'</g><g>'+density.replace('<svg ','<svg x="0" y="320" width="880" height="320" ')+'</g>';
-    z5chart.setAttribute('aria-valuenow',currentDepth);
-    z5chart.setAttribute('aria-valuetext',currentDepth+' m; p = '+MF1.number(state.pressure/1e6)+' MPa; ρ = '+MF1.number(state.density)+' kg/m³');
+  function update(){
+    const depth=+slider.value,state=selected(depth),finite=MF1.ocean(depth),reference=p0+rho0*g*depth,difference=finite.pressure-reference,error=depth?100*difference/(finite.pressure-p0):0;
+    root.querySelector('#z5-v-depth').textContent=fmt(depth,0)+' m';root.querySelector('#z5-res-p').textContent=fmt(state.pressure/1e6,3);root.querySelector('#z5-res-rho').textContent=fmt(state.density,1);root.querySelector('#z5-res-perc').textContent=fmt(100*(state.density/rho0-1),2);
+    root.mf1ProfessorState={depth,model,pressure:state.pressure,density:state.density,reference,gradient:state.density*g,difference,error};
+    MF1.decision(root.querySelector('.z5-decision'),{title:'Pretpostavka bira zakon rasta tlaka',branches:[
+      {when:'h = 0: zajednički rubni uvjet',active:depth===0,equation:'p = p₀ = 0,100 MPa; ρ = ρ₀ = 1025 kg/m³',then:'Oba modela počinju u istoj točki.'},
+      {when:'h > 0 i zanemaruješ stlačivost',active:depth>0&&model==='incompressible',equation:'ρ = ρ₀; p = p₀ + ρ₀gh',then:'Gradijent dp/dh ostaje '+fmt(rho0*g/1000,3)+' kPa/m. Tlak je '+fmt(difference/1e6,3)+' MPa manji nego u modelu s konačnim K.'},
+      {when:'h > 0 i uključuješ stlačivost',active:depth>0&&model==='compressible',equation:'dp/dh = ρg; dρ/ρ = dp/K',then:'Veći tlak povećava gustoću, pa raste i gradijent: sada '+fmt(state.density*g/1000,3)+' kPa/m. Nestlačiva procjena podcjenjuje porast tlaka za '+fmt(error,2)+' %.'}
+    ],summary:'K = 2,34 GPa i g = 9,81 m/s² su konstantni. Ista temperatura i salinitet; model uspoređuje utjecaj stlačivosti, a ne stvarnu slojevitost oceana.'});
+    draw(depth,state);
   }
-  z5chart.tabIndex=0;z5chart.setAttribute('role','slider');z5chart.setAttribute('aria-label','Dubina sonde na grafu tlaka i gustoće');z5chart.setAttribute('aria-valuemin','0');z5chart.setAttribute('aria-valuemax','10000');
-  function setChartDepth(d){z5dS.value=Math.round(Math.max(0,Math.min(10000,d))/100)*100;z5dS.dispatchEvent(new Event('input',{bubbles:true}));}
-  z5chart.addEventListener('pointerdown',e=>{const box=z5chart.getBoundingClientRect(),x=(e.clientX-box.left)*880/box.width;setChartDepth((x-85)/765*10000);});
-  z5chart.addEventListener('keydown',e=>{const d=+z5dS.value,next={ArrowLeft:d-100,ArrowDown:d-100,ArrowRight:d+100,ArrowUp:d+100,Home:0,End:10000}[e.key];if(next!==undefined){e.preventDefault();setChartDepth(next);}});
-  z5dS.oninput = updateZ5;
-  updateZ5();
+  function setDepth(depth){slider.value=Math.round(Math.max(0,Math.min(10000,depth))/100)*100;slider.dispatchEvent(new Event('input',{bubbles:true}));}
+  chart.addEventListener('pointerdown',event=>{const b=chart.getBoundingClientRect();setDepth((((event.clientY-b.top)*470/b.height)-100)/300*10000);});
+  chart.addEventListener('keydown',event=>{const d=+slider.value,next={ArrowUp:d-100,ArrowLeft:d-100,ArrowDown:d+100,ArrowRight:d+100,Home:0,End:10000}[event.key];if(next!==undefined){event.preventDefault();setDepth(next);}});
+  root.querySelectorAll('[data-ocean-model]').forEach(button=>button.addEventListener('click',()=>{model=button.dataset.oceanModel;root.querySelectorAll('[data-ocean-model]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));update();}));
+  window.addEventListener('resize',()=>draw(+slider.value,selected(+slider.value)));
+  slider.addEventListener('input',update);update();
 })();
 </script>
 ```
@@ -344,439 +324,171 @@ cijevi iznosi $L$, odrediti ukupnu tangencijalnu silu na stijenkama cijevi.
 
 1. **Gradijent brzine** derivacijom po $r$: $dv/dr = -\beta r/(2\mu)$
 2. **Newtonov zakon** $\tau = \mu\,dv/dr$ daje opće naprezanje:
-$<span class="math inline">\(\tau(r) = -\frac{\beta r}{2}\)</span>$
+$\tau_{xr}(r) = -\frac{\beta r}{2},\qquad r\ge 0$
 3. **Naprezanje na stijenci** ($r = d/2$):
 $$\tau_w = -\frac{\beta d}{4},\qquad |\tau_w|=\frac{\beta d}{4}$$
 4. **Naprezanje na $r = d/4$:**
 $$\tau_{d/4} = -\frac{\beta d}{8}$$
-5. **Ukupna sila** na plaštu $A = \pi d L$:
-$$F_{\tau s} = \tau_w\pi dL=-\frac{\beta d^2\pi L}{4},\qquad |F_{\tau s}|=\frac{\beta d^2\pi L}{4}$$
+5. **Akcija i reakcija** na plaštu $A = \pi dL$, uz os $x$ u smjeru toka:
+$$F_{\text{stijenka}\to\text{fluid}}=-|\tau_w|\pi dL=-\frac{\beta d^2\pi L}{4},\qquad F_{\text{fluid}\to\text{stijenka}}=+\frac{\beta d^2\pi L}{4}.$$
 
-Derivacija $dv/dr$ ovdje je lokalni nagib parabole profila brzine. U osi je nagib, a time i smično naprezanje, jednak nuli; prema stijenci njegov iznos raste. Negativan predznak govori o smjeru sile fluida na okolni fluid ili stijenku, dok je za veličinu opterećenja važan <span class="math inline">\(|\tau|\)</span>.
+Derivacija $du/dr$ daje lokalno smično naprezanje na plohi čija je normala usmjerena radijalno prema van. U osi je nagib nula; prema stijenci iznos raste. Stijenka koči fluid, a fluid vuče stijenku u smjeru toka. U crtežu koristimo potpisanu koordinatu presjeka $y$ i $r=|y|$, pa je $\tau_{xy}=-\beta y/2$, dok je intenzitet $|\tau|=\beta r/2$.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div class="mf1-lab" id="z6-advanced-widget" data-widget-role="application" style="max-width: 900px; margin: 20px auto; font-family: 'Inter', sans-serif; padding: 25px; background: #f8fafc; border: 1px solid #e2e8f0;">
-    <h4 style="text-align: center; color: #1e293b; margin-top: 0; font-weight: 700;">Zadatak 4 · Newtonov zakon viskoznosti (Poiseuilleov tok)</h4>
-    <p class="widget-idea">Mijenjaš svojstva cijevi i toka; skica pokazuje kako se profil brzine i smično naprezanje mijenjaju po radijusu.</p>
-    <div class="widget-equation"><span class="math inline">\(\tau(r) = -\frac{\beta r}{2}\)</span></div>
-
-    <div style="position: relative; margin-bottom: 20px;">
-        <canvas id="z6-main-canvas" width="800" height="320" style="width: 100%; height: 320px; background: #ffffff; border: 1px solid #e2e8f0; cursor: crosshair;"></canvas>
-        <div id="z6-inspect-tooltip" style="position: absolute; display: none; background: rgba(15, 23, 42, 0.9); color: white; padding: 8px 12px; font-size: 0.75rem; pointer-events: none; z-index: 10;">
-            <b>Radijalni položaj:</b> <span id="z6-tt-r">0</span> mm<br>
-            <b>Brzina v:</b> <span id="z6-tt-v">0</span> m/s<br>
-            <b>Naprezanje τ:</b> <span id="z6-tt-tau">0</span> Pa
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: #ffffff; padding: 15px; border: 1px solid #e2e8f0;">
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600; color: #475569;">Viskoznost (μ): <span id="z6-v-mu">1.0</span> mPa·s</label>
-            <input type="range" id="z6-mu" min="1" max="50" step="1" value="10" style="width: 100%; accent-color: #3b82f6;">
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600; color: #475569;">Gradijent tlaka (β): <span id="z6-v-beta">100</span> Pa/m</label>
-            <input type="range" id="z6-beta" min="10" max="500" step="10" value="100" style="width: 100%; accent-color: #3b82f6;">
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600; color: #475569;">Promjer (d): <span id="z6-v-d">100</span> mm</label>
-            <input type="range" id="z6-d" min="40" max="150" step="5" value="100" style="width: 100%; accent-color: #3b82f6;">
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600; color: #475569;">Duljina cijevi (L): <span id="z6-v-l">2.0</span> m</label>
-            <input type="range" id="z6-l" min="0.5" max="10" step="0.5" value="2" style="width: 100%; accent-color: #3b82f6;">
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 15px;">
-        <div style="background: #fee2e2; border: 1px solid #fecaca; padding: 14px;">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #b91c1c; text-transform: uppercase; margin-bottom: 4px;">Intenzitet naprezanja na stijenci</div>
-            <div style="font-size: 1.35rem; font-weight: 800; color: #991b1b;"><span id="z6-res-tau-wall">2.50</span> Pa</div>
-            <div style="font-size: 0.78rem; color: #7f1d1d;">|τ_w| = βd / 4</div>
-        </div>
-        <div style="background: #fff7ed; border: 1px solid #fed7aa; padding: 14px;">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #c2410c; text-transform: uppercase; margin-bottom: 4px;">Naprezanje na r = d/4</div>
-            <div style="font-size: 1.35rem; font-weight: 800; color: #9a3412;"><span id="z6-res-tau-quarter">1.25</span> Pa</div>
-            <div style="font-size: 0.78rem; color: #9a3412;">tau_d/4 = beta d / 8</div>
-        </div>
-        <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 14px;">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #1d4ed8; text-transform: uppercase; margin-bottom: 4px;">Intenzitet ukupne sile na stijenci</div>
-            <div style="font-size: 1.35rem; font-weight: 800; color: #1e40af;"><span id="z6-res-force-wall">1.57</span> N</div>
-            <div style="font-size: 0.78rem; color: #1e3a8a;">|F_τ| = |τ_w|πdL</div>
-        </div>
-        <div style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 14px;">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #0f766e; text-transform: uppercase; margin-bottom: 4px;">Maksimalna brzina na osi</div>
-            <div style="font-size: 1.35rem; font-weight: 800; color: #115e59;"><span id="z6-res-vmax">1.56</span> m/s</div>
-            <div style="font-size: 0.78rem; color: #134e4a;">v_max u središtu presjeka</div>
-        </div>
-    </div>
-
-    <div style="margin-top:12px; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse; font-size:0.82rem; color:#334155;">
-            <thead>
-                <tr style="text-align:left; border-bottom:1px solid #e2e8f0;">
-                    <th style="padding:6px 4px;">Veličina</th>
-                    <th style="padding:6px 4px;">Vrijednost</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td style="padding:6px 4px;"><span class="math inline">\(\tau(r=0)\)</span></td><td style="padding:6px 4px;"><span id="z6-res-tau-center">0.00</span> Pa</td></tr>
-                <tr><td style="padding:6px 4px;"><span class="math inline">\(\tau(r=d/4)\)</span></td><td style="padding:6px 4px;"><span id="z6-res-tau-quarter-tbl">1.25</span> Pa</td></tr>
-                <tr><td style="padding:6px 4px;"><span class="math inline">\(\tau(r=d/2)\)</span></td><td style="padding:6px 4px;"><span id="z6-res-tau-wall-tbl">2.50</span> Pa</td></tr>
-                <tr><td style="padding:6px 4px;"><span class="math inline">\(v_{max}\)</span></td><td style="padding:6px 4px;"><span id="z6-res-vmax-tbl">1.56</span> m/s</td></tr>
-                <tr><td style="padding:6px 4px;"><span class="math inline">\(F_{total}\)</span></td><td style="padding:6px 4px;"><span id="z6-res-force-wall-tbl">1.57</span> N</td></tr>
-            </tbody>
-        </table>
-    </div>
+<div class="mf1-lab" id="z6-advanced-widget" data-widget-role="application">
+  <h4>Zadatak 4 · Od profila brzine do naprezanja na stijenci</h4>
+  <p class="widget-idea">Pomakni sondu kroz isti presjek. Nagib profila daje potpisano naprezanje, a bilanca tlaka određuje silu na stijenci.</p>
+  <div class="widget-equation">u(y) = β(R² − y²)/(4μ) · τ<sub>xy</sub> = μ du/dy = −βy/2 · r = |y|</div>
+  <div id="z6-regime-reading" class="z6-regime-reading"></div>
+  <div class="z6-scene"><canvas id="z6-main-canvas" width="900" height="430" tabindex="0" aria-label="Položaj sonde y: povuci kroz presjek ili koristi strelice gore i dolje"></canvas></div>
+  <div id="z6-probe-reading" class="z6-probe-reading" aria-live="polite"></div>
+  <div class="z6-controls">
+    <div><label for="z6-mu">Viskoznost μ: <strong><span id="z6-v-mu">40</span> mPa·s</strong></label><input type="range" id="z6-mu" min="1" max="50" step="1" value="40"></div>
+    <div><label for="z6-beta">Gradijent β = −dp/dx: <strong><span id="z6-v-beta">100</span> Pa/m</strong></label><input type="range" id="z6-beta" min="10" max="500" step="10" value="100"></div>
+    <div><label for="z6-d">Promjer D: <strong><span id="z6-v-d">100</span> mm</strong></label><input type="range" id="z6-d" min="40" max="150" step="5" value="100"></div>
+  </div>
+  <details class="mf1-parameters"><summary>Duljina promatrane dionice</summary><div class="z6-length"><label for="z6-l">Duljina L: <strong><span id="z6-v-l">2,0</span> m</strong></label><input type="range" id="z6-l" min="0.5" max="10" step="0.5" value="2"><p>Pri zadanom gradijentu β, duljina mijenja Δp = βL i ukupnu silu; profil u(y) ostaje isti.</p></div></details>
+  <div class="z6-results">
+    <div><small>Maksimalna brzina na osi</small><strong><span id="z6-res-vmax">1,56</span> m/s</strong><span>ū = u<sub>max</sub>/2</span></div>
+    <div><small>Iznos naprezanja na stijenci</small><strong><span id="z6-res-tau-wall">2,50</span> Pa</strong><span>|τ<sub>w</sub>| = βD/4</span></div>
+    <div><small>Fluid → stijenka, u smjeru +x</small><strong>+<span id="z6-res-force-wall">1,57</span> N</strong><span>Reakcija na fluid je suprotna.</span></div>
+  </div>
+  <div id="z6-force-balance" class="z6-balance"></div>
+  <div class="z6-decision"></div>
+  <div class="z6-domain"></div>
+  <details class="mf1-parameters"><summary>Vrijednosti u karakterističnim točkama</summary><div class="z6-values">
+    <span>Os: |τ| = <strong id="z6-res-tau-center">0,00</strong> Pa</span>
+    <span>r = D/4: |τ| = <strong id="z6-res-tau-quarter">1,25</strong> Pa</span>
+    <span>Modelni protok Q = <strong id="z6-res-q"></strong> L/s</span>
+  </div></details>
 </div>
-
-<div class="fizikalni-uvid">
-Profil pokazuje da je intenzitet smičnog naprezanja <span class="math inline">\(|\tau|\)</span> najveći na stijenci, a jednak nuli na osi cijevi.
-</div>
-
+<style>
+#z6-advanced-widget{max-width:980px;margin:1.5rem auto;padding:20px;border:1px solid #cbdde8;border-radius:18px;background:#fff;color:#17324b}
+#z6-advanced-widget .z6-scene{margin:14px 0 8px;border:1px solid #d5e2eb;border-radius:12px;background:#fff;overflow:hidden}
+#z6-advanced-widget #z6-main-canvas{display:block;width:100%;height:auto;max-width:100%;touch-action:none;cursor:crosshair}
+#z6-advanced-widget .z6-probe-reading{padding:10px 12px;background:#fff5f3;border-left:3px solid #b93645;font-size:.94rem;line-height:1.65;color:#7f2637;font-variant-numeric:tabular-nums}
+#z6-advanced-widget .z6-regime-reading{margin-top:10px;padding:8px 12px;border-left:3px solid #16836a;background:#eef9f5;color:#145d4c;font-weight:650;line-height:1.5}
+#z6-advanced-widget .z6-regime-reading[data-domain="formal"]{border-color:#b45309;background:#fff6e8;color:#8a4212}
+#z6-advanced-widget .z6-controls,#z6-advanced-widget .z6-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+#z6-advanced-widget .z6-controls>div,#z6-advanced-widget .z6-results>div{min-width:0;padding:12px;border:1px solid #d5e2eb;border-radius:10px;background:#f8fbfd}
+#z6-advanced-widget label{display:block;margin-bottom:8px;font-weight:650;line-height:1.5}
+#z6-advanced-widget input{width:100%;accent-color:#147795}
+#z6-advanced-widget .z6-results small,#z6-advanced-widget .z6-results strong,#z6-advanced-widget .z6-results span{display:block}
+#z6-advanced-widget .z6-results strong{font-size:1.35rem;margin:5px 0;color:#0b657c}
+#z6-advanced-widget .z6-results strong span{display:inline}
+#z6-advanced-widget .z6-results>div>span{font-size:.85rem;color:#526879}
+#z6-advanced-widget .z6-balance{padding:10px 12px;color:#0f665b;background:#eef9f5;line-height:1.6;font-variant-numeric:tabular-nums}
+#z6-advanced-widget .z6-length{padding:10px 0;max-width:550px}
+#z6-advanced-widget .z6-length p{font-size:.9rem;line-height:1.5;margin:10px 0}
+#z6-advanced-widget .z6-values{display:grid;gap:8px;padding:10px 0}
+@media(max-width:620px){#z6-advanced-widget .z6-controls,#z6-advanced-widget .z6-results{grid-template-columns:1fr}#z6-advanced-widget .z6-probe-reading{font-size:.9rem}}
+</style>
 <script>
-(function () {
-  const canvas = document.getElementById("z6-main-canvas");
-  const ctx = canvas.getContext("2d");
-  const muS = document.getElementById("z6-mu");
-  const betaS = document.getElementById("z6-beta");
-  const dS = document.getElementById("z6-d");
-  const lS = document.getElementById("z6-l");
-  const tooltip = document.getElementById("z6-inspect-tooltip");
-
-  let particles = Array.from({ length: 70 }, () => ({
-    x: Math.random(),
-    y: Math.random() * 2 - 1,
-    size: 1.8 + Math.random() * 1.6,
-  }));
-  let mousePos = null;
-  let dragMode = false;
-  let probeYRatio = null;
-
-  canvas.onmousemove = (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mousePos = { x: (e.clientX - rect.left) * canvas.width / rect.width, y: (e.clientY - rect.top) * canvas.height / rect.height };
-    if (dragMode && probeYRatio !== null) {
-      probeYRatio = Math.max(0, Math.min(1, mousePos.y / canvas.height));
-    }
-    draw();
-  };
-  canvas.onmouseleave = () => {
-    mousePos = null;
-    tooltip.style.display = "none";
-    draw();
-  };
-  canvas.onmousedown = (e) => {
-    const rect = canvas.getBoundingClientRect();
-    dragMode = true;
-    probeYRatio = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    draw();
-  };
-  window.addEventListener("mouseup", () => {
-    dragMode = false;
-  });
-
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
+(() => {
+  const root=document.getElementById('z6-advanced-widget');
+  const canvas=MF1.vectorSurface(root.querySelector('#z6-main-canvas')),ctx=canvas.getContext('2d');
+  const q=selector=>root.querySelector(selector),muS=q('#z6-mu'),betaS=q('#z6-beta'),dS=q('#z6-d'),lS=q('#z6-l');
+  const fmt=(value,digits=2)=>value.toLocaleString('hr-HR',{minimumFractionDigits:digits,maximumFractionDigits:digits});
+  const sign=value=>value>0?'+':value<0?'−':'';
+  const signed=(value,digits=2)=>sign(value)+fmt(Math.abs(value),digits);
+  let eta=.5,drag=false,geometry;
+  const ns='http://www.w3.org/2000/svg';
+  canvas.setAttribute('role','slider');canvas.setAttribute('aria-orientation','vertical');
+  function line(x1,y1,x2,y2,color,width=1.5,dash=[]){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);}
+  function text(value,x,y,color='#475f70',size=15,weight=400,align='left'){ctx.fillStyle=color;ctx.font=weight+' '+size+'px Inter, system-ui, sans-serif';ctx.textAlign=align;ctx.fillText(value,x,y);ctx.textAlign='left';}
+  function arrow(x1,y,x2,color,width=2.5,traction){if(Math.abs(x2-x1)<.05)return;line(x1,y,x2,y,color,width);if(traction)canvas.querySelector('[data-vector-scene]').lastElementChild.setAttribute('data-z6-traction',traction);const dir=Math.sign(x2-x1),head=Math.min(7,Math.abs(x2-x1)*.38);ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x2,y);ctx.lineTo(x2-dir*head,y-3.5);ctx.lineTo(x2-dir*head,y+3.5);ctx.closePath();ctx.fill();}
+  function marker(x,y,name){const node=document.createElementNS(ns,'circle');for(const[k,v]of Object.entries({cx:x,cy:y,r:5,fill:'#b93645',stroke:'#fff','stroke-width':1.5,'data-z6-probe':name}))node.setAttribute(k,v);canvas.querySelector('[data-vector-scene]').append(node);}
+  function draw(){
+    const mu=+muS.value/1000,beta=+betaS.value,D=+dS.value/1000,R=D/2,L=+lS.value,rho=1000;
+    const vmax=beta*D*D/(16*mu),meanVelocity=vmax/2,flow=Math.PI*R*R*meanVelocity,Re=rho*meanVelocity*D/mu;
+    const y=eta*R,r=Math.abs(y),u=vmax*(1-eta*eta),signedShear=-beta*y/2,tau=Math.abs(signedShear),wallStress=beta*D/4;
+    const pressureForce=beta*L*Math.PI*R*R,shearForce=wallStress*Math.PI*D*L;
+    const decade=10**Math.floor(Math.log10(vmax)),axisMax=[1,2,5,10].find(n=>n*decade>=vmax)*decade;
+    const compact=(root.clientWidth||window.innerWidth)<620,W=compact?420:900,H=compact?735:430;
+    if(canvas.width!==W)canvas.width=W;if(canvas.height!==H)canvas.height=H;
+    ctx.clearRect(0,0,W,H);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
+    const top=compact?95:95,bottom=compact?295:315,span=bottom-top,chartTop=compact?465:top,chartBottom=chartTop+span;
+    const channelX=compact?45:50,channelW=compact?330:320,velocityX=channelX+22,chartX=compact?95:545,plotW=260;
+    const py=top+(1-eta)*span/2,plotY=chartTop+(1-eta)*span/2,px=chartX+u/axisMax*plotW;
+    geometry={compact,top,bottom,chartTop,chartBottom,channelX,channelW,chartX,plotW,width:W,height:H};
+    const layout=compact?'stacked':'side';
+    root.mf1ProfessorState={mu,beta,D,L,r,y,R,u,tau,signedShear,wallStress,pressureForce,shearForce,fluidOnWallForce:shearForce,wallOnFluidForce:-shearForce,flow,vmax,meanVelocity,rho,Re,ReLimit:2320,axisMax,probePixel:py,probeChartY:plotY,probeChartX:px,topWall:top,bottomWall:bottom,chartTop,chartBottom,layout};
+    q('#z6-v-mu').textContent=fmt(mu*1000,0);q('#z6-v-beta').textContent=fmt(beta,0);q('#z6-v-d').textContent=fmt(D*1000,0);q('#z6-v-l').textContent=fmt(L,1);
+    q('#z6-res-tau-wall').textContent=fmt(wallStress);q('#z6-res-tau-quarter').textContent=fmt(wallStress/2);q('#z6-res-force-wall').textContent=fmt(shearForce);q('#z6-res-vmax').textContent=fmt(vmax);q('#z6-res-tau-center').textContent=fmt(0);q('#z6-res-q').textContent=fmt(flow*1000,3);
+    q('#z6-probe-reading').textContent='P: y = '+signed(y*1000,1)+' mm; r = '+fmt(r*1000,1)+' mm · u = '+fmt(u,3)+' m/s · τxy = '+signed(signedShear)+' Pa · |τ| = '+fmt(tau)+' Pa';
+    q('#z6-regime-reading').textContent='Re = '+fmt(Re,0)+' · '+(Re<2320?'potpuno razvijen laminarni model':Re<4000?'prijelazno područje: prikazana je formalno zadana parabola':'izvan laminarne primjene: prikazana je formalno zadana parabola');
+    q('#z6-regime-reading').dataset.domain=Re<2320?'laminar':'formal';
+    q('#z6-force-balance').textContent='Na fluid: ΔpA + Fstijenka→fluid = '+fmt(pressureForce,3)+' − '+fmt(shearForce,3)+' = 0 N. Δp = βL = '+fmt(beta*L,1)+' Pa.';
+    canvas.setAttribute('aria-valuemin',-R*1000);canvas.setAttribute('aria-valuemax',R*1000);canvas.setAttribute('aria-valuenow',y*1000);canvas.setAttribute('aria-valuetext',q('#z6-probe-reading').textContent);
+    // Both panels use one physical ordinate. The mobile version only translates the second panel vertically.
+    text('Tok +x →',channelX,27,'#17324b',17,700);
+    text('Presjek: y je potpisan, r = |y|',channelX,50,'#475f70',compact?14:15);
+    ctx.fillStyle='#e4f2f8';ctx.fillRect(channelX,top,channelW,span);
+    ctx.fillStyle='#344d60';ctx.fillRect(channelX,top-10,channelW,8);ctx.fillRect(channelX,bottom+2,channelW,8);
+    line(channelX,(top+bottom)/2,channelX+channelW,(top+bottom)/2,'#8da6b7',1,[5,4]);
+    // These blue arrows and the right-hand profile use exactly the same pixels per m/s.
+    for(const fraction of [-.75,-.5,0,.5,.75]){const speed=vmax*(1-fraction*fraction),yy=top+(1-fraction)*span/2;arrow(velocityX,yy,velocityX+speed/axisMax*plotW,'#1675ad',2.5);}
+    // Wall traction acts upstream on the fluid at BOTH walls. Its reaction acts downstream on the wall.
+    arrow(channelX+210,top+16,channelX+130,'#b93645',3,'wall-on-fluid-top');
+    arrow(channelX+210,bottom-16,channelX+130,'#b93645',3,'wall-on-fluid-bottom');
+    arrow(channelX+100,top-24,channelX+180,'#a46521',3,'fluid-on-wall');
+    text('fluid → stijenka',channelX+188,top-20,'#8b561d',compact?13:14);
+    text('stijenka → fluid: −|τw|',channelX+18,bottom+38,'#9f2839',compact?14:15);
+    text('Sile: smjer shematski; iznos je u rezultatu.',channelX,bottom+61,'#5b7080',compact?12.5:13.5);
+    text('Dionica L; uzdužna geometrija shematska.',channelX,bottom+81,'#5b7080',compact?12.5:13.5);
+    const titleY=compact?410:27;
+    text('Ista sonda na profilu u(y)',compact?45:475,titleY,'#17324b',17,700);
+    text('y [mm]',chartX-12,chartTop-21,'#475f70',14,400,'right');
+    line(chartX,chartTop,chartX,chartBottom,'#607d91');
+    line(chartX,chartBottom,chartX+plotW,chartBottom,'#607d91');
+    const physicalY=value=>chartTop+(1-value/R)*span/2;
+    for(const fraction of [1,.5,0,-.5,-1]){const yy=physicalY(fraction*R);line(chartX,yy,chartX+plotW,yy,'#dbe6ed',1,[3,4]);text(signed(fraction*R*1000,0),chartX-12,yy+5,'#526b7e',14,400,'right');}
+    const digits=axisMax<.1?3:axisMax<10?2:1;
+    for(let i=0;i<=4;i++)text(fmt(axisMax*i/4,digits),chartX+plotW*i/4,chartBottom+23,'#526b7e',13,400,'center');
+    text('u [m/s] · automatsko mjerilo',chartX+plotW/2,chartBottom+49,'#475f70',compact?13:14,400,'center');
+    ctx.fillStyle='#e1effa';ctx.beginPath();ctx.moveTo(chartX,chartTop);
+    for(let i=0;i<=100;i++){const e=1-2*i/100;ctx.lineTo(chartX+vmax*(1-e*e)/axisMax*plotW,chartTop+i/100*span);}
+    ctx.lineTo(chartX,chartBottom);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#176da9';ctx.lineWidth=3;ctx.beginPath();
+    for(let i=0;i<=100;i++){const e=1-2*i/100,x=chartX+vmax*(1-e*e)/axisMax*plotW,yy=chartTop+i/100*span;if(i===0)ctx.moveTo(x,yy);else ctx.lineTo(x,yy);}ctx.stroke();
+    if(compact){line(channelX,py,channelX+channelW,py,'#c46974',1.5,[4,4]);line(chartX,plotY,px,plotY,'#c46974',1.5,[4,4]);}
+    else line(channelX,py,px,plotY,'#c46974',1.5,[4,4]);
+    line(px,plotY,px,chartBottom,'#c46974',1,[4,4]);
+    marker(velocityX,py,'channel');marker(px,plotY,'profile');
+    text('P',velocityX-15,py-9,'#9f2839',15,700);
+    const labelX=px>chartX+plotW-25?px-13:px+11;
+    text('P',labelX,Math.max(chartTop+15,plotY-10),'#9f2839',15,700);
+    if(!compact)text('Plave strelice i graf: ista skala brzine.',475,396,'#5b7080',14);
+    const rr=Math.abs(eta);
+    MF1.decision(q('.z6-decision'),{title:'Mjesto sonde → lokalni nagib → naprezanje',branches:[
+      {when:'y = 0: os cijevi',active:rr<1e-9,equation:'du/dy = 0; τxy = 0; u = umax',then:'Najbrži sloj ne mora imati najveće smicanje: simetrija poništava nagib.'},
+      {when:'0 < |y| < R: unutrašnjost',active:rr>=1e-9&&rr<1-1e-9,equation:'τxy = −βy/2; |τ| = βr/2',then:'Na plohi s normalom +y naprezanje je '+signed(signedShear)+' Pa; iznos raste prema stijenci.'},
+      {when:'|y| = R: stijenka',active:rr>=1-1e-9,equation:'u = 0; |τw| = βR/2',then:'Prianjanje daje nultu brzinu. Stijenka koči fluid na obje strane, a fluid vuče stijenku u smjeru toka.'}
+    ],summary:'β = −dp/dx > 0. Crvene strelice: stijenka na fluid. Smeđu reakciju osjeća stijenka. Strelice ↑/↓ i povlačenje pomiču sondu.'});
+    MF1.decision(q('.z6-domain'),{title:'Je li zadani parabolični profil primjenjiv?',branches:[
+      {when:'Re < 2320: laminarno područje',active:Re<2320,equation:'ū = umax/2; Re = ρūD/μ',then:'Re = '+fmt(Re,0)+'. Profil odgovara ustaljenom, potpuno razvijenom laminarnom toku.'},
+      {when:'2320 ≤ Re < 4000: prijelazno područje',active:Re>=2320&&Re<4000,equation:'Re = ρβD³/(32μ²)',then:'Re = '+fmt(Re,0)+'. Prikazane brojke su vrijednosti zadanog laminarnog profila; stvarno stanje osjetljivo je na smetnje.'},
+      {when:'Re ≥ 4000: izvan laminarne primjene',active:Re>=4000,equation:'Parabola je formalno zadani profil',then:'Re = '+fmt(Re,0)+'. Brojke nisu predviđanje stvarnog turbulentnog profila. Bilanca ΔpA = |Fstijenka→fluid| ostaje valjana za potpuno razvijen tok.'}
+    ],summary:'Modelni Newtonski fluid: ρ = 1000 kg/m³, μ je neovisni parametar. Pragovi su inženjerski orijentiri. Dionica je iza ulaznog područja; zanemareni su rubni učinci.'});
   }
-
-  function panel(ctx, x, y, w, h, title, accent) {
-    ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#dbeafe";
-    ctx.lineWidth = 1.5;
-    roundRect(ctx, x, y, w, h, 16, true, true);
-    ctx.fillStyle = accent;
-    ctx.font = "600 13px Inter";
-    ctx.fillText(title, x + 14, y + 24);
+  function moveFromPointer(event){
+    if(!geometry)return;const b=canvas.getBoundingClientRect(),yy=(event.clientY-b.top)*geometry.height/b.height;
+    const panelTop=geometry.compact&&yy>geometry.chartTop-55?geometry.chartTop:geometry.top;
+    eta=Math.max(-1,Math.min(1,1-2*(yy-panelTop)/(geometry.bottom-geometry.top)));draw();
   }
-
-  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-    if (fill) ctx.fill();
-    if (stroke) ctx.stroke();
-  }
-
-  function drawArrow(ctx, x1, y1, x2, y2, color, width = 2) {
- if(Math.hypot(x2-x1,y2-y1)<1e-9)return;
-    const headlen = Math.min(8,Math.hypot(x2-x1,y2-y1)*.4);
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-    ctx.fill();
-  }
-
-  function draw() {
-    const mu = parseFloat(muS.value) / 1000;
-    const beta = parseFloat(betaS.value);
-    const d_mm = parseFloat(dS.value);
-    const L = parseFloat(lS.value);
-    const R = d_mm / 2;
-    const d_m = d_mm / 1000;
-    const tauWall = (beta * d_m) / 4;
-    const tauQuarter = (beta * d_m) / 8;
-    const v_max = (beta * d_m * d_m) / (16 * mu);
-    const F_tau = tauWall * Math.PI * d_m * L;
-    const refV=6.25, decade=10**Math.floor(Math.log10(Math.max(v_max,refV)));
-    const axisMax=[1,2,5,10].find(x=>x*decade>=Math.max(v_max,refV))*decade;
-
-    document.getElementById("z6-v-mu").innerText = (mu * 1000).toFixed(0);
-    document.getElementById("z6-v-beta").innerText = beta;
-    document.getElementById("z6-v-d").innerText = d_mm;
-    document.getElementById("z6-v-l").innerText = L.toFixed(1);
-    document.getElementById("z6-res-tau-wall").innerText = tauWall.toFixed(2);
-    document.getElementById("z6-res-tau-quarter").innerText = tauQuarter.toFixed(2);
-    document.getElementById("z6-res-force-wall").innerText = F_tau.toFixed(2);
-    document.getElementById("z6-res-vmax").innerText = v_max.toFixed(2);
-    document.getElementById("z6-res-tau-center").innerText = "0.00";
-    document.getElementById("z6-res-tau-quarter-tbl").innerText = tauQuarter.toFixed(2);
-    document.getElementById("z6-res-tau-wall-tbl").innerText = tauWall.toFixed(2);
-    document.getElementById("z6-res-vmax-tbl").innerText = v_max.toFixed(2);
-    document.getElementById("z6-res-force-wall-tbl").innerText = F_tau.toFixed(2);
-
-    const w = canvas.width;
-    const h = canvas.height;
-    const left = { x: 24, y: 22, w: 318, h: 276 };
-    const right = { x: 366, y: 22, w: 410, h: 276 };
-    const channel = {
-      x: left.x + 26,
-      y: left.y + 46,
-      w: left.w - 52,
-      h: left.h - 88,
-    };
-    const cy = channel.y + channel.h / 2;
-    const drawR = Math.min(channel.h * 0.43, 92);
-    const topWall = cy - drawR;
-    const bottomWall = cy + drawR;
-    const chart = {
-      x: right.x + 54,
-      y: right.y + 34,
-      w: right.w - 88,
-      h: right.h - 68,
-    };
-
-    ctx.clearRect(0, 0, w, h);
-
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-    bgGrad.addColorStop(0, "#f8fbff");
-    bgGrad.addColorStop(1, "#eef6ff");
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, w, h);
-
-    panel(ctx, left.x, left.y, left.w, left.h, "Cijev: normirani r/R i x/L", "#0f766e");
-    panel(ctx, right.x, right.y, right.w, right.h, "Profil brzine v(r)", "#1d4ed8");
-
-    // Left panel: channel
-    const fluidGrad = ctx.createLinearGradient(channel.x, topWall, channel.x, bottomWall);
-    fluidGrad.addColorStop(0, "rgba(191, 219, 254, 0.55)");
-    fluidGrad.addColorStop(0.5, "rgba(59, 130, 246, 0.18)");
-    fluidGrad.addColorStop(1, "rgba(191, 219, 254, 0.55)");
-    ctx.fillStyle = fluidGrad;
-    roundRect(ctx, channel.x, topWall, channel.w, bottomWall - topWall, 18, true, false);
-
-    ctx.fillStyle = "#334155";
-    ctx.fillRect(channel.x, topWall - 12, channel.w, 10);
-    ctx.fillRect(channel.x, bottomWall + 2, channel.w, 10);
-
-    ctx.strokeStyle = "#94a3b8";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([6, 6]);
-    ctx.beginPath();
-    ctx.moveTo(channel.x, cy);
-    ctx.lineTo(channel.x + channel.w, cy);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.font = "12px Inter";
-    ctx.fillStyle = "#475569";
-    ctx.fillText("os cijevi", channel.x + 6, cy - 8);
-    ctx.fillText("stijenka", channel.x + 6, topWall - 16);
-    ctx.fillText("stijenka", channel.x + 6, bottomWall + 28);
-
-    // Layer arrows
-    for (let i = 0; i <= 8; i++) {
-      const y = topWall + (i / 8) * (bottomWall - topWall);
-      const r_mm = ((y - cy) / drawR) * R;
-      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
-      const len = (v / axisMax) * 120;
-      if (len < 0.1) continue;
-      const alpha = 0.2 + 0.55 * (v / Math.max(v_max, 1e-6));
-      drawArrow(ctx, channel.x + 18, y, channel.x + 18 + len, y, `rgba(37, 99, 235, ${alpha})`, 2.5);
-    }
-
-    // Particles
-    particles.forEach((p) => {
-      const r_mm = p.y * R;
-      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
-      const speedRatio = v / Math.max(v_max, 1e-6);
-      // Tracers are a static sample of the computed profile.
-      if (p.x > 1.05) p.x = -0.05;
-      const px = channel.x + p.x * channel.w;
-      const py = cy + p.y * drawR;
-      ctx.fillStyle = `rgba(14, 116, 144, ${0.25 + 0.6 * speedRatio})`;
-      ctx.beginPath();
-      ctx.arc(px, py, p.size, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // Small formula badge
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.strokeStyle = "#dbeafe";
-    roundRect(ctx, channel.x + channel.w - 150, topWall + 14, 136, 34, 10, true, true);
-    ctx.fillStyle = "#1e40af";
-    ctx.font = "600 12px Inter";
-    ctx.fillText("v(r) = vmax (1 - (r/R)^2)", channel.x + channel.w - 140, topWall + 36);
-
-    // Right panel: chart axes
-    ctx.strokeStyle = "#94a3b8";
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(chart.x, chart.y);
-    ctx.lineTo(chart.x, chart.y + chart.h);
-    ctx.lineTo(chart.x + chart.w, chart.y + chart.h);
-    ctx.stroke();
-
-    ctx.setLineDash([4, 6]);
-    for (let i = 0; i <= 4; i++) {
-      const gy = chart.y + (i / 4) * chart.h;
-      ctx.beginPath();
-      ctx.moveTo(chart.x, gy);
-      ctx.lineTo(chart.x + chart.w, gy);
-      ctx.stroke();
-    }
-    ctx.setLineDash([]);
-
-    ctx.font = "11px Inter";
-    ctx.fillStyle = "#64748b";
-    ctx.fillText("+R", chart.x - 24, chart.y + 4);
-    ctx.fillText("0", chart.x - 16, chart.y + chart.h / 2 + 4);
-    ctx.fillText("-R", chart.x - 24, chart.y + chart.h);
-    ctx.fillText("r", chart.x - 10, chart.y - 8);
-    ctx.fillText("v [m/s]", chart.x + chart.w - 45, chart.y + chart.h + 30);
-    for(let i=0;i<=4;i++){const xx=chart.x+(chart.w-12)*i/4;ctx.fillText((axisMax*i/4).toLocaleString("hr-HR",{maximumFractionDigits:2}),xx-6,chart.y+chart.h+15);}
-    ctx.save();ctx.strokeStyle="#8398a6";ctx.setLineDash([5,4]);ctx.beginPath();for(let i=0;i<=80;i++){const rr=1-i/40,xx=chart.x+(refV*(1-rr*rr)/axisMax)*(chart.w-12),yy=chart.y+i/80*chart.h;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.stroke();ctx.restore();
-
-    // Profile fill and curve
-    ctx.beginPath();
-    ctx.moveTo(chart.x, chart.y);
-    for (let i = 0; i <= 120; i++) {
-      const t = i / 120;
-      const r_mm = R - 2 * R * t;
-      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
-      const px = chart.x + (v / axisMax) * (chart.w - 12);
-      const py = chart.y + t * chart.h;
-      ctx.lineTo(px, py);
-    }
-    ctx.lineTo(chart.x, chart.y + chart.h);
-    ctx.closePath();
-    const chartFill = ctx.createLinearGradient(chart.x, chart.y, chart.x + chart.w, chart.y);
-    chartFill.addColorStop(0, "rgba(191, 219, 254, 0.15)");
-    chartFill.addColorStop(1, "rgba(59, 130, 246, 0.32)");
-    ctx.fillStyle = chartFill;
-    ctx.fill();
-
-    ctx.strokeStyle = "#2563eb";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    for (let i = 0; i <= 120; i++) {
-      const t = i / 120;
-      const r_mm = R - 2 * R * t;
-      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - (r_mm / 1000) ** 2));
-      const px = chart.x + (v / axisMax) * (chart.w - 12);
-      const py = chart.y + t * chart.h;
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    // Centerline and wall stress bars
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.9)";
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(chart.x, chart.y + chart.h / 2);
-    ctx.lineTo(chart.x + chart.w, chart.y + chart.h / 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.fillStyle="#b91c1c";ctx.font="600 12px Inter";ctx.fillText("|τw| = "+tauWall.toFixed(2)+" Pa",chart.x+chart.w-100,chart.y-12);
-
-    // Interactive highlight by radial position
-    const probeY = probeYRatio === null ? (mousePos ? mousePos.y : null) : probeYRatio * h;
-    if (probeY !== null && probeY >= topWall && probeY <= bottomWall) {
-      const r_inspect_mm = ((cy - probeY) / drawR) * R;
-      const r_m = r_inspect_mm / 1000;
-      const v = Math.max(0, (beta / (4 * mu)) * ((d_mm / 2000) ** 2 - r_m ** 2));
-      const tau = Math.abs((beta * r_m) / 2);
-      const inspectYChart = chart.y + ((R - r_inspect_mm) / (2 * R)) * chart.h;
-      const inspectXChart = chart.x + (v / axisMax) * (chart.w - 12);
-
-      tooltip.style.display = "block";
-      tooltip.style.left = (mousePos ? mousePos.x : chart.x) + 15 + "px";
-      tooltip.style.top = probeY + 15 + "px";
-      document.getElementById("z6-tt-r").innerText = r_inspect_mm.toFixed(1);
-      document.getElementById("z6-tt-v").innerText = v.toFixed(3);
-      document.getElementById("z6-tt-tau").innerText = tau.toFixed(2);
-
-      ctx.strokeStyle = "rgba(239, 68, 68, 0.42)";
-      ctx.setLineDash([5, 5]);
-      ctx.beginPath();
-      ctx.moveTo(channel.x, probeY);
-      ctx.lineTo(chart.x + chart.w, probeY);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      ctx.fillStyle = "#ef4444";
-      ctx.beginPath();
-      ctx.arc(channel.x + 14, probeY, 4.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(inspectXChart, inspectYChart, 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      drawArrow(
-        ctx,
-        channel.x + channel.w - 86,
-        probeY,
-        channel.x + channel.w - 86 - (tauWall===0?0:58*tau/tauWall),
-        probeY,
-        "#ef4444",
-        2.5,
-      );
-    } else {
-      tooltip.style.display = "none";
-    }
-
-    // Bottom legends
-    ctx.fillStyle = "#64748b";
-    ctx.font = "12px Inter";
-    ctx.fillText("sporije uz stijenku", channel.x, left.y + left.h - 18);
-    ctx.fillText("najbrže na osi", channel.x + channel.w - 92, left.y + left.h - 18);
-    ctx.fillText("Isprekidano: početnih 6,25 m/s", chart.x, right.y + right.h - 5);
-
-  }
-
-  [muS, betaS, dS, lS].forEach((slider) => slider.addEventListener("input", draw));
-  window.addEventListener("resize", draw);
+  canvas.addEventListener('pointerdown',event=>{drag=true;canvas.focus();canvas.setPointerCapture?.(event.pointerId);moveFromPointer(event);});
+  canvas.addEventListener('pointermove',event=>{if(drag)moveFromPointer(event);});
+  canvas.addEventListener('pointerup',()=>{drag=false;});canvas.addEventListener('pointercancel',()=>{drag=false;});
+  canvas.addEventListener('keydown',event=>{if(!['ArrowUp','ArrowDown','Home','End'].includes(event.key))return;event.preventDefault();eta=event.key==='Home'?1:event.key==='End'?-1:Math.max(-1,Math.min(1,Math.round((eta+(event.key==='ArrowUp'?.1:-.1))*10)/10));draw();});
+  [muS,betaS,dS,lS].forEach(input=>input.addEventListener('input',draw));window.addEventListener('resize',draw);
+  if(window.ResizeObserver)new ResizeObserver(()=>draw()).observe(root);
   draw();
 })();
 </script>
+
 ```
 
 <br>

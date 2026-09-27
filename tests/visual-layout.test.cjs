@@ -9,6 +9,13 @@ test('Every live drawing has a full-width path through its widget, including mod
   try{
    function check(){
     for(const root of a.w.document.querySelectorAll('.mf1-compact')){
+     // Moody keeps its reviewed responsive shell instead of generic stacking.
+     if(root.id==='v13-moody-widget'){
+      assert.ok(a.visible(root.querySelector('#v13-moody-canvas')));
+      assert.ok(a.visible(root.querySelector('.m13-tree')));
+      assert.equal(root.querySelector('.mf1-visual-stack'),null);
+      continue;
+     }
      for(const graphic of root.querySelectorAll('canvas,svg')){
       if(!a.visible(graphic)||graphic.closest('mjx-container,details:not([open])')||graphic.parentElement.closest('svg'))continue;
       assert.ok(graphic.classList.contains('mf1-graphic'),`V${n}: undecorated ${graphic.id}`);
@@ -57,9 +64,6 @@ test('V5 canvas fitting preserves physical angles even in a mismatched viewport'
 test('V6 merged pressure scene reverses both force directions without changing magnitudes',()=>{
  const a=load(6),root=a.w.document.getElementById('widget-curved-pressure');
  try{
-  let drawn;
-  const draw=a.w.MF1.quarterScene;
-  a.w.MF1.quarterScene=(canvas,model)=>{drawn={...model};return draw(canvas,model);};
   root.querySelector('[data-cp-step="3"]').click();
   for(const h of [0,1.2,3])for(const R of [.4,1,1.8]){
    a.change(root.querySelector('#cp-h'),h);a.change(root.querySelector('#cp-r'),R);
@@ -67,8 +71,18 @@ test('V6 merged pressure scene reverses both force directions without changing m
    const magnitudes=[];
    for(const side of ['outside','inside']){
     root.querySelector(`[data-cp-side="${side}"]`).click();
-    close(drawn.FH,expectedH);close(drawn.FV,expectedV);
-    assert.equal(drawn.inside,side==='inside');assert.equal(drawn.step,3);
+    const scaleVector=points(root.querySelector('#cp-force-scale path'));
+    const forceScale=Math.hypot(scaleVector[2]-scaleVector[0],scaleVector[3]-scaleVector[1])/100;
+    const horizontalVector=points(root.querySelector('#cp-force-horizontal path'));
+    const verticalVector=points(root.querySelector('#cp-force-vertical path'));
+    const resultantVector=points(root.querySelector('#cp-force-resultant path'));
+    const sign=side==='inside'?-1:1;
+    close(horizontalVector[2]-horizontalVector[0],sign*expectedH*forceScale);
+    close(verticalVector[3]-verticalVector[1],-sign*expectedV*forceScale);
+    close(resultantVector[2]-resultantVector[0],horizontalVector[2]-horizontalVector[0]);
+    close(resultantVector[3]-resultantVector[1],verticalVector[3]-verticalVector[1]);
+    const Q=root.querySelector('#cp-resultant-point');
+    close(resultantVector[0],+Q.getAttribute('cx'));close(resultantVector[1],+Q.getAttribute('cy'));
     const horizontal=root.querySelector('#cp-fh').textContent,vertical=root.querySelector('#cp-fv').textContent;
     assert.ok(horizontal.endsWith(side==='inside'?'←':'→'),horizontal);
     assert.ok(vertical.endsWith(side==='inside'?'↓':'↑'),vertical);

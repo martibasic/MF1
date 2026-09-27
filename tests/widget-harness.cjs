@@ -25,6 +25,7 @@ function load(n,{rendered=false,reduced=true,labs=true}={}) {
   w.HTMLElement.prototype.scrollIntoView=function(){};
   w.SVGElement.prototype.getBBox=function(){return {x:0,y:0,width:100,height:30}};
   w.HTMLElement.prototype.getBoundingClientRect=function(){const width=+(this.getAttribute('width')||900),height=+(this.getAttribute('height')||400);return {x:0,y:0,left:0,top:0,right:width,bottom:height,width,height}};
+  w.SVGElement.prototype.getBoundingClientRect=w.HTMLElement.prototype.getBoundingClientRect;
   Object.defineProperty(w.HTMLElement.prototype,'innerText',{get(){return this.textContent},set(t){this.textContent=t}});
   w.HTMLCanvasElement.prototype.getContext=function(){
     if(canvases.has(this))return canvases.get(this).ctx;
@@ -36,6 +37,7 @@ function load(n,{rendered=false,reduced=true,labs=true}={}) {
   };
   w.eval(fs.readFileSync('assets/mf1-widgets.js','utf8'));
   w.eval(fs.readFileSync('assets/mf1-science.js','utf8'));
+  w.eval(fs.readFileSync('assets/mf1-vector.js','utf8'));
   let i=0;
   for(const script of w.document.querySelectorAll('script')){
     i++;if(script.src||(script.type&&!['text/javascript','application/javascript'].includes(script.type))||script.id==='quarto-html-after-body')continue;

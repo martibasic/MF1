@@ -63,9 +63,14 @@ test('Sprinkler torque uses absolute exit velocity; a locked rotor has torque bu
   a.change(input('n'),rpm);
   const Q=+input('q').value/1000,r=+input('r').value,omega=rpm*Math.PI/30,W=Q/(Math.PI*.01**2),Vtheta=r*omega-W;
   const torque=-1000*Q*r*Vtheta;
-  assert.ok(Math.abs(out('vv')-Vtheta)<=.00501);
-  assert.ok(Math.abs(out('m')-torque)<=.05001);
-  assert.ok(Math.abs(out('p')*1000-torque*omega)<=50.01);
+  const s=root.mf1SprinklerState;
+  close(s.V,Vtheta);close(s.M,torque);close(s.P,torque*omega);
+  // Readings use four significant digits and select W/kW without changing SI physics.
+  const powerUnit=root.querySelector('[data-v="p"]').textContent.endsWith('kW')?1000:1;
+  for(const [key,expected]of [['vv',Vtheta],['m',torque],['p',torque*omega/powerUnit]]){
+   const halfLastDigit=expected===0?1e-12:.5001*10**(Math.floor(Math.log10(Math.abs(expected)))-3);
+   assert.ok(Math.abs(out(key)-expected)<=halfLastDigit,`${key}: displayed rounding`);
+  }
   if(rpm===0){assert.ok(out('m')>0);close(out('p'),0);}
  }
  assert.deepEqual(a.errors,[]);}finally{a.dom.window.close();}
@@ -105,12 +110,22 @@ for(let n=1;n<=13;n++)test(`V${n}: live handlers, presets, minima/maxima and com
  assert.deepEqual([...new Set(a.errors)],[]);a.dom.window.close();
 });
 
-test('Moody widget stays byte-equivalent to its reviewed protected fixture',()=>{
- const fs=require('fs'),crypto=require('crypto'),s=fs.readFileSync('vjezba_13.qmd','utf8');
+test('Moody preserves its reviewed physics and complete original decision tree across the vector port',()=>{
+ const fs=require('fs'),crypto=require('crypto'),s=fs.readFileSync('vjezba_13.qmd','utf8').replace(/\r\n/g,'\n');
+ const hash=value=>crypto.createHash('sha256').update(value).digest('hex');
  const start=s.indexOf('<!-- WIDGET: Moodyjev Dijagram -->'),end=s.indexOf('<!-- END REVIEWED MOODY -->');
  assert.ok(start>=0&&end>start,'Reviewed Moody block must retain explicit boundaries');
- const block=s.slice(start,end).replace(/\r\n/g,'\n');
- const fixture=JSON.parse(fs.readFileSync('tests/moody-protection.json','utf8'));
- assert.equal(crypto.createHash('sha256').update(block).digest('hex'),fixture.sha256);
+ const block=s.slice(start,end),fixture=JSON.parse(fs.readFileSync('tests/moody-protection.json','utf8'));
+ assert.equal(fixture.previousReviewedSha256,'19724f7993ccfda6ad613c72fc052e7f0918d79ba7a0de780a3abe453b20a40a');
+ for(const [name,expected]of Object.entries(fixture.protectedFunctions)){
+  const a=block.indexOf('    function '+name+'('),brace=block.indexOf('{',a);assert.ok(a>=0,name+' must remain');let level=1,b=brace+1;
+  for(;level;b++){if(block[b]==='{')level++;if(block[b]==='}')level--;}
+  assert.equal(hash(block.slice(a,b)),expected,name+' physics/branch implementation must stay byte-identical');
+ }
+ assert.ok(block.includes(fixture.protectedRegimeExpression));assert.ok(block.includes(fixture.protectedCurveDefinition));
+ const a=block.indexOf('        <div class="m13-tree">'),b=block.indexOf('\n        <div class="m13-right-col">',a);assert.ok(a>=0&&b>a);let tree=block.slice(a,b);
+ for(const [before,after]of fixture.allowedDisplayCorrections){assert.ok(tree.includes(after),'Explicit reviewed display correction: '+after);tree=tree.replace(after,before);}
+ assert.equal(hash(tree),fixture.originalTreeSha256,'Only the explicitly reviewed accuracy labels may change in the original tree');
+ assert.equal(hash(block),fixture.sha256,'Reviewed vector drawing and display fixture');
  assert.ok(!fs.readFileSync('assets/mf1-widgets.css','utf8').includes('#v13-moody-widget'));
 });

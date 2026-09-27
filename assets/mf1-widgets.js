@@ -25,9 +25,15 @@
   // Cp is mechanical extraction, not generator efficiency.
   function actuatorDisk(rho, area, upstream, cp) {
     if(cp<0 || cp>16/27 || upstream<0 || area<=0) return null;
-    let lo=0,hi=1/3;
-    for(let i=0;i<60;i++){const a=(lo+hi)/2;if(4*a*(1-a)**2<cp)lo=a;else hi=a;}
-    const a=(lo+hi)/2,disk=upstream*(1-a),wake=upstream*(1-2*a);
+    let a;
+    if(cp===0)a=0;
+    else if(cp===16/27)a=1/3;
+    else {
+      let lo=0,hi=1/3;
+      for(let i=0;i<60;i++){const mid=(lo+hi)/2;if(4*mid*(1-mid)**2<cp)lo=mid;else hi=mid;}
+      a=(lo+hi)/2;
+    }
+    const disk=upstream*(1-a),wake=upstream*(1-2*a);
     const mass=rho*area*disk,force=mass*(upstream-wake),power=force*disk;
     return {a,disk,wake,mass,force,power};
   }

@@ -16,14 +16,15 @@ test('Curved-pressure scene preserves circles and normals on wide and tall canva
 
 test('Pipe shear balances the pressure force and keeps the Poiseuille profile across its controls',()=>{
  const a=load(1),q=id=>a.w.document.getElementById(id);
+ const reading=id=>Number(q(id).textContent.replace(/\./g,'').replace(',','.'));
  try{for(const beta of [10,100,500])for(const mu of [1,10,50])for(const dmm of [40,100,150]){
   a.change(q('z6-beta'),beta);a.change(q('z6-mu'),mu);a.change(q('z6-d'),dmm);
   const d=dmm/1000,L=+q('z6-l').value,pressureForce=beta*L*Math.PI*d*d/4;
-  close(+q('z6-res-force-wall').textContent,pressureForce,.00500001);
-  close(+q('z6-res-tau-wall').textContent,beta*d/4,.00500001);
-  close(+q('z6-res-tau-quarter').textContent,beta*d/8,.00500001);
-  close(+q('z6-res-vmax').textContent,beta*d*d/(16*mu*.001),.00500001);
-  close(+q('z6-res-tau-center').textContent,0);
+  close(reading('z6-res-force-wall'),pressureForce,.00500001);
+  close(reading('z6-res-tau-wall'),beta*d/4,.00500001);
+  close(reading('z6-res-tau-quarter'),beta*d/8,.00500001);
+  close(reading('z6-res-vmax'),beta*d*d/(16*mu*.001),.00500001);
+  close(reading('z6-res-tau-center'),0);
  }assert.deepEqual(a.errors,[]);}finally{a.dom.window.close();}
 });
 
@@ -60,10 +61,10 @@ test('Ocean graph pointer and keyboard selection updates the same depth, pressur
  const a=load(1);a.frames(2);
  try{
   const chart=a.w.document.getElementById('z5-chart'),depth=a.w.document.getElementById('z5-depth');
-  chart.getBoundingClientRect=()=>({left:0,top:0,width:880,height:640});
+  chart.getBoundingClientRect=()=>({left:0,top:0,width:900,height:470});
   chart.dispatchEvent(new a.w.KeyboardEvent('keydown',{key:'End',bubbles:true}));assert.equal(depth.value,'10000');
-  chart.dispatchEvent(new a.w.MouseEvent('pointerdown',{clientX:467.5,bubbles:true}));assert.equal(depth.value,'5000');
-  const expected=1025/(1-1025*9.81*5000/2.34e9);close(+a.w.document.getElementById('z5-res-rho').textContent,expected,.0001);
+  chart.dispatchEvent(new a.w.MouseEvent('pointerdown',{clientX:300,clientY:250,bubbles:true}));assert.equal(depth.value,'5000');
+  const expected=1025/(1-1025*9.81*5000/2.34e9);close(Number(a.w.document.getElementById('z5-res-rho').textContent.replaceAll('.','').replace(',','.')),expected,.0001);
   assert.equal(chart.getAttribute('aria-valuenow'),'5000');assert.deepEqual(a.errors,[]);
  }finally{a.dom.window.close();}
 });

@@ -38,9 +38,11 @@
     const Iz = t => -zC*Math.cos(t) + R*(t/2-Math.sin(2*t)/4);
     const factor = -rho*g*b*R;
     let fx = 0, fz = 0, nx = 0, nz = 0, elements = 0, wetAngle = 0;
+    const wetIntervals = [];
     for (let i = 1; i < cuts.length; i++) {
       const a = cuts[i-1], c = cuts[i];
       if (zC + R*Math.sin((a+c)/2) <= 0) continue;
+      wetIntervals.push({start:a, end:c});
       wetAngle += c-a; fx += factor*(Ix(c)-Ix(a)); fz += factor*(Iz(c)-Iz(a));
       const n = Math.max(2, Math.ceil(N*(c-a)/span)), dt = (c-a)/n;
       elements += n;
@@ -49,7 +51,7 @@
         nx += df*Math.cos(t); nz += df*Math.sin(t);
       }
     }
-    return {fx, fz, numericalX:nx, numericalZ:nz, force:Math.hypot(fx,fz), wetAngle, elements,
+    return {fx, fz, numericalX:nx, numericalZ:nz, force:Math.hypot(fx,fz), wetAngle, wetIntervals, elements,
       error:Math.hypot(nx-fx,nz-fz), pressure:t => rho*g*Math.max(0,zC+R*Math.sin(t))};
   }
   function colebrook(Re, roughness = 0) {
@@ -66,7 +68,7 @@
   function pipeFriction(Re, roughness = 0) {
     if (!(Re >= 0 && Number.isFinite(Re) && roughness >= 0 && roughness < 1)) return null;
     if (Re === 0) return {factor:0, regime:'mirovanje', uncertain:false};
-    if (Re <= 2320) return {factor:64/Re, regime:'laminarno', uncertain:false};
+    if (Re < 2320) return {factor:64/Re, regime:'laminarno', uncertain:false};
     if (Re >= 4000) return {factor:colebrook(Re,roughness), regime:'turbulentno', uncertain:false};
     const t = (Re-2320)/1680, a = 64*2320, b = colebrook(4000,roughness)*4000**2;
     return {factor:((1-t)*a+t*b)/Re**2, regime:'prijelazno', uncertain:true};
@@ -155,7 +157,26 @@
     svg.setAttribute('viewBox',el.getAttribute('viewBox'));svg.setAttribute('aria-label',el.getAttribute('aria-label'));
     svg.classList.add('mf1-quantitative');svg.innerHTML=el.innerHTML;
   }
-  const api={ticks,ocean,powerLaw,arcPressure,colebrook,pipeFriction,pipeBranch,parallelPipes,pipeProfile,fitCanvas,canvasAxes,hydrostaticStrips,mathText,plot,renderPlot,number};
+  function decision(container,{title='Uvjet → model → posljedica',branches=[],summary=''}={}) {
+    if(!container)return;
+    const signature=JSON.stringify([title,branches,summary]);
+    if(container.dataset.decisionState===signature&&container.querySelector('.mf1-decision-branches'))return;
+    container.dataset.decisionState=signature;container.classList.add('mf1-decision');
+    const doc=container.ownerDocument,fragment=doc.createDocumentFragment();
+    const heading=doc.createElement('strong');heading.className='mf1-decision-title';heading.textContent=title;fragment.append(heading);
+    const list=doc.createElement('ol');list.className='mf1-decision-branches';
+    branches.forEach((branch,index)=>{
+      const item=doc.createElement('li');item.dataset.active=String(!!branch.active);item.dataset.branch=String(index);
+      const condition=doc.createElement('strong');condition.className='mf1-decision-condition';condition.textContent=(branch.active?'● Vrijedi: ':'Ako: ')+(branch.when||'');item.append(condition);
+      if(branch.equation){const equation=doc.createElement('span');equation.className='mf1-decision-equation';equation.textContent=branch.equation;item.append(equation);}
+      if(branch.active&&branch.then){const result=doc.createElement('span');result.className='mf1-decision-result';result.textContent='Zato: '+branch.then;item.append(result);}
+      list.append(item);
+    });
+    fragment.append(list);
+    if(summary){const note=doc.createElement('p');note.className='mf1-decision-summary';note.textContent=summary;fragment.append(note);}
+    container.replaceChildren(fragment);
+  }
+  const api={decision,ticks,ocean,powerLaw,arcPressure,colebrook,pipeFriction,pipeBranch,parallelPipes,pipeProfile,fitCanvas,canvasAxes,hydrostaticStrips,mathText,plot,renderPlot,number};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   Object.assign(scope.MF1||(scope.MF1={}),api);
 })(typeof window==='undefined'?globalThis:window);

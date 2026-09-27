@@ -99,7 +99,7 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
     box-shadow: 0 4px 18px rgba(15,23,42,0.07);
     width: 100%;
 }
-#v13-moody-widget canvas {
+#v13-moody-widget #v13-moody-canvas {
     display: block;
     width: 100%;
     height: auto;
@@ -223,7 +223,7 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
     border: 1.5px solid #e2e8f0;
     margin-bottom: 7px;
     overflow: hidden;
-    opacity: 0.35;
+    opacity: 1;
     transition: opacity 0.20s, border-color 0.20s, box-shadow 0.20s, background 0.20s;
 }
 #v13-moody-widget .m13-branch:last-child { margin-bottom: 0; }
@@ -290,7 +290,7 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
     border-radius: 7px;
     border: 1px solid #fecaca;
     padding: 5px 9px;
-    opacity: 0.35;
+    opacity: 1;
     transition: opacity 0.20s, border-color 0.20s, background 0.20s;
     font-size: 0.73rem;
     line-height: 1.45;
@@ -363,18 +363,18 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
                 <span>Reynoldsov broj (log<sub>10</sub> Re)</span>
                 <span class="m13-slider-val" id="v13-v-re">5.00</span>
             </div>
-            <input type="range" id="v13-re-slider" min="3" max="8" step="0.01" value="5">
+            <input type="range" id="v13-re-slider" aria-label="logaritamski Reynoldsov broj" min="3" max="8" step="any" value="5">
         </div>
         <div class="m13-slider-box">
             <div class="m13-slider-label">
                 <span>Relativna hrapavost k/D</span>
                 <span class="m13-slider-val" id="v13-v-kd">0.0010</span>
             </div>
-            <input type="range" id="v13-kd-slider" min="-6" max="-1.3" step="0.1" value="-3">
+            <input type="range" id="v13-kd-slider" aria-label="logaritamska relativna hrapavost" min="-6" max="-1.3" step="0.1" value="-3">
         </div>
         <div class="m13-lcard">
-            <small>Koef. trenja</small>
-            <strong>λ = <span id="v13-res-lambda">—</span></strong>
+            <small>Darcyjev koef. trenja</small>
+            <strong><span id="v13-lambda-sign">λ =</span> <span id="v13-res-lambda">—</span></strong>
         </div>
     </div>
 
@@ -400,7 +400,7 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
             <div class="m13-branch trans" id="m13-b-trans">
                 <div class="m13-bh">
                     <span class="m13-bkw">ELSE IF</span>
-                    <span class="m13-bcond">Re ≤ 4 000</span>
+                    <span class="m13-bcond">2 320 ≤ Re &lt; 4 000</span>
                     <span class="m13-barr">→</span>
                     <span class="m13-blbl">PRIJELAZNO</span>
                 </div>
@@ -413,7 +413,7 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
             <div class="m13-branch turb" id="m13-b-turb">
                 <div class="m13-bh">
                     <span class="m13-bkw">ELSE</span>
-                    <span class="m13-bcond">Re &gt; 4 000</span>
+                    <span class="m13-bcond">Re ≥ 4 000</span>
                     <span class="m13-barr">→</span>
                     <span class="m13-blbl">TURBULENTNO</span>
                 </div>
@@ -422,23 +422,23 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
                         <div class="m13-sub" id="m13-b-smooth">
                             <div class="m13-sbh">
                                 <span class="m13-skw">IF</span>
-                                <span class="m13-scond">k/D ≈ 0 &ensp;(glatka cijev)</span>
+                                <span class="m13-scond">k⁺ &lt; 5 (hidraulički glatka)</span>
                             </div>
                             <span class="m13-sf">Glatka cijev: λ ovisi o Re</span>
                         </div>
                         <div class="m13-sub" id="m13-b-cb">
                             <div class="m13-sbh">
                                 <span class="m13-skw">ELSE IF</span>
-                                <span class="m13-scond">prijelazno hrapava</span>
+                                <span class="m13-scond">5 ≤ k⁺ ≤ 70 · prijelazno hrapava</span>
                             </div>
                             <span class="m13-sf">Colebrook–White (iteracija)</span>
                         </div>
                         <div class="m13-sub" id="m13-b-rough">
                             <div class="m13-sbh">
                                 <span class="m13-skw">ELSE</span>
-                                <span class="m13-scond">potpuno hrapava</span>
+                                <span class="m13-scond">k⁺ &gt; 70 · približno potpuno hrapava</span>
                             </div>
-                            <span class="m13-sf">1/√λ = −2·log(k/D / 3.71)</span>
+                            <span class="m13-sf">Asimptota: 1/√λ = −2·log(k/D / 3.71)</span>
                         </div>
                     </div>
                 </div>
@@ -460,7 +460,8 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
 
 <script>
 (function() {
-    var canvas   = document.getElementById('v13-moody-canvas');
+    var canvas   = MF1.vectorSurface(document.getElementById('v13-moody-canvas'));
+    canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Moodyjev dijagram: Darcyjev koeficijent trenja, svih deset krivulja i radna točka');
     var ctx      = canvas.getContext('2d');
     var reSlider = document.getElementById('v13-re-slider');
     var kdSlider = document.getElementById('v13-kd-slider');
@@ -496,7 +497,7 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
     /* ── Coords ── */
     function xRe(re)  { return P.l + (Math.log10(re) - 3) / 5 * (P.r - P.l); }
     function yLam(lam) {
-        var lo = Math.log10(0.0079), hi = Math.log10(0.121);
+        var lo = Math.log10(0.0055), hi = Math.log10(0.121);
         return P.t + (hi - Math.log10(lam)) / (hi - lo) * (P.b - P.t);
     }
     function fmtKd(kd) {
@@ -515,170 +516,86 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
 
     /* ── Drawing: light theme ── */
     function drawGrid() {
-        /* white/light background */
-        ctx.fillStyle = '#fafcff';
-        ctx.fillRect(0, 0, W, H);
-
-        /* zone tints */
-        ctx.fillStyle = 'rgba(22,163,74,0.07)';
-        ctx.fillRect(P.l, P.t, xRe(2320)-P.l, P.b-P.t);
-        ctx.fillStyle = 'rgba(217,119,6,0.08)';
-        ctx.fillRect(xRe(2320), P.t, xRe(4000)-xRe(2320), P.b-P.t);
-
-        /* zone boundary dashes */
-        ctx.setLineDash([5,5]); ctx.lineWidth = 1.2;
-        ctx.strokeStyle = 'rgba(22,163,74,0.55)';
-        ctx.beginPath(); ctx.moveTo(xRe(2320), P.t); ctx.lineTo(xRe(2320), P.b); ctx.stroke();
-        ctx.strokeStyle = 'rgba(217,119,6,0.65)';
-        ctx.beginPath(); ctx.moveTo(xRe(4000), P.t); ctx.lineTo(xRe(4000), P.b); ctx.stroke();
-        ctx.setLineDash([]);
-
-        /* Re grid (minor + major) */
-        for (var dec = 3; dec <= 8; dec++) {
-            for (var m = 1; m <= 9; m++) {
-                var re = m * Math.pow(10, dec);
-                if (re > 1e8) break;
-                var x = xRe(re);
-                ctx.strokeStyle = m === 1 ? 'rgba(100,116,139,0.30)' : 'rgba(100,116,139,0.10)';
-                ctx.lineWidth   = m === 1 ? 0.9 : 0.5;
-                ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.b); ctx.stroke();
-            }
+        ctx.fillStyle = '#fafcff'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = 'rgba(22,163,74,0.07)'; ctx.fillRect(P.l,P.t,xRe(2320)-P.l,P.b-P.t);
+        ctx.fillStyle = 'rgba(217,119,6,0.10)'; ctx.fillRect(xRe(2320),P.t,xRe(4000)-xRe(2320),P.b-P.t);
+        for (var dec=3;dec<=8;dec++) for(var m=1;m<=9;m++) {
+            var re=m*Math.pow(10,dec); if(re>1e8)break;
+            ctx.strokeStyle=m===1?'rgba(100,116,139,0.32)':'rgba(100,116,139,0.11)';ctx.lineWidth=m===1?1:.55;
+            ctx.beginPath();ctx.moveTo(xRe(re),P.t);ctx.lineTo(xRe(re),P.b);ctx.stroke();
         }
-
-        /* λ grid */
-        var ticks  = [0.008,0.009,0.01,0.012,0.015,0.02,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.12];
-        var majors = [0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1];
-        ticks.forEach(function(t) {
-            if (t < 0.0079 || t > 0.121) return;
-            var y = yLam(t), isMaj = majors.indexOf(t) >= 0;
-            ctx.strokeStyle = isMaj ? 'rgba(100,116,139,0.28)' : 'rgba(100,116,139,0.10)';
-            ctx.lineWidth   = isMaj ? 0.9 : 0.5;
-            ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(P.r, y); ctx.stroke();
+        [0.006,0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1,0.12].forEach(function(lam){
+            ctx.strokeStyle='rgba(100,116,139,0.23)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(P.l,yLam(lam));ctx.lineTo(P.r,yLam(lam));ctx.stroke();
         });
-
-        /* border */
-        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
-        ctx.strokeRect(P.l, P.t, P.r-P.l, P.b-P.t);
+        ctx.setLineDash([5,5]);ctx.lineWidth=1.4;
+        [[2320,'#16a34a'],[4000,'#d97706']].forEach(function(v){ctx.strokeStyle=v[1];ctx.beginPath();ctx.moveTo(xRe(v[0]),P.t);ctx.lineTo(xRe(v[0]),P.b);ctx.stroke();});
+        ctx.setLineDash([]);ctx.strokeStyle='#94a3b8';ctx.lineWidth=1.3;ctx.strokeRect(P.l,P.t,P.r-P.l,P.b-P.t);
     }
 
     function drawLabels() {
-        /* Re axis ticks */
-        ctx.textAlign = 'center';
-        for (var dec = 3; dec <= 8; dec++) {
-            var x = xRe(Math.pow(10, dec));
-            ctx.fillStyle = '#64748b'; ctx.font = '600 12px Inter,sans-serif';
-            ctx.fillText('10', x - 7, P.b + 19);
-            ctx.font = '600 9px Inter,sans-serif';
-            ctx.fillText(String(dec), x + 6, P.b + 15);
-        }
-
-        /* λ axis labels */
-        var lbls = [0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1];
-        ctx.textAlign = 'right'; ctx.font = '600 11px Inter,sans-serif';
-        lbls.forEach(function(t) {
-            var y = yLam(t);
-            ctx.fillStyle = '#64748b';
-            var s = t <= 0.015 ? t.toFixed(3) : t < 0.1 ? t.toFixed(2) : t.toFixed(1);
-            ctx.fillText(s, P.l - 6, y + 4);
+        var font=W<650?20:16;
+        ctx.font='600 '+font+'px Inter,sans-serif';ctx.fillStyle='#435d72';ctx.textAlign='center';
+        var powers=['10³','10⁴','10⁵','10⁶','10⁷','10⁸'];
+        for(var dec=3;dec<=8;dec++)ctx.fillText(powers[dec-3],xRe(Math.pow(10,dec)),P.b+28);
+        ctx.textAlign='right';
+        [0.006,0.008,0.01,0.015,0.02,0.03,0.05,0.08,0.12].forEach(function(lam){
+            var label=(lam<.02?lam.toFixed(3):lam.toFixed(2)).replace('.',',');
+            ctx.fillText(label,P.l-8,yLam(lam)+font*.32);
         });
-
-        /* axis titles */
-        ctx.fillStyle = '#334155'; ctx.font = '700 13px Inter,sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('Reynoldsov broj  Re', P.l + (P.r-P.l)/2, H - 18);
-        ctx.save();
-        ctx.translate(14, P.t + (P.b-P.t)/2);
-        ctx.rotate(-Math.PI/2);
-        ctx.fillText('Koeficijent trenja  \u03bb', 0, 0);
-        ctx.restore();
-
-        /* zone labels */
-        ctx.font = '700 11px Inter,sans-serif'; ctx.textAlign = 'center';
-        var lw = xRe(2320) - P.l;
-        if (lw > 18) { ctx.fillStyle = '#15803d'; ctx.fillText('LAM.', P.l + lw/2, P.t + 16); }
-        var tw = xRe(4000) - xRe(2320);
-        if (tw > 14) { ctx.fillStyle = '#b45309'; ctx.fillText('PRIJ.', xRe(2320) + tw/2, P.t + 16); }
-        ctx.fillStyle = '#b91c1c'; ctx.textAlign = 'left';
-        ctx.fillText('TURBULENTNO', xRe(5500), P.t + 16);
+        ctx.font='700 '+font+'px Inter,sans-serif';
+        ctx.fillText('λ',P.l-8,P.t-24);ctx.textAlign='left';ctx.fillText('k/D',P.r+18,P.t-12);
+        ctx.textAlign='center';ctx.fillText('Re',P.l+(P.r-P.l)/2,H-13);
+        if(W>=650){
+            ctx.font='700 16px Inter,sans-serif';
+            var lw=xRe(2320)-P.l,tw=xRe(4000)-xRe(2320);
+            if(lw>ctx.measureText('LAM.').width+8){ctx.fillStyle='#15803d';ctx.fillText('LAM.',P.l+lw/2,P.t+22);}
+            if(tw>ctx.measureText('PRIJ.').width+8){ctx.fillStyle='#b45309';ctx.fillText('PRIJ.',xRe(2320)+tw/2,P.t+22);}
+            ctx.fillStyle='#b91c1c';ctx.textAlign='left';ctx.fillText('TURBULENTNO',xRe(4000)+10,P.t+22);
+        }
     }
 
     function plotCurves() {
-        /* laminar line: dashed dark amber */
-        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2.4; ctx.setLineDash([8,5]);
-        ctx.beginPath(); var ls = false;
-        for (var rL = 700; rL <= 2330; rL += 12) {
-            var lL = 64/rL;
-            if (lL < 0.0079 || lL > 0.121) continue;
-            var xL = xRe(rL), yL = yLam(lL);
-            if (!ls) { ctx.moveTo(xL,yL); ls=true; } else ctx.lineTo(xL,yL);
-        }
-        ctx.stroke(); ctx.setLineDash([]);
-
-        /* turbulent curves */
-        KD_CURVES.forEach(function(kd, idx) {
-            ctx.strokeStyle = KD_COLORS[idx];
-            ctx.lineWidth   = kd === 0 ? 2.4 : 1.7;
-            ctx.beginPath(); var ok = false;
-            var rStart = kd === 0 ? 2320 : 2800;
-            for (var logR = Math.log10(rStart); logR <= 8.002; logR += 0.016) {
-                var r = Math.pow(10, logR);
-                var l = solveLambda(r, kd === 0 ? 1e-12 : kd);
-                if (l < 0.0079 || l > 0.121) { ok = false; continue; }
-                var xc = xRe(r), yc = yLam(l);
-                if (!ok) { ctx.moveTo(xc,yc); ok=true; } else ctx.lineTo(xc,yc);
-            }
-            ctx.stroke();
-
-            /* k/D label */
-            if (kd > 0) {
-                var sR = 5.5e7, sL = solveLambda(sR, kd);
-                if (sL >= 0.0079 && sL <= 0.121) {
-                    var ly = yLam(sL);
-                    if (ly > P.t+8 && ly < P.b-3) {
-                        ctx.save();
-                        ctx.fillStyle = KD_COLORS[idx];
-                        ctx.font = '600 10px Inter,sans-serif'; ctx.textAlign = 'left';
-                        ctx.fillText(fmtKd(kd), P.r + 4, ly + 3);
-                        ctx.restore();
-                    }
+        var labels=[];
+        ctx.save();ctx.beginPath();ctx.rect(P.l,P.t,P.r-P.l,P.b-P.t);ctx.clip();
+        ctx.strokeStyle='#d97706';ctx.lineWidth=2.5;ctx.setLineDash([8,5]);ctx.beginPath();
+        for(var re=1000;re<=2320;re+=10){if(re===1000)ctx.moveTo(xRe(re),yLam(64/re));else ctx.lineTo(xRe(re),yLam(64/re));}
+        ctx.lineTo(xRe(2320),yLam(64/2320));ctx.stroke();ctx.setLineDash([]);
+        KD_CURVES.forEach(function(kd,idx){
+            var effective=kd===0?1e-12:kd,start=kd===0?2320:2800;
+            ctx.strokeStyle=KD_COLORS[idx];ctx.lineWidth=kd===0?2.5:1.8;
+            [[start,4000,true],[4000,1e8,false]].forEach(function(part){
+                ctx.setLineDash(part[2]?[3,5]:[]);ctx.beginPath();var first=true;
+                for(var lr=Math.log10(part[0]);lr<Math.log10(part[1]);lr+=.016){
+                    var re=Math.pow(10,lr),lam=solveLambda(re,effective);
+                    if(first){ctx.moveTo(xRe(re),yLam(lam));first=false;}else ctx.lineTo(xRe(re),yLam(lam));
                 }
-            }
+                ctx.lineTo(xRe(part[1]),yLam(solveLambda(part[1],effective)));ctx.stroke();
+            });
+            labels.push({kd:kd,idx:idx,actual:yLam(solveLambda(1e8,effective))});
+        });
+        ctx.setLineDash([]);ctx.restore();
+        labels.sort(function(a,b){return a.actual-b.actual;});
+        var spacing=W<650?24:20;
+        labels.forEach(function(label,i){label.y=Math.max(label.actual,i?labels[i-1].y+spacing:P.t+15);});
+        labels[labels.length-1].y=Math.min(labels[labels.length-1].y,P.b-7);
+        for(var i=labels.length-2;i>=0;i--)labels[i].y=Math.min(labels[i].y,labels[i+1].y-spacing);
+        labels.forEach(function(label){
+            ctx.strokeStyle=KD_COLORS[label.idx];ctx.lineWidth=1;
+            ctx.beginPath();ctx.moveTo(P.r,label.actual);ctx.lineTo(P.r+5,label.actual);ctx.lineTo(P.r+13,label.y);ctx.lineTo(P.r+17,label.y);ctx.stroke();
+            ctx.fillStyle=KD_COLORS[label.idx];ctx.font='600 '+(W<650?20:16)+'px Inter,sans-serif';ctx.textAlign='left';
+            var name=label.kd===0?'0':label.kd===5e-5?'5·10⁻⁵':label.kd===1e-4?'10⁻⁴':label.kd===5e-4?'5·10⁻⁴':String(label.kd).replace('.',',');
+            ctx.fillText(name,P.r+20,label.y+6);
         });
     }
 
-    function drawPoint(re, lam, regime) {
-        var x = xRe(re), y = yLam(lam);
-        var rc = regime === 'lam' ? '#16a34a' : regime === 'trans' ? '#d97706' : '#dc2626';
-
-        /* crosshair: subtle dark on light */
-        ctx.strokeStyle = 'rgba(15,23,42,0.18)';
-        ctx.lineWidth = 1; ctx.setLineDash([5,5]);
-        ctx.beginPath(); ctx.moveTo(x, P.b); ctx.lineTo(x, y); ctx.lineTo(P.l, y); ctx.stroke();
-        ctx.setLineDash([]);
-
-        /* glow ring */
-        var g = ctx.createRadialGradient(x, y, 0, x, y, 22);
-        g.addColorStop(0, rc + '45'); g.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(x, y, 22, 0, 2*Math.PI); ctx.fill();
-
-        /* dot */
-        ctx.fillStyle = rc;
-        ctx.beginPath(); ctx.arc(x, y, 7, 0, 2*Math.PI); ctx.fill();
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; ctx.stroke();
-        ctx.strokeStyle = rc; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(x, y, 7, 0, 2*Math.PI); ctx.stroke();
-
-        /* annotation bubble: light card */
-        var bx = x + (x > P.r - 145 ? -150 : 14);
-        var by = y + (y < P.t + 55 ? 12 : -46);
-        ctx.fillStyle = 'rgba(248,250,252,0.97)';
-        ctx.beginPath(); ctx.roundRect(bx, by, 138, 40, 8); ctx.fill();
-        ctx.strokeStyle = rc; ctx.lineWidth = 1.5; ctx.stroke();
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#334155'; ctx.font = '600 11px Inter,sans-serif';
-        ctx.fillText('Re = ' + fmtRe(re), bx + 8, by + 14);
-        ctx.fillStyle = rc; ctx.font = '700 12px Inter,sans-serif';
-        ctx.fillText('\u03bb = ' + lam.toFixed(4), bx + 8, by + 30);
+    function drawPoint(re,lam,regime) {
+        var x=xRe(re),y=yLam(lam),rc=regime==='lam'?'#16a34a':regime==='trans'?'#d97706':'#dc2626';
+        ctx.strokeStyle='rgba(15,23,42,0.28)';ctx.lineWidth=1;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(x,P.b);ctx.lineTo(x,y);ctx.lineTo(P.l,y);ctx.stroke();ctx.setLineDash([]);
+        var glow=ctx.createRadialGradient(x,y,0,x,y,18);glow.addColorStop(0,rc+'40');glow.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle=glow;ctx.beginPath();ctx.arc(x,y,18,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=regime==='trans'?'#fafcff':rc;ctx.strokeStyle=rc;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();ctx.stroke();
+        ctx.font='700 '+(W<650?18:17)+'px Inter,sans-serif';ctx.fillStyle=rc;ctx.textAlign='center';
+        ctx.fillText('Re = '+fmtRe(re).replace('.',',')+'    λ '+(regime==='trans'?'≈ ':'= ')+lam.toFixed(4).replace('.',','),W/2,28);
     }
 
     /* ── Decision tree ── */
@@ -696,20 +613,23 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
     }
     function explainerText(re, kd, lam, regime, sub) {
         if (regime === 'lam')
-            return 'Re\u00a0=\u00a0' + re.toExponential(2) + '\u00a0<\u00a02\u202f320 \u2192 laminarno. \u03bb\u00a0=\u00a064/Re\u00a0=\u00a0' + lam.toFixed(4) + '. Profil brzine: parabola (Hagen\u2013Poiseuille). Dijagram nije potreban.';
+            return 'Re = '+re.toExponential(2)+' < 2 320 → laminarno. Darcyjev λ = 64/Re = '+lam.toFixed(4)+'. Profil brzine: parabola (Hagen–Poiseuille). Dijagram nije potreban.';
         if (regime === 'trans')
-            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ' u prijelaznom podr\u016fcju (2\u202f320\u2013\u20224\u202f000). Strujanje nestabilno, \u03bb nije pouzdano definiran. Uzeti konzervativnu vrijednost ili redizajnirati sustav.';
+            return '2 320 ≤ Re < 4 000: prijelazno područje. Prikazani λ ≈ '+lam.toFixed(4)+' jest ilustrativna linearna interpolacija, a ne pouzdan zakon strujanja. Očitanje nije projektna vrijednost.';
+        var kplus=kd * re * Math.sqrt(lam) / Math.sqrt(8);
+        var note=' k⁺ = (k/D) Re √(λ/8) = '+kplus.toLocaleString('hr-HR',{maximumSignificantDigits:5})+'. Prikazani λ je Darcyjev, ne Fanningov.';
         if (sub === 'smooth')
-            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + '\u00a0\u2192 turbulentno, hidrauli\u010dki glatka cijev. Haalandova aproksimacija: \u03bb\u00a0=\u00a0' + lam.toFixed(4) + '. Hrapavost skrivena u viskoznom podsloju.';
+            return 'k⁺ < 5 → hidraulički glatka cijev: hrapavost je unutar viskoznog podsloja. Ovdje Haalandova aproksimacija daje λ = '+lam.toFixed(4)+'.'+note;
         if (sub === 'rough')
-            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + '\u00a0\u2192 potpuno hrapavo turbulentno. Kvadratni zakon: \u03bb ovisi SAMO o k/D. 1/\u221a\u03bb\u00a0=\u00a0\u22122\u00b7log(k/D\u00a0/\u00a03.71), \u03bb\u00a0\u2248\u00a0' + lam.toFixed(4) + '.';
-        return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + '\u00a0\u2192 prijelazno turbulentno. \u03bb\u00a0=\u00a0' + lam.toFixed(4) + '. Koristiti Colebrook\u2013White ili Moodyjev dijagram. Swamee\u2013Jain: eksplicitna aproksimacija (<\u00a03\u00a0% gre\u0161ke).';
+            return 'k⁺ > 70 → približno potpuno hrapavo turbulentno strujanje. Asimptota pri Re → ∞: 1/√λ = −2 log₁₀[(k/D)/3,71], ovisna samo o k/D. Prikazani λ = '+lam.toFixed(4)+' ipak je Haalandova vrijednost pri konačnom Re.'+note;
+        return '5 ≤ k⁺ ≤ 70 → prijelazno hrapava cijev: važni su i Re i k/D. Colebrook–White rješava se iterativno; ovdje je nacrtana eksplicitna Haalandova aproksimacija, λ = '+lam.toFixed(4)+'.'+note;
     }
 
     /* ── Update ── */
     function update() {
         var logRe = parseFloat(reSlider.value);
         var re    = Math.pow(10, logRe);
+        [2320,4000].forEach(function(boundary){if(Math.abs(re-boundary)<=64*Number.EPSILON*boundary)re=boundary;});
         var kd    = Math.pow(10, parseFloat(kdSlider.value));
         var lam   = solveLambda(re, kd);
         var regime = re < 2320 ? 'lam' : re < 4000 ? 'trans' : 'turb';
@@ -718,11 +638,13 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
         document.getElementById('v13-v-re').textContent       = logRe.toFixed(2);
         document.getElementById('v13-v-kd').textContent       = fmtKd(kd);
         document.getElementById('v13-res-lambda').textContent = lam.toFixed(4);
+        document.getElementById('v13-lambda-sign').textContent = regime==='trans'?'λ ≈':'λ =';
         document.getElementById('v13-re-card').textContent    = re.toExponential(2);
         document.getElementById('v13-kd-card').textContent    = fmtKd(kd);
         document.getElementById('v13-explainer-box').textContent = explainerText(re, kd, lam, regime, sub);
 
         updateTree(regime, sub);
+        document.getElementById('v13-moody-widget').mf1MoodyState={re:re,kd:kd,lam:lam,regime:regime,sub:sub,kplus:kd * re * Math.sqrt(lam) / Math.sqrt(8),curves:KD_CURVES.slice(),geometry:{width:W,height:H,left:P.l,right:P.r,top:P.t,bottom:P.b,x:xRe(re),y:yLam(lam),lambdaMin:.0055,lambdaMax:.121}};
 
         ctx.clearRect(0, 0, W, H);
         drawGrid();
@@ -733,115 +655,16 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
 
     reSlider.oninput = update;
     kdSlider.oninput = update;
-    update();
+    function resizeDiagram(){
+        W=Math.max(360,Math.round(canvas.parentElement.getBoundingClientRect().width));H=W<650?500:560;
+        canvas.width=W;canvas.height=H;P={l:68,r:W-(W<650?94:105),t:70,b:H-72};update();
+    }
+    new ResizeObserver(resizeDiagram).observe(canvas.parentElement);
+    resizeDiagram();
 })();
 </script>
 <!-- END REVIEWED MOODY -->
-<script>
-// The existing Reynolds scene shares the Moody controls; it is a second view, not a second experiment.
-(() => {
-  const root=document.getElementById('v13-moody-widget'),diagram=root.querySelector('.m13-scene');
-  const vS=root.querySelector('#v13-re-slider');
-  const panel=document.createElement('section');panel.id='v13-profile-panel';
-  panel.innerHTML='<canvas id="flow-canvas" width="920" height="340" role="img" aria-label="Srednje strujnice i normirani profil brzine za isti Reynoldsov broj kao na Moodyjevu dijagramu"></canvas><p class="mf1-editorial-guide" id="re-explainer"></p>';
-  const modes=document.createElement('div');modes.className='mf1-editorial-modes';modes.setAttribute('role','group');modes.setAttribute('aria-label','Prikaz istog strujanja');
-  modes.innerHTML='<button type="button" aria-pressed="true" aria-controls="v13-profile-panel">1 · Profil strujanja</button><button type="button" aria-pressed="false" aria-controls="v13-moody-canvas">2 · Moodyjev dijagram</button>';
-  diagram.before(modes,panel);
-  root.querySelector('.m13-title').textContent='Od Reynoldsova broja do otpora cijevi';
-  root.querySelector('.m13-kicker').textContent='Režim strujanja i trenje';
-  root.querySelector('.m13-subtitle').textContent='Promijeni Re i prvo promotri profil brzine. Zatim prijeđi na dijagram: za isto strujanje očitaj λ i istraži utjecaj hrapavosti.';
-  const explanation=document.createElement('details'),summary=document.createElement('summary');
-  explanation.className='mf1-parameters';summary.textContent='Zašto ovaj postupak? Režim, korelacije i ograničenja';
-  const bottom=root.querySelector('.m13-bottom');bottom.before(explanation);explanation.append(summary,bottom);
-  let showDiagram=false;
-  function view(index){showDiagram=index===1;panel.hidden=showDiagram;diagram.hidden=!showDiagram;
-    modes.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
-    if(showDiagram)panel.querySelector('.mf1-motion button[aria-pressed=true]')?.click();
-  }
-  modes.querySelectorAll('button').forEach((b,i)=>b.addEventListener('click',()=>view(i)));
-  const canvas=panel.querySelector('canvas'),ctx=canvas.getContext('2d');
-  const lanes=[-0.86,-0.7,-0.54,-0.38,-0.22,-0.06,0.06,0.22,0.38,0.54,0.7,0.86],particles=[];
-  lanes.forEach((lane,laneIndex)=>{for(let i=0;i<8;i++)particles.push({lane,phase:(i/8+laneIndex*.025)%1});});
-  const state={re:1000,color:'#22c55e',time:0};
-  function laneSpeed(lane){return MF1.pipeProfile(lane,state.re);}
-  function update(){
-    state.re=10**Number(vS.value);
-    const laminar=state.re<2320,transition=state.re<4000&&!laminar;
-    state.color=laminar?'#22c55e':transition?'#f59e0b':'#ef4444';
-    state.regime=laminar?'Laminarno':transition?'Prijelazno':'Turbulentno';
-    panel.querySelector('#re-explainer').textContent=(laminar?'Laminarni profil je parabola: u/v̄ = 2[1 − (r/R)²]. Na osi je brzina dvostruka srednja, a na stijenci nula.':transition?'Prijelaz je osjetljiv na poremećaje. Ovdje je profil samo ilustrativna interpolacija između dvaju srednjih profila; nije predviđanje nestabilnosti.':'Turbulentni srednji profil približen je zakonom 1/7 izvan neposredne blizine stijenke. Prikaz ne računa vrtloge ni fluktuacije i ne modelira utjecaj hrapavosti na profil.')+' Oba profila imaju istu normiranu srednju brzinu. Oznake pokazuju relativne lokalne brzine; animacija nema zadano mjerilo fizičkog vremena. Hrapavost mijenja λ u dijagramu.';
-  }
-  function streamlineY(x,lane,pipe){return pipe.cy+lane*pipe.h/2;}
 
-  function draw(dt=0) {
-    state.time += dt;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const pipe = { x: 42, y: 72, w: 520, h: 196, cy: 170 };
-    const profile = { x: 620, y: 58, w: 230, h: 224 };
-
-    ctx.fillStyle = "#0b1220";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const fluidGrad = ctx.createLinearGradient(0, pipe.y, 0, pipe.y + pipe.h);
-    fluidGrad.addColorStop(0, "rgba(37,99,235,0.18)");
-    fluidGrad.addColorStop(0.5, "rgba(96,165,250,0.28)");
-    fluidGrad.addColorStop(1, "rgba(37,99,235,0.18)");
-    ctx.fillStyle = fluidGrad;
-    ctx.fillRect(pipe.x, pipe.y, pipe.w, pipe.h);
-    ctx.strokeStyle = "#cbd5e1";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(pipe.x, pipe.y, pipe.w, pipe.h);
-
-    ctx.fillStyle = "#f8fafc";
-    ctx.font = "700 13px Inter";
-    ctx.fillText("srednje strujnice · relativne brzine", pipe.x, 34);
-    ctx.fillText("normirani srednji profil u/v̄", profile.x, 34);
-
-    ctx.strokeStyle = "rgba(148,163,184,0.35)";
-    ctx.lineWidth = 1.3;
-    lanes.forEach((lane) => {
-      ctx.beginPath();
-      for (let x = pipe.x + 8; x <= pipe.x + pipe.w - 8; x += 12) {
-        const y = streamlineY(x, lane, pipe);
-        if (x === pipe.x + 8) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    });
-
-    particles.forEach((particle) => {
-      particle.phase = (particle.phase + dt * laneSpeed(particle.lane) / 5) % 1;
-      const x = pipe.x + particle.phase * pipe.w;
-      const y = streamlineY(x, particle.lane, pipe);
-      ctx.fillStyle = state.color;
-      ctx.beginPath();
-      ctx.arc(x, y, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    const px=u=>profile.x+43+u*76,py=r=>profile.y+16+(r+1)/2*(profile.h-32);
-    ctx.font='12px system-ui';ctx.lineWidth=1;ctx.textAlign='center';
-    for(const u of [0,1,2]){ctx.strokeStyle='#526579';ctx.setLineDash(u===1?[4,4]:[]);ctx.beginPath();ctx.moveTo(px(u),py(-1));ctx.lineTo(px(u),py(1));ctx.stroke();ctx.fillStyle='#e3edf6';ctx.fillText(String(u),px(u),py(1)+20);}
-    ctx.setLineDash([]);ctx.textAlign='right';
-    for(const r of [-1,0,1]){ctx.fillStyle='#d1dfeb';ctx.fillText(String(r),px(0)-10,py(r)+4);}
-    ctx.textAlign='left';ctx.fillText('r/R',profile.x,profile.y-5);ctx.fillText('u/v̄',px(2)-12,py(1)+40);
-    ctx.strokeStyle='#a3b9cd';ctx.setLineDash([4,4]);ctx.beginPath();for(let i=0;i<=160;i++){const r=-1+i/80,x=px(2*(1-r*r)),y=py(r);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();ctx.setLineDash([]);
-    ctx.strokeStyle=state.color;ctx.lineWidth=2.5;ctx.beginPath();
-    for(let i=0;i<=300;i++){const r=Math.sin(-Math.PI/2+i*Math.PI/300),x=px(laneSpeed(r)),y=py(r);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
-    ctx.fillStyle='#d1dfeb';ctx.font='12px system-ui';ctx.fillText('Isprekidana krivulja: laminarna referenca · okomica u/v̄ = 1: srednja brzina',42,320);
-    root.mf1ProfileState={...state,wall:laneSpeed(1),center:laneSpeed(0)};
-
-
-  }
-
-
-  vS.addEventListener('input',()=>{update();draw();});
-  MF1.motion(panel,draw,{reset:()=>{state.time=0;particles.forEach((p,i)=>p.phase=(i*.61803398875)%1);}});
-  panel.querySelector('.mf1-motion span').textContent='Normirano gibanje: uspoređuju se brzine slojeva.';
-  update();draw();view(0);
-})();
-</script>
 </section>
 ```
 
@@ -910,7 +733,7 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
 </div>
 <div class="rjesenje-label">Rješenje</div>
 
-1. $v = 3,06 \, \text{m/s}, Re = 116865, \lambda = 0,0315$.
+1. $v = 3,06 \, \text{m/s}, Re = 117530, \lambda = 0,0315$.
 2. $\sum \zeta = 2,36$.
 3.
 
@@ -922,428 +745,90 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
 
 ```{=html}
 <!-- WIDGET: Budžet gubitaka cjevovoda -->
-<div id="z123-budget-widget" data-widget-role="application" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
-    <style>
-        #z123-budget-widget .z123-shell {
-            border-radius: 30px;
-            border: 1px solid #dde6f4;
-            background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
-            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.08);
-            padding: 28px;
-        }
-        #z123-budget-widget .z123-head {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 18px;
-            align-items: start;
-            margin-bottom: 18px;
-        }
-        #z123-budget-widget .z123-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        #z123-budget-widget .z123-title {
-            margin: 0;
-            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
-            line-height: 1.08;
-            color: #0f172a;
-            font-weight: 800;
-        }
-        #z123-budget-widget .z123-sub {
-            margin: 8px 0 0;
-            max-width: 74ch;
-            color: #475569;
-            font-size: 0.95rem;
-            line-height: 1.62;
-        }
-        #z123-budget-widget .z123-chip {
-            align-self: start;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #fef3c7, #ffedd5);
-            border: 1px solid #fdba74;
-            color: #c2410c;
-            font-size: 0.78rem;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-        #z123-budget-widget .z123-note {
-            margin-bottom: 18px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            border: 1px solid #bfdbfe;
-            background: linear-gradient(135deg, #eff6ff, #f8fbff);
-            color: #1e3a8a;
-            font-size: 0.86rem;
-            line-height: 1.58;
-        }
-        #z123-budget-widget .z123-stage {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-        #z123-budget-widget .z123-scene {
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-        }
-        #z123-budget-widget canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        #z123-budget-widget .z123-summary {
-            display: grid;
-            grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #z123-budget-widget .z123-total,
-        #z123-budget-widget .z123-metric,
-        #z123-budget-widget .z123-controls,
-        #z123-budget-widget .z123-breakdown,
-        #z123-budget-widget .z123-explainer {
-            border-radius: 18px;
-            border: 1px solid #dbeafe;
-            background: #ffffff;
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
-        }
-        #z123-budget-widget .z123-total {
-            padding: 18px;
-            background: linear-gradient(135deg, #eff6ff, #ffffff);
-        }
-        #z123-budget-widget .z123-total small {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #64748b;
-        }
-        #z123-hw-total {
-            display: block;
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: #1d4ed8;
-            margin-bottom: 8px;
-        }
-        #z123-budget-widget .z123-total span {
-            display: block;
-            color: #475569;
-            font-size: 0.84rem;
-            line-height: 1.58;
-        }
-        #z123-budget-widget .z123-metrics {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-        }
-        #z123-budget-widget .z123-metric {
-            padding: 14px;
-            text-align: center;
-        }
-        #z123-budget-widget .z123-metric small {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #64748b;
-        }
-        #z123-budget-widget .z123-metric strong {
-            display: block;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-            font-size: 0.98rem;
-            color: #0f172a;
-        }
-        #z123-budget-widget .z123-lower {
-            display: grid;
-            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #z123-budget-widget .z123-controls,
-        #z123-budget-widget .z123-breakdown,
-        #z123-budget-widget .z123-explainer {
-            padding: 18px;
-        }
-        #z123-budget-widget .z123-control + .z123-control {
-            margin-top: 18px;
-        }
-        #z123-budget-widget .z123-control label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 0.84rem;
-            font-weight: 700;
-            color: #475569;
-        }
-        #z123-budget-widget .z123-control input {
-            width: 100%;
-            accent-color: #2563eb;
-        }
-        #z123-budget-widget .z123-breakdown {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-        }
-        #z123-budget-widget .z123-breakdown-title {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            color: #64748b;
-            text-align: center;
-        }
-        #z123-budget-widget .z123-track {
-            display: flex;
-            height: 30px;
-            border-radius: 999px;
-            overflow: hidden;
-            background: #e2e8f0;
-        }
-        #z123-bar-friction,
-        #z123-bar-local {
-            height: 100%;
-        }
-        #z123-bar-friction {
-            background: linear-gradient(90deg, #f97316, #fb923c);
-        }
-        #z123-bar-local {
-            background: linear-gradient(90deg, #3b82f6, #60a5fa);
-        }
-        #z123-budget-widget .z123-breakdown-legend {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-top: 8px;
-            font-size: 0.72rem;
-            font-weight: 700;
-        }
-        #z123-budget-widget .z123-breakdown-legend span:first-child {
-            color: #ea580c;
-        }
-        #z123-budget-widget .z123-breakdown-legend span:last-child {
-            color: #2563eb;
-        }
-        #z123-budget-widget .z123-explainer {
-            grid-column: 1 / -1;
-            background: #fff7ed;
-            border-color: #fdba74;
-            color: #7c2d12;
-            font-size: 0.84rem;
-            line-height: 1.58;
-        }
-        #z123-budget-widget .z123-shell {
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-            padding: 22px;
-            border-radius: 20px;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-        }
-        #z123-budget-widget .z123-title {
-            font-size: clamp(1.3rem, 2.2vw, 1.75rem);
-        }
-        #z123-budget-widget .z123-scene {
-            border-radius: 16px;
-        }
-        #z123-budget-widget .z123-total,
-        #z123-budget-widget .z123-metric,
-        #z123-budget-widget .z123-controls,
-        #z123-budget-widget .z123-breakdown,
-        #z123-budget-widget .z123-explainer {
-            border-radius: 14px;
-            box-shadow: none;
-        }
-        @media (max-width: 960px) {
-            #z123-budget-widget .z123-head,
-            #z123-budget-widget .z123-summary,
-            #z123-budget-widget .z123-lower,
-            #z123-budget-widget .z123-metrics {
-                grid-template-columns: 1fr;
-            }
-            #z123-budget-widget .z123-chip {
-                justify-self: start;
-            }
-            #z123-budget-widget .z123-explainer {
-                grid-column: auto;
-            }
-        }
-    </style>
-
-    <div class="z123-shell">
-        <div class="z123-head">
-            <div>
-                <div class="z123-kicker">Z123 budžet gubitaka</div>
-                <h4 class="z123-title">Energetska bilanca između dvaju otvorenih spremnika</h4>
-                <p class="z123-sub">Slobodne su površine spremnika pri atmosferskom tlaku, pa se raspoloživa visina između njih troši na linijske i lokalne gubitke: h<sub>L</sub> = h<sub>L,lin</sub> + h<sub>L,loc</sub>.</p>
-            </div>
-            <div class="z123-chip">h<sub>L</sub> = h<sub>L,lin</sub> + h<sub>L,loc</sub></div>
-        </div>
-
-        <div class="z123-note"><strong>Kako čitati bilancu:</strong> Hrapavost povećava relativnu hrapavost <strong>k/D</strong>, a time može povećati <strong>&lambda;</strong> i linijski gubitak. Lokalni elementi ne „troše protok”; oni disipiraju mehaničku energiju toka. Njihov se doprinos zbraja s trenjem u cijevi.</div>
-
-        <div class="z123-stage">
-            <div class="z123-scene">
-                <canvas id="z123-canvas" width="520" height="520"></canvas>
-            </div>
-            <div class="z123-summary">
-                <div class="z123-total">
-                    <small>Potrebna uzvodna kota z₁</small>
-                    <strong id="z123-hw-total">31.8 m</strong>
-                    <span>Za slobodne površine pri atmosferskom tlaku vrijedi z₁ − z₂ = h<sub>L</sub>.</span>
-                </div>
-                <div class="z123-metrics">
-                    <div class="z123-metric"><small>Re</small><strong id="z123-re-card">0</strong></div>
-                    <div class="z123-metric"><small>λ</small><strong id="z123-lambda-card">0.0000</strong></div>
-                    <div class="z123-metric"><small>Ukupni h<sub>L</sub></small><strong id="z123-z1-card">0.0 m</strong></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="z123-lower">
-            <div class="z123-controls">
-                <div class="z123-control">
-                    <label>Protok Q: <span id="z123-v-vdot" style="color:#2563eb;">6.0</span> L/s</label>
-                    <input type="range" id="z123-vdot-slider" min="1" max="15" step="0.5" value="6">
-                </div>
-                <div class="z123-control">
-                    <label>Hrapavost k: <span id="z123-v-k" style="color:#2563eb;">0.26</span> mm</label>
-                    <input type="range" id="z123-k-slider" min="0.01" max="1.0" step="0.01" value="0.26">
-                </div>
-            </div>
-
-            <div class="z123-breakdown">
-                <div class="z123-breakdown-title">Raspodjela otpora [%]</div>
-                <div class="z123-track">
-                    <div id="z123-bar-friction" style="width: 90%;" title="Trenje u cijevi"></div>
-                    <div id="z123-bar-local" style="width: 10%;" title="Lokalni gubici"></div>
-                </div>
-                <div class="z123-breakdown-legend">
-                    <span id="z123-legend-friction">LINIJSKI (trenje)</span>
-                    <span id="z123-legend-local">LOKALNI (elementi)</span>
-                </div>
-            </div>
-
-            <div class="z123-explainer"><strong>Tumačenje scene:</strong> <span id="z123-explainer"></span></div>
-        </div>
-    </div>
+<style>
+#z123-budget-widget{width:100%;max-width:1060px;margin:1.5rem auto;font-family:Inter,system-ui,sans-serif;color:#27475d}
+#z123-budget-widget .z123-native-head h4{margin:0 0 .45rem}
+#z123-budget-widget .z123-native-head p{margin:.45rem 0;line-height:1.55}
+#z123-budget-widget #z123-scene{display:block;width:100%;height:auto;max-height:none;background:#f6fbfe;border:0}
+#z123-budget-widget #z123-scene text{font:18px Inter,system-ui,sans-serif;fill:#27475d;stroke:none;paint-order:normal}
+#z123-budget-widget .z123-native-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+#z123-budget-widget .z123-native-control label{display:flex;flex-wrap:wrap;align-items:baseline;gap:.3rem .5rem;margin:.7rem 0 .2rem;font-weight:700}
+#z123-budget-widget .z123-native-control output{margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+#z123-budget-widget .z123-native-control input{width:100%}
+#z123-budget-widget .z123-native-presets{display:flex;gap:.45rem;flex-wrap:wrap;margin:.6rem 0}
+#z123-budget-widget .z123-native-presets button{border:1px solid #9bbdd0;border-radius:.45rem;background:#fff;color:#254b65;padding:.4rem .6rem;font:inherit;cursor:pointer}
+#z123-budget-widget .z123-native-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;margin:.8rem 0}
+#z123-budget-widget .z123-native-results span,#z123-budget-widget .z123-native-results strong{display:block}
+#z123-budget-widget .z123-native-results span{font-size:.86rem;color:#587083}
+#z123-budget-widget .z123-native-results strong{font-size:1.1rem;font-variant-numeric:tabular-nums}
+#z123-budget-widget .z123-native-work{margin:.65rem 0;line-height:1.6}
+#z123-budget-widget .z123-native-work p{margin:.4rem 0}
+@media(max-width:550px){#z123-budget-widget .z123-native-controls{grid-template-columns:1fr}#z123-budget-widget .z123-native-results{grid-template-columns:1fr!important;gap:.7rem}#z123-budget-widget .z123-native-results strong{font-size:1rem;white-space:nowrap}}
+</style>
+<div id="z123-budget-widget" data-widget-role="application">
+<header class="z123-native-head"><h4>Zadani protok → potrebna uzvodna kota</h4><p>Za zadani Q računamo koliko viša mora biti slobodna površina prvog spremnika: z₁ = z₂ + hL. Linijski gubitak nastaje duž svih 89 m cijevi; lokalni padovi nastaju na označenim elementima.</p></header>
+<svg id="z123-scene" role="img" aria-label="Energetska i hidraulička linija po razvijenoj duljini te shema dvaju spremnika s dva koljena i ventilom"></svg>
+<div class="z123-native-controls"><div class="z123-native-control"><label for="z123-vdot-slider">Protok Q <output id="z123-v-vdot"></output></label><input type="range" id="z123-vdot-slider" min="0.05" max="15" step="any" value="6"></div><div class="z123-native-control"><label for="z123-k-slider">Hrapavost k <output id="z123-v-k"></output></label><input type="range" id="z123-k-slider" min="0.01" max="1" step="0.01" value="0.26"></div></div>
+<div class="z123-native-presets"><button type="button" data-z123-preset="source">Izvorni Z123</button><button type="button" data-z123-preset="laminar-boundary">Granica Re = 2320</button><button type="button" data-z123-preset="turbulent-boundary">Granica Re = 4000</button></div>
+<div class="z123-native-results" aria-live="polite"><div><span>Potrebna kota z₁</span><strong id="z123-hw-total"></strong></div><div><span>Linijski gubitak hlin</span><strong id="z123-lin-result"></strong></div><div><span>Lokalni gubitak hloc</span><strong id="z123-local-result"></strong></div></div>
+<div class="z123-native-work"><p id="z123-regime-values"></p><p id="z123-equation"></p><p id="z123-loss-values"></p><p id="z123-cause"></p><p>Donja shema ima dva koljena i uspon 9 m: priključak U na z = −6 m, priključak I na z = 3 m, nizvodna površina z₂ = 4 m. Podjela vodoravnih 80 m na 40 + 40 m i položaj ventila su shematski; gornja os s mjeri razvijenu duljinu puta.</p></div>
+<div id="z123-explainer"></div>
+<details class="mf1-parameters"><summary>Koeficijenti, profil i granice modela</summary><p>Voda: ρ = 1000 kg/m³, μ = 1,30 mPa s; D = 50 mm, L = 89 m. Velike otvorene površine imaju atmosferski tlak i zanemarivu brzinu. EGL = z + p*/(ρg) + αv²/(2g), HGL = z + p*/(ρg); p* je manometarski tlak.</p><p>Izlaz u veliki spremnik disipira kinetičku energiju pa je ζizlaz = α. Za razvijeni laminarni profil α = 2, a za turbulentni izvorni slučaj zadržana je zadana vrijednost 1,06. U prijelazu α linearno prelazi iz 2 u 1,06, dok se za trenje interpolira Re²λ: obje su veličine nastavna procjena.</p><p>Ulaz ζ = 0,5, dva koljena po 0,3 i ventil 0,2 daju 1,3. Njihova ovisnost o Reynoldsovu broju nije zadana; zadržavanje tih vrijednosti pri malom Re jest aproksimacija zadatka. Izvorni turbulentni zbroj ostaje Σζ = 2,36.</p></details>
 </div>
-
 <script>
-(function() {
-    const canvas = document.getElementById('z123-canvas'), ctx = canvas.getContext('2d');
-    const vdotS = document.getElementById('z123-vdot-slider'), kS = document.getElementById('z123-k-slider');
-
-    function solveLambda(Re, kd) {
-        if (Re < 2320) return 64 / Re;
-        let f = 0.02;
-        for (let i = 0; i < 8; i++) {
-            f = 1 / Math.pow(-2 * Math.log10(kd / 3.7 + 2.51 / (Re * Math.sqrt(f))), 2);
-        }
-        return f;
-    }
-
-    function update() {
-        const vdot_l = parseFloat(vdotS.value), k_mm = parseFloat(kS.value);
-        const d = 0.05, L = 89, rho = 1000, mu = 0.0013, g = 9.81;
-        const A = Math.PI * d * d / 4;
-        const v = (vdot_l / 1000) / A;
-        const Re = (rho * v * d) / mu;
-        const lambda = solveLambda(Re, k_mm / (d * 1000));
-
-        const hw_lin = lambda * (L / d) * (v * v / (2 * g));
-        const sum_zeta = 2.36;
-        const hw_loc = sum_zeta * (v * v / (2 * g));
-        const hw_total = hw_lin + hw_loc;
-        const z1 = 4 + hw_total;
-
-        const perc_lin = (hw_lin / hw_total) * 100;
-        const perc_loc = 100 - perc_lin;
-
-        document.getElementById('z123-v-vdot').innerText = vdot_l.toFixed(1);
-        document.getElementById('z123-v-k').innerText = k_mm.toFixed(2);
-        document.getElementById('z123-hw-total').innerText = z1.toFixed(1) + " m";
-        document.getElementById('z123-bar-friction').style.width = perc_lin + "%";
-        document.getElementById('z123-bar-local').style.width = perc_loc + "%";
-        document.getElementById('z123-legend-friction').textContent = 'LINIJSKI: ' + perc_lin.toFixed(0) + ' %';
-        document.getElementById('z123-legend-local').textContent = 'LOKALNI: ' + perc_loc.toFixed(0) + ' %';
-        document.getElementById('z123-re-card').textContent = Math.round(Re);
-        document.getElementById('z123-lambda-card').textContent = lambda.toFixed(4);
-        document.getElementById('z123-z1-card').textContent = hw_total.toFixed(1) + ' m';
-        document.getElementById('z123-explainer').textContent =
-            'Za Q = ' + vdot_l.toFixed(1) + ' L/s i k = ' + k_mm.toFixed(2) +
-            ' mm je Re ≈ ' + Math.round(Re) + ' i λ = ' + lambda.toFixed(4) +
-            '. Linijski gubitak iznosi ' + hw_lin.toFixed(1) +
-            ' m, lokalni ' + hw_loc.toFixed(1) + ' m, pa je hL = ' +
-            hw_total.toFixed(1) + ' m i potrebna kota z₁ = ' + z1.toFixed(1) + ' m.';
-
-        draw(hw_total, hw_lin, hw_loc);
-    }
-
-    function draw(hwt, hlin, hloc) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const oy = canvas.height - 44;
-        const totalHead = 4 + hwt;
-        const topPadding = 84;
-        const scale = Math.min(10, (oy - topPadding) / Math.max(totalHead, 6));
-        const sourceX = 28;
-        const tankWidth = 92;
-        const targetX = canvas.width - 120;
-        const sourceTop = oy - totalHead * scale;
-        const targetTop = oy - 4 * scale;
-        const pipeY = oy - 24;
-
-        ctx.fillStyle = '#ebf8ff';
-        ctx.fillRect(sourceX, sourceTop, tankWidth, totalHead * scale);
-        ctx.fillRect(targetX, targetTop, tankWidth, 4 * scale);
-        ctx.strokeStyle = '#475569';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(sourceX, sourceTop, tankWidth, totalHead * scale);
-        ctx.strokeRect(targetX, targetTop, tankWidth, 4 * scale);
-
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 10;
-        ctx.beginPath();
-        ctx.moveTo(sourceX + tankWidth, pipeY);
-        ctx.lineTo(targetX, pipeY);
-        ctx.stroke();
-
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-        ctx.moveTo(sourceX + tankWidth, sourceTop);
-        ctx.lineTo(targetX, targetTop - 6);
-        ctx.stroke();
-
-        ctx.strokeStyle = '#3b82f6';
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(sourceX + tankWidth, sourceTop + 10);
-        ctx.lineTo(targetX, targetTop + 6);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.fillStyle = '#1e293b';
-        ctx.font = 'bold 11px Inter';
-        ctx.fillText('EGL', sourceX + tankWidth + 8, Math.max(28, sourceTop - 10));
-        ctx.fillText('HGL', sourceX + tankWidth + 8, Math.max(44, sourceTop + 14));
-        ctx.fillText('z1 = ' + totalHead.toFixed(1) + ' m', sourceX + 4, Math.max(26, sourceTop - 14));
-        ctx.fillText('z2 = 4.0 m', targetX + 8, targetTop - 14);
-        ctx.fillStyle = '#475569';
-        ctx.font = '11px Inter';
-        ctx.fillText('hw,lin = ' + hlin.toFixed(1) + ' m', canvas.width / 2 - 96, sourceTop + (targetTop - sourceTop) * 0.35);
-        ctx.fillText('hw,loc = ' + hloc.toFixed(1) + ' m', canvas.width / 2 - 96, sourceTop + (targetTop - sourceTop) * 0.62);
-    }
-
-    vdotS.oninput = update; kS.oninput = update; update();
+(() => {
+ const root=document.getElementById('z123-budget-widget');if(!root)return;
+ const q=id=>root.querySelector('#z123-'+id),svg=q('scene'),Qinput=q('vdot-slider'),Kinput=q('k-slider'),rho=1000,mu=.0013,D=.05,L=89,g=9.81,z2=4,A=Math.PI*D*D/4;
+ const C={line:'#c95d12',local:'#b93645',hgl:'#7356a3',pipe:'#58768b',water:'#149ec8',ink:'#27475d',muted:'#617788'},fmt=(x,n=3)=>x.toLocaleString('hr-HR',{minimumFractionDigits:n,maximumFractionDigits:n});let changed='Q';
+ const length=x=>Math.abs(x)<1?fmt(x*1000,3)+' mm':fmt(x,3)+' m';
+ const text=(x,y,t,color=C.ink,anchor='start')=>`<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Inter,system-ui,sans-serif" font-size="18" style="fill:${color}">${t}</text>`;
+ const line=(id,x,y,X,Y,color=C.muted,stroke=1.5,extra='')=>`<path ${id?`id="${id}"`:''} d="M ${x} ${y} L ${X} ${Y}" fill="none" stroke="${color}" stroke-width="${stroke}" ${extra}/>`;
+ function arrow(id,x,y,dx,dy,color){const n=Math.hypot(dx,dy),h=Math.min(7,n*.4),ux=n?dx/n:0,uy=n?dy/n:0;return `<g id="${id}">${line('',x,y,x+dx,y+dy,color,2.8)}${n>1e-10?`<path d="M ${x+dx} ${y+dy} L ${x+dx-h*ux-h*.4*uy} ${y+dy-h*uy+h*.4*ux} L ${x+dx-h*ux+h*.4*uy} ${y+dy-h*uy-h*.4*ux} Z" fill="${color}"/>`:''}</g>`;}
+ function calc(){
+  const Q=+Qinput.value/1000,K=+Kinput.value/1000,V=Q/A,rawRe=rho*V*D/mu,Re=[2320,4000].find(x=>Math.abs(rawRe-x)<=32*Number.EPSILON*x)||rawRe,f=MF1.pipeFriction(Re,K/D),lam=f.factor,alpha=Re<2320?2:Re>=4000?1.06:2-.94*(Re-2320)/1680,vh=V*V/(2*g),zeta=1.3+alpha,lin=lam*L/D*vh,local=zeta*vh,total=lin+local,z1=z2+total;
+  const segments=[],points=[{s:0,E:z1,H:z1,pipe:false}],locals=[{name:'U',label:'Ulaz',s:0,zeta:.5},{name:'K₁',label:'Prvo koljeno',s:40,zeta:.3},{name:'K₂',label:'Drugo koljeno',s:49,zeta:.3},{name:'V',label:'Ventil',s:69,zeta:.2},{name:'I',label:'Izlaz',s:89,zeta:alpha}];let head=z1,station=0;
+  for(let i=0;i<locals.length;i++){const item=locals[i];if(item.s>station){const loss=lam*(item.s-station)/D*vh,start=head;head-=loss;segments.push({kind:'line',s0:station,s1:item.s,E0:start,E1:head,loss});points.push({s:item.s,E:head,H:head-alpha*vh,pipe:true});}const start=head,loss=item.zeta*vh;head-=loss;if(i===locals.length-1)head=z2;segments.push({kind:'local',name:item.name,label:item.label,s0:item.s,s1:item.s,E0:start,E1:head,loss,zeta:item.zeta});points.push({s:item.s,E:head,H:head-(i===locals.length-1?0:alpha*vh),pipe:i!==locals.length-1});station=item.s;}
+  return{Q,K,D,L,rho,mu,g,A,V,Re,lam,alpha,vh,zeta,lin,local,total,z1,z2,pLin:100*lin/total,pLoc:100*local/total,regime:f.regime,uncertain:f.uncertain,segments,points,locals,energyResidual:z1-z2-total};
+ }
+ function draw(s){
+  const W=Math.max(300,Math.min(900,Math.round(svg.getBoundingClientRect().width||900))),H=790,left=52,right=W-20,top=100,bottom=300,unitScale=s.total<1?1000:1,unit=unitScale===1000?'mm':'m',maxHead=s.total*1.12,X=x=>left+x/L*(right-left),Y=h=>bottom-(h-z2)/maxHead*(bottom-top);
+  let d=`<title>Bilanca gubitaka pri protoku ${s.Q*1000} litara u sekundi</title>${text(12,26,'EGL / HGL prema z₂ = 4 m')}${line('',12,53,42,53,C.line,3)}${text(49,59,'EGL',C.line)}${line('',135,53,165,53,C.hgl,2,'stroke-dasharray="5 3"')}${text(174,59,'HGL',C.hgl)}${text(left,84,'H − z₂ ['+unit+']')}`;
+  for(const tick of MF1.ticks(0,maxHead*unitScale,4)){const yy=Y(z2+tick/unitScale);d+=line('',left,yy,right,yy,'#d5e2eb',1,'stroke-dasharray="3 4"')+text(left-8,yy+6,fmt(tick,tick<10&&tick%1!==0?1:0),C.muted,'end');}
+  d+=line('',left,top,left,bottom)+line('',left,bottom,right,bottom);
+  for(const [i,item]of s.segments.entries())d+=line('z123-loss-'+i,X(item.s0),Y(item.E0),X(item.s1),Y(item.E1),item.kind==='line'?C.line:C.local,3,`data-loss-kind="${item.kind}" data-loss="${item.loss}" data-s0="${item.s0}" data-s1="${item.s1}"`);
+  d+=`<path id="z123-hgl" d="${s.points.map((p,i)=>(i?'L':'M')+' '+X(p.s)+' '+Y(p.H)).join(' ')}" fill="none" stroke="${C.hgl}" stroke-width="2" stroke-dasharray="5 3"/>`;
+  for(const item of s.locals){const x=X(item.s),tx=x+(item.s===40?-2:item.s===49?2:0),anchor=item.s===40?'end':item.s===49?'start':'middle';d+=line('',x,bottom,x,bottom+5)+text(tx,bottom+25,fmt(item.s,0),C.muted,anchor)+text(tx,bottom+51,item.name,C.local,anchor);}
+  d+=text(right,bottom+80,'Razvijena duljina s [m]',C.muted,'end');
+  const cx=W/2,ta=cx-130,tb=cx-65,tc=cx+65,td=cx+130,inletY=610,outletY=520,r=7,free1=470,free2=510,velocityScale=6;
+  d+=text(12,414,'Shema puta · nije u mjerilu')+text(12,441,'Obje površine: p = pₐₜₘ');
+  d+=`<rect x="${ta}" y="${free1}" width="65" height="175" fill="#d9f1fa"/><rect x="${tc}" y="${free2}" width="65" height="45" fill="#d9f1fa"/><path d="M ${ta} 455 V 645 H ${tb} V 616 M ${tb} 604 V 455 M ${tc} 485 V 514 M ${tc} 526 V 555 H ${td} V 485" fill="none" stroke="${C.pipe}" stroke-width="3"/>`;
+  d+=line('z123-level-1',ta,free1,tb,free1,C.water,2)+line('z123-level-2',tc,free2,td,free2,C.water,2)+text(ta+4,free1+24,'z₁',C.water)+text(td,free2-17,'z₂ = 4 m',C.water,'end');
+  const pipe=`M ${tb} ${inletY} H ${cx-r} Q ${cx} ${inletY} ${cx} ${inletY-r} V ${outletY+r} Q ${cx} ${outletY} ${cx+r} ${outletY} H ${tc}`;
+  d+=`<path id="z123-pipe-wall" d="${pipe}" fill="none" stroke="${C.pipe}" stroke-width="13" stroke-linejoin="round"/><path id="z123-pipe-fluid" d="${pipe}" fill="none" stroke="#b6e3f5" stroke-width="8" stroke-linejoin="round"/>`;
+  const valveX=(cx+tc)/2;d+=`<path id="z123-valve" d="M ${valveX-7} ${outletY-6} L ${valveX+7} ${outletY+6} V ${outletY-6} L ${valveX-7} ${outletY+6} Z" fill="#fff" stroke="${C.pipe}" stroke-width="1.7"/>`;
+  d+=text(tb-15,inletY+6,'U',C.local,'middle')+text(cx+18,inletY+6,'K₁',C.local)+text(cx-18,outletY+6,'K₂',C.local,'end')+text(valveX,outletY-20,'V',C.local,'middle')+text(tc+15,outletY+6,'I',C.local,'middle');
+  d+=arrow('z123-velocity',tb+3,inletY,s.V*velocityScale,0,C.water)+text(12,inletY+65,'L = 40 + 9 + 40 = 89 m',C.muted);
+  const dimX=cx+50;d+=line('z123-rise',dimX,outletY,dimX,inletY,C.muted)+line('',dimX-4,outletY,dimX+4,outletY)+line('',dimX-4,inletY,dimX+4,inletY)+text(dimX+8,inletY-10,'9 m',C.muted);
+  d+=text(12,702,'U 0,5 · K₁ 0,3 · K₂ 0,3')+text(12,728,'V 0,2 · I α = '+fmt(s.alpha,3))+arrow('z123-velocity-scale',12,766,18,0,C.water)+text(42,772,'3 m/s',C.water);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=d;s.geometry={width:W,height:H,left,right,top,bottom,maxHead,unitScale,unit,stations:s.locals.map(p=>({s:p.s,x:X(p.s),name:p.name})),pipe:{ta,tb,tc,td,cx,inletY,outletY,free1,free2,valveX,r,velocityScale}};
+ }
+ function update(){
+  const s=calc();draw(s);root.mf1BudgetState=s;q('v-vdot').value=fmt(s.Q*1000,s.Q<.0003?5:2)+' L/s';q('v-k').value=fmt(s.K*1000,2)+' mm';q('hw-total').textContent=(s.uncertain?'≈ ':'')+fmt(s.z1,s.total<.1?6:s.total<10?4:3)+' m';q('lin-result').textContent=(s.uncertain?'≈ ':'')+length(s.lin);q('local-result').textContent=(s.uncertain?'≈ ':'')+length(s.local);
+  q('regime-values').textContent='v = '+fmt(s.V,4)+' m/s; Re = '+fmt(s.Re,1)+'; λ = '+fmt(s.lam,6)+'; α = '+fmt(s.alpha,4)+(s.uncertain?' · prijelazna procjena.':'.');
+  q('equation').textContent='hlin = λ(L/D)v²/(2g) = '+length(s.lin)+'; hloc = (1,3 + α)v²/(2g) = '+length(s.local)+'. z₁ − 4 m = hlin + hloc.';
+  q('loss-values').textContent='Σζ = '+fmt(s.zeta,4)+'; EGL − HGL = αv²/(2g) = '+length(s.alpha*s.vh)+'. HGL na izlazu doseže z₂; izlazni pad EGL jednak je αv²/(2g).';
+  q('cause').textContent=changed==='k'?(s.Re<2320?'Pri laminarnom toku promjena hrapavosti ne mijenja λ = 64/Re ni potrebnu kotu.':'Pri istom Q hrapavost mijenja λ i linijski gubitak; brzina, α i lokalni gubitak ostaju isti.'):'Q je zadani zahtjev, a z₁ rezultat. U laminarnom području hlin raste linearno s Q; lokalni član uz zadane koeficijente raste s Q².';
+  MF1.decision(q('explainer'),{title:'Reynoldsov broj bira trenje i model izlaznog profila',branches:[
+   {when:'Re < 2320: laminarno',active:s.Re<2320,equation:'λ = 64/Re; α = ζizlaz = 2',then:'Hrapavost nema utjecaja. hlin = '+length(s.lin)+', Σζ = 3,3; z₁ = '+fmt(s.z1,6)+' m.'},
+   {when:'2320 ≤ Re < 4000: prijelaz',active:s.Re>=2320&&s.Re<4000,equation:'Procjena: interpolacija Re²λ i α od 2 do 1,06',then:'Re = '+fmt(s.Re,1)+', α ≈ '+fmt(s.alpha,4)+', z₁ ≈ '+fmt(s.z1,6)+' m. Prijelaz nema jedinstvenu pouzdanu korelaciju.'},
+   {when:'Re ≥ 4000: turbulentno',active:s.Re>=4000,equation:'Colebrook λ(Re,k/D); α = ζizlaz = 1,06',then:'k/D = '+fmt(s.K/D,5)+', λ = '+fmt(s.lam,6)+'. Izvorni zbroj Σζ = 2,36 daje z₁ = '+fmt(s.z1,3)+' m.'}
+  ],summary:'U, K₁, K₂, V i I označuju iste elemente na oba prikaza. Nagnuti dijelovi EGL jesu trenje po razvijenoj duljini; okomiti skokovi jesu lokalni gubici. Pri malom Re ostali ζ ostaju aproksimacija zadatka.'});
+ }
+ [Qinput,Kinput].forEach(input=>input.addEventListener('input',()=>{changed=input===Qinput?'Q':'k';update();}));
+ root.querySelectorAll('[data-z123-preset]').forEach(b=>b.addEventListener('click',()=>{const key=b.dataset.z123Preset;if(key==='source'){Qinput.value=6;Kinput.value=.26;}else Qinput.value=(key==='laminar-boundary'?2320:4000)*mu*A/(rho*D)*1000;changed='Q';update();}));
+ window.addEventListener('resize',update);if(typeof ResizeObserver!=='undefined')new ResizeObserver(update).observe(root);update();
 })();
 </script>
-
 ```
 
 ***
@@ -1366,478 +851,83 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 </div>
 <div class="rjesenje-label">Rješenje</div>
 
-1. $v_2 = v_1 \sqrt{\frac{\lambda_1 d_2}{\lambda_2 d_1}} = 1,56 v_1$.
-2.
-
-    $$
-    \dot{V}_{tot} = A_1 v_1 + A_2 (1,56 v_1)
-    $$
-
-    $$
-    v_1 = \mathbf{3,29 \, \text{m/s}}, \qquad v_2 = \mathbf{5,15 \, \text{m/s}}
-    $$
-3. $\dot{V}_1 = \mathbf{4,1 \, \text{L/s}}, \dot{V}_2 = \mathbf{25,9 \, \text{L/s}}$.
-4. $H_{pump} = (z_B - z_A) + h_{wl1} = \mathbf{18,93 \, \text{m}}$.
+1. Jednakost gubitaka u paralelnim granama daje $v_2=v_1\sqrt{\lambda_1d_2/(\lambda_2d_1)}$. Colebrookove jednadžbe i bilanca $\dot V_{tot}=A_1v_1+A_2v_2$ rješavaju se zajedno.
+2. Dobiva se $\lambda_1=0,0220871$, $\lambda_2=0,0182140$ te **$v_1=3,3023\,\mathrm{m/s}$ i $v_2=5,1427\,\mathrm{m/s}$**.
+3. Protoci su **$\dot V_1=4,1498\,\mathrm{L/s}$ i $\dot V_2=25,8502\,\mathrm{L/s}$**, a zajednički gubitak visine **$h_{L,1}=h_{L,2}=11,0486\,\mathrm{m}$**.
+4. Lokalni tlak $p_R$ ne može se odrediti iz navedenih podataka: potrebne su kote, brzina u presjeku R i referentni tlak. Uz **dodatnu naslijeđenu pretpostavku $z_B-z_A=8\,\mathrm m$**, jednake tlakove na velikim spremnicima i zanemarive brzine njihovih površina, potrebna je visina pumpe $H_p=8+h_L=\mathbf{19,05\,\mathrm m}$. Ekvivalentni porast tlaka pumpe tada je $\Delta p_{eq}=\rho gH_p=186,49\,\mathrm{kPa}$; ta veličina nije tlak $p_R$.
 
 ```{=html}
 <!-- WIDGET: Paralelne cijevi i raspodjela protoka -->
-<div id="z124-parallel-widget" data-widget-role="application" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
-    <style>
-        #z124-parallel-widget .z124-shell {
-            border-radius: 30px;
-            border: 1px solid #d7f0eb;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fffd 100%);
-            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.08);
-            padding: 28px;
-        }
-        #z124-parallel-widget .z124-head {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 18px;
-            align-items: start;
-            margin-bottom: 18px;
-        }
-        #z124-parallel-widget .z124-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        #z124-parallel-widget .z124-title {
-            margin: 0;
-            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
-            line-height: 1.08;
-            color: #0f172a;
-            font-weight: 800;
-        }
-        #z124-parallel-widget .z124-sub {
-            margin: 8px 0 0;
-            max-width: 74ch;
-            color: #475569;
-            font-size: 0.95rem;
-            line-height: 1.62;
-        }
-        #z124-parallel-widget .z124-chip {
-            align-self: start;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #dcfce7, #ecfeff);
-            border: 1px solid #a7f3d0;
-            color: #047857;
-            font-size: 0.78rem;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-        #z124-parallel-widget .z124-note {
-            margin-bottom: 18px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            border: 1px solid #bfdbfe;
-            background: linear-gradient(135deg, #eff6ff, #f8fbff);
-            color: #1e3a8a;
-            font-size: 0.86rem;
-            line-height: 1.6;
-        }
-        #z124-parallel-widget .z124-stage {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-        #z124-parallel-widget .z124-scene {
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid #dbeafe;
-            background: linear-gradient(180deg, #f9fcff 0%, #eef6ff 100%);
-        }
-        #z124-parallel-widget canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        #z124-parallel-widget .z124-summary {
-            display: grid;
-            grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #z124-parallel-widget .z124-pressure,
-        #z124-parallel-widget .z124-metric,
-        #z124-parallel-widget .z124-controls,
-        #z124-parallel-widget .z124-split,
-        #z124-parallel-widget .z124-explainer {
-            border-radius: 18px;
-            border: 1px solid #dbeafe;
-            background: #ffffff;
-            box-shadow: 0 10px 24px rgba(16, 185, 129, 0.06);
-        }
-        #z124-parallel-widget .z124-pressure {
-            padding: 18px;
-            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
-        }
-        #z124-parallel-widget .z124-pressure small {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #64748b;
-        }
-        #z124-pr-val {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #1d4ed8;
-            margin-bottom: 8px;
-        }
-        #z124-parallel-widget .z124-pressure span {
-            display: block;
-            color: #475569;
-            font-size: 0.82rem;
-            line-height: 1.55;
-        }
-        #z124-parallel-widget .z124-metrics {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-        }
-        #z124-parallel-widget .z124-metric {
-            padding: 14px;
-            text-align: center;
-        }
-        #z124-parallel-widget .z124-metric small {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #64748b;
-        }
-        #z124-parallel-widget .z124-metric strong {
-            display: block;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-            font-size: 0.98rem;
-            color: #0f172a;
-        }
-        #z124-parallel-widget .z124-lower {
-            display: grid;
-            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #z124-parallel-widget .z124-controls,
-        #z124-parallel-widget .z124-split,
-        #z124-parallel-widget .z124-explainer {
-            padding: 18px;
-        }
-        #z124-parallel-widget .z124-control + .z124-control {
-            margin-top: 18px;
-        }
-        #z124-parallel-widget .z124-control label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 0.84rem;
-            font-weight: 700;
-            color: #475569;
-        }
-        #z124-parallel-widget .z124-control input {
-            width: 100%;
-            accent-color: #2563eb;
-        }
-        #z124-parallel-widget .z124-split {
-            background: linear-gradient(180deg, #ecfeff 0%, #f8fbff 100%);
-            border-left: 6px solid #0ea5e9;
-        }
-        #z124-parallel-widget .z124-split-title {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-bottom: 14px;
-            color: #0f4c81;
-        }
-        #z124-parallel-widget .z124-bar-label {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 6px;
-            font-size: 0.84rem;
-            color: #1e293b;
-        }
-        #z124-parallel-widget .z124-track {
-            height: 10px;
-            background: #dbeafe;
-            border-radius: 999px;
-            overflow: hidden;
-        }
-        #z124-bar-v1,
-        #z124-bar-v2 {
-            height: 100%;
-            border-radius: 999px;
-        }
-        #z124-bar-v1 {
-            background: linear-gradient(90deg, #3b82f6, #60a5fa);
-        }
-        #z124-bar-v2 {
-            background: linear-gradient(90deg, #10b981, #34d399);
-        }
-        #z124-parallel-widget .z124-split-item + .z124-split-item {
-            margin-top: 14px;
-        }
-        #z124-parallel-widget .z124-explainer {
-            grid-column: 1 / -1;
-            background: #fff7ed;
-            border-color: #fdba74;
-            color: #7c2d12;
-            font-size: 0.84rem;
-            line-height: 1.58;
-        }
-        #z124-parallel-widget .z124-shell {
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-            padding: 22px;
-            border-radius: 20px;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-        }
-        #z124-parallel-widget .z124-title {
-            font-size: clamp(1.3rem, 2.2vw, 1.75rem);
-        }
-        #z124-parallel-widget .z124-scene {
-            border-radius: 16px;
-        }
-        #z124-parallel-widget .z124-pressure,
-        #z124-parallel-widget .z124-metric,
-        #z124-parallel-widget .z124-controls,
-        #z124-parallel-widget .z124-split,
-        #z124-parallel-widget .z124-explainer {
-            border-radius: 14px;
-            box-shadow: none;
-        }
-        @media (max-width: 960px) {
-            #z124-parallel-widget .z124-head,
-            #z124-parallel-widget .z124-summary,
-            #z124-parallel-widget .z124-lower,
-            #z124-parallel-widget .z124-metrics {
-                grid-template-columns: 1fr;
-            }
-            #z124-parallel-widget .z124-chip {
-                justify-self: start;
-            }
-            #z124-parallel-widget .z124-explainer {
-                grid-column: auto;
-            }
-        }
-    </style>
-
-    <div class="z124-shell">
-        <div class="z124-head">
-            <div>
-                <div class="z124-kicker">Z124 paralelne grane</div>
-                <h4 class="z124-title">Raspodjela protoka u paralelnim cijevima</h4>
-                <p class="z124-sub">U čvorištu vrijedi Q = Q<sub>1</sub> + Q<sub>2</sub>, a između istih čvorova obje grane imaju jednak gubitak visine: h<sub>L,1</sub> = h<sub>L,2</sub>.</p>
-            </div>
-            <div class="z124-chip">h<sub>L,1</sub> = h<sub>L,2</sub></div>
-        </div>
-
-        <div class="z124-note"><strong>Kako čitati paralelne grane:</strong> Raspodjela nije proizvoljna: grana s manjim hidrauličkim otporom preuzima veći dio ukupnog protoka. Povećanjem otpora jedne grane njezin se dio protoka smanjuje, a ostatak ukupnog protoka prelazi u drugu granu.</div>
-
-        <div class="z124-stage">
-            <div class="z124-scene">
-                <canvas id="z124-canvas" width="550" height="400"></canvas>
-            </div>
-            <div class="z124-summary">
-                <div class="z124-pressure">
-                    <small>Tlak u račvi p_R</small>
-                    <strong id="z124-pr-val">--- kPa</strong>
-                    <span>U izračunu je <span id="z124-hl-equality">h<sub>L,1</sub> = h<sub>L,2</sub></span>, pa se ukupni protok raspodjeljuje prema otporu grana.</span>
-                </div>
-                <div class="z124-metrics">
-                    <div class="z124-metric">
-                        <small>v₁</small>
-                        <strong id="z124-v1-card">0.00 m/s</strong>
-                    </div>
-                    <div class="z124-metric">
-                        <small>v₂</small>
-                        <strong id="z124-v2-card">0.00 m/s</strong>
-                    </div>
-                    <div class="z124-metric">
-                        <small>v₂/v₁</small>
-                        <strong id="z124-ratio-card">0.00</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="z124-lower">
-            <div class="z124-controls">
-                <div class="z124-control">
-                    <label>Ukupni protok Q_tot: <span id="z124-v-vtot" style="color:#2563eb;">30</span> L/s</label>
-                    <input type="range" id="z124-vtot-slider" min="10" max="60" step="1" value="30">
-                </div>
-                <div class="z124-control">
-                    <label>Promjer cijevi 2 (D2): <span id="z124-v-d2" style="color:#2563eb;">80</span> mm</label>
-                    <input type="range" id="z124-d2-slider" min="40" max="120" step="5" value="80">
-                </div>
-            </div>
-
-            <div class="z124-split">
-                <div class="z124-split-title">Raspodjela protoka</div>
-                <div class="z124-split-item">
-                    <div class="z124-bar-label"><span>Cijev 1 (40 mm): Q<sub>1</sub>/Q</span><b id="z124-v1-out">4.1 L/s (14 %)</b></div>
-                    <div class="z124-track"><div id="z124-bar-v1" style="width: 14%;"></div></div>
-                </div>
-                <div class="z124-split-item">
-                    <div class="z124-bar-label"><span>Cijev 2 (<span id="z124-d2-label">80</span> mm): Q<sub>2</sub>/Q</span><b id="z124-v2-out">25.9 L/s (86 %)</b></div>
-                    <div class="z124-track"><div id="z124-bar-v2" style="width: 86%;"></div></div>
-                </div>
-            </div>
-
-            <div class="z124-explainer"><strong>Tumačenje scene:</strong> <span id="z124-explainer"></span></div>
-        </div>
+<div id="z124-parallel-widget" data-widget-role="application">
+  <div class="z124-shell">
+    <h4 class="z124-title">Paralelne cijevi: isti gubitak visine, različiti protoci</h4>
+    <p>Između račve R i sastavišta S vrijedi Q = Q<sub>1</sub> + Q<sub>2</sub> i h<sub>L,1</sub> = h<sub>L,2</sub>. Promijeni promjer jedne grane i prati preraspodjelu zadanog protoka.</p>
+    <div class="z124-scene"><svg id="z124-canvas" role="img" aria-label="Dvije spojene paralelne cijevi, brzine i zajednička raspodjela protoka"></svg></div>
+    <div class="z124-controls">
+      <div class="z124-control"><label for="z124-vtot-slider">Ukupni protok Q: <output id="z124-v-vtot"></output> L/s</label><input id="z124-vtot-slider" type="range" min="0.01" max="60" step="0.01" value="30"></div>
+      <div class="z124-control"><label for="z124-d1-slider">Promjer D<sub>1</sub>: <output id="z124-v-d1"></output> mm</label><input id="z124-d1-slider" type="range" min="30" max="100" step="5" value="40"></div>
+      <div class="z124-control"><label for="z124-d2-slider">Promjer D<sub>2</sub>: <output id="z124-v-d2"></output> mm</label><input id="z124-d2-slider" type="range" min="40" max="120" step="5" value="80"></div>
     </div>
+    <div class="v13p-presets"><button class="v13p-btn" type="button" data-p="source">Izvorni Z124</button><button class="v13p-btn" type="button" data-p="same">Jednake grane</button><button class="v13p-btn" type="button" data-p="narrow">Uža grana 1</button></div>
+    <div class="z124-results"><div><span>Protok grane 1</span><strong id="z124-q1-val"></strong></div><div><span>Protok grane 2</span><strong id="z124-q2-val"></strong></div><div><span>Zajednički gubitak h<sub>L</sub></span><strong id="z124-hl-val"></strong></div></div>
+    <p id="z124-balance"></p>
+    <div id="z124-explainer"></div>
+    <details><summary>Pretpostavke modela i tlak u račvi</summary><p>L<sub>1</sub> = L<sub>2</sub> = 36 m; voda: ρ = 998 kg/m³, μ = 0,001 Pa s; hrapavost k = 0,045 mm. Mjesni gubici zanemareni su. U prijelazu 2320 ≤ Re &lt; 4000 interpolira se Re²λ, pa h(Q) ostaje monoton; to je ilustrativna procjena nesigurnoga prijelaznog strujanja.</p><p>Iz danih podataka <strong>nije određen lokalni tlak p<sub>R</sub></strong>: potrebne su kote, lokalna brzina i referentni tlak. Samo uz dodatnu naslijeđenu pretpostavku z<sub>B</sub> − z<sub>A</sub> = 8 m, jednaki tlakovi na velikim spremnicima i zanemarive brzine njihovih površina vrijedi H<sub>p</sub> = 8 m + h<sub>L</sub>. <span id="z124-pump-assumption"></span> Ekvivalent Δp<sub>eq</sub> = ρgH<sub>p</sub> opisuje porast ukupne energije pumpe po jedinici volumena; nije p<sub>R</sub>.</p></details>
+  </div>
 </div>
-
+<style>
+#z124-parallel-widget .z124-shell{background:#fff;color:#17324d}
+#z124-parallel-widget .z124-title{margin:0 0 .6rem;font-size:1.4rem;line-height:1.3}
+#z124-parallel-widget p{line-height:1.6;margin:.65rem 0}
+#z124-parallel-widget #z124-canvas{display:block;width:100%;height:auto;max-height:none;background:#fbfdff}
+#z124-parallel-widget .z124-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:1rem 0}
+#z124-parallel-widget .z124-control label{display:block;font-weight:650;margin-bottom:.5rem}
+#z124-parallel-widget .z124-control input{width:100%;accent-color:#1269b0}
+#z124-parallel-widget .z124-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:1rem 0}
+#z124-parallel-widget .z124-results>div{padding:.75rem;border-left:3px solid #c6dae8;background:#f4f8fb}
+#z124-parallel-widget .z124-results span{display:block;font-size:.85rem;color:#526779}
+#z124-parallel-widget .z124-results strong{display:block;font-size:1.2rem;font-variant-numeric:tabular-nums;margin-top:.25rem}
+#z124-parallel-widget details{margin-top:1rem;color:#526779}
+#z124-parallel-widget summary{cursor:pointer;font-weight:650}
+#z124-parallel-widget button[aria-pressed="true"]{background:#e4f2fa;border-color:#1269b0}
+@media(max-width:650px){#z124-parallel-widget .z124-controls{grid-template-columns:1fr}#z124-parallel-widget .z124-results{grid-template-columns:1fr!important}#z124-parallel-widget .z124-results>div{display:flex!important;justify-content:space-between;align-items:center;gap:.5rem}#z124-parallel-widget .z124-results strong{margin:0;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important}}
+</style>
 <script>
-(function() {
-    const canvas = document.getElementById('z124-canvas'), ctx = canvas.getContext('2d');
-    const vtotS = document.getElementById('z124-vtot-slider'), d2S = document.getElementById('z124-d2-slider');
-    const state = { v1: 0, v2: 0, d1: 0.04, d2: 0.08, pr: 0, ratio: 0, vdot1: 0, vdot2: 0 };
-
-    let particles = [];
-    for (let i = 0; i < 150; i++) particles.push({ t: (i * 0.61803398875) % 1, branch: i % 2 ? 1 : 2 });
-
-    function update() {
-        const vtot_l = parseFloat(vtotS.value), d2_mm = parseFloat(d2S.value);
-        const d1 = 0.04, d2 = d2_mm / 1000, L = 36, rho = 998, g = 9.81;
-        const lam1 = 0.022, lam2 = 0.018;
-
-        const ratio_v = Math.sqrt((lam1 * d2) / (lam2 * d1));
-        const A1 = Math.PI * d1 * d1 / 4;
-        const A2 = Math.PI * d2 * d2 / 4;
-
-        const v1 = (vtot_l / 1000) / (A1 + A2 * ratio_v);
-        const v2 = v1 * ratio_v;
-        const vdot1 = A1 * v1 * 1000;
-        const vdot2 = A2 * v2 * 1000;
-
-        const hw = lam1 * (L / d1) * (v1 * v1 / (2 * g));
-        const hw2 = lam2 * (L / d2) * (v2 * v2 / (2 * g));
-        const pr = (rho * g * (13 - 5 + hw)) / 1000;
-
-        state.v1 = v1;
-        state.v2 = v2;
-        state.d1 = d1;
-        state.d2 = d2;
-        state.pr = pr;
-        state.ratio = ratio_v;
-        state.vdot1 = vdot1;
-        state.vdot2 = vdot2;
-
-        document.getElementById('z124-v-vtot').innerText = vtot_l;
-        document.getElementById('z124-v-d2').innerText = d2_mm;
-        document.getElementById('z124-d2-label').innerText = d2_mm;
-        document.getElementById('z124-v1-out').innerText = vdot1.toFixed(1) + ' L/s (' + (vdot1 / vtot_l * 100).toFixed(0) + ' %)';
-        document.getElementById('z124-v2-out').innerText = vdot2.toFixed(1) + ' L/s (' + (vdot2 / vtot_l * 100).toFixed(0) + ' %)';
-        document.getElementById('z124-bar-v1').style.width = (vdot1 / vtot_l * 100) + '%';
-        document.getElementById('z124-bar-v2').style.width = (vdot2 / vtot_l * 100) + '%';
-        document.getElementById('z124-hl-equality').innerHTML = 'h<sub>L,1</sub> = ' + hw.toFixed(2) + ' m; h<sub>L,2</sub> = ' + hw2.toFixed(2) + ' m';
-        document.getElementById('z124-pr-val').innerText = pr.toFixed(1) + ' kPa';
-        document.getElementById('z124-v1-card').textContent = v1.toFixed(2) + ' m/s';
-        document.getElementById('z124-v2-card').textContent = v2.toFixed(2) + ' m/s';
-        document.getElementById('z124-ratio-card').textContent = ratio_v.toFixed(2);
-        document.getElementById('z124-explainer').textContent =
-            'Za Q = ' + vtot_l.toFixed(0) + ' L/s i D₂ = ' +
-            d2_mm.toFixed(0) + ' mm uvjet jednakih gubitaka daje v₂/v₁ = ' +
-            ratio_v.toFixed(2) + '. Zato Q₁ = ' + vdot1.toFixed(1) +
-            ' L/s, Q₂ = ' + vdot2.toFixed(1) + ' L/s, a pR = ' +
-            pr.toFixed(1) + ' kPa. Promjena promjera druge grane mijenja njezin otpor i time raspodjelu protoka.';
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cy = 200;
-        const ox = 150;
-
-        ctx.fillStyle = '#f8fbff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([6, 6]);
-        ctx.beginPath();
-        ctx.moveTo(68, cy);
-        ctx.lineTo(canvas.width - 48, cy);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.fillStyle = '#475569';
-        ctx.beginPath(); ctx.arc(ox, cy, 15, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(ox + 250, cy, 15, 0, Math.PI * 2); ctx.fill();
-
-        ctx.strokeStyle = '#cbd5e0';
-        ctx.lineCap = 'round';
-        ctx.lineWidth = state.d1 * 500;
-        ctx.beginPath();
-        ctx.moveTo(ox, cy);
-        ctx.lineTo(ox, cy - 80);
-        ctx.lineTo(ox + 250, cy - 80);
-        ctx.lineTo(ox + 250, cy);
-        ctx.stroke();
-
-        ctx.lineWidth = state.d2 * 500;
-        ctx.beginPath();
-        ctx.moveTo(ox, cy);
-        ctx.lineTo(ox, cy + 80);
-        ctx.lineTo(ox + 250, cy + 80);
-        ctx.lineTo(ox + 250, cy);
-        ctx.stroke();
-
-        ctx.fillStyle = '#1e293b';
-        ctx.font = 'bold 12px Inter';
-        ctx.fillText('grana 1: Q₁', ox + 82, cy - 106);
-        ctx.fillText('grana 2: Q₂', ox + 82, cy + 118);
-
-        particles.forEach((particle) => {
-            const currentV = particle.branch === 1 ? state.v1 : state.v2;
-            particle.t += 0.005 * currentV;
-            if (particle.t > 1) particle.t = 0;
-
-            let px, py;
-            const h = particle.branch === 1 ? -80 : 80;
-            if (particle.t < 0.2) {
-                px = ox;
-                py = cy + (particle.t / 0.2) * h;
-            } else if (particle.t < 0.8) {
-                px = ox + ((particle.t - 0.2) / 0.6) * 250;
-                py = cy + h;
-            } else {
-                px = ox + 250;
-                py = cy + h - ((particle.t - 0.8) / 0.2) * h;
-            }
-
-            ctx.fillStyle = particle.branch === 1 ? '#3b82f6' : '#10b981';
-            ctx.beginPath();
-            ctx.arc(px, py, 2, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        ctx.fillStyle = '#334155';
-        ctx.font = '12px Inter';
-        ctx.fillText('Q = Q₁ + Q₂', ox - 58, cy - 22);
-        ctx.fillText('hL,1 = hL,2', ox + 130, cy + 22);
-    }
-
-    function frame() {
-        draw();
-        if (canvas.isConnected && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(frame);
-    }
-
-    vtotS.oninput = update;
-    d2S.oninput = update;
-    update();
-    frame();
+(() => {
+  const init=()=>{
+    const root=document.getElementById('z124-parallel-widget');if(!root||root.dataset.z124Ready)return;root.dataset.z124Ready='true';
+    const $=id=>root.querySelector('#z124-'+id),svg=$('canvas'),q=$('vtot-slider'),d1=$('d1-slider'),d2=$('d2-slider');
+    const f=(v,d=3)=>Number(v).toLocaleString('hr-HR',{maximumSignificantDigits:d}),flow=v=>v<.001?f(v*1e6,4)+' mL/s':f(v*1000,4)+' L/s',head=v=>v<.1?f(v*1000,4)+' mm':f(v,4)+' m',velocity=v=>v<.01?f(v*1000,4)+' mm/s':f(v,4)+' m/s';
+    const sub=(base,index)=>base+'<tspan baseline-shift="sub" font-size=".75em">'+index+'</tspan>';
+    const text=(x,y,value,anchor='start',color='#17324d',weight=400)=>'<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" fill="'+color+'" font-size="16" font-weight="'+weight+'">'+value+'</text>';
+    const draw=s=>{
+      const style=getComputedStyle(svg.parentElement),W=Math.max(300,svg.parentElement.clientWidth-parseFloat(style.paddingLeft||0)-parseFloat(style.paddingRight||0)),wide=W>=650,H=525,diameterScale=wide?600:300,velocityScale=wide?6:3,jl=wide?W*.13:35,jr=W-jl,xa=wide?W*.26:95,xb=W-xa,cy=205,y1=110,y2=300;
+      const arrow=(x,y,length,color,kind='velocity-vector')=>{const h=Math.min(6,length/2);return length>0?'<g data-'+kind+'="true"><path d="M'+x+' '+y+'h'+length+'" fill="none" stroke="'+color+'" stroke-width="2.4"/><path d="M'+(x+length)+' '+y+'l'+(-h)+' '+(-h*.55)+'v'+h*1.1+'Z" fill="'+color+'"/></g>':'';};
+      const branch=(y,D,color)=>{const path='M'+jl+' '+cy+'C'+(jl+30)+' '+cy+' '+(xa-30)+' '+y+' '+xa+' '+y+'H'+xb+'C'+(xb+30)+' '+y+' '+(jr-30)+' '+cy+' '+jr+' '+cy;return '<path data-pipe-wall="true" d="'+path+'" fill="none" stroke="#58768b" stroke-linejoin="round" stroke-width="'+(D*diameterScale+4)+'"/><path data-pipe-diameter="'+D+'" d="'+path+'" fill="none" stroke="'+color+'" stroke-linejoin="round" stroke-width="'+D*diameterScale+'"/>';};
+      const p1=s.Q1/s.Q,barX=26,barW=W-52;
+      svg.setAttribute('viewBox','0 0 '+W+' '+H);
+      svg.innerHTML='<rect width="'+W+'" height="'+H+'" fill="#fbfdff"/>'+branch(y1,s.D1,'#c2e4fa')+branch(y2,s.D2,'#c2eada')+'<path d="M5 '+cy+'H'+jl+'M'+jr+' '+cy+'H'+(W-5)+'" stroke="#58768b" stroke-width="14"/><path d="M5 '+cy+'H'+jl+'M'+jr+' '+cy+'H'+(W-5)+'" stroke="#d6e8f1" stroke-width="10"/>'+arrow(xa,y1,s.b1.V*velocityScale,'#1269b0')+arrow(xa,y2,s.b2.V*velocityScale,'#147a55')+arrow(9,cy,22,'#17324d','flow-direction')+arrow(W-31,cy,22,'#17324d','flow-direction')+text(17,180,'Q','middle','#17324d',650)+text(W-17,180,'Q','middle','#17324d',650)+
+        text(W/2,35,'Cijev 1 · '+sub('D','1')+' = '+f(s.D1*1000)+' mm','middle','#1269b0',650)+text(W/2,63,sub('v','1')+' = '+velocity(s.b1.V),'middle','#1269b0')+text(jl,244,'R','middle','#17324d',700)+text(jr,244,'S','middle','#17324d',700)+text(W/2,195,sub('h','L,1')+' = '+sub('h','L,2'),'middle','#4f46a5',650)+text(W/2,349,'Cijev 2 · '+sub('D','2')+' = '+f(s.D2*1000)+' mm','middle','#147a55',650)+text(W/2,377,sub('v','2')+' = '+velocity(s.b2.V),'middle','#147a55')+
+        text(barX,412,'1: '+f(p1*100,3)+' %','start','#1269b0',650)+text(W-barX,412,'2: '+f((1-p1)*100,3)+' %','end','#147a55',650)+'<rect data-split="1" x="'+barX+'" y="426" width="'+barW*p1+'" height="14" fill="#1269b0"/><rect data-split="2" x="'+(barX+barW*p1)+'" y="426" width="'+barW*(1-p1)+'" height="14" fill="#147a55"/>'+
+        text(W/2,467,'L₁ = L₂ = 36 m; duljine shematske','middle','#526779')+text(W/2,493,'D: '+diameterScale+' px/m · v: '+velocityScale+' px/(m/s)','middle','#526779')+text(W/2,517,'Priključci: Q →, samo smjer','middle','#526779');
+      s.geometry={width:W,height:H,diameterScale,velocityScale,branch1Y:y1,branch2Y:y2,arrowX:xa,junctionLeft:jl,junctionRight:jr,splitX:barX,splitWidth:barW};
+    };
+    const update=()=>{
+      const Q=+q.value/1000,D1=+d1.value/1000,D2=+d2.value/1000,solution=MF1.parallelPipes(Q,D1,D2),s={Q,D1,D2,...solution};s.hL=(s.b1.h+s.b2.h)/2;s.assumedDeltaZ=8;s.assumedPumpHead=8+s.hL;s.equivalentPumpPressure=998*9.81*s.assumedPumpHead;root.mf1NetworkState=s;
+      $('v-vtot').textContent=f(Q*1000,5);$('v-d1').textContent=f(D1*1000);$('v-d2').textContent=f(D2*1000);$('q1-val').textContent=flow(s.Q1);$('q2-val').textContent=flow(s.Q2);$('hl-val').textContent=head(s.hL);
+      $('balance').textContent='Bilanca: '+flow(s.Q1)+' + '+flow(s.Q2)+' = '+flow(Q)+'. Gubitak u svakoj grani: '+head(s.b1.h)+'.';
+      $('pump-assumption').textContent='Tada je Hₚ = '+f(s.assumedPumpHead,5)+' m i Δpₑq = '+f(s.equivalentPumpPressure/1000,5)+' kPa.';
+      const laminar=s.b1.Re<2320&&s.b2.Re<2320,turbulent=s.b1.Re>=4000&&s.b2.Re>=4000;
+      MF1.decision($('explainer'),{title:'Jednak gubitak, zakon trenja prema režimu svake grane',branches:[
+        {when:'Obje grane laminarne: Re₁ < 2320 i Re₂ < 2320',active:laminar,equation:'λ = 64/Re; hL = 128μLQ/(ρgπD⁴)',then:'Q₁/Q₂ = (D₁/D₂)⁴ = '+f(s.Q1/s.Q2,4)+'. Pri malom Re Darcyjev λ može biti veći od 1; nije udio izgubljene energije.'},
+        {when:'Obje grane turbulentne: Re₁ ≥ 4000 i Re₂ ≥ 4000',active:turbulent,equation:'hL = 8λLQ²/(gπ²D⁵); λ iz Colebrookove jednadžbe',then:'Rješenje daje '+flow(s.Q1)+' i '+flow(s.Q2)+' uz isti hL = '+head(s.hL)+'. Promjenom D mijenjaju se i Re i relativna hrapavost k/D.'},
+        {when:'Različiti režimi ili prijelaz 2320 ≤ Re < 4000',active:!laminar&&!turbulent,equation:'Za svaku granu vlastiti λ(Re,k/D); Q₁ + Q₂ = Q; hL,1 = hL,2',then:(s.b1.uncertain||s.b2.uncertain?'Najmanje jedna grana je u prijelazu: interpolacija Re²λ daje ilustrativan, nesiguran gubitak. ':'Jedna je grana laminarna, a druga turbulentna. ')+'Jednak gubitak određuje zajedničku raspodjelu.'}
+      ],summary:'Re₁ = '+f(s.b1.Re,4)+'; λ₁ = '+f(s.b1.lam,4)+'; Re₂ = '+f(s.b2.Re,4)+'; λ₂ = '+f(s.b2.lam,4)+'. '+(D1===D2?'D₁ = D₂ → Q₁ = Q₂.':D1<D2?'D₁ < D₂ → Q₁ < Q₂.':'D₁ > D₂ → Q₁ > Q₂.')});
+      root.querySelectorAll('[data-p]').forEach(b=>{const p=b.dataset.p,match=Q===.03&&(p==='source'?D1===.04&&D2===.08:p==='same'?D1===.06&&D2===.06:D1===.035&&D2===.08);b.setAttribute('aria-pressed',String(match));});draw(s);
+    };
+    [q,d1,d2].forEach(e=>e.addEventListener('input',update));root.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>{q.value=30;d1.value=b.dataset.p==='same'?60:b.dataset.p==='narrow'?35:40;d2.value=b.dataset.p==='same'?60:80;update();}));
+    update();if(window.ResizeObserver)new ResizeObserver(()=>draw(root.mf1NetworkState)).observe(svg.parentElement);
+  };if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 
@@ -1940,233 +1030,6 @@ Zrak struji kroz 7 m dug pravokutni ventilacijski kanal dimenzija $150 \times 20
     const lambda = (Re, kd) => MF1.pipeFriction(Re,kd).factor;
     const regime = (Re) => (Re < 2320 ? "laminarno" : Re < 4000 ? "prijelazno" : "turbulentno");
 
-    function z123() {
-      const root = document.getElementById("z123-budget-widget");
-      if (!root) return;
-      const q = root.querySelector("#z123-vdot-slider"),
-        k = root.querySelector("#z123-k-slider"),
-        scene = svgFor(
-          root,
-          "#z123-canvas",
-          "Dva otvorena spremnika povezana cjevovodom s ulazom, koljenom, ventilom, izlazom i energetskom linijom",
-          "0 0 920 430",
-        ),
-        out = primary(
-          root,
-          ".z123-summary",
-          "Dominantni rezultat: potrebna uzvodna kota z₁",
-          "Za slobodne površine pri atmosferskom tlaku vrijedi z₁ − z₂ = hL.",
-        ),
-        loc = locator(
-          root,
-          ".z123-stage",
-          "v13p-z123-locator",
-          '<h5>Budžet ukupnog gubitka hL</h5><div class="v13p-budget"><div class="v13p-budget-row"><span>linijski</span><div class="v13p-budget-track"><div class="v13p-budget-fill v13p-budget-fill--line"></div></div><b></b></div><div class="v13p-budget-row"><span>lokalni</span><div class="v13p-budget-track"><div class="v13p-budget-fill v13p-budget-fill--local"></div></div><b></b></div></div><p></p>',
-        );
-      let previousState = null,
-        lastChanged = "Q";
-      const calc = () => {
-        const Q = +q.value / 1000,
-          K = +k.value / 1000,
-          D = 0.05,
-          L = 89,
-          rho = 1000,
-          mu = 0.0013,
-          g = 9.81,
-          A = (Math.PI * D ** 2) / 4,
-          V = Q / A,
-          Re = (rho * V * D) / mu,
-          lam = lambda(Re, K / D),
-          lin = (lam * (L / D) * V ** 2) / (2 * g),
-          local = (2.36 * V ** 2) / (2 * g),
-          total = lin + local;
-        return {
-          Q,
-          K,
-          D,
-          L,
-          V,
-          Re,
-          lam,
-          lin,
-          local,
-          total,
-          z1: 4 + total,
-          pLin: (100 * lin) / total,
-          pLoc: (100 * local) / total,
-        };
-      };
-      const draw = (s)=>{
- const vh=s.V*s.V/(2*9.81),scale=135/Math.max(s.z1,5),Y=h=>205-h*scale;
- const points=[[80,s.z1],[130,s.z1],[130,s.z1-.5*vh],[280,s.z1-.5*vh-s.lin*.25],[280,s.z1-.8*vh-s.lin*.25],[430,s.z1-.8*vh-s.lin*.5],[430,s.z1-vh-s.lin*.5],[620,s.z1-vh-s.lin*.75],[620,s.z1-1.3*vh-s.lin*.75],[790,4+1.06*vh],[790,4],[860,4]];
- const line=points.map((p,i)=>(i?'L':'M')+p[0]+' '+Y(p[1])).join('');const hgl=points.map((p,i)=>(i?'L':'M')+p[0]+' '+Y(p[1]-(i>=2&&i<=9?1.06*vh:0))).join('');
- scene.innerHTML='<rect width="920" height="430" fill="#fbfdff"/><text x="50" y="30" font-size="17">Energetska bilanca između slobodnih površina</text><path d="M65 55V205H875" fill="none" stroke="#94a3b8"/><path d="'+line+'" fill="none" stroke="#c95d12" stroke-width="3"/><path d="'+hgl+'" fill="none" stroke="#6d28d9" stroke-width="2" stroke-dasharray="5 4"/><text x="280" y="55">EGL (narančasto), HGL (ljubičasto) [m]</text><text x="70" y="'+(Y(s.z1)-8)+'">z₁='+fmt(s.z1,2)+'</text><text x="800" y="'+(Y(4)-8)+'">z₂=4</text><text x="45" y="210">0</text>'+
- '<path d="M80 245V345H170V245M750 285V345H860V285" stroke="#58768b" fill="#e0f2fe" stroke-width="4"/><path d="M80 270H170M750 300H860" stroke="#0284c7" stroke-width="2"/><path d="M170 320H280V370H620V320H750" stroke="#58768b" fill="none" stroke-width="18"/><path d="M170 320H280V370H620V320H750" stroke="#bae6fd" fill="none" stroke-width="11"/>'+MF1.svgArrow(400,370,s.V*5,0,C.velocity,'v')+
- '<text x="55" y="410">Shema: ulaz (0,5), dva koljena (2×0,3), ventil (0,2), izlaz (1,06). Σζ=2,36.</text>';
- };
-      const sync = () => {
-        const s = calc();
-        set(root, "#z123-v-vdot", fmt(s.Q * 1000, 1));
-        set(root, "#z123-v-k", fmt(s.K * 1000, 2));
-        set(root, "#z123-hw-total", fmt(s.z1, 1) + " m");
-        set(root, "#z123-re-card", fmt(s.Re, 0));
-        set(root, "#z123-lambda-card", fmt(s.lam, 4));
-        set(root, "#z123-z1-card", fmt(s.total, 1) + " m");
-        set(root, "#z123-bar-friction", null);
-        const barF = root.querySelector("#z123-bar-friction"),
-          barL = root.querySelector("#z123-bar-local");
-        if (barF) barF.style.width = s.pLin + "%";
-        if (barL) barL.style.width = s.pLoc + "%";
-        set(root, "#z123-legend-friction", "LINIJSKI: " + fmt(s.pLin, 0) + " %");
-        set(root, "#z123-legend-local", "LOKALNI: " + fmt(s.pLoc, 0) + " %");
-        out.textContent = fmt(s.z1, 1) + " m";
-        const rows = loc.querySelectorAll(".v13p-budget-row");
-        rows[0].querySelector(".v13p-budget-fill").style.width = s.pLin + "%";
-        rows[1].querySelector(".v13p-budget-fill").style.width = s.pLoc + "%";
-        rows[0].querySelector("b").textContent = fmt(s.lin, 2) + " m";
-        rows[1].querySelector("b").textContent = fmt(s.local, 2) + " m";
-        const msg =
-          lastChanged === "Q"
-            ? `Veći Q povećava brzinu na ${fmt(s.V, 2)} m/s; oba gubitka rastu s v². Linijski dio sada čini ${fmt(s.pLin, 0)} % ukupnog hL.`
-            : `Veća hrapavost daje k/D = ${(s.K / s.D).toFixed(4)} i λ = ${fmt(s.lam, 4)}. U turbulentnom stanju zato raste samo linijski dio; lokalni ζ-gubici ostaju isti za istu brzinu.`;
-        loc.querySelector("p").textContent = msg;
-        set(root, "#z123-explainer", msg);
-        draw(s);
-        previousState = s;
-      };
-      [q, k].forEach((el) =>
-        el.addEventListener("input", (e) => {
-          lastChanged = e.target === q ? "Q" : "k";
-          sync();
-        }),
-      );
-      sync();
-    }
-
-    function z124() {
-      const root = document.getElementById("z124-parallel-widget");
-      if (!root) return;
-      const q = root.querySelector("#z124-vtot-slider"),
-        d2 = root.querySelector("#z124-d2-slider"),
-        controls = root.querySelector(".z124-controls");
-      let d1 = 40;
-      const d1Control = document.createElement("div");
-      d1Control.className = "z124-control";
-      d1Control.innerHTML =
-        '<label for="z124-d1-slider">Promjer cijevi 1 (D₁): <span style="color:#2563eb">40</span> mm</label><input id="z124-d1-slider" type="range" min="30" max="100" step="5" value="40">';
-      controls?.append(d1Control);
-      const d1Input = d1Control.querySelector("input"),
-        d1Out = d1Control.querySelector("span"),
-        scene = svgFor(
-          root,
-          "#z124-canvas",
-          "Paralelni cjevovodi s račvom, dvjema granama, sastavištem i vidljivom raspodjelom protoka",
-          "0 0 920 400",
-        ),
-        out = primary(
-          root,
-          ".z124-summary",
-          "Dominantni rezultat: raspodjela Q₁ i Q₂",
-          "Između istih čvorova vrijedi hL,1 = hL,2; protoci se zato prilagode otporima.",
-        ),
-        loc = locator(
-          root,
-          ".z124-stage",
-          "v13p-z124-locator",
-          '<h5>Trenutačna raspodjela i uvjet mreže</h5><div class="v13p-split-total"><span class="one"></span><span class="two"></span></div><div class="v13p-equal"><div><span>grana 1 · hL,1</span><i></i><b></b></div><div><span>grana 2 · hL,2</span><i></i><b></b></div></div><p></p>',
-        );
-      const presets = document.createElement("div");
-      presets.className = "v13p-presets";
-      presets.innerHTML =
-        '<button class="v13p-btn" type="button" data-p="source">Izvorni Z124</button><button class="v13p-btn" type="button" data-p="same">Jednake grane</button><button class="v13p-btn" type="button" data-p="narrow">Uža grana 1</button>';
-      controls?.append(presets);
-      let previousState = null,
-        lastChanged = "Q";
-      const calc = () => {
-        const Q=+q.value/1000,D1=d1/1000,D2=+d2.value/1000,solution=MF1.parallelPipes(Q,D1,D2);
-        const pR=998*9.81*(8+(solution.b1.h+solution.b2.h)/2)/1000;
-        const state={Q,D1,D2,...solution,pR};root.mf1NetworkState=state;return state;
-      };
-      const draw = (s)=>{
- const t1=s.D1*400,t2=s.D2*400,vs=6;scene.innerHTML='<rect width="920" height="400" fill="#fbfdff"/><text x="50" y="35" font-size="17">Paralelne grane: isti gubitak visine, različiti protoci</text>'+
- '<path d="M210 205V115H710V205" fill="none" stroke="#58768b" stroke-width="'+(t1+8)+'"/><path d="M210 205V115H710V205" fill="none" stroke="#bae6fd" stroke-width="'+t1+'"/><path d="M210 205V295H710V205" fill="none" stroke="#58768b" stroke-width="'+(t2+8)+'"/><path d="M210 205V295H710V205" fill="none" stroke="#bae6fd" stroke-width="'+t2+'"/><path d="M65 205H210M710 205H855" stroke="#94a3b8" stroke-width="20"/>'+
- MF1.svgArrow(340,115,s.b1.V*vs,0,C.velocity,'v₁')+MF1.svgArrow(340,295,s.b2.V*vs,0,C.velocity,'v₂')+
- '<text x="290" y="75">D₁='+fmt(s.D1*1000,0)+' mm; Q₁='+fmt(s.Q1*1000,2)+' L/s</text><text x="290" y="355">D₂='+fmt(s.D2*1000,0)+' mm; Q₂='+fmt(s.Q2*1000,2)+' L/s</text><text x="285" y="195">hL,1 = hL,2 = '+fmt(s.b1.h,3)+' m</text><text x="285" y="220">λ₁ = '+fmt(s.b1.lam,4)+'; λ₂ = '+fmt(s.b2.lam,4)+'</text><text x="55" y="380">Širine cijevi ∝ D; strelice brzine: 6 px/(m/s); duljine grana shematski.</text>';
- };
-      const sync = () => {
-        const s = calc(),
-          p1 = (100 * s.Q1) / s.Q,
-          p2 = 100 - p1;
-        d1Out.textContent = fmt(d1, 0);
-        set(root, "#z124-v-vtot", fmt(s.Q * 1000, 0));
-        set(root, "#z124-v-d2", fmt(s.D2 * 1000, 0));
-        set(root, "#z124-d2-label", fmt(s.D2 * 1000, 0));
-        set(root, "#z124-v1-out", fmt(s.Q1 * 1000, 1) + " L/s (" + fmt(p1, 0) + " %)");
-        set(root, "#z124-v2-out", fmt(s.Q2 * 1000, 1) + " L/s (" + fmt(p2, 0) + " %)");
-        const b1 = root.querySelector("#z124-bar-v1"),
-          b2 = root.querySelector("#z124-bar-v2");
-        if (b1) b1.style.width = p1 + "%";
-        if (b2) b2.style.width = p2 + "%";
-        set(root, "#z124-hl-equality", "hL,1 = " + fmt(s.b1.h, 2) + " m; hL,2 = " + fmt(s.b2.h, 2) + " m");
-        set(root, "#z124-pr-val", fmt(s.pR, 1) + " kPa");
-        set(root, "#z124-v1-card", fmt(s.b1.V, 2) + " m/s");
-        set(root, "#z124-v2-card", fmt(s.b2.V, 2) + " m/s");
-        set(root, "#z124-ratio-card", fmt(s.b2.V / s.b1.V, 2));
-        out.textContent = "Q₁ " + fmt(s.Q1 * 1000, 1) + " + Q₂ " + fmt(s.Q2 * 1000, 1) + " L/s";
-        const cells = loc.querySelectorAll(".v13p-split-total span");
-        cells[0].style.width = p1 + "%";
-        cells[0].textContent = "Q₁ " + fmt(p1, 0) + " %";
-        cells[1].style.width = p2 + "%";
-        cells[1].textContent = "Q₂ " + fmt(p2, 0) + " %";
-        const eql = loc.querySelectorAll(".v13p-equal b");
-        eql[0].textContent = fmt(s.b1.h, 3) + " m";
-        eql[1].textContent = fmt(s.b2.h, 3) + " m";
-        const msg =
-          lastChanged === "D₁"
-            ? `Promjena D₁ mijenja otpor prve grane. Protoci se preraspodjeljuju tako da vrijedi hL,1 = hL,2 i Q₁ + Q₂ = Q. Uža grana pri istom protoku ima veći gubitak.`
-            : lastChanged === "D₂"
-              ? `Promjena D₂ mijenja stvarni promjer druge grane i njezin otpor. Raspodjela ne slijedi samo površinu, nego uvjet jednakih gubitaka između istih čvorova.`
-              : `Veći ukupni Q povećava gubitke u obje grane; manji ih smanjuje. Proračun u oba slučaja održava Q = Q₁ + Q₂ i hL,1 = hL,2.`;
-        const validity=(s.b1.uncertain||s.b2.uncertain)?" Prijelazni režim: interpolirani gubici su procjena, ne jednoznačno predviđanje stvarnog toka.":"";
-        loc.querySelector("p").textContent = msg+validity;
-        set(root, "#z124-explainer", msg+validity);
-        draw(s);
-        previousState = s;
-      };
-      [q, d2, d1Input].forEach((el) =>
-        el.addEventListener("input", (e) => {
-          if (e.target === d1Input) {
-            d1 = +d1Input.value;
-            lastChanged = "D₁";
-          } else lastChanged = e.target === d2 ? "D₂" : "Q";
-          sync();
-        }),
-      );
-      presets.querySelectorAll("button").forEach((b) =>
-        b.addEventListener("click", () => {
-          if (b.dataset.p === "source") {
-            q.value = 30;
-            d1Input.value = 40;
-            d2.value = 80;
-            d1 = 40;
-          } else if (b.dataset.p === "same") {
-            q.value = 30;
-            d1Input.value = 60;
-            d2.value = 60;
-            d1 = 60;
-          } else {
-            q.value = 30;
-            d1Input.value = 35;
-            d2.value = 80;
-            d1 = 35;
-          }
-          lastChanged = b.dataset.p === "narrow" ? "D₁" : "Q";
-          sync();
-        }),
-      );
-      sync();
-    }
-
     function z121() {
       const section = document.querySelector('section[id*="z121"]');
       if (!section || section.querySelector(".v13p-z121")) return;
@@ -2176,8 +1039,7 @@ Zrak struji kroz 7 m dug pravokutni ventilacijski kanal dimenzija $150 \times 20
         '<svg viewBox="0 0 680 230" role="img" aria-label="Pravokutni ventilacijski kanal s označenim strujnim presjekom i omočenim opsegom"><rect width="680" height="230" fill="#fbfdff"/><text x="28" y="32" fill="#17324d" font-size="17" font-weight="700">Pravokutni kanal: hidraulički promjer</text><rect x="95" y="68" width="200" height="150" rx="3" fill="#d9f4fa" stroke="#58768b" stroke-width="7"/><path d="M95 55H295M95 49V61M295 49V61M72 68V218M66 68H78M66 218H78" stroke="#71869b" stroke-width="2"/><text x="155" y="48" fill="#526779" font-size="15">b = 200 mm</text><text x="20" y="130" fill="#526779" font-size="15">h = 150 mm</text><circle cx="195" cy="143" r="15" fill="none" stroke="#1269b0" stroke-width="3"/><circle cx="195" cy="143" r="4" fill="#1269b0"/><defs><marker id="v13z121a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L7 4L0 8Z" fill="#1269b0"/></marker></defs><text x="135" y="105" fill="#1269b0" font-size="15">v̄ = 7 m/s</text><path d="M405 70H620V180H405Z" fill="#eef6fa" stroke="#58768b" stroke-width="3"/><path d="M405 70H620M405 180H620M405 70V180M620 70V180" fill="none" stroke="#b93645" stroke-width="5" stroke-dasharray="8 5"/><text x="420" y="108" fill="#17324d" font-size="16" font-weight="700">A = b h</text><text x="420" y="134" fill="#526779" font-size="15">P (omočeni) = 2(b+h)</text><text x="420" y="160" fill="#4f46a5" font-size="16" font-weight="700">Dₕ = 4A/P</text></svg><p>Hidraulički promjer nije stvarni promjer kanala: povezuje površinu kroz koju zrak teče s opsegom stijenke koji stvara trenje.</p>';
       section.append(box);
     }
-    z123();
-    z124();
+
     z121();
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

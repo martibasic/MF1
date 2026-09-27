@@ -21,189 +21,105 @@ Komponenta $F_H$ računa se na vertikalnoj projekciji zakrivljene plohe, a njezi
 
 ```{=html}
 <style>
-  #widget-curved-pressure { max-width: 1080px; margin: 1.4rem auto; color: #17324d; font-family: system-ui, sans-serif; }
-  #widget-curved-pressure * { box-sizing: border-box; }
-  #widget-curved-pressure .cp-shell { border: 1px solid #bed1df; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 4px 18px #17324d12; }
-  #widget-curved-pressure .cp-head { padding: 1.1rem 1.25rem; background: #eaf6fb; border-bottom: 1px solid #bed1df; }
-  #widget-curved-pressure h4 { margin: 0; font-size: 1.18rem; color: #123b5b; }
-  #widget-curved-pressure .cp-sub { margin: .3rem 0 0; font-size: .92rem; }
-  #widget-curved-pressure .cp-layout { display: block; }
-  #widget-curved-pressure .cp-figure { padding: 1rem; background: #f9fcfe; }
-  #widget-curved-pressure canvas { display: block; width: 100%; max-width: 920px; margin: 0 auto; border: 1px solid #c8d8e3; border-radius: 10px; background: #fff; }
-  #widget-curved-pressure .cp-panel { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; border-top: 1px solid #d7e3ea; }
-  #widget-curved-pressure .cp-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .8rem; order: 2; }
-  #widget-curved-pressure label { display: grid; gap: .25rem; font-size: .88rem; font-weight: 650; }
-  #widget-curved-pressure input { width: 100%; accent-color: #157a9b; }
-  #widget-curved-pressure .cp-read { color: #0c5874; font-variant-numeric: tabular-nums; }
-  #widget-curved-pressure .cp-tabs { display: flex; flex-wrap: wrap; gap: .42rem; margin: 0; order: 1; }
-  #widget-curved-pressure button { padding: .42rem .6rem; border: 1px solid #7baabd; border-radius: 7px; background: #fff; color: #124967; font-weight: 650; cursor: pointer; }
-  #widget-curved-pressure button[aria-pressed="true"] { background: #146b8a; color: #fff; border-color: #146b8a; }
-  #widget-curved-pressure .cp-result { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .5rem; padding: .8rem; border-radius: 9px; background: #f1f7fa; font-size: .9rem; font-variant-numeric: tabular-nums; order: 3; }
-  #widget-curved-pressure .cp-result div { display: grid; gap: .2rem; }
-  #widget-curved-pressure .cp-result strong { color: #103f5b; }
-  #widget-curved-pressure .cp-note { margin: 0; padding: .72rem .82rem; border-left: 4px solid #157a9b; background: #f0f8fb; font-size: .88rem; line-height: 1.45; order: 4; }
-  #widget-curved-pressure .cp-caption { max-width: 680px; margin: .55rem auto 0; font-size: .82rem; color: #4b6577; line-height: 1.4; }
-  @media (min-width: 1000px) { #widget-curved-pressure { width: min(1050px, calc(100vw - 270px)); max-width: none; } }
-  @media (max-width: 520px) { #widget-curved-pressure .cp-controls { grid-template-columns: 1fr; } }
+#widget-curved-pressure{max-width:1050px;margin:1.4rem auto;color:#17324b;font-family:Inter,Segoe UI,sans-serif}#widget-curved-pressure h4{margin:0 0 .5rem}#widget-curved-pressure .cp-sub,#widget-curved-pressure .cp-caption{margin:.5rem 0;color:#475569;line-height:1.5}#widget-curved-pressure #cp-canvas{display:block;width:100%;height:auto;max-height:none;margin:.5rem auto}
+#widget-curved-pressure .cp-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}#widget-curved-pressure .cp-tabs button{font:inherit;padding:.5rem .65rem;border:1px solid #b9cddd;border-radius:6px;background:#f4f8fb;color:#17324b;cursor:pointer}#widget-curved-pressure .cp-tabs button[aria-pressed=true]{background:#176d90;color:white;border-color:#176d90}
+#widget-curved-pressure .cp-controls{display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0}#widget-curved-pressure .cp-controls>label{flex:1 1 230px;display:block;font-weight:650;min-width:0}#widget-curved-pressure input{display:block;width:100%;margin-top:.6rem}
+#widget-curved-pressure .cp-result{display:flex;flex-wrap:wrap;gap:.7rem 1.5rem;border-block:1px solid #dbe7f3;padding:.7rem 0;margin:.8rem 0}#widget-curved-pressure .cp-result>div{display:flex;align-items:baseline;gap:.45rem;flex-wrap:wrap}#widget-curved-pressure .cp-result strong{font-variant-numeric:tabular-nums}#widget-curved-pressure #cp-fh{color:#176d9c}#widget-curved-pressure #cp-fv{color:#19836b}#widget-curved-pressure #cp-fr{color:#b42342}#widget-curved-pressure .cp-model-line{margin:.6rem 0;color:#475569;font-size:.92rem;line-height:1.5}
 </style>
 <div class="mf1-lab" id="widget-curved-pressure" data-widget-role="intro">
-  <div class="cp-shell">
-    <div class="cp-head">
-      <h4>Zakrivljena ploha: od lokalnog tlaka do rezultante</h4>
-      <p class="cp-sub">Prođi tri koraka na istoj plohi: lokalni tlak → komponente → rezultanta. Zatim promijeni stranu vode i provjeri što se mijenja u smjeru sila, a što ostaje isto.</p>
-    </div>
-    <div class="cp-layout">
-      <div class="cp-figure">
-        <canvas id="cp-canvas" width="1400" height="860" aria-label="Skica četvrtine cilindra, lokalnih tlakova i rezultantnih komponenti"></canvas>
-        <p class="cp-caption" id="cp-caption">Korak 1 od 3: raspodjela tlaka i normale na zakrivljenu plohu.</p>
-      </div>
-      <div class="cp-panel">
-        <div class="cp-controls">
-          <label>Dubina gornjeg ruba <span class="cp-read"><span id="cp-h-value">1,20</span> m</span>
-            <input id="cp-h" type="range" min="0" max="3" step="0.05" value="1.2">
-          </label>
-          <label>Polumjer zakrivljenja <span class="cp-read"><span id="cp-r-value">1,00</span> m</span>
-            <input id="cp-r" type="range" min="0.4" max="1.8" step="0.05" value="1">
-          </label>
-        </div>
-        <div class="cp-tabs" aria-label="Strana vode"><button type="button" data-cp-side="outside" aria-pressed="true">Voda izvana</button><button type="button" data-cp-side="inside" aria-pressed="false">Voda iznutra</button></div>
-        <div class="cp-tabs" aria-label="Koraci prikaza">
-          <button type="button" data-cp-step="1" aria-pressed="true">1. Lokalni tlak</button>
-          <button type="button" data-cp-step="2" aria-pressed="false">2. Komponente</button>
-          <button type="button" data-cp-step="3" aria-pressed="false">3. Rezultanta</button>
-        </div>
-        <div class="cp-result" aria-live="polite">
-          <div><span>Vodoravna <strong>F<sub>H</sub></strong></span><span id="cp-fh">—</span></div>
-          <div><span>Vertikalna <strong>F<sub>V</sub></strong></span><span id="cp-fv">—</span></div>
-          <div><span>Rezultanta <strong>F<sub>R</sub></strong></span><span id="cp-fr">—</span></div>
-          <div><span>Smjer <strong>φ<sub>R</sub></strong></span><span id="cp-theta">—</span></div>
-        </div>
-        <p class="cp-note" id="cp-note"></p>
-      </div>
-    </div>
-  </div>
+<header><h4>Zakrivljena ploha: od lokalnog tlaka do rezultante</h4><p class="cp-sub">Ista četvrtina cilindra, tri koraka. Voda opterećuje odabranu stranu; s druge djeluje tlak p₀. Sve sile odnose se na širinu b = 1 m, a lokalne strelice na pretlak p* = ρgz.</p></header>
+<div class="cp-tabs" aria-label="Koraci prikaza"><button type="button" data-cp-step="1" aria-pressed="true">1. Lokalni tlak</button><button type="button" data-cp-step="2" aria-pressed="false">2. Komponente</button><button type="button" data-cp-step="3" aria-pressed="false">3. Rezultanta</button></div>
+<svg id="cp-canvas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 450" font-family="Inter, Segoe UI, sans-serif" role="img" aria-label="Četvrtina cilindra s lokalnim tlakovima"></svg>
+<p class="cp-caption" id="cp-caption"></p>
+<div class="cp-tabs" aria-label="Strana vode"><button type="button" data-cp-side="outside" aria-pressed="true">Voda izvana</button><button type="button" data-cp-side="inside" aria-pressed="false">Voda iznutra</button></div>
+<div class="cp-controls">
+<label><span>Dubina gornjeg ruba h: <span id="cp-h-value">1,20</span> m</span><input id="cp-h" type="range" min="0" max="3" step="0.05" value="1.2"></label>
+<label><span>Polumjer R: <span id="cp-r-value">1,00</span> m</span><input id="cp-r" type="range" min="0.4" max="1.8" step="0.05" value="1"></label>
 </div>
-
+<div class="cp-result" aria-live="polite"><div><span>F<sub>H</sub></span><strong id="cp-fh"></strong></div><div><span>F<sub>V</sub></span><strong id="cp-fv"></strong></div><div><span>F<sub>R</sub></span><strong id="cp-fr"></strong></div></div>
+<p id="cp-model-line" class="cp-model-line"></p><div id="cp-note"></div>
+</div>
 <script>
-(() => {
-  const root = document.getElementById("widget-curved-pressure");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "true";
-
-  const canvas = root.querySelector("#cp-canvas");
-  const ctx = canvas.getContext("2d");
-  const hInput = root.querySelector("#cp-h");
-  const rInput = root.querySelector("#cp-r");
-  const buttons = [...root.querySelectorAll("[data-cp-step]")];
-  const ui = {
-    h: root.querySelector("#cp-h-value"),
-    r: root.querySelector("#cp-r-value"),
-    fh: root.querySelector("#cp-fh"),
-    fv: root.querySelector("#cp-fv"),
-    fr: root.querySelector("#cp-fr"),
-    theta: root.querySelector("#cp-theta"),
-    note: root.querySelector("#cp-note"),
-    caption: root.querySelector("#cp-caption"),
-  };
-  const rho = 1000,
-    g = 9.81,
-    b = 1;
-  let step = 1, inside = false;
-
-  const arrow = (x1, y1, x2, y2, color, width = 2.5, label = "") => {
-    const a = Math.atan2(y2 - y1, x2 - x1),
-      head = 9;
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - head * Math.cos(a - Math.PI / 6), y2 - head * Math.sin(a - Math.PI / 6));
-    ctx.lineTo(x2 - head * Math.cos(a + Math.PI / 6), y2 - head * Math.sin(a + Math.PI / 6));
-    ctx.closePath();
-    ctx.fill();
-    if (label) {
-      ctx.font = "600 15px system-ui, sans-serif";
-      ctx.fillText(label, (x1 + x2) / 2 + 7, (y1 + y2) / 2 - 7);
-    }
+window.MF1V6 = {
+  annotateQuarter(canvas,m) {
+    const ctx=canvas.getContext('2d'),W=700,H=430,sc=Math.min(canvas.width/W,canvas.height/H);
+    ctx.save();ctx.setTransform(sc,0,0,sc,(canvas.width-W*sc)/2,(canvas.height-H*sc)/2);
+    const rho=m.rho||1000,zT=m.h+m.R/2,zH=zT+m.R*m.R/(12*zT),V=m.h*m.R+Math.PI*m.R*m.R/4,xV=(m.h*m.R*m.R/2+m.R**3/3)/V;
+    ctx.fillStyle='#fff';ctx.fillRect(45,340,630,42);ctx.font='13px system-ui';ctx.fillStyle='#17324d';
+    ctx.fillText('h = '+m.h.toFixed(2)+' m; R = '+m.R.toFixed(2)+' m; p_A = '+(rho*9.81*m.h/1000).toFixed(2)+' kPa',55,354);
+    if((m.step||3)>=2)ctx.fillText('b = 1 m: A_v = '+m.R.toFixed(2)+' m²; V* = '+V.toFixed(3)+' m³; z_H = '+zH.toFixed(3)+' m',55,375);
+    else ctx.fillText('p_B − p_A = ρgR = '+(rho*9.81*m.R/1000).toFixed(2)+' kPa; isti porast tlaka za isti R',55,375);
+    ctx.fillStyle='#fff';ctx.fillRect(520,306,179,30);ctx.fillStyle='#075985';ctx.fillText('p_B = '+(rho*9.81*(m.h+m.R)/1000).toFixed(2)+' kPa',530,326);
     ctx.restore();
-  };
-  const line = (x1, y1, x2, y2, color, dash = []) => {
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.4;
-    ctx.setLineDash(dash);
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.restore();
-  };
-  const label = (text, x, y, color = "#17324d", align = "left") => {
-    ctx.save();
-    ctx.font = "600 14px system-ui, sans-serif";
-    ctx.fillStyle = color;
-    ctx.textAlign = align;
-    ctx.fillText(text, x, y);
-    ctx.restore();
-  };
-  const fmt = (v) => v.toLocaleString("hr-HR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-
-  function update() {
-    const h = +hInput.value,
-      R = +rInput.value;
-    const Av = R * b;
-    const zT = h + R / 2;
-    const V = (h * R + (Math.PI * R * R) / 4) * b;
-    const FH = (rho * g * zT * Av) / 1000;
-    const FV = (rho * g * V) / 1000;
-    const FR = Math.hypot(FH, FV);
-    const phiR = (Math.atan2(FV, FH) * 180) / Math.PI;
-    const xV =
-      (-h * R * (R / 2) - ((Math.PI * R * R) / 4) * ((4 * R) / (3 * Math.PI))) / (h * R + (Math.PI * R * R) / 4);
-
-    ui.h.textContent = h.toFixed(2).replace(".", ",");
-    ui.r.textContent = R.toFixed(2).replace(".", ",");
-    ui.fh.textContent = fmt(FH) + " kN/m " + (inside ? "←" : "→");
-    ui.fv.textContent = fmt(FV) + " kN/m " + (inside ? "↓" : "↑");
-    ui.fr.textContent = fmt(FR) + " kN/m";
-    ui.theta.textContent = fmt(phiR) + "°";
-
-    const messages = {
-      1: "Svaka strelica prikazuje tlak p = ρgz: na većoj dubini strelica je veća, a smjer joj je uvijek normala na plohu. Sve normale četvrtine cilindra prolaze kroz središte C.",
-      2: "Vodoravna komponenta F<sub>H</sub> jednaka je sili na vertikalnu projekciju A<sub>v</sub> = Rb. Magnituda F<sub>V</sub> jednaka je težini stvarnog ili pomoćnog kontrolnog volumena; smjer se određuje iz označene strane vode.",
-      3: "Komponente se geometrijski zbrajaju: F<sub>R</sub> = √(F<sub>H</sub>² + F<sub>V</sub>²). Za kružni luk pravac djelovanja prolazi kroz C jer svi lokalni tlakovi imaju radijalan smjer.",
-    };
-    const captions = {
-      1: "Korak 1 od 3: raspodjela tlaka i normale na zakrivljenu plohu.",
-      2: "Korak 2 od 3: dvije komponente rezultantne hidrostatske sile.",
-      3: "Korak 3 od 3: rezultanta je vektorski zbroj komponenti i prolazi kroz C.",
-    };
-    ui.note.innerHTML = messages[step] + (inside ? " Voda je sada u kontrolnom volumenu: obje komponente mijenjaju smjer, a njihove veličine ostaju jednake." : " Sile su iskazane po metru duljine cilindra; voda ima ρ = 1000 kg/m³.");
-    ui.caption.textContent = captions[step];
-    draw({h,R,FH,FV,inside});
   }
-
-  function draw(model){MF1.quarterScene(canvas,{...model,step});}
-
-  root.querySelectorAll("[data-cp-side]").forEach(button => button.addEventListener("click", () => {inside = button.dataset.cpSide === "inside"; root.querySelectorAll("[data-cp-side]").forEach(b => b.setAttribute("aria-pressed", String(b === button))); update();}));
-  hInput.addEventListener("input", update);
-  rInput.addEventListener("input", update);
-  buttons.forEach((button) =>
-    button.addEventListener("click", () => {
-      step = +button.dataset.cpStep;
-      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
-      update();
-    }),
-  );
-  update();
+};
+</script>
+<script>
+(()=>{
+ const root=document.getElementById('widget-curved-pressure'),svg=root.querySelector('#cp-canvas'),hInput=root.querySelector('#cp-h'),rInput=root.querySelector('#cp-r');
+ const rho=1000,g=9.81,b=1,forceScale=1,pressureScale=.8,ink='#17324b',blue='#176d9c',green='#19836b',red='#b42342',pressureColor='#a85f08';
+ const fmt=x=>new Intl.NumberFormat('hr-HR',{maximumSignificantDigits:4}).format(Math.abs(x)<1e-12?0:x);
+ const text=(x,y,t,attrs='')=>`<text x="${x}" y="${y}" ${attrs}>${t}</text>`;
+ const line=(x1,y1,x2,y2,color,attrs='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" ${attrs}/>`;
+ const vector=(id,x,y,dx,dy,color,width=2)=>`<g ${id?`id="${id}"`:''} data-x="${x}" data-y="${y}" data-dx="${dx}" data-dy="${dy}">${MF1.svgArrow(x,y,dx,dy,color,'',width)}</g>`;
+ let step=1,inside=false,lastWidth=0;
+ function update(){
+  const h=+hInput.value,R=+rInput.value,Av=R*b,zT=h+R/2,V=(h*R+Math.PI*R*R/4)*b;
+  const magnitudeH=rho*g*zT*Av/1000,magnitudeV=rho*g*V/1000,FR=Math.hypot(magnitudeH,magnitudeV),sign=inside?-1:1,FH=sign*magnitudeH,FV=sign*magnitudeV;
+  const zH=zT+R*R/(12*zT),xBar=(h*R*R/2+R**3/3)/(V/b),zV=(h*h*R/2+h*Math.PI*R*R/4+R**3/3)/(V/b),pA=rho*g*h/1000,pB=rho*g*(h+R)/1000,phiR=Math.atan2(FV,FH)*180/Math.PI;
+  const qx=-R*magnitudeH/FR,qDepth=h+R*magnitudeV/FR;
+  const W=Math.max(300,Math.round(svg.getBoundingClientRect().width||900)),scale=Math.min(130,250/(h+R),(W/2-35)/R),r=R*scale,cx=W/2+55,sy=95,cy=sy+h*scale,by=cy+r,lx=cx-r,wall=lx-50;
+  lastWidth=W;const px=cx-xBar*scale,py=sy+zH*scale,qX=cx+qx*scale,qY=sy+qDepth*scale,tvY=sy+zV*scale;
+  const sceneHeight=by+175,arc=`M${lx} ${cy}A${r} ${r} 0 0 0 ${cx} ${by}`;
+  const volumePath=`M${lx} ${sy}H${cx}V${by}A${r} ${r} 0 0 1 ${lx} ${cy}Z`;
+  const fluidPath=inside?volumePath:`M${wall} ${sy}H${lx}V${cy}A${r} ${r} 0 0 0 ${cx} ${by}H${wall}Z`;
+  let drawing=`<title>Četvrtina cilindra: ${inside?'voda iznutra':'voda izvana'}, korak ${step}</title><desc>Koordinate x udesno i y prema gore, ishodište je C. Dubina z = h − y. Stvarni fluid je plav; ljubičasto šrafirani V* je samo pomoćni volumen. P je sjecište pravaca komponenti, Q točka rezultante na luku.</desc><defs><pattern id="cp-volume-hatch" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 8L8-2M6 10L10 6" stroke="#9c81c5" stroke-width="1"/></pattern></defs><g font-size="17" fill="${ink}">`;
+  drawing+=text(12,27,inside?'Voda iznutra · x →, y ↑':'Voda izvana · x →, y ↑','font-weight="650"')+text(12,51,'p* = 0 na slobodnoj površini','fill="#176d9c" font-size="16"');
+  drawing+=`<path id="cp-real-fluid" d="${fluidPath}" fill="#d8edf7"/>`;
+  if(step>=2)drawing+=`<path id="cp-control-volume" d="${volumePath}" fill="${inside?'#70bbae33':'url(#cp-volume-hatch)'}" stroke="${inside?green:'#8b6cb6'}" stroke-width="1.3" stroke-dasharray="5 4" data-volume-kind="${inside?'real':'auxiliary'}"/>`;
+  const wallPath=inside?`M${lx} ${sy}V${cy}M${cx} ${sy}V${by}`:`M${wall} ${sy}V${by}H${cx}M${lx} ${sy}V${cy}`;
+  drawing+=`<path id="cp-container-walls" d="${wallPath}" fill="none" stroke="#536d7c" stroke-width="2.3"/>`+line(inside?lx:wall,sy,inside?cx:lx,sy,'#0284c7','stroke-width="2" data-free-surface=""');
+  drawing+=`<path id="cp-arc" d="${arc}" fill="none" stroke="${ink}" stroke-width="4"/>`;
+  drawing+=line(lx,cy,cx,cy,'#6c8493','stroke-width="1.2" stroke-dasharray="4 4"')+text(cx-.75*r,cy-9,'R','text-anchor="middle" fill="#536d7c"')+text(lx-8,cy-10,'A','text-anchor="end"')+text(cx+8,by+6,'B')+`<circle cx="${cx}" cy="${cy}" r="3" fill="${ink}"/>`+text(cx+8,cy-9,'C');
+  if(h>0)drawing+=line(cx+40,sy,cx+40,cy,'#6c8493','stroke-width="1.2"')+line(cx+35,sy,cx+45,sy,'#6c8493')+line(cx+35,cy,cx+45,cy,'#6c8493')+text(cx+48,(sy+cy)/2+6,'h');
+  if(step===1){
+   for(let i=0;i<=6;i++){const angle=i*Math.PI/12,x=-R*Math.cos(angle),depth=h+R*Math.sin(angle),p=rho*g*depth/1000,xp=cx+x*scale,yp=sy+depth*scale;drawing+=`<g data-pressure="${p}" data-arc-angle="${angle}">${vector('',xp,yp,sign*p*pressureScale*Math.cos(angle),-sign*p*pressureScale*Math.sin(angle),pressureColor,1.8)}</g>`;}
+  }
+  if(step>=2){
+   drawing+=`<rect id="cp-projection" x="${lx-3}" y="${cy}" width="6" height="${r}" fill="#f1be5833" stroke="#aa8233" stroke-width="1.3" stroke-dasharray="4 3"/>`;
+   drawing+=line(lx-22,py,cx+38,py,blue,'stroke-width="1.1" stroke-dasharray="5 4" id="cp-horizontal-line"')+line(px,sy,px,by+15,green,'stroke-width="1.1" stroke-dasharray="5 4" id="cp-vertical-line"');
+   drawing+=`<circle id="cp-volume-centroid" cx="${px}" cy="${tvY}" r="4" fill="${green}" stroke="white" stroke-width="1.2"/>`+text(px+8,tvY-8,'T*','fill="#19836b"');
+   drawing+=vector('cp-force-horizontal',px,py,FH*forceScale,0,blue,2.3)+vector('cp-force-vertical',px,py,0,-FV*forceScale,green,2.3);
+   drawing+=`<circle id="cp-equivalent-point" cx="${px}" cy="${py}" r="3.5" fill="white" stroke="#64748b" stroke-width="1.3"/>`+text(px+8,py+21,'P','fill="#64748b"');
+   if(step===3){
+    drawing+=line(qX,qY,cx,cy,red,'stroke-width="1.3" stroke-dasharray="3 4" id="cp-resultant-line"')+vector('cp-force-resultant',qX,qY,FH*forceScale,-FV*forceScale,red,3);
+    drawing+=`<circle id="cp-resultant-point" cx="${qX}" cy="${qY}" r="3.5" fill="${red}"/>`+line(qX,qY,qX-34,qY+7,red,'stroke-width="1"')+text(qX-40,qY+12,'Q','text-anchor="end" fill="#b42342"');
+   }
+  }
+  const infoY=by+80;
+  drawing+=text(12,infoY,'h = '+fmt(h)+' m · R = '+fmt(R)+' m · b = 1 m','font-size="16"');
+  drawing+=vector('cp-pressure-scale',14,infoY+28,50*pressureScale,0,pressureColor,1.8)+text(65,infoY+34,'50 kPa','font-size="16"');
+  drawing+=vector('cp-force-scale',14,infoY+64,100*forceScale,0,red,2.3)+text(125,infoY+70,'100 kN','font-size="16"')+'</g>';
+  svg.setAttribute('viewBox',`0 0 ${W} ${sceneHeight}`);svg.innerHTML=drawing;
+  svg.setAttribute('aria-label','Četvrtina cilindra, '+(inside?'voda iznutra':'voda izvana')+', korak '+step+'. Sve sile za širinu jedan metar.');
+  root.querySelector('#cp-h-value').textContent=fmt(h);root.querySelector('#cp-r-value').textContent=fmt(R);
+  root.querySelector('#cp-fh').textContent=fmt(magnitudeH)+' kN '+(inside?'←':'→');root.querySelector('#cp-fv').textContent=fmt(magnitudeV)+' kN '+(inside?'↓':'↑');root.querySelector('#cp-fr').textContent=fmt(FR)+' kN';
+  const captions={1:'Lokalne sile su normalne na luk i prolaze kroz C. Dubina je z = h − y. Stalno mjerilo strelica pokazuje kako tlak raste s dubinom; s druge strane plohe djeluje p₀.',2:'Zlatna isprekidana crta označuje vertikalnu projekciju Aᵥ = Rb. V* je '+(inside?'stvarni volumen vode':'pomoćni, šrafirani volumen')+' iznad luka; T* je njegovo težište. P je samo sjecište pravaca komponenti.',3:'Q je točka na luku kroz koju prolazi pravac rezultante Q–C. P je virtualno sjecište pravaca vodoravne i vertikalne komponente; nije centar pritiska na plohi.'};
+  root.querySelector('#cp-caption').textContent=captions[step];
+  root.querySelector('#cp-model-line').textContent=step===1?'p*A = '+fmt(pA)+' kPa; p*B = '+fmt(pB)+' kPa; porast ρgR = '+fmt(pB-pA)+' kPa.':'Aᵥ = '+fmt(Av)+' m²; V* = '+fmt(V)+' m³; z_H = '+fmt(zH)+' m; x_V = −'+fmt(xBar)+' m. φ_R = '+fmt(phiR)+'° od +x.';
+  root.mf1Physics={h,R,rho,b,Av,V,zT,zH,xV:xBar,zV,FH,FV,FR,momentAboutC:-xBar*FV+(zH-h)*FH,inside,step,pA,pB,phiR,componentPoint:{x:-xBar,y:h-zH,depth:zH},volumeCentroid:{x:-xBar,y:h-zV,depth:zV},resultantPoint:{x:qx,y:h-qDepth,depth:qDepth},geometry:{width:W,height:sceneHeight,scale,r,cx,cy,sy,by,lx,wall,px,py,qX,qY,tvY,pressureScale,forceScale}};
+  MF1.decision(root.querySelector('#cp-note'),{title:'Strana vode → predznak sile',branches:[
+   {when:'Voda izvana: lijevo i ispod luka',active:!inside,equation:'FH = +ρgzT Aᵥ; FV = +ρgV*',then:'FH = +'+fmt(magnitudeH)+' kN udesno; FV = +'+fmt(magnitudeV)+' kN gore. V* je pomoćni volumen; njegovu težinu rabimo za iznos sile.'},
+   {when:'Voda iznutra: iznad luka',active:inside,equation:'FH = −ρgzT Aᵥ; FV = −ρgV*',then:'FH = −'+fmt(magnitudeH)+' kN ulijevo; FV = −'+fmt(magnitudeV)+' kN dolje. V* je stvarni volumen vode.'}
+  ],summary:step===1?'Pretlak je razlika prema istom vanjskom p₀. Na A vrijedi p*A = ρgh; na B p*B = ρg(h+R).':'Za b = 1 m: |FH| = '+fmt(9.81*zT)+' × '+fmt(Av)+' = '+fmt(magnitudeH)+' kN; |FV| = 9,81 × '+fmt(V)+' = '+fmt(magnitudeV)+' kN. Oko C: (zH−h)FH − x̄FV = '+fmt((zH-h)*FH)+' − ('+fmt(xBar*FV)+') = 0 kN·m.'});
+ }
+ root.querySelectorAll('[data-cp-step]').forEach(button=>button.addEventListener('click',()=>{step=+button.dataset.cpStep;root.querySelectorAll('[data-cp-step]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));update();}));
+ root.querySelectorAll('[data-cp-side]').forEach(button=>button.addEventListener('click',()=>{inside=button.dataset.cpSide==='inside';root.querySelectorAll('[data-cp-side]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));update();}));
+ [hInput,rInput].forEach(input=>input.addEventListener('input',update));
+ const resize=()=>{if(Math.max(300,Math.round(svg.getBoundingClientRect().width||900))!==lastWidth)update();};window.addEventListener('resize',resize);if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(svg);update();
 })();
 </script>
+
 ```
 
 <hr class="zadatak-sep">
@@ -219,206 +135,161 @@ Komponenta $F_H$ računa se na vertikalnoj projekciji zakrivljene plohe, a njezi
 </div>
 <div class="zadano-row">
 <span class="label">Odrediti</span>
-<span class="zadano-text">ukupnu hidrostatsku silu $F_R$; liniju djelovanja (kut $\alpha$) te težinu cilindra po metru duljine $G_c$</span>
+<span class="zadano-text">ukupnu hidrostatsku silu $F_R$; liniju djelovanja (kut $\varphi_R$) te težinu odsječka cilindra širine $b=1\text{ m}$, $G_c$</span>
 </div>
 </div>
 <div class="rjesenje-label">Rješenje</div>
 
-Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($F_V$) komponentu.
+Sve sile računamo za odsječak širine $b=1\text{ m}$; pripadni iznosi po metru duljine imaju iste numeričke vrijednosti. Kod zakrivljenih ploha, silu rastavljamo na horizontalnu ($F_H$) i vertikalnu ($F_V$) komponentu.
 
 1.  **Horizontalna komponenta ($F_H$):** Ona djeluje na vertikalnu projekciju plohe (pravokutnik visine $R$ i širine $1\text{ m}$).
     *   Vertikalna projekcija ima površinu $A_v=Rb=0,8\text{ m}^2$, a njezino je težište na dubini $z_T=s+R/2=4,6\text{ m}$.
-    *   $F_H=\rho g z_T A_v=1000\cdot9,81\cdot4,6\cdot0,8=36,1\text{ kN/m}$.
+    *   $F_H=\rho g z_T A_v=1000\cdot9,81\cdot4,6\cdot0,8=36,1\text{ kN}$.
 
 2.  **Vertikalna komponenta ($F_V$):** Ona je jednaka težini zamišljenog stupca tekućine iznad plohe. Budući da je tekućina *ispod* plohe, sila djeluje prema gore (uzgon).
     *   Prvo uzmemo silu na zamišljeni pravokutni stupac $F_y=\rho gH(Rb)$, a zatim oduzmemo težinu izostavljenog dijela $W_f=\rho g\left(R^2-\pi R^2/4\right)b$.
-    *   $F_V=F_y-W_f=37,9\text{ kN/m}$ prema gore.
+    *   $F_V=F_y-W_f=37,9\text{ kN}$ prema gore.
 
 3.  **Rezultantna sila ($F_R$) i smjer ($\varphi_R$):**
-    *   $F_R=\sqrt{F_H^2+F_V^2}=52,3\text{ kN/m}$.
+    *   $F_R=\sqrt{F_H^2+F_V^2}=52,3\text{ kN}$.
     *   Smjer rezultante: $\varphi_R=\operatorname{atan2}(F_V,F_H)=46,4^\circ$. Linija sile prolazi kroz središte C jer su sve elementarne sile tlaka normalne na kružnu plohu, odnosno radijalne su.
 
 4.  **Težina cilindra ($G_c$):** Da bi se vrata otvorila, moment težine mora biti jednak momentu hidrostatske sile oko točke A.
-    *   $\sum M_A=0\implies F_RR\sin\alpha-G_cR=0$.
-    *   Kako je $F_R\sin\varphi_R=F_V$, na pragu otvaranja vrijedi $G_c=F_V\approx37,9\text{ kN/m}$.
+    *   $\sum M_A=0\implies F_RR\sin\varphi_R-G_cR=0$.
+    *   Kako je $F_R\sin\varphi_R=F_V$, na pragu otvaranja vrijedi $G_c=F_V\approx37,9\text{ kN}$.
 
 <hr class="widget-sep">
 <div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
 <style>
-  #widget-49 { max-width: 1050px; margin: 1.4rem auto; font-family: system-ui, sans-serif; color: #19354c; }
-  #widget-49 * { box-sizing: border-box; }
-  #widget-49 .z49-shell { border: 1px solid #bed1df; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 4px 18px #17324d12; }
-  #widget-49 .z49-head { padding: 1.05rem 1.2rem; background: #eaf6fb; border-bottom: 1px solid #bed1df; }
-  #widget-49 h4 { margin: 0; color: #123b5b; font-size: 1.15rem; }
-  #widget-49 .z49-head p { margin: .3rem 0 0; font-size: .9rem; }
-  #widget-49 .z49-grid { display: block; }
-  #widget-49 .z49-figure { padding: 1rem; background: #f9fcfe; }
-  #widget-49 canvas { width: 100%; max-width: 920px; display: block; margin: 0 auto; border: 1px solid #c8d8e3; border-radius: 10px; background: #fff; }
-  #widget-49 .z49-panel { padding: 1rem; border-top: 1px solid #d7e3ea; }
-  #widget-49 .z49-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .78rem; }
-  #widget-49 label { display: grid; gap: .25rem; font-size: .88rem; font-weight: 650; }
-  #widget-49 input { width: 100%; accent-color: #157a9b; }
-  #widget-49 .z49-read { color: #0c5874; font-variant-numeric: tabular-nums; }
-  #widget-49 .z49-values { margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: .42rem; padding: .78rem; border-radius: 9px; background: #f1f7fa; font-size: .89rem; font-variant-numeric: tabular-nums; }
-  #widget-49 .z49-values div { display: grid; gap: .2rem; }
-  #widget-49 .z49-values strong { color: #113f5b; }
-  #widget-49 .z49-status { margin-top: .85rem; padding: .72rem .8rem; border-left: 4px solid #157a9b; background: #f0f8fb; font-size: .88rem; line-height: 1.45; }
-  #widget-49 .z49-formula { margin: 1rem 0 0; padding: .75rem .9rem; background: #fbfdfe; border: 1px solid #d7e3ea; border-radius: 9px; font-size: .86rem; line-height: 1.5; }
-  #widget-49 .z49-formula p { margin: .2rem 0; }
-  @media (min-width: 1000px) { #widget-49 { width: min(1050px, calc(100vw - 270px)); max-width: none; } }
-  @media (max-width: 520px) { #widget-49 .z49-controls { grid-template-columns: 1fr; } }
+#widget-49{max-width:1050px;margin:1.4rem auto;font-family:system-ui,sans-serif;color:#19354c}
+#widget-49 *{box-sizing:border-box}
+#widget-49 .z49-shell{border:1px solid #bed1df;border-radius:16px;overflow:hidden;background:#fff}
+#widget-49 .z49-head{padding:1rem 1.2rem;background:#eaf6fb;border-bottom:1px solid #bed1df}
+#widget-49 h4{margin:0;color:#123b5b;font-size:1.15rem}
+#widget-49 .z49-head p{margin:.3rem 0 0;line-height:1.5}
+#widget-49 .z49-figure{padding:.7rem;background:#fff}
+#widget-49 #z49-canvas{display:block;width:100%;height:auto;max-height:none;overflow:visible;background:#fff}
+#widget-49 #z49-canvas text{font:16px system-ui,sans-serif;fill:#19354c}
+#widget-49 .z49-panel{padding:1rem;border-top:1px solid #d7e3ea}
+#widget-49 .z49-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem}
+#widget-49 label{display:grid;gap:.25rem;font-weight:650}
+#widget-49 input{width:100%;accent-color:#157a9b}
+#widget-49 .z49-read{color:#0c5874;font-variant-numeric:tabular-nums}
+#widget-49 .z49-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:1rem 0}
+#widget-49 .z49-reading{display:grid;gap:.3rem}
+#widget-49 .z49-reading strong{color:#113f5b;font-variant-numeric:tabular-nums}
+#widget-49 .z49-preset{padding:.55rem .8rem;border:1px solid #a8c0d0;border-radius:7px;background:#f1f8fb;color:#143d57;font:inherit;cursor:pointer}
+#widget-49 .z49-preset:disabled{opacity:.58;cursor:default}
+#widget-49 .z49-caption,#widget-49 .z49-formula{line-height:1.55;margin:.65rem 0}
+#widget-49 .z49-status{margin-top:.8rem}
+@media(max-width:520px){#widget-49 .z49-controls{grid-template-columns:1fr}#widget-49 .z49-values{grid-template-columns:1fr}}
 </style>
 <div class="mf1-lab" id="widget-49" data-widget-role="application">
-  <div class="z49-shell">
-    <div class="z49-head">
-      <h4>Z49 · cilindrična zaklopka</h4>
-      <p>Može li voda otvoriti zaklopku? Uz zadanu težinu povećavaj razinu vode do promjene predznaka neto momenta. Na pragu otvaranja moment vode oko A izjednačava se s momentom težine.</p>
-    </div>
-    <div class="z49-grid">
-      <div class="z49-figure"><canvas id="z49-canvas" width="1400" height="860" aria-label="Cilindar s lijevim zglobom, vodom, komponentama sila i momentom"></canvas></div>
-      <div class="z49-panel">
-        <div class="z49-controls">
-          <label>Razina vode H <span class="z49-read"><span id="z49-h-read">5,00</span> m</span><input id="z49-h" type="range" min="1.3" max="7" step="0.05" value="5"></label>
-          <label>Polumjer R <span class="z49-read"><span id="z49-r-read">0,80</span> m</span><input id="z49-r" type="range" min="0.3" max="1.2" step="0.05" value="0.8"></label>
-          <label>Gustoća ρ <span class="z49-read"><span id="z49-rho-read">1000</span> kg/m³</span><input id="z49-rho" type="range" min="900" max="1100" step="10" value="1000"></label>
-          <label>Stvarna težina G<sub>c</sub> <span class="z49-read"><span id="z49-gc-read">37,9</span> kN/m</span><input id="z49-gc" type="range" min="15" max="80" step="0.1" value="37.9"></label>
-        </div>
-        <div class="z49-values" aria-live="polite">
-          <div><span>s = H − R</span><strong id="z49-s">—</strong></div>
-          <div><span>F<sub>H</sub></span><strong id="z49-fh">—</strong></div>
-          <div><span>F<sub>V</sub> (gore)</span><strong id="z49-fv">—</strong></div>
-          <div><span>F<sub>R</sub>, α</span><strong id="z49-fr">—</strong></div>
-          <div><span>M<sub>voda,A</sub></span><strong id="z49-mw">—</strong></div>
-          <div><span>G<sub>c</sub> na pragu</span><strong id="z49-greq">—</strong></div>
-        </div>
-        <div class="z49-formula">
-          <p><strong>Komponente:</strong> <i>F</i><sub>H</sub> = ρg(s + R/2)Rb i <i>F</i><sub>V</sub> = <i>F</i><sub>y</sub> − <i>W</i><sub>f</sub>, gdje je <i>F</i><sub>y</sub> = ρgH(Rb), a <i>W</i><sub>f</sub> = ρg(R² − πR²/4)b.</p>
-          <p><strong>Moment oko A:</strong> <i>M</i><sub>voda,A</sub> = <i>F</i><sub>R</sub>R sin α = <i>F</i><sub>V</sub>R. Zato je na pragu otvaranja <i>G</i><sub>c</sub> = <i>F</i><sub>V</sub> (za b = 1 m).</p>
-        </div>
-        <p class="z49-status" id="z49-status"></p>
-      </div>
-    </div>
+ <div class="z49-shell">
+  <div class="z49-head"><h4>Z49 · kada oslonac prestaje nositi cilindar?</h4><p>Povećaj H do praga otvaranja. Moment vode suprotstavlja se težini, a donji oslonac može samo gurati cilindar prema gore.</p></div>
+  <div class="z49-figure">
+   <svg id="z49-canvas" role="img" aria-label="Cilindar, zglob A, kontakt B, stvarne sile i prag otvaranja"></svg>
+   <p class="z49-caption" id="z49-caption"></p>
   </div>
+  <div class="z49-panel">
+   <div class="z49-controls">
+    <label for="z49-h">Razina vode H <span class="z49-read"><span id="z49-h-read">5,00</span> m</span><input id="z49-h" type="range" min="1.3" max="7" step="any" value="5"></label>
+    <label for="z49-r">Polumjer R <span class="z49-read"><span id="z49-r-read">0,80</span> m</span><input id="z49-r" type="range" min="0.3" max="1.2" step="0.05" value="0.8"></label>
+    <label for="z49-rho">Gustoća ρ <span class="z49-read"><span id="z49-rho-read">1000</span> kg/m³</span><input id="z49-rho" type="range" min="900" max="1100" step="10" value="1000"></label>
+    <label for="z49-gc"><span>Težina odsječka G<sub>c</sub></span> <span class="z49-read"><span id="z49-gc-read">37,9</span> kN</span><input id="z49-gc" type="range" min="15" max="80" step="0.1" value="37.9"></label>
+   </div>
+   <div class="z49-values" aria-live="polite">
+    <div class="z49-reading"><span>ΔM<sub>A</sub> vode i težine</span><strong id="z49-moment">—</strong></div>
+    <div class="z49-reading"><span>Reakcija oslonca N</span><strong id="z49-contact">—</strong></div>
+    <div class="z49-reading"><span>Kritična razina H<sub>krit</sub></span><strong id="z49-critical">—</strong></div>
+   </div>
+   <button type="button" class="z49-preset" id="z49-critical-preset">Točno na prag otvaranja</button>
+   <p class="z49-formula">Za odsječak b = 1 m: F<sub>H</sub> = ρg(H − R/2)Rb; F<sub>V</sub> = ρgb[HR − (1 − π/4)R²]. Sile su u kN; iznosi po metru imaju iste numeričke vrijednosti. Pravac rezultante Q–C prolazi kroz C, pa komponente smijemo prenijeti u C: F<sub>H</sub> tada ima nulti moment oko A, a krak F<sub>V</sub> iznosi R.</p>
+   <div class="z49-status" id="z49-status"></div>
+  </div>
+ </div>
 </div>
 <script>
 (() => {
-  const root = document.getElementById("widget-49");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "true";
-  const canvas = root.querySelector("#z49-canvas"),
-    ctx = canvas.getContext("2d");
-  const controls = {
-    H: root.querySelector("#z49-h"),
-    R: root.querySelector("#z49-r"),
-    rho: root.querySelector("#z49-rho"),
-    Gc: root.querySelector("#z49-gc"),
-  };
-  const ui = {
-    H: root.querySelector("#z49-h-read"),
-    R: root.querySelector("#z49-r-read"),
-    rho: root.querySelector("#z49-rho-read"),
-    Gc: root.querySelector("#z49-gc-read"),
-    s: root.querySelector("#z49-s"),
-    fh: root.querySelector("#z49-fh"),
-    fv: root.querySelector("#z49-fv"),
-    fr: root.querySelector("#z49-fr"),
-    mw: root.querySelector("#z49-mw"),
-    greq: root.querySelector("#z49-greq"),
-    status: root.querySelector("#z49-status"),
-  };
-  const g = 9.81,
-    b = 1,
-    fmt = (v, n = 1) => v.toLocaleString("hr-HR", { minimumFractionDigits: n, maximumFractionDigits: n });
-  const line = (x1, y1, x2, y2, color, dash = [], width = 1.5) => {
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.setLineDash(dash);
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.restore();
-  };
-  const text = (v, x, y, color = "#17324d", align = "left", size = 14) => {
-    ctx.save();
-    ctx.fillStyle = color;
-    ctx.font = "600 " + size + "px system-ui, sans-serif";
-    ctx.textAlign = align;
-    ctx.fillText(v, x, y);
-    ctx.restore();
-  };
-  const arrow = (x1, y1, x2, y2, color, label = "", width = 3) => {
-    const a = Math.atan2(y2 - y1, x2 - x1),
-      d = 9;
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - d * Math.cos(a - Math.PI / 6), y2 - d * Math.sin(a - Math.PI / 6));
-    ctx.lineTo(x2 - d * Math.cos(a + Math.PI / 6), y2 - d * Math.sin(a + Math.PI / 6));
-    ctx.closePath();
-    ctx.fill();
-    if (label) {
-      ctx.font = "700 15px system-ui, sans-serif";
-      ctx.fillText(label, (x1 + x2) / 2 + 6, (y1 + y2) / 2 - 7);
-    }
-    ctx.restore();
-  };
-
-  function draw(m){MF1.quarterScene(canvas,m);}
-
-  function update() {
-    const H = +controls.H.value,
-      R = +controls.R.value,
-      rho = +controls.rho.value,
-      Gc = +controls.Gc.value,
-      s = H - R,
-      Av = R * b,
-      zT = s + R / 2;
-    const FH = (rho * g * zT * Av) / 1000,
-      Fy = (rho * g * H * Av) / 1000,
-      Wf = (rho * g * (R * R - (Math.PI * R * R) / 4) * b) / 1000,
-      FV = Fy - Wf,
-      FR = Math.hypot(FH, FV),
-      theta = (Math.atan2(FV, FH) * 180) / Math.PI,
-      Mw = FV * R,
-      difference = FV - Gc;
-    ui.H.textContent = H.toFixed(2).replace(".", ",");
-    ui.R.textContent = R.toFixed(2).replace(".", ",");
-    ui.rho.textContent = rho.toFixed(0);
-    ui.Gc.textContent = fmt(Gc);
-    ui.s.textContent = fmt(s, 2) + " m";
-    ui.fh.textContent = fmt(FH) + " kN/m";
-    ui.fv.textContent = fmt(FV) + " kN/m ↑";
-    ui.fr.textContent = fmt(FR) + " kN/m; " + fmt(theta) + "°";
-    ui.mw.textContent = fmt(Mw) + " kNm/m";
-    ui.greq.textContent = fmt(FV) + " kN/m";
-    if (Math.abs(difference) < 0.06)
-      ui.status.innerHTML =
-        "<strong>Na pragu otvaranja.</strong> M<sub>voda,A</sub> = F<sub>V</sub>R i M<sub>G,A</sub> = G<sub>c</sub>R su jednaki.";
-    else if (difference > 0)
-      ui.status.innerHTML =
-        "<strong>Zaklopka se otvara.</strong> Moment vode veći je za " +
-        fmt(difference) +
-        " kN/m × R od momenta težine.";
-    else
-      ui.status.innerHTML =
-        "<strong>Zaklopka ostaje zatvorena.</strong> Težina treba biti manja za " +
-        fmt(-difference) +
-        " kN/m da bi se dosegnuo prag.";
-    draw({h:s,R,FH,FV,G:Gc});
+ const root=document.getElementById('widget-49');if(!root||root.dataset.ready)return;root.dataset.ready='true';
+ const svg=root.querySelector('#z49-canvas'),get=id=>root.querySelector('#'+id),controls={H:get('z49-h'),R:get('z49-r'),rho:get('z49-rho'),Gc:get('z49-gc')};
+ const g=9.81,b=1;let lastWidth=0;
+ const fmt=(v,n=2)=>v.toLocaleString('hr-HR',{minimumFractionDigits:n,maximumFractionDigits:n});
+ const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const text=(x,y,v,attrs='')=>'<text x="'+x+'" y="'+y+'" '+attrs+'>'+esc(v).replace(/([A-Za-zΔφ])_([A-Za-z]+)/g,'$1<tspan baseline-shift="sub" font-size=".75em">$2</tspan>')+'</text>';
+ const line=(x1,y1,x2,y2,attrs='')=>'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" '+attrs+'/>';
+ const arrow=(key,x,y,dx,dy,color)=>{
+  const length=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),head=Math.min(7,length*.38),ex=x+dx,ey=y+dy;
+  return '<g data-cylinder-force="'+key+'" data-x="'+x+'" data-y="'+y+'" data-dx="'+dx+'" data-dy="'+dy+'" fill="'+color+'" stroke="'+color+'">'+line(x,y,ex,ey,'stroke-width="2.5"')+(length>1e-8?'<path d="M '+ex+' '+ey+' L '+(ex-head*Math.cos(angle-.5))+' '+(ey-head*Math.sin(angle-.5))+' L '+(ex-head*Math.cos(angle+.5))+' '+(ey-head*Math.sin(angle+.5))+' Z" stroke="none"/>':'')+'</g>';
+ };
+ function update(){
+  const H=+controls.H.value,R=+controls.R.value,rho=+controls.rho.value,Gc=+controls.Gc.value,s=H-R;
+  const FH=rho*g*(H-R/2)*R*b/1000,FV=rho*g*b*(H*R-(1-Math.PI/4)*R*R)/1000,FR=Math.hypot(FH,FV);
+  const tolerance=64*Number.EPSILON*Math.max(1,FV,Gc),rawDifference=FV-Gc,difference=Math.abs(rawDifference)<=tolerance?0:rawDifference;
+  const netMoment=difference*R,N=Math.max(0,-difference),criticalLevel=Gc*1000/(rho*g*R*b)+(1-Math.PI/4)*R,regime=difference<0?'closed':difference>0?'opening':'threshold';
+  const qx=-R*FH/FR,qz=R-R*FV/FR,theta=Math.atan2(FV,FH)*180/Math.PI;
+  const W=Math.max(300,Math.round(svg.getBoundingClientRect().width||900)),wide=W>=660;lastWidth=W;
+  const radius=wide?88:72,scale=radius/R,cx=wide?Math.min(W*.41,385):W*.60,by=wide?350:340,cy=by-radius,wall=cx-radius;
+  const left=wide?82:52,visibleHead=Math.min(H*scale,2*radius+86),sy=by-visibleHead,broken=H*scale>visibleHead+1e-8,breakY=by-2*radius-42;
+  const qX=cx+qx*scale,qY=by-qz*scale,forceScale=wide?.70:.48,legendX=wide?cx+radius+45:16,legendY=wide?132:by+63,height=wide?410:by+225;
+  const blue='#147aab',red='#c53838',orange='#a85e10',green='#247443',purple='#7854a0';
+  let out=text(16,28,'Cilindrična zaklopka','font-weight="650"')+text(16,54,regime==='opening'?'Trenutak prije pokretanja':regime==='threshold'?'Prag otvaranja':'Oslonac nosi cilindar');
+  out+='<path data-cylinder-water d="M '+left+' '+sy+' H '+wall+' V '+cy+' A '+radius+' '+radius+' 0 0 0 '+cx+' '+by+' H '+left+' Z" fill="#d5edf7"/>';
+  out+=line(left,sy,wall,sy,'stroke="'+blue+'" stroke-width="2"')+text(left+2,cy-sy<70?sy-40:sy+22,'p* = 0');
+  out+=line(wall,sy-8,wall,cy,'data-fixed-wall="" stroke="#526b7d" stroke-width="8"');
+  out+=line(left,by,cx+radius+20,by,'stroke="#526b7d" stroke-width="3"');
+  for(let x=left;x<cx+radius+15;x+=14)out+=line(x,by+10,x+9,by,'stroke="#8097a6" stroke-width="1"');
+  out+='<circle data-cylinder-outline cx="'+cx+'" cy="'+cy+'" r="'+radius+'" fill="#faf9f3" stroke="#526b7d" stroke-width="2.4"/>';
+  out+='<path data-wetted-arc d="M '+wall+' '+cy+' A '+radius+' '+radius+' 0 0 0 '+cx+' '+by+'" fill="none" stroke="'+blue+'" stroke-width="5"/>';
+  out+=line(wall,cy,cx,cy,'stroke="#8494a1" stroke-dasharray="4 4"')+line(wall,cy+18,cx,cy+18,'data-radius-dimension="" stroke="#8094a3"');
+  out+=line(wall,cy+14,wall,cy+22,'stroke="#8094a3"')+line(cx,cy+14,cx,cy+22,'stroke="#8094a3"')+text(wall+radius*.5,cy+40,'R','text-anchor="middle"');
+  out+=line(25,sy,25,by,'data-height-dimension="H" stroke="#658193"')+line(20,sy,30,sy,'stroke="#658193"')+line(20,by,30,by,'stroke="#658193"');
+  out+=text(18,(sy+by)/2,'H','text-anchor="end"');
+  out+=line(wall-19,sy,wall-19,cy,'data-height-dimension="s" stroke="#658193"')+line(wall-24,sy,wall-14,sy,'stroke="#658193"')+line(wall-24,cy,wall-14,cy,'stroke="#658193"')+text(wall-25,cy-sy<40?cy+30:(sy+cy)/2+6,'s','text-anchor="end"');
+  if(cy-sy<40)out+=line(wall-20,cy+17,wall-19,(sy+cy)/2,'stroke="#658193"');
+  if(broken){
+   out+='<g data-height-break><path d="M 16 '+(breakY-5)+' L 24 '+(breakY+3)+' L 32 '+(breakY-5)+' M '+(left-2)+' '+(breakY-5)+' L '+(left+10)+' '+(breakY+3)+' L '+(left+22)+' '+(breakY-5)+' L '+(wall-12)+' '+(breakY+3)+' L '+(wall+4)+' '+(breakY-5)+'" fill="none" stroke="white" stroke-width="10"/>';
+   out+='<path d="M 16 '+(breakY-5)+' L 24 '+(breakY+3)+' L 32 '+(breakY-5)+' M '+(left-2)+' '+(breakY-5)+' L '+(left+10)+' '+(breakY+3)+' L '+(left+22)+' '+(breakY-5)+' L '+(wall-12)+' '+(breakY+3)+' L '+(wall+4)+' '+(breakY-5)+'" fill="none" stroke="#526b7d" stroke-width="1.5"/></g>';
+   out+=text(wall+12,breakY+5,'prekinuta visina');
   }
-  Object.values(controls).forEach((input) => input.addEventListener("input", update));
-  update();
+  out+=line(qX,qY,cx,cy,'data-resultant-line="" stroke="'+red+'" stroke-width="1.6" stroke-dasharray="5 4"');
+  out+=arrow('horizontal',cx,cy,FH*forceScale,0,blue)+arrow('vertical',cx,cy,0,-FV*forceScale,blue)+arrow('resultant',cx,cy,FH*forceScale,-FV*forceScale,red)+arrow('weight',cx,cy,0,Gc*forceScale,orange)+arrow('contact',cx,by,0,-N*forceScale,green);
+  if(regime!=='opening')out+=arrow('hinge',wall,cy,-FH*forceScale,0,purple);
+  out+='<path data-hinge d="M '+(wall-8)+' '+(cy+10)+' L '+wall+' '+cy+' L '+(wall+8)+' '+(cy+10)+' Z" fill="#fff" stroke="#526b7d" stroke-width="1.8"/>';
+  out+='<circle cx="'+wall+'" cy="'+cy+'" r="4" fill="#fff" stroke="#526b7d" stroke-width="2"/><circle data-center cx="'+cx+'" cy="'+cy+'" r="3" fill="#526b7d"/><circle data-contact cx="'+cx+'" cy="'+by+'" r="3.5" fill="'+green+'"/><circle data-resultant-point cx="'+qX+'" cy="'+qY+'" r="3.5" fill="'+red+'"/>';
+  out+=text(wall-12,cy-12,'A','text-anchor="end"')+text(cx+10,cy+20,'C')+text(cx+13,by-4,'B')+text(cx+33,cy+Gc*forceScale+20,'G_c','style="fill:'+orange+'"')+text(cx-12,by-16,'N','text-anchor="end" style="fill:'+green+'"');
+  out+=line(qX,qY,qX-22,qY+20,'stroke="'+red+'"')+text(qX-25,qY+36,'Q','text-anchor="end" style="fill:'+red+'"');
+  const torqueRadius=radius*.52,start=regime==='opening'?35:-65,end=regime==='opening'?-65:35,rad=Math.PI/180;
+  if(difference!==0){
+   const x1=wall+torqueRadius*Math.cos(start*rad),y1=cy+torqueRadius*Math.sin(start*rad),x2=wall+torqueRadius*Math.cos(end*rad),y2=cy+torqueRadius*Math.sin(end*rad),tangent=(end+(regime==='opening'?-90:90))*rad;
+   out+='<path data-moment-arc data-sense="'+(regime==='opening'?'ccw':'cw')+'" d="M '+x1+' '+y1+' A '+torqueRadius+' '+torqueRadius+' 0 0 '+(regime==='opening'?0:1)+' '+x2+' '+y2+'" fill="none" stroke="'+orange+'" stroke-width="1.8"/>';
+   out+='<path d="M '+x2+' '+y2+' L '+(x2-7*Math.cos(tangent-.45))+' '+(y2-7*Math.sin(tangent-.45))+' L '+(x2-7*Math.cos(tangent+.45))+' '+(y2-7*Math.sin(tangent+.45))+' Z" fill="'+orange+'"/>';
+   out+=text(cx-14,cy-radius*.58,(difference>0?'+':'−')+'ΔM_A','text-anchor="end" style="fill:'+orange+'"');
+  }
+  out+=text(legendX,legendY,'F_H = '+fmt(FH)+' kN →','style="fill:'+blue+'"')+text(legendX,legendY+28,'F_V = '+fmt(FV)+' kN ↑','style="fill:'+blue+'"')+text(legendX,legendY+56,'F_R = '+fmt(FR)+' kN','style="fill:'+red+'"')+text(legendX,legendY+84,'φ_R = '+fmt(theta)+'° od +x');
+  out+=text(legendX,legendY+112,'Sile: isto stalno mjerilo');
+  out+=arrow('ruler',legendX,legendY+137,50*forceScale,0,'#526b7d')+text(legendX+50*forceScale+12,legendY+143,'50 kN');
+  svg.setAttribute('viewBox','0 0 '+W+' '+height);svg.innerHTML=out;
+  get('z49-h-read').textContent=fmt(H,3);get('z49-r-read').textContent=fmt(R);get('z49-rho-read').textContent=fmt(rho,0);get('z49-gc-read').textContent=fmt(Gc,2);
+  get('z49-moment').textContent=(netMoment>0?'+':'')+fmt(netMoment,Math.abs(netMoment)<.1?5:2)+' kN·m';
+  get('z49-contact').textContent=N>0&&N<1?fmt(N*1000,3)+' N':fmt(N,3)+' kN';
+  get('z49-critical').textContent=fmt(criticalLevel,6)+' m';
+  const reachable=criticalLevel>=+controls.H.min&&criticalLevel<=+controls.H.max;
+  get('z49-critical-preset').disabled=!reachable;get('z49-critical-preset').textContent=reachable?'Točno na prag otvaranja':'Prag je izvan raspona H ≤ 7 m';
+  get('z49-caption').innerHTML='H = '+fmt(H,3)+' m; s = H − R = '+fmt(s,3)+' m. '+(broken?'Visina vodenog stupca je prekinuta; tlak se računa s punim H. ':'')+'Krug i krak R imaju jednako vodoravno i okomito mjerilo. Q je na mokrom luku; sile u C su prenesene duž pravca Q–C.';
+  root.mf1Physics={H,R,rho,G:Gc,b,s,FH,FV,FR,theta,netMoment,criticalLevel,thresholdFullyWet:criticalLevel>=R,N,difference,regime,hingeHorizontal:regime==='opening'?null:-FH,hingeVertical:regime==='opening'?null:0,waterMoment:FV*R,weightMoment:Gc*R,contactMoment:N*R,resultantPoint:{x:qx,z:qz},geometry:{width:W,height,wide,radius,scale,cx,cy,by,wall,left,sy,broken,breakY,qX,qY,forceScale}};
+  MF1.decision(get('z49-status'),{title:'Uvjet kontakta → ravnoteža ili početak otvaranja',branches:[
+   {when:'FV < Gc',active:regime==='closed',equation:'N = Gc − FV > 0; ΔMA + NR = 0',then:'Oslonac B daje '+(N<1?fmt(N*1000,3)+' N':fmt(N,3)+' kN')+' prema gore. Moment vode i težine je negativan, ali ukupni moment s reakcijom oslonca jednak je nuli. Ax = −FH; Az = 0.'},
+   {when:'FV = Gc',active:regime==='threshold',equation:'N = 0; ΔMA = (FV − Gc)R = 0',then:'Točan prag: oslonac više ne nosi teret. Hkrit = '+fmt(criticalLevel,6)+' m.'},
+   {when:'FV > Gc',active:regime==='opening',equation:'N = 0; ΔMA = (FV − Gc)R > 0',then:'Oslonac ne može povlačiti prema dolje. Početni moment je '+fmt(netMoment,3)+' kN·m suprotno kazaljci na satu; prikaz je trenutak prije pokretanja, a statička ravnoteža više ne vrijedi.'}
+  ],summary:'ΔMA = ('+fmt(FV,5)+' − '+fmt(Gc,5)+') × '+fmt(R,2)+' = '+fmt(netMoment,5)+' kN·m. Hkrit = Gc/(ρgbR) + (1−π/4)R, uz Gc u N. '+(!reachable?'Traženi prag '+fmt(criticalLevel,3)+' m nije doseziv ovim rasponom razine.':'')});
+ }
+ Object.values(controls).forEach(input=>input.addEventListener('input',update));
+ get('z49-critical-preset').addEventListener('click',()=>{controls.H.value=root.mf1Physics.criticalLevel;update();});
+ const resize=()=>{if(Math.max(300,Math.round(svg.getBoundingClientRect().width||900))!==lastWidth)update();};window.addEventListener('resize',resize);if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(svg);
+ update();
 })();
 </script>
 ```
@@ -458,7 +329,7 @@ Potopljena zakrivljena površina AB presjeka četvrtine kruga polumjera $R=1,22\
 
 ### Zadatak Z55 — Potopljeni naopaki cilindar (CENGEL 3.151) {.unnumbered}
 
-Cilindrični spremnik težine $G=79\,\mathrm{N}$ djelomično je potopljen. Potrebno je odrediti visinu stupca u manometru ($h_1$) i silu $F$ potrebnu da spremnik ostane u tom položaju.
+Cilindrični spremnik težine $G=79\,\mathrm{N}$ djelomično je potopljen. Potrebno je odrediti visinu stupca u manometru ($h_1$) i silu $F$ potrebnu da spremnik ostane u tom položaju. U modelu je krov iznad vanjske slobodne površine, pa na njega izvana djeluje $p_0$, a iznutra $p_0+p^*$. Stijenke su idealno tanke, težina zraka se zanemaruje i količina plina nije zadana: promjene parametara uspoređuju zasebno pripremljena ravnotežna stanja, a ne kompresiju zatvorene mase plina.
 
 <div class="zadano-grid">
 <div class="zadano-row">
@@ -492,131 +363,125 @@ Cilindrični spremnik težine $G=79\,\mathrm{N}$ djelomično je potopljen. Potre
 
 ```{=html}
 <style>
-  #widget-55 { max-width: 980px; margin: 1.4rem auto; font-family: system-ui, sans-serif; color: #17324d; }
-  #widget-55 * { box-sizing: border-box; }
-  #widget-55 .z55 { overflow: hidden; border: 1px solid #bed1df; border-radius: 16px; background: #fff; box-shadow: 0 4px 18px #17324d12; }
-  #widget-55 .z55-head { padding: 1rem 1.2rem; background: #eaf6fb; border-bottom: 1px solid #bed1df; }
-  #widget-55 h4 { margin: 0; color: #123b5b; font-size: 1.15rem; }
-  #widget-55 .z55-head p { margin: .28rem 0 0; font-size: .9rem; }
-  #widget-55 .z55-figure { padding: 1rem; background: #f9fcfe; }
-  #widget-55 canvas { display: block; width: 100%; max-width: 920px; margin: auto; border: 1px solid #c8d8e3; border-radius: 10px; background: #fff; }
-  #widget-55 .z55-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .8rem; padding: 1rem; border-top: 1px solid #d7e3ea; }
-  #widget-55 label { display: grid; gap: .25rem; margin: 0; font-weight: 650; font-size: .88rem; }
-  #widget-55 input { width: 100%; accent-color: #157a9b; }
-  #widget-55 .read { color: #0c5874; font-variant-numeric: tabular-nums; }
-  #widget-55 .values { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: .42rem; padding: .75rem; border-radius: 9px; background: #f1f7fa; font-size: .89rem; font-variant-numeric: tabular-nums; }
-  #widget-55 .values div { display: grid; gap: .2rem; }
-  #widget-55 .note { grid-column: 1 / -1; margin: 0; padding: .7rem .8rem; border-left: 4px solid #157a9b; background: #f0f8fb; font-size: .88rem; line-height: 1.45; }
-  #widget-55 .formula { grid-column: 1 / -1; margin: 0; padding: .72rem .85rem; border: 1px solid #d7e3ea; border-radius: 9px; background: #fbfdfe; font-size: .86rem; line-height: 1.5; }
-  @media (min-width: 1000px) { #widget-55 { width: min(1050px, calc(100vw - 270px)); max-width: none; } }
-  @media (max-width: 520px) { #widget-55 .z55-panel { grid-template-columns: 1fr; } }
+  #widget-55{max-width:980px;margin:1.4rem auto;font-family:system-ui,sans-serif;color:#17324d;}
+  #widget-55 *{box-sizing:border-box;}
+  #widget-55 .z55{overflow:hidden;border:1px solid #bed1df;border-radius:16px;background:#fff;}
+  #widget-55 .z55-head{padding:1rem 1.2rem;background:#eaf6fb;}
+  #widget-55 h4{margin:0;color:#123b5b;font-size:1.15rem;}
+  #widget-55 .z55-head p{margin:.4rem 0 0;font-size:.94rem;}
+  #widget-55 .z55-figure{padding:.6rem;background:#f9fcfe;}
+  #widget-55 .z55-figure svg{display:block;width:100%;height:auto;max-height:none;margin:auto;background:#fff;border-radius:9px;}
+  #widget-55 .z55-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;padding:1rem;border-top:1px solid #d7e3ea;}
+  #widget-55 label{display:grid;gap:.25rem;margin:0;font-weight:650;font-size:.9rem;}
+  #widget-55 input{width:100%;accent-color:#157a9b;}
+  #widget-55 .read{color:#0c5874;font-variant-numeric:tabular-nums;}
+  #widget-55 .values{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;padding:.75rem;border-radius:9px;background:#f1f7fa;font-size:.92rem;}
+  #widget-55 .values div{display:grid;gap:.3rem;}
+  #widget-55 .z55-wide{grid-column:1/-1;line-height:1.6;}
+  #widget-55 #z55-neutral{padding:.45rem .7rem;border:1px solid #83b1c4;border-radius:7px;background:#f1f9fc;color:#145674;cursor:pointer;}
+  #widget-55 #z55-neutral:disabled{opacity:.65;cursor:default;}
+  @media(min-width:1000px){#widget-55{width:min(1050px,calc(100vw - 270px));max-width:none;}}
+  @media(max-width:520px){#widget-55 .z55-panel{grid-template-columns:1fr;}#widget-55 .values{grid-template-columns:1fr;}}
 </style>
 <div class="mf1-lab" id="widget-55" data-widget-role="application">
   <div class="z55">
-    <div class="z55-head"><h4>Jedan pretlak: manometar i ravnoteža cilindra</h4><p>Povećaj razliku razina i prati isti pretlak u dvjema ulogama: kao očitanje manometra i kao sila na gornju bazu. Zatim mijenjaj težinu do promjene smjera sile zadržavanja.</p></div>
-    <div class="z55-figure"><canvas id="z55-canvas" width="920" height="578" aria-label="Potopljeni cilindar s manometrom, težinom i silama"></canvas></div>
+    <div class="z55-head"><h4>Jedan pretlak: manometar i ravnoteža zvona</h4><p>Krov i donji rub zvona su fiksni. Mijenjaj unutarnju razinu vode i usporedi tlak, manometar i smjer potrebne sile. Prikaz uspoređuje zasebno pripremljena statička stanja.</p></div>
+    <div class="z55-figure"><canvas id="z55-canvas" width="820" height="700" role="img" aria-label="Fiksno zvono i spojeni U-manometar u zajedničkom mjerilu, s kolinearnim silama"></canvas></div>
     <div class="z55-panel">
-      <label>Težina spremnika G <span class="read"><span id="z55-g-r">79</span> N</span><input id="z55-g" type="range" min="20" max="150" step="1" value="79"></label>
-      <label>Promjer D <span class="read"><span id="z55-d-r">0,30</span> m</span><input id="z55-d" type="range" min=".15" max=".5" step=".01" value=".3"></label>
-      <label>Razlika razina h<sub>2</sub> <span class="read"><span id="z55-h-r">0,20</span> m</span><input id="z55-h" type="range" min=".05" max=".5" step=".01" value=".2"></label>
-      <label>Relativna gustoća manometra <span class="read"><span id="z55-rm-r">2,10</span></span><input id="z55-rm" type="range" min="1.2" max="3" step=".1" value="2.1"></label>
+      <label>Težina G <span class="read"><span id="z55-g-r">79</span> N</span><input id="z55-g" type="range" min="20" max="150" step="1" value="79"></label>
+      <label>Promjer D <span class="read"><span id="z55-d-r">0,3</span> m</span><input id="z55-d" type="range" min=".15" max=".5" step=".01" value=".3"></label>
+      <label><span>Dubina sučelja h<sub>2</sub></span><span class="read"><span id="z55-h-r">0,2</span> m</span><input id="z55-h" type="range" min=".05" max=".5" step="any" value=".2"></label>
+      <label><span>Relativna gustoća ρ<sub>m</sub>/ρ</span><span class="read" id="z55-rm-r">2,1</span><input id="z55-rm" type="range" min="1.2" max="3" step=".1" value="2.1"></label>
+      <div class="z55-wide"><button type="button" id="z55-neutral">Postavi F = 0</button> <span id="z55-neutral-read"></span></div>
       <div class="values" aria-live="polite">
-        <div><span>p<sub>m</sub> = ρgh<sub>2</sub></span><strong id="z55-p">—</strong></div>
-        <div><span>h<sub>1</sub> = h<sub>2</sub>/s<sub>mf</sub></span><strong id="z55-h1">—</strong></div>
-        <div><span>p<sub>m</sub>A<sub>c</sub></span><strong id="z55-pa">—</strong></div>
-        <div><span>F za ravnotežu</span><strong id="z55-f">—</strong></div>
+        <div><span>Pretlak p* = ρgh<sub>2</sub></span><strong id="z55-p">—</strong></div>
+        <div><span>Razlika u manometru h<sub>1</sub></span><strong id="z55-h1">—</strong></div>
+        <div><span>Sila zadržavanja F · + dolje</span><strong id="z55-f">—</strong></div>
       </div>
-      <div class="formula"><strong>Uvjet ravnoteže:</strong> p<sub>m</sub> = ρgh<sub>2</sub>; h<sub>1</sub> = h<sub>2</sub>/s<sub>mf</sub>; F = p<sub>m</sub>A<sub>c</sub> − G.</div>
-      <p class="note" id="z55-note"></p>
+      <div class="z55-wide" id="z55-balance"></div>
+      <div class="z55-wide" id="z55-note"></div>
     </div>
   </div>
 </div>
 <script>
 (() => {
-  const root = document.getElementById("widget-55");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "true";
-  const canvas = root.querySelector("#z55-canvas"),
-    ctx = canvas.getContext("2d");
-  const inputs = {
-    G: root.querySelector("#z55-g"),
-    D: root.querySelector("#z55-d"),
-    h: root.querySelector("#z55-h"),
-    rm: root.querySelector("#z55-rm"),
-  };
-  const ui = {
-    G: root.querySelector("#z55-g-r"),
-    D: root.querySelector("#z55-d-r"),
-    h: root.querySelector("#z55-h-r"),
-    rm: root.querySelector("#z55-rm-r"),
-    p: root.querySelector("#z55-p"),
-    h1: root.querySelector("#z55-h1"),
-    pa: root.querySelector("#z55-pa"),
-    f: root.querySelector("#z55-f"),
-    note: root.querySelector("#z55-note"),
-  };
-  const fmt = (v, n = 1) => v.toLocaleString("hr-HR", { minimumFractionDigits: n, maximumFractionDigits: n });
-  const arrow = (x1, y1, x2, y2, color, label = "") => {
-    const a = Math.atan2(y2 - y1, x2 - x1),
-      d = 9;
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - d * Math.cos(a - Math.PI / 6), y2 - d * Math.sin(a - Math.PI / 6));
-    ctx.lineTo(x2 - d * Math.cos(a + Math.PI / 6), y2 - d * Math.sin(a + Math.PI / 6));
-    ctx.closePath();
-    ctx.fill();
-    if (label) {
-      ctx.font = "700 14px system-ui";
-      ctx.fillText(label, (x1 + x2) / 2 + 7, (y1 + y2) / 2 - 7);
+  function init(){
+    const root=document.getElementById('widget-55'),old=root.querySelector('#z55-canvas');
+    if(!old||old.localName!=='canvas')return;
+    const svg=MF1.vectorSurface(old),inputs={G:root.querySelector('#z55-g'),D:root.querySelector('#z55-d'),h:root.querySelector('#z55-h'),rm:root.querySelector('#z55-rm')};
+    const ns='http://www.w3.org/2000/svg',fmt=(v,n=5)=>new Intl.NumberFormat('hr-HR',{maximumSignificantDigits:n,useGrouping:false}).format(Object.is(v,-0)?0:v);
+    const forceText=v=>Math.abs(v)>0&&Math.abs(v)<.0001?v.toExponential(3).replace('.',','):fmt(v,6);
+    const add=(tag,attrs,text)=>{const e=document.createElementNS(ns,tag);for(const[k,v]of Object.entries(attrs||{}))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;svg.querySelector('[data-vector-scene]').append(e);return e;};
+    function update(){
+      const G=+inputs.G.value,D=+inputs.D.value,h=+inputs.h.value,rm=+inputs.rm.value,rho=1000,g=9.81,p=rho*g*h,h1=h/rm,A=Math.PI*D*D/4,pa=p*A,Fraw=pa-G;
+      const neutralDepth=G/(rho*g*A),tol=32*Number.EPSILON*Math.max(1,G,pa),F=Math.abs(Fraw)<=tol?0:Fraw,branch=F>0?0:F===0?1:2;
+      const compact=(root.clientWidth||window.innerWidth)<600,W=compact?360:820,scale=compact?225:370,freeY=compact?230:270,bellX=compact?125:260,mlX=compact?254:585,mrX=compact?302:685;
+      const roofZ=-.15,rimZ=.60,meanZ=.30,tubeBottomZ=.74,connectionZ=-.10,openZ=-.12,leftZ=meanZ+h1/2,rightZ=meanZ-h1/2;
+      const Y=z=>freeY+z*scale,roofY=Y(roofZ),rimY=Y(rimZ),interfaceY=Y(h),leftY=Y(leftZ),rightY=Y(rightZ),bellLeft=bellX-D*scale/2,bellRight=bellX+D*scale/2,waterLeft=compact?60:85,waterRight=compact?195:425,waterBottom=Y(.84),H=waterBottom+130,forceScale=compact?.1:.12;
+      svg.width=W;svg.height=H;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+      add('title',{},'Zvono s fiksnim krovom i rubom: pretlak, manometar i ravnoteža');
+      add('desc',{},'Dubina z raste prema dolje od vanjske slobodne površine. Krov je 0,15 m iznad nje, rub 0,60 m ispod. Obje razine manometra mijenjaju se oko fiksne srednje razine. Sve sile djeluju po centralnoj osi.');
+      const ink='#243b50',muted='#637c90',blue='#0279a6',pressureColor='#078268',weightColor='#7654ad',forceColor='#c44324',fluid='#b67731';
+      const line=(x1,y1,x2,y2,color=muted,width=1.2,attrs={})=>add('line',{x1,y1,x2,y2,stroke:color,'stroke-width':width,...attrs});
+      const text=(x,y,t,attrs={})=>add('text',{x,y,fill:ink,'font-size':compact?16:18,'font-family':'system-ui,sans-serif',...attrs},t);
+      const arrow=(x,y,dy,color,attrs={})=>{const group=add('g',{'data-start-y':y,'data-end-y':y+dy,...attrs});const ln=document.createElementNS(ns,'line');for(const[k,v]of Object.entries({x1:x,y1:y,x2:x,y2:y+dy,stroke:color,'stroke-width':2.8}))ln.setAttribute(k,v);group.append(ln);if(Math.abs(dy)>1e-12){const d=Math.min(6,Math.abs(dy)*.65),sgn=Math.sign(dy),head=document.createElementNS(ns,'path');head.setAttribute('d',`M ${x-d*.55} ${y+dy-sgn*d} L ${x} ${y+dy} L ${x+d*.55} ${y+dy-sgn*d}`);head.setAttribute('fill','none');head.setAttribute('stroke',color);head.setAttribute('stroke-width','2.5');group.append(head);}return group;};
+      text(W/2,27,'Zvono i spojeni U-manometar',{'text-anchor':'middle','font-weight':600});
+      text(W/2,53,'p*A = '+fmt(pa)+' N ↑ · G = '+fmt(G)+' N ↓',{'text-anchor':'middle','font-size':compact?16:17});
+      const keyX=W-27;arrow(keyX,80,100*forceScale,muted,{'data-z55-force-key':'100'});text(keyX-13,89,'100 N',{'text-anchor':'end','font-size':16,fill:muted});
+      // One metric projection for D, the fixed bell, h₂ and both manometer levels.
+      add('rect',{x:waterLeft,y:freeY,width:waterRight-waterLeft,height:waterBottom-freeY,fill:'#e0f2fe'});
+      add('rect',{x:bellLeft,y:roofY,width:D*scale,height:interfaceY-roofY,fill:'#fffdf3','data-z55-air':''});
+      line(bellX,roofY-105,bellX,waterBottom,'#b2bcc4',1,{'stroke-dasharray':'3 5','data-z55-force-axis':''});
+      line(waterLeft,freeY,bellLeft,freeY,blue,1.8);line(bellRight,freeY,waterRight,freeY,blue,1.8);
+      line(bellLeft,interfaceY,bellRight,interfaceY,blue,2,{'data-z55-interface':''});
+      add('path',{d:`M ${bellLeft} ${rimY} L ${bellLeft} ${roofY} L ${bellRight} ${roofY} L ${bellRight} ${rimY}`,fill:'none',stroke:ink,'stroke-width':3,'data-z55-bell':''});
+      const tube=`M ${bellRight} ${Y(connectionZ)} L ${mlX} ${Y(connectionZ)} L ${mlX} ${Y(tubeBottomZ)} Q ${(mlX+mrX)/2} ${Y(tubeBottomZ)+18} ${mrX} ${Y(tubeBottomZ)} L ${mrX} ${Y(openZ)}`;
+      add('path',{d:tube,fill:'none',stroke:'#7c91a2','stroke-width':11,'stroke-linejoin':'round','data-z55-tube':''});
+      add('path',{d:tube,fill:'none',stroke:'#fffdf3','stroke-width':7,'stroke-linejoin':'round'});
+      add('path',{d:`M ${mlX} ${leftY} L ${mlX} ${Y(tubeBottomZ)} Q ${(mlX+mrX)/2} ${Y(tubeBottomZ)+18} ${mrX} ${Y(tubeBottomZ)} L ${mrX} ${rightY}`,fill:'none',stroke:fluid,'stroke-width':7,'data-z55-manometer-fluid':''});
+      line(mlX-5,leftY,mlX+5,leftY,fluid,2,{'data-z55-left-level':''});line(mrX-5,rightY,mrX+5,rightY,fluid,2,{'data-z55-right-level':''});
+      text((bellRight+mlX)/2,Y(connectionZ)-12,'p*',{'text-anchor':'middle',fill:blue});
+      text(mrX,Y(openZ)-14,'p₀',{'text-anchor':'middle'});text(waterLeft,roofY-15,'p₀',{'font-size':16});
+      const axisX=compact?55:65;line(axisX,Y(-.15),axisX,Y(.6),'#94a7b5',1);
+      text(5,Y(-.15)-38,'z (m)',{'font-size':16});
+      for(const z of [-.15,0,.2,.4,.6]){line(axisX-4,Y(z),axisX+4,Y(z));text(axisX-8,Y(z)+5,fmt(z),{'text-anchor':'end','font-size':16});}
+      // h₂ is measured from the external free surface; h₁ is the difference of the two fluid levels.
+      const h2X=compact?211:463,h1X=compact?329:740;
+      line(waterRight,freeY,h2X+3,freeY,blue,1,{'stroke-dasharray':'3 3'});line(bellRight,interfaceY,h2X+3,interfaceY,blue,1,{'stroke-dasharray':'3 3'});line(h2X,freeY,h2X,interfaceY,blue,1.5,{'data-z55-h2-dimension':''});
+      text(h2X+14,(freeY+interfaceY)/2,'h₂',{'text-anchor':'middle',fill:blue,'font-size':16});
+      line(mlX+6,leftY,h1X+3,leftY,fluid,1,{'stroke-dasharray':'3 3'});line(mrX+6,rightY,h1X+3,rightY,fluid,1,{'stroke-dasharray':'3 3'});line(h1X,rightY,h1X,leftY,fluid,1.5,{'data-z55-h1-dimension':''});
+      text(h1X+15,(leftY+rightY)/2+5,'h₁',{'text-anchor':'middle',fill:fluid,'font-size':16});
+      const paY=roofY,gY=roofY+30,fY=roofY+85;
+      arrow(bellX,paY,-pa*forceScale,pressureColor,{'data-z55-force':'pressure','data-value':pa});
+      arrow(bellX,gY,G*forceScale,weightColor,{'data-z55-force':'weight','data-value':G});
+      arrow(bellX,fY,F*forceScale,forceColor,{'data-z55-force':'holding','data-value':F});
+      text(bellX+12,paY-12,'p*A',{'font-size':16,fill:pressureColor,'font-weight':700});
+      text(bellX-12,gY+12,'G',{'text-anchor':'end','font-size':16,fill:weightColor,'font-weight':700});
+      text(bellX+12,fY+(F<0?-9:18),F===0?'F = 0':'F',{'font-size':16,fill:forceColor,'font-weight':700});
+      const dimY=waterBottom+19;line(bellLeft,dimY,bellRight,dimY,ink);line(bellLeft,dimY-5,bellLeft,dimY+5,ink);line(bellRight,dimY-5,bellRight,dimY+5,ink);
+      text(bellX,dimY+26,'D = '+fmt(D)+' m',{'text-anchor':'middle'});
+      text(W/2,waterBottom+76,'Razine i D imaju isto mjerilo.',{'text-anchor':'middle','font-size':compact?16:17});
+      text(W/2,waterBottom+99,'Sile su pomaknute duž iste osi.',{'text-anchor':'middle','font-size':compact?16:17,fill:muted});
+      text(W/2,waterBottom+122,'Širina cijevi je shematska.',{'text-anchor':'middle','font-size':compact?16:17,fill:muted});
+      const neutralAvailable=neutralDepth>=+inputs.h.min&&neutralDepth<=+inputs.h.max,residual=Math.abs(pa-G-F)<=tol?0:pa-G-F;
+      root.mf1Physics={G,D,h,relativeDensity:rm,rho,g,p,h1,A,pressureForce:pa,F,residual,neutralDepth,neutralAvailable,branch,roofZ,rimZ,meanZ,leftZ,rightZ,tubeBottomZ,connectionZ,openZ,scale,forceScale,freeY,roofY,rimY,interfaceY,leftY,rightY,bellX,bellLeft,bellRight,manometerLeftX:mlX,manometerRightX:mrX,svgWidth:W,svgHeight:H};
+      for(const[key,id]of Object.entries({G:'g',D:'d',h:'h',rm:'rm'}))root.querySelector('#z55-'+id+'-r').textContent=fmt(+inputs[key].value,7);
+      root.querySelector('#z55-p').textContent=fmt(p,6)+' Pa';root.querySelector('#z55-h1').textContent=fmt(h1,6)+' m';
+      root.querySelector('#z55-f').textContent=forceText(F)+' N'+(F>0?' ↓':F<0?' ↑':'');
+      root.querySelector('#z55-neutral').disabled=!neutralAvailable;
+      root.querySelector('#z55-neutral-read').textContent='h₂,ravn = '+fmt(neutralDepth,7)+' m'+(neutralAvailable?'':' · izvan raspona klizača');
+      root.querySelector('#z55-balance').innerHTML='p* = ρgh₂ = ρₘgh₁ = '+fmt(p,6)+' Pa; A = '+fmt(A,6)+' m².<br>Ravnoteža (+ gore): <strong>p*A − G − F = <span id="z55-pa">'+forceText(pa)+' N</span> − '+forceText(G)+' N − ('+forceText(F)+' N) = '+forceText(residual)+' N</strong>.';
+      MF1.decision(root.querySelector('#z55-note'),{title:'Tlak nasuprot težini → smjer zadržavanja',branches:[
+        {when:'p*A > G',active:branch===0,equation:'F = p*A − G > 0',then:'Treba pritiskati prema dolje silom '+forceText(F)+' N.'},
+        {when:'p*A = G',active:branch===1,equation:'F = 0',then:'Tlak i težina uravnotežuju se bez dodatne sile.'},
+        {when:'p*A < G',active:branch===2,equation:'F = p*A − G < 0',then:'Treba povlačiti prema gore silom '+forceText(Math.abs(F))+' N.'}
+      ],summary:'Veća ρₘ smanjuje h₁, ali pri istom h₂ ne mijenja pretlak ni silu. Zanemarene su težina zraka i debljina stijenke; količina plina nije zadana.'});
     }
-    ctx.restore();
-  };
-  function draw(m){
- MF1.fitCanvas(canvas,ctx,620,390);
- const sc=Math.min(220,140/Math.max(m.h,.2)),sy=180,iy=sy+m.h*sc,xc=250,w=m.D*sc,top=80,bottom=iy+30;
- ctx.fillStyle='#bae6fd';ctx.fillRect(35,sy,375,350-sy);ctx.fillStyle='#fff';ctx.fillRect(xc-w/2,top,w,iy-top);
- ctx.strokeStyle='#334155';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(xc-w/2,bottom);ctx.lineTo(xc-w/2,top);ctx.lineTo(xc+w/2,top);ctx.lineTo(xc+w/2,bottom);ctx.stroke();
- ctx.strokeStyle='#0284c7';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(35,sy);ctx.lineTo(xc-w/2,sy);ctx.moveTo(xc-w/2,iy);ctx.lineTo(xc+w/2,iy);ctx.moveTo(xc+w/2,sy);ctx.lineTo(410,sy);ctx.stroke();
- const ml=260+m.h1*sc/2,mr=260-m.h1*sc/2;
- ctx.strokeStyle='#64748b';ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(xc+w/2,top+15);ctx.lineTo(460,top+15);ctx.lineTo(460,325);ctx.lineTo(535,325);ctx.lineTo(535,110);ctx.stroke();
- ctx.strokeStyle='#b08968';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(460,ml);ctx.lineTo(460,325);ctx.lineTo(535,325);ctx.lineTo(535,mr);ctx.stroke();
- const vs=52/Math.max(m.pa,m.G,Math.abs(m.F));MF1.arrow(ctx,xc,top,0,-m.pa*vs,'#059669',3,'pₘ A');MF1.arrow(ctx,xc,top+35,0,m.G*vs,'#7c3aed',3,'G');MF1.arrow(ctx,xc+25,top,0,m.F*vs,'#dc2626',3,'F');
- ctx.font='13px system-ui';ctx.fillStyle='#334155';ctx.fillText('zarobljeni zrak',xc-w/2-10,top+65);ctx.fillText('p_atm',515,90);ctx.fillText('h₁ = '+m.h1.toFixed(3)+' m',420,367);ctx.fillText('h₂ = '+m.h.toFixed(2)+' m',35,sy+30);ctx.fillText('Otvoreno dno; debljina stijenke zanemarena',35,385);ctx.setTransform(1,0,0,1,0,0);
- }
-  function update() {
-    const G = +inputs.G.value,
-      D = +inputs.D.value,
-      h = +inputs.h.value,
-      rm = +inputs.rm.value,
-      p = 1000 * 9.81 * h,
-      h1 = h / rm,
-      A = (Math.PI * D * D) / 4,
-      pa = p * A,
-      F = pa - G;
-    ui.G.textContent = G;
-    ui.D.textContent = D.toFixed(2).replace(".", ",");
-    ui.h.textContent = h.toFixed(2).replace(".", ",");
-    ui.rm.textContent = rm.toFixed(2).replace(".", ",");
-    ui.p.textContent = fmt(p, 0) + " Pa";
-    ui.h1.textContent = fmt(h1, 3) + " m";
-    ui.pa.textContent = fmt(pa, 1) + " N";
-    ui.f.textContent = fmt(Math.abs(F), 1) + " N " + (F >= 0 ? "↓" : "↑");
-    ui.note.innerHTML =
-      F >= 0
-        ? "<strong>Potrebna je sila prema dolje.</strong> Sila tlaka p<sub>m</sub>A<sub>c</sub> veća je od težine G."
-        : "<strong>Težina nadmašuje silu tlaka.</strong> Za ravnotežu bi trebalo djelovati dodatnom silom prema gore.";
-    draw({h1,F,h,D,G,pa});
+    for(const input of Object.values(inputs))input.addEventListener('input',update);
+    root.querySelector('#z55-neutral').addEventListener('click',()=>{const s=root.mf1Physics;if(!s.neutralAvailable)return;inputs.h.value=String(s.neutralDepth);inputs.h.dispatchEvent(new Event('input',{bubbles:true}));});
+    window.addEventListener('resize',update);if(typeof ResizeObserver!=='undefined')new ResizeObserver(update).observe(root);update();
   }
-  Object.values(inputs).forEach((input) => input.addEventListener("input", update));
-  update();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
 ```

@@ -26,16 +26,20 @@ test('Every exercise has one introductory widget, followed by only its selected 
  }
 });
 
-test('Moody and the merged velocity profile use the same Reynolds number in every view',()=>{
+test('Moody opens with its reviewed diagram and complete decision tree visible',()=>{
  const a=load(13);try{
-  const root=a.w.document.querySelector('#v13-moody-widget'),slider=root.querySelector('#v13-re-slider'),modes=root.querySelectorAll('.mf1-editorial-modes button');
-  for(const re of [1000,2320,3000,4000,1e6]){
+  const root=a.w.document.querySelector('#v13-moody-widget'),slider=root.querySelector('#v13-re-slider');
+  assert.equal(root.querySelector('#v13-profile-panel'),null);
+  assert.equal(root.querySelector('.m13-bottom').closest('details'),null);
+  for(const [re,branch]of [[1000,'lam'],[3000,'trans'],[1e6,'turb']]){
    a.change(slider,Math.log10(re));a.frames(1);
-   const actual=10**Number(slider.value),s=root.mf1ProfileState;
-   assert.equal(s.re,actual);assert.equal(s.wall,0);assert.ok(s.center>1&&s.center<=2);
-   modes[1].click();assert.ok(!a.visible(root.querySelector('#flow-canvas')));assert.ok(a.visible(root.querySelector('#v13-moody-canvas')));
-   modes[0].click();assert.ok(a.visible(root.querySelector('#flow-canvas')));assert.ok(!a.visible(root.querySelector('#v13-moody-canvas')));
-   assert.equal(root.mf1ProfileState.re,actual,'view switch preserves physical state');
+   assert.ok(a.visible(root.querySelector('#v13-moody-canvas')));
+   assert.ok(a.visible(root.querySelector('.m13-tree')));
+   assert.ok(root.querySelector('#m13-b-'+branch).classList.contains('m13-on'));
+  }
+  for(const [re,kd,branch]of [[1e4,1e-6,'smooth'],[1e5,.001,'cb'],[1e8,.01,'rough']]){
+   a.change(slider,Math.log10(re));a.change(root.querySelector('#v13-kd-slider'),Math.log10(kd));
+   assert.ok(root.querySelector('#m13-b-'+branch).classList.contains('m13-on'));
   }
   assert.deepEqual(a.errors,[]);
  }finally{a.dom.window.close();}
@@ -43,7 +47,7 @@ test('Moody and the merged velocity profile use the same Reynolds number in ever
 
 test('Pelton presents one view at a time and keeps velocity/power analysis synchronized',()=>{
  const a=load(12);try{
-  const root=a.w.document.querySelector('#v12-pelton'),modes=root.querySelectorAll('.mf1-editorial-modes button'),rotor=root.querySelector('#v12-pelton-rotor'),analysis=root.querySelector('#v12-pelton-analysis');
+  const root=a.w.document.querySelector('#v12-pelton'),modes=root.querySelectorAll('button[data-p-view]'),rotor=root.querySelector('#v12-pelton-rotor'),analysis=root.querySelector('#v12-pelton-analysis');
   assert.ok(a.visible(rotor));assert.ok(!a.visible(analysis));
   modes[1].click();assert.ok(!a.visible(rotor));assert.ok(a.visible(analysis));
   for(const u of [0,.5,.9]){a.change(root.querySelector('[data-k=u]'),u);a.frames(1);assert.ok(a.visible(analysis));assert.ok(!a.visible(rotor));a.scan('Pelton '+u);}

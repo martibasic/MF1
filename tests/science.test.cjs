@@ -71,10 +71,12 @@ test('Parallel networks conserve flow and equal head, including flows crossing t
  finally{a.dom.window.close();}
 });
 
-test('Quantitative plots use common rheology scales, physical units, and finite geometry',()=>{
- const a=load(2),root=a.w.document.getElementById('v2-nn-explorer');
- try{const plots=[];for(const button of root.querySelectorAll('[data-v2nn]')){
-  button.click();a.scan('rheology');const svg=root.querySelector('svg');plots.push([...svg.querySelectorAll('text')].map(t=>t.textContent).join('|'));assert.match(svg.textContent,/Pa/);assert.match(svg.textContent,/s⁻¹/);
+test('Rheology shares the Couette strain rate and common axes across material laws',()=>{
+ const a=load(2),root=a.w.document.getElementById('widget-visc-basics'),plots=[];
+ try{for(const button of root.querySelectorAll('[data-v2nn]')){
+  button.click();a.scan('rheology');const svg=root.querySelector('#v2nn-plot'),m=root.mf1ProfessorState;
+  plots.push(JSON.stringify({axes:[svg.dataset.xMax,svg.dataset.yMax],curves:[...svg.querySelectorAll('[data-visc-curve]')].map(c=>[c.dataset.viscCurve,c.getAttribute('d')]).sort((a,b)=>Number(a[0])-Number(b[0]))}));
+  assert.match(svg.textContent,/Pa/);assert.match(svg.textContent,/s⁻¹/);close(m.gradient,m.v/m.delta);close(m.tangent/m.apparent,m.exponent);
  }assert.equal(new Set(plots).size,1);assert.deepEqual(a.errors,[]);}
  finally{a.dom.window.close();}
 });
@@ -107,7 +109,7 @@ test('Exact input accepts decimal commas, rejects bounds and step errors, and up
   const dialog=a.w.document.querySelector('dialog'),field=dialog.querySelector('input'),form=dialog.querySelector('form');
   const submit=v=>{field.value=v;form.dispatchEvent(new a.w.Event('submit',{cancelable:true}));};
   const original=slider.value;submit('900');assert.equal(slider.value,original);assert.equal(field.getAttribute('aria-invalid'),'true');submit('20,5');assert.equal(slider.value,original);
-  submit('250');assert.equal(slider.value,'250');assert.ok(!dialog.isConnected);close(+a.w.document.getElementById('z6-res-tau-wall').textContent,250*.1/4,.001);assert.deepEqual(a.errors,[]);
+  submit('250');assert.equal(slider.value,'250');assert.ok(!dialog.isConnected);close(Number(a.w.document.getElementById('z6-res-tau-wall').textContent.replace(/\./g,'').replace(',','.')),250*.1/4,.001);assert.deepEqual(a.errors,[]);
   const ratio=a.w.document.getElementById('v1x-ratio');ratio.mf1Limits.querySelector('.mf1-exact-button').click();
   const decimal=a.w.document.querySelector('dialog');decimal.querySelector('input').value='3,5';decimal.querySelector('form').dispatchEvent(new a.w.Event('submit',{cancelable:true}));
   assert.equal(ratio.value,'3.5');assert.match(a.w.document.getElementById('v1x-primary').textContent,/420/);
@@ -127,10 +129,10 @@ test('The retained continuity explorer conserves accumulated volume at 2, 10 and
  states.forEach(h=>close(h,states[0]));
 });
 
-test('The buoyancy mode moves the same prism through a fixed surface and balances displaced weight',()=>{
+test('The standalone buoyancy model preserves floating, neutral and sinking branches',()=>{
  const a=load(3),root=a.w.document.getElementById('v3-buoyancy-explorer');
  try{
-  a.w.switchV3Tab('uzgon');assert.equal(root.hidden,false);assert.equal(a.w.document.getElementById('v3-primary-view').hidden,true);
+  assert.equal(root.closest('#v3-intro-widget'),null);assert.ok(a.visible(root));
   let lastDraft=Infinity,lastTop=Infinity;
   for(const rho of [820,1000,1300]){
    a.change(root.querySelector('input'),rho);const s=root.mf1BuoyancyState;
@@ -138,32 +140,29 @@ test('The buoyancy mode moves the same prism through a fixed surface and balance
    close((s.bottom-s.surface)/(s.bottom-s.top),800/rho);close(s.center,(s.surface+s.bottom)/2);close(s.surface,150);
    assert.ok(s.draft<lastDraft);assert.ok(s.top<lastTop);lastDraft=s.draft;lastTop=s.top;
   }
-  a.w.switchV3Tab('manometar');assert.equal(root.hidden,true);a.w.switchV3Tab('uzgon');close(root.mf1BuoyancyState.rho,1300);a.scan('buoyancy');assert.deepEqual(a.errors,[]);
+  for(const rho of [500,800]){a.change(root.querySelector('input'),rho);const m=root.mf1BuoyancyState;close(m.fraction,1);close(m.force/m.weight,rho/800);assert.ok(m.top>m.surface);}
+  a.w.switchV3Tab('manometar');assert.ok(a.visible(root));a.scan('buoyancy');assert.deepEqual(a.errors,[]);
  }finally{a.dom.window.close();}
 });
 
-test('The unified viscosity and surface laboratory preserves live models across its four modes',()=>{
- const a=load(2),root=a.w.document.getElementById('widget-visc-basics');
- const read=id=>parseFloat(root.querySelector('#'+id).textContent.replace('−','-').replace(',','.'));
- const mode=n=>{root.querySelector(`[data-editorial-mode="${n}"]`).click();assert.equal([...root.querySelectorAll('[data-editorial-pane]')].filter(p=>!p.hidden).length,1);};
+test('Viscosity and capillarity are independent examples with genuinely coupled physical quantities',()=>{
+ const a=load(2),shear=a.w.document.getElementById('widget-visc-basics'),cap=a.w.document.getElementById('widget-z12-vdual-fixed');
  try{
-  a.change(root.querySelector('#mu-slider'),.4);const tau=read('tau-out');
-  mode(1);assert.equal(a.visible(root.querySelector('#v2nn-plot')),true);assert.equal(a.visible(root.querySelector('#visc-canvas')),false);
-  mode(2);a.change(root.querySelector('#r-slider-z12-dual'),.3);const rise=read('hv-res-z12');a.change(root.querySelector('#r-slider-z12-dual'),.6);close(read('hv-res-z12'),rise/2,.005);assert.ok(read('hhg-res-z12')<0);
-  mode(3);a.change(root.querySelector('#yl-slider-d'),.5);const pressure=read('yl-res-dp');a.change(root.querySelector('#yl-slider-d'),1);close(read('yl-res-dp'),pressure/2);
-  mode(0);close(read('tau-out'),tau);assert.equal(root.querySelector('#mu-slider').value,'0.4');assert.equal(a.visible(root.querySelector('#visc-canvas')),true);a.scan('unified V2');assert.deepEqual(a.errors,[]);
+  a.change(shear.querySelector('#mu-slider'),.4);const tau=shear.mf1ProfessorState.tau;
+  assert.equal(cap.closest('#widget-visc-basics'),null);assert.ok(a.visible(cap));assert.ok(a.visible(shear.querySelector('#v2nn-plot')));
+  a.change(cap.querySelector('#r-slider-z12-dual'),.3);const rise=cap.mf1ProfessorState.h,jump=cap.mf1ProfessorState.jump;
+  a.change(cap.querySelector('#r-slider-z12-dual'),.6);close(cap.mf1ProfessorState.h,rise/2);close(cap.mf1ProfessorState.jump,jump/2);
+  for(const theta of [0,90,130]){a.change(cap.querySelector('#z12-theta'),theta);const m=cap.mf1ProfessorState;close(m.jump,m.rho*9.81*m.h);close(m.force,m.column);assert.equal(Math.sign(m.h),theta<90?1:theta===90?0:-1);}
+  close(shear.mf1ProfessorState.tau,tau);a.scan('V2');assert.deepEqual(a.errors,[]);
  }finally{a.dom.window.close();}
 });
 
-test('Translation and rotation share one laboratory while retaining the independent pressure contributions',()=>{
- const a=load(4),root=a.w.document.getElementById('v4-intro-principle-widget');
- const read=id=>parseFloat(root.querySelector('#'+id).textContent.replace('−','-').replace(',','.'));
+test('Translation and rotation keep separate scenes and independent pressure contributions',()=>{
+ const a=load(4),translation=a.w.document.getElementById('v4-intro-principle-widget'),rotation=a.w.document.getElementById('z35-advanced-widget');
  try{
-  a.change(root.querySelector('#v4-ax-slider'),-4);
-  root.querySelector('[data-editorial-mode="1"]').click();assert.equal(a.visible(root.querySelector('#z35-heatmap-canvas')),true);assert.equal(a.visible(root.querySelector('#v4-principle-canvas')),false);
-  a.change(root.querySelector('#z35-a-slider'),0);const vertical=read('z35-res-dpv');
-  for(const n of [0,100,200]){a.change(root.querySelector('#z35-n-slider'),n);close(read('z35-res-dpr'),+(740*(n*Math.PI/30)**2*.5**2/2000).toFixed(1));close(read('z35-res-dpv'),vertical);}
-  a.change(root.querySelector('#z35-a-slider'),10);close(read('z35-res-dpv'),+(740*19.81*2/1000).toFixed(1));
-  root.querySelector('[data-editorial-mode="0"]').click();assert.equal(root.querySelector('#v4-ax-slider').value,'-4');a.scan('unified V4');assert.deepEqual(a.errors,[]);
+  a.change(translation.querySelector('#v4-ax-slider'),-4);assert.ok(a.visible(rotation));assert.equal(rotation.closest('#v4-intro-principle-widget'),null);
+  a.change(rotation.querySelector('#z35-a-slider'),0);const vertical=rotation.mf1ProfessorState.dpv;
+  for(const n of [0,100,200]){a.change(rotation.querySelector('#z35-n-slider'),n);const m=rotation.mf1ProfessorState;close(m.dpr,740*(n*Math.PI/30)**2*.5**2/2);close(m.dpv,vertical);close(m.pressure,m.pVertical+m.pRadial);}
+  a.change(rotation.querySelector('#z35-a-slider'),10);close(rotation.mf1ProfessorState.dpv,740*19.81*2);assert.equal(translation.querySelector('#v4-ax-slider').value,'-4');a.scan('V4');assert.deepEqual(a.errors,[]);
  }finally{a.dom.window.close();}
 });

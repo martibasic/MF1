@@ -73,6 +73,7 @@ for(let n=1;n<=13;n++)test(`V${n}: live handlers, presets, minima/maxima and com
  a.frames(2);a.scan('all extrema');
  for(const button of a.w.document.querySelectorAll('button')){
   if(!button.isConnected||!a.visible(button)||button.classList.contains('quarto-color-scheme-toggle'))continue;
+  if(button.closest('.mf1-view-tools,.mf1-range-limits'))continue; // Dialog workflows have dedicated tests.
   try{button.click();a.frames(2);a.scan('button '+button.textContent.trim().slice(0,30));}catch(e){a.errors.push(e.stack);}
  }
  assert.deepEqual([...new Set(a.errors)],[]);a.dom.window.close();

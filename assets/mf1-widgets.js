@@ -60,8 +60,9 @@
       const diagonal=Math.abs(dx)>.2*len&&Math.abs(dy)>.2*len,left=dx < -Math.abs(dy)*.5;
       const tx=diagonal?x+.68*dx-15*dy/len:x+dx+(left?-9:9),ty=diagonal?y+.68*dy+15*dx/len:y+dy-9;
       ctx.font='600 14px system-ui';ctx.textAlign=diagonal?'center':left?'right':'left';
-      ctx.strokeStyle='#ffffff';ctx.lineWidth=4;ctx.strokeText(label,tx,ty);
-      ctx.fillText(label,tx,ty);
+      ctx.strokeStyle='#ffffff';ctx.lineWidth=4;
+      if(scope.MF1?.mathText){scope.MF1.mathText(ctx,label,tx,ty,true);scope.MF1.mathText(ctx,label,tx,ty);}
+      else{ctx.strokeText(label,tx,ty);ctx.fillText(label,tx,ty);}
     }
     ctx.restore();
   }
@@ -124,8 +125,9 @@
     const s=Math.min(135,290/Math.max(h+R,G===null?0:2*R)),r=R*s,cx=445;
     const sy=45+(G===null?0:Math.max(0,R-h)*s),cy=sy+h*s,by=cy+r,lx=cx-r;
     const line=(x,y,xx,yy,color='#64748b',dash=[])=>{ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(xx,yy);ctx.stroke();ctx.setLineDash([])};
-    const text=(t,x,y,c='#334155')=>{ctx.font='13px system-ui';ctx.fillStyle=c;ctx.fillText(t,x,y)};
-    ctx.fillStyle='#bae6fd';ctx.beginPath();
+    const text=(t,x,y,c='#334155')=>{ctx.font='13px system-ui';ctx.fillStyle=c;if(scope.MF1?.mathText)scope.MF1.mathText(ctx,t,x,y);else ctx.fillText(t,x,y)};
+    const fluid=ctx.createLinearGradient(0,sy,0,by);fluid.addColorStop(0,'#e5f5fc');fluid.addColorStop(1,'#91cee8');
+    ctx.fillStyle=fluid;ctx.beginPath();
     if(inside){ctx.moveTo(lx,sy);ctx.lineTo(cx,sy);ctx.lineTo(cx,by);ctx.arc(cx,cy,r,Math.PI/2,Math.PI);ctx.closePath();}
     else{ctx.moveTo(45,sy);ctx.lineTo(lx,sy);ctx.lineTo(lx,cy);ctx.arc(cx,cy,r,Math.PI,Math.PI/2,true);ctx.lineTo(45,by);ctx.closePath();}ctx.fill();
     line(45,sy,inside?cx:lx,sy,'#0284c7');text('slobodna površina',45,sy-12);
@@ -133,6 +135,14 @@
     if(step>=2){ctx.fillStyle=inside?'#38bdf833':'#a78bfa22';ctx.beginPath();ctx.moveTo(lx,sy);ctx.lineTo(cx,sy);ctx.lineTo(cx,by);ctx.arc(cx,cy,r,Math.PI/2,Math.PI);ctx.closePath();ctx.fill();ctx.setLineDash([4,4]);ctx.strokeStyle='#64748b';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);text(inside?'V*: stvarni fluid':'V*: pomoćni volumen',55,390);}
     ctx.strokeStyle='#1e293b';ctx.lineWidth=5;ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,Math.PI/2,true);ctx.stroke();
     text('C',cx+8,cy-10);text('A',lx-18,cy-8);text('B',cx+8,by+17);line(cx,cy,lx,cy,'#64748b',[4,4]);text('R',lx+r/2,cy-8);
+    // A dimensionless pressure profile avoids inventing a density or span.
+    const plotX=G===null?565:610,plotW=G===null?75:48,plotTop=75,plotH=205;
+    line(plotX,plotTop,plotX,plotTop+plotH);line(plotX,plotTop+plotH,plotX+plotW,plotTop+plotH);
+    text('p / p_B',plotX-8,plotTop-16);text('0',plotX-4,plotTop+plotH+18);text('1',plotX+plotW-3,plotTop+plotH+18);
+    line(plotX,plotTop,plotX+plotW,plotTop+plotH,'#087eab');
+    const ya=plotTop+plotH*h/(h+R),xa=plotX+plotW*h/(h+R);
+    line(plotX,ya,xa,ya,'#8a9eab',[3,3]);text('A',plotX-19,ya+4);text('B',plotX-19,plotTop+plotH+4);
+    text('p_B = ρg(h + R)',530,plotTop+plotH+46);
     const sign=inside?-1:1;
     if(step===1||step===3)for(let i=0;i<=6;i++){const t=Math.PI-i*Math.PI/12,px=cx+r*Math.cos(t),py=cy+r*Math.sin(t),len=42*(h+R*Math.sin(t))/(h+R);arrow(ctx,px,py,-sign*len*Math.cos(t),-sign*len*Math.sin(t),'#c26b35',1.8);}
     if(step>=2){const zH=h+R/2+R*R/(12*(h+R/2)),xbar=(h*R*R/2+R**3/3)/(h*R+Math.PI*R*R/4),px=cx-xbar*s,py=sy+zH*s;

@@ -72,7 +72,7 @@ Derivacija $du/dy$ nije samo simbol: ona je lokalni nagib profila brzine, odnosn
       note='Klipovi su na istoj visini. Prikazan je dodatni tlak zbog opterećenja; težine klipova i hidrostatska korekcija zanemarene su. Širine kružnih klipova prate √A, a obje sile imaju istu prilagođenu skalu. Veća sila znači manji pomak.';
     }else if(mode==='compression'){
       const ratio=Math.exp(-state.dp/state.K),V=1000*ratio,top=280-180*ratio;
-      scene=`<path d="M285 65V280H575V65" fill="none" stroke="#315b72" stroke-width="5"/><rect x="288" y="${top}" width="284" height="${280-top}" fill="#dff2f8"/><rect x="285" y="${top-14}" width="290" height="14" fill="#64748b"/><path d="M265 100H595" stroke="#94a3b8" stroke-dasharray="6 5"/>`+arrow(430,top-14,0,state.dp*3,'#b93645')+text(320,45,`Δp = ${fmt(state.dp,1)} MPa`,'#b93645')+text(610,190,`V₂ = ${fmt(V,1)} cm³`,'#176da9')+text(165,330,'Isprekidano: početni položaj. Visina fluida proporcionalna je volumenu.',undefined,16);
+      scene=`<path d="M285 65V280H575V65" fill="none" stroke="#315b72" stroke-width="5"/><rect x="288" y="${top}" width="284" height="${280-top}" fill="#dff2f8"/><rect x="285" y="${top-14}" width="290" height="14" fill="#64748b"/><path d="M265 100H595" stroke="#94a3b8" stroke-dasharray="6 5"/>`+arrow(430,top-14-state.dp*3,0,state.dp*3,'#b93645')+text(320,45,`Δp = ${fmt(state.dp,1)} MPa`,'#b93645')+text(610,190,`V₂ = ${fmt(V,1)} cm³`,'#176da9')+text(165,330,'Isprekidano: početni položaj. Visina fluida proporcionalna je volumenu.',undefined,16);
       label='Relativna promjena volumena';result=`ΔV/V₁ = ${fmt((ratio-1)*100,3)} %`;eq='K = −V dp/dV; za konstantan K: V₂ = V₁ exp(−Δp/K).';note='Masa ostaje ista. Veći tlak spušta klip i smanjuje volumen; veći K smanjuje pomak. Pri Δp = 0 klip je na početnoj razini, V₁ = 1000 cm³.';
     }else{
       const h=state.delta*3600,bottom=274,top=bottom-h,gradient=state.U/state.delta,tau=state.mu*gradient;
@@ -567,7 +567,7 @@ Linearna procjena $\Delta\rho/\rho_1\approx\Delta p/K$ ovdje daje $3{,}06\ \%$; 
 
             <div style="background:#ffffff; padding:12px; border:1px solid #dbeafe; border-radius:10px;">
                 <div style="font-size:0.74rem; font-weight:800; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Graf: tlak i gustoća po dubini</div>
-                <canvas id="z5-chart" width="340" height="180" style="width:100%; height:auto; display:block;"></canvas>
+                <svg id="z5-chart" viewBox="0 0 880 640" style="width:100%; height:auto; display:block;"></svg>
             </div>
         </div>
     </div>
@@ -585,7 +585,6 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
   const z5c = document.getElementById("z5-molecules");
   const z5ctx = z5c.getContext("2d");
   const z5chart = document.getElementById("z5-chart");
-  const z5chartCtx = z5chart.getContext("2d");
 
   function updateZ5() {
     const d = parseFloat(z5dS.value);
@@ -593,12 +592,9 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
     document.getElementById("z5-v-depth-val").innerText = d;
 
     const rho0 = 1025;
-    const g0 = 9.81;
-    const K = 2.34e9;
-    const p0 = 0.1e6;
-    const compression = (rho0 * g0 * d) / K;
-    const rho = rho0 / (1 - compression);
-    const p = (p0 - K * Math.log(1 - compression)) / 1e6;
+    const state = MF1.ocean(d);
+    const rho = state.density;
+    const p = state.pressure / 1e6;
     const perc = (rho / 1025 - 1) * 100;
 
     document.getElementById("z5-res-p").innerText = p.toFixed(1);
@@ -636,77 +632,16 @@ Tlak u oceanu raste s dubinom i komprimira vodu. Na 7 km dubine gustoća je vidl
   }
 
   function drawChart(currentDepth) {
-    const c = z5chartCtx;
-    const w = z5chart.width;
-    const h = z5chart.height;
-    c.clearRect(0, 0, w, h);
-    c.fillStyle = "#ffffff";
-    c.fillRect(0, 0, w, h);
-
-    const pArea = { l: 36, r: w - 28, t: 28, b: h - 30 };
-    c.strokeStyle = "#cbd5e1";
-    c.beginPath();
-    c.moveTo(pArea.l, pArea.t);
-    c.lineTo(pArea.l, pArea.b);
-    c.lineTo(pArea.r, pArea.b);
-    c.stroke();
-
-    c.fillStyle = "#1d4ed8";
-    c.font = "12px Inter";
-    c.fillText("p [0–105 MPa]", 4, 13);
-    c.fillStyle = "#64748b";
-    c.fillText("Dubina [0–10000 m]", pArea.r - 145, h - 7);
-    c.fillStyle = "#dc2626";
-    c.fillText("ρ [1025–1075 kg/m³]", pArea.r - 135, 13);
-
-    const dMax = 10000;
-    const dNow = Math.max(0, Math.min(currentDepth, dMax));
-    const n = 50;
-    c.strokeStyle = "#1d4ed8";
-    c.lineWidth = 2;
-    c.beginPath();
-    for (let i = 0; i <= n; i++) {
-      const d = (i / n) * dMax;
-      const compression = (1025 * 9.81 * d) / 2.34e9;
-      const p = (0.1e6 - 2.34e9 * Math.log(1 - compression)) / 1e6;
-      const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
-      const y = pArea.b - (p / 105) * (pArea.b - pArea.t);
-      if (i === 0) c.moveTo(x, y);
-      else c.lineTo(x, y);
-    }
-    c.stroke();
-
-    c.strokeStyle = "#dc2626";
-    c.lineWidth = 2;
-    c.beginPath();
-    for (let i = 0; i <= n; i++) {
-      const d = (i / n) * dMax;
-      const compression = (1025 * 9.81 * d) / 2.34e9;
-      const rho = 1025 / (1 - compression);
-      const x = pArea.l + (d / dMax) * (pArea.r - pArea.l);
-      const y = pArea.b - ((rho - 1025) / 50) * (pArea.b - pArea.t);
-      if (i === 0) c.moveTo(x, y);
-      else c.lineTo(x, y);
-    }
-    c.stroke();
-
-    const cx = pArea.l + (dNow / dMax) * (pArea.r - pArea.l);
-    c.strokeStyle = "#94a3b8";
-    c.setLineDash([4, 4]);
-    c.beginPath();
-    c.moveTo(cx, pArea.t);
-    c.lineTo(cx, pArea.b);
-    c.stroke();
-    c.setLineDash([]);
-    const compression=(1025*9.81*dNow)/2.34e9;
-    const pointP=(0.1e6-2.34e9*Math.log(1-compression))/1e6,pointRho=1025/(1-compression);
-    for(const [value,color] of [[pointP/105,'#1d4ed8'],[(pointRho-1025)/50,'#dc2626']]){c.beginPath();c.arc(cx,pArea.b-value*(pArea.b-pArea.t),3.5,0,2*Math.PI);c.fillStyle=color;c.fill();}
-    z5chart.setAttribute('aria-valuenow',dNow);
-    z5chart.setAttribute('aria-valuetext',`${dNow} m; p = ${pointP.toFixed(1)} MPa; ρ = ${pointRho.toFixed(1)} kg/m³`);
+    const state=MF1.ocean(currentDepth),x=currentDepth/1000;
+    const pressure=MF1.plot({height:320,x:[0,10],y:[0,110],title:'Tlak u stlačivoj vodi',xlabel:'dubina h [km]',ylabel:'apsolutni tlak p [MPa]',curves:[{fn:h=>MF1.ocean(h*1000).pressure/1e6}],points:[{x,y:state.pressure/1e6}],note:'p = p₀ − K ln(1 − ρ₀gh/K) · p₀ = 0,10 MPa'});
+    const density=MF1.plot({height:320,x:[0,10],y:[1025,1075],title:'Gustoća istog fluida',xlabel:'dubina h [km]',ylabel:'gustoća ρ [kg/m³]',curves:[{fn:h=>MF1.ocean(h*1000).density,color:'#bc5734'}],points:[{x,y:state.density}],note:'ρ = ρ₀/(1 − ρ₀gh/K) · K = 2,34 GPa, konstantan'});
+    z5chart.innerHTML='<g>'+pressure.replace('<svg ','<svg x="0" y="0" width="880" height="320" ')+'</g><g>'+density.replace('<svg ','<svg x="0" y="320" width="880" height="320" ')+'</g>';
+    z5chart.setAttribute('aria-valuenow',currentDepth);
+    z5chart.setAttribute('aria-valuetext',currentDepth+' m; p = '+MF1.number(state.pressure/1e6)+' MPa; ρ = '+MF1.number(state.density)+' kg/m³');
   }
   z5chart.tabIndex=0;z5chart.setAttribute('role','slider');z5chart.setAttribute('aria-label','Dubina sonde na grafu tlaka i gustoće');z5chart.setAttribute('aria-valuemin','0');z5chart.setAttribute('aria-valuemax','10000');
   function setChartDepth(d){z5dS.value=Math.round(Math.max(0,Math.min(10000,d))/100)*100;z5dS.dispatchEvent(new Event('input',{bubbles:true}));}
-  z5chart.addEventListener('pointerdown',e=>{const box=z5chart.getBoundingClientRect(),x=(e.clientX-box.left)*z5chart.width/box.width;setChartDepth((x-36)/(z5chart.width-64)*10000);});
+  z5chart.addEventListener('pointerdown',e=>{const box=z5chart.getBoundingClientRect(),x=(e.clientX-box.left)*880/box.width;setChartDepth((x-85)/765*10000);});
   z5chart.addEventListener('keydown',e=>{const d=+z5dS.value,next={ArrowLeft:d-100,ArrowDown:d-100,ArrowRight:d+100,ArrowUp:d+100,Home:0,End:10000}[e.key];if(next!==undefined){e.preventDefault();setChartDepth(next);}});
   z5dS.oninput = updateZ5;
   updateZ5();

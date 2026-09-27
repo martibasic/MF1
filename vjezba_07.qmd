@@ -75,7 +75,7 @@ Zbog odabrane osi $F_z<0$ znači silu prema gore, pa je $F_U=|F_z|=\rho gV_{\tex
       cy = y + Z * s;
     x.clearRect(0, 0, c.width, c.height);
     x.save();
-    x.scale(c.width / W, c.height / H);
+    MF1.fitCanvas(c,x,W,H);
     x.fillStyle = "#dff2f9";
     x.fillRect(45, y, 610, H - y);
     x.strokeStyle = "#147b9a";
@@ -91,6 +91,7 @@ Zbog odabrane osi $F_z<0$ znači silu prema gore, pa je $F_U=|F_z|=\rho gV_{\tex
     x.lineWidth = 2;
     x.stroke();
     x.fillStyle = "#17324d";
+    x.font = "600 14px system-ui";
     x.fillText("C", cx + 8, cy - 8);
     let aa =
       k === 3 ? [20, 60, 120, 160, 200, 240, 300, 340] : [15, 45, 75, 105, 135, 165, 195, 225, 255, 285, 315, 345];
@@ -242,7 +243,7 @@ $F_H$ djeluje malo ispod C, a $F_V$ prolazi lijevo od C. Njihovi se pravci sijek
     const px = cx + model.xFV * scale;
     const py = waterY + model.zFH * scale;
 
-    ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+    MF1.fitCanvas(canvas,ctx,W,H);
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = "#dff2f9";
     ctx.fillRect(48, waterY, cx - 48, H - waterY);
@@ -366,7 +367,7 @@ Numerički zbroj čuva predznake sila, pa radi i kada luk prijeđe krajnje polo�
 <div class="widget-label">Interaktivni prikaz</div>
 
 ```{=html}
-<div id="v7-widget-a-container" class="v7 mf1-lab"><div class="v7b"><div class="v7h"><h4>Opći kružni luk</h4><p>Numerička i analitička integracija potpisanih komponenti; voda ima ρ = 1000 kg/m³.</p></div><div class="v7s"><canvas id="ac" width="920" height="590" aria-label="Opći uronjeni kružni luk s lokalnim tlakovima i rezultantom"></canvas><p class="v7c">Tanka kružnica je referenca, a tamni luk opterećena ploha. F<sub>R</sub> prolazi kroz C.</p></div><div class="v7p"><button data-p="q">Donja četvrtina</button><button data-p="l">Lijeva polukružnica</button><button data-p="d">Desna polukružnica</button><button data-p="f">Puni cilindar</button></div><div class="v7x"><label>Početni kut α<sub>1</sub> <span class="v7r" id="a1r"></span><input id="a1" type="range" min="0" max="330" step="5" value="0"></label><label>Raspon Δα <span class="v7r" id="asr"></span><input id="as" type="range" min="30" max="360" step="5" value="90"></label><label>Dubina centra z<sub>C</sub> <span class="v7r" id="azr"></span><input id="az" type="range" min="0.7" max="5" step=".1" value="3"></label><label>Polumjer R <span class="v7r" id="arr"></span><input id="ar" type="range" min=".5" max="1.5" step=".1" value="1"></label><label>Duljina b <span class="v7r" id="abr"></span><input id="ab" type="range" min=".5" max="3" step=".1" value="1"></label></div><div class="v7o"><div><span>F<sub>x</sub> (potpisano)</span><strong id="afx"></strong></div><div><span>F<sub>z</sub> (potpisano)</span><strong id="afz"></strong></div><div><span>F<sub>R</sub></span><strong id="afr"></strong></div><div><span>Broj elemenata N</span><strong id="an"></strong></div></div><div class="v7e" id="ae"></div><p class="v7n" id="anote"></p></div></div>
+<div id="v7-widget-a-container" class="v7 mf1-lab"><div class="v7b"><div class="v7h"><h4>Opći kružni luk</h4><p>Integracija tlaka po mokrom dijelu luka; voda ima ρ = 1000 kg/m³. Istraži i presijecanje slobodne površine.</p></div><div class="v7s"><canvas id="ac" width="920" height="590" aria-label="Opći uronjeni kružni luk s lokalnim tlakovima i rezultantom"></canvas><p class="v7c">Tanka kružnica je referenca, a tamni luk opterećena ploha. F<sub>R</sub> prolazi kroz C.</p></div><div class="v7p"><button data-p="q">Donja četvrtina</button><button data-p="l">Lijeva polukružnica</button><button data-p="d">Desna polukružnica</button><button data-p="f">Puni cilindar</button></div><div class="v7x"><label>Početni kut α<sub>1</sub> <span class="v7r" id="a1r"></span><input id="a1" type="range" min="0" max="330" step="5" value="0"></label><label>Raspon Δα <span class="v7r" id="asr"></span><input id="as" type="range" min="30" max="360" step="5" value="90"></label><label>Dubina centra z<sub>C</sub> <span class="v7r" id="azr"></span><input id="az" type="range" min="-1.5" max="5" step=".1" value="3"></label><label>Polumjer R <span class="v7r" id="arr"></span><input id="ar" type="range" min=".5" max="1.5" step=".1" value="1"></label><label>Duljina b <span class="v7r" id="abr"></span><input id="ab" type="range" min=".5" max="3" step=".1" value="1"></label></div><div class="v7o"><div><span>F<sub>x</sub> (potpisano)</span><strong id="afx"></strong></div><div><span>F<sub>z</sub> (potpisano)</span><strong id="afz"></strong></div><div><span>F<sub>R</sub></span><strong id="afr"></strong></div><div><span>Broj elemenata N</span><strong id="an"></strong></div></div><div class="v7e" id="ae"></div><p class="v7n" id="anote"></p></div></div>
 <script>
 (() => {
   const root = document.getElementById("v7-widget-a-container");
@@ -386,47 +387,13 @@ Numerički zbroj čuva predznake sila, pa radi i kada luk prijeđe krajnje polo�
     value.toLocaleString("hr-HR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
   function readState() {
-    const R = +controls.R.value;
-    const minimumDepth = R + epsilon;
-    controls.zC.min = minimumDepth.toFixed(1);
-    if (+controls.zC.value < minimumDepth) controls.zC.value = minimumDepth.toFixed(1);
-    return {
-      a1: +controls.a1.value,
-      span: +controls.span.value,
-      zC: +controls.zC.value,
-      R,
-      b: +controls.b.value,
-      minimumDepth,
-    };
+    return {a1:+controls.a1.value,span:+controls.span.value,zC:+controls.zC.value,R:+controls.R.value,b:+controls.b.value};
   }
-
   function calculateForces(state) {
-    const theta1 = state.a1 * radians;
-    const theta2 = (state.a1 + state.span) * radians;
-    const N = Math.max(360, Math.ceil(state.span * 4));
-    const dTheta = (theta2 - theta1) / N;
-    let fxNumerical = 0,
-      fzNumerical = 0;
-    for (let index = 0; index < N; index += 1) {
-      const theta = theta1 + (index + 0.5) * dTheta;
-      const pressure = rho * g * (state.zC + state.R * Math.sin(theta));
-      const dA = state.b * state.R * dTheta;
-      fxNumerical -= pressure * Math.cos(theta) * dA;
-      fzNumerical -= pressure * Math.sin(theta) * dA;
-    }
-    fxNumerical /= 1000;
-    fzNumerical /= 1000;
-
-    const integralX = (theta) => state.zC * Math.sin(theta) + (state.R * Math.sin(theta) ** 2) / 2;
-    const integralZ = (theta) => -state.zC * Math.cos(theta) + state.R * (theta / 2 - Math.sin(2 * theta) / 4);
-    const factor = (-rho * g * state.b * state.R) / 1000;
-    const fxAnalytical = factor * (integralX(theta2) - integralX(theta1));
-    const fzAnalytical = factor * (integralZ(theta2) - integralZ(theta1));
-    const FR = Math.hypot(fxNumerical, fzNumerical);
-    const error =
-      (100 * Math.hypot(fxNumerical - fxAnalytical, fzNumerical - fzAnalytical)) /
-      Math.max(1e-12, Math.hypot(fxAnalytical, fzAnalytical));
-    return { ...state, theta1, theta2, N, fxNumerical, fzNumerical, fxAnalytical, fzAnalytical, FR, error };
+    const theta1=state.a1*radians,theta2=(state.a1+state.span)*radians;
+    const m=MF1.arcPressure({...state,start:theta1,span:state.span*radians});
+    return {...state,theta1,theta2,N:m.elements,fxNumerical:m.numericalX/1000,fzNumerical:m.numericalZ/1000,
+      fxAnalytical:m.fx/1000,fzAnalytical:m.fz/1000,FR:m.force/1000,error:m.force>1e-9?100*m.error/m.force:0,wetAngle:m.wetAngle};
   }
 
   function arrow(x1, y1, x2, y2, color, width = 3, label = "") {
@@ -452,56 +419,37 @@ Numerički zbroj čuva predznake sila, pa radi i kada luk prijeđe krajnje polo�
   }
 
   function drawScene(model) {
-    const W = 720,
-      H = 460,
-      waterY = 48;
-    const scale = Math.min(92, 275 / (model.zC + model.R));
-    const cx = 350,
-      cy = waterY + model.zC * scale,
-      radius = model.R * scale;
-    ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = "#dff2f9";
-    ctx.fillRect(42, waterY, 636, H - waterY);
-    ctx.strokeStyle = "#147b9a";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(42, waterY);
-    ctx.lineTo(678, waterY);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-    ctx.strokeStyle = "#9aabb6";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, model.theta1, model.theta2);
-    ctx.strokeStyle = "#17324d";
-    ctx.lineWidth = 5;
-    ctx.stroke();
-    ctx.fillStyle = "#17324d";
-    ctx.font = "700 14px system-ui";
-    ctx.fillText("C", cx + 8, cy - 8);
-    for (let index = 0; index < 10; index += 1) {
-      const theta = model.theta1 + ((index + 0.5) * (model.theta2 - model.theta1)) / 10;
-      const nx = Math.cos(theta),
-        ny = Math.sin(theta);
-      const len=40*(model.zC+model.R*ny)/(model.zC+model.R);arrow(cx+radius*nx,cy+radius*ny,cx+(radius-len)*nx,cy+(radius-len)*ny,"#1986a8",2);
+    const W=720,H=490,scale=Math.min(82,290/(Math.abs(model.zC)+2*model.R)),radius=model.R*scale;
+    const waterY=60+Math.max(0,model.R-model.zC)*scale,cx=355,cy=waterY+model.zC*scale;
+    MF1.fitCanvas(canvas,ctx,W,H);
+    const water=ctx.createLinearGradient(0,waterY,0,H);water.addColorStop(0,'#e4f5fc');water.addColorStop(1,'#8ecde5');
+    ctx.fillStyle=water;ctx.fillRect(45,waterY,630,Math.max(0,H-65-waterY));
+    ctx.strokeStyle='#1286ad';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(45,waterY);ctx.lineTo(675,waterY);ctx.stroke();
+    ctx.font='14px system-ui';ctx.fillStyle='#2d5970';ctx.fillText('slobodna površina · p = 0 (manometarski)',48,waterY-12);
+    ctx.setLineDash([4,4]);ctx.strokeStyle='#9aabb6';ctx.beginPath();ctx.arc(cx,cy,radius,0,2*Math.PI);ctx.stroke();ctx.setLineDash([]);
+    for(let i=0;i<180;i++){
+      const a=model.theta1+(model.theta2-model.theta1)*i/180,b=model.theta1+(model.theta2-model.theta1)*(i+1)/180;
+      ctx.strokeStyle=model.zC+model.R*Math.sin((a+b)/2)>0?'#17324d':'#a8b6c1';ctx.lineWidth=5;ctx.beginPath();ctx.arc(cx,cy,radius,a,b);ctx.stroke();
     }
-    if (model.FR > 0.01) {
-      const vectorScale = 90 / Math.max(Math.abs(model.fxNumerical), Math.abs(model.fzNumerical), 1);
-      const vx = cx - model.fxNumerical * vectorScale,
-        vy = cy - model.fzNumerical * vectorScale;
-      arrow(vx, vy, cx, vy, "#0b7898", 3, "Fₓ");
-      arrow(cx, vy, cx, cy, "#198754", 3, "F_z");
-      arrow(vx, vy, cx, cy, "#c73c42", 4, "Fᵣ");
+    for(let i=0;i<15;i++){
+      const a=model.theta1+(i+.5)*(model.theta2-model.theta1)/15,depth=Math.max(0,model.zC+model.R*Math.sin(a));
+      const len=42*depth/Math.max(.01,model.zC+model.R),px=cx+radius*Math.cos(a),py=cy+radius*Math.sin(a);
+      MF1.arrow(ctx,px,py,-len*Math.cos(a),-len*Math.sin(a),'#087eab','',1.8);
     }
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle='#17324d';ctx.fillText('C',cx+8,cy-9);ctx.beginPath();ctx.arc(cx,cy,3,0,2*Math.PI);ctx.fill();
+    // Free vectors in a separate construction, all using one scale.
+    const ox=135,oy=415,vs=65/Math.max(Math.abs(model.fxAnalytical),Math.abs(model.fzAnalytical),.001),dx=model.fxAnalytical*vs,dy=model.fzAnalytical*vs;
+    MF1.arrow(ctx,ox,oy,dx,0,'#087eab','F_x');MF1.arrow(ctx,ox+dx,oy,0,dy,'#168361','F_z');MF1.arrow(ctx,ox,oy,dx,dy,'#c64442','F_R');
+    if(model.FR>1e-8){MF1.arrow(ctx,cx,cy,dx,dy,'#c64442','');}
+    ctx.fillStyle='#40596b';ctx.font='13px system-ui';ctx.fillText('Vektorski zbroj · +x →, +z ↓',240,410);
+    ctx.fillText('Mokri luk: '+MF1.number(model.wetAngle*180/Math.PI)+'° · suhi dio bez tlakovnog opterećenja',240,432);
+    ctx.fillText('Sile u zajedničkom mjerilu; lokalne strelice u mjerilu tlaka.',45,477);
+    ctx.setTransform(1,0,0,1,0,0);
   }
 
   function renderOutputs(model) {
     const signed = (value, positiveDirection, negativeDirection) =>
-      `${value >= 0 ? "+" : "−"}${format(Math.abs(value), 1)} kN ${value >= 0 ? positiveDirection : negativeDirection}`;
+      Math.abs(value)<1e-8 ? '0,0 kN' : `${value >= 0 ? "+" : "−"}${format(Math.abs(value), 1)} kN ${value >= 0 ? positiveDirection : negativeDirection}`;
     byId("a1r").textContent = `${format(model.a1, 0)}°`;
     byId("asr").textContent = `${format(model.span, 0)}°`;
     byId("azr").textContent = `${format(model.zC)} m`;
@@ -514,11 +462,12 @@ Numerički zbroj čuva predznake sila, pa radi i kada luk prijeđe krajnje polo�
     byId("ae").innerHTML =
       `Numerički: F<sub>x</sub> = Σ[−ρgz(θ)bR cosθ Δθ], F<sub>z</sub> = Σ[−ρgz(θ)bR sinθ Δθ]. Analitički: F<sub>x</sub> = ${format(model.fxAnalytical)} kN, F<sub>z</sub> = ${format(model.fzAnalytical)} kN. Relativna pogreška numeričkog zbroja iznosi ${format(model.error, 3)} %.`;
     byId("anote").innerHTML =
-      `Osi su +x udesno i +z prema dolje. Widget pretpostavlja da je cijela referentna kružnica uronjena: z<sub>C</sub> ≥ R + ε, gdje je ε = ${format(epsilon)} m. Zato su svi odabrani lukovi potpuno mokri. Za inženjerske magnitude vrijedi F<sub>H</sub> = |F<sub>x</sub>| i F<sub>V</sub> = |F<sub>z</sub>|, uz smjer iz predznaka.`;
+      `Osi su +x udesno i +z prema dolje. p(θ) = ρg max(0, z<sub>C</sub> + R sinθ). Integral se dijeli na sjecištima s vodnom plohom; suhi dio ne doprinosi. Jednaki atmosferski tlakovi s obje strane se poništavaju. Pravac rezultante prolazi kroz C; F<sub>H</sub> = |F<sub>x</sub>|, F<sub>V</sub> = |F<sub>z</sub>|.`;
   }
 
   function update() {
     const model = calculateForces(readState());
+    root.mf1ArcState=model;
     drawScene(model);
     renderOutputs(model);
   }

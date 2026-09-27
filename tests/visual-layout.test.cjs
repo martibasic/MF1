@@ -10,7 +10,7 @@ test('Every live drawing has a full-width path through its widget, including mod
    function check(){
     for(const root of a.w.document.querySelectorAll('.mf1-compact')){
      for(const graphic of root.querySelectorAll('canvas,svg')){
-      if(!a.visible(graphic)||graphic.closest('mjx-container'))continue;
+      if(!a.visible(graphic)||graphic.closest('mjx-container')||graphic.parentElement.closest('svg'))continue;
       assert.ok(graphic.classList.contains('mf1-graphic'),`V${n}: undecorated ${graphic.id}`);
       for(let branch=graphic;branch!==root;branch=branch.parentElement){
        const css=a.w.getComputedStyle(branch),parent=branch.parentElement;

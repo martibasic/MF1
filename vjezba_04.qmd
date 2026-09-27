@@ -373,7 +373,7 @@ window.MF1V4.prepareCanvas = function(canvas, ctx, logicalWidth, logicalHeight) 
         canvas.width = width;
         canvas.height = height;
     }
-    ctx.setTransform(width / logicalWidth, 0, 0, height / logicalHeight, 0, 0);
+    MF1.fitCanvas(canvas, ctx, logicalWidth, logicalHeight);
     ctx.imageSmoothingEnabled = true;
 };
 </script>
@@ -1030,6 +1030,17 @@ Spremnik rotira oko svoje osi i ubrzava vertikalno. Potrebno je odrediti razlike
         ctx.fillRect(ox + r_px, oy + z_px, Math.min(step,dw-r_px), Math.min(step,dh-z_px));
       }
     }
+    // Curves p = const are exact intersections of the pressure potential.
+    const pmax=rho*(g+a)*H+rho*w*w*R*R/2;
+    ctx.save();ctx.beginPath();ctx.rect(ox,oy,dw,dh);ctx.clip();ctx.strokeStyle='#ffffffbb';ctx.lineWidth=1.5;
+    for(const fraction of [.2,.4,.6,.8]){ctx.beginPath();for(let i=0;i<=150;i++){
+      const r=i/150*R,z=(fraction*pmax/rho-w*w*r*r/2)/(g+a),x=ox+dw*r/R,y=oy+dh*z/H;
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }ctx.stroke();}ctx.restore();
+    ctx.font='13px system-ui';ctx.fillStyle='#40596b';
+    for(const f of [0,.5,1]){ctx.fillText(MF1.number(f*R),ox+dw*f-4,oy+dh+22);ctx.fillText(MF1.number(f*H),ox-38,oy+dh*f+5);}
+    ctx.fillText('r [m]',ox+dw+10,oy+dh+22);ctx.fillText('dubina [m]',ox-35,oy-40);
+    ctx.fillText('Izobare: 20, 40, 60 i 80 % raspona tlaka',ox,oy+dh+125);
     ctx.strokeStyle = "#2d3748";
     ctx.lineWidth = 3;
     ctx.strokeRect(ox, oy, dw, dh);

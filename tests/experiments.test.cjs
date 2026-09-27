@@ -55,8 +55,9 @@ test('Ocean graph pointer and keyboard selection updates the same depth, pressur
  const a=load(1);a.frames(2);
  try{
   const chart=a.w.document.getElementById('z5-chart'),depth=a.w.document.getElementById('z5-depth');
+  chart.getBoundingClientRect=()=>({left:0,top:0,width:880,height:640});
   chart.dispatchEvent(new a.w.KeyboardEvent('keydown',{key:'End',bubbles:true}));assert.equal(depth.value,'10000');
-  chart.dispatchEvent(new a.w.MouseEvent('pointerdown',{clientX:174,bubbles:true}));assert.equal(depth.value,'5000');
+  chart.dispatchEvent(new a.w.MouseEvent('pointerdown',{clientX:467.5,bubbles:true}));assert.equal(depth.value,'5000');
   const expected=1025/(1-1025*9.81*5000/2.34e9);close(+a.w.document.getElementById('z5-res-rho').textContent,expected,.0001);
   assert.equal(chart.getAttribute('aria-valuenow'),'5000');assert.deepEqual(a.errors,[]);
  }finally{a.dom.window.close();}

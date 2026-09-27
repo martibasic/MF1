@@ -1462,43 +1462,22 @@ Sila je integral tlaka po površini: $F = \int p \, dA$. Ovaj widget vizualizira
   const ctx = canvas.getContext("2d");
   const slider = document.getElementById("v5-int-p-slider");
   function draw() {
-    window.MF1V5.prepareCanvas(canvas, ctx, 450, 400);
-    const count = parseInt(slider.value);
-    document.getElementById("v5-int-p-count").innerText = count + " elemenata";
-    ctx.clearRect(0, 0, 450, 400);
-    const h = 280,
-      w = 50,
-      ox = 60,
-      oy = 60,
-      dz = h / count;
-    const hM = 3,
-      bM = 2,
-      rho = 1000,
-      g = 9.81,
-      dzM = hM / count;
-    let FN = 0,
-      MN = 0;
-    ctx.fillStyle = "#f1f5f9";
-    ctx.fillRect(ox, oy, w, h);
-    for (let i = 0; i < count; i++) {
-      let z = (i + 0.5) * dz;
-      let p_scaled = (z / h) * 250;
-      ctx.fillStyle = "rgba(56, 189, 248, 0.3)";
-      ctx.fillRect(ox + w + 2, oy + i * dz + 1, p_scaled, Math.max(.5,dz-1));
-      const zM = (i + 0.5) * dzM;
-      const dF = rho * g * zM * bM * dzM;
-      FN += dF;
-      MN += zM * dF;
-    }
-    const zFN = MN / FN;
-    const FExact = (rho * g * bM * hM * hM) / 2;
-    const zFExact = (2 * hM) / 3;
-    document.getElementById("v5-int-p-results").innerHTML =
-      `Za svaku traku: <strong>ΔFᵢ = ρgzᵢbΔz</strong><br>F_N = ${(FN / 1000).toFixed(3)} kN; F = ${(FExact / 1000).toFixed(3)} kN<br>pogreška = ${((100 * (FN - FExact)) / FExact).toFixed(2)} %<br>z<sub>F,N</sub> = <span id="v5-int-p-zf">${zFN.toFixed(3)}</span> m; z<sub>F</sub> = ${zFExact.toFixed(3)} m`;
-    ctx.fillStyle='#334155';ctx.font='12px system-ui';ctx.fillText('Pravokutnik: h = 3 m, b = 2 m, a = 0',40,25);ctx.fillText('p [kPa]: 0                 29,43',110,365);ctx.fillText('z [m] ↓',10,48);ctx.fillStyle = "#ef4444";
-    ctx.beginPath();
-    ctx.arc(ox + w / 2, oy + (zFExact / hM) * h, 7, 0, 7);
-    ctx.fill();
+    window.MF1V5.prepareCanvas(canvas,ctx,650,460);ctx.clearRect(0,0,650,460);
+    const N=+slider.value,h=3,b=2,rho=1000,m=MF1.hydrostaticStrips(h,b,rho,N),pmax=rho*9.81*h/1000;
+    const axes=MF1.canvasAxes(ctx,{left:120,top:75,width:310,height:280,x:[0,32],y:[0,3],down:true,xlabel:'pretlak p [kPa]',ylabel:'dubina z [m] ↓'});
+    for(let i=0;i<N;i++){const z=(i+.5)*h/N,y=axes.py(i*h/N),end=axes.px(rho*9.81*z/1000);ctx.fillStyle='#85cce999';ctx.fillRect(120,y,end-120,280/N-0.6);}
+    ctx.strokeStyle='#087eab';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(120,75);ctx.lineTo(axes.px(pmax),355);ctx.stroke();
+    ctx.strokeStyle='#bc5734';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(75,axes.py(m.exactCenter));ctx.lineTo(450,axes.py(m.exactCenter));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#bc5734';ctx.beginPath();ctx.arc(88,axes.py(m.exactCenter),6,0,2*Math.PI);ctx.fill();
+    ctx.strokeStyle='#168361';ctx.lineWidth=2;ctx.strokeRect(58,axes.py(m.center)-5,10,10);
+    ctx.fillStyle='#17324d';ctx.font='bold 17px system-ui';ctx.fillText('Od lokalnog tlaka do rezultante',45,28);
+    ctx.font='13px system-ui';ctx.fillText('Pravokutnik: h = 3 m, b = 2 m · metoda srednjih točaka',45,51);
+    ctx.fillStyle='#bc5734';ctx.fillText('● točan centar',465,120);ctx.fillStyle='#168361';ctx.fillText('□ numerički centar',465,145);
+    ctx.fillStyle='#40596b';ctx.fillText('Sila je površina dijagrama × b. Moment određuje hvatište.',45,425);
+    ctx.fillText('F je ovdje točan za svaki N; pogreška hvatišta pada kao 1/N².',45,446);
+    document.getElementById('v5-int-p-count').textContent=N+' elemenata';
+    document.getElementById('v5-int-p-results').innerHTML='ΔFᵢ = ρgzᵢbΔz; M = ΣzᵢΔFᵢ; zF = M/F<br>F = '+MF1.number(m.force/1000)+' kN · z<sub>F,N</sub> = <span id="v5-int-p-zf">'+m.center.toFixed(4)+'</span> m · z<sub>F</sub> = 2,0000 m<br>Pogreška hvatišta: '+MF1.number(1000*(m.center-m.exactCenter))+' mm. Udvostručenje N smanjuje je četiri puta.';
+    document.getElementById('v5-integration-premium').mf1IntegrationState=m;
   }
   slider.oninput = draw;
   window.addEventListener("resize", draw);

@@ -594,7 +594,20 @@ Ovdje je $K_c$ indeks konzistencije; nije volumenski modul iz Vježbe 1.
 <div class="v2nn-grid"><svg id="v2nn-plot" viewBox="0 0 620 280" role="img" aria-label="Graf smičnog naprezanja prema brzini smicanja"></svg><div class="v2nn-side"><label for="v2nn-rate">Brzina smicanja $\dot\gamma$: <output id="v2nn-rate-value">60</output> s⁻¹</label><input id="v2nn-rate" type="range" min="1" max="120" step="1" value="60"><small>Trenutačni odgovor</small><strong id="v2nn-primary">τ = 6,00 Pa</strong><div class="v2nn-note" id="v2nn-note"></div></div></div>
 </div>
 <script>
-(() => { const root=document.getElementById('v2-nn-explorer'); if(!root||root.dataset.ready)return; root.dataset.ready='1'; const plot=root.querySelector('#v2nn-plot'),rate=root.querySelector('#v2nn-rate'),out=root.querySelector('#v2nn-rate-value'),primary=root.querySelector('#v2nn-primary'),note=root.querySelector('#v2nn-note'); const models={newton:{n:1,K:.10,label:'Newtonski fluid: τ je proporcionalan s γ̇, pa je μ = τ/γ̇ stalna.'},thin:{n:.58,K:.32,label:'Shear-thinning: s rastom γ̇ prividna viskoznost pada, pa se krivulja izravnava.'},thick:{n:1.45,K:.012,label:'Shear-thickening: s rastom γ̇ prividna viskoznost raste, pa krivulja postaje strmija.'}}; let kind='newton'; const fmt=(n,d=2)=>Number(n).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}); function render(){const m=models[kind],g=+rate.value,tau=m.K*Math.pow(g,m.n),muApp=tau/g,maxTau=Math.max(...Array.from({length:121},(_,i)=>m.K*Math.pow(i+1,m.n)));let path='';for(let x=1;x<=120;x+=2){const px=62+x/120*520,py=230-(m.K*Math.pow(x,m.n)/maxTau)*176;path+=(x===1?'M':'L')+px.toFixed(1)+' '+py.toFixed(1)+' ';}const mx=62+g/120*520,my=230-(tau/maxTau)*176;plot.innerHTML=`<rect width="620" height="280" fill="#fff"/><path d="M62 28V230H582" fill="none" stroke="#64748b" stroke-width="2"/><text x="18" y="34" fill="#475569" font-size="15" font-weight="700">τ [Pa]</text><text x="483" y="264" fill="#475569" font-size="15" font-weight="700">γ̇ [s⁻¹]</text><path d="${path}" fill="none" stroke="#126987" stroke-width="5" stroke-linecap="round"/><path d="M${mx} 230V${my}M62 ${my}H${mx}" stroke="#93c5fd" stroke-width="2" stroke-dasharray="6 5"/><circle cx="${mx}" cy="${my}" r="7" fill="#ea580c" stroke="#fff" stroke-width="3"/><text x="${Math.min(mx+10,500)}" y="${Math.max(my-10,25)}" fill="#9a3412" font-size="15" font-weight="800">(${fmt(g,0)}, ${fmt(tau)})</text><text x="76" y="54" fill="#126987" font-size="15" font-weight="800">τ = K₍c₎ γ̇ⁿ, n = ${fmt(m.n,2)}</text>`;out.textContent=fmt(g,0);primary.textContent='τ = '+fmt(tau)+' Pa';note.textContent=m.label+' Ovdje je μ_app = '+fmt(muApp,3)+' Pa·s.';} root.querySelectorAll('[data-v2nn]').forEach(button=>button.addEventListener('click',()=>{kind=button.dataset.v2nn;root.querySelectorAll('[data-v2nn]').forEach(x=>x.setAttribute('aria-pressed',String(x===button)));render()}));rate.addEventListener('input',render);render(); })();
+(() => {
+ const root=document.getElementById('v2-nn-explorer'),rate=root.querySelector('#v2nn-rate');
+ const models={newton:{n:1,K:.10,label:'Newtonski: stalna viskoznost.'},thin:{n:.58,K:.32,label:'Pseudoplastični: prividna viskoznost opada.'},thick:{n:1.45,K:.012,label:'Dilatantni: prividna viskoznost raste.'}};
+ let kind='newton';
+ function render(){
+  const m=models[kind],r=+rate.value,state=MF1.powerLaw(r,m.K,m.n);
+  MF1.renderPlot(root.querySelector('#v2nn-plot'),{x:[0,120],y:[0,14],title:'Potencijski zakon: τ = K γ̇ⁿ',xlabel:'brzina smicanja γ̇ [s⁻¹]',ylabel:'smično naprezanje τ [Pa]',curves:[{fn:x=>.1*x,color:'#8e9faf',dash:'6 5'},{fn:x=>MF1.powerLaw(x,m.K,m.n).stress}],points:[{x:r,y:state.stress}],note:'Puna linija: odabrani model · isprekidano: μ = 0,10 Pa·s · iste osi za sve modele'});
+  root.querySelector('#v2nn-rate-value').textContent=MF1.number(r);
+  root.querySelector('#v2nn-primary').textContent='τ = '+MF1.number(state.stress)+' Pa';
+  root.querySelector('#v2nn-note').textContent=m.label+' K = '+MF1.number(m.K)+' Pa·sⁿ; n = '+MF1.number(m.n)+'. μₐ = τ/γ̇ = '+MF1.number(state.apparent)+' Pa·s. Potencijski zakon vrijedi u promatranom rasponu smicanja.';
+ }
+ root.querySelectorAll('[data-v2nn]').forEach(button=>button.addEventListener('click',()=>{kind=button.dataset.v2nn;root.querySelectorAll('[data-v2nn]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();}));
+ rate.addEventListener('input',render);render();
+})();
 </script>
 ```
 
@@ -2995,45 +3008,17 @@ $$\mathbf{\bar{\rho}_u = 0,911}$$
     ctxT.fillStyle = "#ef4444";
     ctxT.fillText(`z = ${probeZ.toFixed(1)} m`, 182, py - 8);
 
-    ctxG.clearRect(0, 0, cGraph.width, cGraph.height);
-    ctxG.fillStyle = "#ffffff";
-    ctxG.fillRect(0, 0, cGraph.width, cGraph.height);
-    const padX = 58;
-    const padY = 24;
-    const maxP = patm + layers.reduce((p,l)=>p+l.r*9.81*l.h,0) * 1.08;
-    const scaleX = (cGraph.width - padX - 24) / (maxP - patm);
-    ctxG.strokeStyle = "#cbd5e1";
-    ctxG.beginPath();
-    ctxG.moveTo(padX, padY);
-    ctxG.lineTo(padX, padY + totalH * scaleY);
-    ctxG.lineTo(cGraph.width - 20, padY + totalH * scaleY);
-    ctxG.stroke();
+    ctxG.clearRect(0,0,cGraph.width,cGraph.height);
+    const maxP=patm+layers.reduce((p,l)=>p+l.r*9.81*l.h,0);
+    const axes=MF1.canvasAxes(ctxG,{left:70,top:58,width:420,height:315,x:[patm,maxP*1.03],y:[0,totalH],down:true,xlabel:'apsolutni tlak p [kPa]',ylabel:'dubina z [m] ↓'});
+    let z=0,p=patm;
+    for(const layer of layers){const nextP=p+layer.r*9.81*layer.h;
+      ctxG.strokeStyle=layer.color;ctxG.lineWidth=4;ctxG.beginPath();ctxG.moveTo(axes.px(p),axes.py(z));ctxG.lineTo(axes.px(nextP),axes.py(z+layer.h));ctxG.stroke();z+=layer.h;p=nextP;
+    }
+    ctxG.fillStyle='#b93645';ctxG.beginPath();ctxG.arc(axes.px(probeP),axes.py(probeZ),5,0,2*Math.PI);ctxG.fill();
+    ctxG.font='bold 14px system-ui';ctxG.fillStyle='#17324d';ctxG.fillText('Spojit tlak; nagib se mijenja na sučeljima',70,24);
+    ctxG.font='12px system-ui';ctxG.fillText('Na površini p = '+MF1.number(patm)+' kPa; dp/dz = ρg.',70,435);
 
-    let curZ = 0;
-    let curP = patm;
-    ctxG.lineWidth = 4;
-    ctxG.beginPath();
-    ctxG.moveTo(padX, padY);
-    layers.forEach((layer) => {
-      const nextZ = curZ + layer.h;
-      const nextP = curP + (layer.r * 1000 * 9.81 * layer.h) / 1000;
-      ctxG.strokeStyle = layer.color;
-      ctxG.lineTo(padX + (nextP - patm) * scaleX, padY + nextZ * scaleY);
-      ctxG.stroke();
-      ctxG.beginPath();
-      ctxG.moveTo(padX + (nextP - patm) * scaleX, padY + nextZ * scaleY);
-      curZ = nextZ;
-      curP = nextP;
-    });
-    const gx = padX + (probeP - patm) * scaleX;
-    const gy = padY + probeZ * scaleY;
-    ctxG.fillStyle = "#ef4444";
-    ctxG.beginPath();
-    ctxG.arc(gx, gy, 5, 0, Math.PI * 2);
-    ctxG.fill();
-    ctxG.fillStyle = "#0f172a";
-    ctxG.font = "bold 12px Inter";
-    ctxG.fillText("p(z)", padX + 8, 18);
   }
 
   slRu.addEventListener("input", update);

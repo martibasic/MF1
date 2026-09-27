@@ -306,7 +306,7 @@ Slobodna površina otvorenog, djelomično ispunjenog spremnika ploha je stalnog 
       depth.toFixed(1) +
       " m pretlak je " +
       dp.toFixed(2) +
-      " kPa. Duljine strelica grafički su ograničene, ali njihove oznake ostaju fizikalne.";
+      " kPa. Lokalne strelice imaju zajedničko mjerilo tlaka; graf ima stalne osi.";
     impact1.textContent = "h = " + depth.toFixed(1) + " m, ρ = " + rho.toFixed(0) + " kg/m³";
     impact2.textContent = "dp/dh = ρg";
     impact3.textContent = "tlak raste prema dolje";
@@ -355,37 +355,11 @@ Slobodna površina otvorenog, djelomično ispunjenog spremnika ploha je stalnog 
     ctx.fillText("h = " + depth.toFixed(1) + " m", tx + tw + 16, probeY + 5);
     drawArrow(tx + tw / 2, 105, tx + tw / 2, 175, "#d97706", "g");
 
-    const gx = 555,
-      gy = 292,
-      gw = 270,
-      gh = 225;
-    ctx.strokeStyle = "#334155";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(gx, gy - gh);
-    ctx.lineTo(gx, gy);
-    ctx.lineTo(gx + gw, gy);
-    ctx.stroke();
-    const endX = gx + gw - 20,
-      endY = gy - (rho / 1400) * (gh - 20);
-    ctx.strokeStyle = "#4338ca";
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(gx + 8, gy - 5);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
-    const px = gx + 8 + (depth / 3) * (endX - gx - 8),
-      py = gy - 5 + (depth / 3) * (endY - gy + 5);
-    ctx.fillStyle = "#dc2626";
-    ctx.beginPath();
-    ctx.arc(px, py, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#334155";
-    ctx.font = "800 15px Inter";
-    ctx.fillText("h", gx + gw + 8, gy + 5);
-    ctx.fillText("p", gx - 18, gy - gh - 6);
-    ctx.fillStyle = "#4338ca";
-    ctx.fillText("p(h) = p₀ + ρgh", gx + 70, gy - gh + 22);
+    const axes=MF1.canvasAxes(ctx,{left:575,top:78,width:245,height:212,x:[0,3],y:[0,42],xlabel:'dubina h [m]',ylabel:'pretlak p − p₀ [kPa]'});
+    ctx.strokeStyle='#087eab';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(axes.px(0),axes.py(0));ctx.lineTo(axes.px(3),axes.py(rho*g*3/1000));ctx.stroke();
+    const px=axes.px(depth),py=axes.py(dp);ctx.strokeStyle='#b93645';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(px,axes.py(0));ctx.lineTo(px,py);ctx.lineTo(axes.px(0),py);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#b93645';ctx.beginPath();ctx.arc(px,py,5,0,2*Math.PI);ctx.fill();ctx.font='13px system-ui';ctx.fillText('p − p₀ = ρgh',625,48);
+
   }
 
   function drawManometer(rho2) {
@@ -3589,45 +3563,12 @@ $$\Delta p_{gr} = \frac{8}{3402} \cdot 100 = \mathbf{0,2\%}$$
   }
 
   function drawGraph(points, totalDP) {
-    ctxG.clearRect(0, 0, graphW, graphH);
-    ctxG.fillStyle = "#ffffff";
-    ctxG.fillRect(0, 0, graphW, graphH);
-    const padX = 52;
-    const baseY = 170;
-    const segW = 98;
-    const maxAbs = Math.max(6, ...points.map((point) => Math.abs(point.value)));
-    const scaleY = 100 / maxAbs;
-
-    ctxG.strokeStyle = "#cbd5e1";
-    ctxG.setLineDash([6, 5]);
-    ctxG.beginPath();
-    ctxG.moveTo(20, baseY);
-    ctxG.lineTo(graphW - 20, baseY);
-    ctxG.stroke();
-    ctxG.setLineDash([]);
-
-    for (let index = 0; index < points.length - 1; index += 1) {
-      const x1 = padX + index * segW;
-      const x2 = padX + (index + 1) * segW;
-      const y1 = baseY - points[index].value * scaleY;
-      const y2 = baseY - points[index + 1].value * scaleY;
-      ctxG.strokeStyle = points[index + 1].color;
-      ctxG.lineWidth = 4;
-      ctxG.beginPath();
-      ctxG.moveTo(x1, y1);
-      ctxG.lineTo(x2, y2);
-      ctxG.stroke();
-      ctxG.fillStyle = points[index + 1].color;
-      ctxG.beginPath();
-      ctxG.arc(x2, y2, 4.5, 0, Math.PI * 2);
-      ctxG.fill();
-      ctxG.fillStyle = "#475569";
-      ctxG.font = "11px Inter";
-      ctxG.fillText(points[index + 1].name, x1 - 6, 28 + index * 18);
-    }
-    ctxG.fillStyle = "#0f172a";
-    ctxG.font = "bold 12px Inter";
-    ctxG.fillText(`konačno: p₁ - p₂ = ${totalDP.toFixed(2)} kPa`, 52, 24);
+    ctxG.clearRect(0,0,graphW,graphH);
+    const limit=Math.max(6,...points.map(p=>Math.abs(p.value)))*1.12;
+    const axes=MF1.canvasAxes(ctxG,{left:64,top:80,width:405,height:190,x:[0,4],y:[-limit,limit],xlabel:'korak hidrostatskog hoda [1]',ylabel:'p − p₁ [kPa]'});
+    for(let i=1;i<points.length;i++){ctxG.strokeStyle=points[i].color;ctxG.lineWidth=3;ctxG.beginPath();ctxG.moveTo(axes.px(i-1),axes.py(points[i-1].value));ctxG.lineTo(axes.px(i),axes.py(points[i].value));ctxG.stroke();}
+    ctxG.font='bold 14px system-ui';ctxG.fillStyle='#17324d';ctxG.fillText('Kraj hoda: p₂ − p₁ = '+MF1.number(-totalDP)+' kPa',64,24);
+    ctxG.font='12px system-ui';ctxG.fillText('1 voda ↓   2 živa ↑   3 zrak ↑   4 morska voda ↓',64,50);
   }
 
   [slH1, slH2, slH4].forEach((slider) => slider.addEventListener("input", update));

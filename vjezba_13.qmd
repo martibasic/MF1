@@ -53,10 +53,8 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
   $$\lambda = \frac{0{,}25}{\left[\log\!\left(\dfrac{k/D}{3{,}7} + \dfrac{5{,}74}{Re^{0{,}9}}\right)\right]^2}$$
 - **Tipične hrapavosti:** čelik $k \approx 0{,}046\ \text{mm}$; beton $k \approx 0{,}3\!-\!3\ \text{mm}$; glatke plastične cijevi $k \approx 0{,}0015\ \text{mm}$.
 
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
-
 ```{=html}
+<section data-widget-role="intro" data-widget-id="v13-moody-widget">
 <!-- WIDGET: Moodyjev Dijagram -->
 <div id="v13-moody-widget" style="max-width: 1100px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
 <style>
@@ -738,736 +736,132 @@ Jer ova jednadžba zahtijeva iteraciju, Moodyjev dijagram je bio — i još uvij
     update();
 })();
 </script>
-<script type="text/plain">
-        if (ksp > 70)              return 'rough';
-        return 'cb';
-    }
-
-    /* ── Coordinate helpers ── */
-    function xRe(re)     { return P.l + (Math.log10(re) - 3) / 5 * (P.r - P.l); }
-    function yLam(lam)   {
-        var logMin = Math.log10(0.0079), logMax = Math.log10(0.121);
-        return P.t + (logMax - Math.log10(lam)) / (logMax - logMin) * (P.b - P.t);
-    }
-
-    function fmtKd(kd) {
-        if (kd >= 0.01)    return kd.toFixed(3);
-        if (kd >= 0.001)   return kd.toFixed(4);
-        if (kd >= 0.0001)  return kd.toFixed(5);
-        return kd.toExponential(1);
-    }
-    function fmtRe(re) {
-        if (re >= 1e7) return (re/1e7).toFixed(1)+'\xd710\u2077';
-        if (re >= 1e6) return (re/1e6).toFixed(2)+'\xd710\u2076';
-        if (re >= 1e5) return (re/1e5).toFixed(2)+'\xd710\u2075';
-        if (re >= 1e4) return (re/1e4).toFixed(1)+'\xd710\u2074';
-        return re.toFixed(0);
-    }
-
-    /* ── Draw helpers ── */
-    function drawGrid() {
-        /* background */
-        ctx.fillStyle = '#070d1a';
-        ctx.fillRect(0, 0, W, H);
-
-        /* zone fills */
-        ctx.fillStyle = 'rgba(34,197,94,0.09)';
-        ctx.fillRect(P.l, P.t, xRe(2320) - P.l, P.b - P.t);
-        ctx.fillStyle = 'rgba(245,158,11,0.11)';
-        ctx.fillRect(xRe(2320), P.t, xRe(4000) - xRe(2320), P.b - P.t);
-
-        /* zone boundary dashes */
-        ctx.setLineDash([5,5]);
-        ctx.lineWidth = 1.2;
-        ctx.strokeStyle = 'rgba(74,222,128,0.45)';
-        ctx.beginPath(); ctx.moveTo(xRe(2320), P.t); ctx.lineTo(xRe(2320), P.b); ctx.stroke();
-        ctx.strokeStyle = 'rgba(251,191,36,0.55)';
-        ctx.beginPath(); ctx.moveTo(xRe(4000), P.t); ctx.lineTo(xRe(4000), P.b); ctx.stroke();
-        ctx.setLineDash([]);
-
-        /* Re grid */
-        for (var dec = 3; dec <= 8; dec++) {
-            for (var m = 1; m <= 9; m++) {
-                var re = m * Math.pow(10, dec);
-                if (re > 1e8) break;
-                var x = xRe(re);
-                ctx.strokeStyle = m === 1 ? 'rgba(148,163,184,0.28)' : 'rgba(148,163,184,0.09)';
-                ctx.lineWidth   = m === 1 ? 0.9 : 0.5;
-                ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.b); ctx.stroke();
-            }
-        }
-
-        /* λ grid */
-        var lambdaTicks  = [0.008,0.009,0.01,0.012,0.015,0.02,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.12];
-        var lambdaLabels = [0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1];
-        lambdaTicks.forEach(function(t) {
-            if (t < 0.0079 || t > 0.121) return;
-            var y = yLam(t);
-            var major = lambdaLabels.indexOf(t) >= 0;
-            ctx.strokeStyle = major ? 'rgba(148,163,184,0.26)' : 'rgba(148,163,184,0.09)';
-            ctx.lineWidth   = major ? 0.9 : 0.5;
-            ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(P.r, y); ctx.stroke();
-        });
-
-        /* border */
-        ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5;
-        ctx.strokeRect(P.l, P.t, P.r - P.l, P.b - P.t);
-    }
-
-    function drawLabels() {
-        /* Re axis */
-        ctx.textAlign = 'center';
-        for (var dec = 3; dec <= 8; dec++) {
-            var x = xRe(Math.pow(10, dec));
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '600 12px Inter,sans-serif';
-            ctx.fillText('10', x - 7, P.b + 20);
-            ctx.font = '600 9px Inter,sans-serif';
-            ctx.fillText(String(dec), x + 6, P.b + 16);
-        }
-
-        /* λ axis */
-        var lbls = [0.008,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.08,0.1];
-        ctx.textAlign = 'right';
-        ctx.font = '600 11px Inter,sans-serif';
-        lbls.forEach(function(t) {
-            var y = yLam(t);
-            ctx.fillStyle = '#94a3b8';
-            var s = t < 0.01 ? t.toFixed(3) : t < 0.1 ? t.toFixed(2) : t.toFixed(1);
-            ctx.fillText(s, P.l - 7, y + 4);
-        });
-
-        /* axis titles */
-        ctx.fillStyle = '#cbd5e1'; ctx.font = '700 13px Inter,sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('Reynoldsov broj  Re', P.l + (P.r - P.l) / 2, H - 20);
-        ctx.save();
-        ctx.translate(16, P.t + (P.b - P.t) / 2);
-        ctx.rotate(-Math.PI / 2);
-        ctx.fillText('Koeficijent trenja  \u03bb', 0, 0);
-        ctx.restore();
-
-        /* zone labels */
-        ctx.font = '700 11px Inter,sans-serif'; ctx.textAlign = 'center';
-        var lw = xRe(2320) - P.l;
-        if (lw > 20) { ctx.fillStyle = 'rgba(74,222,128,0.90)'; ctx.fillText('LAM.', P.l + lw/2, P.t + 17); }
-        var tw = xRe(4000) - xRe(2320);
-        if (tw > 15) { ctx.fillStyle = 'rgba(251,191,36,0.90)'; ctx.fillText('PRIJ.', xRe(2320) + tw/2, P.t + 17); }
-        ctx.fillStyle = 'rgba(248,113,113,0.82)'; ctx.textAlign = 'left';
-        ctx.fillText('TURBULENTNO', xRe(5500), P.t + 17);
-    }
-
-    function plotCurves() {
-        /* laminar line */
-        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.6; ctx.setLineDash([7,5]);
-        ctx.beginPath();
-        var lamStarted = false;
-        for (var reLam = 700; reLam <= 2330; reLam += 14) {
-            var lam = 64 / reLam;
-            if (lam < 0.0079 || lam > 0.121) continue;
-            var x = xRe(reLam), y = yLam(lam);
-            if (!lamStarted) { ctx.moveTo(x, y); lamStarted = true; } else ctx.lineTo(x, y);
-        }
-        ctx.stroke(); ctx.setLineDash([]);
-
-        /* turbulent curves */
-        KD_CURVES.forEach(function(kd, idx) {
-            ctx.strokeStyle = KD_COLORS[idx];
-            ctx.lineWidth   = kd === 0 ? 2.4 : 1.6;
-            ctx.beginPath();
-            var started = false;
-            var reStart = kd === 0 ? 2320 : 2800;
-            for (var logRe = Math.log10(reStart); logRe <= 8.002; logRe += 0.016) {
-                var re  = Math.pow(10, logRe);
-                var lambda = solveLambda(re, kd === 0 ? 1e-12 : kd);
-                if (lambda < 0.0079 || lambda > 0.121) { started = false; continue; }
-                var xc = xRe(re), yc = yLam(lambda);
-                if (!started) { ctx.moveTo(xc, yc); started = true; } else ctx.lineTo(xc, yc);
-            }
-            ctx.stroke();
-
-            /* k/D label on right margin */
-            if (kd > 0) {
-                var sRe = 5.5e7;
-                var sL  = solveLambda(sRe, kd);
-                if (sL >= 0.0079 && sL <= 0.121) {
-                    var ly = yLam(sL);
-                    if (ly > P.t + 10 && ly < P.b - 4) {
-                        ctx.save();
-                        ctx.fillStyle = KD_COLORS[idx];
-                        ctx.font = '600 10px Inter,sans-serif';
-                        ctx.textAlign = 'left';
-                        ctx.fillText(fmtKd(kd), P.r + 5, ly + 3);
-                        ctx.restore();
-                    }
-                }
-            }
-        });
-    }
-
-    function drawPoint(re, lam, regime, sub) {
-        var x = xRe(re), y = yLam(lam);
-        var regColor = regime === 'lam' ? '#4ade80' : regime === 'trans' ? '#fbbf24' : '#f87171';
-
-        /* crosshair */
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-        ctx.lineWidth = 1; ctx.setLineDash([5,5]);
-        ctx.beginPath(); ctx.moveTo(x, P.b); ctx.lineTo(x, y); ctx.lineTo(P.l, y); ctx.stroke();
-        ctx.setLineDash([]);
-
-        /* glow */
-        var g = ctx.createRadialGradient(x, y, 0, x, y, 20);
-        g.addColorStop(0, regColor + '55'); g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(x, y, 20, 0, 2*Math.PI); ctx.fill();
-
-        /* dot */
-        ctx.fillStyle = regColor;
-        ctx.beginPath(); ctx.arc(x, y, 7, 0, 2*Math.PI); ctx.fill();
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
-
-        /* annotation bubble */
-        var bx = x + (x > P.r - 140 ? -148 : 14);
-        var by = y + (y < P.t + 54 ? 14 : -46);
-        ctx.fillStyle = 'rgba(7,13,26,0.90)';
-        ctx.beginPath(); ctx.roundRect(bx, by, 136, 40, 7); ctx.fill();
-        ctx.strokeStyle = regColor; ctx.lineWidth = 1.2; ctx.stroke();
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#e2e8f0'; ctx.font = '600 11px Inter,sans-serif';
-        ctx.fillText('Re = ' + fmtRe(re), bx + 8, by + 14);
-        ctx.fillStyle = '#fbbf24'; ctx.font = '700 11px Inter,sans-serif';
-        ctx.fillText('\u03bb = ' + lam.toFixed(4), bx + 8, by + 29);
-    }
-
-    /* ── Decision tree state ── */
-    function setOn(id, on) {
-        var el = document.getElementById(id);
-        if (el) el.classList.toggle('m13-on', on);
-    }
-
-    function updateTree(regime, sub) {
-        setOn('m13-b-lam',    regime === 'lam');
-        setOn('m13-b-trans',  regime === 'trans');
-        setOn('m13-b-turb',   regime === 'turb');
-        setOn('m13-b-smooth', regime === 'turb' && sub === 'smooth');
-        setOn('m13-b-cb',     regime === 'turb' && sub === 'cb');
-        setOn('m13-b-rough',  regime === 'turb' && sub === 'rough');
-    }
-
-    function explainerText(re, kd, lam, regime, sub) {
-        if (regime === 'lam')
-            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ' < 2\u202f320 \u2192 laminarno strujanje. Formula: \u03bb = 64/Re = ' + lam.toFixed(4) + '. Profil brzine: parabola (Hagen\u2013Poiseuille). Dijagram nije potreban.';
-        if (regime === 'trans')
-            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ' je u prijelaznom podr\u00fcuju (2\u202f320\u2013\u00202\u202f000). Strujanje nestabilno, \u03bb nije pouzdano definiran. Inženjerska praksa: uzeti konzervativnu vrijednost ili redizajnirati sustav.';
-        if (sub === 'smooth')
-            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D = ' + fmtKd(kd) + ' \u2192 turbulentno, hidrauli\u010dki glatka cijev. Blasius: \u03bb\u00a0=\u00a00.316\u00b7Re\u207b\u2070\u02d9\u00b2\u2075 = ' + lam.toFixed(4) + '. Hrapavost je skrivena u viskoznom podsloju \u2014 k/D gotovo ne utje\u010de na \u03bb.';
-        if (sub === 'rough')
-            return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + ' \u2192 potpuno hrapavo turbulentno. Kvadratni zakon otpora: \u03bb ovisi SAMO o k/D. Pove\u0107anje brzine vi\u0161e ne mijenja \u03bb. 1/\u221a\u03bb = \u22122\u00b7log(k/D / 3.71), \u03bb\u00a0\u2248\u00a0' + lam.toFixed(4) + '.';
-        return 'Re\u00a0=\u00a0' + re.toExponential(2) + ', k/D\u00a0=\u00a0' + fmtKd(kd) + ' \u2192 prijelazno turbulentno. \u03bb ovisi i o Re i o k/D \u2014 Colebrook\u2013White ili Moodyjev dijagram. \u03bb\u00a0=\u00a0' + lam.toFixed(4) + '. Swamee\u2013Jain daje eksplicitnu aproksimaciju s gre\u0161kom < 3\u00a0%.';
-    }
-
-    /* ── Main update ── */
-    function update() {
-        var logRe = parseFloat(reSlider.value);
-        var re    = Math.pow(10, logRe);
-        var kd    = Math.pow(10, parseFloat(kdSlider.value));
-        var lam   = solveLambda(re, kd);
-        var regime = re < 2320 ? 'lam' : re < 4000 ? 'trans' : 'turb';
-        var sub    = regime === 'turb' ? turbSubregime(re, kd, lam) : null;
-
-        document.getElementById('v13-v-re').textContent      = logRe.toFixed(2);
-        document.getElementById('v13-v-kd').textContent      = fmtKd(kd);
-        document.getElementById('v13-re-card').textContent   = re.toExponential(2);
-        document.getElementById('v13-kd-card').textContent   = fmtKd(kd);
-        document.getElementById('v13-res-lambda').textContent = lam.toFixed(4);
-        document.getElementById('v13-explainer-box').textContent = explainerText(re, kd, lam, regime, sub);
-
-        updateTree(regime, sub);
-
-        ctx.clearRect(0, 0, W, H);
-        drawGrid();
-        drawLabels();
-        plotCurves();
-        drawPoint(re, lam, regime, sub);
-    }
-
-    reSlider.oninput = update;
-    kdSlider.oninput = update;
-    update();
-})();
-</script>
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni prikaz</div>
-
-```{=html}
-<!-- WIDGET: Laminarni pad tlaka (Hagen-Poiseuille) -->
-<div id="z120-laminar-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
-    <style>
-        #z120-laminar-widget .z120-shell {
-            border-radius: 30px;
-            border: 1px solid #d8e7f7;
-            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
-            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.08);
-            padding: 28px;
-        }
-        #z120-laminar-widget .z120-head {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 18px;
-            align-items: start;
-            margin-bottom: 18px;
-        }
-        #z120-laminar-widget .z120-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        #z120-laminar-widget .z120-title {
-            margin: 0;
-            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
-            line-height: 1.08;
-            color: #0f172a;
-            font-weight: 800;
-        }
-        #z120-laminar-widget .z120-sub {
-            margin: 8px 0 0;
-            max-width: 72ch;
-            color: #475569;
-            font-size: 0.95rem;
-            line-height: 1.62;
-        }
-        #z120-laminar-widget .z120-chip {
-            align-self: start;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #e0f2fe, #eff6ff);
-            border: 1px solid #bfdbfe;
-            color: #1d4ed8;
-            font-size: 0.78rem;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-        #z120-laminar-widget .z120-note {
-            margin-bottom: 18px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            border: 1px solid #bfdbfe;
-            background: linear-gradient(135deg, #eff6ff, #f8fbff);
-            color: #1e3a8a;
-            font-size: 0.86rem;
-            line-height: 1.62;
-        }
-        #z120-laminar-widget .z120-stage {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-        #z120-laminar-widget .z120-scene {
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid #dbeafe;
-            background: linear-gradient(180deg, #fbfdff 0%, #eff6ff 100%);
-        }
-        #z120-laminar-widget canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        #z120-laminar-widget .z120-summary {
-            display: grid;
-            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #z120-laminar-widget .z120-pressures {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-        }
-        #z120-laminar-widget .z120-pressure,
-        #z120-laminar-widget .z120-state,
-        #z120-laminar-widget .z120-controls,
-        #z120-laminar-widget .z120-metric,
-        #z120-laminar-widget .z120-physics,
-        #z120-laminar-widget .z120-explainer {
-            border-radius: 18px;
-            border: 1px solid #dbeafe;
-            background: #ffffff;
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
-        }
-        #z120-laminar-widget .z120-pressure {
-            padding: 16px;
-            text-align: center;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-        }
-        #z120-laminar-widget .z120-pressure small {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #64748b;
-        }
-        #z120-p1-gauge,
-        #z120-p2-gauge {
-            display: block;
-            font-size: 1.35rem;
-            font-weight: 800;
-        }
-        #z120-p1-gauge {
-            color: #1d4ed8;
-        }
-        #z120-p2-gauge {
-            color: #dc2626;
-        }
-        #z120-laminar-widget .z120-state {
-            padding: 18px 20px;
-            background: linear-gradient(180deg, #ebf8ff 0%, #f7fbff 100%);
-            border-left: 6px solid #3182ce;
-        }
-        #z120-laminar-widget .z120-state-title,
-        #z120-laminar-widget .z120-physics-title {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-        #z120-laminar-widget .z120-state-title {
-            color: #2c5282;
-        }
-        #z120-laminar-widget .z120-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            font-size: 0.95rem;
-            color: #1e293b;
-        }
-        #z120-laminar-widget .z120-row + .z120-row {
-            margin-top: 8px;
-        }
-        #z120-laminar-widget .z120-row + .z120-row.is-divider {
-            border-top: 1px solid #bee3f8;
-            padding-top: 8px;
-        }
-        #z120-laminar-widget .z120-lower {
-            display: grid;
-            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #z120-laminar-widget .z120-controls,
-        #z120-laminar-widget .z120-physics,
-        #z120-laminar-widget .z120-explainer {
-            padding: 18px;
-        }
-        #z120-laminar-widget .z120-control + .z120-control {
-            margin-top: 18px;
-        }
-        #z120-laminar-widget .z120-control label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 0.84rem;
-            font-weight: 700;
-            color: #475569;
-        }
-        #z120-laminar-widget .z120-control input {
-            width: 100%;
-            accent-color: #2563eb;
-        }
-        #z120-laminar-widget .z120-side {
-            display: grid;
-            gap: 14px;
-        }
-        #z120-laminar-widget .z120-metrics {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-        }
-        #z120-laminar-widget .z120-metric {
-            padding: 14px;
-            text-align: center;
-        }
-        #z120-laminar-widget .z120-metric small {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #64748b;
-        }
-        #z120-laminar-widget .z120-metric strong {
-            display: block;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-            font-size: 0.98rem;
-            color: #0f172a;
-        }
-        #z120-laminar-widget .z120-physics {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-            color: #475569;
-            font-size: 0.8rem;
-            line-height: 1.58;
-        }
-        #z120-laminar-widget .z120-physics-title {
-            color: #334155;
-        }
-        #z120-laminar-widget .z120-explainer {
-            grid-column: 1 / -1;
-            background: #fff7ed;
-            border-color: #fdba74;
-            color: #7c2d12;
-            font-size: 0.84rem;
-            line-height: 1.58;
-        }
-        #z120-laminar-widget .z120-shell {
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-            padding: 22px;
-            border-radius: 20px;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-        }
-        #z120-laminar-widget .z120-title {
-            font-size: clamp(1.3rem, 2.2vw, 1.75rem);
-        }
-        #z120-laminar-widget .z120-scene {
-            border-radius: 16px;
-        }
-        #z120-laminar-widget .z120-pressure,
-        #z120-laminar-widget .z120-state,
-        #z120-laminar-widget .z120-controls,
-        #z120-laminar-widget .z120-metric,
-        #z120-laminar-widget .z120-physics,
-        #z120-laminar-widget .z120-explainer {
-            border-radius: 14px;
-            box-shadow: none;
-        }
-        #z120-laminar-widget .z120-model-status {
-            margin: 12px 0 0;
-            padding: 10px 12px;
-            border-radius: 12px;
-            font-size: 0.84rem;
-            line-height: 1.5;
-        }
-        #z120-laminar-widget .z120-model-status.is-valid {
-            color: #166534;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-        }
-        #z120-laminar-widget .z120-model-status.is-outside {
-            color: #9a3412;
-            background: #fff7ed;
-            border: 1px solid #fdba74;
-        }
-        @media (max-width: 960px) {
-            #z120-laminar-widget .z120-head,
-            #z120-laminar-widget .z120-summary,
-            #z120-laminar-widget .z120-lower,
-            #z120-laminar-widget .z120-pressures,
-            #z120-laminar-widget .z120-metrics {
-                grid-template-columns: 1fr;
-            }
-            #z120-laminar-widget .z120-chip {
-                justify-self: start;
-            }
-            #z120-laminar-widget .z120-explainer {
-                grid-column: auto;
-            }
-        }
-    </style>
-
-    <div class="z120-shell">
-        <div class="z120-head">
-            <div>
-                <div class="z120-kicker">Laminarni gubici tlaka — Hagen–Poiseuille</div>
-                <h4 class="z120-title">Laminarno strujanje u cijevi: kako temperatura utječe na pad tlaka</h4>
-                <p class="z120-sub">Temperatura mijenja viskoznost vode, a brzina određuje Reynoldsov broj. Prikaz slijedi lanac T &rarr; &mu; &rarr; Re &rarr; &lambda; &rarr; &Delta;p.</p>
-            </div>
-            <div class="z120-chip">T -> μ -> Re -> λ -> Δp</div>
-        </div>
-
-        <div class="z120-note"><strong>Kako čitati laminarni slučaj:</strong> Pri zadanoj srednjoj brzini Hagen–Poiseuilleova jednadžba daje <strong>&Delta;p = 32&mu;Lv/D<sup>2</sup></strong>. Temperatura zato najprije mijenja dinamičku viskoznost <strong>&mu;</strong>, zatim <strong>Re</strong> i <strong>&lambda; = 64/Re</strong>, a na kraju potreban pad tlaka.</div>
-
-        <div class="z120-stage">
-            <div class="z120-scene">
-                <canvas id="z120-canvas" width="550" height="400"></canvas>
-            </div>
-            <div class="z120-summary">
-                <div class="z120-pressures">
-                    <div class="z120-pressure">
-                        <small>Ulaz p1</small>
-                        <strong id="z120-p1-gauge">200 kPa</strong>
-                    </div>
-                    <div class="z120-pressure">
-                        <small>Izlaz p2</small>
-                        <strong id="z120-p2-gauge">11.8 kPa</strong>
-                    </div>
-                </div>
-                <div class="z120-state">
-                    <div class="z120-state-title">Fizikalna stanja</div>
-                    <div class="z120-row"><span>Reynolds Re</span><b id="z120-res-re">1836</b></div>
-                    <div class="z120-row"><span>Pad tlaka Δp</span><b id="z120-res-dp">188.2 kPa</b></div>
-                    <div class="z120-row is-divider"><span>Gubitak h<sub>w</sub></span><b id="z120-res-hw">19.2 m</b></div>
-                    <p id="z120-model-status" class="z120-model-status is-valid"></p>
-                </div>
-            </div>
-        </div>
-
-        <div class="z120-lower">
-            <div class="z120-controls">
-                <div class="z120-control">
-                    <label>Temperatura T: <span id="z120-v-T" style="color:#2563eb;">10</span> °C</label>
-                    <input type="range" id="z120-T-slider" min="5" max="80" step="1" value="10">
-                </div>
-                <div class="z120-control">
-                    <label>Brzina v: <span id="z120-v-v" style="color:#2563eb;">1.2</span> m/s</label>
-                    <input type="range" id="z120-v-slider" min="0.1" max="3" step="0.1" value="1.2">
-                </div>
-            </div>
-
-            <div class="z120-side">
-                <div class="z120-metrics">
-                    <div class="z120-metric">
-                        <small>μ</small>
-                        <strong id="z120-res-mu">0.0000 Pa s</strong>
-                    </div>
-                    <div class="z120-metric">
-                        <small>λ = 64/Re</small>
-                        <strong id="z120-res-lambda">0.0000</strong>
-                    </div>
-                </div>
-                <div class="z120-physics">
-                    <div class="z120-physics-title">Fizikalni uvid</div>
-                    U laminarnom području pri zadanoj brzini vrijedi &Delta;p = 32&mu;Lv/D<sup>2</sup>: pad tlaka raste s viskoznošću i dužinom, a jako se smanjuje s većim promjerom cijevi. Porast temperature vode obično smanjuje &mu;.
-                </div>
-            </div>
-
-            <div class="z120-explainer"><strong>Tumačenje scene:</strong> <span id="z120-explainer"></span></div>
-        </div>
-    </div>
-</div>
-
+<!-- END REVIEWED MOODY -->
 <script>
-(function() {
-    const canvas = document.getElementById('z120-canvas');
-    const ctx = canvas.getContext('2d');
-    const tS = document.getElementById('z120-T-slider');
-    const vS = document.getElementById('z120-v-slider');
+// The existing Reynolds scene shares the Moody controls; it is a second view, not a second experiment.
+(() => {
+  const root=document.getElementById('v13-moody-widget'),diagram=root.querySelector('.m13-scene');
+  const vS=root.querySelector('#v13-re-slider');
+  const panel=document.createElement('section');panel.id='v13-profile-panel';
+  panel.innerHTML='<canvas id="flow-canvas" width="920" height="340" role="img" aria-label="Srednje strujnice i normirani profil brzine za isti Reynoldsov broj kao na Moodyjevu dijagramu"></canvas><p class="mf1-editorial-guide" id="re-explainer"></p>';
+  const modes=document.createElement('div');modes.className='mf1-editorial-modes';modes.setAttribute('role','group');modes.setAttribute('aria-label','Prikaz istog strujanja');
+  modes.innerHTML='<button type="button" aria-pressed="true" aria-controls="v13-profile-panel">1 · Profil strujanja</button><button type="button" aria-pressed="false" aria-controls="v13-moody-canvas">2 · Moodyjev dijagram</button>';
+  diagram.before(modes,panel);
+  root.querySelector('.m13-title').textContent='Od Reynoldsova broja do otpora cijevi';
+  root.querySelector('.m13-kicker').textContent='Režim strujanja i trenje';
+  root.querySelector('.m13-subtitle').textContent='Promijeni Re i prvo promotri profil brzine. Zatim prijeđi na dijagram: za isto strujanje očitaj λ i istraži utjecaj hrapavosti.';
+  const explanation=document.createElement('details'),summary=document.createElement('summary');
+  explanation.className='mf1-parameters';summary.textContent='Zašto ovaj postupak? Režim, korelacije i ograničenja';
+  const bottom=root.querySelector('.m13-bottom');bottom.before(explanation);explanation.append(summary,bottom);
+  let showDiagram=false;
+  function view(index){showDiagram=index===1;panel.hidden=showDiagram;diagram.hidden=!showDiagram;
+    modes.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
+    if(showDiagram)panel.querySelector('.mf1-motion button[aria-pressed=true]')?.click();
+  }
+  modes.querySelectorAll('button').forEach((b,i)=>b.addEventListener('click',()=>view(i)));
+  const canvas=panel.querySelector('canvas'),ctx=canvas.getContext('2d');
+  const lanes=[-0.86,-0.7,-0.54,-0.38,-0.22,-0.06,0.06,0.22,0.38,0.54,0.7,0.86],particles=[];
+  lanes.forEach((lane,laneIndex)=>{for(let i=0;i<8;i++)particles.push({lane,phase:(i/8+laneIndex*.025)%1});});
+  const state={re:1000,color:'#22c55e',time:0};
+  function laneSpeed(lane){return MF1.pipeProfile(lane,state.re);}
+  function update(){
+    state.re=10**Number(vS.value);
+    const laminar=state.re<2320,transition=state.re<4000&&!laminar;
+    state.color=laminar?'#22c55e':transition?'#f59e0b':'#ef4444';
+    state.regime=laminar?'Laminarno':transition?'Prijelazno':'Turbulentno';
+    panel.querySelector('#re-explainer').textContent=(laminar?'Laminarni profil je parabola: u/v̄ = 2[1 − (r/R)²]. Na osi je brzina dvostruka srednja, a na stijenci nula.':transition?'Prijelaz je osjetljiv na poremećaje. Ovdje je profil samo ilustrativna interpolacija između dvaju srednjih profila; nije predviđanje nestabilnosti.':'Turbulentni srednji profil približen je zakonom 1/7 izvan neposredne blizine stijenke. Prikaz ne računa vrtloge ni fluktuacije i ne modelira utjecaj hrapavosti na profil.')+' Oba profila imaju istu normiranu srednju brzinu. Oznake pokazuju relativne lokalne brzine; animacija nema zadano mjerilo fizičkog vremena. Hrapavost mijenja λ u dijagramu.';
+  }
+  function streamlineY(x,lane,pipe){return pipe.cy+lane*pipe.h/2;}
 
-    let particles = [];
-    for (let index = 0; index < 100; index++) {
-        particles.push({ t: (index * 0.61803398875) % 1, yRel: -1 + 2 * ((index * 37) % 101) / 100 });
-    }
+  function draw(dt=0) {
+    state.time += dt;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const state = { v: 1.2 };
+    const pipe = { x: 42, y: 72, w: 520, h: 196, cy: 170 };
+    const profile = { x: 620, y: 58, w: 230, h: 224 };
 
-    function getViscosity(T) {
-        return 0.00179 / (1 + 0.0337 * T + 0.00022 * T * T);
-    }
+    ctx.fillStyle = "#0b1220";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    function update() {
-        const T = parseFloat(tS.value);
-        const v = parseFloat(vS.value);
-        const L = 15;
-        const d = 0.002;
-        const rho = 1000;
-        const g = 9.81;
-        const mu = getViscosity(T);
+    const fluidGrad = ctx.createLinearGradient(0, pipe.y, 0, pipe.y + pipe.h);
+    fluidGrad.addColorStop(0, "rgba(37,99,235,0.18)");
+    fluidGrad.addColorStop(0.5, "rgba(96,165,250,0.28)");
+    fluidGrad.addColorStop(1, "rgba(37,99,235,0.18)");
+    ctx.fillStyle = fluidGrad;
+    ctx.fillRect(pipe.x, pipe.y, pipe.w, pipe.h);
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(pipe.x, pipe.y, pipe.w, pipe.h);
 
-        const Re = (rho * v * d) / mu;
-        const lambda = 64 / Re;
-        const dp = lambda * (L / d) * (rho * v * v / 2) / 1000;
-        const hw = (dp * 1000) / (rho * g);
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "700 13px Inter";
+    ctx.fillText("srednje strujnice · relativne brzine", pipe.x, 34);
+    ctx.fillText("normirani srednji profil u/v̄", profile.x, 34);
 
-        state.v = v;
+    ctx.strokeStyle = "rgba(148,163,184,0.35)";
+    ctx.lineWidth = 1.3;
+    lanes.forEach((lane) => {
+      ctx.beginPath();
+      for (let x = pipe.x + 8; x <= pipe.x + pipe.w - 8; x += 12) {
+        const y = streamlineY(x, lane, pipe);
+        if (x === pipe.x + 8) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
 
-        document.getElementById('z120-v-T').innerText = T;
-        document.getElementById('z120-v-v').innerText = v.toFixed(1);
-        document.getElementById('z120-res-re').innerText = Math.round(Re);
-        document.getElementById('z120-res-dp').innerText = dp.toFixed(1) + ' kPa';
-        document.getElementById('z120-res-hw').innerText = hw.toFixed(1) + ' m';
-        document.getElementById('z120-res-mu').innerText = mu.toFixed(5) + ' Pa s';
-        document.getElementById('z120-res-lambda').innerText = lambda.toFixed(4);
-        document.getElementById('z120-p2-gauge').innerText = Math.max(0, 200 - dp).toFixed(1) + ' kPa';
-        document.getElementById('z120-explainer').textContent =
-            'Pri ' + T.toFixed(0) + ' °C je μ = ' + mu.toFixed(5) +
-            ' Pa s. Za v = ' + v.toFixed(1) + ' m/s slijedi Re ≈ ' +
-            Math.round(Re) + ', λ = ' + lambda.toFixed(4) +
-            ' te Δp = ' + dp.toFixed(1) + ' kPa.';
+    particles.forEach((particle) => {
+      particle.phase = (particle.phase + dt * laneSpeed(particle.lane) / 5) % 1;
+      const x = pipe.x + particle.phase * pipe.w;
+      const y = streamlineY(x, particle.lane, pipe);
+      ctx.fillStyle = state.color;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    });
 
-        const modelStatus = document.getElementById('z120-model-status');
-        if (Re < 2320) {
-            modelStatus.className = 'z120-model-status is-valid';
-            modelStatus.textContent = 'Re je u laminarnom području: prikaz koristi Hagen–Poiseuilleov model i λ = 64/Re.';
-        } else {
-            modelStatus.className = 'z120-model-status is-outside';
-            modelStatus.textContent = 'Za ovaj skup parametara Reynoldsov broj više nije u laminarnom području; Hagen–Poiseuilleov model ovdje više nije odgovarajući model gubitka.';
-        }
-    }
+    const px=u=>profile.x+43+u*76,py=r=>profile.y+16+(r+1)/2*(profile.h-32);
+    ctx.font='12px system-ui';ctx.lineWidth=1;ctx.textAlign='center';
+    for(const u of [0,1,2]){ctx.strokeStyle='#526579';ctx.setLineDash(u===1?[4,4]:[]);ctx.beginPath();ctx.moveTo(px(u),py(-1));ctx.lineTo(px(u),py(1));ctx.stroke();ctx.fillStyle='#e3edf6';ctx.fillText(String(u),px(u),py(1)+20);}
+    ctx.setLineDash([]);ctx.textAlign='right';
+    for(const r of [-1,0,1]){ctx.fillStyle='#d1dfeb';ctx.fillText(String(r),px(0)-10,py(r)+4);}
+    ctx.textAlign='left';ctx.fillText('r/R',profile.x,profile.y-5);ctx.fillText('u/v̄',px(2)-12,py(1)+40);
+    ctx.strokeStyle='#a3b9cd';ctx.setLineDash([4,4]);ctx.beginPath();for(let i=0;i<=160;i++){const r=-1+i/80,x=px(2*(1-r*r)),y=py(r);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle=state.color;ctx.lineWidth=2.5;ctx.beginPath();
+    for(let i=0;i<=300;i++){const r=Math.sin(-Math.PI/2+i*Math.PI/300),x=px(laneSpeed(r)),y=py(r);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
+    ctx.fillStyle='#d1dfeb';ctx.font='12px system-ui';ctx.fillText('Isprekidana krivulja: laminarna referenca · okomica u/v̄ = 1: srednja brzina',42,320);
+    root.mf1ProfileState={...state,wall:laneSpeed(1),center:laneSpeed(0)};
 
-    function draw() {
-        ctx.clearRect(0, 0, 550, 400);
-        const cy = 200;
-        const dPx = 100;
 
-        const grad = ctx.createLinearGradient(50, 0, 500, 0);
-        grad.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
-        grad.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(50, cy - dPx / 2, 450, dPx);
+  }
 
-        ctx.strokeStyle = '#475569';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(50, cy - dPx / 2);
-        ctx.lineTo(500, cy - dPx / 2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(50, cy + dPx / 2);
-        ctx.lineTo(500, cy + dPx / 2);
-        ctx.stroke();
 
-        ctx.strokeStyle = 'rgba(30, 64, 175, 0.3)';
-        ctx.setLineDash([2, 2]);
-        ctx.beginPath();
-        for (let y = -dPx / 2; y <= dPx / 2; y += 5) {
-            const rRel = Math.abs(y) / (dPx / 2);
-            const vx = (1 - rRel * rRel) * 80;
-            if (y === -dPx / 2) ctx.moveTo(50 + vx, cy + y);
-            else ctx.lineTo(50 + vx, cy + y);
-        }
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        particles.forEach((particle) => {
-            const rRel = Math.abs(particle.yRel);
-            const vLocal = 2 * state.v * (1 - rRel * rRel);
-            particle.t += 0.005 * vLocal;
-            if (particle.t > 1) particle.t = 0;
-
-            const px = 50 + particle.t * 450;
-            const py = cy + particle.yRel * (dPx / 2 - 5);
-            ctx.fillStyle = '#3b82f6';
-            ctx.beginPath();
-            ctx.arc(px, py, 2, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        if (canvas.isConnected && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(draw);
-    }
-
-    tS.oninput = update;
-    vS.oninput = update;
-    update();
-    draw();
+  vS.addEventListener('input',()=>{update();draw();});
+  MF1.motion(panel,draw,{reset:()=>{state.time=0;particles.forEach((p,i)=>p.phase=(i*.61803398875)%1);}});
+  panel.querySelector('.mf1-motion span').textContent='Normirano gibanje: uspoređuju se brzine slojeva.';
+  update();draw();view(0);
 })();
 </script>
-
+</section>
 ```
 
 ***
+
+### Zadatak Z120 — Laminarni pad tlaka {.unnumbered}
+
+Za potpuno razvijeno laminarno strujanje u kružnoj cijevi vrijedi
+
+$$\Delta p=\frac{32\mu L\bar v}{D^2},\qquad \lambda=\frac{64}{Re}.$$
+
+Pri zadanim $L=15\,\mathrm m$, $D=2\,\mathrm{mm}$ i $\bar v=1{,}2\,\mathrm{m/s}$ prvo odredi viskoznost vode pri $10^\circ\mathrm C$ i provjeri $Re$. Laminarni izraz primjenjuje se samo dok režim ostaje laminaran. Povećanje temperature mijenja i viskoznost i režim, pa ne smiješ isti izraz nekritički produžiti u turbulentno područje.
+
+<div class="rjesenje-label">Rješenje</div>
+
+Za vodu uzmimo $\rho=1000\,\mathrm{kg/m^3}$ i istu aproksimaciju viskoznosti kao u izvornom prikazu, s $T$ u $^\circ\mathrm C$:
+
+$$\mu(T)=\frac{0{,}00179}{1+0{,}0337T+0{,}00022T^2}\,\mathrm{Pa\,s}.$$
+
+Pri $T=10^\circ\mathrm C$ slijedi $\mu=0{,}001317\,\mathrm{Pa\,s}$, $Re=\rho\bar vD/\mu=1822<2320$ i $\lambda=64/Re=0{,}03512$. Laminarni je model primjenjiv, pa su $\Delta p=189{,}67\,\mathrm{kPa}$ i $h_f=\Delta p/(\rho g)=19{,}33\,\mathrm m$.
 
 ### Zadatak Z122 — Difuzor s lokalnim gubicima {.unnumbered}
 
@@ -1485,6 +879,8 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
 </div>
 <div class="rjesenje-label">Rješenje</div>
 
+Za ovu procjenu usvojeni su koeficijent lokalnoga gubitka $\zeta=0{,}07$ i koeficijent korekcije kinetičke energije $\beta=1{,}06$, kao u izvornom proračunu. Vrijednost $\zeta$ zadana je za promatranu geometriju; ne slijedi samo iz kontinuiteta.
+
 1. $v_2 = 3,11 \, \text{m/s}$.
 2. $h_{wm} = \zeta \frac{v_1^2}{2g} = \mathbf{0,175 \, \text{m}}$.
 3.
@@ -1494,526 +890,13 @@ Horizontalna cijev promjera 60 mm postupno povećava promjer na 90 mm. Stjenke d
     = \mathbf{169,1 \, \text{kPa}}
     $$
 
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni prikaz</div>
-
-```{=html}
-<!-- WIDGET: Difuzor i lokalni gubici -->
-<div id="z122-diffuser-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
-    <style>
-        #z122-diffuser-widget .z122-shell {
-            border-radius: 30px;
-            border: 1px solid #d8e7f7;
-            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
-            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.08);
-            padding: 28px;
-        }
-        #z122-diffuser-widget .z122-head {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 18px;
-            align-items: start;
-            margin-bottom: 18px;
-        }
-        #z122-diffuser-widget .z122-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        #z122-diffuser-widget .z122-title {
-            margin: 0;
-            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
-            line-height: 1.08;
-            color: #0f172a;
-            font-weight: 800;
-        }
-        #z122-diffuser-widget .z122-sub {
-            margin: 8px 0 0;
-            max-width: 74ch;
-            color: #475569;
-            font-size: 0.95rem;
-            line-height: 1.62;
-        }
-        #z122-diffuser-widget .z122-chip {
-            align-self: start;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #dbeafe, #ecfeff);
-            border: 1px solid #bfdbfe;
-            color: #0369a1;
-            font-size: 0.78rem;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-        #z122-diffuser-widget .z122-note {
-            margin-bottom: 18px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            border: 1px solid #bfdbfe;
-            background: linear-gradient(135deg, #eff6ff, #f8fbff);
-            color: #1e3a8a;
-            font-size: 0.86rem;
-            line-height: 1.6;
-        }
-        #z122-diffuser-widget .z122-stage {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-        #z122-diffuser-widget .z122-scene {
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid #dbeafe;
-            background: linear-gradient(180deg, #f8fafc 0%, #eef6ff 100%);
-        }
-        #z122-diffuser-widget canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        #z122-diffuser-widget .z122-summary {
-            display: grid;
-            grid-template-columns: minmax(240px, 0.88fr) minmax(0, 1.12fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #z122-diffuser-widget .z122-status,
-        #z122-diffuser-widget .z122-balance,
-        #z122-diffuser-widget .z122-metric,
-        #z122-diffuser-widget .z122-controls,
-        #z122-diffuser-widget .z122-physics,
-        #z122-diffuser-widget .z122-explainer {
-            border-radius: 18px;
-            border: 1px solid #dbeafe;
-            background: #ffffff;
-            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.06);
-        }
-        #z122-diffuser-widget .z122-status {
-            padding: 18px;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-        }
-        #z122-diffuser-widget .z122-status-title,
-        #z122-diffuser-widget .z122-balance-title,
-        #z122-diffuser-widget .z122-physics-title {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-        #z122-diffuser-widget .z122-status-title {
-            color: #475569;
-        }
-        #z122-diffuser-widget .z122-status-copy {
-            margin: 0;
-            color: #475569;
-            font-size: 0.86rem;
-            line-height: 1.58;
-        }
-        #z122-sep-warn {
-            display: none;
-            margin-top: 14px;
-            padding: 10px 12px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #ef4444, #fb7185);
-            color: #ffffff;
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.03em;
-            text-align: center;
-            box-shadow: 0 12px 22px rgba(239, 68, 68, 0.22);
-        }
-        #z122-diffuser-widget .z122-summary-side {
-            display: grid;
-            gap: 12px;
-        }
-        #z122-diffuser-widget .z122-balance {
-            padding: 18px 20px;
-            background: #fff7ed;
-            border-left: 6px solid #f97316;
-        }
-        #z122-diffuser-widget .z122-balance-title {
-            color: #9a3412;
-        }
-        #z122-diffuser-widget .z122-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            font-size: 0.95rem;
-            color: #1e293b;
-        }
-        #z122-diffuser-widget .z122-row + .z122-row {
-            margin-top: 8px;
-        }
-        #z122-diffuser-widget .z122-metrics {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-        }
-        #z122-diffuser-widget .z122-metric {
-            padding: 14px;
-            text-align: center;
-        }
-        #z122-diffuser-widget .z122-metric small {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #64748b;
-        }
-        #z122-diffuser-widget .z122-metric strong {
-            display: block;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-            font-size: 0.98rem;
-            color: #0f172a;
-        }
-        #z122-diffuser-widget .z122-lower {
-            display: grid;
-            grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #z122-diffuser-widget .z122-controls,
-        #z122-diffuser-widget .z122-physics,
-        #z122-diffuser-widget .z122-explainer {
-            padding: 18px;
-        }
-        #z122-diffuser-widget .z122-control + .z122-control {
-            margin-top: 18px;
-        }
-        #z122-diffuser-widget .z122-control label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 0.84rem;
-            font-weight: 700;
-            color: #475569;
-        }
-        #z122-diffuser-widget .z122-control input {
-            width: 100%;
-            accent-color: #2563eb;
-        }
-        #z122-diffuser-widget .z122-physics {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-            color: #475569;
-            font-size: 0.84rem;
-            line-height: 1.58;
-        }
-        #z122-diffuser-widget .z122-physics-title {
-            color: #334155;
-        }
-        #z122-diffuser-widget .z122-explainer {
-            grid-column: 1 / -1;
-            background: #fff7ed;
-            border-color: #fdba74;
-            color: #7c2d12;
-            font-size: 0.84rem;
-            line-height: 1.58;
-        }
-        #z122-diffuser-widget .z122-shell {
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-            padding: 22px;
-            border-radius: 20px;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-        }
-        #z122-diffuser-widget .z122-title {
-            font-size: clamp(1.3rem, 2.2vw, 1.75rem);
-        }
-        #z122-diffuser-widget .z122-scene {
-            border-radius: 16px;
-        }
-        #z122-diffuser-widget .z122-status,
-        #z122-diffuser-widget .z122-balance,
-        #z122-diffuser-widget .z122-metric,
-        #z122-diffuser-widget .z122-controls,
-        #z122-diffuser-widget .z122-physics,
-        #z122-diffuser-widget .z122-explainer {
-            border-radius: 14px;
-            box-shadow: none;
-        }
-        #z122-sep-warn {
-            background: #fff7ed;
-            color: #9a3412;
-            border: 1px solid #fdba74;
-            box-shadow: none;
-        }
-        @media (max-width: 960px) {
-            #z122-diffuser-widget .z122-head,
-            #z122-diffuser-widget .z122-summary,
-            #z122-diffuser-widget .z122-lower,
-            #z122-diffuser-widget .z122-metrics {
-                grid-template-columns: 1fr;
-            }
-            #z122-diffuser-widget .z122-chip {
-                justify-self: start;
-            }
-            #z122-diffuser-widget .z122-explainer {
-                grid-column: auto;
-            }
-        }
-    </style>
-
-    <div class="z122-shell">
-        <div class="z122-head">
-            <div>
-                <div class="z122-kicker">Z122 difuzor</div>
-                <h4 class="z122-title">Širenje presjeka i stvarni povrat tlaka u difuzoru</h4>
-                <p class="z122-sub">Kako se presjek povećava, vrijedi A<sub>2</sub> &gt; A<sub>1</sub> pa je v<sub>2</sub> &lt; v<sub>1</sub>. Dio brzinske visine može se vratiti u tlak, ali se ukupna mehanička visina smanjuje za lokalni gubitak h<sub>L</sub>.</p>
-            </div>
-            <div class="z122-chip">v₁ -> v₂ -> p₂</div>
-        </div>
-
-        <div class="z122-note"><strong>Kako čitati difuzor:</strong> Idealni difuzor pretvara dio brzinske visine u tlak bez gubitka. Stvarni difuzor ima lokalni gubitak; za zadatak je uzet &beta;<sub>1</sub> = &beta;<sub>2</sub> = 1,06. Veći kut širenja povećava nepovoljan gradijent tlaka i sklonost odvajanju, ali univerzalna granična vrijednost kuta ne postoji.</div>
-
-        <div class="z122-stage">
-            <div class="z122-scene">
-                <canvas id="z122-canvas" width="920" height="440"></canvas>
-            </div>
-            <div class="z122-summary">
-                <div class="z122-status">
-                    <div class="z122-status-title">Stvarni učinak širenja</div>
-                    <p class="z122-status-copy">Smanjenje brzine pogoduje porastu statičkog tlaka, dok lokalni gubitak smanjuje ukupnu mehaničku visinu. Veći kut samo kvalitativno povećava sklonost dodatnim gubicima.</p>
-                    <div id="z122-sep-warn">VEĆA SKLONOST LOKALNIM GUBICIMA</div>
-                </div>
-                <div class="z122-summary-side">
-                    <div class="z122-balance">
-                        <div class="z122-balance-title">Bilanca učinaka</div>
-                        <div class="z122-row"><span>Koeficijent ζ (model)</span><b id="z122-res-zeta">0.07</b></div>
-                        <div class="z122-row"><span>Lokalni gubitak hwm</span><b id="z122-res-hwm">0.18 m</b></div>
-                        <div class="z122-row"><span>Izlazni tlak p₂</span><b id="z122-res-p2" style="color:#c2410c;">169.1 kPa</b></div>
-                    </div>
-                    <div class="z122-metrics">
-                        <div class="z122-metric"><small>v₂</small><strong id="z122-res-v2">0.00 m/s</strong></div>
-                        <div class="z122-metric"><small>Δ(v²/2g)</small><strong id="z122-res-dhead">0.00 m</strong></div>
-                        <div class="z122-metric"><small>Odabrani kut</small><strong id="z122-res-regime">30°</strong></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="z122-lower">
-            <div class="z122-controls">
-                <div class="z122-control">
-                    <label>Kut širenja α: <span id="z122-v-alpha" style="color:#2563eb;">30</span>°</label>
-                    <input type="range" id="z122-alpha-slider" min="5" max="60" step="1" value="30">
-                </div>
-                <div class="z122-control">
-                    <label>Ulazna brzina v₁: <span id="z122-v-v1" style="color:#2563eb;">7.0</span> m/s</label>
-                    <input type="range" id="z122-v1-slider" min="1" max="15" step="0.5" value="7">
-                </div>
-            </div>
-
-            <div class="z122-physics">
-                <div class="z122-physics-title">Fizikalni uvid</div>
-                Budući da je A<sub>2</sub> veći od A<sub>1</sub>, izlazna je brzina manja. Zato p<sub>2</sub> može porasti iako ukupna mehanička visina opada: razlika je lokalni gubitak h<sub>L</sub>.
-            </div>
-
-            <div class="z122-explainer"><strong>Tumačenje scene:</strong> <span id="z122-explainer"></span></div>
-        </div>
-    </div>
-</div>
-
-<script>
-(function() {
-    const canvas = document.getElementById('z122-canvas');
-    const ctx = canvas.getContext('2d');
-    const aS = document.getElementById('z122-alpha-slider');
-    const v1S = document.getElementById('z122-v1-slider');
-    const lanes = [-0.82, -0.62, -0.42, -0.22, 0, 0.22, 0.42, 0.62, 0.82];
-    const particles = [];
-    const state = { alpha: 30, v1: 7, v2: 3.11, zeta: 0.07, hwm: 0.18, deltaHead: 0.18, p2: 169.1, lossTendency: 0.45, time: 0 };
-
-    lanes.forEach((lane, laneIndex) => {
-        for (let index = 0; index < 8; index++) {
-            particles.push({ lane, phase: (index / 8 + laneIndex * 0.03) % 1, bias: 0.9 + ((index * 17 + laneIndex * 11) % 25) / 100 });
-        }
-    });
-
-    function getZeta(alpha) {
-        const scale = alpha / 30;
-        return 0.035 + 0.035 * scale * scale;
-    }
-
-    function getGeometry(alpha) {
-        const cy = canvas.height / 2 + 18;
-        const halfIn = 34;
-        const halfOut = 68;
-        const inletStart = 44;
-        const inletEnd = 210;
-        const diffL = Math.max(150, Math.min(320, (halfOut - halfIn) / Math.tan(alpha * Math.PI / 180)));
-        const outletStart = inletEnd + diffL;
-        const outletEnd = canvas.width - 56;
-        return { cy, halfIn, halfOut, inletStart, inletEnd, diffL, outletStart, outletEnd };
-    }
-
-    function getHalfHeight(x, geometry) {
-        if (x <= geometry.inletEnd) return geometry.halfIn;
-        if (x <= geometry.outletStart) {
-            const t = (x - geometry.inletEnd) / geometry.diffL;
-            return geometry.halfIn + t * (geometry.halfOut - geometry.halfIn);
-        }
-        return geometry.halfOut;
-    }
-
-    function streamlineY(x, lane, geometry, lossTendency) {
-        const half = getHalfHeight(x, geometry) - 8;
-        let localLane = lane;
-        if (x > geometry.inletEnd + 0.35 * geometry.diffL && Math.abs(lane) > 0.58) {
-            const t = Math.min(1, (x - (geometry.inletEnd + 0.35 * geometry.diffL)) / (0.65 * geometry.diffL));
-            localLane = lane * (1 - 0.32 * t * lossTendency);
-        }
-        return geometry.cy + localLane * half;
-    }
-
-    function update() {
-        const alpha = parseFloat(aS.value);
-        const v1 = parseFloat(v1S.value);
-        const p1 = 150;
-        const rho = 1000;
-        const g = 9.81;
-        const beta = 1.06;
-        const d1 = 0.06;
-        const d2 = 0.09;
-        const v2 = v1 * Math.pow(d1 / d2, 2);
-        const zeta = getZeta(alpha);
-        const hwm = zeta * (v1 * v1 / (2 * g));
-        const deltaHead = beta * (v1 * v1 - v2 * v2) / (2 * g);
-        const p2 = p1 + rho * g * (deltaHead - hwm) / 1000;
-        const lossTendency = (alpha - 5) / 55;
-
-        state.alpha = alpha;
-        state.v1 = v1;
-        state.v2 = v2;
-        state.zeta = zeta;
-        state.hwm = hwm;
-        state.deltaHead = deltaHead;
-        state.p2 = p2;
-        state.lossTendency = lossTendency;
-
-        document.getElementById('z122-v-alpha').textContent = alpha.toFixed(0);
-        document.getElementById('z122-v-v1').textContent = v1.toFixed(1);
-        document.getElementById('z122-res-zeta').textContent = zeta.toFixed(2);
-        document.getElementById('z122-res-hwm').textContent = hwm.toFixed(3) + ' m';
-        document.getElementById('z122-res-p2').textContent = p2.toFixed(1) + ' kPa';
-        document.getElementById('z122-res-v2').textContent = v2.toFixed(2) + ' m/s';
-        document.getElementById('z122-res-dhead').textContent = deltaHead.toFixed(2) + ' m';
-        document.getElementById('z122-res-regime').textContent = alpha.toFixed(0) + '°';
-        document.getElementById('z122-explainer').textContent =
-            'Pri α = ' + alpha.toFixed(0) + '° i v₁ = ' + v1.toFixed(1) +
-            ' m/s brzinska se visina smanji za ' + deltaHead.toFixed(2) +
-            ' m. Model lokalnog gubitka daje hL = ' + hwm.toFixed(3) +
-            ' m i p₂ = ' + p2.toFixed(1) +
-            ' kPa; veći kut ovdje samo kvalitativno označuje veću sklonost gubicima.';
-        document.getElementById('z122-sep-warn').style.display = 'block';
-    }
-
-    function draw() {
-        state.time += 1;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const geometry = getGeometry(state.alpha);
-
-        const fluidGrad = ctx.createLinearGradient(0, geometry.cy - geometry.halfOut, 0, geometry.cy + geometry.halfOut);
-        fluidGrad.addColorStop(0, '#dbeafe');
-        fluidGrad.addColorStop(1, '#bfdbfe');
-        ctx.fillStyle = fluidGrad;
-        ctx.beginPath();
-        ctx.moveTo(geometry.inletStart, geometry.cy - geometry.halfIn);
-        ctx.lineTo(geometry.inletEnd, geometry.cy - geometry.halfIn);
-        ctx.lineTo(geometry.outletStart, geometry.cy - geometry.halfOut);
-        ctx.lineTo(geometry.outletEnd, geometry.cy - geometry.halfOut);
-        ctx.lineTo(geometry.outletEnd, geometry.cy + geometry.halfOut);
-        ctx.lineTo(geometry.outletStart, geometry.cy + geometry.halfOut);
-        ctx.lineTo(geometry.inletEnd, geometry.cy + geometry.halfIn);
-        ctx.lineTo(geometry.inletStart, geometry.cy + geometry.halfIn);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.strokeStyle = '#475569';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(0, geometry.cy - geometry.halfIn);
-        ctx.lineTo(geometry.inletEnd, geometry.cy - geometry.halfIn);
-        ctx.lineTo(geometry.outletStart, geometry.cy - geometry.halfOut);
-        ctx.lineTo(canvas.width, geometry.cy - geometry.halfOut);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0, geometry.cy + geometry.halfIn);
-        ctx.lineTo(geometry.inletEnd, geometry.cy + geometry.halfIn);
-        ctx.lineTo(geometry.outletStart, geometry.cy + geometry.halfOut);
-        ctx.lineTo(canvas.width, geometry.cy + geometry.halfOut);
-        ctx.stroke();
-
-        ctx.strokeStyle = 'rgba(59,130,246,0.22)';
-        ctx.lineWidth = 1.4;
-        lanes.forEach((lane) => {
-            ctx.beginPath();
-            for (let x = geometry.inletStart; x <= geometry.outletEnd; x += 10) {
-                const wiggle = (0.5 + 4 * state.lossTendency) * Math.sin((x * 0.025) + state.time * 0.015 + lane * 4) * (Math.abs(lane) * 0.65);
-                const y = streamlineY(x, lane, geometry, state.lossTendency) + wiggle;
-                if (x === geometry.inletStart) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        });
-
-        particles.forEach((particle) => {
-            const laneSpeed = 0.55 + (1 - Math.abs(particle.lane)) * 0.65;
-            particle.phase = (particle.phase + 0.0018 * state.v1 * laneSpeed * particle.bias) % 1;
-            const x = geometry.inletStart + particle.phase * (geometry.outletEnd - geometry.inletStart);
-            const wiggle = (0.5 + 4 * state.lossTendency) * Math.sin((x * 0.025) + state.time * 0.015 + particle.lane * 4) * (Math.abs(particle.lane) * 0.65);
-            const y = streamlineY(x, particle.lane, geometry, state.lossTendency) + wiggle;
-            ctx.fillStyle = '#2563eb';
-            ctx.beginPath();
-            ctx.arc(x, y, 2.2, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        ctx.strokeStyle = 'rgba(249,115,22,' + (0.15 + 0.6 * state.lossTendency) + ')';
-        ctx.lineWidth = 2;
-        [geometry.cy - geometry.halfOut + 22, geometry.cy + geometry.halfOut - 22].forEach((yCenter, index) => {
-            ctx.beginPath();
-            ctx.arc(geometry.outletStart + 70, yCenter, 18, index === 0 ? Math.PI * 0.1 : Math.PI * 1.1, index === 0 ? Math.PI * 1.85 : Math.PI * 0.85, index !== 0);
-            ctx.stroke();
-        });
-
-        ctx.strokeStyle = '#0f766e';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(geometry.inletEnd + 10, geometry.cy - geometry.halfOut - 42);
-        ctx.lineTo(geometry.outletStart - 10, geometry.cy - geometry.halfOut - 42);
-        ctx.stroke();
-        ctx.fillStyle = '#0f766e';
-        ctx.font = '700 12px Inter';
-        ctx.fillText('pad v i mogući povrat tlaka', geometry.inletEnd + 18, geometry.cy - geometry.halfOut - 50);
-
-        ctx.fillStyle = '#334155';
-        ctx.font = '700 13px Inter';
-        ctx.fillText('v₁ = ' + state.v1.toFixed(1) + ' m/s', 34, geometry.cy - geometry.halfIn - 14);
-        ctx.fillText('v₂ = ' + state.v2.toFixed(2) + ' m/s', canvas.width - 160, geometry.cy - geometry.halfOut - 14);
-
-        if (canvas.isConnected && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(draw);
-    }
-
-    aS.oninput = update;
-    v1S.oninput = update;
-    update();
-    draw();
-})();
-</script>
-
-```
-
 ***
 
 <hr class='zadatak-sep'>
 
 ### Zadatak Z123 — Protok između dva spremnika {.unnumbered}
 
-Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50 mm izrađene od sivog lijeva. Hrapavost iznosi $2,6 \cdot 10^{-4} \, \text{m}$, dok su koeficijenti mjesnih gubitaka redom: $\zeta_u = 0,5$ (ulaz), $\zeta_k = 0,3$ (koljeno), $\zeta_v = 0,2$ (ventil), $\zeta_i = 1,06$ (izlaz).
+Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50 mm izrađenu od sivog lijeva. Hrapavost iznosi $2,6\cdot10^{-4}\,\mathrm m$. Cjevovod ima ulaz ($\zeta_u=0{,}5$), dva koljena (svako $\zeta_k=0{,}3$), ventil ($\zeta_v=0{,}2$) i izlaz ($\zeta_i=1{,}06$), pa je $\sum\zeta=2{,}36$. Ukupna duljina za trenje obuhvaća vodoravni i okomiti dio: $L_{tot}=L+h=80+9=89\,\mathrm m$.
 
 <div class="zadano-grid">
 <div class="zadano-row">
@@ -2037,12 +920,9 @@ Voda temperature 10°C struji iz većeg spremnika u manji kroz cijev promjera 50
     $$
 4. $z_1 = z_2 + h_w = \mathbf{31,8 \, \text{m}}$.
 
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni prikaz</div>
-
 ```{=html}
 <!-- WIDGET: Budžet gubitaka cjevovoda -->
-<div id="z123-budget-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+<div id="z123-budget-widget" data-widget-role="application" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
     <style>
         #z123-budget-widget .z123-shell {
             border-radius: 30px;
@@ -2499,12 +1379,9 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 3. $\dot{V}_1 = \mathbf{4,1 \, \text{L/s}}, \dot{V}_2 = \mathbf{25,9 \, \text{L/s}}$.
 4. $H_{pump} = (z_B - z_A) + h_{wl1} = \mathbf{18,93 \, \text{m}}$.
 
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni prikaz</div>
-
 ```{=html}
 <!-- WIDGET: Paralelne cijevi i raspodjela protoka -->
-<div id="z124-parallel-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
+<div id="z124-parallel-widget" data-widget-role="application" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
     <style>
         #z124-parallel-widget .z124-shell {
             border-radius: 30px;
@@ -2966,368 +1843,6 @@ Voda temperature 20°C crpi se iz spremnika A u spremnik B putem dviju paralelni
 
 ```
 
-<hr class="widget-sep">
-<div class="widget-label">⚙ Interaktivni simulator</div>
-
-```{=html}
-<!-- Flow Regime / Reynolds Widget -->
-<div id="reynolds-widget" style="max-width: 1060px; margin: 2rem auto; font-family: 'Inter', system-ui, sans-serif;">
-    <style>
-        #reynolds-widget .rw-shell {
-            border-radius: 30px;
-            border: 1px solid #dce9f7;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-            box-shadow: 0 28px 64px rgba(15, 23, 42, 0.09);
-            padding: 28px;
-        }
-        #reynolds-widget .rw-head {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 18px;
-            align-items: start;
-            margin-bottom: 18px;
-        }
-        #reynolds-widget .rw-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        #reynolds-widget .rw-title {
-            margin: 0;
-            font-size: clamp(1.45rem, 2.4vw, 1.95rem);
-            line-height: 1.08;
-            color: #0f172a;
-            font-weight: 800;
-        }
-        #reynolds-widget .rw-sub {
-            margin: 8px 0 0;
-            max-width: 74ch;
-            color: #475569;
-            font-size: 0.95rem;
-            line-height: 1.62;
-        }
-        #reynolds-widget .rw-chip {
-            align-self: start;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #dcfce7, #dbeafe);
-            border: 1px solid #bbf7d0;
-            color: #047857;
-            font-size: 0.78rem;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-        #reynolds-widget .rw-note {
-            margin-bottom: 18px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            border: 1px solid #bfdbfe;
-            background: linear-gradient(135deg, #eff6ff, #f8fbff);
-            color: #1e3a8a;
-            font-size: 0.86rem;
-            line-height: 1.62;
-        }
-        #reynolds-widget .rw-stage {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-        #reynolds-widget .rw-scene {
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid #1e293b;
-            background: radial-gradient(circle at top, #172554 0%, #0f172a 60%, #020617 100%);
-        }
-        #reynolds-widget canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        #reynolds-widget .rw-summary {
-            display: grid;
-            grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #re-status,
-        #reynolds-widget .rw-metric,
-        #reynolds-widget .rw-controls,
-        #reynolds-widget .rw-explainer {
-            border-radius: 18px;
-            border: 1px solid #dbeafe;
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
-        }
-        #re-status {
-            padding: 18px;
-            text-align: center;
-            font-weight: 800;
-            font-size: 1rem;
-        }
-        #reynolds-widget .rw-metrics {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-        }
-        #reynolds-widget .rw-metric {
-            padding: 14px;
-            text-align: center;
-            background: #ffffff;
-        }
-        #reynolds-widget .rw-metric small {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #64748b;
-        }
-        #reynolds-widget .rw-metric strong,
-        #re-dominant,
-        #re-thresholds,
-        #re-profile {
-            display: block;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-            font-weight: 800;
-            color: #0f172a;
-        }
-        #reynolds-widget .rw-lower {
-            display: grid;
-            grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.08fr);
-            gap: 14px;
-            align-items: start;
-        }
-        #reynolds-widget .rw-controls,
-        #reynolds-widget .rw-explainer {
-            padding: 18px;
-            background: #ffffff;
-        }
-        #reynolds-widget .rw-controls label {
-            display: block;
-            margin-bottom: 10px;
-            color: #475569;
-            font-weight: 700;
-        }
-        #reynolds-widget .rw-controls input {
-            width: 100%;
-            accent-color: #2563eb;
-        }
-        #reynolds-widget .rw-model {
-            margin-top: 10px;
-            font-size: 0.78rem;
-            color: #64748b;
-            line-height: 1.55;
-        }
-        #reynolds-widget .rw-explainer {
-            background: #fff7ed;
-            border-color: #fdba74;
-            color: #7c2d12;
-            font-size: 0.84rem;
-            line-height: 1.6;
-        }
-        @media (max-width: 960px) {
-            #reynolds-widget .rw-head,
-            #reynolds-widget .rw-summary,
-            #reynolds-widget .rw-lower,
-            #reynolds-widget .rw-metrics {
-                grid-template-columns: 1fr;
-            }
-            #reynolds-widget .rw-chip {
-                justify-self: start;
-            }
-        }
-    </style>
-
-    <div class="rw-shell">
-        <div class="rw-head">
-            <div>
-                <div class="rw-kicker">Reynoldsov broj</div>
-                <h3 class="rw-title">Brzina ne mijenja samo broj na ekranu nego i samu prirodu toka: od urednih slojeva do vrtložnog miješanja</h3>
-                <p class="rw-sub">Promijeni Reynoldsov broj i usporedi srednje profile brzine. Oznake fluida prate lokalnu brzinu odabranog profila.</p>
-            </div>
-            <div class="rw-chip">v -> Re -> režim</div>
-        </div>
-
-        <div class="rw-note"><strong>Kako čitati režim:</strong> Ovdje je modelirana voda u maloj cijevi promjera <strong>2 mm</strong>, pa pomicanjem brzine možeš stvarno proći kroz sve tri zone. Lijevo su putanje oznaka u srednjem toku, a desno srednji profil brzine. Turbulentne fluktuacije i vrtlozi nisu simulirani. Parabola je egzaktno laminarno rješenje; zakon 1/7 je aproksimacija turbulentnog profila izvan neposredne blizine stijenke.</div>
-
-        <div class="rw-stage">
-            <div class="rw-scene">
-                <canvas id="flow-canvas" width="920" height="340"></canvas>
-            </div>
-            <div class="rw-summary">
-                <div id="re-status">Re = 1000 (Laminarno)</div>
-                <div class="rw-metrics">
-                    <div class="rw-metric"><small>Dominira</small><strong id="re-dominant">viskoznost</strong></div>
-                    <div class="rw-metric"><small>Pragovi</small><strong id="re-thresholds">2300 / 4000</strong></div>
-                    <div class="rw-metric"><small>Profil</small><strong id="re-profile">parabola</strong></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="rw-lower">
-            <div class="rw-controls">
-                <label>Brzina strujanja v: <span id="v-re-val" style="color:#2563eb;">0.50</span> m/s</label>
-                <input type="range" id="v-re-slider" min="0.05" max="5" step="0.05" value="0.5">
-                <div class="rw-model">Model: voda, ν = 1.0×10⁻⁶ m²/s, d = 2 mm.</div>
-            </div>
-
-            <div class="rw-explainer"><strong>Tumačenje scene:</strong> <span id="re-explainer"></span></div>
-        </div>
-    </div>
-</div>
-
-<script>
-(function () {
-  const vS = document.getElementById("v-re-slider");
-  const canvas = document.getElementById("flow-canvas");
-  const ctx = canvas.getContext("2d");
-  const status = document.getElementById("re-status");
-  const lanes = [-0.86, -0.7, -0.54, -0.38, -0.22, -0.06, 0.06, 0.22, 0.38, 0.54, 0.7, 0.86];
-  const particles = [];
-  const state = {
-    v: 0.5,
-    re: 1000,
-    regime: "Laminarno",
-    dominant: "viskoznost",
-    profile: "parabola",
-    color: "#22c55e",
-    mix: 0,
-    time: 0,
-  };
-  const d = 0.002;
-  const nu = 1e-6;
-
-  lanes.forEach((lane, laneIndex) => {
-    for (let index = 0; index < 8; index++) {
-      particles.push({
-        lane,
-        phase: (index / 8 + laneIndex * 0.025) % 1,
-        bias: 0.85 + ((index * 19 + laneIndex * 7) % 31) / 100,
-      });
-    }
-  });
-
-  function classify(re) {
-    if (re < 2320)
-      return { regime: "Laminarno", dominant: "viskoznost", profile: "parabola", color: "#22c55e", mix: 0 };
-    if (re < 4000)
-      return {
-        regime: "Prijelazno",
-        dominant: "oba učinka",
-        profile: "spljošten",
-        color: "#f59e0b",
-        mix: (re - 2320) / 1680,
-      };
-    return { regime: "Turbulentno", dominant: "inercija", profile: "puniji, bez klizanja na stijenci", color: "#ef4444", mix: 1 };
-  }
-
-  function laneSpeed(lane){return MF1.pipeProfile(lane,state.re);}
-
-  function update() {
-    const v = parseFloat(vS.value);
-    const re = (v * d) / nu;
-    const cls = classify(re);
-
-    state.v = v;
-    state.re = re;
-    Object.assign(state, cls);
-
-    document.getElementById("v-re-val").textContent = v.toFixed(2);
-    document.getElementById("re-dominant").textContent = cls.dominant;
-    document.getElementById("re-profile").textContent = cls.profile;
-    document.getElementById("re-explainer").textContent =
-      `Za brzinu ${v.toFixed(2)} m/s dobivaš Re ≈ ${re.toFixed(0)}. Zato je režim ${cls.regime.toLowerCase()}, dominira ${cls.dominant}, a profil brzine prelazi prema obliku: ${cls.profile}. Pragovi su približni. Prijelazni profil je ilustrativna interpolacija, a turbulentni srednji profil aproksimiran je zakonom 1/7; fluktuacije nisu simulirane.`;
-
-    status.textContent = `Re = ${re.toFixed(0)} (${cls.regime})`;
-    if (cls.regime === "Laminarno") {
-      status.style.background = "#dcfce7";
-      status.style.borderColor = "#bbf7d0";
-      status.style.color = "#166534";
-    } else if (cls.regime === "Prijelazno") {
-      status.style.background = "#fef3c7";
-      status.style.borderColor = "#fde68a";
-      status.style.color = "#92400e";
-    } else {
-      status.style.background = "#fee2e2";
-      status.style.borderColor = "#fecaca";
-      status.style.color = "#991b1b";
-    }
-  }
-
-  function streamlineY(x,lane,pipe){return pipe.cy+lane*pipe.h/2;}
-
-  function draw(dt=0) {
-    state.time += dt;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const pipe = { x: 42, y: 72, w: 520, h: 196, cy: 170 };
-    const profile = { x: 620, y: 58, w: 230, h: 224 };
-
-    ctx.fillStyle = "#0b1220";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const fluidGrad = ctx.createLinearGradient(0, pipe.y, 0, pipe.y + pipe.h);
-    fluidGrad.addColorStop(0, "rgba(37,99,235,0.18)");
-    fluidGrad.addColorStop(0.5, "rgba(96,165,250,0.28)");
-    fluidGrad.addColorStop(1, "rgba(37,99,235,0.18)");
-    ctx.fillStyle = fluidGrad;
-    ctx.fillRect(pipe.x, pipe.y, pipe.w, pipe.h);
-    ctx.strokeStyle = "#cbd5e1";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(pipe.x, pipe.y, pipe.w, pipe.h);
-
-    ctx.fillStyle = "#f8fafc";
-    ctx.font = "700 13px Inter";
-    ctx.fillText("srednje strujnice · prikazana duljina 5 m", pipe.x, 34);
-    ctx.fillText("normirani srednji profil u/v̄", profile.x, 34);
-
-    ctx.strokeStyle = "rgba(148,163,184,0.35)";
-    ctx.lineWidth = 1.3;
-    lanes.forEach((lane) => {
-      ctx.beginPath();
-      for (let x = pipe.x + 8; x <= pipe.x + pipe.w - 8; x += 12) {
-        const y = streamlineY(x, lane, pipe);
-        if (x === pipe.x + 8) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    });
-
-    particles.forEach((particle) => {
-      particle.phase = (particle.phase + dt * state.v * laneSpeed(particle.lane) / 5) % 1;
-      const x = pipe.x + particle.phase * pipe.w;
-      const y = streamlineY(x, particle.lane, pipe);
-      ctx.fillStyle = state.color;
-      ctx.beginPath();
-      ctx.arc(x, y, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    const px=u=>profile.x+43+u*76,py=r=>profile.y+16+(r+1)/2*(profile.h-32);
-    ctx.font='12px system-ui';ctx.lineWidth=1;ctx.textAlign='center';
-    for(const u of [0,1,2]){ctx.strokeStyle='#526579';ctx.setLineDash(u===1?[4,4]:[]);ctx.beginPath();ctx.moveTo(px(u),py(-1));ctx.lineTo(px(u),py(1));ctx.stroke();ctx.fillStyle='#e3edf6';ctx.fillText(String(u),px(u),py(1)+20);}
-    ctx.setLineDash([]);ctx.textAlign='right';
-    for(const r of [-1,0,1]){ctx.fillStyle='#d1dfeb';ctx.fillText(String(r),px(0)-10,py(r)+4);}
-    ctx.textAlign='left';ctx.fillText('r/R',profile.x,profile.y-5);ctx.fillText('u/v̄',px(2)-12,py(1)+40);
-    ctx.strokeStyle='#a3b9cd';ctx.setLineDash([4,4]);ctx.beginPath();for(let i=0;i<=160;i++){const r=-1+i/80,x=px(2*(1-r*r)),y=py(r);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();ctx.setLineDash([]);
-    ctx.strokeStyle=state.color;ctx.lineWidth=2.5;ctx.beginPath();
-    for(let i=0;i<=300;i++){const r=Math.sin(-Math.PI/2+i*Math.PI/300),x=px(laneSpeed(r)),y=py(r);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
-    ctx.fillStyle='#d1dfeb';ctx.font='12px system-ui';ctx.fillText('Isprekidana krivulja: laminarna referenca · okomica u/v̄ = 1: srednja brzina',42,320);
-    canvas.closest('#reynolds-widget').mf1ProfileState={...state,wall:laneSpeed(1),center:laneSpeed(0)};
-
-
-  }
-
-  vS.oninput = ()=>{update();draw()}; MF1.motion(canvas.parentElement,draw,{reset:()=>particles.forEach((p,i)=>p.phase=(i*.61803398875)%1)});
-  update();
-  draw();
-})();
-</script>
-
-```
-
-
 ## Dodatni primjeri {.unnumbered}
 
 ### Dodatni primjer Z121 — Turbulentno strujanje zraka {.unnumbered}
@@ -3424,166 +1939,6 @@ Zrak struji kroz 7 m dug pravokutni ventilacijski kanal dimenzija $150 \times 20
     };
     const lambda = (Re, kd) => MF1.pipeFriction(Re,kd).factor;
     const regime = (Re) => (Re < 2320 ? "laminarno" : Re < 4000 ? "prijelazno" : "turbulentno");
-
-    function z120() {
-      const root = document.getElementById("z120-laminar-widget");
-      if (!root) return;
-      const t = root.querySelector("#z120-T-slider"),
-        v = root.querySelector("#z120-v-slider"),
-        scene = svgFor(
-          root,
-          "#z120-canvas",
-          "Duga kružna cijev s paraboličnim profilom brzine i linearnim padom tlaka",
-          "0 0 920 360",
-        ),
-        out = primary(
-          root,
-          ".z120-summary",
-          "Dominantni rezultat: pad tlaka Δp",
-          "Hagen–Poiseuille vrijedi samo dok je Re < 2320.",
-        );
-      const loc = locator(
-        root,
-        ".z120-stage",
-        "v13p-z120-locator",
-        '<h5>Trenutačni lanac modela</h5><div class="v13p-chain"><span>T</span><span>μ</span><span>Re</span><span>λ</span><span>Δp</span></div><p></p>',
-      );
-      let previousState = null,
-        lastChanged = "T";
-      const calc = () => {
-        const T = +t.value,
-          V = +v.value,
-          L = 15,
-          D = 0.002,
-          rho = 1000,
-          g = 9.81,
-          mu = 0.00179 / (1 + 0.0337 * T + 0.00022 * T * T),
-          Re = (rho * V * D) / mu,
-          valid = Re < 2320,
-          lam = 64 / Re,
-          dp = (32 * mu * L * V) / (D * D) / 1000,
-          hw = (dp * 1000) / (rho * g);
-        return { T, V, L, D, mu, Re, valid, lam, dp, hw, p1: dp, p2: 0 };
-      };
-      const draw = (s)=>{
- const h=scene;let p='';for(let i=0;i<=40;i++){const r=-1+i/20;p+=(i?'L':'M')+(680+2*s.V*(1-r*r)*23)+' '+(85+i*3);}
- const yP1=75,yP2=185;
- h.innerHTML='<rect width="920" height="360" fill="#fbfdff"/><text x="55" y="35" font-size="17">'+(s.valid?'Potpuno razvijeno laminarno strujanje':'Izvan laminarnog modela: profil i pad tlaka nisu predviđeni')+'</text>'+
- '<path d="M65 205H560M65 275H560" stroke="#58768b" stroke-width="6"/><rect x="65" y="208" width="495" height="64" fill="#e0f2fe"/>'+MF1.svgArrow(90,240,s.V*35,0,C.velocity,'v̄')+
- (s.valid?'<path d="M80 '+yP1+'L550 '+yP2+'" stroke="#6d28d9" stroke-width="3"/><path d="M80 '+yP1+'V205M550 '+yP2+'V205" stroke="#a78bfa"/><text x="80" y="60">p₁ − p₂ = '+fmt(s.dp,1)+' kPa</text><text x="370" y="'+(yP2-13)+'">p₂ = '+fmt(s.p2,1)+' kPa</text><path d="'+p+'" fill="none" stroke="#0284c7" stroke-width="3"/><path d="M680 85V205" stroke="#94a3b8"/><text x="650" y="60">u(r)=2v̄[1−(r/R)²]</text>':'')+
- '<text x="70" y="310">L = 15 m; D = 2 mm (duljina i promjer shematski)</text><text x="70" y="340">Tlak: prilagođena skala, referenca p₂ = 0; profil: 23 px/(m/s).</text>';
- };
-      const sync = () => {
-        const s = calc();
-        set(root, "#z120-v-T", fmt(s.T, 0));
-        set(root, "#z120-v-v", fmt(s.V, 1));
-        set(root, "#z120-res-re", fmt(s.Re, 0));
-        set(root, "#z120-res-mu", fmt(s.mu, 5) + " Pa s");
-        set(root, "#z120-res-lambda", s.valid ? fmt(s.lam, 4) : "—");
-        set(root, "#z120-res-dp", s.valid ? fmt(s.dp, 1) + " kPa" : "model nije valjan");
-        set(root, "#z120-res-hw", s.valid ? fmt(s.hw, 1) + " m" : "—");
-        set(root, "#z120-p1-gauge", fmt(s.p1, 0) + " kPa");
-        set(root, "#z120-p2-gauge", s.valid ? fmt(s.p2, 1) + " kPa" : "—");
-        out.textContent = s.valid ? fmt(s.dp, 1) + " kPa" : "izvan laminarnog modela";
-        const status = root.querySelector("#z120-model-status");
-        status.className = "z120-model-status " + (s.valid ? "is-valid" : "is-outside");
-        status.textContent = s.valid
-          ? "LAMINARNO: λ = 64/Re; tlak pada linearno duž iste cijevi."
-          : "IZVAN PODRUČJA PRIMJENE: Re ≥ 2320; Hagen–Poiseuilleov model više nije odgovarajući.";
-        loc.querySelector("p").textContent =
-          lastChanged === "T"
-            ? `T = ${fmt(s.T, 0)} °C mijenja μ = ${fmt(s.mu, 5)} Pa s; pri istoj brzini manja viskoznost znači manji Δp.`
-            : `v = ${fmt(s.V, 1)} m/s mijenja intenzitet paraboličnog profila. U laminarnom području Δp je razmjeran v.`;
-        set(root, "#z120-explainer", loc.querySelector("p").textContent);
-        draw(s);
-        previousState = s;
-      };
-      [t, v].forEach((el) =>
-        el.addEventListener("input", (e) => {
-          lastChanged = e.target === t ? "T" : "v";
-          sync();
-        }),
-      );
-      sync();
-    }
-
-    function z122() {
-      const root = document.getElementById("z122-diffuser-widget");
-      if (!root) return;
-      const alpha = root.querySelector("#z122-alpha-slider"),
-        v1 = root.querySelector("#z122-v1-slider"),
-        scene = svgFor(
-          root,
-          "#z122-canvas",
-          "Difuzor s promjenjivim kutom, usporavanjem struje i oporavkom statičkog tlaka",
-          "0 0 920 390",
-        ),
-        out = primary(
-          root,
-          ".z122-summary",
-          "Dominantni rezultat: stvarni izlazni tlak p₂",
-          "Dio brzinske visine vraća se u tlak, ali H₂ je manji od H₁ zbog hL.",
-        ),
-        loc = locator(
-          root,
-          ".z122-stage",
-          "v13p-z122-locator",
-          '<h5>Dva locatora: brzina i energija</h5><div class="v13p-chain"><span>v₁</span><span>v₂</span><span>v²/2g ↓</span><span>p/ρg ↑</span><span>H ↓ zbog hL</span></div><p></p>',
-        );
-      let previousState = null,
-        lastChanged = "α";
-      const calc = () => {
-        const a = +alpha.value,
-          V1 = +v1.value,
-          D1 = 0.06,
-          D2 = 0.09,
-          rho = 1000,
-          g = 9.81,
-          beta = 1.06,
-          V2 = V1 * (D1 / D2) ** 2,
-          zeta = 0.035 + 0.035 * (a / 30) ** 2,
-          hL = (zeta * V1 ** 2) / (2 * g),
-          ideal = 150 + (rho * g * ((beta * (V1 ** 2 - V2 ** 2)) / (2 * g))) / 1000,
-          p2 = ideal - (rho * g * hL) / 1000;
-        return { a, V1, D1, D2, V2, zeta, hL, ideal, p2, delta: (beta * (V1 ** 2 - V2 ** 2)) / (2 * g) };
-      };
-      const draw = (s)=>{
- const metric=Math.min(1200,290/((s.D2-s.D1)/2/Math.tan(s.a*Math.PI/180))),r1=s.D1/2*metric,r2=s.D2/2*metric,L=(r2-r1)/Math.tan(s.a*Math.PI/180),x1=170,x2=x1+L,y=245,vs=11;
- const E1=150/9.81+1.06*s.V1*s.V1/(2*9.81),E2=E1-s.hL,H1=150/9.81,H2=s.p2/9.81,ps=4,Y=v=>165-v*ps;
- scene.innerHTML='<rect width="920" height="390" fill="#fbfdff"/><text x="50" y="30" font-size="17">Difuzor: točan omjer promjera i polukut α</text>'+
- '<path d="M70 '+(y-r1)+'H'+x1+'L'+x2+' '+(y-r2)+'H865V'+(y+r2)+'H'+x2+'L'+x1+' '+(y+r1)+'H70Z" fill="#e0f2fe" stroke="#58768b" stroke-width="4"/>'+MF1.svgArrow(80,y,s.V1*vs,0,C.velocity,'v₁')+MF1.svgArrow(x2+90,y,s.V2*vs,0,C.velocity,'v₂')+
- '<path d="M80 '+Y(E1)+'H'+x1+'L'+x2+' '+Y(E2)+'H840" fill="none" stroke="#c95d12" stroke-width="3"/><path d="M80 '+Y(H1)+'H'+x1+'L'+x2+' '+Y(H2)+'H840" fill="none" stroke="#6d28d9" stroke-width="3" stroke-dasharray="5 4"/>'+
- '<text x="55" y="'+(Y(E1)-8)+'">EGL</text><text x="55" y="'+(Y(H1)+18)+'">HGL</text><text x="520" y="155">Visine: 4 px/m, isti datum</text><text x="520" y="180">hL = '+fmt(s.hL,3)+' m; p₂ = '+fmt(s.p2,1)+' kPa</text>'+
- '<text x="70" y="335">D₁ = 60 mm; D₂ = 90 mm; α = '+fmt(s.a,0)+'°; duljina difuzora = '+fmt((s.D2-s.D1)/2/Math.tan(s.a*Math.PI/180),3)+' m</text><text x="70" y="366">ζ(α) je zadana ilustrativna korelacija; vrtlozi i odvajanje nisu izračunati.</text>';
- };
-      const sync = () => {
-        const s = calc();
-        set(root, "#z122-v-alpha", fmt(s.a, 0));
-        set(root, "#z122-v-v1", fmt(s.V1, 1));
-        set(root, "#z122-res-zeta", fmt(s.zeta, 3));
-        set(root, "#z122-res-hwm", fmt(s.hL, 3) + " m");
-        set(root, "#z122-res-p2", fmt(s.p2, 1) + " kPa");
-        set(root, "#z122-res-v2", fmt(s.V2, 2) + " m/s");
-        set(root, "#z122-res-dhead", fmt(s.delta, 2) + " m");
-        set(root, "#z122-res-regime", fmt(s.a, 0) + "°");
-        out.textContent = fmt(s.p2, 1) + " kPa";
-        const msg =
-          lastChanged === "α"
-            ? `Kut α = ${fmt(s.a, 0)}° stvarno mijenja geometriju difuzora i ζ = ${fmt(s.zeta, 3)}. Veći kut u ovom modelu daje veći lokalni gubitak, bez pretpostavljanja univerzalnog praga odvajanja.`
-            : `Veći v₁ povećava raspoloživu brzinsku visinu, ali i hL = ζv₁²/(2g). Zato se i idealni povrat tlaka i njegova disipacijska cijena povećavaju.`;
-        loc.querySelector("p").textContent = msg;
-        set(root, "#z122-explainer", msg);
-        draw(s);
-        previousState = s;
-      };
-      [alpha, v1].forEach((el) =>
-        el.addEventListener("input", (e) => {
-          lastChanged = e.target === alpha ? "α" : "v₁";
-          sync();
-        }),
-      );
-      sync();
-    }
 
     function z123() {
       const root = document.getElementById("z123-budget-widget");
@@ -3821,8 +2176,6 @@ Zrak struji kroz 7 m dug pravokutni ventilacijski kanal dimenzija $150 \times 20
         '<svg viewBox="0 0 680 230" role="img" aria-label="Pravokutni ventilacijski kanal s označenim strujnim presjekom i omočenim opsegom"><rect width="680" height="230" fill="#fbfdff"/><text x="28" y="32" fill="#17324d" font-size="17" font-weight="700">Pravokutni kanal: hidraulički promjer</text><rect x="95" y="68" width="200" height="150" rx="3" fill="#d9f4fa" stroke="#58768b" stroke-width="7"/><path d="M95 55H295M95 49V61M295 49V61M72 68V218M66 68H78M66 218H78" stroke="#71869b" stroke-width="2"/><text x="155" y="48" fill="#526779" font-size="15">b = 200 mm</text><text x="20" y="130" fill="#526779" font-size="15">h = 150 mm</text><circle cx="195" cy="143" r="15" fill="none" stroke="#1269b0" stroke-width="3"/><circle cx="195" cy="143" r="4" fill="#1269b0"/><defs><marker id="v13z121a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L7 4L0 8Z" fill="#1269b0"/></marker></defs><text x="135" y="105" fill="#1269b0" font-size="15">v̄ = 7 m/s</text><path d="M405 70H620V180H405Z" fill="#eef6fa" stroke="#58768b" stroke-width="3"/><path d="M405 70H620M405 180H620M405 70V180M620 70V180" fill="none" stroke="#b93645" stroke-width="5" stroke-dasharray="8 5"/><text x="420" y="108" fill="#17324d" font-size="16" font-weight="700">A = b h</text><text x="420" y="134" fill="#526779" font-size="15">P (omočeni) = 2(b+h)</text><text x="420" y="160" fill="#4f46a5" font-size="16" font-weight="700">Dₕ = 4A/P</text></svg><p>Hidraulički promjer nije stvarni promjer kanala: povezuje površinu kroz koju zrak teče s opsegom stijenke koji stvara trenje.</p>';
       section.append(box);
     }
-    z120();
-    z122();
     z123();
     z124();
     z121();

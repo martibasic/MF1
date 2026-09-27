@@ -1,5 +1,7 @@
 # Grafička i fizikalna nadogradnja — 27. rujna 2026.
 
+> Povijesni izvještaj prethodnih krugova. Konačno uredničko uređenje, smanjenje sa 127 na 36 widgeta i aktualni izbor opisani su u [UREDNICKO_UREDENJE.md](UREDNICKO_UREDENJE.md). Naknadno dodani laboratoriji polja opisani niže uklonjeni su; njihovi modeli ostaju samo regresijska referenca.
+
 Promjene obuhvaćaju svih 13 izvora vježbi i zajedničke alate postojećih widgeta. Izričit korisnikov zahtjev za rad na vježbama nadjačava staru napomenu o zamrznutim izvorima u README-u. Nema objave na udaljeni poslužitelj.
 
 ## Zajedničke promjene

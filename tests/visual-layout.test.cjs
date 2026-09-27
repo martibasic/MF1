@@ -10,7 +10,7 @@ test('Every live drawing has a full-width path through its widget, including mod
    function check(){
     for(const root of a.w.document.querySelectorAll('.mf1-compact')){
      for(const graphic of root.querySelectorAll('canvas,svg')){
-      if(!a.visible(graphic)||graphic.closest('mjx-container')||graphic.parentElement.closest('svg'))continue;
+      if(!a.visible(graphic)||graphic.closest('mjx-container,details:not([open])')||graphic.parentElement.closest('svg'))continue;
       assert.ok(graphic.classList.contains('mf1-graphic'),`V${n}: undecorated ${graphic.id}`);
       for(let branch=graphic;branch!==root;branch=branch.parentElement){
        const css=a.w.getComputedStyle(branch),parent=branch.parentElement;
@@ -21,20 +21,26 @@ test('Every live drawing has a full-width path through its widget, including mod
         (layout.display==='grid'&&css.gridColumn==='1/-1')||layout.display==='block',
         `V${n}: graphic shares a row in ${parent.className}`);
       }
-      assert.ok(!graphic.closest('details:not([open])'),`V${n}: hidden vector construction`);
      }
     }
    }
    a.frames(2);check();
    for(const mode of a.w.document.querySelectorAll('[data-mode]')){mode.click();a.frames(2);check();}
+   // Secondary constructions may be disclosed deliberately; they must be
+   // readable at full width when a student opens the derivation.
+   for(const details of a.w.document.querySelectorAll('.mf1-compact details'))details.open=true;
+   a.frames(2);check();
    assert.deepEqual(a.errors,[]);
   }finally{a.dom.window.close();}
  }
 });
 
-test('Replaced legacy canvases remain hidden under the new drawing styles',()=>{
+test('Replaced legacy canvases are removed or remain hidden under the drawing styles',()=>{
  const a=load(2);
- try{for(const id of ['canvas-z12-dual','canvas-yl','canvas-z14-v2','canvas-z15-vfinal'])assert.equal(a.visible(a.w.document.getElementById(id)),false,id);}
+ try{for(const id of ['canvas-z12-dual','canvas-yl','canvas-z14-v2','canvas-z15-vfinal']){
+  const canvas=a.w.document.getElementById(id);
+  assert.ok(!canvas||!a.visible(canvas),id);
+ }}
  finally{a.dom.window.close();}
 });
 
@@ -46,6 +52,32 @@ test('V5 canvas fitting preserves physical angles even in a mismatched viewport'
    {setTransform:(...args)=>transform=args},450,400);
   close(transform[0],transform[3]);assert.ok(transform[4]>=0&&transform[5]>=0);
  }}finally{a.dom.window.close();}
+});
+
+test('V6 merged pressure scene reverses both force directions without changing magnitudes',()=>{
+ const a=load(6),root=a.w.document.getElementById('widget-curved-pressure');
+ try{
+  let drawn;
+  const draw=a.w.MF1.quarterScene;
+  a.w.MF1.quarterScene=(canvas,model)=>{drawn={...model};return draw(canvas,model);};
+  root.querySelector('[data-cp-step="3"]').click();
+  for(const h of [0,1.2,3])for(const R of [.4,1,1.8]){
+   a.change(root.querySelector('#cp-h'),h);a.change(root.querySelector('#cp-r'),R);
+   const expectedH=9.81*(h+R/2)*R,expectedV=9.81*(h*R+Math.PI*R*R/4);
+   const magnitudes=[];
+   for(const side of ['outside','inside']){
+    root.querySelector(`[data-cp-side="${side}"]`).click();
+    close(drawn.FH,expectedH);close(drawn.FV,expectedV);
+    assert.equal(drawn.inside,side==='inside');assert.equal(drawn.step,3);
+    const horizontal=root.querySelector('#cp-fh').textContent,vertical=root.querySelector('#cp-fv').textContent;
+    assert.ok(horizontal.endsWith(side==='inside'?'←':'→'),horizontal);
+    assert.ok(vertical.endsWith(side==='inside'?'↓':'↑'),vertical);
+    magnitudes.push([horizontal.slice(0,-1),vertical.slice(0,-1),root.querySelector('#cp-fr').textContent]);
+   }
+   assert.deepEqual(magnitudes[0],magnitudes[1]);
+  }
+  assert.deepEqual(a.errors,[]);
+ }finally{a.dom.window.close();}
 });
 
 test('Pelton velocity triangles still close after separating their visual panels',()=>{

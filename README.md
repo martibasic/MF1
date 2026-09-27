@@ -1,5 +1,7 @@
 # Interni README - MF1 repozitorij (svibanj 2026)
 
+> Ažuriranje, rujan 2026.: na izričit zahtjev ponovno je otvoren rad na widgetima u `vjezba_01.qmd`–`vjezba_13.qmd`. Za taj rad vrijedi [aktualni urednički pregled](UREDNICKO_UREDENJE.md); napomene o zamrznutim vježbama u svibanjskom presjeku niže povijesne su. Kanonski udžbenik ostaje u `MF1_udzbenik/`.
+
 Ovaj README vise nije plan za odvojenu skriptu i zaseban teorijski prirucnik. Sluzi kao kratki operativni presjek stvarnog stanja repozitorija nakon sto je `MF1_udzbenik` postao kanonski proizvod.
 
 ## Trenutni raspored projekta

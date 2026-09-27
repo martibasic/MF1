@@ -47,7 +47,7 @@
   'z124-parallel-widget':['z124-d1-slider']
  };
  const dataSecondary={
-  'v12-pelton':['q','b'], 'v12-rocket':['m','ve'],
+  'v12-pelton':['q','b','k'], 'v12-rocket':['m','ve'],
   'v12-cantilever':['l'], 'v12-sprinkler':['r'], 'v12-wind':['e']
  };
  function group(root,inputs){

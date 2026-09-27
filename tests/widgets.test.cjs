@@ -42,23 +42,49 @@ test('Rocket obeys the variable-mass equation, including a 45% propellant fracti
  a.change(input('dm'),2250);close(out('dv'),3000*Math.log(5000/2750),.0001);
  const dv=out('dv');a.change(input('t'),input('t').max);close(out('dv'),dv);a.dom.window.close();
 });
-test('Gate uses pressure minus momentum; equal levels approach the stated critical branch',()=>{
- const a=load(12),root=a.w.document.querySelector('#v12-gate'),h1=root.querySelector('[data-k="h1"]'),h2=root.querySelector('[data-k="h2"]'),out=k=>numeric(root.querySelector(`[data-v="${k}"]`));
- for(const depth of [0,.5,2.9,3]){a.change(h2,depth);close(out('f'),out('ph')-out('im'),.002);assert.ok(out('f')>=0);}
- a.change(h1,.8);assert.ok(+h2.value<=+h1.value);a.dom.window.close();
+test('Pelton scene preserves tangential momentum, power and the stationary-bucket limit',()=>{
+ const a=load(12),root=a.w.document.querySelector('#v12-pelton'),input=k=>root.querySelector(`[data-k="${k}"]`),out=k=>numeric(root.querySelector(`[data-v="${k}"]`));
+ try{for(const ratio of [0,.25,.5,.75,.95]){
+  a.change(input('u'),ratio);
+  const v=+input('v').value,U=v*ratio,mdot=1000*+input('q').value,k=+input('k').value,beta=+input('b').value*Math.PI/180;
+  const v2=U+k*(v-U)*Math.cos(beta),force=mdot*(v-v2);
+  assert.ok(Math.abs(out('f')*1000-force)<=50.01); // displayed to 0.1 kN
+  assert.ok(Math.abs(out('p')*1e6-force*U)<=5000.01); // displayed to 0.01 MW
+  if(ratio===0){close(out('p'),0);assert.ok(out('f')>0);}
+ }
+ a.change(input('u'),.5);const peak=out('p');
+ for(const ratio of [.4,.6]){a.change(input('u'),ratio);assert.ok(out('p')<peak);}
+ assert.deepEqual(a.errors,[]);}finally{a.dom.window.close();}
 });
-test('Flyboard reaches 10 m continuously, then follows free fall and stops at the surface',()=>{
- const a=load(12,{reduced:false}),root=a.w.document.querySelector('#v12-fly');root.querySelector('.mf1-motion button').click();a.frames(1,10);
- a.frames(400,10);let s=root.mf1FlyState;assert.ok(!s.active&&s.y>10);close(s.ac,-9.81);close(s.vy,s.vc-9.81*(s.time-s.cut));
- a.frames(300,10);s=root.mf1FlyState;assert.ok(s.landed);close(s.y,0);close(s.vy,0);assert.equal(root.querySelector('.mf1-motion button').getAttribute('aria-pressed'),'false');a.dom.window.close();
+
+test('Sprinkler torque uses absolute exit velocity; a locked rotor has torque but no shaft power',()=>{
+ const a=load(12),root=a.w.document.querySelector('#v12-sprinkler'),input=k=>root.querySelector(`[data-k="${k}"]`),out=k=>numeric(root.querySelector(`[data-v="${k}"]`));
+ try{for(const rpm of [0,300,+input('n').max]){
+  a.change(input('n'),rpm);
+  const Q=+input('q').value/1000,r=+input('r').value,omega=rpm*Math.PI/30,W=Q/(Math.PI*.01**2),Vtheta=r*omega-W;
+  const torque=-1000*Q*r*Vtheta;
+  assert.ok(Math.abs(out('vv')-Vtheta)<=.00501);
+  assert.ok(Math.abs(out('m')-torque)<=.05001);
+  assert.ok(Math.abs(out('p')*1000-torque*omega)<=50.01);
+  if(rpm===0){assert.ok(out('m')>0);close(out('p'),0);}
+ }
+ assert.deepEqual(a.errors,[]);}finally{a.dom.window.close();}
 });
-test('Z99 pressure and energy depend on the same explicit coordinates',()=>{
- const a=load(11),get=k=>a.w.document.querySelector('#v11-z99-'+k),out=k=>numeric(get(k));
- const omega=+get('omega').value,p0=+get('p0').value*1000,re=+get('re').value,ze=+get('ze').value;
- close(out('pa'),(p0+998*9.81*.8+998*omega*omega/2)/1000,.0002);
- close(out('w'),Math.sqrt(2*p0/998+omega*omega*re*re-2*9.81*ze),.0002);
- a.change(get('omega'),0);a.change(get('ze'),8);assert.ok(get('q').textContent.includes('nema'));a.dom.window.close();
+
+test('Draining scene conserves the initial volume and has quarter depth at half the emptying time',()=>{
+ const a=load(11),get=k=>a.w.document.querySelector('#v11-z97-'+k),out=k=>numeric(get(k));
+ try{
+  const D=+get('diameter').value,d=+get('nozzle').value/1000,h0=+get('h0').value,cd=+get('cd').value;
+  const A=Math.PI*D**2/4,T=(D/d)**2*Math.sqrt(2*h0/9.81)/cd;
+  close(out('T'),T,.0001);a.change(get('time'),T/2);close(out('h'),h0/4,.0005);
+  let volume=0;const steps=20;
+  for(let i=0;i<=steps;i++){a.change(get('time'),T*i/steps);volume+=((i===0||i===steps)? .5 : 1)*out('q')/1000*T/steps;}
+  close(volume,A*h0,.0001);close(out('h'),0);close(out('q'),0);
+  a.change(get('time'),0);a.change(get('nozzle'),d*2000);close(out('T'),T/4,.0001);
+  assert.deepEqual(a.errors,[]);
+ }finally{a.dom.window.close();}
 });
+
 
 for(let n=1;n<=13;n++)test(`V${n}: live handlers, presets, minima/maxima and combined extremes`,()=>{
  const a=load(n);a.frames(2);a.scan('initial');
@@ -81,7 +107,9 @@ for(let n=1;n<=13;n++)test(`V${n}: live handlers, presets, minima/maxima and com
 
 test('Moody widget stays byte-equivalent to its reviewed protected fixture',()=>{
  const fs=require('fs'),crypto=require('crypto'),s=fs.readFileSync('vjezba_13.qmd','utf8');
- const block=s.slice(s.indexOf('<!-- WIDGET: Moodyjev Dijagram -->'),s.indexOf('<script type="text/plain">')).replace(/\r\n/g,'\n');
+ const start=s.indexOf('<!-- WIDGET: Moodyjev Dijagram -->'),end=s.indexOf('<!-- END REVIEWED MOODY -->');
+ assert.ok(start>=0&&end>start,'Reviewed Moody block must retain explicit boundaries');
+ const block=s.slice(start,end).replace(/\r\n/g,'\n');
  const fixture=JSON.parse(fs.readFileSync('tests/moody-protection.json','utf8'));
  assert.equal(crypto.createHash('sha256').update(block).digest('hex'),fixture.sha256);
  assert.ok(!fs.readFileSync('assets/mf1-widgets.css','utf8').includes('#v13-moody-widget'));

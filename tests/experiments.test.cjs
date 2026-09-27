@@ -14,14 +14,19 @@ test('Curved-pressure scene preserves circles and normals on wide and tall canva
  }
 });
 
-test('Inclined block keeps terminal velocity and force balance across its original control range',()=>{
+test('Pipe shear balances the pressure force and keeps the Poiseuille profile across its controls',()=>{
  const a=load(1),q=id=>a.w.document.getElementById(id);
- try{for(const angle of [5,20,45])for(const mu of [1,7,50])for(const delta of [1,6,50]){
-  a.change(q('z7-alpha'),angle);a.change(q('z7-mu'),mu);a.change(q('z7-delta'),delta);
-  const force=1100*Math.sin(angle*Math.PI/180),velocity=force*delta*1e-6/(mu*1e-3*.25**2);
-  close(+q('z7-res-fg').textContent,force,.001);close(+q('z7-res-v').textContent,velocity,.005);
+ try{for(const beta of [10,100,500])for(const mu of [1,10,50])for(const dmm of [40,100,150]){
+  a.change(q('z6-beta'),beta);a.change(q('z6-mu'),mu);a.change(q('z6-d'),dmm);
+  const d=dmm/1000,L=+q('z6-l').value,pressureForce=beta*L*Math.PI*d*d/4;
+  close(+q('z6-res-force-wall').textContent,pressureForce,.00500001);
+  close(+q('z6-res-tau-wall').textContent,beta*d/4,.00500001);
+  close(+q('z6-res-tau-quarter').textContent,beta*d/8,.00500001);
+  close(+q('z6-res-vmax').textContent,beta*d*d/(16*mu*.001),.00500001);
+  close(+q('z6-res-tau-center').textContent,0);
  }assert.deepEqual(a.errors,[]);}finally{a.dom.window.close();}
 });
+
 
 test('Continuity modes use two primary controls and preserve finite physics under presets',()=>{
  const a=load(8),root=a.w.document.getElementById('v8-explorer');

@@ -1,4 +1,4 @@
-const test=require('node:test'),assert=require('node:assert/strict'),{load}=require('./widget-harness.cjs');
+const test=require('node:test'),assert=require('node:assert/strict');
 const M=require('../assets/mf1-field-models.js'),F=require('../assets/mf1-science.js');
 const near=(a,b,t=1e-8)=>assert.ok(Math.abs(a-b)<t*Math.max(1,Math.abs(b)),`${a} != ${b}`);
 test('Couette–Poiseuille satisfies both walls, Navier–Stokes, flux and work-dissipation balance',()=>{
@@ -45,35 +45,4 @@ test('Jet momentum and Pelton three-part power budget close over every parameter
   const m=M.pelton({ratio,beta,k});near(m.vx,m.U+m.wx);near(m.vy,m.wy);near(m.input,m.power+m.exit+m.loss);assert.ok(m.power>=0&&m.loss>=0&&m.efficiency<=1+1e-10);
   assert.ok(M.pelton({ratio:.5,beta,k}).power>=m.power-1e-8);
  }
-});
-test('Unattainable single-phase pipe settings stop the tracers and expose the pressure limit',()=>{
- const a=load(10),root=a.w.document.querySelector('.mf1-field-lab');try{
-  for(const [key,value] of [['Q',20],['D',.06],['zeta',8],['p0',0]])a.change(root.querySelector('[data-parameter='+key+']'),value);
-  assert.ok(root.mf1FieldState.model.invalid);assert.ok(root.querySelector('[data-action=play]').disabled);assert.ok(root.mf1FieldState.model.minimumAbsolutePressure<2340);
-  a.change(root.querySelector('[data-parameter=p0]'),600);assert.ok(!root.mf1FieldState.model.invalid);assert.ok(!root.querySelector('[data-action=play]').disabled);assert.deepEqual(a.errors,[]);
- }finally{a.dom.window.close();}
-});
-test('Each exercise mounts exactly one labelled field laboratory and every model corner stays finite',()=>{
- for(let n=1;n<=13;n++){
-  const a=load(n);try{const roots=a.w.document.querySelectorAll('.mf1-field-lab');assert.equal(roots.length,1,'V'+n);const root=roots[0];a.frames(1);
-   const inputs=[...root.querySelectorAll('[data-parameter]')];
-   for(const mode of ['min','max']){for(const input of inputs)a.change(input,input[mode]);a.scan(mode);const values=Object.values(root.mf1FieldState.model).filter(v=>typeof v==='number');assert.ok(values.every(Number.isFinite),'V'+n);}
-   assert.ok(root.querySelector('svg title').textContent.length>10);assert.ok(root.querySelector('svg desc').textContent.length>30);assert.deepEqual(a.errors,[]);
-  }finally{a.dom.window.close();}
- }
-});
-test('Field motion uses physical seconds at 10 and 120 fps, pauses and resets explicitly',()=>{
- for(const fps of [10,120]){
-  const a=load(8),root=a.w.document.querySelector('.mf1-field-lab'),play=root.querySelector('[data-action=play]');
-  a.frames(5);near(root.mf1FieldState.time,0);play.click();a.frames(1,1000/fps);a.frames(fps*2,1000/fps);near(root.mf1FieldState.time,.5);
-  play.click();a.frames(fps,1000/fps);near(root.mf1FieldState.time,.5);root.querySelector('[data-action=rewind]').click();near(root.mf1FieldState.time,0);assert.equal(root.mf1FieldState.running,false);assert.deepEqual(a.errors,[]);a.dom.window.close();
- }
-});
-test('Saved state A is immutable, changes are reported and removal preserves live widget B',()=>{
- const a=load(2),root=a.w.document.querySelector('.mf1-field-lab');try{
-  const buttons=[...root.querySelectorAll('.mf1-view-tools button')],save=buttons.find(b=>b.textContent==='Zapamti A');save.click();
-  const tray=root.querySelector('.mf1-compare-tray'),image=tray.querySelector('img'),source=image.src,before=root.mf1FieldState.model.mean;
-  a.change(root.querySelector('[data-parameter=U]'),2);a.frames(2);assert.equal(image.src,source);assert.notEqual(root.mf1FieldState.model.mean,before);assert.equal(tray.querySelectorAll('tbody tr').length,1);
-  assert.equal(tray.querySelectorAll('svg,[id]').length,0);tray.querySelector('button').click();assert.equal(root.querySelector('.mf1-compare-tray'),null);near(root.mf1FieldState.parameters.U,2);assert.deepEqual(a.errors,[]);
- }finally{a.dom.window.close();}
 });

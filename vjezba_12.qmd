@@ -83,13 +83,7 @@
     const primary = {
       pelton: "p",
       rocket: "f",
-      valve: "r",
-      cantilever: "ma",
       sprinkler: "p",
-      wind: "p",
-      heli: "p",
-      gate: "f",
-      fly: "a",
     };
     Object.entries(primary).forEach(([name, key]) => {
       const root = document.getElementById(`v12-${name}`);
@@ -115,13 +109,7 @@
         "sila i moment",
       ],
       rocket: ["fluid", "ispuh", "absolute", "Δv satelita", "force", "potisak"],
-      valve: ["fluid", "fluid", "absolute", "brzine", "force", "sila na prirubnicu"],
-      cantilever: ["fluid", "mlaz", "force", "opterećenje i reakcija", "motion", "pozitivan moment"],
       sprinkler: ["fluid", "mlaz", "absolute", "Vθ", "relative", "Wθ", "motion", "ω i U"],
-      wind: ["fluid", "struja zraka", "absolute", "v₁ i v₂", "motion", "rotor", "force", "reakcija"],
-      heli: ["fluid", "nizvodna struja", "force", "T i W", "motion", "rotor"],
-      gate: ["fluid", "voda", "absolute", "v₁ i v₂", "force", "sila na ustavu"],
-      fly: ["fluid", "mlaz", "force", "potisak i težina", "absolute", "brzina", "motion", "gibanje"],
     };
     Object.entries(legendFor).forEach(([name, items]) => {
       const root = document.getElementById(`v12-${name}`),
@@ -137,46 +125,15 @@
       }
       stage.insertAdjacentElement("afterend", legend);
     });
-    const addCause = (id, label, read) => {
-      const root = document.getElementById(id);
-      if (!root) return;
-      let box = root.querySelector(".v12x-cause");
-      if (!box) {
-        box = document.createElement("div");
-        box.className = "v12x-cause";
-        box.dataset.v12Added = "true";
-        const formula = root.querySelector(".v12x-formula");
-        formula ? formula.insertAdjacentElement("afterend", box) : root.append(box);
-      }
-      const refresh = () =>
-        requestAnimationFrame(() => {
-          box.innerHTML = `<strong>${label}:</strong> ${read(root)}`;
-        });
-      root.querySelectorAll("input").forEach((input) => input.addEventListener("input", refresh));
-      refresh();
-    };
-    addCause("v12-wind", "Zašto se rezultat mijenja", (root) => {
-      const d = +root.querySelector('[data-k="d"]').value,
-        v = +root.querySelector('[data-k="v"]').value,
-        e = +root.querySelector('[data-k="e"]').value;
-      return `D=${d.toFixed(0)} m ulazi preko površine A∝D², a v₁=${v.toFixed(2)} m/s preko snage P∝v³. Koeficijent Cₚ=${(100 * e).toFixed(0)} % određuje mehaničku snagu idealnog diska; sila slijedi iz usporenja struje i protoka kroz disk.`;
-    });
-    addCause("v12-gate", "Zašto se rezultat mijenja", (root) => {
-      const h1 = +root.querySelector('[data-k="h1"]').value,
-        h2 = +root.querySelector('[data-k="h2"]').value;
-      return `Razlika razina Δh=${(h1 - h2).toFixed(2)} m ubrzava tok, dok hidrostatski trokut raste s h². Sila vode na ustavu jednaka je razlici tlačnog doprinosa i porasta toka količine gibanja: F = Ftlak − ΔṖ.`;
-    });
     const pelton = document.getElementById("v12-pelton");
     if (pelton) {
-      const loss = pelton.querySelector('[data-k="k"]')?.closest(".v12x-control"),
-        presets = pelton.querySelector(".v12x-presets");
-      if (loss && presets && !loss.parentElement.matches("details")) {
-        const advanced = document.createElement("details");
-        advanced.className = "v12x-advanced";
-        advanced.innerHTML = "<summary>Napredni parametar: zadržavanje relativne brzine k</summary>";
-        advanced.append(loss);
-        presets.before(advanced);
-      }
+      const cards=pelton.querySelector('.v12x-cards'),details=document.createElement('details'),extra=document.createElement('div');
+      details.className='mf1-parameters';extra.className='v12x-extra-readings';
+      details.innerHTML='<summary>Brzine i moment</summary>';
+      for(const key of ['w','v2','m'])extra.append(pelton.querySelector('[data-v="'+key+'"]').closest('.v12x-card'));
+      cards.querySelectorAll('.v12x-card').forEach(card=>{if(!card.querySelector('[data-v]'))card.remove();});
+      details.append(extra);cards.after(details);
+      const presets = pelton.querySelector(".v12x-presets");
       const source = pelton.querySelector('[data-p="z"]');
       if (source) source.textContent = "Izvorni Z111";
       const optimum = document.createElement("button");
@@ -198,13 +155,8 @@
 </script>
 ```
 
-```{=html}
-<script>
-/* Z106 is calculated and rendered by the unified active scene below. */
-</script>
-```
 
-## Prije zadataka: jedna promjena, tri prikaza {.unnumbered}
+## Fizikalni uvod: relativna brzina, moment i snaga {.unnumbered}
 
 Za pokretnu lopaticu prvo odvojimo brzinu vode koju vidi mirujući promatrač od brzine koju vidi lopatica:
 
@@ -216,49 +168,62 @@ Kod vrtnje promjenu količine gibanja zapisujemo kao
 
 $$M_z=\dot m(r_1V_{\theta1}-r_2V_{\theta2}),\qquad P=M_z\omega.$$
 
-$V_\theta$ je apsolutna tangencijalna komponenta, a $rV_\theta$ specifični moment količine gibanja. Pri ulazu kroz os je $r_1=0$, pa nema ulaznog momenta. U nastavku isti impuls prelazi u potisak i snagu.
+<span class="math inline">\(V_\theta\)</span> je apsolutna tangencijalna komponenta, a $rV_\theta$ specifični moment količine gibanja. Pri ulazu kroz os je <span class="math inline">\(r_1=0\)</span>, pa nema ulaznog momenta. U nastavku isti impuls prelazi u potisak i snagu.
+
+U jednadžbu momenta upisujemo apsolutni <span class="math inline">\(V_\theta\)</span>, ne relativni $W$. Predznak je unaprijed dogovoren: smjer vrtnje je pozitivan; izlaz vode suprotno tom smjeru ima $V_{\theta2}<0$ i daje pozitivan reakcijski moment na rotor.
 
 ```{=html}
-<div id="v12-pelton" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Pokretna lopatica · brzinski trokuti</div><h3>Peltonov mlaz: snaga dolazi iz promjene tangencijalne brzine</h3><p>Ulazni i izlazni trokut pokazuju sve tri brzine. Klizači mijenjaju i crtež i izračun.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 410" role="img" aria-label="Peltonov mlaz na pokretnoj lopatici s vektorima brzine" data-svg></svg><p class="v12x-caption">Plavo je apsolutna brzina vode V, zeleno brzina lopatice U, a narančasto relativna brzina W.</p></div><div class="v12x-body"><div class="v12x-panel"><h4>Uzroci</h4><label class="v12x-control">Ulazna brzina $V_1$ <output data-o="v"></output><input data-k="v" type="range" min="10" max="80" step="1" value="50"></label><label class="v12x-control">Volumenski protok $\dot V$ <output data-o="q"></output><input data-k="q" type="range" min="1" max="16" step=".5" value="10"></label><label class="v12x-control">Omjer $U/V_1$ <output data-o="u"></output><input data-k="u" type="range" min="0" max=".95" step=".001" value=".6283"></label><label class="v12x-control">Otklon $\beta$ <output data-o="b"></output><input data-k="b" type="range" min="95" max="175" step="1" value="160"></label><label class="v12x-control">Zadržavanje $k$ <output data-o="k"></output><input data-k="k" type="range" min=".6" max="1" step=".01" value="1"></label><div class="v12x-presets"><button class="v12x-btn" data-p="z" type="button">Podaci Z111</button><button class="v12x-btn" data-p="zero" type="button">U = 0</button><button class="v12x-btn" data-p="fast" type="button">Brza lopatica</button></div></div><div class="v12x-panel"><h4>Posljedice</h4><div class="v12x-cards"><div class="v12x-card"><small>Relativni ulaz $W_1$</small><strong data-v="w"></strong></div><div class="v12x-card"><small>Izlaz $V_{\theta2}$</small><strong data-v="v2"></strong></div><div class="v12x-card"><small>Sila $F_\theta$</small><strong data-v="f"></strong></div><div class="v12x-card"><small>Moment, $r=2$ m</small><strong data-v="m"></strong></div><div class="v12x-card"><small>Snaga P</small><strong data-v="p"></strong></div><div class="v12x-card"><small>Optimum ovog modela</small><strong>U/V₁ = 0,50</strong></div></div></div></div><div class="v12x-formula"><strong>Model:</strong> $W_1=V_1-U$, $W_{\theta2}=kW_1\cos\beta$, $V_{\theta2}=U+W_{\theta2}$; $F_\theta=\dot m(V_1-V_{\theta2})$, $P=F_\theta U$. Pri $U=0$ je $P=0$. Vrh pri $U/V_1=0,50$ slijedi iz ovog idealiziranog modela; nije opće pravilo za svaku turbinu.</div><div class="v12x-cause"><strong>Lanac promjene:</strong> <span data-c></span></div></div>
+<div id="v12-pelton" data-widget-role="intro" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Pokretna lopatica · brzinski trokuti</div><h3>Peltonov mlaz: snaga dolazi iz promjene tangencijalne brzine</h3><p>Počni s U = 0, zatim povećavaj U/V₁. Prati izlaznu tangencijalnu brzinu i provjeri zašto sila može biti velika, a snaga ipak nula.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 410" role="img" aria-label="Peltonov mlaz na pokretnoj lopatici s vektorima brzine" data-svg></svg><p class="v12x-caption">Plavo je apsolutna brzina vode V, zeleno brzina lopatice U, a narančasto relativna brzina W.</p></div><div class="v12x-body"><div class="v12x-panel"><h4>Uzroci</h4><label class="v12x-control"><span class="mf1-control-caption">Ulazna brzina <span class="math inline">\(V_1\)</span> </span><output data-o="v"></output><input data-k="v" type="range" min="10" max="80" step="1" value="50"></label><label class="v12x-control"><span class="mf1-control-caption">Volumenski protok <span class="math inline">\(\dot V\)</span> </span><output data-o="q"></output><input data-k="q" type="range" min="1" max="16" step=".5" value="10"></label><label class="v12x-control"><span class="mf1-control-caption">Omjer <span class="math inline">\(U/V_1\)</span> </span><output data-o="u"></output><input data-k="u" type="range" min="0" max=".95" step=".001" value=".6283"></label><label class="v12x-control"><span class="mf1-control-caption">Otklon <span class="math inline">\(\beta\)</span> </span><output data-o="b"></output><input data-k="b" type="range" min="95" max="175" step="1" value="160"></label><label class="v12x-control"><span class="mf1-control-caption">Zadržavanje <span class="math inline">\(k\)</span> </span><output data-o="k"></output><input data-k="k" type="range" min=".6" max="1" step=".01" value="1"></label><div class="v12x-presets"><button class="v12x-btn" data-p="z" type="button">Podaci Z111</button><button class="v12x-btn" data-p="zero" type="button">U = 0</button><button class="v12x-btn" data-p="fast" type="button">Brza lopatica</button></div></div><div class="v12x-panel"><h4>Posljedice</h4><div class="v12x-cards"><div class="v12x-card"><small>Relativni ulaz <span class="math inline">\(W_1\)</span></small><strong data-v="w"></strong></div><div class="v12x-card"><small>Izlaz <span class="math inline">\(V_{\theta2}\)</span></small><strong data-v="v2"></strong></div><div class="v12x-card"><small>Sila <span class="math inline">\(F_\theta\)</span></small><strong data-v="f"></strong></div><div class="v12x-card"><small>Moment, <span class="math inline">\(r=2\)</span> m</small><strong data-v="m"></strong></div><div class="v12x-card"><small>Snaga P</small><strong data-v="p"></strong></div><div class="v12x-card"><small>Optimum ovog modela</small><strong>U/V₁ = 0,50</strong></div></div></div></div><div class="v12x-formula"><strong>Model:</strong> <span class="math inline">\(W_1=V_1-U\)</span>, <span class="math inline">\(W_{\theta2}=kW_1\cos\beta\)</span>, <span class="math inline">\(V_{\theta2}=U+W_{\theta2}\)</span>; <span class="math inline">\(F_\theta=\dot m(V_1-V_{\theta2})\)</span>, <span class="math inline">\(P=F_\theta U\)</span>. Pri <span class="math inline">\(U=0\)</span> je <span class="math inline">\(P=0\)</span>. Vrh pri <span class="math inline">\(U/V_1=0,50\)</span> slijedi iz ovog idealiziranog modela; nije opće pravilo za svaku turbinu.</div><div class="v12x-cause"><strong>Lanac promjene:</strong> <span data-c></span></div></div>
 <script>(()=>{const r=document.querySelector('#v12-pelton'),g=r.querySelector('[data-svg]'),s={v:50,q:10,u:.6283,b:160,k:1};let ch='u';const n=(x,d=1)=>Number(x).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}),A=(x1,y1,x2,y2,c,t)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="4" marker-end="url(#a${c.slice(1)})"/><text x="${(x1+x2)/2+5}" y="${(y1+y2)/2-8}" fill="${c}" font-size="15" font-weight="700">${t}</text>`;function up(){const U=s.v*s.u,w=s.v-U,c=Math.cos(s.b*Math.PI/180),si=Math.sin(s.b*Math.PI/180),w2=s.k*w*c,v2=U+w2,md=1000*s.q,F=md*(s.v-v2),P=F*U;const o={v:`${n(s.v,0)} m/s`,q:`${n(s.q,1)} m³/s`,u:n(s.u,2),b:`${n(s.b,0)}°`,k:n(s.k,2)};r.querySelectorAll('[data-o]').forEach(x=>x.textContent=o[x.dataset.o]);const put=(k,t)=>r.querySelector(`[data-v="${k}"]`).textContent=t;put('w',`${n(w)} m/s`);put('v2',`${n(v2)} m/s`);put('f',`${n(F/1000,1)} kN`);put('m',`${n(2*F/1000,1)} kN m`);put('p',`${n(P/1e6,2)} MW`);r.querySelector('[data-c]').textContent=ch==='u'?`U sada je ${n(U)} m/s. Time se mijenja W₁ i zatim izlazni Vθ₂; snaga je ${n(P/1e6,2)} MW.`:ch==='b'?`Otklon β mijenja samo smjer izlaznog W₂. Što se mlaz više vraća, veća je promjena tangencijalne količine gibanja.`:ch==='k'?`k određuje koliki dio relativne izlazne brzine ostaje nakon skretanja, pa mijenja Vθ₂, silu i snagu.`:ch==='q'?`Protok mijenja maseni protok ${n(md,0)} kg/s: brzinski trokuti ostaju istog oblika, ali sila i snaga rastu razmjerno protoku.`:`V₁ mijenja cijeli trokut i raspoloživu snagu.`;const z=2.1,V=s.v*z,UU=U*z,W=w*z,X=500,Y=150,ox=w2*z,oy=-s.k*w*si*z;g.innerHTML=`<defs>${['#1269b0','#147a55','#c95d12','#b93645'].map(c=>`<marker id="a${c.slice(1)}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="${c}"/></marker>`).join('')}</defs><rect width="960" height="410" fill="#fbfdfe"/><path d="M45 174H304" stroke="#bee8f8" stroke-width="20"/><path d="M45 174H304" stroke="#1269b0" stroke-width="3"/><text x="48" y="142" fill="#1269b0" font-size="15" font-weight="700">sapnica: ṁ=ρV̇=${n(md,0)} kg/s</text><circle cx="410" cy="205" r="105" fill="#edf6fa" stroke="#1269b0" stroke-width="5"/><path d="M345 152Q420 262 490 145L467 125Q415 206 370 132Z" fill="#d8edf8" stroke="#1269b0" stroke-width="4"/><circle cx="410" cy="205" r="9" fill="#10283c"/><text x="430" y="198" fill="#526779" font-size="14">r = 2 m</text>${A(304,174,304+V,174,'#1269b0','V₁')}${A(340,286,340+UU,286,'#147a55','U')}${A(340+UU,286,340+UU+W,286,'#c95d12','W₁')}<text x="335" y="326" fill="#526779" font-size="14">V₁ = U + W₁</text>${A(X,Y,X+ox,Y+oy,'#c95d12','W₂')}${A(X,Y,X+UU,Y,'#147a55','U')}${A(X+UU,Y,X+UU+ox,Y+oy,'#1269b0','V₂')}<text x="570" y="95" fill="#526779" font-size="14">V₂ = U + W₂</text><rect x="690" y="268" width="210" height="88" rx="12" fill="#eef6fa" stroke="#cbd9e4"/><text x="708" y="295" fill="#10283c" font-size="15" font-weight="700">P(U) istog mlaza</text><path d="M710 340Q795 275 880 340" fill="none" stroke="#1269b0" stroke-width="3"/><line x1="${710+170*s.u}" y1="316" x2="${710+170*s.u}" y2="345" stroke="#b93645" stroke-width="3"/><text x="715" y="370" fill="#b93645" font-size="13">trenutni U/V₁</text></svg>`}r.querySelectorAll('input').forEach(i=>i.oninput=e=>{s[e.target.dataset.k]=+e.target.value;ch=e.target.dataset.k;up()});r.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{if(b.dataset.p==='z')Object.assign(s,{v:50,q:10,u:31.416/50,b:160,k:1});if(b.dataset.p==='zero')s.u=0;if(b.dataset.p==='fast')s.u=.9;r.querySelectorAll('input').forEach(i=>i.value=s[i.dataset.k]);ch='u';up()});up()})();</script>
 ```
 
-## Kutna količina gibanja prije prskalice {.unnumbered}
 
-U jednadžbu momenta upisujemo apsolutni $V_\theta$, ne relativni $W$. Predznak je unaprijed dogovoren: smjer vrtnje je pozitivan; izlaz vode suprotno tom smjeru ima $V_{\theta2}<0$ i daje pozitivan reakcijski moment na rotor.
+## Zadaci i odabrane primjene {.unnumbered}
 
 ### Dodatni primjer Z104 — Potisak satelita {.unnumbered}
 
 Satelit u orbiti mase 5000 kg putuje konstantnom brzinom $v_0$. Da bi skrenuo s putanje, raketni pogon ispušta 100 kg ispušnih plinova relativnom brzinom 3000 m/s, u smjeru suprotnom od $v_0$, i to ravnomjerno tijekom 2 sekunde. Potrebno je odrediti ubrzanje satelita tijekom tog razdoblja, promjenu brzine satelita te silu potiska na satelit.
 
-<div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$m_s=5000\, \text{kg}$, $m_g=100\, \text{kg}$, $v_i=3000\, \text{m/s}$, $\Delta t=2\, \text{s}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$a_s$; $\Delta v$; $F_p$</span></div></div>
+<div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$m_s=5000\, \text{kg}$, $m_g=100\, \text{kg}$, $v_i=3000\, \text{m/s}$, $\Delta t=2\, \text{s}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$a_s$; <span class="math inline">\(\Delta v\)</span>; <span class="math inline">\(F_p\)</span></span></div></div>
 <div class="rjesenje-label">Rješenje</div>
 
 Za jednolik izbačaj je $\dot m=100/2=50\,\mathrm{kg/s}$ i stalan potisak $F_p=\dot m v_i=150\,\mathrm{kN}$. Masa opada kao $m(t)=m_0-\dot m t$, pa ubrzanje raste od $a_0=30$ do $a_f=30{,}61\,\mathrm{m/s^2}$. Zanemarimo li vanjske sile tijekom impulsa, točna promjena brzine iznosi $\Delta v=v_i\ln(m_0/m_f)=60{,}61\,\mathrm{m/s}$. Aproksimacija stalne mase daje $60\,\mathrm{m/s}$ i dobra je samo za malen udio izbačene mase.
 
 ```{=html}
-<div id="v12-rocket" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z104 · potisni modul</div><h3>Kratki potisak: mlaz napušta satelit, a satelit dobiva suprotan impuls</h3><p>Masa opada tijekom impulsa. Stalan potisak zato proizvodi rastuće ubrzanje; promjena brzine računa se raketnom jednadžbom.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 390" role="img" aria-label="Satelit s potisnim modulom, mlazom, potiskom i promjenom mase" data-v12r-svg></svg><p class="v12x-caption">Cijan je mlaz, plavo brzina satelita, a crveno potisak na satelit. Mjerilo u spremniku pokazuje trenutačni udio preostale mase.</p></div><div class="v12x-body"><div class="v12x-panel"><h4>Uzroci kratkog impulsa</h4><label class="v12x-control">Masa satelita $m_s$ <output data-o="m"></output><input data-k="m" type="range" min="2000" max="9000" step="100" value="5000"></label><label class="v12x-control">Izbačena masa $\Delta m$ <output data-o="dm"></output><input data-k="dm" type="range" min="20" max="300" step="5" value="100"></label><label class="v12x-control">Relativna brzina mlaza $v_i$ <output data-o="ve"></output><input data-k="ve" type="range" min="1000" max="4500" step="100" value="3000"></label><label class="v12x-control">Trajanje $\Delta t$ <output data-o="t"></output><input data-k="t" type="range" min=".5" max="5" step=".5" value="2"></label><div class="v12x-presets"><button class="v12x-btn" data-p="z104" type="button">Izvorni podaci Z104</button><button class="v12x-btn" data-p="short" type="button">Kraći impuls</button></div></div><div class="v12x-panel"><h4>Posljedice na satelit</h4><div class="v12x-cards"><div class="v12x-card"><small>Maseni protok $\dot m$</small><strong data-v="md"></strong></div><div class="v12x-card"><small>Potisak $F_p$</small><strong data-v="f"></strong></div><div class="v12x-card"><small>Početno ubrzanje $a_0$</small><strong data-v="a"></strong></div><div class="v12x-card"><small>Promjena brzine $\Delta v$</small><strong data-v="dv"></strong></div><div class="v12x-card"><small>Masa nakon impulsa</small><strong data-v="mf"></strong></div></div></div></div><div class="v12x-formula">$\dot m=\Delta m/\Delta t$, $F_p=\dot m v_i$, $a(t)=F_p/(m_0-\dot m t)$ i $\Delta v=v_i\ln(m_0/m_f)$. Potisak i promjena brzine suprotni su relativnom ispuhu.</div><div class="v12x-cause"><strong>Lanac uzroka:</strong> <span data-c></span></div></div>
+<div id="v12-rocket" data-widget-role="application" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z104 · potisni modul</div><h3>Kratki potisak: mlaz napušta satelit, a satelit dobiva suprotan impuls</h3><p>Masa opada tijekom impulsa. Stalan potisak zato proizvodi rastuće ubrzanje; promjena brzine računa se raketnom jednadžbom.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 390" role="img" aria-label="Satelit s potisnim modulom, mlazom, potiskom i promjenom mase" data-v12r-svg></svg><p class="v12x-caption">Cijan je mlaz, plavo brzina satelita, a crveno potisak na satelit. Mjerilo u spremniku pokazuje trenutačni udio preostale mase.</p></div><div class="v12x-body"><div class="v12x-panel"><h4>Uzroci kratkog impulsa</h4><label class="v12x-control"><span class="mf1-control-caption">Masa satelita <span class="math inline">\(m_s\)</span> </span><output data-o="m"></output><input data-k="m" type="range" min="2000" max="9000" step="100" value="5000"></label><label class="v12x-control"><span class="mf1-control-caption">Izbačena masa <span class="math inline">\(\Delta m\)</span> </span><output data-o="dm"></output><input data-k="dm" type="range" min="20" max="300" step="5" value="100"></label><label class="v12x-control"><span class="mf1-control-caption">Relativna brzina mlaza <span class="math inline">\(v_i\)</span> </span><output data-o="ve"></output><input data-k="ve" type="range" min="1000" max="4500" step="100" value="3000"></label><label class="v12x-control"><span class="mf1-control-caption">Trajanje <span class="math inline">\(\Delta t\)</span> </span><output data-o="t"></output><input data-k="t" type="range" min=".5" max="5" step=".5" value="2"></label><div class="v12x-presets"><button class="v12x-btn" data-p="z104" type="button">Izvorni podaci Z104</button><button class="v12x-btn" data-p="short" type="button">Kraći impuls</button></div></div><div class="v12x-panel"><h4>Posljedice na satelit</h4><div class="v12x-cards"><div class="v12x-card"><small>Maseni protok <span class="math inline">\(\dot m\)</span></small><strong data-v="md"></strong></div><div class="v12x-card"><small>Potisak <span class="math inline">\(F_p\)</span></small><strong data-v="f"></strong></div><div class="v12x-card"><small>Početno ubrzanje <span class="math inline">\(a_0\)</span></small><strong data-v="a"></strong></div><div class="v12x-card"><small>Promjena brzine <span class="math inline">\(\Delta v\)</span></small><strong data-v="dv"></strong></div><div class="v12x-card"><small>Masa nakon impulsa</small><strong data-v="mf"></strong></div></div></div></div><div class="v12x-formula"><span class="math inline">\(\dot m=\Delta m/\Delta t\)</span>, <span class="math inline">\(F_p=\dot m v_i\)</span>, <span class="math inline">\(a(t)=F_p/(m_0-\dot m t)\)</span> i <span class="math inline">\(\Delta v=v_i\ln(m_0/m_f)\)</span>. Potisak i promjena brzine suprotni su relativnom ispuhu.</div><div class="v12x-cause"><strong>Lanac uzroka:</strong> <span data-c></span></div></div>
 ```
 
 ### Dodatni primjer Z105 — Sila na prirubnici slavine {.unnumbered}
 
-Volumenski protok vode iznosi 0,07 m$^3$/min kroz djelomično zatvoreni ventil. Unutarnji promjer cijevi na mjestu prirubnice iznosi 20 mm, pri čemu pretlak na dotičnom mjestu iznosi 89,6 kPa. Ukupna masa sustava i vode iznosi 5,8 kg. Potrebno je odrediti ukupnu silu na prirubnici.
+Volumenski protok vode iznosi 0,07 m$^3$/min kroz djelomično zatvoreni ventil. Voda ulazi vodoravno, skreće za $90^\circ$ i izlazi prema dolje u atmosferu; ulazni i izlazni presjek jednaki su. Unutarnji promjer iznosi 20 mm, a ulazni pretlak 89,6 kPa. Ukupna masa slavine i vode iznosi 5,8 kg. Potrebno je odrediti ukupnu silu na prirubnici.
 
 <div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$\dot V=0,07\,\text{m}^3/\text{min}$, $d=20\,\text{mm}$, $p_1=89,6\,\text{kPa}$, $m=5,8\,\text{kg}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$\vec F_P$</span></div></div>
 
-```{=html}
-<div id="v12-valve" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z105 · kontrolni volumen je slavina</div><h3>Tlak, skretanje struje i težina zajedno opterećuju prirubnicu</h3><p>U glavnoj skici R je sila oslonca na slavinu i vodu. Izdvojeni dijagram i brojčane kartice prikazuju suprotno opterećenje prirubnice −R.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 330" role="img" aria-label="Slavina s kontrolnim volumenom i silama" data-svg></svg></div><div class="v12x-body"><div class="v12x-panel"><h4>Ulazni uvjeti</h4><label class="v12x-control">Protok $\dot V$ <output data-o="q"></output><input data-k="q" type="range" min=".3" max="2.4" step=".001" value="1.167"></label><label class="v12x-control">Pretlak $p_1$ <output data-o="p"></output><input data-k="p" type="range" min="0" max="140" step=".1" value="89.6"></label><div class="v12x-presets"><button class="v12x-btn" type="button" data-p>Izvorni podaci Z105</button></div></div><div class="v12x-panel"><h4>Komponente na prirubnicu</h4><div class="v12x-cards"><div class="v12x-card"><small>Brzina u cijevi</small><strong data-v="v"></strong></div><div class="v12x-card"><small>Maseni protok</small><strong data-v="m"></strong></div><div class="v12x-card"><small>$F_{P,x}$</small><strong data-v="x"></strong></div><div class="v12x-card"><small>$F_{P,z}$</small><strong data-v="z"></strong></div><div class="v12x-card"><small>$|\vec F_P|$</small><strong data-v="r"></strong></div></div></div></div><div class="v12x-formula">Za $\beta=1,03$: $v=\dot V/A$, $\dot m=\rho\dot V$. Na slavinu je $R_x=-p_1A-\beta\dot mv$, $R_z=-\beta\dot mv+mg$; tražena sila je $\vec F_P=-\vec R$.</div><div class="v12x-cause"><strong>Što se mijenja:</strong> <span data-c></span></div></div><script>(()=>{const r=document.querySelector('#v12-valve'),g=r.querySelector('[data-svg]'),s={q:1.167,p:89.6};let ch='p';const n=(x,d=1)=>Number(x).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});function up(){const A=Math.PI*.02**2/4,q=s.q/1000,v=q/A,md=998*q,imp=1.03*md*v,rx=-s.p*1000*A-imp,rz=-imp+5.8*9.81,x=-rx,z=-rz;const o={q:`${n(s.q,3)} L/s`,p:`${n(s.p,1)} kPa`};r.querySelectorAll('[data-o]').forEach(e=>e.textContent=o[e.dataset.o]);const p=(k,t)=>r.querySelector(`[data-v="${k}"]`).textContent=t;p('v',`${n(v,2)} m/s`);p('m',`${n(md,3)} kg/s`);p('x',`${n(x,1)} N`);p('z',`${n(z,1)} N`);p('r',`${n(Math.hypot(x,z),1)} N`);r.querySelector('[data-c]').textContent=ch==='p'?`Pretlak izravno mijenja vodoravnu tlačnu silu. Skretanje struje i težina ostaju isti.`:`Protok mijenja brzinu i maseni protok, pa doprinos količine gibanja raste približno s kvadratom protoka.`;g.innerHTML=`<defs><marker id="va" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#b93645"/></marker><marker id="vb" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#1269b0"/></marker></defs><rect width="960" height="330" fill="#fbfdfe"/><path d="M120 185H410V95H700" fill="none" stroke="#547387" stroke-width="48" stroke-linejoin="round"/><path d="M120 185H410V95H700" fill="none" stroke="#c7eafa" stroke-width="30" stroke-linejoin="round"/><path d="M100 145V225M130 145V225" stroke="#10283c" stroke-width="5"/><text x="55" y="135" fill="#10283c" font-size="15" font-weight="700">prirubnica</text><rect x="140" y="50" width="570" height="225" rx="18" fill="none" stroke="#71869b" stroke-width="2" stroke-dasharray="8 6"/><text x="510" y="267" fill="#526779" font-size="14">kontrolni volumen</text><path d="M165 185H340" stroke="#1269b0" stroke-width="4" marker-end="url(#vb)"/><text x="240" y="164" fill="#1269b0" font-size="15">v₁</text><path d="M410 140V240" stroke="#1269b0" stroke-width="4" marker-end="url(#vb)"/><text x="425" y="225" fill="#1269b0" font-size="15">v₂</text><path d="M170 250H${170+Math.min(150,x*3)}" stroke="#b93645" stroke-width="4" marker-end="url(#va)"/><text x="175" y="240" fill="#b93645" font-size="15" font-weight="700">Fₚx</text><path d="M330 220V${220+Math.min(90,Math.abs(z)*1.1)}" stroke="#b93645" stroke-width="4" marker-end="url(#va)"/><text x="340" y="308" fill="#b93645" font-size="15" font-weight="700">Fₚz</text><text x="716" y="99" fill="#526779" font-size="14">p₂=p_atm</text></svg>`}r.querySelectorAll('input').forEach(i=>i.oninput=e=>{s[e.target.dataset.k]=+e.target.value;ch=e.target.dataset.k;up()});r.querySelector('[data-p]').onclick=()=>{Object.assign(s,{q:1.167,p:89.6});r.querySelectorAll('input').forEach(i=>i.value=s[i.dataset.k]);up()};up()})();</script>
-```
+<div class="rjesenje-label">Model rješenja</div>
+
+Odaberimo $+x$ u smjeru ulaza i $+z$ prema gore. Za $\rho=998\,\mathrm{kg/m^3}$ i koeficijent korekcije količine gibanja $\beta=1{,}03$ vrijedi $A=\pi d^2/4$, $v=\dot V/A=3{,}714\,\mathrm{m/s}$ i $\dot m=\rho\dot V=1{,}164\,\mathrm{kg/s}$. Bilanca sila na slavinu i vodu daje
+
+$$R_x=-p_1A-\beta\dot mv,\qquad R_z=mg-\beta\dot mv.$$
+
+Traženo opterećenje prirubnice suprotno je reakciji oslonca: $\vec F_P=-\vec R$. Zato su $F_{P,x}=32{,}6\,\mathrm N$, $F_{P,z}=-52{,}4\,\mathrm N$ i $|\vec F_P|=61{,}8\,\mathrm N$; vertikalna komponenta djeluje prema dolje.
 
 ### Dodatni primjer Z106 — Konzolni cjevovod {.unnumbered}
 
-Podzemnim cjevovodom crpi se voda na određenu visinu, pri čemu unutarnji promjer cjevovoda iznosi 100 mm. Dimenzije cjevovoda prikazane su na slici. Voda se ispušta u okolinu u kojoj vlada atmosferski tlak. Brzina istrujavanja iznosi 3 m/s, masa horizontalnog dijela cjevovoda napunjenog vodom iznosi 12 kg/m. Cijev je konzolno pričvršćena za tlo. Potrebno je odrediti: a) moment savijanja u točki A, b) potrebnu duljinu horizontalnog dijela cjevovoda da bi moment u točki A bio jednak nuli.
+Podzemnim cjevovodom unutarnjeg promjera 100 mm voda se podiže vertikalnim krakom visine $H=2\,\mathrm m$, zatim skreće u vodoravni krak duljine $L=1\,\mathrm m$ i istječe vodoravno u atmosferu. Brzina istrujavanja iznosi 3 m/s, a masa horizontalnog dijela cjevovoda napunjenog vodom 12 kg/m. Cijev je konzolno pričvršćena za tlo u A. Potrebno je odrediti: a) moment savijanja u A, b) duljinu horizontalnog kraka pri kojoj je taj moment jednak nuli.
 
 <div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$d=100\,\text{mm}$, $L=1\,\text{m}$, $H=2\,\text{m}$, $v=3\,\text{m/s}$, $m'=12\,\text{kg/m}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$M_A$; $L_{M_A=0}$</span></div></div>
 
-```{=html}
-<div id="v12-cantilever" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z106 · momenti oko A</div><h3>Težina kraka i promjena smjera mlaza imaju suprotne predznake</h3><p>Pozitivni moment je suprotno od kazaljke na satu.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 340" role="img" aria-label="L-cjevovod s označenim momentima u osloncu" data-svg></svg></div><div class="v12x-body"><div class="v12x-panel"><h4>Promijeni geometriju</h4><label class="v12x-control">Duljina $L$ <output data-o="l"></output><input data-k="l" type="range" min=".2" max="4" step=".05" value="1"></label><label class="v12x-control">Visina $H$ <output data-o="h"></output><input data-k="h" type="range" min=".5" max="3" step=".05" value="2"></label><label class="v12x-control">Brzina $v$ <output data-o="v"></output><input data-k="v" type="range" min="1" max="6" step=".1" value="3"></label><div class="v12x-presets"><button class="v12x-btn" data-p type="button">Izvorni podaci Z106</button></div></div><div class="v12x-panel"><h4>Ravnoteža momenata</h4><div class="v12x-cards"><div class="v12x-card"><small>$\dot m$</small><strong data-v="md"></strong></div><div class="v12x-card"><small>$G'=m'g$</small><strong data-v="gp"></strong></div><div class="v12x-card"><small>$M_G$</small><strong data-v="mg"></strong></div><div class="v12x-card"><small>$M_v$</small><strong data-v="mv"></strong></div><div class="v12x-card"><small>$M_A$</small><strong data-v="ma"></strong></div><div class="v12x-card"><small>Za $M_A=0$</small><strong data-v="l0"></strong></div></div></div></div><div class="v12x-formula">$\dot m=\rho(\pi d^2/4)v$, $G'=m'g$, $M_A=(L/2)G'L-H\dot mv$. Za izvorne podatke $M_A=-82,5\,\mathrm{N\,m}$, a $L_{M_A=0}=2,40\,\mathrm m$.</div><div class="v12x-cause"><strong>Čitanje predznaka:</strong> <span data-c></span></div></div><script>(()=>{const r=document.querySelector('#v12-cantilever'),g=r.querySelector('[data-svg]'),s={l:1,h:2,v:3};let ch='l';const n=(x,d=1)=>Number(x).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});function up(){const md=1000*Math.PI*.1**2/4*s.v,G=12*9.81,MG=.5*s.l*s.l*G,MV=-s.h*md*s.v,MA=MG+MV,L0=2*s.h*md*s.v/G;const o={l:`${n(s.l,2)} m`,h:`${n(s.h,2)} m`,v:`${n(s.v,1)} m/s`};r.querySelectorAll('[data-o]').forEach(e=>e.textContent=o[e.dataset.o]);const p=(k,t)=>r.querySelector(`[data-v="${k}"]`).textContent=t;p('md',`${n(md,2)} kg/s`);p('gp',`${n(G,1)} N/m`);p('mg',`+${n(MG,1)} N m`);p('mv',`${n(MV,1)} N m`);p('ma',`${n(MA,1)} N m`);p('l0',`${n(L0,2)} m`);r.querySelector('[data-c]').textContent=ch==='l'?`L povećava težinski moment s L²: raste i težina kraka i njezin krak djelovanja.`:ch==='h'?`Veći H povećava negativni moment mlaza −Hṁv.`:`Brzina mijenja ṁ, a zatim moment mlaza s v².`;const x=265,y=286,top=y-78*s.h,w=110*Math.min(2.6,s.l);g.innerHTML=`<defs><marker id="ca" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#b93645"/></marker><marker id="cb" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#1269b0"/></marker></defs><rect width="960" height="340" fill="#fbfdfe"/><path d="M180 ${y}H340" stroke="#526779" stroke-width="9"/><path d="M${x} ${y}V${top}H${x+w}" fill="none" stroke="#5b798d" stroke-width="34" stroke-linejoin="round"/><path d="M${x} ${y}V${top}H${x+w}" fill="none" stroke="#d9f0fa" stroke-width="20" stroke-linejoin="round"/><circle cx="${x}" cy="${y}" r="7" fill="#10283c"/><text x="${x-20}" y="${y+25}" fill="#10283c" font-size="15">A</text><path d="M${x+w} ${top}H${x+w+70}" stroke="#1269b0" stroke-width="4" marker-end="url(#cb)"/><text x="${x+w+10}" y="${top-10}" fill="#1269b0" font-size="15">ṁv</text><path d="M${x+w/2} ${top-28}V${top+22}" stroke="#b93645" stroke-width="4" marker-end="url(#ca)"/><text x="${x+w/2+7}" y="${top-32}" fill="#b93645" font-size="14">G'L</text><path d="M${x-44} ${y}V${top}" stroke="#71869b" stroke-dasharray="5 4"/><text x="${x-70}" y="${(y+top)/2}" fill="#526779" font-size="14">H</text><path d="M${x} ${top-48}H${x+w}" stroke="#71869b" stroke-dasharray="5 4"/><text x="${x+w/2}" y="${top-55}" fill="#526779" font-size="14">L</text><path d="M430 270A62 62 0 0 0 382 220" fill="none" stroke="#147a55" stroke-width="4" marker-end="url(#ca)"/><text x="440" y="220" fill="#147a55" font-size="16" font-weight="700">M_A=${n(MA,1)} N m</text><rect x="640" y="75" width="230" height="170" rx="13" fill="#eef6fa" stroke="#cbd9e4"/><text x="660" y="108" fill="#10283c" font-size="16" font-weight="700">Doprinosi</text><text x="660" y="145" fill="#1269b0" font-size="15">+M_G=${n(MG,1)}</text><text x="660" y="178" fill="#b93645" font-size="15">M_v=${n(MV,1)}</text><text x="660" y="218" fill="#10283c" font-size="16" font-weight="700">zbroj=${n(MA,1)}</text></svg>`}r.querySelectorAll('input').forEach(i=>i.oninput=e=>{s[e.target.dataset.k]=+e.target.value;ch=e.target.dataset.k;up()});r.querySelector('[data-p]').onclick=()=>{Object.assign(s,{l:1,h:2,v:3});r.querySelectorAll('input').forEach(i=>i.value=s[i.dataset.k]);up()};up()})();</script>
-```
+<div class="rjesenje-label">Model rješenja</div>
+
+Za vodu gustoće $1000\,\mathrm{kg/m^3}$ vrijedi $\dot m=\rho(\pi d^2/4)v=23{,}56\,\mathrm{kg/s}$ i $G'=m'g=117{,}72\,\mathrm{N/m}$. Uz pozitivan moment suprotno od kazaljke na satu, moment oslonca dobiva se iz
+
+$$M_A=\frac{G'L^2}{2}-H\dot mv=58{,}86-141{,}37=-82{,}51\,\mathrm{N\,m}.$$
+
+Na granici poništavanja tih doprinosa vrijedi
+
+$$L_{M_A=0}=\sqrt{\frac{2H\dot mv}{G'}}=1{,}55\,\mathrm m.$$
+
+Težinski moment raste s $L^2$: povećavaju se i težina kraka i udaljenost njezina hvatišta od A.
 
 ### Dodatni primjer Z107 — Snaga rotirajuće prskalice {.unnumbered}
 
@@ -267,7 +232,7 @@ Prskalica za vodu prenamijenjena je u turbinu za generiranje električne energij
 <div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$\dot V=20\,\text{dm}^3/\text{s}$, $n=300\,\text{o/min}$, $d=1\,\text{cm}$, $r=0,6\,\text{m}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$P$</span></div></div>
 
 ```{=html}
-<div id="v12-sprinkler" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z107 · moment količine gibanja</div><h3>Četiri mlaznice: moment računa apsolutni izlazni $V_\theta$</h3><p>Ulaz kroz os ima $r_1=0$. Svaka mlaznica izbacuje vodu suprotno od pozitivnog smjera vrtnje.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 380" role="img" aria-label="Rotirajuća prskalica s vektorima brzine" data-svg></svg></div><div class="v12x-body"><div class="v12x-panel"><h4>Radni uvjeti</h4><label class="v12x-control">Protok $\dot V$ <output data-o="q"></output><input data-k="q" type="range" min="4" max="32" step="1" value="20"></label><label class="v12x-control">Brzina vrtnje $n$ <output data-o="n"></output><input data-k="n" type="range" min="0" max="600" step="10" value="300"></label><label class="v12x-control">Polumjer r <output data-o="r"></output><input data-k="r" type="range" min=".2" max="1.1" step=".05" value=".6"></label><div class="v12x-presets"><button class="v12x-btn" data-p type="button">Z107: 4 mlaznice</button><button class="v12x-btn" data-stop type="button">n = 0</button></div></div><div class="v12x-panel"><h4>Na vratilu</h4><div class="v12x-cards"><div class="v12x-card"><small>$\omega$</small><strong data-v="om"></strong></div><div class="v12x-card"><small>$U=r\omega$</small><strong data-v="u"></strong></div><div class="v12x-card"><small>$W_{\theta,izl}$</small><strong data-v="w"></strong></div><div class="v12x-card"><small>$V_{\theta,izl}$</small><strong data-v="vv"></strong></div><div class="v12x-card"><small>Moment rotora</small><strong data-v="m"></strong></div><div class="v12x-card"><small>Snaga</small><strong data-v="p"></strong></div></div></div></div><div class="v12x-formula">Za četiri mlaznice: $W=\dot V/(4A_m)$, $W_{\theta,izl}=-W$, $V_{\theta,izl}=U-W$. $M_{rot}=\dot m(0-rV_{\theta,izl})$, $P=M\omega$. U moment ulazi apsolutni $V_\theta$.</div><div class="v12x-cause"><strong>Lanac uzroka:</strong> <span data-c></span></div></div><script>(()=>{const r=document.querySelector('#v12-sprinkler'),g=r.querySelector('[data-svg]'),s={q:20,n:300,r:.6};let ch='n';const n=(x,d=1)=>Number(x).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});function up(){const q=s.q/1000,A=Math.PI*.01**2/4,om=s.n*2*Math.PI/60,U=s.r*om,W=q/(4*A),V=U-W,md=1000*q,M=md*(0-s.r*V),P=M*om;const o={q:`${n(s.q,0)} L/s`,n:`${n(s.n,0)} o/min`,r:`${n(s.r,2)} m`};r.querySelectorAll('[data-o]').forEach(e=>e.textContent=o[e.dataset.o]);const p=(k,t)=>r.querySelector(`[data-v="${k}"]`).textContent=t;p('om',`${n(om,2)} rad/s`);p('u',`${n(U,2)} m/s`);p('w',`${n(-W,2)} m/s`);p('vv',`${n(V,2)} m/s`);p('m',`${n(M,1)} N m`);p('p',`${n(P/1000,1)} kW`);r.querySelector('[data-c]').textContent=ch==='n'?`n mijenja U linearno s ω. Pri većem n izlazni apsolutni Vθ postaje manje negativan, pa moment pada; snaga ima optimum.`:ch==='q'?`Protok mijenja relativnu brzinu po mlaznici i ukupni maseni protok.`:`r mijenja i obodnu brzinu U i krak momenta.`;const x=305,y=195,R=110,z=2.5;g.innerHTML=`<defs><marker id="sa" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#1269b0"/></marker><marker id="sg" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#147a55"/></marker><marker id="so" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#c95d12"/></marker></defs><rect width="960" height="380" fill="#fbfdfe"/><circle cx="${x}" cy="${y}" r="29" fill="#e7f2f8" stroke="#10283c" stroke-width="4"/><path d="M${x} ${y}H${x+R}M${x} ${y}H${x-R}M${x} ${y-R}V${y+R}" stroke="#58768b" stroke-width="20" stroke-linecap="round"/><path d="M${x+R} ${y}h28M${x-R} ${y}h-28M${x} ${y-R}v-28M${x} ${y+R}v28" stroke="#10283c" stroke-width="8"/><path d="M${x-10} ${y-55}A56 56 0 0 1 ${x+55} ${y-10}" fill="none" stroke="#147a55" stroke-width="4" marker-end="url(#sg)"/><text x="${x+35}" y="${y-60}" fill="#147a55" font-size="15">ω, U</text><line x1="${x+R+28}" y1="${y}" x2="${x+R+28}" y2="${y-Math.min(135,W*z)}" stroke="#c95d12" stroke-width="4" marker-end="url(#so)"/><text x="${x+R+40}" y="${y-Math.min(135,W*z)+8}" fill="#c95d12" font-size="14">Wθ</text><line x1="${x+R+28}" y1="${y}" x2="${x+R+28}" y2="${y-Math.max(-85,Math.min(135,V*z))}" stroke="#1269b0" stroke-width="4" marker-end="url(#sa)"/><text x="${x+R+40}" y="${y-Math.max(-85,Math.min(135,V*z))-8}" fill="#1269b0" font-size="14">Vθ,izl</text><text x="85" y="338" fill="#526779" font-size="15">ulaz kroz os: r₁=0 → nema ulaznog momenta</text><rect x="580" y="70" width="290" height="220" rx="14" fill="#eef6fa" stroke="#cbd9e4"/><text x="602" y="105" fill="#10283c" font-size="16" font-weight="700">Trokut na sapnici</text><line x1="620" y1="185" x2="${620+Math.min(170,U*z)}" y2="185" stroke="#147a55" stroke-width="4" marker-end="url(#sg)"/><line x1="${620+Math.min(170,U*z)}" y1="185" x2="${620+Math.min(170,U*z)-Math.min(170,W*z)}" y2="185" stroke="#c95d12" stroke-width="4" marker-end="url(#so)"/><line x1="620" y1="235" x2="${620+Math.max(-80,Math.min(170,V*z))}" y2="235" stroke="#1269b0" stroke-width="4" marker-end="url(#sa)"/><text x="622" y="265" fill="#1269b0" font-size="15">Vθ = U + Wθ</text></svg>`}r.querySelectorAll('input').forEach(i=>i.oninput=e=>{s[e.target.dataset.k]=+e.target.value;ch=e.target.dataset.k;up()});r.querySelector('[data-p]').onclick=()=>{Object.assign(s,{q:20,n:300,r:.6});r.querySelectorAll('input').forEach(i=>i.value=s[i.dataset.k]);up()};r.querySelector('[data-stop]').onclick=()=>{s.n=0;r.querySelector('[data-k="n"]').value=0;up()};up()})();</script>
+<div id="v12-sprinkler" data-widget-role="application" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z107 · moment količine gibanja</div><h3>Četiri mlaznice: moment računa apsolutni izlazni <span class="math inline">\(V_\theta\)</span></h3><p>Ulaz kroz os ima <span class="math inline">\(r_1=0\)</span>. Svaka mlaznica izbacuje vodu suprotno od pozitivnog smjera vrtnje.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 380" role="img" aria-label="Rotirajuća prskalica s vektorima brzine" data-svg></svg></div><div class="v12x-body"><div class="v12x-panel"><h4>Radni uvjeti</h4><label class="v12x-control"><span class="mf1-control-caption">Protok <span class="math inline">\(\dot V\)</span> </span><output data-o="q"></output><input data-k="q" type="range" min="4" max="32" step="1" value="20"></label><label class="v12x-control"><span class="mf1-control-caption">Brzina vrtnje <span class="math inline">\(n\)</span> </span><output data-o="n"></output><input data-k="n" type="range" min="0" max="600" step="10" value="300"></label><label class="v12x-control">Polumjer r <output data-o="r"></output><input data-k="r" type="range" min=".2" max="1.1" step=".05" value=".6"></label><div class="v12x-presets"><button class="v12x-btn" data-p type="button">Z107: 4 mlaznice</button><button class="v12x-btn" data-stop type="button">n = 0</button></div></div><div class="v12x-panel"><h4>Na vratilu</h4><div class="v12x-cards"><div class="v12x-card"><small><span class="math inline">\(\omega\)</span></small><strong data-v="om"></strong></div><div class="v12x-card"><small><span class="math inline">\(U=r\omega\)</span></small><strong data-v="u"></strong></div><div class="v12x-card"><small><span class="math inline">\(W_{\theta,izl}\)</span></small><strong data-v="w"></strong></div><div class="v12x-card"><small><span class="math inline">\(V_{\theta,izl}\)</span></small><strong data-v="vv"></strong></div><div class="v12x-card"><small>Moment rotora</small><strong data-v="m"></strong></div><div class="v12x-card"><small>Snaga</small><strong data-v="p"></strong></div></div></div></div><div class="v12x-formula">Za četiri mlaznice: <span class="math inline">\(W=\dot V/(4A_m)\)</span>, <span class="math inline">\(W_{\theta,izl}=-W\)</span>, <span class="math inline">\(V_{\theta,izl}=U-W\)</span>. <span class="math inline">\(M_{rot}=\dot m(0-rV_{\theta,izl})\)</span>, <span class="math inline">\(P=M\omega\)</span>. U moment ulazi apsolutni <span class="math inline">\(V_\theta\)</span>.</div><div class="v12x-cause"><strong>Lanac uzroka:</strong> <span data-c></span></div></div><script>(()=>{const r=document.querySelector('#v12-sprinkler'),g=r.querySelector('[data-svg]'),s={q:20,n:300,r:.6};let ch='n';const n=(x,d=1)=>Number(x).toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});function up(){const q=s.q/1000,A=Math.PI*.01**2/4,om=s.n*2*Math.PI/60,U=s.r*om,W=q/(4*A),V=U-W,md=1000*q,M=md*(0-s.r*V),P=M*om;const o={q:`${n(s.q,0)} L/s`,n:`${n(s.n,0)} o/min`,r:`${n(s.r,2)} m`};r.querySelectorAll('[data-o]').forEach(e=>e.textContent=o[e.dataset.o]);const p=(k,t)=>r.querySelector(`[data-v="${k}"]`).textContent=t;p('om',`${n(om,2)} rad/s`);p('u',`${n(U,2)} m/s`);p('w',`${n(-W,2)} m/s`);p('vv',`${n(V,2)} m/s`);p('m',`${n(M,1)} N m`);p('p',`${n(P/1000,1)} kW`);r.querySelector('[data-c]').textContent=ch==='n'?`n mijenja U linearno s ω. Pri većem n izlazni apsolutni Vθ postaje manje negativan, pa moment pada; snaga ima optimum.`:ch==='q'?`Protok mijenja relativnu brzinu po mlaznici i ukupni maseni protok.`:`r mijenja i obodnu brzinu U i krak momenta.`;const x=305,y=195,R=110,z=2.5;g.innerHTML=`<defs><marker id="sa" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#1269b0"/></marker><marker id="sg" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#147a55"/></marker><marker id="so" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#c95d12"/></marker></defs><rect width="960" height="380" fill="#fbfdfe"/><circle cx="${x}" cy="${y}" r="29" fill="#e7f2f8" stroke="#10283c" stroke-width="4"/><path d="M${x} ${y}H${x+R}M${x} ${y}H${x-R}M${x} ${y-R}V${y+R}" stroke="#58768b" stroke-width="20" stroke-linecap="round"/><path d="M${x+R} ${y}h28M${x-R} ${y}h-28M${x} ${y-R}v-28M${x} ${y+R}v28" stroke="#10283c" stroke-width="8"/><path d="M${x-10} ${y-55}A56 56 0 0 1 ${x+55} ${y-10}" fill="none" stroke="#147a55" stroke-width="4" marker-end="url(#sg)"/><text x="${x+35}" y="${y-60}" fill="#147a55" font-size="15">ω, U</text><line x1="${x+R+28}" y1="${y}" x2="${x+R+28}" y2="${y-Math.min(135,W*z)}" stroke="#c95d12" stroke-width="4" marker-end="url(#so)"/><text x="${x+R+40}" y="${y-Math.min(135,W*z)+8}" fill="#c95d12" font-size="14">Wθ</text><line x1="${x+R+28}" y1="${y}" x2="${x+R+28}" y2="${y-Math.max(-85,Math.min(135,V*z))}" stroke="#1269b0" stroke-width="4" marker-end="url(#sa)"/><text x="${x+R+40}" y="${y-Math.max(-85,Math.min(135,V*z))-8}" fill="#1269b0" font-size="14">Vθ,izl</text><text x="85" y="338" fill="#526779" font-size="15">ulaz kroz os: r₁=0 → nema ulaznog momenta</text><rect x="580" y="70" width="290" height="220" rx="14" fill="#eef6fa" stroke="#cbd9e4"/><text x="602" y="105" fill="#10283c" font-size="16" font-weight="700">Trokut na sapnici</text><line x1="620" y1="185" x2="${620+Math.min(170,U*z)}" y2="185" stroke="#147a55" stroke-width="4" marker-end="url(#sg)"/><line x1="${620+Math.min(170,U*z)}" y1="185" x2="${620+Math.min(170,U*z)-Math.min(170,W*z)}" y2="185" stroke="#c95d12" stroke-width="4" marker-end="url(#so)"/><line x1="620" y1="235" x2="${620+Math.max(-80,Math.min(170,V*z))}" y2="235" stroke="#1269b0" stroke-width="4" marker-end="url(#sa)"/><text x="622" y="265" fill="#1269b0" font-size="15">Vθ = U + Wθ</text></svg>`}r.querySelectorAll('input').forEach(i=>i.oninput=e=>{s[e.target.dataset.k]=+e.target.value;ch=e.target.dataset.k;up()});r.querySelector('[data-p]').onclick=()=>{Object.assign(s,{q:20,n:300,r:.6});r.querySelectorAll('input').forEach(i=>i.value=s[i.dataset.k]);up()};r.querySelector('[data-stop]').onclick=()=>{s.n=0;r.querySelector('[data-k="n"]').value=0;up()};up()})();</script>
 ```
 
 ### Dodatni primjer Z108 — Komercijalne vjetroturbine {.unnumbered}
@@ -276,39 +241,11 @@ Komercijalne vjetroturbine promjera lopatica 100 m generiraju električnu snagu 
 
 <div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$D=90\, \text{m}$, $v=25\, \text{km/h}$, $\eta = 32\%$, $\rho=1,25\, \text{kg/m}^3$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$P$; $F_R$</span></div></div>
 
-```{=html}
-<div id="v12-wind" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z108 · vjetar</div><h3>Promjer ulazi s $D^2$, a brzina vjetra s $v^3$ u raspoloživu snagu</h3></div><div class="v12x-stage"><svg viewBox="0 0 960 270" role="img" aria-label="Vjetroturbina i usporavanje struje" data-svg></svg></div><div class="v12x-body"><div class="v12x-panel"><h4>Uvjeti</h4><label class="v12x-control">Promjer D <output data-o="d"></output><input data-k="d" type="range" min="30" max="130" step="1" value="90"></label><label class="v12x-control">Brzina $v_1$ <output data-o="v"></output><input data-k="v" type="range" min="3" max="14" step=".001" value="6.944"></label><label class="v12x-control">Koeficijent snage Cₚ <output data-o="e"></output><input data-k="e" type="range" min=".05" max=".55" step=".01" value=".32"></label></div><div class="v12x-panel"><h4>Jednostavni model</h4><div class="v12x-cards"><div class="v12x-card"><small>Površina A</small><strong data-v="a"></strong></div><div class="v12x-card"><small>Tok energije vjetra</small><strong data-v="pw"></strong></div><div class="v12x-card"><small>Snaga uz idealnu pretvorbu</small><strong data-v="p"></strong></div><div class="v12x-card"><small>Reakcija na stup</small><strong data-v="f"></strong></div></div></div></div><div class="v12x-formula">Idealni disk: $P_{vjetar}=\rho Av_1^3/2$, $C_P=4a(1-a)^2$, $v_d=v_1(1-a)$, $v_2=v_1(1-2a)$, $\dot m=\rho Av_d$, $F=\dot m(v_1-v_2)$ i $P=Fv_d$. Uzima se grana $0\le a\le1/3$ i idealna pretvorba: zadana $\eta$ tada je $C_P$. Uz nepoznatu učinkovitost generatora sila se ne može izvesti samo iz električne snage.</div></div><script>
-(() => {
-  const r = document.querySelector("#v12-wind"),
-    g = r.querySelector("[data-svg]"),
-    s = { d: 90, v: 6.944, e: 0.32 };
-  const n = (x, d = 1) => Number(x).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function up() {
-    const A = (Math.PI * s.d * s.d) / 4,
-      pw = 0.5 * 1.25 * A * s.v ** 3,
-      P = s.e * pw,
-      disk=MF1.actuatorDisk(1.25,A,s.v,s.e),
-      v2 = disk.wake, F = disk.force;
-    const o = { d: `${n(s.d, 0)} m`, v: `${n(s.v, 2)} m/s`, e: `${n(s.e * 100, 0)} %` };
-    r.querySelectorAll("[data-o]").forEach((e) => (e.textContent = o[e.dataset.o]));
-    const p = (k, t) => (r.querySelector(`[data-v="${k}"]`).textContent = t);
-    p("a", `${n(A, 0)} m²`);
-    p("pw", `${n(pw / 1e6, 2)} MW`);
-    p("p", `${n(P / 1000, 0)} kW`);
-    p("f", `${n(F / 1000, 1)} kN`);
-    g.innerHTML = `<defs><marker id="wa" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#1269b0"/></marker></defs><rect width="960" height="270" fill="#fbfdfe"/><path d="M50 92H390M50 135H390M50 178H390" stroke="#1269b0" stroke-width="4" marker-end="url(#wa)"/><path d="M585 106H850M585 140H850M585 174H850" stroke="#1269b0" stroke-width="3" marker-end="url(#wa)"/><line x1="480" y1="32" x2="480" y2="240" stroke="#58768b" stroke-width="7"/><circle cx="480" cy="135" r="${Math.min(92, 25 + s.d * 0.65)}" fill="none" stroke="#147a55" stroke-width="12"/><text x="125" y="68" fill="#1269b0" font-size="16" font-weight="700">v₁=${n(s.v, 2)} m/s</text><text x="635" y="83" fill="#1269b0" font-size="16" font-weight="700">v₂=${n(v2, 2)} m/s</text><text x="424" y="262" fill="#526779" font-size="14">D=${n(s.d, 0)} m</text></svg>`;
-  }
-  r.querySelectorAll("input").forEach(
-    (i) =>
-      (i.oninput = (e) => {
-        s[e.target.dataset.k] = +e.target.value;
-        up();
-      }),
-  );
-  up();
-})();
-</script>
-```
+<div class="rjesenje-label">Model rješenja</div>
+
+Idealni disk: $P_{vjetar}=\rho Av_1^3/2$, $C_P=4a(1-a)^2$, $v_d=v_1(1-a)$, $v_2=v_1(1-2a)$, $\dot m=\rho Av_d$, $F=\dot m(v_1-v_2)$ i $P=Fv_d$. Uzima se grana $0\le a\le1/3$ i idealna pretvorba: zadana $\eta$ tada je $C_P$. Uz nepoznatu učinkovitost generatora sila se ne može izvesti samo iz električne snage.
+
+Za $A=\pi D^2/4=6361{,}7\,\mathrm{m^2}$ i $v_1=25/3{,}6=6{,}944\,\mathrm{m/s}$ dobiva se $a=0{,}09842$, $v_d=6{,}261\,\mathrm{m/s}$, $v_2=5{,}578\,\mathrm{m/s}$, $P=426{,}1\,\mathrm{kW}$ i $F=68{,}1\,\mathrm{kN}$. Sila na rotor usmjerena je niz vjetar.
 
 ### Dodatni primjer Z109 — Snaga helikoptera {.unnumbered}
 
@@ -316,43 +253,19 @@ Rasterećeni helikopter mase 10 t lebdi iznad razine mora za vrijeme ukrcaja. U 
 
 <div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$m_1=10\, \text{t}$, $n_1=400\, \text{o/min}$, $D=15\, \text{m}$, $m_2=15\, \text{t}$ (dodatni teret), $\rho=1,18\, \text{kg/m}^3$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$\dot V_1$; $P_1$; $P_2$; $n_2$</span></div></div>
 
-```{=html}
-<div id="v12-heli" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z109 · lebdenje</div><h3>Za lebdenje vrijedi $T=mg$</h3><p>Dosljedan model zadatka: $T=\rho A v_w^2$ i $P=Tv_w/2$, gdje su $v_w$ i $A=πD²/4$ brzina i površina dalekog traga. Idealno je površina rotora $2A$, a brzina na disku $v_w/2$. Skaliranje okretaja vrijedi pri istoj geometriji rotora.</p></div><div class="v12x-stage"><svg viewBox="0 0 960 275" role="img" aria-label="Helikopter s potiskom i nizvodnom strujom" data-svg></svg></div><div class="v12x-body"><div class="v12x-panel"><h4>Teret</h4><label class="v12x-control">Ukupna masa <output data-o="m"></output><input data-k="m" type="range" min="8" max="30" step="1" value="10"></label><label class="v12x-control">Promjer dalekog traga D <output data-o="d"></output><input data-k="d" type="range" min="8" max="20" step=".5" value="15"></label></div><div class="v12x-panel"><h4>Ravnoteža i snaga</h4><div class="v12x-cards"><div class="v12x-card"><small>Potisak T</small><strong data-v="t"></strong></div><div class="v12x-card"><small>Brzina $v_w$</small><strong data-v="v"></strong></div><div class="v12x-card"><small>Volumenski protok</small><strong data-v="q"></strong></div><div class="v12x-card"><small>Idealna snaga</small><strong data-v="p"></strong></div><div class="v12x-card"><small>Skalirani broj okretaja</small><strong data-v="rpm"></strong></div></div></div></div><div class="v12x-cause"><strong>Provjera:</strong> <span data-c></span></div></div><script>
-(() => {
-  const r = document.querySelector("#v12-heli"),
-    g = r.querySelector("[data-svg]"),
-    s = { m: 10, d: 15 };
-  const n = (x, d = 1) => Number(x).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function up() {
-    const A = (Math.PI * s.d * s.d) / 4,
-      T = s.m * 1000 * 9.81,
-      v = Math.sqrt(T / (1.18 * A)),
-      q = A * v,
-      P = 0.5 * T * v,
-      rpm = (400 * v) / Math.sqrt(10000*9.81/(1.18*Math.PI*15**2/4));
-    const o = { m: `${n(s.m, 0)} t`, d: `${n(s.d, 1)} m` };
-    r.querySelectorAll("[data-o]").forEach((e) => (e.textContent = o[e.dataset.o]));
-    const p = (k, t) => (r.querySelector(`[data-v="${k}"]`).textContent = t);
-    p("t", `${n(T / 1000, 1)} kN`);
-    p("v", `${n(v, 1)} m/s`);
-    p("q", `${n(q, 0)} m³/s`);
-    p("p", `${n(P / 1000, 0)} kW`);
-    p("rpm", s.d===15 ? `${n(rpm, 0)} o/min` : "— (promijenjena geometrija)");
-    r.querySelector("[data-c]").textContent =
-      `T=${n(T / 1000, 1)} kN=mg. Veća masa traži veću nizvodnu brzinu; u ovom modelu snaga raste s m^(3/2).`;
-    g.innerHTML = `<defs><marker id="ha" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#1269b0"/></marker><marker id="hr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#b93645"/></marker></defs><rect width="960" height="275" fill="#fbfdfe"/><path d="M250 225Q480 95 710 225" fill="#d9f0fa"/><path d="M270 55H690" stroke="#10283c" stroke-width="7"/><path d="M450 105H510L550 155H410Z" fill="#dbe7ee" stroke="#10283c" stroke-width="4"/><line x1="480" y1="95" x2="480" y2="35" stroke="#1269b0" stroke-width="5" marker-end="url(#ha)"/><text x="494" y="52" fill="#1269b0" font-size="16">T=mg</text><line x1="480" y1="165" x2="480" y2="${165 + Math.min(75, v * 3)}" stroke="#b93645" stroke-width="5" marker-end="url(#hr)"/><text x="495" y="${185 + Math.min(75, v * 3)}" fill="#b93645" font-size="16">v_w</text><text x="365" y="260" fill="#526779" font-size="14">A=${n(A, 1)} m²</text></svg>`;
-  }
-  r.querySelectorAll("input").forEach(
-    (i) =>
-      (i.oninput = (e) => {
-        s[e.target.dataset.k] = +e.target.value;
-        up();
-      }),
-  );
-  up();
-})();
-</script>
-```
+<div class="rjesenje-label">Model rješenja</div>
+
+U ovom modelu $D=15\,\mathrm m$ označava promjer **dalekoga traga**, pa je $A=\pi D^2/4$. Idealna teorija diska daje brzinu na rotoru $v_d=v_w/2$ i površinu rotora $A_d=2A$. Za lebdenje zato vrijedi
+
+$$T=mg=\rho Av_w^2,\qquad \dot V=Av_w,\qquad P=Tv_d=\frac12Tv_w.$$
+
+Pri $m_1=10\,\mathrm t$ dobiva se $v_{w,1}=21{,}69\,\mathrm{m/s}$, $\dot V_1=3832{,}9\,\mathrm{m^3/s}$ i $P_1=1{,}064\,\mathrm{MW}$. Dodatni teret od $15\,\mathrm t$ daje ukupnu masu $m_{tot}=25\,\mathrm t$. Uz istu geometriju i zadanu proporcionalnost $v_w\propto n$ slijedi
+
+$$v_{w,2}=v_{w,1}\sqrt{\frac{m_{tot}}{m_1}}=34{,}29\,\mathrm{m/s},\qquad n_2=n_1\sqrt{\frac{m_{tot}}{m_1}}=632{,}5\,\mathrm{o/min},$$
+
+$$P_2=P_1\left(\frac{m_{tot}}{m_1}\right)^{3/2}=4{,}205\,\mathrm{MW}.$$
+
+To su idealne snage potrebne za lebdenje, bez profilnih gubitaka lopatica i mehaničkih gubitaka pogona.
 
 ### Dodatni primjer Z110 — Brana s razlikom razina {.unnumbered}
 
@@ -360,61 +273,50 @@ Maseni protok vode regulira se pomoću brane, podizanjem ili spuštanjem vertika
 
 <div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$h_1=3\,\text{m}$, $h_2=0,5\,\text{m}$, $b=1\,\text{m}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$v_1$; $v_2$; $F/b$</span></div></div>
 
-```{=html}
-<div id="v12-gate" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z110 · tlak + impuls</div><h3>Na ustavu djeluju hidrostatski trokuti tlaka i ubrzanje struje</h3></div><div class="v12x-stage"><svg viewBox="0 0 960 345" role="img" aria-label="Ustava s razinama vode i doprinosima sile" data-svg></svg></div><div class="v12x-body"><div class="v12x-panel"><h4>Razine</h4><label class="v12x-control">Uzvodna $h_1$ <output data-o="h1"></output><input data-k="h1" type="range" min=".8" max="4" step=".1" value="3"></label><label class="v12x-control">Nizvodna $h_2$ <output data-o="h2"></output><input data-k="h2" type="range" min="0" max="4" step=".05" value=".5"></label></div><div class="v12x-panel"><h4>Po metru širine</h4><div class="v12x-cards"><div class="v12x-card"><small>$v_1$</small><strong data-v="v1"></strong></div><div class="v12x-card"><small>$v_2$</small><strong data-v="v2"></strong></div><div class="v12x-card"><small>Hidrostatski doprinos</small><strong data-v="ph"></strong></div><div class="v12x-card"><small>Doprinos impulsa</small><strong data-v="im"></strong></div><div class="v12x-card"><small>Sila na ustavu</small><strong data-v="f"></strong></div></div></div></div><div class="v12x-formula">$v_2=\sqrt{2gh_1^2/(h_1+h_2)}$ za $h_2<h_1$, $v_1=(h_2/h_1)v_2$. $F/b=\rho g(h_1^2-h_2^2)/2-(\dot m/b)(v_2-v_1)$, $\dot m/b=\rho h_1v_1$.</div><div class="v12x-cause"><strong>Predznak:</strong> voda gura ustavu nizvodno; reakcija ustave na kontrolni volumen je suprotna.</div></div><script>
-(() => {
-  const r = document.querySelector("#v12-gate"),
-    g = r.querySelector("[data-svg]"),
-    s = { h1: 3, h2: 0.5 };
-  const n = (x, d = 1) => Number(x).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function up() {
-    if (s.h2 > s.h1) {
-      s.h2 = s.h1;
-      r.querySelector('[data-k="h2"]').value = s.h2;
-    }
-    const v2 = Math.sqrt(2*9.81*s.h1*s.h1/(s.h1+s.h2)),
-      v1 = (s.h2 / s.h1) * v2,
-      md = 1000 * s.h1 * v1,
-      im = md * (v2 - v1),
-      ph = ((1000 * 9.81) / 2) * (s.h1 * s.h1 - s.h2 * s.h2),
-      F = ph - im;
-    const o = { h1: `${n(s.h1, 2)} m`, h2: `${n(s.h2, 2)} m` };
-    r.querySelectorAll("[data-o]").forEach((e) => (e.textContent = o[e.dataset.o]));
-    const p = (k, t) => (r.querySelector(`[data-v="${k}"]`).textContent = t);
-    p("v1", `${n(v1, 2)} m/s`);
-    p("v2", `${n(v2, 2)} m/s`);
-    p("ph", `${n(ph / 1000, 1)} kN/m`);
-    p("im", `${n(im / 1000, 1)} kN/m`);
-    p("f", `${n(F / 1000, 1)} kN/m`);
-    const y = 292,
-      a = s.h1 * 65,
-      b = s.h2 * 65;
-    g.innerHTML = `<defs><marker id="ga" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#1269b0"/></marker><marker id="gr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 3L0 6z" fill="#b93645"/></marker></defs><rect width="960" height="345" fill="#fbfdfe"/><rect x="80" y="${y - a}" width="330" height="${a}" fill="#cfeefa"/><rect x="530" y="${y - b}" width="330" height="${b}" fill="#cfeefa"/><path d="M80 ${y - a}H410M530 ${y - b}H860" stroke="#1269b0" stroke-width="4"/><path d="M80 ${y}H860" stroke="#526779" stroke-width="7"/><rect x="445" y="48" width="35" height="244" fill="#d9e4ec" stroke="#10283c" stroke-width="3"/><path d="M250 ${y - a / 2}H390M555 ${y - b / 2}H760" stroke="#1269b0" stroke-width="4" marker-end="url(#ga)"/><text x="240" y="${y - a / 2 - 12}" fill="#1269b0" font-size="15">v₁</text><text x="650" y="${y - b / 2 - 12}" fill="#1269b0" font-size="15">v₂</text><path d="M410 165H${410 + Math.min(115, F / 700)}" stroke="#b93645" stroke-width="5" marker-end="url(#gr)"/><text x="355" y="146" fill="#b93645" font-size="15">F/b</text><path d="M410 ${y - a}L445 ${y}L410 ${y}Z" fill="#b9364530"/><path d="M530 ${y - b}L495 ${y}L530 ${y}Z" fill="#b9364520"/><text x="670" y="322" fill="#526779" font-size="14">trokuti: p=ρg(h-z)</text></svg>`;
-  }
-  r.querySelectorAll("input").forEach(
-    (i) =>
-      (i.oninput = (e) => {
-        s[e.target.dataset.k] = +e.target.value;
-        up();
-      }),
-  );
-  up();
-})();
-</script>
-```
+<div class="rjesenje-label">Model rješenja</div>
+
+Kontinuitet daje $h_1v_1=h_2v_2$, a Bernoullijeva jednadžba između slobodnih površina $h_1+v_1^2/(2g)=h_2+v_2^2/(2g)$. Za $h_2<h_1$ slijedi
+
+$$v_2=\sqrt{\frac{2gh_1^2}{h_1+h_2}},\qquad v_1=\frac{h_2}{h_1}v_2.$$
+
+Razlika hidrostatskih sila mora pokriti promjenu toka količine gibanja i silu vode na ustavu. Zato je
+
+$$\frac{F}{b}=\frac{\rho g(h_1^2-h_2^2)}{2}-\frac{\dot m}{b}(v_2-v_1),\qquad \frac{\dot m}{b}=\rho h_1v_1.$$
+
+Za vodu gustoće $1000\,\mathrm{kg/m^3}$ i zadane razine dobiva se $v_1=1{,}184\,\mathrm{m/s}$, $v_2=7{,}103\,\mathrm{m/s}$ i $F/b=21{,}90\,\mathrm{kN/m}$. Voda gura ustavu nizvodno; reakcija ustave na kontrolni volumen je suprotna.
 
 ### Dodatni primjer Z111 — Peltonova turbina {.unnumbered}
 
-Potrebno je dokazati da je snaga proizvedena pomoću Peltonove turbine polumjera $r$, koja rotira konstantnom kutnom brzinom $\omega$, jednaka
+Potrebno je dokazati da je snaga proizvedena pomoću Peltonove turbine polumjera $r$, koja rotira konstantnom kutnom brzinom <span class="math inline">\(\omega\)</span>, jednaka
 $$P = \rho \cdot \omega \cdot r \cdot \dot{V} \cdot (v - \omega r)(1 - \cos\beta).$$
 Pri tome je $\rho$ gustoća tekućine, a $\dot{V}$ volumenski protok. Za zadane podatke potom treba odrediti numeričku snagu turbine.
 
 <div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$\rho=1000\,\text{kg/m}^3$, $r=2\,\text{m}$, $\dot{V}=10\,\text{m}^3/\text{s}$, $n=150\,\text{o/min}$, $\beta = 160^\circ$, $v=50\,\text{m/s}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$P$</span></div></div>
 <div class="rjesenje-label">Rješenje</div>
 
-Za $n=150\,\mathrm{o/min}$ je $\omega=15,708\,\mathrm{rad/s}$ i $U=r\omega=31,42\,\mathrm{m/s}$. Za idealno skretanje vrijedi $V_{\theta2}=U+(v-U)\cos\beta$, pa je $F_\theta=\rho\dot V(v-U)(1-\cos\beta)$. Množenjem s $U=\omega r$ dobiva se zadani izraz i $P=11,3\,\mathrm{MW}$. Prvi laboratorij ima gumb s tim podacima.
+Za $n=150\,\mathrm{o/min}$ je $\omega=15,708\,\mathrm{rad/s}$ i $U=r\omega=31,42\,\mathrm{m/s}$. Za idealno skretanje vrijedi $V_{\theta2}=U+(v-U)\cos\beta$, pa je $F_\theta=\rho\dot V(v-U)(1-\cos\beta)$. Množenjem s $U=\omega r$ dobiva se zadani izraz i $P=11,3\,\mathrm{MW}$. Podatke provjeri u glavnom widgetu na početku vježbe, odabirom „Izvorni Z111”.
 
 ### Dodatni primjer Z112 — Flyboard dinamika {.unnumbered}
+
+
+Osoba na Flyboard-u penje se na visinu 10 metara. Četiri sapnice promjera 5 cm, pričvršćene na noge, omogućuju podizanje osobe i sustava Flyboard ukupne mase 150 kg. Potrebno je odrediti minimalnu brzinu mlaza za lebdenje. Ako je brzina mlaza 15 m/s, treba odrediti potrebno vrijeme za postizanje zadane visine i brzinu podizanja. Zatim treba odrediti koliko će se sustav podignuti iznad visine od 10 m ako se dotok vode prekine točno pri dosezanju te visine, te koliko će se vremena osoba zadržati iznad 10 m.
+
+<div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$H=10\,\text{m}$, $4 \times d=5\,\text{cm}$, $m=150\,\text{kg}$, $v=15\,\text{m/s}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$v_{min}$; $t$; $w$; $\Delta H$; <span class="math inline">\(\Delta t\)</span></span></div></div>
+
+<div class="rjesenje-label">Model rješenja</div>
+
+U pojednostavljenom modelu stalnoga potiska zanemarujemo silu dovodne cijevi, otpor zraka i promjenu potiska s brzinom uspona. Ukupna izlazna površina četiriju sapnica jest $A=4\pi d^2/4=0{,}007854\,\mathrm{m^2}$, a voda ima $\rho=1000\,\mathrm{kg/m^3}$. Tada je $F_p=\rho Av_j^2$, pa iz $F_p=mg$ slijedi minimalna brzina za lebdenje
+
+$$v_{min}=\sqrt{\frac{mg}{\rho A}}=13{,}69\,\mathrm{m/s}.$$
+
+Pri $v_j=15\,\mathrm{m/s}$ ubrzanje iznosi $a=(F_p-mg)/m=1{,}971\,\mathrm{m/s^2}$. Iz mirovanja do visine $H=10\,\mathrm m$ slijede $t_{10}=\sqrt{2H/a}=3{,}185\,\mathrm s$ i $v_c=at_{10}=6{,}278\,\mathrm{m/s}$. Nakon prekida potiska gibanje je balističko s $a=-g$:
+
+$$\Delta H=\frac{v_c^2}{2g}=2{,}009\,\mathrm m,\qquad \Delta t=\frac{2v_c}{g}=1{,}280\,\mathrm s.$$
+
+<span class="math inline">\(\Delta t\)</span> obuhvaća uspon od 10 m do vrha i povratak na 10 m.
+
+<strong>Ključni prijelaz:</strong> prekid protoka uklanja samo potisak. Položaj i brzina su neprekinuti.
+
 
 ```{=html}
 <style>
@@ -523,6 +425,19 @@ document.addEventListener("DOMContentLoaded", function () {
  '<path d="M680 350V430H910" fill="none" stroke="#94a3b8"/><path d="'+curve+'" fill="none" stroke="#0284c7" stroke-width="3"/><circle cx="'+(680+230*ratio)+'" cy="'+(430-65*4*ratio*(1-ratio))+'" r="5" fill="#dc2626"/>'+text(680,345,'P/Pmax = 4(U/V₁)(1−U/V₁)',C.steel,13)+text(680,452,'0',C.steel,13)+text(786,452,'0,5',C.steel,13)+text(885,452,'1 U/V₁',C.steel,13);
  MF1.separateScene(svg,'[data-panel="velocity"]','40 0 580 440','625 25 330 445','Brzinski trokuti Peltonove lopatice i krivulja snage');
  const detail=svg.mf1Detail;detail.setAttribute('viewBox','0 0 880 590');
+ if(!root.mf1ViewModes){
+   svg.id='v12-pelton-rotor';detail.id='v12-pelton-analysis';
+   const modes=document.createElement('div');modes.className='mf1-editorial-modes';modes.setAttribute('role','group');modes.setAttribute('aria-label','Prikaz istog Peltonova mlaza');
+   modes.innerHTML='<button type="button" aria-pressed="true" aria-controls="v12-pelton-rotor">1 · Mlaz i rotor</button><button type="button" aria-pressed="false" aria-controls="v12-pelton-analysis">2 · Brzine i snaga</button>';
+   svg.before(modes);root.mf1ViewModes=modes;
+   root.querySelector('.v12x-caption').textContent='Mlaz predaje moment rotoru. Zelena strelica pokazuje obodnu brzinu lopatice u dodiru s mlazom.';
+   modes.querySelectorAll('button').forEach((button,index)=>button.addEventListener('click',()=>{
+     root.dataset.view=String(index);svg.toggleAttribute('hidden',index===1);detail.toggleAttribute('hidden',index===0);
+     modes.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
+     root.querySelector('.v12x-caption').textContent=index===0?'Mlaz predaje moment rotoru. Zelena strelica pokazuje obodnu brzinu lopatice u dodiru s mlazom.':'Trokuti zatvaraju V = U + W u zajedničkom mjerilu. Točka na krivulji pokazuje snagu za trenutačni omjer U/V₁.';
+   }));
+ }
+ svg.toggleAttribute('hidden',root.dataset.view==='1');detail.toggleAttribute('hidden',root.dataset.view!=='1');
  const sv=205/Math.max(v,1),ix=100,iy=120,ex=530,ey=170;
  detail.innerHTML=text(45,35,'Brzinski trokuti: V = U + W',C.ink,20)+text(60,72,'Ulaz',C.steel,16)+text(505,72,'Izlaz',C.steel,16)+
  MF1.svgArrow(ix,iy,u*sv,0,C.u)+MF1.svgArrow(ix+u*sv,iy,w*sv,0,C.w)+MF1.svgArrow(ix,iy+42,v*sv,0,C.v)+
@@ -532,210 +447,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 }
 ;
-  const drawValve = function(){
- const root=document.querySelector('#v12-valve'),q=value(root,'q')/1000,p=value(root,'p')*1000,A=Math.PI*.02**2/4,v=q/A,md=998*q,I=1.03*md*v,G=5.8*9.81,rx=-p*A-I,rz=G-I,fs=105/Math.max(Math.hypot(rx,rz),p*A,G,1),vs=90/Math.max(v,1);
- const svg=scene(root,'valve','Slavina s izlazom prema dolje: sila oslonca na sustav i suprotno opterećenje prirubnice','0 0 960 400');
- svg.innerHTML='<path d="M100 180H465Q510 180 510 225V280" fill="none" stroke="#64748b" stroke-width="52"/><path d="M100 180H465Q510 180 510 225V280" fill="none" stroke="#bae6fd" stroke-width="32"/><path d="M510 280V350" stroke="#38bdf8" stroke-width="25"/><rect x="215" y="138" width="25" height="84" fill="#cbd5e1" stroke="#334155" stroke-width="3"/>'+MF1.svgArrow(115,180,v*vs,0,C.v,'v₁')+MF1.svgArrow(510,260,0,v*vs,C.v,'v₂')+MF1.svgArrow(225,180,rx*fs,-rz*fs,C.f,'R oslonca')+MF1.svgArrow(330,180,0,G*fs,C.g,'G')+
- '<rect x="200" y="80" width="365" height="225" rx="12" fill="none" stroke="#94a3b8" stroke-dasharray="6 5"/>'+text(90,40,'p₁A + Rₓ = −βṁv; Rz − G = −βṁv',C.ink,17)+text(90,375,'Jednaki ulazni i izlazni presjek; izlazni manometarski tlak je nula.',C.steel,14)+
- '<rect x="650" y="90" width="280" height="245" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>'+text(670,120,'Opterećenje prirubnice = −R',C.ink,15)+MF1.svgArrow(780,220,-rx*fs,rz*fs,C.f)+text(665,315,'Fx='+num(-rx,1)+' N; Fz='+num(-rz,1)+' N',C.f,14);
- MF1.separateScene(svg,'rect[x="650"]','5 15 650 385','630 70 325 285','Opterećenje prirubnice: sila suprotna reakciji oslonca');
-};
-  const fixCantilever = function () {
-    const root = document.querySelector("#v12-cantilever");
-    if (!root) return;
-    const L = value(root, "l"),
-      H = value(root, "h"),
-      v = value(root, "v"),
-      md = ((1000 * Math.PI * 0.1 * 0.1) / 4) * v,
-      gp = 12 * 9.81,
-      mg = 0.5 * gp * L * L,
-      mv = -H * md * v,
-      ma = mg + mv,
-      l0 = Math.sqrt((-2 * mv) / gp);
-    const put = function (k, val) {
-      const e = root.querySelector('[data-v="' + k + '"]');
-      if (e) e.textContent = val;
-    };
-    put("md", num(md, 2) + " kg/s");
-    put("gp", num(gp, 1) + " N/m");
-    put("mg", "+" + num(mg, 1) + " N m");
-    put("mv", num(mv, 1) + " N m");
-    put("ma", num(ma, 1) + " N m");
-    put("l0", num(l0, 2) + " m");
-    const c = root.querySelector("[data-c]");
-    if (c)
-      c.textContent =
-        "Raspodijeljena težina daje +" +
-        num(mg, 1) +
-        " N m, a mlaz " +
-        num(mv, 1) +
-        " N m. Pri L = " +
-        num(l0, 2) +
-        " m rezultantni je moment nula.";
-    const f = root.querySelector(".v12x-formula");
-    if (f)
-      f.innerHTML =
-        "ṁ = ρ(πd²/4)v; G′ = m′g; M_A = (G′/2)L² − Hṁv. Reakcijski moment iščezava pri L = √(2Hṁv/G′), odnosno 1,55 m za izvorne podatke. Strelice F mlaz i G′L imaju zajedničku skalu; sitne strelice označuju raspodijeljeno opterećenje.";
-    const svg = scene(
-      root,
-      "cantilever",
-      "Konzolni L-cjevovod učvršćen je u A; raspodijeljena težina kraka i mlaz na izlazu stvaraju momente suprotnih predznaka.",
-      "0 0 960 400",
-    );
-    if (!svg) return;
-    const x = 205,
-      y = 334,
-      metric = Math.min(190/Math.max(H,.001),300/Math.max(L,.001)),
-      top = y-H*metric, width=L*metric,
-      outlet = x + width,
-      scale = 75 / Math.max(Math.abs(mg), Math.abs(mv), Math.abs(ma), 1),
-      posG = 800 + mg * scale,
-      posV = 800 + mv * scale,
-      posA = 800 + ma * scale;
-    let weights = "";
-    for (let i = 1; i <= 7; i++) {
-      const px = x + (width * i) / 8;
-      weights += arrow("cantilever", px, top - 24, px, top + 18, "g", "", 0, 0, 2);
-    }
-    svg.innerHTML =
-      defs("cantilever") +
-      '<rect width="960" height="400" fill="#fbfdfe"/><path d="M80 ' +
-      y +
-      ' H230" stroke="#7d909a" stroke-width="9"/><path d="M160 ' +
-      y +
-      ' l45 -42 v84 z" fill="#c9d4d9" stroke="' +
-      C.ink +
-      '" stroke-width="3"/><path d="M' +
-      x +
-      " " +
-      y +
-      " V" +
-      top +
-      " H" +
-      outlet +
-      '" fill="none" stroke="#536b78" stroke-width="44" stroke-linejoin="round"/><path d="M' +
-      x +
-      " " +
-      y +
-      " V" +
-      top +
-      " H" +
-      outlet +
-      '" fill="none" stroke="#dff4fa" stroke-width="26" stroke-linejoin="round"/><circle cx="' +
-      x +
-      '" cy="' +
-      y +
-      '" r="8" fill="' +
-      C.ink +
-      '"/>' +
-      text(x - 14, y + 29, "A", C.ink, 16, 800) +
-      '<path d="M' +
-      outlet +
-      " " +
-      top +
-      " H" +
-      (outlet + 92) +
-      '" stroke="' +
-      C.fluid +
-      '" stroke-width="18" stroke-linecap="round"/><path d="M' +
-      outlet +
-      " " +
-      top +
-      " H" +
-      (outlet + 92) +
-      '" stroke="#d8fbff" stroke-width="6" stroke-linecap="round"/>' +
-      weights +
-      arrow(
-        "cantilever",
-        outlet,
-        top,
-        outlet - md*v*(70/Math.max(md*v,gp*L,1)),
-        top,
-        "f",
-        "F mlaz",
-        -5,
-        -10,
-        5,
-      ) +
-      '<line x1="' +
-      (x - 40) +
-      '" y1="' +
-      y +
-      '" x2="' +
-      (x - 40) +
-      '" y2="' +
-      top +
-      '" stroke="' +
-      C.guide +
-      '" stroke-width="2" stroke-dasharray="6 5"/>' +
-      text(x - 67, (y + top) / 2, "H", C.guide, 15, 750) +
-      '<line x1="' +
-      x +
-      '" y1="' +
-      (top - 45) +
-      '" x2="' +
-      outlet +
-      '" y2="' +
-      (top - 45) +
-      '" stroke="' +
-      C.guide +
-      '" stroke-width="2" stroke-dasharray="6 5"/>' +
-      text((x + outlet) / 2, top - 53, "L", C.guide, 15, 750) +
-      '<line x1="' +
-      (x + width / 2) +
-      '" y1="' +
-      (top - 8) +
-      '" x2="' +
-      (x + width / 2) +
-      '" y2="' +
-      (top - 8 + gp*L*(70/Math.max(md*v,gp*L,1))) +
-      '" stroke="' +
-      C.g +
-      '" stroke-width="5" marker-end="url(#cantilever-g)"/>' +
-      text(x + width / 2 + 9, top - 14, "G′L", C.g, 15, 750) +
-      '<text x="' +
-      (x + width / 2 - 18) +
-      '" y="' +
-      (top + 54) +
-      '" fill="' +
-      C.guide +
-      '" font-size="13">L/2</text>' +
-      '<rect x="590" y="45" width="320" height="300" rx="14" fill="#ffffff" stroke="#cbd9e4" stroke-width="2"/>' +
-      text(614, 76, "BILANCA MOMENATA U A", C.ink, 14, 800) +
-      text(614, 103, "NEGATIVNO", C.steel, 12, 750) +
-      text(794, 103, "0", C.steel, 12, 750) +
-      text(840, 103, "POZITIVNO", C.steel, 12, 750) +
-      '<line x1="622" y1="130" x2="888" y2="130" stroke="' +
-      C.guide +
-      '" stroke-width="3"/><line x1="800" y1="116" x2="800" y2="146" stroke="' +
-      C.ink +
-      '" stroke-width="3"/><line x1="' +
-      clamp(posV, 626, 884) +
-      '" y1="130" x2="' +
-      clamp(posV, 626, 884) +
-      '" y2="170" stroke="' +
-      C.f +
-      '" stroke-width="5"/>' +
-      text(clamp(posV, 626, 884), 190, "M mlaz", C.f, 13, 750, "middle") +
-      '<line x1="' +
-      clamp(posG, 626, 884) +
-      '" y1="130" x2="' +
-      clamp(posG, 626, 884) +
-      '" y2="170" stroke="' +
-      C.g +
-      '" stroke-width="5"/>' +
-      text(clamp(posG, 626, 884), 211, "M težina", C.g, 13, 750, "middle") +
-      '<circle cx="' +
-      clamp(posA, 626, 884) +
-      '" cy="252" r="9" fill="' +
-      C.m +
-      '"/><line x1="622" y1="252" x2="888" y2="252" stroke="' +
-      C.guide +
-      '" stroke-width="2"/>' +
-      text(clamp(posA, 626, 884), 280, "M_A = " + num(ma, 1) + " N m", C.m, 14, 800, "middle") +
-      text(614, 322, "Pri L = L* markeri se ponište oko nule.", C.steel, 13, 600);
-    MF1.separateScene(svg,'rect[x="590"]','60 30 515 380','570 25 365 345','Bilanca momenata težine, mlaza i oslonca A');
-  };
   const drawSprinkler = function(angle){
  const root=document.querySelector('#v12-sprinkler'),q=value(root,'q')/1000,n=value(root,'n'),r=value(root,'r'),omega=n*Math.PI/30,U=r*omega,W=q/(Math.PI*.01**2),V=U-W,R=r*140,vs=110/Math.max(U,W,Math.abs(V),1);
  const svg=scene(root,'sprinkler','Pogled odozgo: relativni izlaz nasproti vrtnji; Vθ = U − W','0 0 960 450');let arms='';
@@ -746,28 +457,6 @@ document.addEventListener("DOMContentLoaded", function () {
  MF1.separateScene(svg,'rect[x="600"]','30 0 545 440','580 45 370 340','Tangencijalna bilanca brzina rasprskivača: Vθ = U − W');
 }
 ;
-  const drawWind = function(){
- const root=document.querySelector('#v12-wind'),D=value(root,'d'),v=value(root,'v'),cp=value(root,'e'),d=MF1.actuatorDisk(1.25,Math.PI*D*D/4,v,cp),R=D*.65,ru=R*Math.sqrt(d.disk/v),rw=R*Math.sqrt(d.disk/d.wake),vs=13,fs=90/Math.max(d.force,1);
- const svg=scene(root,'wind','Idealni disk: strujna cijev se širi kako brzina pada','0 0 960 420');
- svg.innerHTML='<path d="M70 '+(195-ru)+'Q300 '+(195-ru)+' 480 '+(195-R)+'Q680 '+(195-rw)+' 890 '+(195-rw)+'V'+(195+rw)+'Q680 '+(195+rw)+' 480 '+(195+R)+'Q300 '+(195+ru)+' 70 '+(195+ru)+'Z" fill="#e0f2fe" stroke="#94a3b8"/>'+
- '<ellipse cx="480" cy="195" rx="15" ry="'+R+'" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>'+MF1.svgArrow(95,195,v*vs,0,C.v,'v₁')+MF1.svgArrow(650,195,d.wake*vs,0,C.v,'v₂')+MF1.svgArrow(480,350,d.force*fs,0,C.f,'F vjetra')+MF1.svgArrow(480,390,-d.force*fs,0,C.g,'R oslonca')+text(70,35,'D='+num(D,0)+' m; v diska='+num(d.disk,2)+' m/s; Cₚ='+num(cp,2),C.ink,17)+text(70,315,'ṁ = ρA v diska; P = F v diska; A₁v₁ = A v diska = A₂v₂',C.steel,15);
-};
-  const drawHeli = function(){
- const root=document.querySelector('#v12-heli'),m=value(root,'m'),D=value(root,'d'),A=Math.PI*D*D/4,T=m*1000*9.81,v=Math.sqrt(T/(1.18*A)),rw=D*8,rr=rw*Math.SQRT2,vs=2,fs=70/Math.max(T,1);
- const svg=scene(root,'heli','Idealno lebdenje: daleki trag ima pola površine rotora i dvostruku brzinu','0 0 960 420');
- svg.innerHTML='<path d="M'+(450-rr)+' 110Q'+(450-rw)+' 220 '+(450-rw)+' 330H'+(450+rw)+'Q'+(450+rw)+' 220 '+(450+rr)+' 110Z" fill="#e0f2fe" stroke="#94a3b8"/>'+
- '<path d="M'+(450-rr)+' 110H'+(450+rr)+'" stroke="#475569" stroke-width="8"/><path d="M415 55H485L510 85H390Z" fill="#cbd5e1" stroke="#334155" stroke-width="3"/>'+MF1.svgArrow(450-rr*.65,112,0,v*vs/2,C.v,'v diska')+MF1.svgArrow(450-rw*.65,260,0,v*vs,C.v,'v trag')+MF1.svgArrow(680,155,0,-T*fs,C.f,'T')+MF1.svgArrow(680,155,0,T*fs,C.g,'G')+
- text(65,30,'D = promjer dalekog traga; D rotora = √2 D',C.ink,17)+text(65,370,'A rotora = 2A; v diska = v trag/2; P = T v diska',C.steel,16)+text(65,400,'Idealni model: jednoliko strujanje, bez gubitaka i vrtložne komponente.',C.steel,14)+text(680,285,'T = G = '+num(T/1000,1)+' kN',C.f,15);
-};
-  const drawGate = function(){
- const root=document.querySelector('#v12-gate'),h1=value(root,'h1'),h2=Math.min(value(root,'h2'),h1),v2=Math.sqrt(2*9.81*h1*h1/(h1+h2)),v1=h2/h1*v2,ph=1000*9.81*(h1*h1-h2*h2)/2,I=1000*h1*v1*(v2-v1),F=ph-I,scale=220/Math.max(h1,1),base=310,y1=base-h1*scale,y2=base-h2*scale,vs=16,fs=110/Math.max(ph,I,F,1);
- const svg=scene(root,'gate','Ustava s podljevom: F = razlika hidrostatskih sila minus porast toka količine gibanja','0 0 960 450');
- svg.innerHTML='<path d="M70 '+y1+'H390Q450 '+y1+' 510 '+y2+'H890V310H70Z" fill="#bae6fd"/><path d="M70 '+y1+'H390M510 '+y2+'H890" stroke="#0284c7" stroke-width="3"/><path d="M55 315H905" stroke="#64748b" stroke-width="8"/>'+
- '<rect x="430" y="45" width="32" height="'+Math.max(0,y2-45)+'" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>'+MF1.svgArrow(150,(base+y1)/2,v1*vs,0,C.v,'v₁')+(h2>0?MF1.svgArrow(590,(base+y2)/2,v2*vs,0,C.v,'v₂'):'')+MF1.svgArrow(446,(y1+y2)/2,F*fs,0,C.f,'F voda → ustava')+
- text(65,30,'h₁='+num(h1,2)+' m; h₂='+num(h2,2)+' m',C.ink,17)+
- MF1.svgArrow(135,380,ph*fs,0,C.f,'Ftlak')+MF1.svgArrow(460,380,-I*fs,0,C.v,'−ΔṖ')+MF1.svgArrow(690,380,F*fs,0,C.f,'F')+
- text(65,430,h1===h2?'h₁=h₂: prikazana kritična granična vrijednost toka; F=0.':'Hidrostatski tlakovi pripadaju udaljenim presjecima 1 i 2; gubici su zanemareni.',C.steel,14);
-};
   const bind = function (id, fn) {
     const root = document.querySelector(id);
     if (!root) return;
@@ -788,53 +477,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (el) el.textContent = content;
   };
   plainHeader("#v12-sprinkler .v12x-head h3", "Četiri mlaznice: moment računa apsolutnu izlaznu komponentu Vθ");
-  plainHeader("#v12-wind .v12x-head h3", "Promjer ulazi s D², a brzina vjetra s v³ u raspoloživu snagu");
-  plainHeader("#v12-heli .v12x-head h3", "Za lebdenje vrijedi T = mg");
-  plainHeader("#v12-fly .v12x-head h3", "Pri prekidu mlaza brzina ostaje, a ubrzanje se promijeni u −g");
-  bind("#v12-valve", drawValve);
-  bind("#v12-cantilever", fixCantilever);
-  bind("#v12-wind", drawWind);
-  bind("#v12-gate", drawGate);
   let peltonAngle=0,sprinklerAngle=0;
- bind('#v12-pelton',()=>drawPelton(peltonAngle));bind('#v12-sprinkler',()=>drawSprinkler(sprinklerAngle));bind('#v12-heli',drawHeli);
+ bind('#v12-pelton',()=>drawPelton(peltonAngle));bind('#v12-sprinkler',()=>drawSprinkler(sprinklerAngle));
  for(const [id,step,reset]of [
  ['pelton',dt=>{const root=document.querySelector('#v12-pelton');peltonAngle+=value(root,'v')*value(root,'u')/2*dt;drawPelton(peltonAngle)},()=>{peltonAngle=0}],
  ['sprinkler',dt=>{const root=document.querySelector('#v12-sprinkler');sprinklerAngle+=value(root,'n')*Math.PI/30*dt;drawSprinkler(sprinklerAngle)},()=>{sprinklerAngle=0}]]){
  const root=document.querySelector('#v12-'+id);MF1.motion(root,step,{reset,speed:.05});root.querySelector('.mf1-motion span').textContent='Usporeni prikaz 20×; brojčane vrijednosti su stvarne.';
  }
 });
-</script>
-```
-
-Osoba na Flyboard-u penje se na visinu 10 metara. Četiri sapnice promjera 5 cm, pričvršćene na noge, omogućuju podizanje osobe i sustava Flyboard ukupne mase 150 kg. Potrebno je odrediti minimalnu brzinu mlaza za lebdenje. Ako je brzina mlaza 15 m/s, treba odrediti potrebno vrijeme za postizanje zadane visine i brzinu podizanja. Zatim treba odrediti koliko će se sustav podignuti iznad visine od 10 m ako se dotok vode prekine točno pri dosezanju te visine, te koliko će se vremena osoba zadržati iznad 10 m.
-
-<div class="zadano-grid"><div class="zadano-row"><span class="label">Zadano</span><span class="zadano-text">$H=10\,\text{m}$, $4 \times d=5\,\text{cm}$, $m=150\,\text{kg}$, $v=15\,\text{m/s}$</span></div><div class="zadano-row"><span class="label">Odrediti</span><span class="zadano-text">$v_{min}$; $t$; $w$; $\Delta H$; $\Delta t$</span></div></div>
-
-```{=html}
-<div id="v12-fly" class="v12x-shell"><div class="v12x-head"><div class="v12x-kicker">Z112 · vremenska evolucija</div><h3>Pri prekidu mlaza brzina ostaje, a ubrzanje se promijeni u $-g$</h3></div><div class="v12x-stage"><svg viewBox="0 0 960 400" role="img" aria-label="Flyboard s uključenim i isključenim mlazom" data-svg></svg></div><div class="v12x-body"><div class="v12x-panel"><h4>Pokreni slučaj</h4><label class="v12x-control">Brzina mlaza <output data-o="v"></output><input data-k="v" type="range" min="10" max="22" step=".5" value="15"></label><div class="v12x-run"><button class="v12x-btn" data-play type="button">Pokreni</button><button class="v12x-btn" data-pause type="button">Pauza</button><button class="v12x-btn" data-reset type="button">Početak</button><span class="v12x-status" data-status></span></div><div class="v12x-presets"><button class="v12x-btn" data-p type="button">Izvorni slučaj: 15 m/s</button><button class="v12x-btn" data-h type="button">Lebdenje</button></div></div><div class="v12x-panel"><h4>Fizika slučaja</h4><div class="v12x-cards"><div class="v12x-card"><small>Prag lebdenja</small><strong data-v="min"></strong></div><div class="v12x-card"><small>Potisak / težina</small><strong data-v="fg"></strong></div><div class="v12x-card"><small>Trenutačno ubrzanje</small><strong data-v="a"></strong></div><div class="v12x-card"><small>Vrijeme do 10 m</small><strong data-v="t"></strong></div><div class="v12x-card"><small>Brzina pri 10 m</small><strong data-v="vc"></strong></div><div class="v12x-card"><small>Dodatna visina</small><strong data-v="dh"></strong></div><div class="v12x-card"><small>Vrijeme iznad 10 m</small><strong data-v="above"></strong></div></div></div></div><div class="v12x-formula">$F_p=\rho Av_j^2$, $a=(F_p-mg)/m$. Pri 15 m/s: $a=1,97\,\mathrm{m/s^2}$, $t_{10}=3,19\,\mathrm s$, $v_c=6,28\,\mathrm{m/s}$; nakon prekida $a=-g$, pa je dodatna visina $v_c^2/(2g)=2,01\,\mathrm m$.</div><div class="v12x-cause"><strong>Ključni prijelaz:</strong> prekid protoka uklanja samo potisak. Položaj i brzina su neprekinuti.</div></div><script>
-(()=>{
- const root=document.querySelector('#v12-fly'),svg=root.querySelector('[data-svg]'),input=root.querySelector('input'),fmt=(x,d=2)=>x.toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});let time=0,velocity=+input.value,motion;
- const A=Math.PI*.05**2,m=150,g=9.81,min=Math.sqrt(m*g/(1000*A));
- function model(){const thrust=1000*A*velocity**2,a=(thrust-m*g)/m,cut=a>1e-10?Math.sqrt(20/a):Infinity,vc=Number.isFinite(cut)?a*cut:0,land=Number.isFinite(cut)?cut+(vc+Math.sqrt(vc*vc+20*g))/g:Infinity;return {thrust,a,cut,vc,land,peak:10+vc*vc/(2*g)};}
- function draw(){const d=model(),after=time>=d.cut,t=after?time-d.cut:0,landed=time>=d.land,active=!after&&!landed;
- const y=landed?0:after?10+d.vc*t-.5*g*t*t:Math.max(0,.5*d.a*time*time),vy=landed?0:after?d.vc-g*t:Math.max(0,d.a*time),ac=landed?0:after?-g:d.a>1e-10?d.a:0;
- const put=(k,v)=>root.querySelector('[data-v="'+k+'"]').textContent=v;
- put('min',fmt(min)+' m/s');put('fg',fmt(active?d.thrust:0,0)+' / '+fmt(m*g,0)+' N');put('a',fmt(ac)+' m/s²');put('t',Number.isFinite(d.cut)?fmt(d.cut)+' s':'—');put('vc',fmt(d.vc)+' m/s');put('dh',fmt(d.vc*d.vc/(2*g))+' m');put('above',fmt(2*d.vc/g)+' s');root.querySelector('[data-o]').textContent=fmt(velocity,2)+' m/s';
- root.querySelector('[data-status]').textContent='t='+fmt(time)+' s · '+(landed?'povratak na površinu':after?'mlaz isključen':d.a<=1e-10?'na početnoj razini; nema uzleta':'mlaz uključen');
- const scale=220/Math.max(12,d.peak),base=330,yy=base-y*scale,fs=72/Math.max(d.thrust,m*g),N=active&&d.a<0?m*g-d.thrust:landed?m*g:0;
- svg.setAttribute('viewBox','0 0 960 440');
- let jets='';if(active&&velocity>0)for(const dx of [-25,-8,8,25])jets+='<path d="M'+(325+dx)+' '+yy+'v'+Math.min(velocity*3,70,Math.max(8,base-yy))+'" stroke="#38bdf8" stroke-width="5"/>';
- svg.innerHTML='<title>Flyboard: točno vrijeme, kontinuirana brzina pri prekidu, bez potiska nakon prekida</title><path d="M60 335H910" stroke="#7dd3fc" stroke-width="10"/><path d="M100 80V330H120" stroke="#64748b" fill="none"/><path d="M95 '+(base-10*scale)+'H550" stroke="#d97706" stroke-dasharray="5 5"/><text x="60" y="'+(base-10*scale-9)+'">10 m</text><text x="70" y="350">0 m</text>'+jets+
- '<circle cx="325" cy="'+(yy-70)+'" r="14" fill="#cbd5e1" stroke="#334155"/><path d="M325 '+(yy-55)+'v30m0 -18l-20 14m20 -14l20 14m-20 4l-15 25m15 -25l15 25" fill="none" stroke="#334155" stroke-width="5"/><rect x="290" y="'+(yy-5)+'" width="70" height="9" fill="#64748b"/>'+
- MF1.svgArrow(420,yy-25,0,-(active?d.thrust:0)*fs,'#dc2626','T')+MF1.svgArrow(485,yy-60,0,m*g*fs,'#b7791f','G')+MF1.svgArrow(380,yy,0,-N*fs,'#7c3aed','N')+MF1.svgArrow(555,yy-20,0,-vy*3,'#0284c7','v')+
- '<text x="620" y="155">y = '+fmt(y)+' m</text><text x="620" y="190">v = '+fmt(vy)+' m/s</text><text x="620" y="225">a = '+fmt(ac)+' m/s²</text><text x="65" y="385">Visina se odnosi na ploču; geometrijska skala prilagođena je najvećoj visini.</text><text x="65" y="415">Model zanemaruje otpor zraka i impuls dovodne cijevi; ispod praga nema uzleta.</text>';
- root.mf1FlyState={time,y,vy,ac,active,landed,...d};
- if(landed)motion?.stop();
- }
- motion=MF1.motion(root,(dt)=>{time+=dt;draw()},{reset:()=>{time=0}});
- for(const selector of ['[data-play]','[data-pause]','[data-reset]'])root.querySelector(selector).hidden=true;
- function reset(){motion.stop();time=0;draw();}
- input.oninput=()=>{velocity=+input.value;reset();};root.querySelector('[data-p]').onclick=()=>{velocity=15;input.value=15;reset()};root.querySelector('[data-h]').onclick=()=>{velocity=min;input.value=velocity;reset()};draw();
-})();
 </script>
 ```

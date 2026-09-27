@@ -47,10 +47,36 @@ U ravnoj cijevi stalnog promjera, pri stalnom protoku i približno stalnom $\lam
 </svg>
 </div>
 
+### Fizikalne osnove: Darcy-Weisbachova jednadžba
+
+Gubitak energije pri strujanju realnog fluida kroz ravnu cijev opisuje se **Darcy-Weisbachovom jednadžbom**:
+$$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
+
 ```{=html}
-<section id="v10-loss-explorer" aria-labelledby="v10-loss-title">
+<div class="mf1-bridge">
+    <h4>Konceptualni most</h4>
+    <p>Darcy-Weisbachova jednadžba povezuje pad EGL s uzrokom gubitka: brzina ulazi kvadratno, geometrija kroz omjer <span class="math inline">\(L/D\)</span>, a faktor trenja sažima utjecaj stijenke i režima strujanja.</p>
+</div>
+<div class="mf1-note-grid">
+    <div class="mf1-kriterij">
+        <h4>Kriterij primjene</h4>
+        <ul>
+            <li>Za ravne dionice prvo odvoji linijske gubitke od lokalnih gubitaka na ventilima, koljenima i suženjima.</li>
+            <li>Ako brzinu udvostručiš, Darcy-Weisbachov gubitak raste približno četiri puta jer ulazi član <span class="math inline">\(v^2\)</span>.</li>
+            <li>Prije uvrštavanja pazi koristiš li promjer u metrima i jesu li svi članovi izraženi u visini energije po jediničnoj težini fluida.</li>
+        </ul>
+    </div>
+    <div class="mf1-warning">
+        <h4>Česta pogreška</h4>
+        <p>Najčešća pogreška je zbrajati lokalne i linijske gubitke bez jasnog razdvajanja ili ubaciti tlakni pad <span class="math inline">\(\Delta p\)</span> kao da je već izražen u metrima stupca fluida. Prvo odluči radiš li u paskalima ili u visini dobave, pa tek onda pretvaraj.</p>
+    </div>
+</div>
+```
+
+```{=html}
+<section id="v10-loss-explorer" data-widget-role="intro" aria-labelledby="v10-loss-title">
   <div class="v10x-shell">
-    <header class="v10x-head"><div class="v10x-kicker">Interaktivni prikaz</div><h4 id="v10-loss-title">Istraživač gubitaka mehaničke energije</h4><p>Promijeni protok, geometriju ili otpor cjevovoda. Energetske linije i proračun odmah pokazuju gdje se raspoloživa energija nepovratno gubi.</p></header>
+    <header class="v10x-head"><div class="v10x-kicker">Interaktivni prikaz</div><h4 id="v10-loss-title">Gdje se gubi mehanička energija?</h4><p>Najprije udvostruči protok uz iste koeficijente. Zatim promijeni samo duljinu, pa samo lokalni otpor: nagib EGL i njezin skok odvojeno pokazuju dva uzroka gubitka. λ i Σζ ovdje su zadani; protok nije rezultat visine ulaznog spremnika.</p></header>
     <div class="v10x-presets" role="group" aria-label="Primjeri gubitaka"><button type="button" data-v10-preset="base" aria-pressed="true">Mješoviti gubici</button><button type="button" data-v10-preset="long" aria-pressed="false">Duga cijev</button><button type="button" data-v10-preset="local" aria-pressed="false">Dominiraju lokalni gubici</button><button type="button" data-v10-preset="ideal" aria-pressed="false">Bez gubitaka</button></div>
     <div class="v10x-scene"><svg id="v10x-scene" viewBox="0 0 1000 420" role="img" aria-labelledby="v10x-scene-title v10x-scene-desc"><title id="v10x-scene-title">Cjevovod s raspodijeljenim i ukupnim lokalnim gubicima</title><desc id="v10x-scene-desc">Voda teče iz spremnika kroz ravnu cijev, koljeno i ventil. Crvena EGL pada postupno trenjem te jednim sažetim skokom za ukupne lokalne gubitke. Plava isprekidana HGL prati je na udaljenosti brzinske visine.</desc><defs><marker id="v10x-arrow" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3Z" fill="#1976b9"/></marker></defs><rect x="35" y="212" width="108" height="142" rx="8" fill="#cceafa" stroke="#315b72" stroke-width="4"/><path class="pipe-wall" d="M140 260H420V178H720V258H935" fill="none" stroke-linejoin="round" stroke-linecap="round"/><path d="M140 260H420V178H720V258H935" fill="none" stroke="#8ed3f3" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/><path d="M760 239l30 -22 30 22 -30 22z" fill="#f5b04c" stroke="#9c5a16" stroke-width="3"/><path id="v10x-flow" d="M190 260H315" fill="none" stroke="#1976b9" stroke-width="7" marker-end="url(#v10x-arrow)"/><path id="v10x-egl" class="egl" d="M92 70H920"/><path id="v10x-hgl" class="hgl" d="M92 105H920"/><path id="v10x-local-drop" fill="none" stroke="#c8741f" stroke-width="5"/><path d="M422 118V242M720 130V225" stroke="#738999" stroke-width="2" stroke-dasharray="7 6"/><text x="58" y="46" class="dim" fill="#c24141">EGL</text><text x="58" y="132" class="dim" fill="#1976b9">HGL</text><text x="172" y="388" class="small">ulazni spremnik</text><text x="375" y="310" class="small">raspodijeljeni gubitak</text><text x="395" y="160" class="small">koljeno</text><text x="748" y="212" class="small">ventil</text><text x="838" y="290" class="small">izlaz</text><text id="v10x-scene-note" x="500" y="46" text-anchor="middle" class="small"></text></svg></div>
     <div class="v10x-controlbar">
@@ -153,7 +179,7 @@ U ravnoj cijevi stalnog promjera, pri stalnom protoku i približno stalnom $\lam
       `<strong>Brzina:</strong> Q/A = ${fmt(s.v, 2)} m/s, pa je v²/(2g) = ${fmt(s.vh, 2)} m.`;
     $("#v10x-chain-friction").innerHTML = `<strong>Raspodijeljeno:</strong> hf = λ(L/D)v²/(2g) = ${fmt(s.hf, 3)} m.`;
     $("#v10x-chain-local").innerHTML = `<strong>Lokalno:</strong> hloc = Σζ·v²/(2g) = ${fmt(s.hloc, 3)} m.`;
-    $("#v10x-chain-pressure").innerHTML = `<strong>Posljedica:</strong> p₁ − p₂ = ρghL = ${fmt(s.dp / 1000, 2)} kPa.`;
+    $("#v10x-chain-pressure").innerHTML = `<strong>Ekvivalent gubitka:</strong> ΔpL = ρghL = ${fmt(s.dp / 1000, 2)} kPa.`;
     const direction = previous && changed ? Math.sign(s[changed] - previous[changed]) : 0;
     const changedText =
       changed === "q"
@@ -236,31 +262,68 @@ Za jednoliku cijev hidraulički je nagib $J=h_f/L$. Ukupni gubitak koji uključu
 
 Prandtlova cijev uspoređuje stagnacijski tlak $p_0$ i statički tlak $p$. Uz idealiziranu stagnacijsku strujnicu vrijedi $p_0-p=\rho v^2/2$. Za živin diferencijalni manometar s vodom u priključcima, na istoj koti, vrijedi $p_0-p=(\rho_{Hg}-\rho_v)g\Delta h$. Oduzimanje gustoće strujnog fluida posljedica je hidrostatske ravnoteže u obje grane manometra.
 
-### Fizikalne osnove: Darcy-Weisbachova jednadžba
 
-Gubitak energije pri strujanju realnog fluida kroz ravnu cijev opisuje se **Darcy-Weisbachovom jednadžbom**:
-$$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
+<section class="v10-lab" id="v10-z90-lab" data-widget-role="application" aria-labelledby="v10-z90-title">
+<header class="v10-lab__head"><h4 id="v10-z90-title">Prandtlova cijev: od očitanja manometra do protoka</h4><p>Mjereni podatak je razlika razina žive. Iz nje se dobivaju <span class="math inline">\(\Delta p\)</span>, brzina i volumenski protok.</p></header>
+<div class="v10x-presets"><button type="button" id="v10-z90-reset" aria-pressed="true">Izvorni Z90</button></div>
+<div class="v10-lab__scene"><svg viewBox="0 0 960 390" role="img" aria-labelledby="v10-z90-svg-title"><title id="v10-z90-svg-title">Prandtlova sonda spojena na U-manometar</title><rect x="40" y="55" width="600" height="185" rx="18" fill="#dff2fb" stroke="#8cb9d1" stroke-width="3"/><path d="M610 145H420" stroke="#748897" stroke-width="20" stroke-linecap="round"/><circle cx="420" cy="145" r="10" fill="#dce7ec" stroke="#405b6d" stroke-width="3"/><circle cx="520" cy="133" r="4" fill="#405b6d"/><circle cx="520" cy="157" r="4" fill="#405b6d"/><path d="M420 145V300Q420 345 470 345Q520 345 520 300V157" fill="none" stroke="#627787" stroke-width="13"/><path id="v10-z90-hg" d="M420 300V323Q420 345 470 345Q520 345 520 300V277" fill="none" stroke="#3d4a53" stroke-width="10"/><path id="v10-z90-dh" d="M555 277V323" stroke="#cf741c" stroke-width="3"/><text id="v10-z90-dh-label" x="566" y="305" class="v10-svg-small" fill="#b65e14">ΔhHg</text><text x="250" y="85" class="v10-svg-small">smjer strujanja →</text><text x="355" y="120" class="v10-svg-small">stagnacijski otvor p₀</text><text x="525" y="105" class="v10-svg-small">statički otvori p</text><text x="620" y="335" class="v10-svg-small">živa</text></svg></div>
+<div class="v10-lab__body"><div class="v10-lab__panel"><h5>Očitanje</h5><label for="v10-z90-h">$\Delta h_{Hg}$ <output id="v10-z90-h-out"></output></label><input id="v10-z90-h" type="range" min="0" max="120" step="0.5" value="63.5"><p>$\rho_v=1000\ \mathrm{kg/m^3}$, $\rho_{Hg}=13600\ \mathrm{kg/m^3}$, $d=0{,}2\ \mathrm{m}$.</p></div><div><div class="v10-lab__panel"><h5>Izračunano iz očitanja</h5><div class="v10-lab__grid"><div class="v10-lab__result"><span>$p_0-p$</span><output id="v10-z90-dp"></output></div><div class="v10-lab__result"><span>Brzina $v$</span><output id="v10-z90-v"></output></div><div class="v10-lab__result"><span>Protok $\dot V$</span><output id="v10-z90-q"></output></div><div class="v10-lab__result"><span>Dinamička visina</span><output id="v10-z90-head"></output></div></div><p class="v10-lab__note" id="v10-z90-note"></p></div></div></div>
+</section>
 
-```{=html}
-<div class="mf1-bridge">
-    <h4>Konceptualni most</h4>
-    <p>Uvodni widget iznad već pokazuje fizičku posljedicu gubitaka kroz pad EGL i HGL. Darcy-Weisbach ovdje služi kao kompaktan računski model: brzina ulazi kvadratno, geometrija kroz omjer $L/D$, a faktor trenja sažima utjecaj stijenke i režima strujanja.</p>
-</div>
-<div class="mf1-note-grid">
-    <div class="mf1-kriterij">
-        <h4>Kriterij primjene</h4>
-        <ul>
-            <li>Za ravne dionice prvo odvoji linijske gubitke od lokalnih gubitaka na ventilima, koljenima i suženjima.</li>
-            <li>Ako brzinu udvostručiš, Darcy-Weisbachov gubitak raste približno četiri puta jer ulazi član $v^2$.</li>
-            <li>Prije uvrštavanja pazi koristiš li promjer u metrima i jesu li svi članovi izraženi u visini energije po jediničnoj težini fluida.</li>
-        </ul>
-    </div>
-    <div class="mf1-warning">
-        <h4>Česta pogreška</h4>
-        <p>Najčešća pogreška je zbrajati lokalne i linijske gubitke bez jasnog razdvajanja ili ubaciti tlakni pad $\Delta p$ kao da je već izražen u metrima stupca fluida. Prvo odluči radiš li u paskalima ili u visini dobave, pa tek onda pretvaraj.</p>
-    </div>
-</div>
-```
+<script>
+(() => {
+  const root = document.getElementById("v10-z90-lab");
+  if (!root) return;
+  const input = root.querySelector("#v10-z90-h");
+  const fmt = (n, d = 2) => n.toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
+  function readInputs() {
+    return { h: +input.value / 1000 };
+  }
+  function compute(s) {
+    const rho = 1000,
+      dp = (13600 - rho) * 9.81 * s.h;
+    const v = Math.sqrt((2 * dp) / rho);
+    const q = ((Math.PI * 0.2 * 0.2) / 4) * v;
+    return { h: s.h, dp: dp, v: v, q: q, head: dp / (rho * 9.81) };
+  }
+  function syncOutputs(s) {
+    root.querySelector("#v10-z90-h-out").value = fmt(s.h * 1000, 1) + " mm";
+    root.querySelector("#v10-z90-dp").value = fmt(s.dp / 1000, 3) + " kPa";
+    root.querySelector("#v10-z90-v").value = fmt(s.v, 3) + " m/s";
+    root.querySelector("#v10-z90-q").value = fmt(s.q, 4) + " m³/s";
+    root.querySelector("#v10-z90-head").value = fmt(s.head, 3) + " m";
+    root.querySelector("#v10-z90-note").textContent =
+      "Manometar daje " +
+      fmt(s.dp, 0) +
+      " Pa. To je dinamički tlak p₀ − p, pa za vodu odgovara brzini " +
+      fmt(s.v, 3) +
+      " m/s.";
+  }
+  function draw(s) {
+    const d = s.h * 620;
+    const hi = 300 - d / 2,
+      lo = 300 + d / 2;
+    root.querySelector("#v10-z90-hg").setAttribute("d", "M420 " + lo + "V335Q420 350 470 350Q520 350 520 335V" + hi);
+    root.querySelector("#v10-z90-dh").setAttribute("d", "M555 " + hi + "V" + lo);
+    root.querySelector("#v10-z90-dh-label").setAttribute("y", String((hi + lo) / 2));
+  }
+  function update() {
+    const s = compute(readInputs());
+    syncOutputs(s);
+    draw(s);
+  }
+  input.addEventListener("input", () => {
+    root.querySelector("#v10-z90-reset").setAttribute("aria-pressed", "false");
+    update();
+  });
+  root.querySelector("#v10-z90-reset").addEventListener("click", () => {
+    input.value = 63.5;
+    root.querySelector("#v10-z90-reset").setAttribute("aria-pressed", "true");
+    update();
+  });
+  update();
+})();
+</script>
 
 <hr class="zadatak-sep">
 
@@ -467,84 +530,6 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>U konstantnoj cijevi $v=\dot V/A=4{,}775\ \mathrm{m/s}$, pa je $v^2/(2g)=1{,}162\ \mathrm{m}$. Za atmosferske točke 1 i 3 te veliki spremnik vrijedi $h_2=v^2/(2g)+h_{w,1-3}$. Stoga je $h_{w,1-3}=0{,}338\ \mathrm{m}=0{,}291\,v^2/(2g)$. Dvije trećine toga iznosi $h_{w,1-2}=0{,}225\ \mathrm{m}$, pa iz bilance 1→2 slijedi $p_{2,g}/(\rho g)=-3{,}387\ \mathrm{m}$, odnosno $p_{2,g}=-33{,}16\ \mathrm{kPa}$. To je manometarski, a ne apsolutni tlak.</p></div>
 
-<section class="v10-lab" id="v10-z86-lab" aria-labelledby="v10-z86-title">
-<header class="v10-lab__head"><h4 id="v10-z86-title">Sifon: raspodjela već određenog gubitka</h4><p>Globalna bilanca 1→3 određuje ukupan gubitak. Klizač samo istražuje gdje se taj gubitak događa i kako to mijenja tlak u tjemenu.</p></header>
-<div class="v10x-presets"><button type="button" id="v10-z86-reset" aria-pressed="true">Izvorni Z86</button></div>
-<div class="v10-lab__scene"><svg viewBox="0 0 960 420" role="img" aria-labelledby="v10-z86-svg-title"><title id="v10-z86-svg-title">Sifon s točkama jedan dva i tri, EGL i HGL</title><rect x="55" y="230" width="145" height="120" fill="#bce6fa" stroke="#4b677c" stroke-width="3"/><path d="M185 245V100H545V285" fill="none" stroke="#879dad" stroke-width="25" stroke-linejoin="round"/><path d="M185 245V100H545V285" fill="none" stroke="#1976b9" stroke-width="13" stroke-linejoin="round"/><path id="v10-z86-egl" d="M145 230L330 240L545 247" fill="none" stroke="#c53b3b" stroke-width="5"/><path id="v10-z86-hgl" d="M145 285L330 295L545 302" fill="none" stroke="#1976b9" stroke-width="4" stroke-dasharray="11 8"/><path id="v10-z86-loss" d="M330 230V245" fill="none" stroke="#cf741c" stroke-width="4"/><text x="130" y="212" class="v10-svg-label">1</text><text x="320" y="83" class="v10-svg-label">2</text><text x="560" y="289" class="v10-svg-label">3</text><text x="55" y="375" class="v10-svg-small">slobodna površina, patm</text><text x="320" y="58" class="v10-svg-small">tjeme sifona</text><text x="555" y="325" class="v10-svg-small">ispust, patm</text><text x="95" y="150" class="v10-svg-label" fill="#c53b3b">EGL</text><text x="95" y="305" class="v10-svg-label" fill="#1976b9">HGL</text></svg></div>
-<div class="v10-lab__body"><div class="v10-lab__panel"><h5>Raspodjela i geometrija</h5><label for="v10-z86-q">Protok $\dot V$ <output id="v10-z86-q-out"></output></label><input id="v10-z86-q" type="range" min="50" max="160" step="1" value="150"><label for="v10-z86-f">Udio do tjemena <output id="v10-z86-f-out"></output></label><input id="v10-z86-f" type="range" min="0.1" max="0.9" step="0.01" value="0.6666667"><label for="v10-z86-top">Visina tjemena iznad plohe <output id="v10-z86-top-out"></output></label><input id="v10-z86-top" type="range" min="0.5" max="3.5" step="0.1" value="2"><p>Pri $\dot V=150\ \mathrm{dm^3/s}$ i $f=2/3$ dobiva se raspodjela iz zadatka.</p></div><div><div class="v10-lab__panel"><h5>Stanje u tjemenu sifona</h5><div class="v10-lab__grid"><div class="v10-lab__result"><span>$h_{L,1-3}$</span><output id="v10-z86-total"></output></div><div class="v10-lab__result"><span>$h_{L,1-2}$</span><output id="v10-z86-h12"></output></div><div class="v10-lab__result"><span>$h_{L,2-3}$</span><output id="v10-z86-h23"></output></div><div class="v10-lab__result"><span>$p_{2,g}$</span><output id="v10-z86-p2"></output></div><div class="v10-lab__result"><span>$p_{2,abs}$</span><output id="v10-z86-pabs"></output></div></div><p class="v10-lab__note" id="v10-z86-note"></p></div></div></div>
-</section>
-
-<script>
-(() => {
-  const root = document.getElementById("v10-z86-lab");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "1";
-  const input = root.querySelector("#v10-z86-f"),
-    qInput = root.querySelector("#v10-z86-q"),
-    topInput = root.querySelector("#v10-z86-top");
-  const source = { d: 0.2, drop: 1.5, rho: 998, g: 9.81 },
-    fmt = (n, d = 3) => n.toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function readInputs() {
-    return { part: +input.value, q: +qInput.value / 1000, top: +topInput.value };
-  }
-  function compute(s) {
-    const v = s.q / ((Math.PI * source.d * source.d) / 4);
-    const vh = (v * v) / (2 * source.g);
-    const total = source.drop - vh;
-    const h12 = s.part * total;
-    const h23 = (1 - s.part) * total;
-    const phead = -s.top - vh - h12,
-      p = phead * source.rho * source.g;
-    return { ...s, v: v, vh: vh, total: total, h12: h12, h23: h23, p: p, pabs: 101325 + p, valid: total >= 0 };
-  }
-  function syncOutputs(s) {
-    root.querySelector("#v10-z86-q-out").value = fmt(s.q * 1000, 0) + " L/s";
-    root.querySelector("#v10-z86-f-out").value = fmt(s.part * 100, 1) + " %";
-    root.querySelector("#v10-z86-top-out").value = fmt(s.top, 1) + " m";
-    root.querySelector("#v10-z86-total").value = fmt(s.total) + " m";
-    root.querySelector("#v10-z86-h12").value = fmt(s.h12) + " m";
-    root.querySelector("#v10-z86-h23").value = fmt(s.h23) + " m";
-    root.querySelector("#v10-z86-p2").value = fmt(s.p / 1000, 2) + " kPa";
-    root.querySelector("#v10-z86-pabs").value = fmt(s.pabs / 1000, 2) + " kPa";
-    root.querySelector("#v10-z86-note").textContent = s.valid
-      ? "Brzina je " +
-        fmt(s.v) +
-        " m/s, a brzinska visina " +
-        fmt(s.vh) +
-        " m. Veći gubitak prije tjemena dodatno spušta tlak u točki 2."
-      : "Za odabrani protok brzinska visina prelazi raspoloživu visinu od " +
-        fmt(source.drop, 1) +
-        " m; taj zadani sifonski model više nema nenegativan ukupni gubitak.";
-  }
-  function draw(s){
- const svg=root.querySelector('svg'),sc=75,y=90,off=s.vh*sc;
- ['#v10-z86-egl','#v10-z86-hgl','#v10-z86-loss'].forEach(id=>root.querySelector(id).setAttribute('visibility',s.valid?'visible':'hidden'));
- root.querySelector('#v10-z86-egl').setAttribute('d','M145 '+y+'L330 '+(y+s.h12*sc)+'L545 '+(y+s.total*sc));
- root.querySelector('#v10-z86-hgl').setAttribute('d','M145 '+(y+off)+'L330 '+(y+s.h12*sc+off)+'L545 '+(y+s.total*sc+off));
- root.querySelector('#v10-z86-loss').setAttribute('d','M330 '+y+'V'+(y+s.h12*sc));
- if(s.valid&&s.pabs<=2339)root.querySelector('#v10-z86-note').textContent+=' Formalni tlak vrha je ispod tlaka pare vode pri 20 °C: jednofazni model nije valjan.';
-}
-  function update() {
-    const s = compute(readInputs());
-    syncOutputs(s);
-    draw(s);
-  }
-  [input, qInput, topInput].forEach((x) =>
-    x.addEventListener("input", () => {
-      root.querySelector("#v10-z86-reset").setAttribute("aria-pressed", "false");
-      update();
-    }),
-  );
-  root.querySelector("#v10-z86-reset").addEventListener("click", () => {
-    input.value = 0.6666667;
-    qInput.value = 150;
-    topInput.value = 2;
-    root.querySelector("#v10-z86-reset").setAttribute("aria-pressed", "true");
-    update();
-  });
-  update();
-})();
-</script>
 
 ### Zadatak Z87 — Visina mlaza iz sapnice {.unnumbered}
 
@@ -558,68 +543,6 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>Kontinuitet daje $A_Av_A=A_sv_s$, odnosno $v_s=4v_A$. Iz Bernoullija A→izlaz sapnice, uz $p_{s,g}=0$, slijedi $p_{Am}/(\rho g)+v_A^2/(2g)=h_2+(4v_A)^2/(2g)$. Dobiva se $v_A=2{,}431\ \mathrm{m/s}$, $v_s=9{,}724\ \mathrm{m/s}$ i $h_1=4{,}819\ \mathrm{m}$. Na vrhu mlaza vrijedi $v=0$ i $p=p_{atm}$. To je namjerno idealan kontrast: pri realnom istjecanju dio raspoložive visine odlazi na gubitke.</p></div>
 
-<section class="v10x-task" id="v10-z87-lab" aria-labelledby="v10-z87-title"><div class="v10x-shell"><header class="v10x-head"><div class="v10x-kicker">Z87 · idealni referentni slučaj</div><h4 id="v10-z87-title">Sapnica i visina mlaza</h4><p>Tlak u točki A i kontinuitet određuju izlaznu brzinu; vrh mlaza pretvara tu brzinsku visinu u kotu.</p></header><div class="v10x-presets" role="group" aria-label="Primjeri za Z87"><button type="button" id="v10-z87-reset" aria-pressed="true">Izvorni Z87</button></div><div class="v10x-scene"><svg id="v10-z87-scene" viewBox="0 0 960 340" role="img" aria-label="Cijev, sapnica i vertikalni mlaz čija se visina mijenja s parametrima"><path d="M80 250H440V178H500V250H700" fill="none" stroke="#728898" stroke-width="34"/><path d="M80 250H440V178H500V250H700" fill="none" stroke="#86cdef" stroke-width="17"/><path id="v10-z87-jet" d="M470 162C445 120 490 75 470 28" fill="none" stroke="#1976b9" stroke-width="9"/><path id="v10-z87-hline" d="M545 178V28" stroke="#c8741f" stroke-width="3" stroke-dasharray="7 5"/><text x="365" y="226" class="dim">A</text><text x="532" y="95" class="dim">h₁</text><text x="520" y="198" class="small">h₂</text><text id="v10-z87-scene-note" x="260" y="300" class="small"></text></svg></div><div class="v10x-controlbar"><div class="v10x-control"><label for="v10-z87-p"><span>Tlak A, pA,g</span><output id="v10-z87-p-out"></output></label><input id="v10-z87-p" type="range" min="20" max="90" step="1" value="55"></div><div class="v10x-control"><label for="v10-z87-r"><span>Omjer promjera D₂/D₁</span><output id="v10-z87-r-out"></output></label><input id="v10-z87-r" type="range" min="0.3" max="0.8" step="0.01" value="0.5"></div><div class="v10x-control"><label for="v10-z87-h2"><span>Kota sapnice h₂</span><output id="v10-z87-h2-out"></output></label><input id="v10-z87-h2" type="range" min="0" max="2.5" step="0.1" value="1.1"></div><aside class="v10x-primary" aria-live="polite"><small>Visina iznad sapnice</small><strong id="v10-z87-h1"></strong><span id="v10-z87-sub"></span></aside></div><div class="v10x-explain" id="v10-z87-explain" aria-live="polite"></div></div></section>
-
-<script>
-(() => {
-  const root = document.getElementById("v10-z87-lab");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "1";
-  const $ = (s) => root.querySelector(s),
-    g = 9.81,
-    rho = 998,
-    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d }),
-    p = $("#v10-z87-p"),
-    r = $("#v10-z87-r"),
-    h2 = $("#v10-z87-h2");
-  function state() {
-    const pa = +p.value * 1000,
-      dr = +r.value,
-      z = +h2.value,
-      area = dr * dr,
-      available = pa / (rho * g) - z,
-      valid = available > 0,
-      va = valid ? Math.sqrt((2 * g * available) / (1 / (area * area) - 1)) : 0,
-      vs = va / area,
-      hJet = valid ? pa / (rho * g) + (va * va) / (2 * g) - z : 0;
-    return { pa, dr, z, area, available, valid, va, vs, hJet };
-  }
-  function update() {
-    const s = state();
-    $("#v10-z87-p-out").value = fmt(s.pa / 1000, 0) + " kPa";
-    $("#v10-z87-r-out").value = fmt(s.dr, 2);
-    $("#v10-z87-h2-out").value = fmt(s.z, 1) + " m";
-    $("#v10-z87-h1").textContent = s.valid ? fmt(s.hJet, 2) + " m" : "nema mlaza";
-    $("#v10-z87-sub").textContent = s.valid ? "vₛ = " + fmt(s.vs, 2) + " m/s" : "pA/(ρg) ≤ h₂";
-    const top = s.valid ? 162 - s.hJet * (120/Math.max(15,s.hJet)) : 162;
-    $("#v10-z87-jet").setAttribute(
-      "d",
-      s.valid ? `M470 162V${top}` : "M470 162V162",
-    );
-    $("#v10-z87-hline").setAttribute("d", `M545 162V${top}`);
-    $("#v10-z87-scene-note").textContent = s.valid
-      ? `vA = ${fmt(s.va, 2)} m/s; vs = ${fmt(s.vs, 2)} m/s; D₂/D₁ = ${fmt(s.dr, 2)}; visina mlaza: prilagođena skala`
-      : "Tlak u A nije dovoljan da dosegne zadanu kotu sapnice.";
-    $("#v10-z87-explain").innerHTML = s.valid
-      ? "<strong>Idealni lanac.</strong> Kontinuitet povećava brzinu u užoj sapnici, a na vrhu mlaza vrijedi v = 0. Zato se izlazna brzinska visina pojavljuje kao visina mlaza."
-      : "<strong>Granični slučaj.</strong> Prije računanja mlaza mora vrijediti pA/(ρg) > h₂; inače idealizirana strujnica ne može doseći izlaz sapnice.";
-  }
-  [p, r, h2].forEach((i) =>
-    i.addEventListener("input", () => {
-      root.querySelector("#v10-z87-reset").setAttribute("aria-pressed", "false");
-      update();
-    }),
-  );
-  root.querySelector("#v10-z87-reset").addEventListener("click", () => {
-    p.value = 55;
-    r.value = 0.5;
-    h2.value = 1.1;
-    root.querySelector("#v10-z87-reset").setAttribute("aria-pressed", "true");
-    update();
-  });
-  update();
-})();
-</script>
 
 ### Zadatak Z88 — Cjevovod s poznatim gubicima visine dobave {.unnumbered}
 
@@ -633,101 +556,6 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>Kontinuitet daje $v_2=(D_1/D_2)^2v_1=6{,}00\ \mathrm{m/s}$ i $v_3=(D_1/D_3)^2v_1=2{,}667\ \mathrm{m/s}$. U općoj energetskoj jednadžbi koriste se izravno zadani padovi visine dobave. Slijedi $p_2\approx150{,}2\ \mathrm{kPa}$ i $p_3\approx135{,}3\ \mathrm{kPa}$. PDF ne daje $\lambda$ ni podatke za njegovo određivanje, pa se Darcyjev faktor ne uvodi naknadno.</p></div>
 
-```{=html}
-<section class="v10x-task" id="v10-z88-lab" aria-labelledby="v10-z88-title">
-  <div class="v10x-shell">
-    <header class="v10x-head"><div class="v10x-kicker">Z88 · zadani gubici po dionicama</div><h4 id="v10-z88-title">Čitanje energetske bilance kroz tri presjeka</h4><p>Padovi visine dobave zadani su u izvornom zadatku. Ovdje se vidi kako zajedno s promjenom brzine i kote određuju tlak u svakom presjeku.</p></header>
-    <div class="v10x-presets" role="group" aria-label="Primjer za Z88"><button type="button" id="v10-z88-reset" aria-pressed="true">Izvorni Z88</button></div>
-    <div class="v10x-scene"><svg viewBox="0 0 960 330" role="img" aria-label="Cjevovod s tri presjeka, energetskom linijom i zadanim padovima energije"><path d="M70 180H290V140H570V205H890" fill="none" stroke="#718a9b" stroke-width="34" stroke-linejoin="round"/><path d="M70 180H290V140H570V205H890" fill="none" stroke="#8ed3f3" stroke-width="17" stroke-linejoin="round"/><path id="v10-z88-egl" d="M100 58L370 106L700 220L890 220" class="egl"/><path id="v10-z88-hgl" d="M100 72L370 162L700 231L890 231" class="hgl"/><path id="v10-z88-drop12" d="M370 86V106" stroke="#c8741f" stroke-width="5"/><path id="v10-z88-drop23" d="M700 170V220" stroke="#c8741f" stroke-width="5"/><path d="M290 100V218M570 110V240" stroke="#718394" stroke-dasharray="7 6" stroke-width="2"/><text x="120" y="164" class="dim">1</text><text x="410" y="126" class="dim">2</text><text x="720" y="192" class="dim">3</text><text x="55" y="42" class="small" fill="#c24141">EGL</text><text x="55" y="94" class="small" fill="#1976b9">HGL</text><text id="v10-z88-note-scene" x="480" y="292" text-anchor="middle" class="small"></text></svg></div>
-    <div class="v10x-controlbar"><div class="v10x-control"><label for="v10-z88-v1"><span>Brzina u 1, v₁</span><output id="v10-z88-v1-out"></output></label><input id="v10-z88-v1" type="range" min="0.5" max="3" step="0.1" value="1.5"></div><div class="v10x-control"><label for="v10-z88-h12"><span>Gubitak 1 → 2</span><output id="v10-z88-h12-out"></output></label><input id="v10-z88-h12" type="range" min="0" max="4" step="0.1" value="1.8"></div><div class="v10x-control"><label for="v10-z88-h23"><span>Gubitak 2 → 3</span><output id="v10-z88-h23-out"></output></label><input id="v10-z88-h23" type="range" min="0" max="7" step="0.1" value="4.5"></div><aside class="v10x-primary" aria-live="polite"><small>Tlak u presjeku 3</small><strong id="v10-z88-p3"></strong><span id="v10-z88-primary-sub"></span></aside></div>
-    <div class="v10x-bottom"><aside class="v10x-panel"><h5>Kontinuitet</h5><div class="v10x-chain"><div id="v10-z88-v2"></div><div id="v10-z88-v3"></div></div></aside><aside class="v10x-panel"><h5>Energetski lanac</h5><div class="v10x-chain"><div id="v10-z88-p2"></div><div id="v10-z88-chain"></div></div></aside></div>
-    <div class="v10x-explain" id="v10-z88-explain" aria-live="polite"></div>
-  </div>
-</section>
-<script>
-(() => {
-  const root = document.getElementById("v10-z88-lab");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "1";
-  const $ = (s) => root.querySelector(s),
-    g = 9.81,
-    rho = 998;
-  const inputs = { v1: $("#v10-z88-v1"), h12: $("#v10-z88-h12"), h23: $("#v10-z88-h23") };
-  const fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  const readInputs = () => ({ v1: +inputs.v1.value, h12: +inputs.h12.value, h23: +inputs.h23.value });
-  function computeState(x) {
-    const v2 = 4 * x.v1,
-      v3 = (16 / 9) * x.v1,
-      p1 = 170000,
-      z1 = 6,
-      z2 = 4.5,
-      z3 = 3;
-    const p2 = p1 + rho * g * (z1 - z2 + (x.v1 * x.v1 - v2 * v2) / (2 * g) - x.h12);
-    const p3 = p2 + rho * g * (z2 - z3 + (v2 * v2 - v3 * v3) / (2 * g) - x.h23);
-    return {
-      ...x,
-      v2,
-      v3,
-      p2,
-      p3,
-      e1: p1 / (rho * g) + (x.v1 * x.v1) / (2 * g) + z1,
-      e2: p2 / (rho * g) + (v2 * v2) / (2 * g) + z2,
-      e3: p3 / (rho * g) + (v3 * v3) / (2 * g) + z3,
-    };
-  }
-  function drawScene(s) {
-    const maxE = Math.max(s.e1, s.e2, s.e3),
-      minE = Math.min(s.e1-s.v1*s.v1/(2*g), s.e2-s.v2*s.v2/(2*g), s.e3-s.v3*s.v3/(2*g)),
-      scale = 150 / Math.max(1, maxE - minE);
-    const y = (e) => 50 + (maxE - e) * scale,
-      yH = (e, v) => y(e - (v * v) / (2 * g));
-    $("#v10-z88-egl").setAttribute("d", `M100 ${y(s.e1)}L370 ${y(s.e2)}L700 ${y(s.e3)}L890 ${y(s.e3)}`);
-    $("#v10-z88-hgl").setAttribute(
-      "d",
-      `M100 ${yH(s.e1, s.v1)}L370 ${yH(s.e2, s.v2)}L700 ${yH(s.e3, s.v3)}L890 ${yH(s.e3, s.v3)}`,
-    );
-    $("#v10-z88-drop12").setAttribute(
-      "d",
-      `M370 ${y(s.e1 + s.e2 > 0 ? (s.e1 + s.e2) / 2 + s.h12 / 2 : s.e1)}V${y(s.e2)}`,
-    );
-    $("#v10-z88-drop23").setAttribute("d", `M700 ${y((s.e2 + s.e3) / 2 + s.h23 / 2)}V${y(s.e3)}`);
-    $("#v10-z88-note-scene").textContent = `zadani hL,1–2 = ${fmt(s.h12, 1)} m; hL,2–3 = ${fmt(s.h23, 1)} m`;
-  }
-  function syncUI(s) {
-    $("#v10-z88-v1-out").value = `${fmt(s.v1, 1)} m/s`;
-    $("#v10-z88-h12-out").value = `${fmt(s.h12, 1)} m`;
-    $("#v10-z88-h23-out").value = `${fmt(s.h23, 1)} m`;
-    $("#v10-z88-p3").textContent = `${fmt(s.p3 / 1000, 1)} kPa`;
-    $("#v10-z88-primary-sub").textContent = `p₂ = ${fmt(s.p2 / 1000, 1)} kPa`;
-    $("#v10-z88-v2").innerHTML = `<strong>Presjek 2:</strong> v₂ = 4v₁ = ${fmt(s.v2, 2)} m/s.`;
-    $("#v10-z88-v3").innerHTML = `<strong>Presjek 3:</strong> v₃ = (16/9)v₁ = ${fmt(s.v3, 2)} m/s.`;
-    $("#v10-z88-p2").innerHTML = `<strong>Bilanca 1 → 2:</strong> p₂ = ${fmt(s.p2 / 1000, 2)} kPa.`;
-    $("#v10-z88-chain").innerHTML =
-      `<strong>Bilanca 2 → 3:</strong> zadani gubitak ${fmt(s.h23, 2)} m dodatno spušta raspoloživu energiju.`;
-    $("#v10-z88-explain").innerHTML =
-      "<strong>Što je ovdje zadano.</strong> Vrijednosti h<sub>L</sub> nisu rastavljene na λ i ζ jer izvor ne daje podatke za taj rastav. Narančasti prijelazi zato predstavljaju upravo zadane padove visine dobave.";
-    drawScene(s);
-  }
-  function update() {
-    syncUI(computeState(readInputs()));
-  }
-  Object.values(inputs).forEach((input) =>
-    input.addEventListener("input", () => {
-      $("#v10-z88-reset").setAttribute("aria-pressed", "false");
-      update();
-    }),
-  );
-  $("#v10-z88-reset").addEventListener("click", () => {
-    inputs.v1.value = 1.5;
-    inputs.h12.value = 1.8;
-    inputs.h23.value = 4.5;
-    $("#v10-z88-reset").setAttribute("aria-pressed", "true");
-    update();
-  });
-  update();
-})();
-</script>
-```
 
 ### Zadatak Z90 — Pitot-statička cijev (Prandtl) {.unnumbered}
 
@@ -739,67 +567,6 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>Iz manometra slijedi $p_0-p=(\rho_{Hg}-\rho_v)g\Delta h=7848{,}98\ \mathrm{Pa}$. Uz stagnacijsku strujnicu vrijedi $p_0-p=\rho_vv^2/2$, pa je $v=3{,}962\ \mathrm{m/s}$. Protok je $\dot V=(\pi d^2/4)v=0{,}1245\ \mathrm{m^3/s}$. Ovdje se dosljedno koristi $\rho_v=1000\ \mathrm{kg/m^3}$ iz tablice zadatka u PDF-u; njegova ogledna aritmetika interno umeće 998 kg/m³.</p></div>
 
-<section class="v10-lab" id="v10-z90-lab" aria-labelledby="v10-z90-title">
-<header class="v10-lab__head"><h4 id="v10-z90-title">Prandtlova cijev: od očitanja manometra do protoka</h4><p>Mjereni podatak je razlika razina žive. Iz nje se dobivaju $\Delta p$, brzina i volumenski protok.</p></header>
-<div class="v10x-presets"><button type="button" id="v10-z90-reset" aria-pressed="true">Izvorni Z90</button></div>
-<div class="v10-lab__scene"><svg viewBox="0 0 960 390" role="img" aria-labelledby="v10-z90-svg-title"><title id="v10-z90-svg-title">Prandtlova sonda spojena na U-manometar</title><rect x="40" y="55" width="600" height="185" rx="18" fill="#dff2fb" stroke="#8cb9d1" stroke-width="3"/><path d="M610 145H420" stroke="#748897" stroke-width="20" stroke-linecap="round"/><circle cx="420" cy="145" r="10" fill="#dce7ec" stroke="#405b6d" stroke-width="3"/><circle cx="520" cy="133" r="4" fill="#405b6d"/><circle cx="520" cy="157" r="4" fill="#405b6d"/><path d="M420 145V300Q420 345 470 345Q520 345 520 300V157" fill="none" stroke="#627787" stroke-width="13"/><path id="v10-z90-hg" d="M420 300V323Q420 345 470 345Q520 345 520 300V277" fill="none" stroke="#3d4a53" stroke-width="10"/><path id="v10-z90-dh" d="M555 277V323" stroke="#cf741c" stroke-width="3"/><text id="v10-z90-dh-label" x="566" y="305" class="v10-svg-small" fill="#b65e14">ΔhHg</text><text x="250" y="85" class="v10-svg-small">smjer strujanja →</text><text x="355" y="120" class="v10-svg-small">stagnacijski otvor p₀</text><text x="525" y="105" class="v10-svg-small">statički otvori p</text><text x="620" y="335" class="v10-svg-small">živa</text></svg></div>
-<div class="v10-lab__body"><div class="v10-lab__panel"><h5>Očitanje</h5><label for="v10-z90-h">$\Delta h_{Hg}$ <output id="v10-z90-h-out"></output></label><input id="v10-z90-h" type="range" min="0" max="120" step="0.5" value="63.5"><p>$\rho_v=1000\ \mathrm{kg/m^3}$, $\rho_{Hg}=13600\ \mathrm{kg/m^3}$, $d=0{,}2\ \mathrm{m}$.</p></div><div><div class="v10-lab__panel"><h5>Izračunano iz očitanja</h5><div class="v10-lab__grid"><div class="v10-lab__result"><span>$p_0-p$</span><output id="v10-z90-dp"></output></div><div class="v10-lab__result"><span>Brzina $v$</span><output id="v10-z90-v"></output></div><div class="v10-lab__result"><span>Protok $\dot V$</span><output id="v10-z90-q"></output></div><div class="v10-lab__result"><span>Dinamička visina</span><output id="v10-z90-head"></output></div></div><p class="v10-lab__note" id="v10-z90-note"></p></div></div></div>
-</section>
-
-<script>
-(() => {
-  const root = document.getElementById("v10-z90-lab");
-  if (!root) return;
-  const input = root.querySelector("#v10-z90-h");
-  const fmt = (n, d = 2) => n.toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function readInputs() {
-    return { h: +input.value / 1000 };
-  }
-  function compute(s) {
-    const rho = 1000,
-      dp = (13600 - rho) * 9.81 * s.h;
-    const v = Math.sqrt((2 * dp) / rho);
-    const q = ((Math.PI * 0.2 * 0.2) / 4) * v;
-    return { h: s.h, dp: dp, v: v, q: q, head: dp / (rho * 9.81) };
-  }
-  function syncOutputs(s) {
-    root.querySelector("#v10-z90-h-out").value = fmt(s.h * 1000, 1) + " mm";
-    root.querySelector("#v10-z90-dp").value = fmt(s.dp / 1000, 3) + " kPa";
-    root.querySelector("#v10-z90-v").value = fmt(s.v, 3) + " m/s";
-    root.querySelector("#v10-z90-q").value = fmt(s.q, 4) + " m³/s";
-    root.querySelector("#v10-z90-head").value = fmt(s.head, 3) + " m";
-    root.querySelector("#v10-z90-note").textContent =
-      "Manometar daje " +
-      fmt(s.dp, 0) +
-      " Pa. To je dinamički tlak p₀ − p, pa za vodu odgovara brzini " +
-      fmt(s.v, 3) +
-      " m/s.";
-  }
-  function draw(s) {
-    const d = s.h * 620;
-    const hi = 300 - d / 2,
-      lo = 300 + d / 2;
-    root.querySelector("#v10-z90-hg").setAttribute("d", "M420 " + lo + "V335Q420 350 470 350Q520 350 520 335V" + hi);
-    root.querySelector("#v10-z90-dh").setAttribute("d", "M555 " + hi + "V" + lo);
-    root.querySelector("#v10-z90-dh-label").setAttribute("y", String((hi + lo) / 2));
-  }
-  function update() {
-    const s = compute(readInputs());
-    syncOutputs(s);
-    draw(s);
-  }
-  input.addEventListener("input", () => {
-    root.querySelector("#v10-z90-reset").setAttribute("aria-pressed", "false");
-    update();
-  });
-  root.querySelector("#v10-z90-reset").addEventListener("click", () => {
-    input.value = 63.5;
-    root.querySelector("#v10-z90-reset").setAttribute("aria-pressed", "true");
-    update();
-  });
-  update();
-})();
-</script>
 
 ### Zadatak Z91 — Stratificirani višefazni spremnik {.unnumbered}
 
@@ -813,104 +580,6 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>Najprije se provodi hidrostatika kroz različite slojeve: $\rho_b=680\ \mathrm{kg/m^3}$, $\rho_u=800\ \mathrm{kg/m^3}$ i $p_{u,top,g}=p_m+\rho_bgh_3=133{,}342\ \mathrm{kPa}$. To je manometarski tlak na gornjoj plohi ulja. Voda ispod otvora ne ulazi u taj tlačni lanac. Bernoulli se zatim postavlja samo u ulju, uz $p_{2,g}=0$: $v_2=\sqrt{2p_{u,top,g}/\rho_u-2gh_2}=15{,}965\ \mathrm{m/s}$. Maseni protok je $\dot m=\rho_u(\pi d^2/4)v_2=4{,}012\ \mathrm{kg/s}$.</p></div>
 
-```{=html}
-<section class="v10x-task" id="v10-z91-lab" aria-labelledby="v10-z91-title">
-  <div class="v10x-shell">
-    <header class="v10x-head"><div class="v10x-kicker">Z91 · tlak kroz slojeve iznad ispusta</div><h4 id="v10-z91-title">Stratificirani spremnik: koji stupac određuje tlak?</h4><p>Račun prati zrak i benzin do gornje plohe ulja, a zatim energiju ulja do ispusta. Voda ispod ispusta namjerno je odvojena od tlačnog lanca.</p></header>
-    <div class="v10x-presets" role="group" aria-label="Primjer za Z91"><button type="button" id="v10-z91-reset" aria-pressed="true">Izvorni Z91</button></div>
-    <div class="v10x-scene"><svg viewBox="0 0 960 380" role="img" aria-label="Spremnik s tlakom zraka, slojem benzina, slojem ulja, vodom ispod ispusta i visinskom razlikom h2 do izlaza"><defs><marker id="v10-z91-arrow" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3Z" fill="#c8741f"/></marker></defs><rect x="180" y="38" width="310" height="292" rx="6" fill="#fff" stroke="#496477" stroke-width="4"/><rect id="v10-z91-benzin" x="184" y="105" width="302" height="70" fill="#f3c55d"/><rect id="v10-z91-oil" x="184" y="175" width="302" height="105" fill="#d9943d"/><rect id="v10-z91-water" x="184" y="280" width="302" height="46" fill="#63afe2"/><path id="v10-z91-outlet" d="M490 175V115H770Q805 118 850 145" fill="none" stroke="#d9943d" stroke-width="13"/><path id="v10-z91-flow" d="M650 115H750" fill="none" stroke="#c8741f" stroke-width="5" marker-end="url(#v10-z91-arrow)"/><path d="M135 105V175M125 105H145M125 175H145" stroke="#c8741f" stroke-width="3"/><path id="v10-z91-h2-dim" d="M150 175V115M140 175H160M140 115H160" stroke="#c8741f" stroke-width="3"/><text x="235" y="82" class="dim">zrak: pₘ</text><text x="245" y="145" class="dim">benzin</text><text x="255" y="235" class="dim">ulje</text><text x="255" y="310" class="dim">voda</text><text x="100" y="145" class="small">h₃</text><text id="v10-z91-h2-label" x="100" y="145" class="small">h₂</text><text id="v10-z91-outlet-label" x="565" y="88" class="small">ispust 2, p₂,g = 0</text><text id="v10-z91-stack" x="530" y="292" class="small"></text><text x="530" y="320" class="small">voda je ispod ispusta → ne ulazi u p₂</text></svg></div>
-    <div class="v10x-controlbar"><div class="v10x-control"><label for="v10-z91-pm"><span>Manometarski tlak zraka</span><output id="v10-z91-pm-out"></output></label><input id="v10-z91-pm" type="range" min="40" max="180" step="1" value="120"></div><div class="v10x-control"><label for="v10-z91-h3"><span>Visina benzina h₃</span><output id="v10-z91-h3-out"></output></label><input id="v10-z91-h3" type="range" min="0.5" max="4" step="0.1" value="2"></div><div class="v10x-control"><label for="v10-z91-h2"><span>Visinska razlika h₂ do ispusta</span><output id="v10-z91-h2-out"></output></label><input id="v10-z91-h2" type="range" min="0.5" max="7" step="0.1" value="4"></div><div class="v10x-control"><label for="v10-z91-rhou"><span>Gustoća ulja</span><output id="v10-z91-rhou-out"></output></label><input id="v10-z91-rhou" type="range" min="700" max="900" step="5" value="800"></div><aside class="v10x-primary" aria-live="polite"><small>Maseni protok ulja</small><strong id="v10-z91-mdot"></strong><span id="v10-z91-primary-sub"></span></aside></div>
-    <div class="v10x-bottom"><aside class="v10x-panel"><h5>Tlačni lanac iznad ulja</h5><div class="v10x-chain"><div id="v10-z91-p-top"></div><div id="v10-z91-head"></div></div></aside><aside class="v10x-panel"><h5>Izlaz iz ulja</h5><div class="v10x-chain"><div id="v10-z91-v"></div><div id="v10-z91-water-note"></div></div></aside></div>
-    <div class="v10x-explain" id="v10-z91-explain" aria-live="polite"></div>
-  </div>
-</section>
-<script>
-(() => {
-  const root = document.getElementById("v10-z91-lab");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "1";
-  const $ = (s) => root.querySelector(s),
-    g = 9.81,
-    rhoB = 680,
-    d = 0.02;
-  const inputs = { pm: $("#v10-z91-pm"), h3: $("#v10-z91-h3"), h2: $("#v10-z91-h2"), rhoU: $("#v10-z91-rhou") };
-  const fmt = (n, dec = 2) =>
-    Number(n).toLocaleString("hr-HR", { minimumFractionDigits: dec, maximumFractionDigits: dec });
-  const readInputs = () => ({
-    pm: +inputs.pm.value * 1000,
-    h3: +inputs.h3.value,
-    h2: +inputs.h2.value,
-    rhoU: +inputs.rhoU.value,
-  });
-  function computeState(x) {
-    const pTop = x.pm + rhoB * g * x.h3,
-      head = pTop / (x.rhoU * g) - x.h2,
-      v = Math.sqrt(Math.max(0, 2 * g * head)),
-      mdot = ((x.rhoU * Math.PI * d * d) / 4) * v;
-    return { ...x, pTop, head, v, mdot };
-  }
-  function drawScene(s) {
-    const b = s.h3 * 25,
-      yB = 185 - b,
-      yO = yB + b,
-      o = 85,
-      yW = yO + o,
-      outY = yO - s.h2*25;
-    $('#v10-z91-flow').setAttribute('visibility',s.head>0?'visible':'hidden');
-    $("#v10-z91-benzin").setAttribute("y", yB);
-    $("#v10-z91-benzin").setAttribute("height", b);
-    $("#v10-z91-oil").setAttribute("y", yO);
-    $("#v10-z91-oil").setAttribute("height", o);
-    $("#v10-z91-water").setAttribute("y", yW);
-    $("#v10-z91-water").setAttribute("height", Math.max(12, 326 - yW));
-    $("#v10-z91-outlet").setAttribute("d", `M490 ${yO+35}V${outY}H850`);
-    $("#v10-z91-flow").setAttribute("d", `M650 ${outY}H${650 + s.v * 4}`);
-    $("#v10-z91-h2-dim").setAttribute("d", `M150 ${yO}V${outY}M140 ${yO}H160M140 ${outY}H160`);
-    $("#v10-z91-h2-label").setAttribute("y", String((yO + outY) / 2));
-    $("#v10-z91-outlet-label").setAttribute("y", String(Math.max(28, outY - 24)));
-    $("#v10-z91-stack").textContent = `p na gornjoj plohi ulja = ${fmt(s.pTop / 1000, 1)} kPa`;
-  }
-  function syncUI(s) {
-    $("#v10-z91-pm-out").value = `${fmt(s.pm / 1000, 0)} kPa`;
-    $("#v10-z91-h3-out").value = `${fmt(s.h3, 1)} m`;
-    $("#v10-z91-h2-out").value = `${fmt(s.h2, 1)} m`;
-    $("#v10-z91-rhou-out").value = `${fmt(s.rhoU, 0)} kg/m³`;
-    $("#v10-z91-mdot").textContent = `${fmt(s.mdot, 3)} kg/s`;
-    $("#v10-z91-primary-sub").textContent = `v₂ = ${fmt(s.v, 3)} m/s`;
-    $("#v10-z91-p-top").innerHTML =
-      `<strong>Gornja ploha ulja:</strong> p = pₘ + ρ<sub>b</sub>gh₃ = ${fmt(s.pTop / 1000, 3)} kPa.`;
-    $("#v10-z91-head").innerHTML =
-      `<strong>Raspoloživa visina ulja:</strong> p/(ρ<sub>u</sub>g) − h₂ = ${fmt(s.head, 3)} m.`;
-    $("#v10-z91-v").innerHTML = `<strong>Bernoulli u ulju:</strong> v₂ = ${fmt(s.v, 3)} m/s.`;
-    $("#v10-z91-water-note").innerHTML =
-      "<strong>Granica modela:</strong> voda je ispod ispusta pa se ne pribraja tlaku u toj točki.";
-    $("#v10-z91-explain").innerHTML =
-      s.head > 0
-        ? "<strong>Fizikalno čitanje.</strong> Gornji plin i benzin povećavaju tlak ulja. Gustoća tekućine ispod ispusta nije dio tog tlačnog lanca."
-        : "<strong>Ovdje nema istjecanja u ovom idealnom modelu.</strong> Tlačni doprinos iznad ulja nije dovoljan za zadanu kotu ispusta.";
-    drawScene(s);
-  }
-  function update() {
-    syncUI(computeState(readInputs()));
-  }
-  Object.values(inputs).forEach((input) =>
-    input.addEventListener("input", () => {
-      $("#v10-z91-reset").setAttribute("aria-pressed", "false");
-      update();
-    }),
-  );
-  $("#v10-z91-reset").addEventListener("click", () => {
-    inputs.pm.value = 120;
-    inputs.h3.value = 2;
-    inputs.h2.value = 4;
-    inputs.rhoU.value = 800;
-    $("#v10-z91-reset").setAttribute("aria-pressed", "true");
-    update();
-  });
-  update();
-})();
-</script>
-```
 
 ### Zadatak Z92 — Protočna sapnica u cijevi {.unnumbered}
 
@@ -924,98 +593,13 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>Za priključke na istoj koti $p_A-p_B=(\rho_{Hg}-\rho_v)gh=2472\ \mathrm{Pa}$. Uvrštavanjem $A_A=0{,}03142\ \mathrm{m^2}$, $A_B=0{,}0007069\ \mathrm{m^2}$ i izvornog $c_C=0{,}95$ u zadani izraz dobiva se $\dot V=0{,}001494\ \mathrm{m^3/s}=1{,}494\ \mathrm{L/s}$. Izvorni tekst zadatka $c_C$ naziva koeficijentom kontrakcije i zadaje ga kao empirijski faktor uz idealni izraz. Zato skica prikazuje protočnu sapnicu, a ne pločicu s otvorom i izmišljenu venu contractu.</p></div>
 
-```{=html}
-<section class="v10x-task" id="v10-z92-lab" aria-labelledby="v10-z92-title">
-  <div class="v10x-shell">
-    <header class="v10x-head"><div class="v10x-kicker">Z92 · instrument za protok</div><h4 id="v10-z92-title">Protočna sapnica: očitanje žive do volumenskog protoka</h4><p>Razlika stupaca najprije daje razliku tlakova, a zatim izvorni izraz s empirijskim koeficijentom kontrakcije daje protok.</p></header>
-    <div class="v10x-presets" role="group" aria-label="Primjer za Z92"><button type="button" id="v10-z92-reset" aria-pressed="true">Izvorni Z92</button></div>
-    <div class="v10x-scene"><svg viewBox="0 0 960 340" role="img" aria-label="Protočna sapnica s mjernim presjecima A i B, U-manometrom sa živom i promjenjivim očitanjem"><defs><marker id="v10-z92-arrow" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L0 6L9 3Z" fill="#1976b9"/></marker></defs><path d="M60 95H350L500 130H890M60 215H350L500 180H890" fill="none" stroke="#728898" stroke-width="22"/><path d="M60 102H350L500 137H890M60 208H350L500 173H890" fill="none" stroke="#8ed3f3" stroke-width="12"/><path d="M160 155H305" fill="none" stroke="#1976b9" stroke-width="5" marker-end="url(#v10-z92-arrow)"/><path d="M285 95V282Q285 315 365 315Q445 315 445 282V164" fill="none" stroke="#627787" stroke-width="13"/><path id="v10-z92-hg" d="M285 276V295Q285 315 365 315Q445 315 445 282V263" fill="none" stroke="#3d4a53" stroke-width="10"/><path id="v10-z92-dh" d="M475 263V276" stroke="#c8741f" stroke-width="3"/><text x="290" y="74" class="dim">A</text><text x="525" y="118" class="dim">B</text><text x="365" y="52" class="small">protočna sapnica</text><text id="v10-z92-dh-label" x="487" y="276" class="small" fill="#b65e14">ΔhHg</text><text id="v10-z92-scene-note" x="615" y="282" class="small"></text></svg></div>
-    <div class="v10x-controlbar"><div class="v10x-control"><label for="v10-z92-h"><span>Razlika stupaca žive</span><output id="v10-z92-h-out"></output></label><input id="v10-z92-h" type="range" min="2" max="80" step="1" value="20"></div><div class="v10x-control"><label for="v10-z92-cc"><span>Koeficijent kontrakcije cC</span><output id="v10-z92-cc-out"></output></label><input id="v10-z92-cc" type="range" min="0.7" max="1" step="0.01" value="0.95"></div><aside class="v10x-primary" aria-live="polite"><small>Volumenski protok</small><strong id="v10-z92-q"></strong><span id="v10-z92-primary-sub"></span></aside></div>
-    <div class="v10x-bottom"><aside class="v10x-panel"><h5>Očitanje → tlak</h5><div class="v10x-chain"><div id="v10-z92-dp"></div><div id="v10-z92-ideal"></div></div></aside><aside class="v10x-panel"><h5>Stvarni protok</h5><div class="v10x-chain"><div id="v10-z92-real"></div><div id="v10-z92-coeff"></div></div></aside></div>
-    <div class="v10x-explain" id="v10-z92-explain" aria-live="polite"></div>
-  </div>
-</section>
-<script>
-(() => {
-  const root = document.getElementById("v10-z92-lab");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "1";
-  const $ = (s) => root.querySelector(s),
-    g = 9.81,
-    rho = 1000,
-    rhoHg = 13600,
-    dA = 0.2,
-    dB = 0.03;
-  const inputs = { h: $("#v10-z92-h"), cc: $("#v10-z92-cc") },
-    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  const readInputs = () => ({ h: +inputs.h.value / 1000, cc: +inputs.cc.value });
-  function computeState(x) {
-    const aA = (Math.PI * dA * dA) / 4,
-      aB = (Math.PI * dB * dB) / 4,
-      dp = (rhoHg - rho) * g * x.h,
-      ideal = (aB / Math.sqrt(1 - (aB / aA) ** 2)) * Math.sqrt((2 * dp) / rho),
-      q = x.cc * ideal;
-    return { ...x, aA, aB, dp, ideal, q };
-  }
-  function drawScene(s) {
-    const dh = s.h * 760,
-      hi = 274 - dh / 2,
-      lo = 274 + dh / 2;
-    $("#v10-z92-hg").setAttribute("d", `M285 ${lo}V305Q285 320 365 320Q445 320 445 305V${hi}`);
-    $("#v10-z92-dh").setAttribute("d", `M475 ${hi}V${lo}`);
-    $("#v10-z92-dh-label").setAttribute("y", String((hi + lo) / 2));
-    $("#v10-z92-scene-note").textContent = `pA − pB = ${fmt(s.dp / 1000, 2)} kPa`;
-  }
-  function syncUI(s) {
-    $("#v10-z92-h-out").value = `${fmt(s.h * 1000, 0)} mm Hg`;
-    $("#v10-z92-cc-out").value = fmt(s.cc, 2);
-    $("#v10-z92-q").textContent = `${fmt(s.q * 1000, 3)} L/s`;
-    $("#v10-z92-primary-sub").textContent = `Qideal = ${fmt(s.ideal * 1000, 3)} L/s`;
-    $("#v10-z92-dp").innerHTML = `<strong>Manometar:</strong> Δp = (ρ<sub>Hg</sub> − ρ)gΔh = ${fmt(s.dp, 0)} Pa.`;
-    $("#v10-z92-ideal").innerHTML =
-      `<strong>Idealni dio izraza:</strong> Q<sub>ideal</sub> = ${fmt(s.ideal * 1000, 3)} L/s.`;
-    $("#v10-z92-real").innerHTML =
-      `<strong>Izvorni koeficijent:</strong> Q = c<sub>C</sub>Q<sub>ideal</sub> = ${fmt(s.q * 1000, 3)} L/s.`;
-    $("#v10-z92-coeff").innerHTML =
-      "<strong>Oznaka iz izvora:</strong> c<sub>C</sub> je koeficijent kontrakcije u zadanom izrazu; skica ne uvodi dodatnu venu contractu.";
-    $("#v10-z92-explain").innerHTML =
-      "<strong>Čitanje instrumenta.</strong> Veća razlika stupaca povećava Δp i protok s korijenom iz Δp. Koeficijent c<sub>C</sub> samo proporcionalno korigira idealni rezultat.";
-    drawScene(s);
-  }
-  function update() {
-    syncUI(computeState(readInputs()));
-  }
-  Object.values(inputs).forEach((input) =>
-    input.addEventListener("input", () => {
-      $("#v10-z92-reset").setAttribute("aria-pressed", "false");
-      update();
-    }),
-  );
-  $("#v10-z92-reset").addEventListener("click", () => {
-    inputs.h.value = 20;
-    inputs.cc.value = 0.95;
-    $("#v10-z92-reset").setAttribute("aria-pressed", "true");
-    update();
-  });
-  update();
-})();
-</script>
-```
 
-### Zadatak Z93 — Izbočenje u pravokutnom kanalu {.unnumbered}
+### Slobodna površina kao pokazatelj brzine
 
-<div class="v10-problem">
-<strong>93.</strong> Izbočenje visine $\delta$ nalazi se na dnu pravokutnog kanala jednolike širine duž čitave duljine. Na slobodnoj površini nalazi se ulegnuće visine $d$, prikazano na slici. Ukoliko je fluid idealan, potrebno je odrediti volumenski protok po jedinici širine kanala.
-</div>
-
-<dl class="v10-data"><dt>Zadano</dt><dd>$\delta$, $d$, $h$, $\rho_v$.</dd><dt>Odrediti</dt><dd>$\dot V$ po jedinici širine kanala.</dd></dl>
-
-<svg class="v10-static" viewBox="0 0 900 260" role="img" aria-labelledby="z93-svg-title"><title id="z93-svg-title">Pravokutni kanal s izbočenjem dna i ulegnućem slobodne površine</title><path d="M70 80H420Q500 105 590 100H830" fill="none" stroke="#1976b9" stroke-width="5"/><path d="M70 215H390Q470 160 550 215H830" fill="none" stroke="#5d7183" stroke-width="8"/><text x="190" y="150" class="v10-svg-label">1</text><text x="690" y="155" class="v10-svg-label">2</text><text x="455" y="150" class="v10-svg-small">δ</text><text x="475" y="72" class="v10-svg-small">d</text><text x="95" y="110" class="v10-svg-small">h</text></svg>
-
-<div class="v10-solution"><h4>Rješenje</h4><p>Po slobodnoj površini $p_1=p_2=p_{atm}$, a za idealan fluid $v_1^2/(2g)+h=v_2^2/(2g)+h-d$. Za jediničnu širinu kontinuitet daje $hv_1=(h-d-\delta)v_2$. Kombiniranjem je $\dot V'=hv_1=\sqrt{-2gd\,h^2/[1-(h/(h-d-\delta))^2]}$. To je izvorni idealni problem otvorenog kanala, a ne lokalni gubitak u koljenu.</p></div>
+U otvorenom kanalu atmosferski tlak na površini uklanja tlačni član iz usporedbe dviju površinskih točaka. Kontinuitet $q=hv_1=(h-d-\delta)v_2$ povezuje dubinu i brzinu, a Bernoullijeva jednadžba daje $v_2^2-v_1^2=2gd$. Prikaz povezuje izbočenje dna, ulegnuće površine i protok po jedinici širine; pretpostavlja idealan tok bez hidrauličkog skoka.
 
 ```{=html}
-<section class="v10x-task" id="v10-z93-lab" aria-labelledby="v10-z93-title">
+<section class="v10x-task" id="v10-z93-lab" data-widget-role="application" aria-labelledby="v10-z93-title">
   <div class="v10x-shell">
     <header class="v10x-head"><div class="v10x-kicker">Z93 · idealni otvoreni kanal</div><h4 id="v10-z93-title">Izbočenje dna i ulegnuće slobodne plohe</h4><p>Ovo nije koljeno s lokalnim gubitkom: izvorni zadatak koristi idealnu energetsku jednadžbu po slobodnoj površini i kontinuitet kroz suženi presjek.</p></header>
     <div class="v10x-presets" role="group" aria-label="Polazni primjer za Z93"><button type="button" id="v10-z93-reset" aria-pressed="true">Polazni primjer</button></div>
@@ -1112,7 +696,21 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
   update();
 })();
 </script>
+
 ```
+
+### Zadatak Z93 — Izbočenje u pravokutnom kanalu {.unnumbered}
+
+<div class="v10-problem">
+<strong>93.</strong> Izbočenje visine $\delta$ nalazi se na dnu pravokutnog kanala jednolike širine duž čitave duljine. Na slobodnoj površini nalazi se ulegnuće visine $d$, prikazano na slici. Ukoliko je fluid idealan, potrebno je odrediti volumenski protok po jedinici širine kanala.
+</div>
+
+<dl class="v10-data"><dt>Zadano</dt><dd>$\delta$, $d$, $h$, $\rho_v$.</dd><dt>Odrediti</dt><dd>$\dot V$ po jedinici širine kanala.</dd></dl>
+
+<svg class="v10-static" viewBox="0 0 900 260" role="img" aria-labelledby="z93-svg-title"><title id="z93-svg-title">Pravokutni kanal s izbočenjem dna i ulegnućem slobodne površine</title><path d="M70 80H420Q500 105 590 100H830" fill="none" stroke="#1976b9" stroke-width="5"/><path d="M70 215H390Q470 160 550 215H830" fill="none" stroke="#5d7183" stroke-width="8"/><text x="190" y="150" class="v10-svg-label">1</text><text x="690" y="155" class="v10-svg-label">2</text><text x="455" y="150" class="v10-svg-small">δ</text><text x="475" y="72" class="v10-svg-small">d</text><text x="95" y="110" class="v10-svg-small">h</text></svg>
+
+<div class="v10-solution"><h4>Rješenje</h4><p>Po slobodnoj površini $p_1=p_2=p_{atm}$, a za idealan fluid $v_1^2/(2g)+h=v_2^2/(2g)+h-d$. Za jediničnu širinu kontinuitet daje $hv_1=(h-d-\delta)v_2$. Kombiniranjem je $\dot V'=hv_1=\sqrt{-2gd\,h^2/[1-(h/(h-d-\delta))^2]}$. To je izvorni idealni problem otvorenog kanala, a ne lokalni gubitak u koljenu.</p></div>
+
 
 ### Zadatak Z94 — Venturi cijev i prag podizanja tekućine {.unnumbered}
 
@@ -1124,108 +722,6 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>Na pragu podizanja sekundarni je protok još $Q_s\to0$. Kontinuitet daje $v_1=(d_2/d_1)^2v_2$, a potreban manometarski tlak u grlu (presjek 2) jest $p_{2,g}=-\rho gh$. Uz referentni ulazni tlak $p_1=p_{atm}$, fizički dosljedan uvjet je $v_{2,min}=\sqrt{2gh/[1-(d_2/d_1)^4]}$, uz $d_2&lt;d_1$. Nakon praga maseni bilans uključuje sekundarni tok; ovaj model ne određuje njegovu količinu.</p></div>
 
-<section class="v10-lab" id="v10-z94-lab" aria-labelledby="v10-z94-title">
-<header class="v10-lab__head"><h4 id="v10-z94-title">Venturi: prag podizanja, a ne model sekundarnog protoka</h4><p>Didaktički primjer istražuje idealni prag. Nakon dosezanja uvjeta ne crta se izmišljeni sekundarni protok.</p></header>
-<div class="v10x-presets"><button type="button" id="v10-z94-reset" aria-pressed="true">Izvorni Z94</button><button type="button" id="v10-z94-threshold" aria-pressed="false">Približno pragu</button></div>
-<div class="v10-lab__scene"><svg viewBox="0 0 960 380" role="img" aria-labelledby="v10-z94-svg-title"><title id="v10-z94-svg-title">Venturi cijev s usisnim priključkom i izlazom na atmosferi</title><path d="M50 105H315L450 152H905M50 225H315L450 178H905" fill="none" stroke="#6d8595" stroke-width="18"/><path d="M50 111H315L450 157H905M50 219H315L450 173H905" fill="none" stroke="#82c8ef" stroke-width="10"/><path d="M315 225V300" stroke="#748897" stroke-width="10"/><rect x="230" y="300" width="170" height="48" fill="#bce6fa" stroke="#4b677c" stroke-width="3"/><path id="v10-z94-rise" d="M315 300V300" stroke="#1976b9" stroke-width="7"/><text x="300" y="92" class="v10-svg-label">1</text><text x="842" y="138" class="v10-svg-label">2</text><text x="744" y="95" class="v10-svg-small">p₂ = patm, v₂</text><text x="330" y="267" class="v10-svg-small">stupac pri pragu</text><text x="445" y="330" class="v10-svg-small">spremnik otvoren atmosferi</text></svg></div>
-<div class="v10-lab__body"><div class="v10-lab__panel"><h5>Idealizirani prag</h5><label for="v10-z94-d1">$d_1$ <output id="v10-z94-d1-out"></output></label><input id="v10-z94-d1" type="range" min="60" max="180" step="5" value="100"><label for="v10-z94-d2">$d_2$ <output id="v10-z94-d2-out"></output></label><input id="v10-z94-d2" type="range" min="15" max="90" step="5" value="40"><label for="v10-z94-h">Visina $h$ <output id="v10-z94-h-out"></output></label><input id="v10-z94-h" type="range" min="0.2" max="3" step="0.1" value="1"><label for="v10-z94-v2">Brzina u grlu $v_2$ <output id="v10-z94-v2-out"></output></label><input id="v10-z94-v2" type="range" min="0" max="12" step="0.001" value="4.5"></div><div><div class="v10-lab__panel"><h5>Uvjet na usisnom priključku</h5><div class="v10-lab__grid"><div class="v10-lab__result"><span>$v_{2,min}$</span><output id="v10-z94-vmin"></output></div><div class="v10-lab__result"><span>$v_1$</span><output id="v10-z94-v1"></output></div><div class="v10-lab__result"><span>$p_{2,g}$</span><output id="v10-z94-p2"></output></div><div class="v10-lab__result"><span>Potrebno $p_{2,g}$</span><output id="v10-z94-preq"></output></div></div><p class="v10-lab__note" id="v10-z94-note"></p></div></div></div>
-</section>
-
-<script>
-(() => {
-  const root = document.getElementById("v10-z94-lab");
-  if (!root) return;
-  const d1 = root.querySelector("#v10-z94-d1"),
-    d2 = root.querySelector("#v10-z94-d2"),
-    h = root.querySelector("#v10-z94-h"),
-    v2 = root.querySelector("#v10-z94-v2");
-  const fmt = (n, d = 2) => n.toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function readInputs() {
-    return { d1: +d1.value / 1000, d2: +d2.value / 1000, h: +h.value, v2: +v2.value };
-  }
-  function compute(s) {
-    const r = (s.d2 / s.d1) * (s.d2 / s.d1),
-      ok = r < 1,
-      min = ok ? Math.sqrt((2 * 9.81 * s.h) / (1 - r * r)) : null,
-      v1 = r * s.v2,
-      p = 0.5 * 1000 * (v1 * v1 - s.v2 * s.v2),
-      need = -1000 * 9.81 * s.h;
-    return {
-      d1: s.d1,
-      d2: s.d2,
-      h: s.h,
-      v2: s.v2,
-      r: r,
-      ok: ok,
-      min: min,
-      v1: v1,
-      p: p,
-      need: need,
-      reached: ok && s.v2 >= min,
-      cav: p + 101325 < 2340,
-    };
-  }
-  function syncOutputs(s) {
-    root.querySelector("#v10-z94-d1-out").value = fmt(s.d1 * 1000, 0) + " mm";
-    root.querySelector("#v10-z94-d2-out").value = fmt(s.d2 * 1000, 0) + " mm";
-    root.querySelector("#v10-z94-h-out").value = fmt(s.h, 1) + " m";
-    root.querySelector("#v10-z94-v2-out").value = fmt(s.v2, 3) + " m/s";
-    root.querySelector("#v10-z94-vmin").value = s.ok ? fmt(s.min, 3) + " m/s" : "nije definirano";
-    root.querySelector("#v10-z94-v1").value = fmt(s.v1, 3) + " m/s";
-    root.querySelector("#v10-z94-p2").value = fmt(s.p / 1000, 3) + " kPa";
-    root.querySelector("#v10-z94-preq").value = fmt(s.need / 1000, 3) + " kPa";
-    const note = root.querySelector("#v10-z94-note");
-    if (!s.ok) {
-      note.textContent = "Za Venturi prag mora vrijediti d₂ < d₁.";
-    } else if (s.cav) {
-      note.textContent =
-        "Tlak bi dosegnuo područje kavitacije; jednofazni Bernoullijev model više nije fizički valjan.";
-    } else if (s.reached) {
-      note.textContent =
-        "Uvjet za početak usisa je zadovoljen. Model nakon toga ne određuje količinu sekundarnog protoka.";
-    } else {
-      note.textContent = "Podtlak još nije dovoljan za dosezanje priključka.";
-    }
-  }
-  function draw(s){
- const svg=root.querySelector('svg'),h1=s.d1*420,h2=s.d2*420,cy=145,waterY=310,tapY=cy+h2;
- const rise=s.ok?Math.min(s.h,Math.max(0,-s.p/(1000*9.81))):0,y=waterY-(waterY-tapY)*rise/s.h;
- svg.innerHTML='<path d="M50 '+(cy-h1)+'H280L480 '+(cy-h2)+'H590L760 '+(cy-h1)+'H910V'+(cy+h1)+'H760L590 '+(cy+h2)+'H480L280 '+(cy+h1)+'H50Z" fill="#dff2f8" stroke="#537084" stroke-width="5"/><path d="M530 '+tapY+'V350" stroke="#94a3b8" stroke-width="12"/><rect x="440" y="310" width="180" height="48" fill="#bae6fd" stroke="#537084" stroke-width="3"/><path id="v10-z94-rise" d="M530 350V'+y+'" stroke="#0284c7" stroke-width="7"/>'+MF1.svgArrow(80,cy,s.v1*10,0,'#0284c7','v₁')+MF1.svgArrow(490,cy,s.v2*10,0,'#0284c7','v₂')+'<g fill="#334155" font-size="17"><text x="70" y="45">1: p₁ = p_atm</text><text x="465" y="70">2: usis, p₂,g</text><text x="715" y="45">3: difuzor</text><text x="560" y="270">h = '+s.h.toFixed(1)+' m</text><text x="425" y="380">Otvoreni spremnik; prag Qs → 0</text></g>';
-}
-  function update() {
-    const s = compute(readInputs());
-    syncOutputs(s);
-    draw(s);
-  }
-  [d1, d2, h, v2].forEach((x) =>
-    x.addEventListener("input", () => {
-      root.querySelectorAll(".v10x-presets button").forEach((b) => b.setAttribute("aria-pressed", "false"));
-      update();
-    }),
-  );
-  root.querySelector("#v10-z94-reset").addEventListener("click", () => {
-    d1.value = 100;
-    d2.value = 40;
-    h.value = 1;
-    v2.value = 4.5;
-    root
-      .querySelectorAll(".v10x-presets button")
-      .forEach((b) => b.setAttribute("aria-pressed", String(b.id === "v10-z94-reset")));
-    update();
-  });
-  root.querySelector("#v10-z94-threshold").addEventListener("click", () => {
-    d1.value = 100;
-    d2.value = 40;
-    h.value = 1;
-    v2.value = Math.sqrt((2 * 9.81) / (1 - Math.pow(0.4, 4)));
-    root
-      .querySelectorAll(".v10x-presets button")
-      .forEach((b) => b.setAttribute("aria-pressed", String(b.id === "v10-z94-threshold")));
-    update();
-  });
-  update();
-})();
-</script>
 
 ### Zadatak Z95 — Venturi cijev s priključenim zračnim manometrom {.unnumbered}
 
@@ -1237,90 +733,6 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>Gustoća zraka je zanemariva prema gustoći strujnog fluida, pa manometar daje $(p_1-p_2)/(\rho g)=h$. Kontinuitet daje $v_1=(d_2/d_1)^2v_2=0{,}25v_2$. U Bernoulliju se zato kvadrira taj omjer: $h=[1-(0{,}25)^2]v_2^2/(2g)$. Slijedi $v_2=2{,}287\ \mathrm{m/s}$ i $\dot V=0{,}0404\ \mathrm{m^3/s}$.</p><p>Dodatno pitanje izvora zadaje $h_w=0{,}2v_1^2/(2g)$. Tada je $h=[1-0{,}25^2+0{,}2\cdot0{,}25^2]v_2^2/(2g)$, pa su $v_2=2{,}272\ \mathrm{m/s}$ i $\dot V=0{,}0401\ \mathrm{m^3/s}$. Zadaje se samo taj gubitak; $\lambda$ ili $\sum\zeta$ ne smiju se izmišljati.</p></div>
 
-<section class="v10-lab" id="v10-z95-lab" aria-labelledby="v10-z95-title">
-<header class="v10-lab__head"><h4 id="v10-z95-title">Završna bilanca: tlak manometra, ubrzanje i zadani gubitak</h4><p>Izvorni zadatak nije cjevovod s $\lambda$ i $\sum\zeta$, nego Venturi s dodatnim gubitkom vezanim uz $v_1$.</p></header>
-<div class="v10x-presets"><button type="button" id="v10-z95-reset" aria-pressed="true">Izvorni Z95</button><button type="button" id="v10-z95-ideal" aria-pressed="false">Bez zadanog gubitka</button></div>
-<div class="v10-lab__scene"><svg viewBox="0 0 960 390" role="img" aria-labelledby="v10-z95-svg-title"><title id="v10-z95-svg-title">Venturi s energetskom linijom i zračnim manometrom</title><path d="M55 150H320L485 180H900M55 250H320L485 220H900" fill="none" stroke="#728898" stroke-width="19"/><path d="M55 156H320L485 186H900M55 244H320L485 214H900" fill="none" stroke="#8dd0f3" stroke-width="11"/><path d="M230 150V95M520 180V95M230 95Q375 55 520 95" fill="none" stroke="#90a1aa" stroke-width="8"/><path id="v10-z95-egl" d="M115 70L485 90L850 102" fill="none" stroke="#c53b3b" stroke-width="5"/><path id="v10-z95-hgl" d="M115 105L485 60L850 82" fill="none" stroke="#1976b9" stroke-width="4" stroke-dasharray="11 8"/><path id="v10-z95-loss" d="M700 95V112" fill="none" stroke="#cf741c" stroke-width="4"/><text x="115" y="54" class="v10-svg-label" fill="#c53b3b">EGL</text><text x="115" y="124" class="v10-svg-label" fill="#1976b9">HGL</text><text x="285" y="47" class="v10-svg-small">zrak: h</text><text x="700" y="135" class="v10-svg-small" fill="#b65e14">hᵥ</text><text x="230" y="285" class="v10-svg-label">1</text><text x="520" y="275" class="v10-svg-label">2</text></svg></div>
-<div class="v10-lab__body"><div class="v10-lab__panel"><h5>Dodatno pitanje izvora</h5><label for="v10-z95-h">Manometarska visina $h$ <output id="v10-z95-h-out"></output></label><input id="v10-z95-h" type="range" min="0.05" max="0.6" step="0.01" value="0.25"><label for="v10-z95-k">Koeficijent zadanog gubitka <output id="v10-z95-k-out"></output></label><input id="v10-z95-k" type="range" min="0" max="0.5" step="0.01" value="0.2"></div><div><div class="v10-lab__panel"><h5>Bilanca za $d_1=0{,}3\ \mathrm{m}$, $d_2=0{,}15\ \mathrm{m}$</h5><div class="v10-lab__grid"><div class="v10-lab__result"><span>Idealno $v_2$</span><output id="v10-z95-vi"></output></div><div class="v10-lab__result"><span>Idealno $\dot V$</span><output id="v10-z95-qi"></output></div><div class="v10-lab__result"><span>S gubitkom $v_2$</span><output id="v10-z95-v"></output></div><div class="v10-lab__result"><span>S gubitkom $\dot V$</span><output id="v10-z95-q"></output></div></div><p class="v10-lab__note" id="v10-z95-note"></p></div></div></div>
-</section>
-
-<script>
-(() => {
-  const root = document.getElementById("v10-z95-lab");
-  if (!root) return;
-  const h = root.querySelector("#v10-z95-h"),
-    k = root.querySelector("#v10-z95-k");
-  const fmt = (n, d = 2) => n.toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function readInputs() {
-    return { h: +h.value, k: +k.value };
-  }
-  function compute(s) {
-    const ratio = 0.25,
-      a = (Math.PI * 0.15 * 0.15) / 4,
-      vi = Math.sqrt((2 * 9.81 * s.h) / (1 - ratio * ratio)),
-      v = Math.sqrt((2 * 9.81 * s.h) / (1 - ratio * ratio + s.k * ratio * ratio));
-    return {
-      h: s.h,
-      k: s.k,
-      ratio: ratio,
-      a: a,
-      vi: vi,
-      qi: a * vi,
-      v: v,
-      q: a * v,
-      loss: (s.k * ratio * ratio * v * v) / (2 * 9.81),
-    };
-  }
-  function syncOutputs(s) {
-    root.querySelector("#v10-z95-h-out").value = fmt(s.h, 2) + " m";
-    root.querySelector("#v10-z95-k-out").value = fmt(s.k, 2);
-    root.querySelector("#v10-z95-vi").value = fmt(s.vi, 3) + " m/s";
-    root.querySelector("#v10-z95-qi").value = fmt(s.qi, 4) + " m³/s";
-    root.querySelector("#v10-z95-v").value = fmt(s.v, 3) + " m/s";
-    root.querySelector("#v10-z95-q").value = fmt(s.q, 4) + " m³/s";
-    root.querySelector("#v10-z95-note").textContent =
-      "Zadani gubitak iznosi " + fmt(s.loss, 4) + " m i vezan je uz v₁ = " + fmt(s.ratio * s.v, 3) + " m/s.";
-  }
-  function draw(s){
- const svg=root.querySelector('svg'),vh1=(s.ratio*s.v)**2/19.62,vh2=s.v*s.v/19.62,scale=115/Math.max(vh2+s.loss,.4),base=65,Y=h=>base+h*scale;
- const dy=s.h*130,yl=260-dy/2,yr=260+dy/2;
- svg.innerHTML='<title>Venturi s obrnutim zračnim manometrom: tlak i energija</title><text x="55" y="30" font-size="17">p₁−p₂ = ρgh; H₁−H₂ = hL; v₁ = 0,25v₂</text>'+
- '<path d="M85 '+base+'H320L520 '+Y(s.loss)+'H850" stroke="#c95d12" stroke-width="3" fill="none"/><path d="M85 '+Y(vh1)+'H320L520 '+Y(s.loss+vh2)+'H850" stroke="#6d28d9" stroke-width="3" stroke-dasharray="5 4" fill="none"/><text x="70" y="55">EGL</text><text x="70" y="'+(Y(vh1)+18)+'">HGL</text>'+
- '<path d="M80 320H320L510 340H850M80 400H320L510 380H850" fill="none" stroke="#58768b" stroke-width="5"/><path d="M80 320H320L510 340H850V380H510L320 400H80Z" fill="#e0f2fe"/>'+MF1.svgArrow(170,360,s.ratio*s.v*16,0,'#0284c7','v₁')+MF1.svgArrow(600,360,s.v*16,0,'#0284c7','v₂')+
- '<path d="M250 320V205H610V340" fill="none" stroke="#94a3b8" stroke-width="15"/><path d="M250 320V'+yl+'M610 340V'+yr+'" stroke="#38bdf8" stroke-width="9"/><path d="M280 '+yl+'H570M280 '+yr+'H570" stroke="#94a3b8" stroke-dasharray="4 4"/><text x="400" y="285">h = '+fmt(s.h,2)+' m</text>'+
- '<text x="55" y="435">Gustoća zraka je zanemariva; viši tlak u 1 podiže vodu u lijevom kraku.</text><text x="55" y="460">Energetske linije imaju zajedničku skalu; geometrija cijevi i manometra shematska.</text>';
- svg.setAttribute('viewBox','0 0 920 480');
-}
-  function update() {
-    const s = compute(readInputs());
-    syncOutputs(s);
-    draw(s);
-  }
-  [h, k].forEach((x) =>
-    x.addEventListener("input", () => {
-      root.querySelectorAll(".v10x-presets button").forEach((b) => b.setAttribute("aria-pressed", "false"));
-      update();
-    }),
-  );
-  root.querySelector("#v10-z95-reset").addEventListener("click", () => {
-    h.value = 0.25;
-    k.value = 0.2;
-    root
-      .querySelectorAll(".v10x-presets button")
-      .forEach((b) => b.setAttribute("aria-pressed", String(b.id === "v10-z95-reset")));
-    update();
-  });
-  root.querySelector("#v10-z95-ideal").addEventListener("click", () => {
-    h.value = 0.25;
-    k.value = 0;
-    root
-      .querySelectorAll(".v10x-presets button")
-      .forEach((b) => b.setAttribute("aria-pressed", String(b.id === "v10-z95-ideal")));
-    update();
-  });
-  update();
-})();
-</script>
 
 ### Zadatak Z89 — Torricellijevo istjecanje iz velikog spremnika {.unnumbered}
 
@@ -1334,34 +746,6 @@ $$h_w = \lambda \cdot \frac{L}{D} \cdot \frac{v^2}{2g}$$
 
 <div class="v10-solution"><h4>Rješenje</h4><p>Bernoulli između slobodne plohe i izlaza, pri $p_1=p_2=p_{atm}$, $v_1\approx0$ i $z_1-z_2=h$, daje opći Torricellijev izraz $v_2=\sqrt{2gh}$. Za $h=5\ \mathrm{m}$ slijedi $v_2=9{,}905\ \mathrm{m/s}$. To je idealni kontrast ostatku vježbe: čim su zadani cijev, ventil, hrapavost ili gubici, treba upotrijebiti opću energetsku jednadžbu.</p></div>
 
-<section class="v10x-task" id="v10-z89-lab" aria-labelledby="v10-z89-title"><div class="v10x-shell"><header class="v10x-head"><div class="v10x-kicker">Z89 · idealna referenca</div><h4 id="v10-z89-title">Torricellijevo istjecanje bez gubitaka</h4><p>Ovaj slučaj je namjerno idealan: raspoloživa geodetska visina potpuno se pretvara u brzinu mlaza.</p></header><div class="v10x-scene"><svg viewBox="0 0 960 300" role="img" aria-label="Spremnik i otvor s promjenjivom visinom vode"><path d="M170 35V260H560V35" fill="none" stroke="#537084" stroke-width="5"/><path id="v10-z89-water" d="M175 85H555V255H175Z" fill="#cdeafa"/><path id="v10-z89-surface" d="M175 85H555" stroke="#1976b9" stroke-width="5"/><path d="M560 220H790" stroke="#537084" stroke-width="18"/><path d="M570 220H790" stroke="#4baee5" stroke-width="10"/><path id="v10-z89-arrow" d="M615 220H695" fill="none" stroke="#1976b9" stroke-width="4" marker-end="url(#v10x-arrow)"/><path id="v10-z89-dim" d="M120 85V220M110 85H130M110 220H130" stroke="#c8741f" stroke-width="3"/><text x="89" y="160" class="dim" fill="#b65e14">h</text><text id="v10-z89-note" x="605" y="180" class="small"></text></svg></div><div class="v10x-controlbar"><div class="v10x-control"><label for="v10-z89-h"><span>Visina h</span><output id="v10-z89-h-out"></output></label><input id="v10-z89-h" type="range" min="0.2" max="8" step="0.1" value="5"></div><aside class="v10x-primary" aria-live="polite"><small>Idealna izlazna brzina</small><strong id="v10-z89-v"></strong><span>v = √(2gh)</span></aside></div><div class="v10x-explain" id="v10-z89-explain" aria-live="polite"></div></div></section>
-
-<script>
-(() => {
-  const root = document.getElementById("v10-z89-lab");
-  if (!root || root.dataset.ready) return;
-  root.dataset.ready = "1";
-  const $ = (s) => root.querySelector(s),
-    h = $("#v10-z89-h"),
-    fmt = (n, d = 2) => Number(n).toLocaleString("hr-HR", { minimumFractionDigits: d, maximumFractionDigits: d });
-  function update() {
-    const head = +h.value,
-      v = Math.sqrt(2 * 9.81 * head),
-      y = 220 - Math.min(150, (head / 8) * 150);
-    $("#v10-z89-h-out").value = fmt(head, 1) + " m";
-    $("#v10-z89-v").textContent = fmt(v, 2) + " m/s";
-    $("#v10-z89-water").setAttribute("d", `M175 ${y}H555V255H175Z`);
-    $("#v10-z89-surface").setAttribute("d", `M175 ${y}H555`);
-    $("#v10-z89-dim").setAttribute("d", `M120 ${y}V220M110 ${y}H130M110 220H130`);
-    $("#v10-z89-arrow").setAttribute("d", `M615 220H${615 + v * 10}`);
-    $("#v10-z89-note").textContent = `v₂ = ${fmt(v, 2)} m/s`;
-    $("#v10-z89-explain").innerHTML =
-      "<strong>Veza s V10.</strong> Ovdje je hL = 0, pa EGL nema gubitak. U realnom istjecanju dio iste raspoložive visine otišao bi na trenje i lokalne gubitke, pa bi stvarna brzina bila manja.";
-  }
-  h.addEventListener("input", update);
-  update();
-})();
-</script>
 
 <script>
 /* Pandoc marks block-level divs inside raw HTML as Quarto page grids.  These are

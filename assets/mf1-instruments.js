@@ -73,7 +73,8 @@
     const save=document.createElement('button'),show=document.createElement('button'),status=document.createElement('span');
     save.type=show.type='button';save.textContent='Zapamti A';show.textContent='Prikaži A';show.hidden=true;
     show.setAttribute('aria-expanded','false');status.className='mf1-compare-status';status.setAttribute('role','status');
-    bar.append(status,save,show);
+    const menu=document.createElement('details'),summary=document.createElement('summary'),actions=document.createElement('div');
+    menu.className='mf1-comparison-menu';summary.textContent='Usporedba A/B';actions.append(status,save,show);menu.append(summary,actions);bar.append(menu);
     let tray=null,baseline=[];
     const visible=el=>{for(let p=el;p&&p!==root;p=p.parentElement){if(p.hidden||getComputedStyle(p).display==='none')return false;}return true;};
     function readings(){return [...root.querySelectorAll('input[type=range],input[type=number],select')].filter(e=>!e.closest('.mf1-compare-tray')).map((input,index)=>({key:input.id||input.dataset.key||input.dataset.k||String(index),label:labelText(input.labels?.[0]||input.parentElement.querySelector('label'))||input.getAttribute('aria-label')||'Parametar '+(index+1),value:input.value,display:input.tagName==='SELECT'?input.selectedOptions[0]?.textContent:format(input.value)}));}
@@ -97,8 +98,6 @@
       baseline=readings();if(tray)tray.remove();tray=document.createElement('section');tray.className='mf1-compare-tray';tray.id='mf1-compare-'+(++serial);tray.hidden=true;
       tray.innerHTML='<header><h5>Sačuvano stanje A</h5><button type="button">Ukloni A</button></header><p class="mf1-compare-note"></p><div class="mf1-compare-images"></div><table><caption>Promjene ulaznih parametara</caption><thead><tr><th>Parametar u stanju A</th><th>A</th><th>B sada</th></tr></thead><tbody></tbody></table>';
       tray.querySelector('.mf1-compare-images').append(...images);
-      const readingsPanel=root.querySelector('.mf1-atlas-mobile-readings');
-      if(readingsPanel&&visible(readingsPanel)){const snapshot=document.createElement('p');snapshot.className='mf1-compare-readings';snapshot.textContent=[...readingsPanel.children].map(el=>el.querySelector('small').textContent+': '+el.querySelector('strong').textContent).join(' · ');tray.querySelector('.mf1-compare-images').before(snapshot);}
       tray.querySelector('button').onclick=()=>{tray.remove();tray=null;baseline=[];show.hidden=true;show.setAttribute('aria-expanded','false');status.textContent='Stanje A uklonjeno.';save.focus();};
       root.append(tray);show.hidden=false;show.setAttribute('aria-controls',tray.id);status.textContent='Stanje A sačuvano.';save.textContent='Ponovno zapamti A';toggle(true);
     };

@@ -103,11 +103,11 @@ test('Expanded widgets preserve their owning element, live physics, and original
 });
 test('Exact input accepts decimal commas, rejects bounds and step errors, and updates original model',()=>{
  const a=load(1);dialogs(a.w);
- try{const slider=a.w.document.getElementById('z7-alpha');slider.mf1Limits.querySelector('.mf1-exact-button').click();
+ try{const slider=a.w.document.getElementById('z6-beta');slider.mf1Limits.querySelector('.mf1-exact-button').click();
   const dialog=a.w.document.querySelector('dialog'),field=dialog.querySelector('input'),form=dialog.querySelector('form');
   const submit=v=>{field.value=v;form.dispatchEvent(new a.w.Event('submit',{cancelable:true}));};
   const original=slider.value;submit('900');assert.equal(slider.value,original);assert.equal(field.getAttribute('aria-invalid'),'true');submit('20,5');assert.equal(slider.value,original);
-  submit('25');assert.equal(slider.value,'25');assert.ok(!dialog.isConnected);close(+a.w.document.getElementById('z7-res-fg').textContent,1100*Math.sin(25*Math.PI/180),.001);assert.deepEqual(a.errors,[]);
+  submit('250');assert.equal(slider.value,'250');assert.ok(!dialog.isConnected);close(+a.w.document.getElementById('z6-res-tau-wall').textContent,250*.1/4,.001);assert.deepEqual(a.errors,[]);
   const ratio=a.w.document.getElementById('v1x-ratio');ratio.mf1Limits.querySelector('.mf1-exact-button').click();
   const decimal=a.w.document.querySelector('dialog');decimal.querySelector('input').value='3,5';decimal.querySelector('form').dispatchEvent(new a.w.Event('submit',{cancelable:true}));
   assert.equal(ratio.value,'3.5');assert.match(a.w.document.getElementById('v1x-primary').textContent,/420/);
@@ -116,11 +116,54 @@ test('Exact input accepts decimal commas, rejects bounds and step errors, and up
  }finally{a.dom.window.close();}
 });
 
-test('Tank accumulation uses elapsed seconds at 2, 10 and 120 frames per second',()=>{
+test('The retained continuity explorer conserves accumulated volume at 2, 10 and 120 frames per second',()=>{
  const states=[];
  for(const fps of [2,10,120]){const a=load(8);try{
-  a.w.document.getElementById('z72-start').click();a.frames(2*fps,1000/fps);
-  const state=a.w.document.getElementById('v8-z72').mf1TankState;close(state.time,2);states.push(state.h);assert.deepEqual(a.errors,[]);
+  const root=a.w.document.getElementById('v8-explorer');root.querySelector('[data-mode="tank"]').click();
+  root.querySelector('.mf1-motion button').click();a.frames(1,1000/fps);a.frames(2*fps,1000/fps);
+  const read=label=>{const card=[...root.querySelectorAll('.v8x-mini')].find(x=>x.querySelector('small').textContent===label);return parseFloat(card.querySelector('strong').textContent.replace('−','-').replace(',','.'));};
+  close(read('t'),2);close(read('h'),.9+(.012-.006)*2/.3);states.push(read('h'));assert.deepEqual(a.errors,[]);
  }finally{a.dom.window.close();}}
  states.forEach(h=>close(h,states[0]));
+});
+
+test('The buoyancy mode moves the same prism through a fixed surface and balances displaced weight',()=>{
+ const a=load(3),root=a.w.document.getElementById('v3-buoyancy-explorer');
+ try{
+  a.w.switchV3Tab('uzgon');assert.equal(root.hidden,false);assert.equal(a.w.document.getElementById('v3-primary-view').hidden,true);
+  let lastDraft=Infinity,lastTop=Infinity;
+  for(const rho of [820,1000,1300]){
+   a.change(root.querySelector('input'),rho);const s=root.mf1BuoyancyState;
+   close(s.force,rho*9.81*s.displacedVolume);close(s.displacedVolume/s.volume,800/rho);
+   close((s.bottom-s.surface)/(s.bottom-s.top),800/rho);close(s.center,(s.surface+s.bottom)/2);close(s.surface,150);
+   assert.ok(s.draft<lastDraft);assert.ok(s.top<lastTop);lastDraft=s.draft;lastTop=s.top;
+  }
+  a.w.switchV3Tab('manometar');assert.equal(root.hidden,true);a.w.switchV3Tab('uzgon');close(root.mf1BuoyancyState.rho,1300);a.scan('buoyancy');assert.deepEqual(a.errors,[]);
+ }finally{a.dom.window.close();}
+});
+
+test('The unified viscosity and surface laboratory preserves live models across its four modes',()=>{
+ const a=load(2),root=a.w.document.getElementById('widget-visc-basics');
+ const read=id=>parseFloat(root.querySelector('#'+id).textContent.replace('−','-').replace(',','.'));
+ const mode=n=>{root.querySelector(`[data-editorial-mode="${n}"]`).click();assert.equal([...root.querySelectorAll('[data-editorial-pane]')].filter(p=>!p.hidden).length,1);};
+ try{
+  a.change(root.querySelector('#mu-slider'),.4);const tau=read('tau-out');
+  mode(1);assert.equal(a.visible(root.querySelector('#v2nn-plot')),true);assert.equal(a.visible(root.querySelector('#visc-canvas')),false);
+  mode(2);a.change(root.querySelector('#r-slider-z12-dual'),.3);const rise=read('hv-res-z12');a.change(root.querySelector('#r-slider-z12-dual'),.6);close(read('hv-res-z12'),rise/2,.005);assert.ok(read('hhg-res-z12')<0);
+  mode(3);a.change(root.querySelector('#yl-slider-d'),.5);const pressure=read('yl-res-dp');a.change(root.querySelector('#yl-slider-d'),1);close(read('yl-res-dp'),pressure/2);
+  mode(0);close(read('tau-out'),tau);assert.equal(root.querySelector('#mu-slider').value,'0.4');assert.equal(a.visible(root.querySelector('#visc-canvas')),true);a.scan('unified V2');assert.deepEqual(a.errors,[]);
+ }finally{a.dom.window.close();}
+});
+
+test('Translation and rotation share one laboratory while retaining the independent pressure contributions',()=>{
+ const a=load(4),root=a.w.document.getElementById('v4-intro-principle-widget');
+ const read=id=>parseFloat(root.querySelector('#'+id).textContent.replace('−','-').replace(',','.'));
+ try{
+  a.change(root.querySelector('#v4-ax-slider'),-4);
+  root.querySelector('[data-editorial-mode="1"]').click();assert.equal(a.visible(root.querySelector('#z35-heatmap-canvas')),true);assert.equal(a.visible(root.querySelector('#v4-principle-canvas')),false);
+  a.change(root.querySelector('#z35-a-slider'),0);const vertical=read('z35-res-dpv');
+  for(const n of [0,100,200]){a.change(root.querySelector('#z35-n-slider'),n);close(read('z35-res-dpr'),+(740*(n*Math.PI/30)**2*.5**2/2000).toFixed(1));close(read('z35-res-dpv'),vertical);}
+  a.change(root.querySelector('#z35-a-slider'),10);close(read('z35-res-dpv'),+(740*19.81*2/1000).toFixed(1));
+  root.querySelector('[data-editorial-mode="0"]').click();assert.equal(root.querySelector('#v4-ax-slider').value,'-4');a.scan('unified V4');assert.deepEqual(a.errors,[]);
+ }finally{a.dom.window.close();}
 });
